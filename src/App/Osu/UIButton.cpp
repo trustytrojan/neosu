@@ -8,7 +8,7 @@
 #include "SoundEngine.h"
 #include "TooltipOverlay.h"
 
-using namespace std;
+
 
 static float button_sound_cooldown = 0.f;
 

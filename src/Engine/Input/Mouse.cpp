@@ -5,7 +5,7 @@
 #include "Environment.h"
 #include "ResourceManager.h"
 
-using namespace std;
+
 
 Mouse::Mouse() : InputDevice() {
     this->bMouseLeftDown = false;

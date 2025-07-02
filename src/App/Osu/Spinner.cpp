@@ -11,7 +11,7 @@
 #include "Skin.h"
 #include "SoundEngine.h"
 
-using namespace std;
+
 
 Spinner::Spinner(int x, int y, long time, int sampleType, bool isEndOfCombo, long endTime, BeatmapInterface *beatmap)
     : HitObject(time, sampleType, -1, isEndOfCombo, -1, -1, beatmap) {

@@ -53,7 +53,7 @@
 #include "Spinner.h"
 #include "UIModSelectorModButton.h"
 
-using namespace std;
+
 
 Beatmap::Beatmap() {
     // vars

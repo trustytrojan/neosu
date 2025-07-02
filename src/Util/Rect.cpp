@@ -2,7 +2,7 @@
 
 #include "cbase.h"
 
-using namespace std;
+
 
 McRect::McRect(float x, float y, float width, float height, bool isCentered) {
     this->set(x, y, width, height, isCentered);

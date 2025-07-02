@@ -15,7 +15,7 @@
 #include "Skin.h"
 #include "VertexArrayObject.h"
 
-using namespace std;
+
 
 Shader *SliderRenderer::BLEND_SHADER = NULL;
 

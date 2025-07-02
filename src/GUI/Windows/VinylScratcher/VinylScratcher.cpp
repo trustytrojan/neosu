@@ -13,7 +13,7 @@
 #include "VSMusicBrowser.h"
 #include "VSTitleBar.h"
 
-using namespace std;
+
 
 Sound *VinylScratcher::stream2 = NULL;
 

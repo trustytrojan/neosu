@@ -8,8 +8,6 @@
 #include "Osu.h"
 #include "SliderCurves.h"
 
-using namespace std;
-
 OsuDifficultyHitObject::OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time)
     : OsuDifficultyHitObject(type, pos, time, time) {}
 
@@ -18,7 +16,7 @@ OsuDifficultyHitObject::OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time,
                              std::vector<SLIDER_SCORING_TIME>(), 0, true) {}
 
 OsuDifficultyHitObject::OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time, i32 endTime, f32 spanDuration,
-                                               i8 osuSliderCurveType, std::vector<Vector2> controlPoints,
+                                               i8 osuSliderCurveType, const std::vector<Vector2> &controlPoints,
                                                f32 pixelLength, std::vector<SLIDER_SCORING_TIME> scoringTimes,
                                                i32 repeats, bool calculateSliderCurveInConstructor) {
     this->type = type;
@@ -28,7 +26,7 @@ OsuDifficultyHitObject::OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time,
     this->spanDuration = spanDuration;
     this->osuSliderCurveType = osuSliderCurveType;
     this->pixelLength = pixelLength;
-    this->scoringTimes = scoringTimes;
+    this->scoringTimes = std::move(scoringTimes);
 
     this->curve = NULL;
     this->scheduledCurveAlloc = false;
@@ -273,7 +271,7 @@ f64 DifficultyCalculator::calculateStarDiffForHitObjectsInt(std::vector<DiffObje
                     diff = slider.ho->curve->pointAt(slider.ho->repeats % 2 ? 1.0 : 0.0) - cursor_pos;
                 } else {
                     f64 progress = (std::clamp<f64>(slider.ho->scoringTimes[i].time - (f64)slider.ho->time, 0.f,
-                                               slider.ho->getDuration())) /
+                                                    slider.ho->getDuration())) /
                                    slider.ho->spanDuration;
                     if(std::fmod(progress, 2.0) >= 1.0)
                         progress = 1.0 - std::fmod(progress, 1.0);
@@ -399,9 +397,9 @@ f64 DifficultyCalculator::calculateStarDiffForHitObjectsInt(std::vector<DiffObje
                         (prev1.ho->curve ? prev1.ho->curve->pointAt(prev1.ho->repeats % 2 ? 1.0 : 0.0) : prev1.ho->pos)
                             .distance(cur.ho->pos) *
                         radius_scaling_factor;
-                    cur.minJumpDistance =
-                        std::max(0.0f, std::min((f32)cur.minJumpDistance - (maximum_slider_radius - assumed_slider_radius),
-                                      tail_jump_dist - maximum_slider_radius));
+                    cur.minJumpDistance = std::max(
+                        0.0f, std::min((f32)cur.minJumpDistance - (maximum_slider_radius - assumed_slider_radius),
+                                       tail_jump_dist - maximum_slider_radius));
                 }
 
                 // calculate angles
@@ -525,8 +523,8 @@ f64 DifficultyCalculator::calculatePPv2(i32 modsLegacy, f64 timescale, f64 ar, f
     f64 multiplier = 1.15;  // keep final pp normalized across changes
     {
         if(modsLegacy & LegacyFlags::NoFail)
-            multiplier *=
-                std::max(0.9, 1.0 - 0.02 * effectiveMissCount);  // see https://github.com/ppy/osu-performance/pull/127/files
+            multiplier *= std::max(
+                0.9, 1.0 - 0.02 * effectiveMissCount);  // see https://github.com/ppy/osu-performance/pull/127/files
 
         if((modsLegacy & LegacyFlags::SpunOut) && totalHits > 0)
             multiplier *= 1.0 - pow((f64)numSpinners / (f64)totalHits,
@@ -535,7 +533,8 @@ f64 DifficultyCalculator::calculatePPv2(i32 modsLegacy, f64 timescale, f64 ar, f
         if((modsLegacy & LegacyFlags::Relax)) {
             f64 okMultiplier = std::max(0.0, od > 0.0 ? 1.0 - pow(od / 13.33, 1.8) : 1.0);   // 100
             f64 mehMultiplier = std::max(0.0, od > 0.0 ? 1.0 - pow(od / 13.33, 5.0) : 1.0);  // 50
-            effectiveMissCount = std::min(effectiveMissCount + c100 * okMultiplier + c50 * mehMultiplier, (f64)totalHits);
+            effectiveMissCount =
+                std::min(effectiveMissCount + c100 * okMultiplier + c50 * mehMultiplier, (f64)totalHits);
         }
     }
 
@@ -576,14 +575,14 @@ f64 DifficultyCalculator::calculatePPv2(i32 modsLegacy, f64 timescale, f64 ar, f
         // hidden
         if(modsLegacy & LegacyFlags::Hidden)
             aimValue *= 1.0 + 0.04 * (std::max(12.0 - ar,
-                                          0.0));  // NOTE: clamped to 0 because neosu allows AR > 12
+                                               0.0));  // NOTE: clamped to 0 because neosu allows AR > 12
 
         // "We assume 15% of sliders in a map are difficult since there's no way to tell from the performance
         // calculator."
         f64 estimateDifficultSliders = numSliders * 0.15;
         if(numSliders > 0) {
-            f64 estimateSliderEndsDropped =
-                std::clamp<f64>((f64)std::min(c100 + c50 + misses, maxPossibleCombo - combo), 0.0, estimateDifficultSliders);
+            f64 estimateSliderEndsDropped = std::clamp<f64>(
+                (f64)std::min(c100 + c50 + misses, maxPossibleCombo - combo), 0.0, estimateDifficultSliders);
             f64 sliderNerfFactor =
                 (1.0 - aimSliderFactor) * pow(1.0 - estimateSliderEndsDropped / estimateDifficultSliders, 3.0) +
                 aimSliderFactor;
@@ -623,7 +622,7 @@ f64 DifficultyCalculator::calculatePPv2(i32 modsLegacy, f64 timescale, f64 ar, f
         // hidden
         if(modsLegacy & LegacyFlags::Hidden)
             speedValue *= 1.0 + 0.04 * (std::max(12.0 - ar,
-                                            0.0));  // NOTE: clamped to 0 because neosu allows AR > 12
+                                                 0.0));  // NOTE: clamped to 0 because neosu allows AR > 12
 
         // "Calculate accuracy assuming the worst case scenario"
         f64 relevantTotalDiff = totalHits - speedNotes;
@@ -819,7 +818,7 @@ double DifficultyCalculator::DiffObject::calculate_difficulty(const Skills::Skil
         if(incremental) {
             maxObjectStrain = std::max(incremental->max_object_strain, dobjects[dobjectCount - 1].get_strain(type));
         } else {
-            maxObjectStrain = (*max_element(dobjects, dobjects + dobjectCount, diffObjCompare)).get_strain(type);
+            maxObjectStrain = (*std::max_element(dobjects, dobjects + dobjectCount, diffObjCompare)).get_strain(type);
         }
 
         if(dobjectCount < 1 || maxObjectStrain == 0.0) {
@@ -881,8 +880,8 @@ double DifficultyCalculator::DiffObject::calculate_difficulty(const Skills::Skil
         // "We are reducing the highest strains first to account for extreme difficulty spikes"
         size_t actualReducedSectionCount = std::min(highestStrains.size(), skillSpecificReducedSectionCount);
         for(size_t i = 0; i < actualReducedSectionCount; i++) {
-            const f64 scale =
-                std::log10(std::lerp<f64>(1.0, 10.0, std::clamp<f64>((f64)i / (f64)skillSpecificReducedSectionCount, 0.0, 1.0)));
+            const f64 scale = std::log10(
+                std::lerp<f64>(1.0, 10.0, std::clamp<f64>((f64)i / (f64)skillSpecificReducedSectionCount, 0.0, 1.0)));
             highestStrains[highestStrains.size() - i - 1] *= std::lerp<f64>(reducedStrainBaseline, 1.0, scale);
         }
 
@@ -1048,14 +1047,16 @@ double DifficultyCalculator::DiffObject::spacing_weight2(const Skills::Skill dif
                 // this function is meant to reduce rhythm bonus for deltas that are multiples of each other (i.e 100
                 // and 200)
                 f64 deltaDifferenceRatio = std::min(prevDelta, currDelta) / std::max(prevDelta, currDelta);
-                f64 currRatio = 1.0 + rhythm_ratio_multiplier * std::min(0.5, pow(std::sin(PI / deltaDifferenceRatio), 2.0));
+                f64 currRatio =
+                    1.0 + rhythm_ratio_multiplier * std::min(0.5, pow(std::sin(PI / deltaDifferenceRatio), 2.0));
 
                 // reduce ratio bonus if delta difference is too big
                 f64 fraction = std::max(prevDelta / currDelta, currDelta / prevDelta);
                 f64 fractionMultiplier = std::clamp<f64>(2.0 - fraction / 8.0, 0.0, 1.0);
 
-                f64 windowPenalty = std::min(
-                    1.0, std::max(0.0, std::abs(prevDelta - currDelta) - deltaDifferenceEpsilon) / deltaDifferenceEpsilon);
+                f64 windowPenalty =
+                    std::min(1.0, std::max(0.0, std::abs(prevDelta - currDelta) - deltaDifferenceEpsilon) /
+                                      deltaDifferenceEpsilon);
 
                 f64 effectiveRatio = windowPenalty * currRatio * fractionMultiplier;
 
@@ -1213,9 +1214,9 @@ double DifficultyCalculator::DiffObject::spacing_weight2(const Skills::Skill dif
                             : (calcAcuteAngleBonus(this->angle) * calcAcuteAngleBonus(prev.angle) *
                                std::min(angleBonus, 125.0 / this->strain_time) *
                                std::pow(std::sin(PI / 2.0 * std::min(1.0, (100.0 - this->strain_time) / 25.0)), 2.0) *
-                               std::pow(
-                                   std::sin(PI / 2.0 * (std::clamp<double>(this->jumpDistance, 50.0, 100.0) - 50.0) / 50.0),
-                                   2.0));
+                               std::pow(std::sin(PI / 2.0 *
+                                                 (std::clamp<double>(this->jumpDistance, 50.0, 100.0) - 50.0) / 50.0),
+                                        2.0));
 
                     wideAngleBonus *=
                         angleBonus * (1.0 - std::min(wideAngleBonus, std::pow(calcWideAngleBonus(prev.angle), 3.0)));

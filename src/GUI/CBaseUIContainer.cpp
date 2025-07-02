@@ -2,7 +2,7 @@
 
 #include "Engine.h"
 
-using namespace std;
+
 
 CBaseUIContainer::CBaseUIContainer(float Xpos, float Ypos, float Xsize, float Ysize, UString name)
     : CBaseUIElement(Xpos, Ypos, Xsize, Ysize, name) {}

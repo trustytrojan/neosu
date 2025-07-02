@@ -18,7 +18,7 @@
 #include "SoundEngine.h"
 #include "Timing.h"
 
-using namespace std;
+
 
 SongDifficultyButton::SongDifficultyButton(SongBrowser *songBrowser, CBaseUIScrollView *view,
                                            UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize,

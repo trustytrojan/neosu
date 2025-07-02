@@ -12,7 +12,7 @@
 #include "RenderTarget.h"
 #include "ResourceManager.h"
 
-using namespace std;
+
 
 CBaseUIWindow::CBaseUIWindow(float xPos, float yPos, float xSize, float ySize, UString name)
     : CBaseUIElement(xPos, yPos, xSize, ySize, name) {

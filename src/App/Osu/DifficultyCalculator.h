@@ -49,7 +49,7 @@ class OsuDifficultyHitObject {
     OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time);               // circle
     OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time, i32 endTime);  // spinner
     OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time, i32 endTime, f32 spanDuration, i8 osuSliderCurveType,
-                           std::vector<Vector2> controlPoints, f32 pixelLength,
+                           const std::vector<Vector2> &controlPoints, f32 pixelLength,
                            std::vector<SLIDER_SCORING_TIME> scoringTimes, i32 repeats,
                            bool calculateSliderCurveInConstructor);  // slider
     ~OsuDifficultyHitObject();

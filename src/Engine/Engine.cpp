@@ -20,7 +20,7 @@
 #include "Timing.h"
 #include "VisualProfiler.h"
 
-using namespace std;
+
 
 Environment *env = NULL;
 

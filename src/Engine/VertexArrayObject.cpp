@@ -2,7 +2,7 @@
 
 #include "Engine.h"
 
-using namespace std;
+
 
 VertexArrayObject::VertexArrayObject(Graphics::PRIMITIVE primitive, Graphics::USAGE_TYPE usage, bool keepInSystemMemory)
     : Resource() {

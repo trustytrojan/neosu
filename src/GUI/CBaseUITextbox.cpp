@@ -16,7 +16,7 @@
 #include "Skin.h"
 #include "SoundEngine.h"
 
-using namespace std;
+
 
 CBaseUITextbox::CBaseUITextbox(float xPos, float yPos, float xSize, float ySize, UString name)
     : CBaseUIElement(xPos, yPos, xSize, ySize, name) {

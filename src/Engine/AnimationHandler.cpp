@@ -3,7 +3,7 @@
 #include "ConVar.h"
 #include "Engine.h"
 
-using namespace std;
+
 
 AnimationHandler *anim = NULL;
 

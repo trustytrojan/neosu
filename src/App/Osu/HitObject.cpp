@@ -11,7 +11,7 @@
 #include "Skin.h"
 #include "SkinImage.h"
 
-using namespace std;
+
 
 void HitObject::drawHitResult(Beatmap *beatmap, Vector2 rawPos, LiveScore::HIT result, float animPercentInv,
                               float hitDeltaRangePercent) {

@@ -64,7 +64,7 @@
 #include "WinEnvironment.h"
 #endif
 
-using namespace std;
+
 
 Osu *osu = NULL;
 

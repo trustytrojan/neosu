@@ -20,7 +20,7 @@
 #include "SoundEngine.h"
 #include "VertexArrayObject.h"
 
-using namespace std;
+
 
 Slider::Slider(char stype, int repeat, float pixelLength, std::vector<Vector2> points, std::vector<int> hitSounds,
                std::vector<float> ticks, float sliderTime, float sliderTimeWithoutRepeats, long time, int sampleType,

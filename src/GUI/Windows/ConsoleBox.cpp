@@ -14,7 +14,7 @@
 #include "Mouse.h"
 #include "ResourceManager.h"
 
-using namespace std;
+
 
 class ConsoleBoxTextbox : public CBaseUITextbox {
    public:

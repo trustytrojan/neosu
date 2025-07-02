@@ -14,7 +14,7 @@
 #include "Skin.h"
 #include "SoundEngine.h"
 
-using namespace std;
+
 
 int Button::marginPixelsX = 9;
 int Button::marginPixelsY = 9;

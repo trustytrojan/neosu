@@ -15,7 +15,7 @@
 #include "TooltipOverlay.h"
 #include "UIAvatar.h"
 
-using namespace std;
+
 
 // NOTE: selected username is stored in m_sText
 

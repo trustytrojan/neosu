@@ -6,7 +6,7 @@
 #include "Engine.h"
 #include "OpenGLHeaders.h"
 
-using namespace std;
+
 
 OpenGLVertexArrayObject::OpenGLVertexArrayObject(Graphics::PRIMITIVE primitive, Graphics::USAGE_TYPE usage,
                                                  bool keepInSystemMemory)

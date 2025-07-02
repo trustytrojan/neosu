@@ -28,7 +28,7 @@
 #include "VertexArrayObject.h"
 #include "score.h"
 
-using namespace std;
+
 
 HUD::HUD() : OsuScreen() {
     // resources

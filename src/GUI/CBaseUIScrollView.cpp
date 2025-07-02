@@ -10,7 +10,7 @@
 #include "Mouse.h"
 #include "ResourceManager.h"
 
-using namespace std;
+
 
 CBaseUIScrollView::CBaseUIScrollView(float xPos, float yPos, float xSize, float ySize, UString name)
     : CBaseUIElement(xPos, yPos, xSize, ySize, name) {

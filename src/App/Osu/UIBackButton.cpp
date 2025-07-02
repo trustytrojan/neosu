@@ -8,7 +8,7 @@
 #include "SkinImage.h"
 #include "SoundEngine.h"
 
-using namespace std;
+
 
 UIBackButton::UIBackButton(float xPos, float yPos, float xSize, float ySize, UString name)
     : CBaseUIButton(xPos, yPos, xSize, ySize, name, "") {

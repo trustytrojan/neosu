@@ -6,7 +6,7 @@
 #include "Skin.h"
 #include "SoundEngine.h"
 
-using namespace std;
+
 
 UIPauseMenuButton::UIPauseMenuButton(std::function<Image *()> getImageFunc, float xPos, float yPos, float xSize,
                                      float ySize, UString name)

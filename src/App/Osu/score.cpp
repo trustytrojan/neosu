@@ -14,7 +14,7 @@
 #include "Osu.h"
 #include "RoomScreen.h"
 
-using namespace std;
+
 
 LiveScore::LiveScore(bool simulating) {
     this->simulating = simulating;

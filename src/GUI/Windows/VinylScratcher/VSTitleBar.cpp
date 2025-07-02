@@ -8,7 +8,7 @@
 #include "Mouse.h"
 #include "ResourceManager.h"
 
-using namespace std;
+
 
 class VSTitleBarButton : public CBaseUIButton {
    public:

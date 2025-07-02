@@ -10,7 +10,7 @@
 #include "ResourceManager.h"
 #include "SoundEngine.h"
 
-using namespace std;
+
 
 Sound::Sound(std::string filepath, bool stream, bool overlayable, bool loop) : Resource(filepath) {
     this->sample = 0;

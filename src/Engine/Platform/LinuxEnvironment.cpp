@@ -22,7 +22,7 @@
 #include "Engine.h"
 #include "LinuxGLLegacyInterface.h"
 
-using namespace std;
+
 
 typedef struct {
     unsigned long flags;

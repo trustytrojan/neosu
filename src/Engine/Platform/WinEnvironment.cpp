@@ -20,7 +20,7 @@
 #include "WinGLLegacyInterface.h"
 #include "cbase.h"
 
-using namespace std;
+
 
 bool g_bCursorVisible = true;
 

@@ -16,7 +16,7 @@
 #include "Skin.h"
 #include "UIContextMenu.h"
 
-using namespace std;
+
 
 CollectionButton::CollectionButton(SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu,
                                    float xPos, float yPos, float xSize, float ySize, UString name,

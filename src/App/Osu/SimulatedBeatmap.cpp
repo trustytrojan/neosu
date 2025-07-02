@@ -17,7 +17,7 @@
 #include "Slider.h"
 #include "Spinner.h"
 
-using namespace std;
+
 
 SimulatedBeatmap::SimulatedBeatmap(DatabaseBeatmap *diff2, Replay::Mods mods_) {
     this->selectedDifficulty2 = diff2;

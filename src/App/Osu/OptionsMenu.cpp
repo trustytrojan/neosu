@@ -43,7 +43,7 @@
 #include "UISearchOverlay.h"
 #include "UISlider.h"
 
-using namespace std;
+
 
 class OptionsMenuSkinPreviewElement : public CBaseUIElement {
    public:

@@ -12,7 +12,7 @@
 #include "ResourceManager.h"
 #include "SoundEngine.h"
 
-using namespace std;
+
 
 VisualProfiler *vprof = NULL;
 

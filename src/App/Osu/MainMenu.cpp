@@ -31,7 +31,7 @@
 
 static float button_sound_cooldown = 0.f;
 
-using namespace std;
+
 
 UString MainMenu::NEOSU_MAIN_BUTTON_TEXT = UString("neosu");
 UString MainMenu::NEOSU_MAIN_BUTTON_SUBTEXT = UString("Multiplayer Client");

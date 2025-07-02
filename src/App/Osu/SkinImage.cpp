@@ -7,7 +7,7 @@
 #include "ResourceManager.h"
 #include "Skin.h"
 
-using namespace std;
+
 
 SkinImage::SkinImage(Skin *skin, std::string skinElementName, Vector2 baseSizeForScaling2x, float osuSize,
                      std::string animationSeparator, bool ignoreDefaultSkin) {
