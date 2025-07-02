@@ -48,7 +48,7 @@ class DatabaseBeatmap {
     // custom structs
 
     struct LOAD_DIFFOBJ_RESULT {
-        int errorCode{};
+        int errorCode{0};
 
         std::vector<OsuDifficultyHitObject> diffobjects{};
 
@@ -127,27 +127,27 @@ class DatabaseBeatmap {
     };
 
     struct PRIMITIVE_CONTAINER {
-        int errorCode;
+        int errorCode{0};
 
-        std::vector<HITCIRCLE> hitcircles;
-        std::vector<SLIDER> sliders;
-        std::vector<SPINNER> spinners;
-        std::vector<BREAK> breaks;
+        std::vector<HITCIRCLE> hitcircles{};
+        std::vector<SLIDER> sliders{};
+        std::vector<SPINNER> spinners{};
+        std::vector<BREAK> breaks{};
 
-        zarray<TIMINGPOINT> timingpoints;
-        std::vector<Color> combocolors;
+        zarray<TIMINGPOINT> timingpoints{};
+        std::vector<Color> combocolors{};
 
-        float stackLeniency;
+        float stackLeniency{};
 
-        float sliderMultiplier;
-        float sliderTickRate;
+        float sliderMultiplier{};
+        float sliderTickRate{};
 
-        u32 numCircles;
-        u32 numSliders;
-        u32 numSpinners;
-        u32 numHitobjects;
+        u32 numCircles{};
+        u32 numSliders{};
+        u32 numSpinners{};
+        u32 numHitobjects{};
 
-        int version;
+        int version{};
     };
 
     DatabaseBeatmap(std::string filePath, std::string folder, BeatmapType type);

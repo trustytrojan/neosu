@@ -63,6 +63,17 @@ void MapCalcThread::run() {
         result.diff2 = diff2;
 
         auto c = DatabaseBeatmap::loadPrimitiveObjects(diff2->sFilePath, this->should_stop);
+
+        if(this->should_stop.load()) {
+            return;
+        }
+
+        if(c.errorCode) {
+            this->results.push_back(result);
+            this->computed_count++;
+            continue;
+        }
+
         result.nb_circles = c.numCircles;
         result.nb_sliders = c.numSliders;
         result.nb_spinners = c.numSpinners;
@@ -70,6 +81,16 @@ void MapCalcThread::run() {
         pp_info info;
         auto diffres =
             DatabaseBeatmap::loadDifficultyHitObjects(c, diff2->getAR(), diff2->getCS(), 1.f, false, this->should_stop);
+
+        if(this->should_stop.load()) {
+            return;
+        }
+
+        if(diffres.errorCode) {
+            this->results.push_back(result);
+            this->computed_count++;
+            continue;
+        }
 
         DifficultyCalculator::StarCalcParams params;
         params.sortedHitObjects.swap(diffres.diffobjects);
@@ -89,6 +110,10 @@ void MapCalcThread::run() {
         params.outSpeedStrains = &speedStrains;
         result.star_rating =
             static_cast<f32>(DifficultyCalculator::calculateStarDiffForHitObjects(params, this->should_stop));
+
+        if(this->should_stop.load()) {
+            return;
+        }
 
         BPMInfo bpm = getBPM(c.timingpoints);
         result.min_bpm = bpm.min;

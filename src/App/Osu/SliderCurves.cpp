@@ -405,7 +405,7 @@ Vector2 SliderCurveEqualDistanceMulti::originalPointAt(float t) {
 
 SliderCurveLinearBezier::SliderCurveLinearBezier(std::vector<Vector2> controlPoints, float pixelLength, bool line,
                                                  float curvePointsSeparation)
-    : SliderCurveEqualDistanceMulti(controlPoints, pixelLength, curvePointsSeparation) {
+    : SliderCurveEqualDistanceMulti(std::move(controlPoints), pixelLength, curvePointsSeparation) {
     const int numControlPoints = this->controlPoints.size();
 
     std::vector<SliderCurveType *> beziers;

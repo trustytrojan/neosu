@@ -9,27 +9,27 @@
 
 struct hitobject_cache {
     // Selectors
-    f32 speed;
-    f32 AR;
-    f32 CS;
+    f32 speed{};
+    f32 AR{};
+    f32 CS{};
 
     // Results
-    DatabaseBeatmap::LOAD_DIFFOBJ_RESULT diffres;
+    DatabaseBeatmap::LOAD_DIFFOBJ_RESULT diffres{};
 };
 
 struct info_cache {
     // Selectors
-    f32 speed;
-    f32 AR;
-    f32 CS;
-    f32 OD;
-    bool rx;
-    bool td;
+    f32 speed{};
+    f32 AR{};
+    f32 CS{};
+    f32 OD{};
+    bool rx{};
+    bool td{};
 
     // Results
-    std::vector<DifficultyCalculator::DiffObject> cachedDiffObjects;
-    std::vector<DifficultyCalculator::DiffObject> diffObjects;
-    pp_info info;
+    std::vector<DifficultyCalculator::DiffObject> cachedDiffObjects{};
+    std::vector<DifficultyCalculator::DiffObject> diffObjects{};
+    pp_info info{};
 };
 
 static BeatmapDifficulty* diff = NULL;
@@ -122,7 +122,16 @@ static void run_thread() {
                     return;
                 }
                 computed_ho->diffres =
-                    DatabaseBeatmap::loadDifficultyHitObjects(diff->getFilePath(), rqt.AR, rqt.CS, rqt.speed);
+                    DatabaseBeatmap::loadDifficultyHitObjects(diff->getFilePath(), rqt.AR, rqt.CS, rqt.speed, false, dead);
+                if(dead.load()) {
+                    work_mtx.lock();
+                    return;
+                }
+                if(computed_ho->diffres.errorCode) {
+                    work_mtx.lock();
+                    continue;
+                }
+
                 ho_cache.push_back(computed_ho);
             }
 
@@ -174,6 +183,10 @@ static void run_thread() {
                 params.outSpeedStrains = &speedStrains;
                 computed_info->info.total_stars = DifficultyCalculator::calculateStarDiffForHitObjectsInt(
                     computed_info->cachedDiffObjects, params, NULL, dead);
+                if(dead.load()) {
+                    work_mtx.lock();
+                    return;
+                }
 
                 inf_cache.push_back(computed_info);
 

@@ -38,13 +38,6 @@ class OsuDifficultyHitObject {
         f32 time;
     };
 
-    struct SliderScoringTimeComparator {
-        bool operator()(const SLIDER_SCORING_TIME &a, const SLIDER_SCORING_TIME &b) const {
-            if(a.time != b.time) return a.time < b.time;
-            return &a < &b;
-        }
-    };
-
    public:
     OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time);               // circle
     OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time, i32 endTime);  // spinner
@@ -70,28 +63,28 @@ class OsuDifficultyHitObject {
     [[nodiscard]] inline i32 getDuration() const { return this->endTime - this->time; }
 
     // circles (base)
-    TYPE type;
-    Vector2 pos;
-    i32 time;
+    TYPE type{};
+    Vector2 pos{};
+    i32 time{};
 
     // spinners + sliders
-    i32 endTime;
+    i32 endTime{};
 
     // sliders
-    f32 spanDuration;  // i.e. sliderTimeWithoutRepeats
-    i8 osuSliderCurveType;
-    f32 pixelLength;
-    std::vector<SLIDER_SCORING_TIME> scoringTimes;
-    i32 repeats;
+    f32 spanDuration{};  // i.e. sliderTimeWithoutRepeats
+    i8 osuSliderCurveType{};
+    f32 pixelLength{};
+    std::vector<SLIDER_SCORING_TIME> scoringTimes{};
+    i32 repeats{};
 
     // custom
-    SliderCurve *curve;
-    bool scheduledCurveAlloc;
+    SliderCurve *curve{nullptr};
+    bool scheduledCurveAlloc{false};
     std::vector<Vector2> scheduledCurveAllocControlPoints;
-    f32 scheduledCurveAllocStackOffset;
+    f32 scheduledCurveAllocStackOffset{};
 
-    i32 stack;
-    Vector2 originalPos;
+    i32 stack{};
+    Vector2 originalPos{};
 };
 
 class DifficultyCalculator {

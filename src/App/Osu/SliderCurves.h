@@ -1,4 +1,5 @@
 #pragma once
+
 #include "cbase.h"
 
 //**********************//
@@ -31,8 +32,14 @@ class SliderCurve {
     [[nodiscard]] inline float getEndAngle() const { return this->fEndAngle; }
 
     [[nodiscard]] inline const std::vector<Vector2> &getPoints() const { return this->curvePoints; }
-    [[nodiscard]] inline const std::vector<std::vector<Vector2>> &getPointSegments() const { return this->curvePointSegments; }
+    [[nodiscard]] inline const std::vector<std::vector<Vector2>> &getPointSegments() const {
+        return this->curvePointSegments;
+    }
 
+    [[nodiscard]] inline float getPixelLength() const { return this->fPixelLength; }
+
+   protected:
+    // original input values
     float fPixelLength;
     std::vector<Vector2> controlPoints;
 
@@ -78,7 +85,7 @@ class SliderCurveType {
     std::vector<float> curveDistances;
 };
 
-class SliderCurveTypeBezier2 : public SliderCurveType {
+class SliderCurveTypeBezier2 final : public SliderCurveType {
    public:
     SliderCurveTypeBezier2(const std::vector<Vector2> &points);
     ~SliderCurveTypeBezier2() override { ; }
@@ -86,7 +93,7 @@ class SliderCurveTypeBezier2 : public SliderCurveType {
     Vector2 pointAt(float t) override { return Vector2(); }  // unused
 };
 
-class SliderCurveTypeCentripetalCatmullRom : public SliderCurveType {
+class SliderCurveTypeCentripetalCatmullRom final : public SliderCurveType {
    public:
     SliderCurveTypeCentripetalCatmullRom(const std::vector<Vector2> &points);
     ~SliderCurveTypeCentripetalCatmullRom() override { ; }
@@ -117,20 +124,20 @@ class SliderCurveEqualDistanceMulti : public SliderCurve {
     int iNCurve;
 };
 
-class SliderCurveLinearBezier : public SliderCurveEqualDistanceMulti {
+class SliderCurveLinearBezier final : public SliderCurveEqualDistanceMulti {
    public:
     SliderCurveLinearBezier(std::vector<Vector2> controlPoints, float pixelLength, bool line,
                             float curvePointsSeparation);
     ~SliderCurveLinearBezier() override { ; }
 };
 
-class SliderCurveCatmull : public SliderCurveEqualDistanceMulti {
+class SliderCurveCatmull final : public SliderCurveEqualDistanceMulti {
    public:
     SliderCurveCatmull(std::vector<Vector2> controlPoints, float pixelLength, float curvePointsSeparation);
     ~SliderCurveCatmull() override { ; }
 };
 
-class SliderCurveCircumscribedCircle : public SliderCurve {
+class SliderCurveCircumscribedCircle final : public SliderCurve {
    public:
     SliderCurveCircumscribedCircle(std::vector<Vector2> controlPoints, float pixelLength, float curvePointsSeparation);
     ~SliderCurveCircumscribedCircle() override { ; }
@@ -139,7 +146,7 @@ class SliderCurveCircumscribedCircle : public SliderCurve {
     Vector2 originalPointAt(float t) override;
 
     void updateStackPosition(float stackMulStackOffset,
-                                     bool HR) override;  // must also override this, due to the custom pointAt() function!
+                             bool HR) override;  // must also override this, due to the custom pointAt() function!
 
    private:
     Vector2 intersect(Vector2 a, Vector2 ta, Vector2 b, Vector2 tb);

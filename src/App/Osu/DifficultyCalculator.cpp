@@ -4,7 +4,6 @@
 #include "ConVar.h"
 #include "Engine.h"
 #include "GameRules.h"
-#include "LegacyReplay.h"
 #include "Osu.h"
 #include "SliderCurves.h"
 
@@ -238,7 +237,7 @@ f64 DifficultyCalculator::calculateStarDiffForHitObjectsInt(std::vector<DiffObje
             // star counts on lazer see: DJ Noriken - Stargazer feat. YUC'e (PSYQUI Remix) (Hishiro Chizuru) [Starg-Azer
             // isn't so great? Are you kidding me?]
             if(cv_stars_ignore_clamped_sliders.getBool()) {
-                if(slider.ho->curve->fPixelLength >= cv_slider_curve_max_length.getFloat()) return;
+                if(slider.ho->curve->getPixelLength() >= cv_slider_curve_max_length.getFloat()) return;
             }
 
             // NOTE: although this looks like a duplicate of the end tick time, this really does have a noticeable

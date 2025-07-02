@@ -614,8 +614,19 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
             .time = time,
         });
 
+        if(dead.load()) {
+            r.errorCode = 6;
+            return r;
+        }
+
+        constexpr auto sliderScoringTimeComparator = [](const OsuDifficultyHitObject::SLIDER_SCORING_TIME &a,
+                                                        const OsuDifficultyHitObject::SLIDER_SCORING_TIME &b) -> bool {
+            if(a.time == b.time) return &a < &b;
+            return a.time < b.time;
+        };
+
         // 5) sort scoringTimes from earliest to latest
-        std::ranges::sort(s.scoringTimesForStarCalc, OsuDifficultyHitObject::SliderScoringTimeComparator());
+        std::ranges::sort(s.scoringTimesForStarCalc, sliderScoringTimeComparator);
     }
 
     return r;
@@ -819,7 +830,7 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(P
         } else  // version < 6
         {
             // old stacking algorithm for old beatmaps
-            // https://github.com/ppy/osu/blob/master/osu.Game.Rulesets.Osu/Beatmaps/BeatmapProcessor.cs
+            // https://github.com/ppy/osu/blob/master/osu.Game.Rulesets.Osu/Beatmaps/OsuBeatmapProcessor.cs
 
             for(int i = 0; i < result.diffobjects.size(); i++) {
                 OsuDifficultyHitObject *currHitObject = &result.diffobjects[i];
@@ -866,7 +877,8 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(P
                 return result;
             }
 
-            if(result.diffobjects[i].stack != 0) result.diffobjects[i].updateStackPosition(stackOffset);
+            if(result.diffobjects[i].curve && result.diffobjects[i].stack != 0)
+                result.diffobjects[i].updateStackPosition(stackOffset);
         }
     }
 
