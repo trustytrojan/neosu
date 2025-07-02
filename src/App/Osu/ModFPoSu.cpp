@@ -62,7 +62,7 @@ ModFPoSu::~ModFPoSu() { anim->deleteExistingAnimation(&this->fZoomFOVAnimPercent
 void ModFPoSu::draw() {
     if(!cv_mod_fposu.getBool()) return;
 
-    const float fov = std::lerp<float>(cv_fposu_fov.getFloat(), cv_fposu_zoom_fov.getFloat(), this->fZoomFOVAnimPercent);
+    const float fov = std::lerp(cv_fposu_fov.getFloat(), cv_fposu_zoom_fov.getFloat(), this->fZoomFOVAnimPercent);
     Matrix4 projectionMatrix =
         cv_fposu_vertical_fov.getBool()
             ? Camera::buildMatrixPerspectiveFovVertical(
@@ -668,7 +668,7 @@ float ModFPoSu::subdivide(std::list<VertexPair> &meshList, const std::list<Verte
     const Vector3 a = Vector3((*begin).a.x, 0.0f, (*begin).a.z);
     const Vector3 b = Vector3((*end).a.x, 0.0f, (*end).a.z);
     Vector3 middlePoint =
-        Vector3(std::lerp<float>(a.x, b.x, 0.5f), std::lerp<float>(a.y, b.y, 0.5f), std::lerp<float>(a.z, b.z, 0.5f));
+        Vector3(std::lerp(a.x, b.x, 0.5f), std::lerp(a.y, b.y, 0.5f), std::lerp(a.z, b.z, 0.5f));
 
     if(cv_fposu_curved.getBool()) middlePoint.setLength(edgeDistance);
 
@@ -678,7 +678,7 @@ float ModFPoSu::subdivide(std::list<VertexPair> &meshList, const std::list<Verte
     top.y = (*begin).a.y;
     bottom.y = (*begin).b.y;
 
-    const float tc = std::lerp<float>((*begin).textureCoordinate, (*end).textureCoordinate, 0.5f);
+    const float tc = std::lerp((*begin).textureCoordinate, (*end).textureCoordinate, 0.5f);
 
     VertexPair newVP = VertexPair(top, bottom, tc);
     const std::list<VertexPair>::iterator newPos = meshList.insert(end, newVP);

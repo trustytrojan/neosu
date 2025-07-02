@@ -148,7 +148,7 @@ void VolumeOverlay::mouse_update(bool *propagate_clicks) {
 
     // volume inactive to active animation
     if(this->bVolumeInactiveToActiveScheduled && this->fVolumeInactiveToActiveAnim > 0.0f) {
-        soundEngine->setVolume(std::lerp<float>(cv_volume_master_inactive.getFloat() * cv_volume_master.getFloat(),
+        soundEngine->setVolume(std::lerp(cv_volume_master_inactive.getFloat() * cv_volume_master.getFloat(),
                                                   cv_volume_master.getFloat(), this->fVolumeInactiveToActiveAnim));
 
         // check if we're done

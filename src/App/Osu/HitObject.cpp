@@ -136,19 +136,19 @@ void HitObject::drawHitResult(Skin *skin, float hitcircleDiameter, float rawHitc
         if(doScaleOrRotateAnim && cv_hitresult_animated.getBool()) {
             if(!hasParticle) {
                 if(animPercent < fadeInEndPercent * 0.8f)
-                    scale = std::lerp<float>(0.6f, 1.1f, std::clamp<float>(animPercent / (fadeInEndPercent * 0.8f), 0.0f, 1.0f));
+                    scale = std::lerp(0.6f, 1.1f, std::clamp<float>(animPercent / (fadeInEndPercent * 0.8f), 0.0f, 1.0f));
                 else if(animPercent < fadeInEndPercent * 1.2f)
-                    scale = std::lerp<float>(1.1f, 0.9f,
+                    scale = std::lerp(1.1f, 0.9f,
                                         std::clamp<float>((animPercent - fadeInEndPercent * 0.8f) /
                                                          (fadeInEndPercent * 1.2f - fadeInEndPercent * 0.8f),
                                                      0.0f, 1.0f));
                 else if(animPercent < fadeInEndPercent * 1.4f)
-                    scale = std::lerp<float>(0.9f, 1.0f,
+                    scale = std::lerp(0.9f, 1.0f,
                                         std::clamp<float>((animPercent - fadeInEndPercent * 1.2f) /
                                                          (fadeInEndPercent * 1.4f - fadeInEndPercent * 1.2f),
                                                      0.0f, 1.0f));
             } else
-                scale = std::lerp<float>(0.9f, 1.05f, std::clamp<float>(animPercent, 0.0f, 1.0f));
+                scale = std::lerp(0.9f, 1.05f, std::clamp<float>(animPercent, 0.0f, 1.0f));
 
             // TODO: osu draws an additive copy of the hitresult on top (?) with 0.5 alpha anim and negative timing, if
             // the skin hasParticle. in this case only the copy does the wobble anim, while the main result just scales
@@ -160,7 +160,7 @@ void HitObject::drawHitResult(Skin *skin, float hitcircleDiameter, float rawHitc
                 Vector2 downAnim;
                 if(skin->getHit0()->getNumImages() < 2 && skin->getVersion() > 1.0f)
                     downAnim.y =
-                        std::lerp<float>(-5.0f, 40.0f, std::clamp<float>(animPercent * animPercent * animPercent, 0.0f, 1.0f)) *
+                        std::lerp(-5.0f, 40.0f, std::clamp<float>(animPercent * animPercent * animPercent, 0.0f, 1.0f)) *
                         osuCoordScaleMultiplier;
 
                 float missScale = 1.0f + std::clamp<float>((1.0f - (animPercent / fadeInEndPercent)), 0.0f, 1.0f) *
@@ -368,7 +368,7 @@ void HitObject::update(long curPos, f64 frame_time) {
                 // purpose
             }
             this->fApproachScale =
-                1 + std::lerp<float>(cv_mod_approach_different_initial_size.getFloat() - 1.0f, 0.0f, time);
+                1 + std::lerp(cv_mod_approach_different_initial_size.getFloat() - 1.0f, 0.0f, time);
         }
 
         // hitobject body fadein
@@ -419,7 +419,7 @@ void HitObject::update(long curPos, f64 frame_time) {
             const long hittableDimFadeEnd = hittableDimFadeStart + (long)cv_hitobject_hittable_dim_duration.getInt();
 
             this->fHittableDimRGBColorMultiplierPercent =
-                std::lerp<float>(cv_hitobject_hittable_dim_start_percent.getFloat(), 1.0f,
+                std::lerp(cv_hitobject_hittable_dim_start_percent.getFloat(), 1.0f,
                             std::clamp<float>(1.0f - (float)(hittableDimFadeEnd - curPos) /
                                                     (float)(hittableDimFadeEnd - hittableDimFadeStart),
                                          0.0f, 1.0f));
@@ -483,7 +483,7 @@ void HitObject::onReset(long curPos) {
 
 float HitObject::lerp3f(float a, float b, float c, float percent) {
     if(percent <= 0.5f)
-        return std::lerp<float>(a, b, percent * 2.0f);
+        return std::lerp(a, b, percent * 2.0f);
     else
-        return std::lerp<float>(b, c, (percent - 0.5f) * 2.0f);
+        return std::lerp(b, c, (percent - 0.5f) * 2.0f);
 }

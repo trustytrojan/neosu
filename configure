@@ -6546,9 +6546,9 @@ then :
 
     CC=clang
     CXX=clang++
-    CXXFLAGS="$CXXFLAGS -Qunused-arguments -fuse-ld=lld -Wno-c23-extensions"
-    CFLAGS="$CFLAGS -Qunused-arguments -fuse-ld=lld"
-    LDFLAGS="$LDFLAGS -fuse-ld=lld"
+    CXXFLAGS="$CXXFLAGS -Qunused-arguments -fuse-ld=lld -Wno-c2x-extensions -rtlib=compiler-rt -stdlib=libc++"
+    CFLAGS="$CFLAGS -Qunused-arguments -fuse-ld=lld -rtlib=compiler-rt"
+    LDFLAGS="$LDFLAGS -fuse-ld=lld -rtlib=compiler-rt"
     CLANG=yes
 
 
@@ -7901,7 +7901,7 @@ fi
 COMMON_FLAGS="$COMMON_FLAGS -ffunction-sections -fdata-sections -fwrapv -fno-strict-aliasing -fno-semantic-interposition -ftls-model=initial-exec"
 CXXFLAGS="$CXXFLAGS $COMMON_FLAGS -fno-exceptions" # -fno-rtti
 CFLAGS="$CFLAGS $COMMON_FLAGS"
-if test -z "$ubercompat" || test "x$enable_static" = "xyes"
+if ! { test "x$enable_clang" = "xyes" && test "$host_os" = "linux-gnu" ; } && { test -z "$ubercompat" || test "x$enable_static" = "xyes" ; }
 then :
 
     LDFLAGS="$LDFLAGS -static-libstdc++ -static-libgcc"

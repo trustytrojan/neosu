@@ -255,7 +255,7 @@ void SliderCurveEqualDistanceMulti::init(const std::vector<SliderCurveType *> &c
         if(distanceAt - lastDistanceAt > 1) {
             const float t = (prefDistance - lastDistanceAt) / (distanceAt - lastDistanceAt);
             this->curvePoints[i] =
-                Vector2(std::lerp<float>(lastCurve.x, thisCurve.x, t), std::lerp<float>(lastCurve.y, thisCurve.y, t));
+                Vector2(std::lerp(lastCurve.x, thisCurve.x, t), std::lerp(lastCurve.y, thisCurve.y, t));
         } else
             this->curvePoints[i] = thisCurve;
 
@@ -372,7 +372,7 @@ Vector2 SliderCurveEqualDistanceMulti::pointAt(float t) {
 
         const float t2 = indexF - index;
 
-        return Vector2(std::lerp<float>(poi.x, poi2.x, t2), std::lerp<float>(poi.y, poi2.y, t2));
+        return Vector2(std::lerp(poi.x, poi2.x, t2), std::lerp(poi.y, poi2.y, t2));
     }
 }
 
@@ -399,7 +399,7 @@ Vector2 SliderCurveEqualDistanceMulti::originalPointAt(float t) {
 
         const float t2 = indexF - index;
 
-        return Vector2(std::lerp<float>(poi.x, poi2.x, t2), std::lerp<float>(poi.y, poi2.y, t2));
+        return Vector2(std::lerp(poi.x, poi2.x, t2), std::lerp(poi.y, poi2.y, t2));
     }
 }
 
@@ -601,7 +601,7 @@ Vector2 SliderCurveCircumscribedCircle::pointAt(float t) {
     const float sanityRange =
         cv_slider_curve_max_length
             .getFloat();  // NOTE: added to fix some aspire problems (endless drawFollowPoints and star calc etc.)
-    const float ang = std::lerp<float>(this->fCalculationStartAngle, this->fCalculationEndAngle, t);
+    const float ang = std::lerp(this->fCalculationStartAngle, this->fCalculationEndAngle, t);
 
     return Vector2(std::clamp<float>(std::cos(ang) * this->fRadius + this->vCircleCenter.x, -sanityRange, sanityRange),
                    std::clamp<float>(std::sin(ang) * this->fRadius + this->vCircleCenter.y, -sanityRange, sanityRange));
@@ -611,7 +611,7 @@ Vector2 SliderCurveCircumscribedCircle::originalPointAt(float t) {
     const float sanityRange =
         cv_slider_curve_max_length
             .getFloat();  // NOTE: added to fix some aspire problems (endless drawFollowPoints and star calc etc.)
-    const float ang = std::lerp<float>(this->fCalculationStartAngle, this->fCalculationEndAngle, t);
+    const float ang = std::lerp(this->fCalculationStartAngle, this->fCalculationEndAngle, t);
 
     return Vector2(
         std::clamp<float>(std::cos(ang) * this->fRadius + this->vOriginalCircleCenter.x, -sanityRange, sanityRange),

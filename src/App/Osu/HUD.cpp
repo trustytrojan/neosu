@@ -528,7 +528,7 @@ void HUD::drawCursorRipples() {
             const float animPercent = 1.0f - std::clamp<float>((time - engine->getTime()) / duration, 0.0f, 1.0f);
             const float fadePercent = 1.0f - std::clamp<float>((time - engine->getTime()) / fadeDuration, 0.0f, 1.0f);
 
-            const float scale = std::lerp<float>(cv_cursor_ripple_anim_start_scale.getFloat(),
+            const float scale = std::lerp(cv_cursor_ripple_anim_start_scale.getFloat(),
                                                  cv_cursor_ripple_anim_end_scale.getFloat(),
                                                  1.0f - (1.0f - animPercent) * (1.0f - animPercent));  // quad out
 
@@ -1033,11 +1033,11 @@ void HUD::drawHPBar(double health, float alpha, float breakAnim) {
     if(useNewDefault) {
         if(health < 0.2) {
             const float factor = std::max(0.0, (0.2 - health) / 0.2);
-            const float value = std::lerp<float>(0.0f, 1.0f, factor);
+            const float value = std::lerp(0.0f, 1.0f, factor);
             g->setColor(argb(1.0f, value, 0.0f, 0.0f));
         } else if(health < 0.5) {
             const float factor = std::max(0.0, (0.5 - health) / 0.5);
-            const float value = std::lerp<float>(1.0f, 0.0f, factor);
+            const float value = std::lerp(1.0f, 0.0f, factor);
             g->setColor(argb(1.0f, value, value, value));
         } else
             g->setColor(0xffffffff);

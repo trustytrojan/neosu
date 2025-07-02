@@ -20,7 +20,6 @@
 
 #include "BaseEnvironment.h"  // for Env::cfg (consteval)
 #include "MD5Hash.h"          // convenience
-#include "fmt/compile.h"
 #include "fmt/format.h"
 #include "fmt/printf.h"
 

@@ -2530,7 +2530,7 @@ void Beatmap::update2() {
         }
 
         this->interpolatedMousePos =
-            Vector2{std::lerp<float>(current_frame.x, next_frame.x, percent), std::lerp<float>(current_frame.y, next_frame.y, percent)};
+            Vector2{std::lerp(current_frame.x, next_frame.x, percent), std::lerp(current_frame.y, next_frame.y, percent)};
 
         if(cv_playfield_mirror_horizontal.getBool())
             this->interpolatedMousePos.y = GameRules::OSU_COORD_HEIGHT - this->interpolatedMousePos.y;

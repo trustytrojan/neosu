@@ -152,7 +152,7 @@ void SongDifficultyButton::mouse_update(bool *propagate_clicks) {
         anim->moveQuadOut(&this->fOffsetPercentAnim, newOffsetPercentSelectionState ? 1.0f : 0.0f,
                           0.25f * (1.0f - this->fOffsetPercentAnim), true);
     }
-    this->setOffsetPercent(std::lerp<float>(0.0f, 0.075f, this->fOffsetPercentAnim));
+    this->setOffsetPercent(std::lerp(0.0f, 0.075f, this->fOffsetPercentAnim));
 
     if(this->bUpdateGradeScheduled) {
         this->bUpdateGradeScheduled = false;

@@ -451,7 +451,7 @@ void MainMenu::draw() {
 
             customPulse = 1.0f - customPulse;
 
-            const float anim = std::lerp<float>((1.0f - customPulse) * (1.0f - customPulse), (1.0f - customPulse), 0.25f);
+            const float anim = std::lerp((1.0f - customPulse) * (1.0f - customPulse), (1.0f - customPulse), 0.25f);
             const float anim2 = anim * (this->iMainMenuAnimBeatCounter % 2 == 1 ? 1.0f : -1.0f);
             const float anim3 = anim;
 
@@ -469,12 +469,12 @@ void MainMenu::draw() {
                          this->fMainMenuAnim3 * 360.0f + friendRotation);
     }
 
-    const Color cubeColor = argb(1.0f, std::lerp<float>(0.0f, 0.5f, this->fMainMenuAnimFriendPercent),
-                                   std::lerp<float>(0.0f, 0.768f, this->fMainMenuAnimFriendPercent),
-                                   std::lerp<float>(0.0f, 0.965f, this->fMainMenuAnimFriendPercent));
-    const Color cubeBorderColor = argb(1.0f, std::lerp<float>(1.0f, 0.5f, this->fMainMenuAnimFriendPercent),
-                                         std::lerp<float>(1.0f, 0.768f, this->fMainMenuAnimFriendPercent),
-                                         std::lerp<float>(1.0f, 0.965f, this->fMainMenuAnimFriendPercent));
+    const Color cubeColor = argb(1.0f, std::lerp(0.0f, 0.5f, this->fMainMenuAnimFriendPercent),
+                                   std::lerp(0.0f, 0.768f, this->fMainMenuAnimFriendPercent),
+                                   std::lerp(0.0f, 0.965f, this->fMainMenuAnimFriendPercent));
+    const Color cubeBorderColor = argb(1.0f, std::lerp(1.0f, 0.5f, this->fMainMenuAnimFriendPercent),
+                                         std::lerp(1.0f, 0.768f, this->fMainMenuAnimFriendPercent),
+                                         std::lerp(1.0f, 0.965f, this->fMainMenuAnimFriendPercent));
 
     // front side
     g->pushTransform();
@@ -688,7 +688,7 @@ void MainMenu::draw() {
             const float animRightMultiplier = (this->iMainMenuAnimBeatCounter % 2 == 1 ? 1.0f : 0.1f);
 
             const float animMoveUp =
-                std::lerp<float>((1.0f - customPulse) * (1.0f - customPulse), (1.0f - customPulse), 0.35f) *
+                std::lerp((1.0f - customPulse) * (1.0f - customPulse), (1.0f - customPulse), 0.35f) *
                 this->fMainMenuAnimFriendPercent;
 
             const float animLeftMoveUp = animMoveUp * animLeftMultiplier;

@@ -122,12 +122,12 @@ void CBaseUISlider::mouse_update(bool *propagate_clicks) {
         // set new value
         if(this->bAnimated) {
             if(this->bLiveUpdate) {
-                this->setValue(std::lerp<float>(this->fMinValue, this->fMaxValue, this->fCurPercent), false);
+                this->setValue(std::lerp(this->fMinValue, this->fMaxValue, this->fCurPercent), false);
             } else {
-                this->fCurValue = std::lerp<float>(this->fMinValue, this->fMaxValue, this->fCurPercent);
+                this->fCurValue = std::lerp(this->fMinValue, this->fMaxValue, this->fCurPercent);
             }
         } else {
-            this->setValue(std::lerp<float>(this->fMinValue, this->fMaxValue, this->fCurPercent), false);
+            this->setValue(std::lerp(this->fMinValue, this->fMaxValue, this->fCurPercent), false);
         }
 
         this->bHasChanged = true;
@@ -154,9 +154,9 @@ void CBaseUISlider::mouse_update(bool *propagate_clicks) {
                 std::clamp<float>(std::round(this->vBlockPos.x) / (this->vSize.x - this->vBlockSize.x), 0.0f, 1.0f);
 
             if(this->bLiveUpdate)
-                this->setValue(std::lerp<float>(this->fMinValue, this->fMaxValue, this->fCurPercent), false);
+                this->setValue(std::lerp(this->fMinValue, this->fMaxValue, this->fCurPercent), false);
             else
-                this->fCurValue = std::lerp<float>(this->fMinValue, this->fMaxValue, this->fCurPercent);
+                this->fCurValue = std::lerp(this->fMinValue, this->fMaxValue, this->fCurPercent);
         }
 
         if(anim->isAnimating(&this->vBlockPos.y)) {
@@ -164,9 +164,9 @@ void CBaseUISlider::mouse_update(bool *propagate_clicks) {
                 std::clamp<float>(1.0f - (std::round(this->vBlockPos.y) / (this->vSize.y - this->vBlockSize.y)), 0.0f, 1.0f);
 
             if(this->bLiveUpdate)
-                this->setValue(std::lerp<float>(this->fMinValue, this->fMaxValue, this->fCurPercent), false);
+                this->setValue(std::lerp(this->fMinValue, this->fMaxValue, this->fCurPercent), false);
             else
-                this->fCurValue = std::lerp<float>(this->fMinValue, this->fMaxValue, this->fCurPercent);
+                this->fCurValue = std::lerp(this->fMinValue, this->fMaxValue, this->fCurPercent);
         }
     }
 }

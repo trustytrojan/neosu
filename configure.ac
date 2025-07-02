@@ -298,9 +298,9 @@ AC_SUBST([PKG_CONFIG_PATH_CUSTOM])
 AS_IF([test "x$enable_clang" = "xyes"], [
     CC=clang
     CXX=clang++
-    CXXFLAGS="$CXXFLAGS -Qunused-arguments -fuse-ld=lld -Wno-c23-extensions"
-    CFLAGS="$CFLAGS -Qunused-arguments -fuse-ld=lld"
-    LDFLAGS="$LDFLAGS -fuse-ld=lld"
+    CXXFLAGS="$CXXFLAGS -Qunused-arguments -fuse-ld=lld -Wno-c2x-extensions -rtlib=compiler-rt -stdlib=libc++"
+    CFLAGS="$CFLAGS -Qunused-arguments -fuse-ld=lld -rtlib=compiler-rt"
+    LDFLAGS="$LDFLAGS -fuse-ld=lld -rtlib=compiler-rt"
     CLANG=yes
     AC_SUBST([CLANG])
 ],[
@@ -446,7 +446,7 @@ AS_IF([test "$host_cpu" = "x86_64"], [COMMON_FLAGS="$COMMON_FLAGS -mcmodel=small
 COMMON_FLAGS="$COMMON_FLAGS -ffunction-sections -fdata-sections -fwrapv -fno-strict-aliasing -fno-semantic-interposition -ftls-model=initial-exec"
 CXXFLAGS="$CXXFLAGS $COMMON_FLAGS -fno-exceptions" # -fno-rtti
 CFLAGS="$CFLAGS $COMMON_FLAGS"
-AS_IF([test -z "$ubercompat" || test "x$enable_static" = "xyes"], [
+AS_IF([! { test "x$enable_clang" = "xyes" && test "$host_os" = "linux-gnu" ; } && { test -z "$ubercompat" || test "x$enable_static" = "xyes" ; }], [
     LDFLAGS="$LDFLAGS -static-libstdc++ -static-libgcc"
 ])
 

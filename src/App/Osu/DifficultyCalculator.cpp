@@ -880,8 +880,8 @@ double DifficultyCalculator::DiffObject::calculate_difficulty(const Skills::Skil
         size_t actualReducedSectionCount = std::min(highestStrains.size(), skillSpecificReducedSectionCount);
         for(size_t i = 0; i < actualReducedSectionCount; i++) {
             const f64 scale = std::log10(
-                std::lerp<f64>(1.0, 10.0, std::clamp<f64>((f64)i / (f64)skillSpecificReducedSectionCount, 0.0, 1.0)));
-            highestStrains[highestStrains.size() - i - 1] *= std::lerp<f64>(reducedStrainBaseline, 1.0, scale);
+                std::lerp(1.0, 10.0, std::clamp<f64>((f64)i / (f64)skillSpecificReducedSectionCount, 0.0, 1.0)));
+            highestStrains[highestStrains.size() - i - 1] *= std::lerp(reducedStrainBaseline, 1.0, scale);
         }
 
         // re-sort
