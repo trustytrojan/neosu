@@ -7,6 +7,7 @@
 #include <iostream>
 #include <limits>
 #include <sstream>
+#include <utility>
 
 #include "Bancho.h"  // md5
 #include "Beatmap.h"
@@ -153,7 +154,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
             return c;
         }
 
-        std::istringstream ss("");
+        // std::istringstream ss("");
 
         // load the actual beatmap
         int hitobjectsWithoutSpinnerCounter = 0;
@@ -172,7 +173,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
 
             const char *curLineChar = curLine.c_str();
             const int commentIndex = curLine.find("//");
-            if(commentIndex == std::string::npos ||
+            if(std::cmp_equal(commentIndex, std::string::npos) ||
                commentIndex != 0)  // ignore comments, but only if at the beginning of a line (e.g. allow
                                    // Artist:DJ'TEKINA//SOMETHING)
             {
@@ -236,32 +237,30 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                                   &tpMeter, &tpSampleType, &tpSampleSet, &tpVolume, &tpTimingChange, &tpKiai) == 8 ||
                            sscanf(curLineChar, " %lf , %f , %i , %i , %i , %i , %i", &tpOffset, &tpMSPerBeat, &tpMeter,
                                   &tpSampleType, &tpSampleSet, &tpVolume, &tpTimingChange) == 7) {
-                            TIMINGPOINT t{};
-                            {
-                                t.offset = (long)std::round(tpOffset);
-                                t.msPerBeat = tpMSPerBeat;
+                            TIMINGPOINT t{
+                                .offset = std::round(tpOffset),
+                                .msPerBeat = tpMSPerBeat,
 
-                                t.sampleType = tpSampleType;
-                                t.sampleSet = tpSampleSet;
-                                t.volume = tpVolume;
+                                .sampleType = tpSampleType,
+                                .sampleSet = tpSampleSet,
+                                .volume = tpVolume,
 
-                                t.timingChange = tpTimingChange == 1;
-                                t.kiai = tpKiai > 0;
-                            }
+                                .timingChange = tpTimingChange == 1,
+                                .kiai = tpKiai > 0,
+                            };
                             c.timingpoints.push_back(t);
                         } else if(sscanf(curLineChar, " %lf , %f", &tpOffset, &tpMSPerBeat) == 2) {
-                            TIMINGPOINT t{};
-                            {
-                                t.offset = (long)std::round(tpOffset);
-                                t.msPerBeat = tpMSPerBeat;
+                            TIMINGPOINT t{
+                                .offset = std::round(tpOffset),
+                                .msPerBeat = tpMSPerBeat,
 
-                                t.sampleType = 0;
-                                t.sampleSet = 0;
-                                t.volume = 100;
+                                .sampleType = 0,
+                                .sampleSet = 0,
+                                .volume = 100,
 
-                                t.timingChange = true;
-                                t.kiai = false;
-                            }
+                                .timingChange = true,
+                                .kiai = false,
+                            };
                             c.timingpoints.push_back(t);
                         }
                     } break;
@@ -343,25 +342,24 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                                 c.hitcircles.push_back(h);
                             } else if(type & 0x2)  // slider
                             {
-                                UString curLineString = UString(curLineChar);
-                                std::vector<UString> tokens = curLineString.split(",");
+                                std::vector<UString> tokens = UString(curLineChar).split(",");
                                 if(tokens.size() < 8) {
-                                    debugLog("Invalid slider in beatmap: %s\n\ncurLine = %s\n", osuFilePath.c_str(),
-                                             curLineChar);
+                                    debugLogF("Invalid slider in beatmap: {:s}\n\ncurLine = {:s}\n", osuFilePath,
+                                              curLineChar);
                                     continue;
                                     // engine->showMessageError("Error", UString::format("Invalid slider in beatmap:
-                                    // %s\n\ncurLine = %s", this->sFilePath.c_str(), curLine)); return false;
+                                    // %s\n\ncurLine = %s", m_sFilePath.toUtf8(), curLine)); return false;
                                 }
 
                                 std::vector<UString> sliderTokens = tokens[5].split("|");
                                 if(sliderTokens.size() < 1)  // partially allow bullshit sliders (no controlpoints!),
                                                              // e.g. https://osu.ppy.sh/beatmapsets/791900#osu/1676490
                                 {
-                                    debugLog("Invalid slider tokens: %s\n\nIn beatmap: %s\n", curLineChar,
-                                             osuFilePath.c_str());
+                                    debugLogF("Invalid slider tokens: {:s}\n\nIn beatmap: {:s}\n", curLineChar,
+                                              osuFilePath);
                                     continue;
                                     // engine->showMessageError("Error", UString::format("Invalid slider tokens:
-                                    // %s\n\nIn beatmap: %s", curLineChar, this->sFilePath.c_str())); return false;
+                                    // %s\n\nIn beatmap: %s", curLineChar, m_sFilePath.toUtf8())); return false;
                                 }
 
                                 std::vector<Vector2> points;
@@ -376,25 +374,26 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                                     if(sliderXY.size() != 2 || sliderXY[0].find("E") != -1 ||
                                        sliderXY[0].find("e") != -1 || sliderXY[1].find("E") != -1 ||
                                        sliderXY[1].find("e") != -1) {
-                                        debugLog("Invalid slider positions: %s\n\nIn Beatmap: %s\n", curLineChar,
-                                                 osuFilePath.c_str());
+                                        debugLogF("Invalid slider positions: {:s}\n\nIn Beatmap: {:s}\n", curLineChar,
+                                                  osuFilePath);
                                         continue;
                                         // engine->showMessageError("Error", UString::format("Invalid slider positions:
-                                        // %s\n\nIn beatmap: %s", curLine, this->sFilePath.c_str())); return false;
+                                        // %s\n\nIn beatmap: %s", curLine, m_sFilePath.toUtf8())); return false;
                                     }
 
-                                    points.emplace_back(
-                                        (int)std::clamp<float>(sliderXY[0].toFloat(), -sliderSanityRange, sliderSanityRange),
-                                        (int)std::clamp<float>(sliderXY[1].toFloat(), -sliderSanityRange,
-                                                          sliderSanityRange));
+                                    points.emplace_back((int)std::clamp<float>(sliderXY[0].toFloat(),
+                                                                               -sliderSanityRange, sliderSanityRange),
+                                                        (int)std::clamp<float>(sliderXY[1].toFloat(),
+                                                                               -sliderSanityRange, sliderSanityRange));
                                 }
 
                                 // special case: osu! logic for handling the hitobject point vs the controlpoints (since
                                 // sliders have both, and older beatmaps store the start point inside the control
                                 // points)
                                 {
-                                    const Vector2 xy = Vector2(std::clamp<float>(x, -sliderSanityRange, sliderSanityRange),
-                                                               std::clamp<float>(y, -sliderSanityRange, sliderSanityRange));
+                                    const Vector2 xy =
+                                        Vector2(std::clamp<float>(x, -sliderSanityRange, sliderSanityRange),
+                                                std::clamp<float>(y, -sliderSanityRange, sliderSanityRange));
                                     if(points.size() > 0) {
                                         if(points[0] != xy) points.insert(points.begin(), xy);
                                     } else
@@ -405,42 +404,35 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                                 // https://osu.ppy.sh/beatmapsets/791900#osu/1676490
                                 if(sliderTokens.size() < 2 && points.size() > 0) points.push_back(points[0]);
 
-                                SLIDER s{};
-                                {
-                                    s.x = x;
-                                    s.y = y;
-                                    s.type = sliderTokens[0][0];
-                                    s.repeat = std::clamp<int>((int)tokens[6].toFloat(), -sliderMaxRepeatRange,
-                                                          sliderMaxRepeatRange);
-                                    s.repeat = s.repeat >= 0 ? s.repeat : 0;  // sanity check
-                                    s.pixelLength =
-                                        std::clamp<float>(tokens[7].toFloat(), -sliderSanityRange, sliderSanityRange);
-                                    s.time = time;
-                                    s.sampleType = hitSound;
-                                    s.number = comboNumber++;
-                                    s.colorCounter = colorCounter;
-                                    s.colorOffset = colorOffset;
-                                    s.points = points;
-
+                                SLIDER s{
+                                    .x = x,
+                                    .y = y,
+                                    .type = (sliderTokens[0].toUtf8())[0],
+                                    .repeat = std::clamp<int>((int)tokens[6].toFloat(), 0, sliderMaxRepeatRange),
+                                    .pixelLength =
+                                        std::clamp<float>(tokens[7].toFloat(), -sliderSanityRange, sliderSanityRange),
+                                    .time = time,
+                                    .sampleType = hitSound,
+                                    .number = comboNumber++,
+                                    .colorCounter = colorCounter,
+                                    .colorOffset = colorOffset,
+                                    .points = points,
                                     // new beatmaps: slider hitsounds
-                                    if(tokens.size() > 8) {
-                                        std::vector<UString> hitSoundTokens = tokens[8].split("|");
-                                        for(const auto &hitSoundToken : hitSoundTokens) {
-                                            s.hitSounds.push_back(hitSoundToken.toInt());
-                                        }
-                                    }
-                                }
+                                    .hitSounds = tokens.size() > 8 ? tokens[8].split<int>("|") : std::vector<int>{},
+                                    .sliderTime{},
+                                    .sliderTimeWithoutRepeats{},
+                                    .ticks{},
+                                    .scoringTimesForStarCalc{}};
                                 c.sliders.push_back(s);
                             } else if(type & 0x8)  // spinner
                             {
-                                UString curLineString = UString(curLineChar);
-                                std::vector<UString> tokens = curLineString.split(",");
+                                auto tokens = UString(curLineChar).split<float>(",");
                                 if(tokens.size() < 6) {
-                                    debugLog("Invalid spinner in beatmap: %s\n\ncurLine = %s\n", osuFilePath.c_str(),
-                                             curLineChar);
+                                    debugLogF("Invalid spinner in beatmap: {:s}\n\ncurLine = {:s}\n", osuFilePath,
+                                              curLineChar);
                                     continue;
                                     // engine->showMessageError("Error", UString::format("Invalid spinner in beatmap:
-                                    // %s\n\ncurLine = %s", this->sFilePath.c_str(), curLine)); return false;
+                                    // %s\n\ncurLine = %s", m_sFilePath.toUtf8(), curLine)); return false;
                                 }
 
                                 SPINNER s{};
@@ -449,7 +441,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                                     s.y = y;
                                     s.time = time;
                                     s.sampleType = hitSound;
-                                    s.endTime = tokens[5].toFloat();
+                                    s.endTime = static_cast<int>(tokens[5]);
                                 }
                                 c.spinners.push_back(s);
                             }
@@ -471,7 +463,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
     }
 
     // sort timingpoints by time
-    if(c.timingpoints.size() > 0) std::sort(c.timingpoints.begin(), c.timingpoints.end(), TimingPointSortComparator());
+    if(c.timingpoints.size() > 0) std::ranges::sort(c.timingpoints, TimingPointSortComparator());
 
     return c;
 }
@@ -557,7 +549,7 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
                 tickPixelLength / (s.pixelLength == 0.0f ? 1.0f : s.pixelLength);
             const int max_ticks = cv_slider_max_ticks.getInt();
             const int tickCount = std::min((int)std::ceil(s.pixelLength / tickPixelLength) - 1,
-                                      max_ticks);  // NOTE: hard sanity limit number of ticks per slider
+                                           max_ticks);  // NOTE: hard sanity limit number of ticks per slider
 
             if(tickCount > 0 && !timingInfo.isNaN && !std::isnan(s.pixelLength) &&
                !std::isnan(tickPixelLength))  // don't generate ticks for NaN timingpoints and infinite values
@@ -725,9 +717,9 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(P
     }
 
     // sort hitobjects by time
-    const auto diffHitObjectSortComparator = [&dead](const OsuDifficultyHitObject &a,
-                                                     const OsuDifficultyHitObject &b) -> bool {
-        if(dead.load() || a.time == b.time)
+    constexpr auto diffHitObjectSortComparator = [](const OsuDifficultyHitObject &a,
+                                                    const OsuDifficultyHitObject &b) -> bool {
+        if(a.time == b.time)
             return &a < &b;
         else
             return a.time < b.time;
