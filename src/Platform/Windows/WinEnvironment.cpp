@@ -28,6 +28,7 @@ int WinEnvironment::iNumCoresForProcessAffinity = -1;
 HHOOK WinEnvironment::hKeyboardHook = NULL;
 
 WinEnvironment::WinEnvironment(HWND hwnd, HINSTANCE hinstance) : Environment() {
+    env = this;
     this->hwnd = hwnd;
     this->hInstance = hinstance;
 

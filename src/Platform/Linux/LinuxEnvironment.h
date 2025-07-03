@@ -6,8 +6,6 @@
 #include <X11/Xlib.h>
 #include <X11/extensions/XInput2.h>
 
-#include <unordered_map>
-
 #include "Environment.h"
 
 class LinuxEnvironment : public Environment {
@@ -164,6 +162,8 @@ class LinuxEnvironment : public Environment {
     bool bFullscreenWasResizable;
     Vector2 vPrevDisableFullscreenWindowSize;
 };
+
+using EnvironmentImpl = LinuxEnvironment;
 
 #endif
 

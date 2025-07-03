@@ -35,6 +35,7 @@ bool LinuxEnvironment::bResizable = true;
 std::vector<McRect> LinuxEnvironment::vMonitors;
 
 LinuxEnvironment::LinuxEnvironment(Display *display, Window window) : Environment() {
+    env = this;
     this->display = display;
     this->window = window;
 

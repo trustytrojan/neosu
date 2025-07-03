@@ -20,8 +20,6 @@
 #include "Timing.h"
 #include "VisualProfiler.h"
 
-
-
 Environment *env = NULL;
 
 std::unique_ptr<Mouse> Engine::s_mouseInstance = nullptr;
@@ -47,12 +45,12 @@ Engine *engine = NULL;
 Console *Engine::console = NULL;
 ConsoleBox *Engine::consoleBox = NULL;
 
-Engine::Engine(Environment *environment, i32 argc, char **argv) {
+Engine::Engine(i32 argc, char **argv) {
     // XXX: run curl_global_cleanup() after waiting for network threads to terminate
     curl_global_init(CURL_GLOBAL_DEFAULT);
 
     engine = this;
-    env = environment;
+
     this->iArgc = argc;
     this->sArgv = argv;
 

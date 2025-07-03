@@ -1231,8 +1231,6 @@ CONVAR(cv_win_mouse_raw_input_buffer, "win_mouse_raw_input_buffer", false, FCVAR
                                      "mouse usb polling rates above 1000 Hz");
 CONVAR(cv_win_processpriority, "win_processpriority", 1, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
                               "if compiled on Windows, sets the main process priority (0 = normal, 1 = high)");
-CONVAR(cv_win_realtimestylus, "win_realtimestylus", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
-                             "if compiled on Windows, enables native RealTimeStylus support for tablet clicks");
 CONVAR(cv_win_snd_wasapi_buffer_size, 
     "win_snd_wasapi_buffer_size", 0.011f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
     "buffer size/length in seconds (e.g. 0.011 = 11 ms), directly responsible for audio delay and crackling");

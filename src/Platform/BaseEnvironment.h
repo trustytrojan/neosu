@@ -244,10 +244,6 @@ typedef void* HWND;
 
 #define MCENGINE_DATA_DIR ".\\"
 
-// #define WINVER 0x0A00  // Windows 10, to enable the ifdefs in winuser.h for touch
-// #define MCENGINE_WINDOWS_REALTIMESTYLUS_SUPPORT
-// #define MCENGINE_WINDOWS_TOUCH_SUPPORT
-
 #if defined(_MSC_VER)
 #ifdef _WIN64
 #define _AMD64_

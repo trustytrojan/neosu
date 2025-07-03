@@ -31,7 +31,7 @@ class Console;
 
 class Engine {
    public:
-    Engine(Environment *environment, i32 argc, char **argv);
+    Engine(i32 argc, char **argv);
     ~Engine();
 
     // app

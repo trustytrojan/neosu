@@ -873,11 +873,6 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
 #ifndef MCENGINE_FEATURE_SDL
 
             this->addCheckbox(
-                "OS TabletPC Support (!)",
-                "WARNING: Windows 10 may break raw mouse input if this is enabled!\nWARNING: Do not enable this with a "
-                "mouse (will break right click)!\nEnable this if your tablet clicks aren't handled correctly.",
-                &cv_win_realtimestylus);
-            this->addCheckbox(
                 "Windows Ink Workaround",
                 "Enable this if your tablet cursor is stuck in a tiny area on the top left of the screen.\nIf this "
                 "doesn't fix it, use \"Ignore Raw Input/Sensitivity\" below.",

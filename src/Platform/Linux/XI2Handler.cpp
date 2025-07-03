@@ -1,6 +1,6 @@
 #ifdef __linux__
 
-#include "LinuxEnvironment.h"
+#include "LinuxMain.h"
 #include "XI2Handler.h"
 
 #include "Engine.h"
@@ -8,9 +8,6 @@
 
 #include <X11/Xutil.h>
 #include <X11/extensions/XInput2.h>
-
-extern LinuxEnvironment *g_linuxEnvironment;
-extern Engine *g_engine;
 
 namespace XI2Handler {
 
@@ -119,8 +116,8 @@ void handleGenericEvent(Display *dpy, XEvent &xev) {
             auto *event = static_cast<XIDeviceEvent *>(xev.xcookie.data);
 
             // update cached position for master devices
-            if(g_linuxEnvironment != nullptr) {
-                g_linuxEnvironment->updateMousePos(event->event_x, event->event_y);
+            if(baseEnv != nullptr) {
+                baseEnv->updateMousePos(event->event_x, event->event_y);
             }
             break;
         }
@@ -162,21 +159,21 @@ void handleGenericEvent(Display *dpy, XEvent &xev) {
                         if(pressed) mouse->onWheelHorizontal(120);
                         break;
                     case 8:  // mouse 4 (back)
-                        if(g_engine != nullptr) {
+                        if(engine != nullptr) {
                             if(pressed)
-                                g_engine->onKeyboardKeyDown(XK_Pointer_Button4);
+                                engine->onKeyboardKeyDown(XK_Pointer_Button4);
                             else
-                                g_engine->onKeyboardKeyUp(XK_Pointer_Button4);
+                                engine->onKeyboardKeyUp(XK_Pointer_Button4);
                         }
                         break;
                     case 9:  // mouse 5 (forwards)
                         // NOTE: abusing "dead vowels for universal
                         // syllable entry", no idea what this key does
-                        if(g_engine != nullptr) {
+                        if(engine != nullptr) {
                             if(pressed)
-                                g_engine->onKeyboardKeyDown(XK_Pointer_Button5);
+                                engine->onKeyboardKeyDown(XK_Pointer_Button5);
                             else
-                                g_engine->onKeyboardKeyUp(XK_Pointer_Button5);
+                                engine->onKeyboardKeyUp(XK_Pointer_Button5);
                         }
                         break;
                 }
@@ -239,12 +236,12 @@ void handleGenericEvent(Display *dpy, XEvent &xev) {
             // case XI_KeyRelease: {
             //     auto *event = static_cast<XIDeviceEvent *>(xev.xcookie.data);
 
-            //     if(g_engine != nullptr) {
+            //     if(engine != nullptr) {
             //         bool pressed = (xev.xcookie.evtype == XI_KeyPress);
             //         if(pressed) {
-            //             g_engine->onKeyboardKeyDown(event->detail);
+            //             engine->onKeyboardKeyDown(event->detail);
             //         } else {
-            //             g_engine->onKeyboardKeyUp(event->detail);
+            //             engine->onKeyboardKeyUp(event->detail);
             //         }
             //     }
             //     break;

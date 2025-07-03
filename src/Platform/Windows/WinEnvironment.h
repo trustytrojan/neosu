@@ -5,9 +5,6 @@
 #include "Environment.h"
 #include "cbase.h"
 
-// defined in main_Windows.cpp
-void handle_cmdline_args(const char *args);
-
 class WinEnvironment : public Environment {
    public:
     static long getWindowStyleWindowed();
@@ -143,5 +140,7 @@ class WinEnvironment : public Environment {
     static int iNumCoresForProcessAffinity;
     static HHOOK hKeyboardHook;
 };
+
+using EnvironmentImpl = WinEnvironment;
 
 #endif

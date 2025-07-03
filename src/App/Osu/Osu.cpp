@@ -58,10 +58,14 @@
 #include "UpdateHandler.h"
 #include "UserCard.h"
 #include "VolumeOverlay.h"
+
 #include "score.h"
 
+// HACK: WTF?
 #ifdef _WIN32
 #include "WinEnvironment.h"
+#include "WindowsMain.h"
+extern Main *mainloopPtrHack;
 #endif
 
 Osu *osu = NULL;
@@ -351,7 +355,7 @@ Osu::Osu() {
 #ifdef _WIN32
     // Process cmdline args now, after everything has been initialized
     for(i32 i = 0; i < engine->iArgc; i++) {
-        handle_cmdline_args(engine->sArgv[i]);
+        mainloopPtrHack->handle_cmdline_args(engine->sArgv[i]);
     }
 #endif
 
