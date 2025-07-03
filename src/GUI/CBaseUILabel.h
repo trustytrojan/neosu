@@ -39,7 +39,7 @@ class CBaseUILabel : public CBaseUIElement {
         return this;
     }
 
-    CBaseUILabel *setText(UString text) {
+    CBaseUILabel *setText(const UString &text) {
         this->sText = text;
         this->updateStringMetrics();
         return this;

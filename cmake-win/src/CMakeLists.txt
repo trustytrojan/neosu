@@ -153,7 +153,7 @@ target_compile_definitions(neosu PRIVATE
 
 # Link options
 target_link_options(neosu PRIVATE
-    $<$<CONFIG:Debug>:/DEBUG:FULL;/SUBSYSTEM:CONSOLE>
+    $<$<CONFIG:Debug>:/DEBUG:FULL;/SUBSYSTEM:CONSOLE;/PROFILE>
     $<$<CONFIG:Release>:/SUBSYSTEM:WINDOWS;/LTCG;/OPT:REF;/OPT:ICF>
     ${LIBARCHIVE_STATIC_LDFLAGS}
 )

@@ -258,6 +258,7 @@ class OptionsMenuKeyBindLabel : public CBaseUILabel {
                             CBaseUIButton *bindButton)
         : CBaseUILabel(xPos, yPos, xSize, ySize, name, text) {
         this->key = cvar;
+        this->keyCode = -1;
         this->bindButton = bindButton;
 
         this->textColorBound = 0xffffd700;
@@ -268,14 +269,18 @@ class OptionsMenuKeyBindLabel : public CBaseUILabel {
         if(!this->bVisible) return;
         CBaseUILabel::mouse_update(propagate_clicks);
 
-        const KEYCODE keyCode = (KEYCODE)this->key->getInt();
+        const KEYCODE newKeyCode = (KEYCODE)this->key->getInt();
+        if (this->keyCode == newKeyCode)
+            return;
+
+        this->keyCode = newKeyCode;
 
         // succ
-        UString labelText = env->keyCodeToString(keyCode);
+        UString labelText = env->keyCodeToString(this->keyCode);
         if(labelText.find("?") != -1) labelText.append(UString::format("  (%i)", this->key->getInt()));
 
         // handle bound/unbound
-        if(keyCode == 0) {
+        if(this->keyCode == 0) {
             labelText = "<UNBOUND>";
             this->setTextColor(this->textColorUnbound);
         } else
@@ -299,6 +304,7 @@ class OptionsMenuKeyBindLabel : public CBaseUILabel {
 
     Color textColorBound;
     Color textColorUnbound;
+    KEYCODE keyCode;
 };
 
 class OptionsMenuKeyBindButton : public UIButton {
