@@ -71,7 +71,7 @@ LinuxEnvironment::LinuxEnvironment(Display *display, Window window) : Environmen
         if(resourceString) {
             XrmDatabase db = XrmGetStringDatabase(resourceString);
 
-            char *type = NULL;
+            char *type = nullptr;
             XrmValue value;
 
             if(XrmGetResource(db, "Xft.dpi", "String", &type, &value) == True) {
@@ -139,7 +139,7 @@ std::string LinuxEnvironment::getExecutablePath() {
 }
 
 void LinuxEnvironment::openURLInDefaultBrowser(UString url) {
-    if(fork() == 0) exit(execl("/usr/bin/xdg-open", "xdg-open", url.toUtf8(), (char *)0));
+    if(fork() == 0) exit(execl("/usr/bin/xdg-open", "xdg-open", url.toUtf8(), (char *)nullptr));
 }
 
 void LinuxEnvironment::openDirectory(std::string path) {
@@ -151,7 +151,7 @@ void LinuxEnvironment::openDirectory(std::string path) {
 
 UString LinuxEnvironment::getUsername() {
     passwd *pwd = getpwuid(getuid());
-    if(pwd != NULL && pwd->pw_name != NULL)
+    if(pwd != nullptr && pwd->pw_name != nullptr)
         return UString(pwd->pw_name);
     else
         return UString("");
@@ -159,7 +159,7 @@ UString LinuxEnvironment::getUsername() {
 
 std::string LinuxEnvironment::getUserDataPath() {
     passwd *pwd = getpwuid(getuid());
-    if(pwd != NULL && pwd->pw_dir != NULL)
+    if(pwd != nullptr && pwd->pw_dir != nullptr)
         return std::string(pwd->pw_dir);
     else
         return std::string("");
@@ -646,27 +646,24 @@ bool LinuxEnvironment::isCursorClipped() { return this->bCursorClipped; }
 
 Vector2d LinuxEnvironment::getMousePos() {
     if(!this->bMousePosValid) {
-        // fallback to XIQueryPointer on first call or after focus events
+        // fallback to query pointer if cached position is invalid
         Window rootRet = 0, childRet = 0;
         double childX = 0.0, childY = 0.0;
         double rootX = 0.0, rootY = 0.0;
         XIButtonState buttons;
         XIModifierState modifiers;
         XIGroupState group;
+
         Bool result = XIQueryPointer(this->display, XI2Handler::clientPointerDevID, this->window, &rootRet, &childRet,
                                      &rootX, &rootY, &childX, &childY, &buttons, &modifiers, &group);
         if(result) {
             this->vCachedMousePos = Vector2d(childX, childY);
-        } else {
-            // pointer not on same screen as window, return cached position or (0,0)
-            // this can happen during window switching or multi-monitor setups
-            this->vCachedMousePos = Vector2d(0, 0);
-        }
-        // free the dynamically allocated mask in buttons
+            this->bMousePosValid = true;
+        }  // else fallback to cached position, which could happen during window switching or multi-monitor setups
+
         if(buttons.mask) {
             XFree(buttons.mask);
         }
-        this->bMousePosValid = true;
     }
 
     return this->vCachedMousePos;
@@ -731,22 +728,16 @@ void LinuxEnvironment::setMousePos(double x, double y) {
 
 void LinuxEnvironment::setCursorClip(bool clip, McRect rect) {
     if(clip) {
-        const unsigned int eventMask = ButtonPressMask | ButtonReleaseMask | PointerMotionMask | FocusChangeMask;
-        this->bCursorClipped = (XGrabPointer(this->display, this->window, True, eventMask, GrabModeAsync, GrabModeAsync,
-                                             this->window, None, CurrentTime) == GrabSuccess);
-        // TODO: custom X11 clip rect
+        this->bCursorClipped = XI2Handler::grab(this->display, true, false);
     } else {
-        this->bCursorClipped = false;
-
-        XUngrabPointer(this->display, CurrentTime);
-        XSync(this->display, False);
+        this->bCursorClipped = XI2Handler::grab(this->display, false, false);
     }
-    if (this->bCursorClipped) this->cursorClip = rect;
+    if(this->bCursorClipped) this->cursorClip = rect;
 }
 
 UString LinuxEnvironment::keyCodeToString(KEYCODE keyCode) {
     const char *name = XKeysymToString(keyCode);
-    return name != NULL ? UString(name) : UString("");
+    return name != nullptr ? UString(name) : UString("");
 }
 
 // helper functions
@@ -808,7 +799,7 @@ UString LinuxEnvironment::readWindowProperty(Window window, Atom prop, Atom fmt 
             returnData = UString(temp.c_str());
         }
 
-        if(clipData != 0) XFree(clipData);
+        if(clipData != nullptr) XFree(clipData);
     }
 
     if(deleteAfterReading) XDeleteProperty(this->display, window, prop);
@@ -857,7 +848,7 @@ void LinuxEnvironment::handleSelectionRequest(XSelectionRequestEvent &evt) {
     reply.property = None;  // == "fail"
     reply.time = evt.time;
 
-    char *data = 0;
+    char *data = nullptr;
     int property_format = 0, data_nitems = 0;
     if(evt.selection == XA_PRIMARY || evt.selection == this->atom_CLIPBOARD) {
         if(evt.target == XA_STRING) {

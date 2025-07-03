@@ -33,10 +33,10 @@
 #define WINDOW_WIDTH_MIN 100
 #define WINDOW_HEIGHT_MIN 100
 
-namespace {  // static
+LinuxEnvironment *g_linuxEnvironment = nullptr;
+Engine *g_engine = nullptr;
 
-Engine *g_engine = NULL;
-LinuxEnvironment *g_environment = NULL;
+namespace {  // static
 
 bool g_bRunning = true;
 bool g_bUpdate = true;
@@ -66,22 +66,14 @@ int xi2opcode;
 inline void WndProc() {
     switch(xev.type) {
         case GenericEvent:
-            if(g_environment && mouse && xev.xcookie.extension == xi2opcode) {
+            if(g_linuxEnvironment && xev.xcookie.extension == xi2opcode) {
                 XI2Handler::handleGenericEvent(dpy, xev);
-            }
-            break;
-        case MotionNotify:
-            // update cached absolute position from regular motion events
-            if(g_environment != NULL) {
-                g_environment->updateMousePos(static_cast<float>(xev.xmotion.x), static_cast<float>(xev.xmotion.y));
             }
             break;
 
         case ConfigureNotify:
             if(g_engine != NULL) {
                 g_engine->requestResolutionChange(Vector2(xev.xconfigure.width, xev.xconfigure.height));
-                // update scaling factors for absolute devices when window size changes
-                XI2Handler::updatePointerCache(dpy);
             }
             break;
 
@@ -91,8 +83,8 @@ inline void WndProc() {
 
         case FocusIn:
             g_bHasFocus = true;
-            if(g_environment != NULL) {
-                g_environment->invalidateMousePos();  // force refresh on focus
+            if(g_linuxEnvironment != NULL) {
+                g_linuxEnvironment->invalidateMousePos();  // force refresh on focus
             }
             if(g_bRunning && g_engine != NULL) {
                 g_engine->onFocusGained();
@@ -101,8 +93,8 @@ inline void WndProc() {
 
         case FocusOut:
             g_bHasFocus = false;
-            if(g_environment != NULL) {
-                g_environment->invalidateMousePos();  // force refresh on unfocus
+            if(g_linuxEnvironment != NULL) {
+                g_linuxEnvironment->invalidateMousePos();  // force refresh on unfocus
             }
             if(g_bRunning && g_engine != NULL) {
                 g_engine->onFocusLost();
@@ -111,10 +103,10 @@ inline void WndProc() {
 
         // clipboard
         case SelectionRequest:
-            if(g_environment != NULL) g_environment->handleSelectionRequest(xev.xselectionrequest);
+            if(g_linuxEnvironment != NULL) g_linuxEnvironment->handleSelectionRequest(xev.xselectionrequest);
             break;
 
-        // keyboard
+        // keyboard (TODO: move to xinput2)
         case KeyPress: {
             XKeyEvent *ke = &xev.xkey;
             unsigned long key = XLookupKeysym(
@@ -158,80 +150,11 @@ inline void WndProc() {
             }
         } break;
 
-        // mouse, also inject mouse 4 + 5 as keyboard keys
-        case ButtonPress:
-            if(g_engine != NULL && mouse != NULL) {
-                switch(xev.xbutton.button) {
-                    case Button1:
-                        mouse->onLeftChange(true);
-                        break;
-                    case Button2:
-                        mouse->onMiddleChange(true);
-                        break;
-                    case Button3:
-                        mouse->onRightChange(true);
-                        break;
-
-                    case Button4:  // = mouse wheel up
-                        mouse->onWheelVertical(120);
-                        break;
-                    case Button5:  // = mouse wheel down
-                        mouse->onWheelVertical(-120);
-                        break;
-
-                    case 6:  // = mouse wheel left
-                        mouse->onWheelHorizontal(-120);
-                        break;
-                    case 7:  // = mouse wheel right
-                        mouse->onWheelHorizontal(120);
-                        break;
-
-                    case 8:                                               // mouse 4 (backwards)
-                        g_engine->onKeyboardKeyDown(XK_Pointer_Button4);  // NOTE: abusing "dead vowels for universal
-                                                                          // syllable entry", no idea what this key does
-                        break;
-                    case 9:                                               // mouse 5 (forwards)
-                        g_engine->onKeyboardKeyDown(XK_Pointer_Button5);  // NOTE: abusing "dead vowels for universal
-                                                                          // syllable entry", no idea what this key does
-                        break;
-                    default:
-                        break;
-                }
-            }
-            break;
-
-        case ButtonRelease:
-            if(g_engine != NULL && mouse != NULL) {
-                switch(xev.xbutton.button) {
-                    case Button1:
-                        mouse->onLeftChange(false);
-                        break;
-                    case Button2:
-                        mouse->onMiddleChange(false);
-                        break;
-                    case Button3:
-                        mouse->onRightChange(false);
-                        break;
-
-                    case 8:                                             // mouse 4 (backwards)
-                        g_engine->onKeyboardKeyUp(XK_Pointer_Button4);  // NOTE: abusing "dead vowels for universal
-                                                                        // syllable entry", no idea what this key does
-                        break;
-                    case 9:                                             // mouse 5 (forwards)
-                        g_engine->onKeyboardKeyUp(XK_Pointer_Button5);  // NOTE: abusing "dead vowels for universal
-                                                                        // syllable entry", no idea what this key does
-                        break;
-                    default:
-                        break;
-                }
-            }
-            break;
-
-        // destroy
         case ClientMessage:
             if(g_engine != NULL) g_engine->onShutdown();
             g_bRunning = false;
             break;
+
         default:
             break;
     }
@@ -257,7 +180,7 @@ int main(int argc, char *argv[]) {
         exe_path[exe_path_s] = '\0';
 
         char *last_slash = strrchr(exe_path.data(), '/');
-        if(last_slash != NULL) {
+        if(last_slash != nullptr) {
             *last_slash = '\0';
         }
 
@@ -267,8 +190,8 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    dpy = XOpenDisplay(NULL);
-    if(dpy == NULL) {
+    dpy = XOpenDisplay(nullptr);
+    if(dpy == nullptr) {
         printf("FATAL ERROR: XOpenDisplay() can't connect to X server!\n\n");
         exit(1);
     }
@@ -315,8 +238,8 @@ int main(int argc, char *argv[]) {
 
     // set window attributes
     swa.colormap = cmap;
-    swa.event_mask = ExposureMask | FocusChangeMask | KeyPressMask | KeyReleaseMask | ButtonPressMask |
-                     ButtonReleaseMask | PointerMotionMask | StructureNotifyMask | KeymapStateMask;
+    swa.event_mask =
+        ExposureMask | FocusChangeMask | KeyPressMask | KeyReleaseMask | StructureNotifyMask | KeymapStateMask;
 
     Screen *defaultScreen = DefaultScreenOfDisplay(dpy);
     win = XCreateWindow(dpy, root, defaultScreen->width / 2 - WINDOW_WIDTH / 2,
@@ -355,41 +278,26 @@ int main(int argc, char *argv[]) {
     XMoveWindow(dpy, win, defaultScreen->width / 2 - WINDOW_WIDTH / 2, defaultScreen->height / 2 - WINDOW_HEIGHT / 2);
 
     // get input method
-    im = XOpenIM(dpy, NULL, NULL, NULL);
-    if(im == NULL) {
+    im = XOpenIM(dpy, nullptr, nullptr, nullptr);
+    if(im == nullptr) {
         printf("FATAL ERROR: XOpenIM() couldn't open input method!\n\n");
         exit(1);
     }
 
     // get input context
     ic = XCreateIC(im, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow, win, NULL);
-    if(ic == NULL) {
+    if(ic == nullptr) {
         printf("FATAL ERROR: XCreateIC() couldn't create input context!\n\n");
         exit(1);
     }
 
     XSync(dpy, False);
 
-    // discover and cache pointer device information
-    XI2Handler::updatePointerCache(dpy);
+    XI2Handler::clientPointerDevID = XI2Handler::getClientPointer(dpy);
+    XI2Handler::updateDeviceCache(dpy);
 
-    // set XInput event masks
-    XIEventMask mask;
-    std::array<unsigned char, XIMaskLen(XI_LASTEVENT)> mask_bits{};
-
-    XISetMask(mask_bits.data(), XI_DeviceChanged);
-    XISetMask(mask_bits.data(), XI_RawMotion);
-
-    // listen to all master devices to get proper source device information
-    // this allows us to distinguish between different input devices (mouse vs tablet)
-    XIGetClientPointer(dpy, None, &XI2Handler::clientPointerDevID);
-
-    mask.mask_len = mask_bits.size();
-    mask.mask = mask_bits.data();
-    mask.deviceid = XIAllMasterDevices;
-
-    // and select it on the window
-    XISelectEvents(dpy, DefaultRootWindow(dpy), &mask, 1);
+    // select xi2 events
+    XI2Handler::selectEvents(dpy, win, DefaultRootWindow(dpy));
 
     // get keyboard focus
     XSetICFocus(ic);
@@ -407,7 +315,7 @@ int main(int argc, char *argv[]) {
 
     // initialize engine
     auto *environment = new LinuxEnvironment(dpy, win);
-    g_environment = environment;
+    g_linuxEnvironment = environment;
     g_engine = new Engine(environment, argc, argv);
     g_engine->loadApp();
 
