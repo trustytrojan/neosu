@@ -247,7 +247,7 @@ void Sound::setPositionMS(unsigned long ms) {
     }
 
     // reset interpolation state after seeking
-    this->interpolator.reset(static_cast<f64>(ms), engine->getTime(), this->getSpeed());
+    this->interpolator.reset(static_cast<f64>(ms), Timing::getTimeReal(), this->getSpeed());
 }
 
 // Inaccurate but fast seeking, to use at song select
@@ -282,7 +282,7 @@ void Sound::setPositionMS_fast(u32 ms) {
     }
 
     // reset interpolation state after seeking
-    this->interpolator.reset(static_cast<f64>(ms), engine->getTime(), this->getSpeed());
+    this->interpolator.reset(static_cast<f64>(ms), Timing::getTimeReal(), this->getSpeed());
 }
 
 void Sound::setVolume(float volume) {
@@ -403,7 +403,7 @@ u32 Sound::getPositionMS() {
 
     // get interpolated position
     u32 interpolatedPositionMS =
-        this->interpolator.update(rawPositionMS, engine->getTime(), this->getSpeed(), this->isLooped(),
+        this->interpolator.update(rawPositionMS, Timing::getTimeReal(), this->getSpeed(), this->isLooped(),
                                   static_cast<u64>(this->length), this->isPlaying());
 
     return interpolatedPositionMS;
