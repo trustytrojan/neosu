@@ -19,11 +19,11 @@ class LinuxMain {
     bool bHasFocus{false};
 
     Display *dpy{nullptr};
-    Window root{0};
+    Window rootWindow{0};
 
     Colormap cmap{0};
     XSetWindowAttributes swa{};
-    Window win{0};
+    Window clientWindow{0};
 
     XEvent xev{};
 

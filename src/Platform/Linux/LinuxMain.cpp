@@ -39,8 +39,8 @@
 
 LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> & /*argCmdline*/,
                              const std::unordered_map<UString, std::optional<UString>> & /*argMap*/) {
-    dpy = XOpenDisplay(nullptr);
-    if(dpy == nullptr) {
+    this->dpy = XOpenDisplay(nullptr);
+    if(this->dpy == nullptr) {
         printf("FATAL ERROR: XOpenDisplay() can't connect to X server!\n\n");
         return;
     }
@@ -48,52 +48,52 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> & /*argC
     // before we do anything, check if XInput is available (for raw mouse input, smooth horizontal & vertical mouse
     // wheel etc.)
     int xi2firstEvent = -1, xi2error = -1;
-    if(!XQueryExtension(dpy, "XInputExtension", &xi2opcode, &xi2firstEvent, &xi2error)) {
+    if(!XQueryExtension(this->dpy, "XInputExtension", &this->xi2opcode, &xi2firstEvent, &xi2error)) {
         printf("FATAL ERROR: XQueryExtension() XInput extension not available!\n\n");
         return;
     }
 
     // want version 2 at least
     int ximajor = 2, ximinor = 0;
-    if(XIQueryVersion(dpy, &ximajor, &ximinor) == BadRequest) {
+    if(XIQueryVersion(this->dpy, &ximajor, &ximinor) == BadRequest) {
         printf("FATAL ERROR: XIQueryVersion() XInput2 not available, server supports only %d.%d!\n\n", ximajor,
                ximinor);
         return;
     }
 
-    // debugLogF("XI2 version: {:d}.{:d}, opcode: {:d}, XI_RawMotion: {:d}\n", ximajor, ximinor, xi2opcode,
+    // debugLogF("XI2 version: {:d}.{:d}, opcode: {:d}, XI_RawMotion: {:d}\n", ximajor, ximinor, this->xi2opcode,
     // XI_RawMotion);
 
-    root = DefaultRootWindow(dpy);
+    this->rootWindow = DefaultRootWindow(this->dpy);
 
     // resolve GLX functions
-    int screen = DefaultScreen(dpy);
-    if(!gladLoadGLX(dpy, screen)) {
+    int screen = DefaultScreen(this->dpy);
+    if(!gladLoadGLX(this->dpy, screen)) {
         printf("FATAL ERROR: Couldn't resolve GLX functions (gladLoadGLX() failed)!\n\n");
         return;
     }
 
     int major = 0, minor = 0;
-    glXQueryVersion(dpy, &major, &minor);
+    glXQueryVersion(this->dpy, &major, &minor);
     debugLogF("GLX Version: {}.{}\n", major, minor);
 
-    XVisualInfo *vi = getVisualInfo(dpy);
+    XVisualInfo *vi = getVisualInfo(this->dpy);
     if(!vi) {
         printf("FATAL ERROR: Couldn't glXChooseVisual!\n\n");
         return;
     }
 
-    cmap = XCreateColormap(dpy, root, vi->visual, AllocNone);
+    this->cmap = XCreateColormap(this->dpy, this->rootWindow, vi->visual, AllocNone);
 
     // set window attributes
-    swa.colormap = cmap;
-    swa.event_mask =
+    this->swa.colormap = this->cmap;
+    this->swa.event_mask =
         ExposureMask | FocusChangeMask | KeyPressMask | KeyReleaseMask | StructureNotifyMask | KeymapStateMask;
 
-    Screen *defaultScreen = DefaultScreenOfDisplay(dpy);
-    win = XCreateWindow(dpy, root, defaultScreen->width / 2 - WINDOW_WIDTH / 2,
+    Screen *defaultScreen = DefaultScreenOfDisplay(this->dpy);
+    this->clientWindow = XCreateWindow(this->dpy, this->rootWindow, defaultScreen->width / 2 - WINDOW_WIDTH / 2,
                         defaultScreen->height / 2 - WINDOW_HEIGHT / 2, WINDOW_WIDTH, WINDOW_HEIGHT, 0, vi->depth,
-                        InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
+                        InputOutput, vi->visual, CWColormap | CWEventMask, &this->swa);
 
     XFree(vi);
 
@@ -106,52 +106,52 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> & /*argC
     winSizeHints->flags = PMinSize;
     winSizeHints->min_width = WINDOW_WIDTH_MIN;
     winSizeHints->min_height = WINDOW_HEIGHT_MIN;
-    XSetWMNormalHints(dpy, win, winSizeHints);
+    XSetWMNormalHints(this->dpy, this->clientWindow, winSizeHints);
     XFree(winSizeHints);
 
     // register custom delete message for quitting the engine (received as ClientMessage in the main loop)
-    Atom wm_delete_window = XInternAtom(dpy, "WM_DELETE_WINDOW", false);
-    XSetWMProtocols(dpy, win, &wm_delete_window, 1);
+    Atom wm_delete_window = XInternAtom(this->dpy, "WM_DELETE_WINDOW", false);
+    XSetWMProtocols(this->dpy, this->clientWindow, &wm_delete_window, 1);
 
     // hint that compositing should be disabled (disable forced vsync)
     constexpr const unsigned char shouldBypassCompositor = 1;
-    Atom _net_wm_bypass_compositor = XInternAtom(dpy, "_NET_WM_BYPASS_COMPOSITOR", false);
-    XChangeProperty(dpy, win, _net_wm_bypass_compositor, XA_CARDINAL, 32, PropModeReplace, &shouldBypassCompositor, 1);
+    Atom _net_wm_bypass_compositor = XInternAtom(this->dpy, "_NET_WM_BYPASS_COMPOSITOR", false);
+    XChangeProperty(this->dpy, this->clientWindow, _net_wm_bypass_compositor, XA_CARDINAL, 32, PropModeReplace, &shouldBypassCompositor, 1);
 
     // make window visible & set title
-    XMapWindow(dpy, win);
-    XStoreName(dpy, win, WINDOW_TITLE);
+    XMapWindow(this->dpy, this->clientWindow);
+    XStoreName(this->dpy, this->clientWindow, WINDOW_TITLE);
 
     // after the window is visible, center it again (if the window manager ignored the position of the window in
     // XCreateWindow(), because fuck you)
-    XMoveWindow(dpy, win, defaultScreen->width / 2 - WINDOW_WIDTH / 2, defaultScreen->height / 2 - WINDOW_HEIGHT / 2);
+    XMoveWindow(this->dpy, this->clientWindow, defaultScreen->width / 2 - WINDOW_WIDTH / 2, defaultScreen->height / 2 - WINDOW_HEIGHT / 2);
 
     // get input method
-    im = XOpenIM(dpy, nullptr, nullptr, nullptr);
-    if(im == nullptr) {
+    this->im = XOpenIM(this->dpy, nullptr, nullptr, nullptr);
+    if(this->im == nullptr) {
         printf("FATAL ERROR: XOpenIM() couldn't open input method!\n\n");
         return;
     }
 
     // get input context
-    ic = XCreateIC(im, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow, win, NULL);
-    if(ic == nullptr) {
+    this->ic = XCreateIC(this->im, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow, this->clientWindow, NULL);
+    if(this->ic == nullptr) {
         printf("FATAL ERROR: XCreateIC() couldn't create input context!\n\n");
         return;
     }
 
-    XSync(dpy, False);
+    XSync(this->dpy, False);
 
-    XI2Handler::clientPointerDevID = XI2Handler::getClientPointer(dpy);
-    XI2Handler::updateDeviceCache(dpy);
+    XI2Handler::clientPointerDevID = XI2Handler::getClientPointer(this->dpy);
+    XI2Handler::updateDeviceCache(this->dpy);
 
     // select xi2 events
-    XI2Handler::selectEvents(dpy, win, DefaultRootWindow(dpy));
+    XI2Handler::selectEvents(this->dpy, this->clientWindow, DefaultRootWindow(this->dpy));
 
     // get keyboard focus
-    XSetICFocus(ic);
+    XSetICFocus(this->ic);
 
-    XSync(dpy, False);
+    XSync(this->dpy, False);
 
     // create timers
     auto *frameTimer = new Timer();
@@ -163,7 +163,7 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> & /*argC
     deltaTimer->update();
 
     // initialize engine
-    baseEnv = new LinuxEnvironment(dpy, win);
+    baseEnv = new LinuxEnvironment(this->dpy, this->clientWindow);
     engine = new Engine(argc, argv);
     engine->loadApp();
 
@@ -175,10 +175,10 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> & /*argC
         VPROF_MAIN();
 
         // handle window message queue
-        while(XPending(dpy)) {
-            XNextEvent(dpy, &xev);
+        while(XPending(this->dpy)) {
+            XNextEvent(this->dpy, &this->xev);
 
-            if(XFilterEvent(&xev, win))  // for keyboard chars
+            if(XFilterEvent(&this->xev, this->clientWindow))  // for keyboard chars
                 continue;
 
             WndProc();
@@ -229,8 +229,8 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> & /*argC
     SAFE_DELETE(engine);
 
     // destroy the window
-    XDestroyWindow(dpy, win);
-    XCloseDisplay(dpy);
+    XDestroyWindow(this->dpy, this->clientWindow);
+    XCloseDisplay(this->dpy);
 
     // unload GLX
     gladUnloadGLX();
@@ -243,21 +243,21 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> & /*argC
 //****************//
 
 void LinuxMain::WndProc() {
-    switch(xev.type) {
+    switch(this->xev.type) {
         case GenericEvent:
-            if(baseEnv && xev.xcookie.extension == xi2opcode) {
-                XI2Handler::handleGenericEvent(dpy, xev);
+            if(baseEnv && this->xev.xcookie.extension == this->xi2opcode) {
+                XI2Handler::handleGenericEvent(this->dpy, this->xev);
             }
             break;
 
         case ConfigureNotify:
             if(engine != NULL) {
-                engine->requestResolutionChange(Vector2(xev.xconfigure.width, xev.xconfigure.height));
+                engine->requestResolutionChange(Vector2(this->xev.xconfigure.width, this->xev.xconfigure.height));
             }
             break;
 
         case KeymapNotify:
-            XRefreshKeyboardMapping(&xev.xmapping);
+            XRefreshKeyboardMapping(&this->xev.xmapping);
             break;
 
         case FocusIn:
@@ -282,12 +282,12 @@ void LinuxMain::WndProc() {
 
         // clipboard
         case SelectionRequest:
-            if(baseEnv != NULL) baseEnv->handleSelectionRequest(xev.xselectionrequest);
+            if(baseEnv != NULL) baseEnv->handleSelectionRequest(this->xev.xselectionrequest);
             break;
 
         // keyboard (TODO: move to xinput2)
         case KeyPress: {
-            XKeyEvent *ke = &xev.xkey;
+            XKeyEvent *ke = &this->xev.xkey;
             unsigned long key = XLookupKeysym(
                 ke, /*(ke->state&ShiftMask) ? 1 : 0*/ 1);  // WARNING: these two must be the same (see below)
             // printf("X: keyPress = %i\n", key);
@@ -300,7 +300,7 @@ void LinuxMain::WndProc() {
             std::array<char, buffSize> buf{};
             Status status = 0;
             KeySym keysym = 0;
-            int length = Xutf8LookupString(ic, (XKeyPressedEvent *)&xev.xkey, buf.data(), buffSize, &keysym, &status);
+            int length = Xutf8LookupString(this->ic, (XKeyPressedEvent *)&this->xev.xkey, buf.data(), buffSize, &keysym, &status);
 
             if(length > 0) {
                 buf[buffSize - 1] = 0;
@@ -310,16 +310,16 @@ void LinuxMain::WndProc() {
         } break;
 
         case KeyRelease: {
-            XKeyEvent *ke = &xev.xkey;
+            XKeyEvent *ke = &this->xev.xkey;
             unsigned long key = XLookupKeysym(
                 ke, /*(ke->state & ShiftMask) ? 1 : 0*/ 1);  // WARNING: these two must be the same (see above)
             // printf("X: keyRelease = %i\n", key);
 
             if(engine != NULL) {
                 // LINUX: fuck X11 key repeats with release events inbetween
-                if(XEventsQueued(dpy, QueuedAfterReading)) {
+                if(XEventsQueued(this->dpy, QueuedAfterReading)) {
                     XEvent nextEvent;
-                    XPeekEvent(dpy, &nextEvent);
+                    XPeekEvent(this->dpy, &nextEvent);
                     if(nextEvent.type == KeyPress && nextEvent.xkey.time == ke->time &&
                        nextEvent.xkey.keycode == ke->keycode)
                         break;  // throw the event away
