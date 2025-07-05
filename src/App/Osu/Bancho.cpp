@@ -628,14 +628,15 @@ Packet build_login_packet() {
     write<u8>(&packet, '|');
 
 #ifdef _WIN32
-    wchar_t _osu_path[PATH_MAX]{};
-    GetModuleFileName(NULL, _osu_path, PATH_MAX);
+    std::array<wchar_t, PATH_MAX> _osu_path{};
+    GetModuleFileName(NULL, _osu_path.data(), PATH_MAX);
 #else
-    char _osu_path[PATH_MAX]{};
-    readlink("/proc/self/exe", _osu_path, PATH_MAX - 1);
+    std::array<char, PATH_MAX> _osu_path{};
+    readlink("/proc/self/exe", _osu_path.data(), PATH_MAX - 1);
 #endif
 
-    const char *osu_path = UString(_osu_path).toUtf8();
+    UString temp_string{_osu_path.data()};
+    const char *osu_path = temp_string.toUtf8();
 
     MD5Hash osu_path_md5 = md5((u8 *)osu_path, strlen(osu_path));
 

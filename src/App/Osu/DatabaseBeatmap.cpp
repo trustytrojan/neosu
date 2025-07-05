@@ -237,7 +237,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                                   &tpMeter, &tpSampleType, &tpSampleSet, &tpVolume, &tpTimingChange, &tpKiai) == 8 ||
                            sscanf(curLineChar, " %lf , %f , %i , %i , %i , %i , %i", &tpOffset, &tpMSPerBeat, &tpMeter,
                                   &tpSampleType, &tpSampleSet, &tpVolume, &tpTimingChange) == 7) {
-                            TIMINGPOINT t{
+                            DatabaseBeatmap::TIMINGPOINT t{
                                 .offset = std::round(tpOffset),
                                 .msPerBeat = tpMSPerBeat,
 
@@ -250,7 +250,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                             };
                             c.timingpoints.push_back(t);
                         } else if(sscanf(curLineChar, " %lf , %f", &tpOffset, &tpMSPerBeat) == 2) {
-                            TIMINGPOINT t{
+                            DatabaseBeatmap::TIMINGPOINT t{
                                 .offset = std::round(tpOffset),
                                 .msPerBeat = tpMSPerBeat,
 
@@ -469,7 +469,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
 }
 
 DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::calculateSliderTimesClicksTicks(
-    int beatmapVersion, std::vector<SLIDER> &sliders, zarray<TIMINGPOINT> &timingpoints, float sliderMultiplier,
+    int beatmapVersion, std::vector<SLIDER> &sliders, zarray<DatabaseBeatmap::TIMINGPOINT> &timingpoints, float sliderMultiplier,
     float sliderTickRate) {
     std::atomic<bool> dead;
     dead = false;
@@ -478,7 +478,7 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
 }
 
 DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::calculateSliderTimesClicksTicks(
-    int beatmapVersion, std::vector<SLIDER> &sliders, zarray<TIMINGPOINT> &timingpoints, float sliderMultiplier,
+    int beatmapVersion, std::vector<SLIDER> &sliders, zarray<DatabaseBeatmap::TIMINGPOINT> &timingpoints, float sliderMultiplier,
     float sliderTickRate, const std::atomic<bool> &dead) {
     CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT r;
     {
@@ -1072,7 +1072,7 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
                           &tpSampleType, &tpSampleSet, &tpVolume, &tpTimingChange, &tpKiai) == 8 ||
                    sscanf(curLineChar, " %lf , %f , %i , %i , %i , %i , %i", &tpOffset, &tpMSPerBeat, &tpMeter,
                           &tpSampleType, &tpSampleSet, &tpVolume, &tpTimingChange) == 7) {
-                    TIMINGPOINT t{};
+                    DatabaseBeatmap::TIMINGPOINT t{};
                     {
                         t.offset = (long)std::round(tpOffset);
                         t.msPerBeat = tpMSPerBeat;
@@ -1086,7 +1086,7 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
                     }
                     this->timingpoints.push_back(t);
                 } else if(sscanf(curLineChar, " %lf , %f", &tpOffset, &tpMSPerBeat) == 2) {
-                    TIMINGPOINT t{};
+                    DatabaseBeatmap::TIMINGPOINT t{};
                     {
                         t.offset = (long)std::round(tpOffset);
                         t.msPerBeat = tpMSPerBeat;
@@ -1346,7 +1346,7 @@ DatabaseBeatmap::TIMING_INFO DatabaseBeatmap::getTimingInfoForTime(unsigned long
 }
 
 DatabaseBeatmap::TIMING_INFO DatabaseBeatmap::getTimingInfoForTimeAndTimingPoints(
-    unsigned long positionMS, const zarray<TIMINGPOINT> &timingpoints) {
+    unsigned long positionMS, const zarray<DatabaseBeatmap::TIMINGPOINT> &timingpoints) {
     TIMING_INFO ti{};
     ti.offset = 0;
     ti.beatLengthBase = 1;

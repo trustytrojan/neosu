@@ -262,13 +262,16 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION).source: $(DEPS_CACHE)/curl-$(CURL_VERSION)/cu
 ## BEGIN EXTERNAL DEPENDENCY BUILD/SETUP SECTION
 #####################################################################################################################################################
 
-CURL_INSTALL_LIBS =
 CURL_CFLAGS += -DCURL_CERT_BUNDLE_PATH="\"$(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle/cacert.pem\""
 if WIN_PLATFORM
 if NEED_CURL
-CURL_INSTALL_LIBS += `find $(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/bin -type f -printf '%p '`
-CURL_CFLAGS += -I$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/include
-CURL_LIBS += -L$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib `find $(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib -type f '(' -not '(' -name '*libz*' -o -name '*libcurl.a' ')' ')' -printf '%p ' | sed 's|\(^lib\)\(.*\)\(.a\)|-l\2|'`
+lb := (
+lbq := '('
+rb := )
+rbq := ')'
+CURL_CFLAGS += -I$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/include -DCURL_STATICLIB
+CURL_LIBS += -L$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib $(shell find $(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib -type f -not $(lbq) $(lbq) -name '*libz.a' $(rbq) -o $(lbq) -name '*dll*' $(rbq) $(rbq) -execdir printf '%s ' '{''}' ';' | sed -e 's|./lib|-l|g' -e 's|.a||g' -e 's|-lcurl|-l:libcurl.a|g') $\
+			-lws2_32 -lwldap32 -lcrypt32
 
 $(DEPS_PREFIX)/curl.built: $(DEPS_CACHE)/curl-$(CURL_VERSION).source
 	$(MKDIR_P) $(DEPS_PREFIX)
@@ -888,9 +891,6 @@ install-libs:
 	find $(srcdir)/$(ASSETS_DIR)/materials/default -mindepth 1 -maxdepth 1 -type f -exec $(INSTALL) -Dm 644 '{''}' "$(DESTDIR)$(bindir)/materials/default" ';'
 if WIN_PLATFORM
 	@cp -P $(DISCORDSDK_INSTALL_LIBS) "$(DESTDIR)$(bindir)/$(LIBDEST)"
-if NEED_CURL
-	@cp -P $(CURL_INSTALL_LIBS) "$(DESTDIR)$(bindir)/$(LIBDEST)"
-endif
 if BUILD_MIMALLOC
 	@cp -P "$(DEPS_PREFIX)/bin/mimalloc"{,-redirect$(if $(filter x86_64,$(host_cpu)),,32)}".dll" "$(DESTDIR)$(bindir)/$(LIBDEST)"
 endif

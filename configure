@@ -6357,7 +6357,7 @@ if test "$host_os" = "mingw32"
 then :
 
     NEOSU_CPPFLAGS="$NEOSU_CPPFLAGS -D_UNICODE -DUNICODE"
-    NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -D_UNICODE -DUNICODE -municode"
+    NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -D_UNICODE -DUNICODE -municode -fvisibility=hidden"
     NEOSU_LDFLAGS="$NEOSU_LDFLAGS -municode"
     if test "x$enable_clang" = "xyes"
 then :
@@ -8815,7 +8815,7 @@ fi
 
 fi
 
-NEOSU_CPPFLAGS="$NEOSU_CPPFLAGS -DGLM_ENABLE_EXPERIMENTAL"
+NEOSU_CPPFLAGS="$NEOSU_CPPFLAGS -DCJSON_HIDE_SYMBOLS -DGLM_ENABLE_EXPERIMENTAL"
 NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -Wall -Wno-sign-compare -Wdeprecated-declarations -Wno-error=deprecated-declarations -pthread"
 NEOSU_LDFLAGS="$NEOSU_LDFLAGS -pthread"
 

@@ -12,7 +12,12 @@ class DatabaseBeatmap;
 class MapCalcThread {
    public:
     MapCalcThread() = default;
-    ~MapCalcThread() { abort(); }
+    ~MapCalcThread() {
+        if(instance.get() != nullptr) {
+            abort();
+            instance.reset();
+        }
+    }
 
     // non-copyable, non-movable
     MapCalcThread(const MapCalcThread&) = delete;

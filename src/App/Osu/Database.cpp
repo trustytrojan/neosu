@@ -683,7 +683,7 @@ void Database::loadDB() {
 
                 if(version < 20240812) {
                     u32 nb_timing_points = neosu_maps.read<u32>();
-                    neosu_maps.skip_bytes(sizeof(TIMINGPOINT) * nb_timing_points);
+                    neosu_maps.skip_bytes(sizeof(Database::TIMINGPOINT) * nb_timing_points);
                 }
 
                 if(version >= 20240703) {
@@ -893,13 +893,13 @@ void Database::loadDB() {
             BPMInfo bpm;
             unsigned int nb_timing_points = db.read<u32>();
             if(overrides_found) {
-                db.skip_bytes(sizeof(TIMINGPOINT) * nb_timing_points);
+                db.skip_bytes(sizeof(Database::TIMINGPOINT) * nb_timing_points);
                 bpm.min = overrides->second.min_bpm;
                 bpm.max = overrides->second.max_bpm;
                 bpm.most_common = overrides->second.avg_bpm;
             } else {
-                zarray<TIMINGPOINT> timingPoints(nb_timing_points);
-                db.read_bytes((u8 *)timingPoints.data(), sizeof(TIMINGPOINT) * nb_timing_points);
+                zarray<Database::TIMINGPOINT> timingPoints(nb_timing_points);
+                db.read_bytes((u8 *)timingPoints.data(), sizeof(Database::TIMINGPOINT) * nb_timing_points);
                 bpm = getBPM(timingPoints);
             }
 

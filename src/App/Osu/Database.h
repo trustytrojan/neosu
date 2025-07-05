@@ -23,6 +23,8 @@ typedef DatabaseBeatmap BeatmapSet;
 #define NEOSU_MAPS_DB_VERSION 20240812
 #define NEOSU_SCORE_DB_VERSION 20240725
 
+
+class Database {
 // Field ordering matters here
 #pragma pack(push, 1)
 struct TIMINGPOINT {
@@ -31,8 +33,6 @@ struct TIMINGPOINT {
     bool timingChange;
 };
 #pragma pack(pop)
-
-class Database {
    public:
     struct PlayerStats {
         UString name;

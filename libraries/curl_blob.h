@@ -9,6 +9,7 @@ static constexpr const unsigned char curl_ca_embed[] = {
 };
 
 #define curl_easy_setopt_CAINFO_BLOB_embedded(curl) \
+    curl_easy_setopt((curl), CURLOPT_SSL_VERIFYPEER, true); \
     struct curl_blob blob{}; \
     blob.data = (void *)curl_ca_embed; \
     blob.len = sizeof(curl_ca_embed); \

@@ -134,7 +134,7 @@ class DatabaseBeatmap {
         std::vector<SPINNER> spinners{};
         std::vector<BREAK> breaks{};
 
-        zarray<TIMINGPOINT> timingpoints{};
+        zarray<DatabaseBeatmap::TIMINGPOINT> timingpoints{};
         std::vector<Color> combocolors{};
 
         float stackLeniency{};
@@ -191,7 +191,7 @@ class DatabaseBeatmap {
 
     TIMING_INFO getTimingInfoForTime(unsigned long positionMS);
     static TIMING_INFO getTimingInfoForTimeAndTimingPoints(unsigned long positionMS,
-                                                           const zarray<TIMINGPOINT> &timingpoints);
+                                                           const zarray<DatabaseBeatmap::TIMINGPOINT> &timingpoints);
 
     // raw metadata
 
@@ -223,7 +223,7 @@ class DatabaseBeatmap {
     [[nodiscard]] inline float getSliderTickRate() const { return this->fSliderTickRate; }
     [[nodiscard]] inline float getSliderMultiplier() const { return this->fSliderMultiplier; }
 
-    [[nodiscard]] inline const zarray<TIMINGPOINT> &getTimingpoints() const { return this->timingpoints; }
+    [[nodiscard]] inline const zarray<DatabaseBeatmap::TIMINGPOINT> &getTimingpoints() const { return this->timingpoints; }
 
     std::string getFullSoundFilePath();
 
@@ -286,7 +286,7 @@ class DatabaseBeatmap {
     float fSliderTickRate;
     float fSliderMultiplier;
 
-    zarray<TIMINGPOINT> timingpoints;  // necessary for main menu anim
+    zarray<DatabaseBeatmap::TIMINGPOINT> timingpoints;  // necessary for main menu anim
 
     // redundant data (technically contained in metadata, but precomputed anyway)
 
@@ -325,11 +325,11 @@ class DatabaseBeatmap {
     static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string osuFilePath, const std::atomic<bool> &dead);
     static CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT calculateSliderTimesClicksTicks(int beatmapVersion,
                                                                                       std::vector<SLIDER> &sliders,
-                                                                                      zarray<TIMINGPOINT> &timingpoints,
+                                                                                      zarray<DatabaseBeatmap::TIMINGPOINT> &timingpoints,
                                                                                       float sliderMultiplier,
                                                                                       float sliderTickRate);
     static CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT calculateSliderTimesClicksTicks(
-        int beatmapVersion, std::vector<SLIDER> &sliders, zarray<TIMINGPOINT> &timingpoints, float sliderMultiplier,
+        int beatmapVersion, std::vector<SLIDER> &sliders, zarray<DatabaseBeatmap::TIMINGPOINT> &timingpoints, float sliderMultiplier,
         float sliderTickRate, const std::atomic<bool> &dead);
 
     std::vector<DatabaseBeatmap *> *difficulties = NULL;

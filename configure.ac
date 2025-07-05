@@ -203,7 +203,7 @@ AC_SUBST([NOIME])
 
 AS_IF([test "$host_os" = "mingw32"], [
     NEOSU_CPPFLAGS="$NEOSU_CPPFLAGS -D_UNICODE -DUNICODE"
-    NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -D_UNICODE -DUNICODE -municode"
+    NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -D_UNICODE -DUNICODE -municode -fvisibility=hidden"
     NEOSU_LDFLAGS="$NEOSU_LDFLAGS -municode"
     AS_IF([test "x$enable_clang" = "xyes"], [
         LLVMMINGW=1
@@ -570,7 +570,7 @@ AS_IF([test "x$enable_lto" != "xno"], [
     ])
 ])
 
-NEOSU_CPPFLAGS="$NEOSU_CPPFLAGS -DGLM_ENABLE_EXPERIMENTAL"
+NEOSU_CPPFLAGS="$NEOSU_CPPFLAGS -DCJSON_HIDE_SYMBOLS -DGLM_ENABLE_EXPERIMENTAL"
 NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -Wall -Wno-sign-compare -Wdeprecated-declarations -Wno-error=deprecated-declarations -pthread"
 NEOSU_LDFLAGS="$NEOSU_LDFLAGS -pthread"
 AC_SUBST([NEOSU_CPPFLAGS])

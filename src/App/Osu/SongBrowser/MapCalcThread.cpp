@@ -59,8 +59,7 @@ void MapCalcThread::run() {
         aimStrains.clear();
         speedStrains.clear();
 
-        mct_result result;
-        result.diff2 = diff2;
+        mct_result result{.diff2 = diff2};
 
         auto c = DatabaseBeatmap::loadPrimitiveObjects(diff2->sFilePath, this->should_stop);
 

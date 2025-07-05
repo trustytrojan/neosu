@@ -190,7 +190,7 @@ ModSelector::ModSelector() : OsuScreen() {
     this->ODLock = overrideOD.lock;
 
     OVERRIDE_SLIDER overrideSpeed =
-        this->addOverrideSlider("Speed/BPM Multiplier", "x", &cv_speed_override, 0.0f, 2.5f);
+        this->addOverrideSlider("Speed/BPM Multiplier", "x", &cv_speed_override, 0.9f, 2.5f);
 
     overrideSpeed.slider->setChangeCallback(fastdelegate::MakeDelegate(this, &ModSelector::onOverrideSliderChange));
     // overrideSpeed.slider->setValue(-1.0f, false);
