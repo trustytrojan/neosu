@@ -173,7 +173,7 @@ void Console::execConfigFile(std::string filename) {
     // collect commands first
     std::vector<UString> cmds;
     while(true) {
-        UString line = configFile.readLine();
+        UString line{configFile.readLine()};
 
         // if canRead() is false after readLine(), we hit EOF
         if(!configFile.canRead()) break;
