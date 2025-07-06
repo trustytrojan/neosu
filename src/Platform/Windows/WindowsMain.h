@@ -23,7 +23,7 @@ class WindowsMain {
     bool bMinimized{false};                       // for fps_max_background
     bool bHasFocus{false};                        // for fps_max_background
     bool bIsCursorVisible{true};                  // local variable
-    bool bSupportsPerMonitorDpiAwareness{false};  // local variable
+    static bool bSupportsPerMonitorDpiAwareness;  // checked in wndproc on creation (WM_NCCREATE) for enabling non-client dpi scaling
 
     HWND createWinWindow(HINSTANCE hInstance);
 

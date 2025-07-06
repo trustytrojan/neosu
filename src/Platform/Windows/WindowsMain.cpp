@@ -301,6 +301,8 @@ FARPROC WindowsMain::doLoadComBaseFunction(const char *name) {
 
 Main *mainloopPtrHack = nullptr;  // FIXME: why is the handle_cmdline_args shit in the windows main file
 
+bool WindowsMain::bSupportsPerMonitorDpiAwareness = false;
+
 WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> & /*argCmdline*/,
                          const std::unordered_map<UString, std::optional<UString>> &argMap) {
     mainloopPtrHack = this;
@@ -374,12 +376,12 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> & /*
                 PSPDAN pSetProcessDpiAwareness = (PSPDAN)GetProcAddress(shcore, "SetProcessDpiAwareness");
                 if(pSetProcessDpiAwareness != NULL) {
                     const HRESULT result = pSetProcessDpiAwareness(2);  // 2 == PROCESS_PER_MONITOR_DPI_AWARE
-                    this->bSupportsPerMonitorDpiAwareness = (result == S_OK || result == E_ACCESSDENIED);
+                    WindowsMain::bSupportsPerMonitorDpiAwareness = (result == S_OK || result == E_ACCESSDENIED);
                 }
             }
         }
 
-        if(!this->bSupportsPerMonitorDpiAwareness) {
+        if(!WindowsMain::bSupportsPerMonitorDpiAwareness) {
             // Windows Vista+
             // system-wide dpi scaling
             {
@@ -422,9 +424,6 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> & /*
         MessageBox(NULL, TEXT("Couldn't createWinWindow()!"), TEXT("Fatal Error"), MB_ICONEXCLAMATION | MB_OK);
         return;
     }
-
-    // for the wndproc wrapper to cast to ourselves
-    SetWindowLongPtrW(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
     // get the screen refresh rate, and set fps_max to that as default
     {
@@ -666,15 +665,6 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> & /*
 
 LRESULT CALLBACK WindowsMain::realWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     switch(msg) {
-        case WM_NCCREATE:
-            if(this->bSupportsPerMonitorDpiAwareness) {
-                typedef BOOL(WINAPI * EPNCDS)(HWND);
-                EPNCDS pEnableNonClientDpiScaling =
-                    (EPNCDS)GetProcAddress(GetModuleHandle(TEXT("user32.dll")), "EnableNonClientDpiScaling");
-                if(pEnableNonClientDpiScaling != NULL) pEnableNonClientDpiScaling(hwnd);
-            }
-            return DefWindowProcW(hwnd, msg, wParam, lParam);
-
         case WM_COPYDATA: {
             PCOPYDATASTRUCT cds = (PCOPYDATASTRUCT)lParam;
             if(cds->dwData != WM_NEOSU_PROTOCOL) return 0;
@@ -1066,6 +1056,14 @@ LRESULT CALLBACK WindowsMain::realWndProc(HWND hwnd, UINT msg, WPARAM wParam, LP
 LRESULT CALLBACK WindowsMain::wndProcWrapper(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     auto *ml = reinterpret_cast<WindowsMain *>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
     if(ml) return ml->realWndProc(hwnd, msg, wParam, lParam);
+
+    // the GWLP_USERDATA will be empty until after the window has already been created, so we have to check this here
+    if(msg == WM_NCCREATE && WindowsMain::bSupportsPerMonitorDpiAwareness) {
+        typedef BOOL(WINAPI * EPNCDS)(HWND);
+        EPNCDS pEnableNonClientDpiScaling =
+            (EPNCDS)GetProcAddress(GetModuleHandle(TEXT("user32.dll")), "EnableNonClientDpiScaling");
+        if(pEnableNonClientDpiScaling != NULL) pEnableNonClientDpiScaling(hwnd);
+    }
     return DefWindowProcW(hwnd, msg, wParam, lParam);
 }
 
@@ -1106,6 +1104,9 @@ HWND WindowsMain::createWinWindow(HINSTANCE hInstance) {
         MessageBox(NULL, TEXT("Couldn't CreateWindowEx()!"), TEXT("Fatal Error"), MB_ICONEXCLAMATION | MB_OK);
         return NULL;
     }
+
+    // for the wndproc wrapper to cast to ourselves
+    SetWindowLongPtrW(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
     // NOTE: Hardcoded "1" from resource.rc
     HICON hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(1));
