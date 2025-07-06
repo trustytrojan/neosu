@@ -10,8 +10,6 @@
 #include "ResourceManager.h"
 #include "SoundEngine.h"
 
-
-
 Sound::Sound(std::string filepath, bool stream, bool overlayable, bool loop) : Resource(filepath) {
     this->sample = 0;
     this->stream = 0;
@@ -104,7 +102,7 @@ void Sound::initAsync() {
 
         // Only compute the length once
         if(this->bInterrupted.load()) return;
-        u64 length = BASS_ChannelGetLength(this->stream, BASS_POS_BYTE);
+        i64 length = BASS_ChannelGetLength(this->stream, BASS_POS_BYTE);
         f64 lengthInSeconds = BASS_ChannelBytes2Seconds(this->stream, length);
         f64 lengthInMilliSeconds = lengthInSeconds * 1000.0;
         this->length = (u32)lengthInMilliSeconds;
@@ -127,7 +125,7 @@ void Sound::initAsync() {
 
         // Only compute the length once
         if(this->bInterrupted.load()) return;
-        u64 length = BASS_ChannelGetLength(this->sample, BASS_POS_BYTE);
+        i64 length = BASS_ChannelGetLength(this->sample, BASS_POS_BYTE);
         f64 lengthInSeconds = BASS_ChannelBytes2Seconds(this->sample, length);
         f64 lengthInMilliSeconds = lengthInSeconds * 1000.0;
         this->length = (u32)lengthInMilliSeconds;
@@ -184,7 +182,7 @@ void Sound::setPositionMS(unsigned long ms) {
         return;
     }
 
-    u64 target_pos = BASS_ChannelSeconds2Bytes(this->stream, ms / 1000.0);
+    i64 target_pos = BASS_ChannelSeconds2Bytes(this->stream, ms / 1000.0);
     if(target_pos < 0) {
         debugLog("setPositionMS: error %d while calling BASS_ChannelSeconds2Bytes\n", BASS_ErrorGetCode());
         return;
@@ -258,7 +256,7 @@ void Sound::setPositionMS_fast(u32 ms) {
         return;
     }
 
-    u64 target_pos = BASS_ChannelSeconds2Bytes(this->stream, ms / 1000.0);
+    i64 target_pos = BASS_ChannelSeconds2Bytes(this->stream, ms / 1000.0);
     if(target_pos < 0) {
         debugLog("setPositionMS_fast: error %d while calling BASS_ChannelSeconds2Bytes\n", BASS_ErrorGetCode());
         return;
@@ -360,13 +358,13 @@ float Sound::getPosition() {
         return (f64)this->paused_position_ms / (f64)this->length;
     }
 
-    u64 lengthBytes = BASS_ChannelGetLength(this->stream, BASS_POS_BYTE);
+    i64 lengthBytes = BASS_ChannelGetLength(this->stream, BASS_POS_BYTE);
     if(lengthBytes < 0) {
         // The stream ended and got freed by BASS_STREAM_AUTOFREE -> invalid handle!
         return 1.f;
     }
 
-    u64 positionBytes = 0;
+    i64 positionBytes = 0;
     if(this->isPlaying()) {
         positionBytes = BASS_Mixer_ChannelGetPosition(this->stream, BASS_POS_BYTE);
     } else {
@@ -387,7 +385,7 @@ u32 Sound::getPositionMS() {
         return this->paused_position_ms;
     }
 
-    u64 positionBytes = 0;
+    i64 positionBytes = 0;
     if(this->isPlaying()) {
         positionBytes = BASS_Mixer_ChannelGetPosition(this->stream, BASS_POS_BYTE);
     } else {
