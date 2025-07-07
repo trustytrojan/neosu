@@ -832,7 +832,8 @@ neosu_LDFLAGS := \
 	$(DISCORDSDK_LIBS) \
 	$(NEOSU_LDFLAGS) \
 	$(EXTRA_WIN_LIBS) \
-	$(LDFLAGS_EXTRA)
+	$(LDFLAGS_EXTRA) \
+	$(WINPTHREAD_LDFLAGS) # must come last, otherwise it overrides exe .rsrc section and the program description becomes "POSIX WinThreads for Windows"
 
 compile_commands.json: mostlyclean-compile
 	@$(BEAR) --version || { echo bear is unavailable to generate a compile_commands.json, install bear && exit 1; }

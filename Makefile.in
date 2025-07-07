@@ -729,6 +729,7 @@ VKD3D_CFLAGS = @VKD3D_CFLAGS@
 VKD3D_LIBS = @VKD3D_LIBS@
 WGET = @WGET@
 WINE = @WINE@
+WINPTHREAD_LDFLAGS = @WINPTHREAD_LDFLAGS@
 WINSHARED_DLLS = @WINSHARED_DLLS@
 X11_CFLAGS = @X11_CFLAGS@
 X11_LIBS = @X11_LIBS@
@@ -1085,7 +1086,8 @@ neosu_LDFLAGS := \
 	$(DISCORDSDK_LIBS) \
 	$(NEOSU_LDFLAGS) \
 	$(EXTRA_WIN_LIBS) \
-	$(LDFLAGS_EXTRA)
+	$(LDFLAGS_EXTRA) \
+	$(WINPTHREAD_LDFLAGS) # must come last, otherwise it overrides exe .rsrc section and the program description becomes "POSIX WinThreads for Windows"
 
 
 # windows' loader has no concept of rpaths (so keep all built/required libs in the same level as the main exe)
