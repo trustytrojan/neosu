@@ -22,7 +22,7 @@ struct OUTPUT_DEVICE {
 class SoundEngine {
    public:
     SoundEngine();
-
+    ~SoundEngine() { BassManager::cleanup(); }
     void restart();
     void shutdown();
 
