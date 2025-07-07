@@ -228,6 +228,9 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> & /*argC
     // release the engine
     SAFE_DELETE(engine);
 
+    // clean up environment
+    SAFE_DELETE(baseEnv);
+
     // destroy the window
     XDestroyWindow(this->dpy, this->clientWindow);
     XCloseDisplay(this->dpy);

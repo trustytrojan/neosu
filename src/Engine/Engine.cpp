@@ -142,6 +142,7 @@ Engine::~Engine() {
     // reset() all static unique_ptrs
     debugLog("Engine: Freeing app...\n");
     s_appInstance.reset();
+    app = NULL;
 
     if(this->console != NULL) showMessageErrorFatal("Engine Error", "this->console not set to NULL before shutdown!");
 
@@ -152,19 +153,27 @@ Engine::~Engine() {
     }
     SAFE_DELETE(this->guiContainer);
 
-    debugLog("Engine: Freeing resource manager...\n");
-    s_resourceManagerInstance.reset();
-
-    debugLog("Engine: Freeing Sound...\n");
-    s_soundEngineInstance.reset();
-
-    debugLog("Engine: Freeing animation handler...\n");
-    s_animationHandlerInstance.reset();
-
     destroy_discord_sdk();
 
     debugLog("Engine: Freeing network handler...\n");
     s_networkHandlerInstance.reset();
+    networkHandler = NULL;
+
+    debugLog("Engine: Freeing animation handler...\n");
+    s_animationHandlerInstance.reset();
+    animationHandler = NULL;
+
+    debugLog("Engine: Freeing Sound...\n");
+    s_soundEngineInstance.reset();
+    soundEngine = NULL;
+
+    debugLog("Engine: Freeing resource manager...\n");
+    s_resourceManagerInstance.reset();
+    resourceManager = NULL;
+
+    debugLog("Engine: Freeing graphics...\n");
+    s_graphicsInstance.reset();
+    g = NULL;
 
     debugLog("Engine: Freeing input devices...\n");
     // first remove the mouse and keyboard from the input devices
@@ -182,12 +191,11 @@ Engine::~Engine() {
     // reset the static unique_ptrs
     s_mouseInstance.reset();
     s_keyboardInstance.reset();
+    mouse = NULL;
+    keyboard = NULL;
 
     debugLog("Engine: Freeing timer...\n");
     SAFE_DELETE(this->timer);
-
-    debugLog("Engine: Freeing graphics...\n");
-    s_graphicsInstance.reset();
 
     debugLog("Engine: Freeing fonts...\n");
     McFont::cleanupSharedResources();

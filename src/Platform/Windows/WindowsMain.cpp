@@ -643,6 +643,9 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> & /*
     // release engine
     SAFE_DELETE(engine);
 
+    // clean up environment
+    SAFE_DELETE(baseEnv);
+
     // finally, destroy the window
     DestroyWindow(hwnd);
 
@@ -894,7 +897,7 @@ LRESULT CALLBACK WindowsMain::realWndProc(HWND hwnd, UINT msg, WPARAM wParam, LP
             */
 
             // avoid cursor flicker when using non-normal cursor set by engine
-            if(engine != NULL && env->getCursor() != CURSORTYPE::CURSOR_NORMAL) return TRUE;
+            if(engine && env && env->getCursor() != CURSORTYPE::CURSOR_NORMAL) return TRUE;
 
             break;
 

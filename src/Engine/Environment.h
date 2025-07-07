@@ -12,10 +12,14 @@
 #include <unistd.h> // isatty libc++
 #endif
 
+class Environment;
+
+extern Environment *env;
+
 class Environment {
    public:
     Environment();
-    virtual ~Environment() { ; }
+    virtual ~Environment() { env = NULL; }
 
     virtual void update() { ; }
 
@@ -108,5 +112,3 @@ class Environment {
    protected:
     bool bFullscreenWindowedBorderless;
 };
-
-extern Environment *env;
