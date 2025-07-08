@@ -745,8 +745,8 @@ void Database::loadDB() {
         // read header
         this->iVersion = db.read<u32>();
         this->iFolderCount = db.read<u32>();
-        db.read<u8>();
-        db.read<u64>() /* timestamp */;
+        db.skip<u8>();
+        db.skip<u64>() /* timestamp */;
         auto playerName = db.read_string();
         this->iNumBeatmapsToLoad = db.read<u32>();
 
@@ -781,7 +781,7 @@ void Database::loadDB() {
             //       https://osu.ppy.sh/home/changelog/cuttingedge/20191106
             if(this->iVersion >= 20160408 && this->iVersion < 20191106) {
                 // size in bytes of the beatmap entry
-                db.read<u32>();
+                db.skip<u32>();
             }
 
             std::string artistName = db.read_string();
@@ -801,7 +801,7 @@ void Database::loadDB() {
             bool overrides_found = overrides != this->peppy_overrides.end();
 
             std::string osuFileName = db.read_string();
-            /*unsigned char rankedStatus = */ db.read<u8>();
+            /*unsigned char rankedStatus = */ db.skip<u8>();
             unsigned short numCircles = db.read<u16>();
             unsigned short numSliders = db.read<u16>();
             unsigned short numSpinners = db.read<u16>();
@@ -826,9 +826,9 @@ void Database::loadDB() {
             if(this->iVersion >= 20140609) {
                 unsigned int numOsuStandardStarRatings = db.read<u32>();
                 for(int s = 0; s < numOsuStandardStarRatings; s++) {
-                    db.read<u8>();  // 0x08
+                    db.skip<u8>();  // 0x08
                     unsigned int mods = db.read<u32>();
-                    db.read<u8>();  // 0x0c
+                    db.skip<u8>();  // 0x0c
 
                     f32 sr = 0.f;
 
@@ -844,48 +844,48 @@ void Database::loadDB() {
 
                 unsigned int numTaikoStarRatings = db.read<u32>();
                 for(int s = 0; s < numTaikoStarRatings; s++) {
-                    db.read<u8>();  // 0x08
-                    db.read<u32>();
-                    db.read<u8>();  // 0x0c
+                    db.skip<u8>();  // 0x08
+                    db.skip<u32>();
+                    db.skip<u8>();  // 0x0c
 
                     // https://osu.ppy.sh/home/changelog/stable40/20250108.3
                     if(this->iVersion >= 20250108) {
-                        db.read<f32>();
+                        db.skip<f32>();
                     } else {
-                        db.read<f64>();
+                        db.skip<f64>();
                     }
                 }
 
                 unsigned int numCtbStarRatings = db.read<u32>();
                 for(int s = 0; s < numCtbStarRatings; s++) {
-                    db.read<u8>();  // 0x08
-                    db.read<u32>();
-                    db.read<u8>();  // 0x0c
+                    db.skip<u8>();  // 0x08
+                    db.skip<u32>();
+                    db.skip<u8>();  // 0x0c
 
                     // https://osu.ppy.sh/home/changelog/stable40/20250108.3
                     if(this->iVersion >= 20250108) {
-                        db.read<f32>();
+                        db.skip<f32>();
                     } else {
-                        db.read<f64>();
+                        db.skip<f64>();
                     }
                 }
 
                 unsigned int numManiaStarRatings = db.read<u32>();
                 for(int s = 0; s < numManiaStarRatings; s++) {
-                    db.read<u8>();  // 0x08
-                    db.read<u32>();
-                    db.read<u8>();  // 0x0c
+                    db.skip<u8>();  // 0x08
+                    db.skip<u32>();
+                    db.skip<u8>();  // 0x0c
 
                     // https://osu.ppy.sh/home/changelog/stable40/20250108.3
                     if(this->iVersion >= 20250108) {
-                        db.read<f32>();
+                        db.skip<f32>();
                     } else {
-                        db.read<f64>();
+                        db.skip<f64>();
                     }
                 }
             }
 
-            /*unsigned int drainTime = */ db.read<u32>();  // seconds
+            /*unsigned int drainTime = */ db.skip<u32>();  // seconds
             int duration = db.read<u32>();                 // milliseconds
             duration = duration >= 0 ? duration : 0;       // sanity clamp
             int previewTime = db.read<u32>();
@@ -899,19 +899,22 @@ void Database::loadDB() {
                 bpm.most_common = overrides->second.avg_bpm;
             } else {
                 zarray<Database::TIMINGPOINT> timingPoints(nb_timing_points);
-                db.read_bytes((u8 *)timingPoints.data(), sizeof(Database::TIMINGPOINT) * nb_timing_points);
+                if(db.read_bytes((u8 *)timingPoints.data(), sizeof(Database::TIMINGPOINT) * nb_timing_points) !=
+                   sizeof(Database::TIMINGPOINT) * nb_timing_points) {
+                    debugLog("WARNING: failed to read timing points from beatmap %d !\n", (i + 1));
+                }
                 bpm = getBPM(timingPoints);
             }
 
             int beatmapID = db.read<i32>();  // fucking bullshit, this is NOT an unsigned integer as is described on the
                                              // wiki, it can and is -1 sometimes
             int beatmapSetID = db.read<i32>();  // same here
-            /*unsigned int threadID = */ db.read<u32>();
+            /*unsigned int threadID = */ db.skip<u32>();
 
-            /*unsigned char osuStandardGrade = */ db.read<u8>();
-            /*unsigned char taikoGrade = */ db.read<u8>();
-            /*unsigned char ctbGrade = */ db.read<u8>();
-            /*unsigned char maniaGrade = */ db.read<u8>();
+            /*unsigned char osuStandardGrade = */ db.skip<u8>();
+            /*unsigned char taikoGrade = */ db.skip<u8>();
+            /*unsigned char ctbGrade = */ db.skip<u8>();
+            /*unsigned char maniaGrade = */ db.skip<u8>();
 
             short localOffset = db.read<u16>();
             float stackLeniency = db.read<f32>();
@@ -924,30 +927,30 @@ void Database::loadDB() {
 
             short onlineOffset = db.read<u16>();
             db.skip_string();  // song title font
-            /*bool unplayed = */ db.read<u8>();
-            /*long long lastTimePlayed = */ db.read<u64>();
-            /*bool isOsz2 = */ db.read<u8>();
+            /*bool unplayed = */ db.skip<u8>();
+            /*long long lastTimePlayed = */ db.skip<u64>();
+            /*bool isOsz2 = */ db.skip<u8>();
 
             // somehow, some beatmaps may have spaces at the start/end of their
             // path, breaking the Windows API (e.g. https://osu.ppy.sh/s/215347)
             auto path = db.read_string();
             trim(&path);
 
-            /*long long lastOnlineCheck = */ db.read<u64>();
+            /*long long lastOnlineCheck = */ db.skip<u64>();
 
-            /*bool ignoreBeatmapSounds = */ db.read<u8>();
-            /*bool ignoreBeatmapSkin = */ db.read<u8>();
-            /*bool disableStoryboard = */ db.read<u8>();
-            /*bool disableVideo = */ db.read<u8>();
-            /*bool visualOverride = */ db.read<u8>();
+            /*bool ignoreBeatmapSounds = */ db.skip<u8>();
+            /*bool ignoreBeatmapSkin = */ db.skip<u8>();
+            /*bool disableStoryboard = */ db.skip<u8>();
+            /*bool disableVideo = */ db.skip<u8>();
+            /*bool visualOverride = */ db.skip<u8>();
 
             if(this->iVersion < 20140609) {
                 // https://github.com/ppy/osu/wiki/Legacy-database-file-structure defines it as "Unknown"
-                db.read<u16>();
+                db.skip<u16>();
             }
 
-            /*int lastEditTime = */ db.read<u32>();
-            /*unsigned char maniaScrollSpeed = */ db.read<u8>();
+            /*int lastEditTime = */ db.skip<u32>();
+            /*unsigned char maniaScrollSpeed = */ db.skip<u8>();
 
             // HACKHACK: workaround for linux and macos: it can happen that nested beatmaps are stored in the database,
             // and that osu! stores that filepath with a backslash (because windows)
@@ -1233,8 +1236,7 @@ void Database::loadScores() {
     BanchoFile::Reader db("neosu_scores.db");
     if(!this->bScoresLoaded && db.total_size > 0) {
         u8 magic_bytes[6] = {0};
-        db.read_bytes(magic_bytes, 5);
-        if(memcmp(magic_bytes, "NEOSC", 5) != 0) {
+        if(db.read_bytes(magic_bytes, 5) != 5 || memcmp(magic_bytes, "NEOSC", 5) != 0) {
             osu->getNotificationOverlay()->addToast("Failed to load neosu_scores.db!", 0xffff0000);
             return;
         }
@@ -1375,8 +1377,8 @@ u32 Database::importOldNeosuScores() {
         u32 nb_scores = db.read<u32>();
 
         for(u32 s = 0; s < nb_scores; s++) {
-            db.read<u8>();   // gamemode (always 0)
-            db.read<u32>();  // score version
+            db.skip<u8>();   // gamemode (always 0)
+            db.skip<u32>();  // score version
 
             FinishedScore sc;
             sc.unixTimestamp = db.read<u64>();
@@ -1539,7 +1541,7 @@ u32 Database::importPeppyScores() {
             }
 
             if(sc.mods.flags & Replay::ModFlags::Target) {
-                db.read<f64>();  // total accuracy
+                db.skip<f64>();  // total accuracy
             }
 
             if(gamemode == 0 && sc.bancho_score_id != 0) {

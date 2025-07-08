@@ -2,9 +2,20 @@
 
 #include <cstddef>
 #include <cstring>
+#include <string>
+#include <string_view>
+#include <algorithm>
 
 #include "MD5Hash.h"
 #include "types.h"
+
+#ifdef _MSC_VER
+#define always_inline_attr __forceinline
+#elif defined(__GNUC__)
+#define always_inline_attr [[gnu::always_inline]] inline
+#else
+#define always_inline_attr
+#endif
 
 class BanchoFile {
    private:
@@ -17,66 +28,167 @@ class BanchoFile {
         Reader(const char* path);
         ~Reader();
 
-        [[nodiscard]] size_t read_bytes(u8* out, size_t len);
-        [[nodiscard]] MD5Hash read_hash();
-        [[nodiscard]] std::string read_string();
-        [[nodiscard]] u32 read_uleb128();
-        void skip_bytes(u32 n);
-        void skip_string();
+        // always_inline is a 2x speedup here
+        [[nodiscard]] always_inline_attr size_t read_bytes(u8* out, size_t len) {
+            if(this->error_flag || !this->file) {
+                if(out != NULL) {
+                    memset(out, 0, len);
+                }
+                return 0;
+            }
+
+            if(len > READ_BUFFER_SIZE) {
+                this->set_error("Attempted to read " + std::to_string(len) + " bytes (exceeding buffer size " +
+                                std::to_string(READ_BUFFER_SIZE) + ")");
+                if(out != NULL) {
+                    memset(out, 0, len);
+                }
+                return 0;
+            }
+
+            // make sure the ring buffer has enough data
+            if(this->buffered_bytes < len) {
+                // calculate available space for reading more data
+                size_t available_space = READ_BUFFER_SIZE - this->buffered_bytes;
+                size_t bytes_to_read = available_space;
+
+                if(this->write_pos + bytes_to_read <= READ_BUFFER_SIZE) {
+                    // no wrap needed, read directly
+                    size_t bytes_read = fread(this->buffer + this->write_pos, 1, bytes_to_read, this->file);
+                    this->write_pos = (this->write_pos + bytes_read) % READ_BUFFER_SIZE;
+                    this->buffered_bytes += bytes_read;
+                } else {
+                    // wrap needed, read in two parts
+                    size_t first_part = READ_BUFFER_SIZE - this->write_pos;
+                    size_t bytes_read = fread(this->buffer + this->write_pos, 1, first_part, this->file);
+
+                    if(bytes_read == first_part && bytes_to_read > first_part) {
+                        size_t second_part = bytes_to_read - first_part;
+                        size_t second_read = fread(this->buffer, 1, second_part, this->file);
+                        bytes_read += second_read;
+                        this->write_pos = second_read;
+                    } else {
+                        this->write_pos = (this->write_pos + bytes_read) % READ_BUFFER_SIZE;
+                    }
+
+                    this->buffered_bytes += bytes_read;
+                }
+            }
+
+            if(this->buffered_bytes < len) {
+                // couldn't read enough data
+                if(out != NULL) {
+                    memset(out, 0, len);
+                }
+                return 0;
+            }
+
+            // read from ring buffer
+            if(out != NULL) {
+                if(this->read_pos + len <= READ_BUFFER_SIZE) {
+                    // no wrap needed
+                    memcpy(out, this->buffer + this->read_pos, len);
+                } else {
+                    // wrap needed
+                    size_t first_part = std::min(len, READ_BUFFER_SIZE - this->read_pos);
+                    size_t second_part = len - first_part;
+
+                    memcpy(out, this->buffer + this->read_pos, first_part);
+                    memcpy(out + first_part, this->buffer, second_part);
+                }
+            }
+
+            this->read_pos = (this->read_pos + len) % READ_BUFFER_SIZE;
+            this->buffered_bytes -= len;
+            this->total_pos += len;
+
+            return len;
+        }
 
         template <typename T>
         [[nodiscard]] T read() {
             static_assert(sizeof(T) < READ_BUFFER_SIZE);
 
-            if(this->file == NULL) {
-                T result;
+            T result;
+            if((this->read_bytes((u8*)&result, sizeof(T))) != sizeof(T)) {
                 memset(&result, 0, sizeof(T));
-                return result;
             }
-
-            // XXX: Use proper ring buffer instead of memmove
-            if(this->pos + sizeof(T) > this->avail) {
-                memmove(this->buffer, this->buffer + this->pos, this->avail);
-                this->pos = 0;
-                this->avail += fread(this->buffer + this->avail, 1, READ_BUFFER_SIZE - this->avail, this->file);
-            }
-
-            if(this->pos + sizeof(T) > this->avail) {
-                this->pos = (this->pos + sizeof(T)) % READ_BUFFER_SIZE;
-                this->avail = 0;
-                this->total_pos = this->total_size;
-
-                T result;
-                memset(&result, 0, sizeof(T));
-                return result;
-            } else {
-                u8* out_ptr = this->buffer + this->pos;
-                this->pos = (this->pos + sizeof(T)) % READ_BUFFER_SIZE;
-                this->avail -= sizeof(T);
-                this->total_pos += sizeof(T);
-
-                // use memcpy to avoid misaligned access
-                T result;
-                memcpy(&result, out_ptr, sizeof(T));
-                return result;
-            }
+            return result;
         }
 
-        size_t total_size = 0;
-        size_t total_pos = 0;
+        always_inline_attr void skip_bytes(u32 n) {
+            if(this->error_flag || !this->file) {
+                return;
+            }
+
+            // if we can skip entirely within the buffered data
+            if(n <= this->buffered_bytes) {
+                this->read_pos = (this->read_pos + n) % READ_BUFFER_SIZE;
+                this->buffered_bytes -= n;
+                this->total_pos += n;
+                return;
+            }
+
+            // we need to skip more than what's buffered
+            u32 skip_from_buffer = this->buffered_bytes;
+            u32 skip_from_file = n - skip_from_buffer;
+
+            // skip what's in the buffer
+            this->total_pos += skip_from_buffer;
+
+            // seek in the file to skip the rest
+            if(fseek(this->file, skip_from_file, SEEK_CUR) != 0) {
+                this->set_error("Failed to seek " + std::to_string(skip_from_file) + " bytes");
+                return;
+            }
+
+            this->total_pos += skip_from_file;
+
+            // since we've moved past buffered data, reset buffer state
+            this->read_pos = 0;
+            this->write_pos = 0;
+            this->buffered_bytes = 0;
+        }
+
+        template <typename T>
+        void skip() {
+            static_assert(sizeof(T) < READ_BUFFER_SIZE);
+            this->skip_bytes(sizeof(T));
+        }
+
+        [[nodiscard]] bool good() const { return !this->error_flag; }
+        [[nodiscard]] std::string_view error() const { return this->last_error; }
+
+        [[nodiscard]] MD5Hash read_hash();
+        [[nodiscard]] std::string read_string();
+        [[nodiscard]] u32 read_uleb128();
+
+        void skip_string();
+
+        size_t total_size{0};
+        size_t total_pos{0};
 
        private:
-        FILE* file = NULL;
+        void set_error(const std::string& error_msg);
 
-        u8* buffer = NULL;
-        size_t pos = 0;
-        size_t avail = 0;
+        FILE* file{nullptr};
+
+        u8* buffer{nullptr};
+        size_t read_pos{0};        // current read position in ring buffer
+        size_t write_pos{0};       // current write position in ring buffer
+        size_t buffered_bytes{0};  // amount of data currently buffered
+
+        bool error_flag{false};
+        std::string last_error;
     };
 
     class Writer {
        public:
         Writer(const char* path);
         ~Writer();
+
+        [[nodiscard]] bool good() const { return !this->error_flag; }
+        [[nodiscard]] std::string_view error() const { return this->last_error; }
 
         void flush();
         void write_bytes(u8* bytes, size_t n);
@@ -90,13 +202,16 @@ class BanchoFile {
         }
 
        private:
+        void set_error(const std::string& error_msg);
+
         std::string file_path;
         std::string tmp_file_path;
-        FILE* file = NULL;
+        FILE* file{nullptr};
 
-        u8* buffer = NULL;
-        size_t pos = 0;
-        bool errored = false;
+        u8* buffer{nullptr};
+        size_t pos{0};
+        bool error_flag{false};
+        std::string last_error;
     };
 
     static void copy(const char* from_path, const char* to_path);

@@ -5,6 +5,7 @@
 BanchoFile::Reader::Reader(const char *path) {
     this->file = fopen(path, "rb");
     if(this->file == NULL) {
+        this->set_error("Failed to open file for reading: " + std::string(strerror(errno)));
         debugLog("Failed to open '%s': %s\n", path, strerror(errno));
         return;
     }
@@ -14,55 +15,36 @@ BanchoFile::Reader::Reader(const char *path) {
     rewind(this->file);
 
     this->buffer = (u8 *)malloc(READ_BUFFER_SIZE);
+    if(this->buffer == NULL) {
+        this->set_error("Failed to allocate read buffer");
+        fclose(this->file);
+        this->file = NULL;
+        return;
+    }
 }
 
 BanchoFile::Reader::~Reader() {
-    if(this->file == NULL) return;
-
-    free(this->buffer);
-    fclose(this->file);
+    if(this->file != NULL) {
+        fclose(this->file);
+    }
+    if(this->buffer != NULL) {
+        free(this->buffer);
+    }
 }
 
-size_t BanchoFile::Reader::read_bytes(u8 *out, size_t len) {
-    if(this->file == NULL) {
-        if(out != NULL) {
-            memset(out, 0, len);
-        }
-        return 0;
+void BanchoFile::Reader::set_error(const std::string &error_msg) {
+    if(!this->error_flag) {  // only set first error
+        this->error_flag = true;
+        this->last_error = error_msg;
     }
-
-    if(len > READ_BUFFER_SIZE) {
-        // TODO @kiwec: handle this gracefully
-        debugLog("Tried to read %d bytes (exceeding %d)!\n", len, READ_BUFFER_SIZE);
-        abort();
-        return 0;
-    }
-
-    // XXX: Use proper ring buffer instead of memmove
-    if(this->pos + len > this->avail) {
-        memmove(this->buffer, this->buffer + this->pos, this->avail);
-        this->pos = 0;
-        this->avail += fread(this->buffer + this->avail, 1, READ_BUFFER_SIZE - this->avail, this->file);
-    }
-
-    if(this->pos + len > this->avail) {
-        this->pos = (this->pos + len) % READ_BUFFER_SIZE;
-        this->avail = 0;
-        this->total_pos = this->total_size;
-    } else {
-        if(out != NULL) {
-            memcpy(out, this->buffer + this->pos, len);
-        }
-        this->pos = (this->pos + len) % READ_BUFFER_SIZE;
-        this->avail -= len;
-        this->total_pos += len;
-    }
-
-    return len;
 }
 
 MD5Hash BanchoFile::Reader::read_hash() {
     MD5Hash hash;
+
+    if(this->error_flag) {
+        return hash;
+    }
 
     u8 empty_check = this->read<u8>();
     if(empty_check == 0) return hash;
@@ -70,13 +52,15 @@ MD5Hash BanchoFile::Reader::read_hash() {
     u32 len = this->read_uleb128();
     u32 extra = 0;
     if(len > 32) {
-        debugLog("WARNING: Expected 32 bytes for hash, got %d!\n");
+        // just continue, don't set error flag
+        debugLog("WARNING: Expected 32 bytes for hash, got %d!\n", len);
         extra = len - 32;
         len = 32;
     }
 
     if(this->read_bytes((u8 *)hash.hash, len) != len) {
-        debugLogF("WARNING: failed to read {} bytes to obtain hash.\n", len);
+        // just continue, don't set error flag
+        debugLogF("WARNING: failed to read %d bytes to obtain hash.\n", len);
         extra = len;
     }
     this->skip_bytes(extra);
@@ -85,14 +69,19 @@ MD5Hash BanchoFile::Reader::read_hash() {
 }
 
 std::string BanchoFile::Reader::read_string() {
+    if(this->error_flag) {
+        return {};
+    }
+
     u8 empty_check = this->read<u8>();
-    if(empty_check == 0) return std::string();
+    if(empty_check == 0) return {};
 
     u32 len = this->read_uleb128();
     u8 *str = new u8[len + 1];
     if(this->read_bytes(str, len) != len) {
-        debugLogF("WARNING: failed to read {} bytes.\n", len);
-        return {""};
+        this->set_error("Failed to read " + std::to_string(len) + " bytes for string");
+        delete[] str;
+        return {};
     }
 
     std::string str_out((const char *)str, len);
@@ -102,6 +91,10 @@ std::string BanchoFile::Reader::read_string() {
 }
 
 u32 BanchoFile::Reader::read_uleb128() {
+    if(this->error_flag) {
+        return 0;
+    }
+
     u32 result = 0;
     u32 shift = 0;
     u8 byte = 0;
@@ -115,22 +108,11 @@ u32 BanchoFile::Reader::read_uleb128() {
     return result;
 }
 
-void BanchoFile::Reader::skip_bytes(u32 n) {
-    if(n > READ_BUFFER_SIZE) {
-        debugLog("WARNING: Skipping %d bytes (exceeding %d)!\n", n, READ_BUFFER_SIZE);
-    }
-
-    while(n > 0) {
-        u32 chunk_len = n > READ_BUFFER_SIZE ? READ_BUFFER_SIZE : n;
-        if(this->read_bytes(NULL, chunk_len) != chunk_len) {
-            debugLogF("WARNING: failed to read {} bytes, {} remaining\n", chunk_len, n);
-            break;
-        }
-        n -= chunk_len;
-    }
-}
-
 void BanchoFile::Reader::skip_string() {
+    if(this->error_flag) {
+        return;
+    }
+
     u8 empty_check = this->read<u8>();
     if(empty_check == 0) return;
 
@@ -145,34 +127,58 @@ BanchoFile::Writer::Writer(const char *path) {
 
     this->file = fopen(this->tmp_file_path.c_str(), "wb");
     if(this->file == NULL) {
+        this->set_error("Failed to open file for writing: " + std::string(strerror(errno)));
         debugLog("Failed to open '%s': %s\n", path, strerror(errno));
         return;
     }
 
     this->buffer = (u8 *)malloc(WRITE_BUFFER_SIZE);
+    if(this->buffer == NULL) {
+        this->set_error("Failed to allocate write buffer");
+        fclose(this->file);
+        this->file = NULL;
+        return;
+    }
 }
 
 BanchoFile::Writer::~Writer() {
-    if(this->file == NULL) return;
+    if(this->file != NULL) {
+        this->flush();
+        fclose(this->file);
 
-    this->flush();
+        if(!this->error_flag) {
+            env->deleteFile(this->file_path);  // Windows (the Microsoft docs are LYING)
+            env->renameFile(this->tmp_file_path, this->file_path);
+        }
+    }
 
-    free(this->buffer);
-    fclose(this->file);
+    if(this->buffer != NULL) {
+        free(this->buffer);
+    }
+}
 
-    if(!this->errored) {
-        env->deleteFile(this->file_path);  // Windows (the Microsoft docs are LYING)
-        env->renameFile(this->tmp_file_path, this->file_path);
+void BanchoFile::Writer::set_error(const std::string &error_msg) {
+    if(!this->error_flag) {  // only set first error
+        this->error_flag = true;
+        this->last_error = error_msg;
     }
 }
 
 void BanchoFile::Writer::write_hash(MD5Hash hash) {
+    if(this->error_flag) {
+        return;
+    }
+
     this->write<u8>(0x0B);
     this->write<u8>(0x20);
     this->write_bytes((u8 *)hash.hash, 32);
 }
 
 void BanchoFile::Writer::write_string(std::string str) {
+    if(this->error_flag) {
+        return;
+    }
+
     if(str[0] == '\0') {
         u8 zero = 0;
         this->write<u8>(zero);
@@ -188,23 +194,33 @@ void BanchoFile::Writer::write_string(std::string str) {
 }
 
 void BanchoFile::Writer::flush() {
+    if(this->error_flag || this->file == NULL) {
+        return;
+    }
+
     if(fwrite(this->buffer, 1, this->pos, this->file) != this->pos) {
-        this->errored = true;
-        debugLog("Failed to write to %s: %s\n", tmp_file_path.c_str(), strerror(errno));
+        this->set_error("Failed to write to file: " + std::string(strerror(errno)));
+        return;
     }
     this->pos = 0;
 }
 
 void BanchoFile::Writer::write_bytes(u8 *bytes, size_t n) {
-    if(this->file == NULL || this->errored) return;
+    if(this->error_flag || this->file == NULL) {
+        return;
+    }
 
     if(this->pos + n > WRITE_BUFFER_SIZE) {
         this->flush();
+        if(this->error_flag) {
+            return;
+        }
     }
+
     if(this->pos + n > WRITE_BUFFER_SIZE) {
-        // TODO @kiwec: handle this gracefully
-        debugLog("Tried to write %d bytes (exceeding %d)!\n", n, WRITE_BUFFER_SIZE);
-        abort();
+        this->set_error("Attempted to write " + std::to_string(n) + " bytes (exceeding buffer size " +
+                        std::to_string(WRITE_BUFFER_SIZE) + ")");
+        return;
     }
 
     memcpy(this->buffer + this->pos, bytes, n);
@@ -212,6 +228,10 @@ void BanchoFile::Writer::write_bytes(u8 *bytes, size_t n) {
 }
 
 void BanchoFile::Writer::write_uleb128(u32 num) {
+    if(this->error_flag) {
+        return;
+    }
+
     if(num == 0) {
         u8 zero = 0;
         this->write<u8>(zero);
@@ -232,16 +252,39 @@ void BanchoFile::copy(const char *from_path, const char *to_path) {
     Reader from(from_path);
     Writer to(to_path);
 
+    if(!from.good()) {
+        debugLog("Failed to open source file for copying: %s\n", from.error().data());
+        return;
+    }
+
+    if(!to.good()) {
+        debugLog("Failed to open destination file for copying: %s\n", to.error().data());
+        return;
+    }
+
     u8 *buf = (u8 *)malloc(READ_BUFFER_SIZE);
+    if(buf == NULL) {
+        debugLog("Failed to allocate copy buffer\n");
+        return;
+    }
+
     u32 remaining = from.total_size;
-    while(remaining > 0) {
+    while(remaining > 0 && from.good() && to.good()) {
         u32 len = std::min(remaining, (u32)READ_BUFFER_SIZE);
         if(from.read_bytes(buf, len) != len) {
-            debugLogF("WARNING: failed to copy {} bytes, {} remaining\n", len, remaining);
+            debugLog("Copy failed: could not read %u bytes, %u remaining\n", len, remaining);
             break;
         }
         to.write_bytes(buf, len);
         remaining -= len;
     }
+
+    if(!from.good()) {
+        debugLog("Copy failed during read: %s\n", from.error().data());
+    }
+    if(!to.good()) {
+        debugLog("Copy failed during write: %s\n", to.error().data());
+    }
+
     free(buf);
 }
