@@ -15,8 +15,6 @@ struct MD5Hash {
     bool operator==(const UString &other) const;
 };
 
-void trim(std::string *str);
-
 namespace std {
 template <>
 struct hash<MD5Hash> {

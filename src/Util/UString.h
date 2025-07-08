@@ -86,7 +86,9 @@ class UString {
     [[nodiscard]] constexpr bool isEmpty() const noexcept { return this->sUnicode.empty(); }
 
     // string tests
-    [[nodiscard]] constexpr bool endsWith(char ch) const noexcept { return !this->sUtf8.empty() && this->sUtf8.back() == ch; }
+    [[nodiscard]] constexpr bool endsWith(char ch) const noexcept {
+        return !this->sUtf8.empty() && this->sUtf8.back() == ch;
+    }
     [[nodiscard]] constexpr bool endsWith(wchar_t ch) const noexcept {
         return !this->sUnicode.empty() && this->sUnicode.back() == ch;
     }
@@ -96,14 +98,17 @@ class UString {
         return suffixLen <= thisLen &&
                std::equal(suffix.sUnicode.begin(), suffix.sUnicode.end(), this->sUnicode.end() - suffixLen);
     }
-    [[nodiscard]] constexpr bool startsWith(char ch) const noexcept { return !this->sUtf8.empty() && this->sUtf8.front() == ch; }
+    [[nodiscard]] constexpr bool startsWith(char ch) const noexcept {
+        return !this->sUtf8.empty() && this->sUtf8.front() == ch;
+    }
     [[nodiscard]] constexpr bool startsWith(wchar_t ch) const noexcept {
         return !this->sUnicode.empty() && this->sUnicode.front() == ch;
     }
     [[nodiscard]] constexpr bool startsWith(const UString &suffix) const noexcept {
         int suffixLen = suffix.length();
         int thisLen = length();
-        return suffixLen <= thisLen && std::equal(suffix.sUnicode.begin(), suffix.sUnicode.end(), this->sUnicode.begin());
+        return suffixLen <= thisLen &&
+               std::equal(suffix.sUnicode.begin(), suffix.sUnicode.end(), this->sUnicode.begin());
     }
 
     // search functions
@@ -277,12 +282,14 @@ class UString {
     friend struct std::hash<UString>;
 
    private:
-    // pack ascii flag into the high bit of this->iLengthUnicode so we don't need an extra field just to store that information,
-    // which adds 8 bytes due to padding
+    // pack ascii flag into the high bit of this->iLengthUnicode so we don't need an extra field just to store that
+    // information, which adds 8 bytes due to padding
     static constexpr int ASCII_FLAG = 0x40000000;
     static constexpr int LENGTH_MASK = 0x3FFFFFFF;
 
-    void setLength(int len) noexcept { this->iLengthUnicode = (this->iLengthUnicode & ASCII_FLAG) | (len & LENGTH_MASK); }
+    void setLength(int len) noexcept {
+        this->iLengthUnicode = (this->iLengthUnicode & ASCII_FLAG) | (len & LENGTH_MASK);
+    }
     void setAsciiFlag(bool isAscii) noexcept {
         this->iLengthUnicode = isAscii ? (this->iLengthUnicode | ASCII_FLAG) : (this->iLengthUnicode & LENGTH_MASK);
     }
@@ -343,5 +350,8 @@ UString UString::join(const Range &range, std::string_view delim) noexcept {
 
     return result;
 }
+
+// not related to UString
+void trim(std::string *str);
 
 #endif  // USTRING_H

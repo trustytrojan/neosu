@@ -27,7 +27,7 @@ typedef DatabaseBeatmap BeatmapSet;
 class Database {
 // Field ordering matters here
 #pragma pack(push, 1)
-struct TIMINGPOINT {
+struct alignas(1) TIMINGPOINT {
     double msPerBeat;
     double offset;
     bool timingChange;

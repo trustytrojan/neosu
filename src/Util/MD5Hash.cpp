@@ -1,15 +1,6 @@
 #include "MD5Hash.h"
 #include "UString.h"
 
-void trim(std::string *str) {
-    while(!str->empty() && str->front() == ' ') {
-        str->erase(0, 1);
-    }
-    while(!str->empty() && (str->back() == ' ' || str->back() == '\r')) {
-        str->pop_back();
-    }
-}
-
 MD5Hash::MD5Hash(const char *str) {
     strncpy(this->hash, str, 32);
     this->hash[32] = 0;
