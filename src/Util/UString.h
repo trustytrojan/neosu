@@ -47,7 +47,8 @@ class UString {
     UString(const char *utf8);
     UString(const char *utf8, int length);
     UString(const wchar_t *str, int length);
-    UString(std::string_view utf8);
+    explicit UString(const std::string &utf8);
+    explicit UString(std::string_view utf8);
 
     // member functions
     UString(const UString &ustr) = default;

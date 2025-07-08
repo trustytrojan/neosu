@@ -54,6 +54,10 @@ UString::UString(const wchar_t *str, int length) {
     }
 }
 
+UString::UString(const std::string &utf8) : iLengthUtf8(static_cast<int>(utf8.length())) {
+    if(!utf8.empty()) fromUtf8(utf8.data(), static_cast<int>(utf8.length()));
+}
+
 UString::UString(std::string_view utf8) : iLengthUtf8(static_cast<int>(utf8.length())) {
     if(!utf8.empty()) fromUtf8(utf8.data(), static_cast<int>(utf8.length()));
 }

@@ -306,18 +306,20 @@ bool WindowsMain::bSupportsPerMonitorDpiAwareness = false;
 WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> & /*argCmdline*/,
                          const std::unordered_map<UString, std::optional<UString>> &argMap) {
     mainloopPtrHack = this;
-#ifdef _MSC_VER
-    // When building with MSVC, vprintf() is not returning the correct value unless we have a console allocated.
-    FILE *dummy;
-#ifdef _DEBUG
-    AllocConsole();
-    freopen_s(&dummy, "CONOUT$", "w", stdout);
-    freopen_s(&dummy, "CONOUT$", "w", stderr);
-#else
-    freopen_s(&dummy, "NUL", "w", stdout);
-    freopen_s(&dummy, "NUL", "w", stderr);
-#endif
-#endif
+    // @spec: TEST THIS?
+    // see: Engine.h:250
+// #ifdef _MSC_VER
+//     // When building with MSVC, vprintf() is not returning the correct value unless we have a console allocated.
+//     FILE *dummy;
+// #ifdef _DEBUG
+//     AllocConsole();
+//     freopen_s(&dummy, "CONOUT$", "w", stdout);
+//     freopen_s(&dummy, "CONOUT$", "w", stderr);
+// #else
+//     freopen_s(&dummy, "NUL", "w", stdout);
+//     freopen_s(&dummy, "NUL", "w", stderr);
+// #endif
+// #endif
 
     // register .osk, .osr, .osz, and neosu:// protocol
     register_neosu_file_associations();

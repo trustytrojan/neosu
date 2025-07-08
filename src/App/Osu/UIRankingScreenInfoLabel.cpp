@@ -30,13 +30,13 @@ void UIRankingScreenInfoLabel::draw() {
     // build strings
     UString titleText{this->sArtist};
     titleText.append({" - "});
-    titleText.append({this->sTitle});
+    titleText.append(UString{this->sTitle});
     titleText.append({" ["});
-    titleText.append({this->sDiff});
+    titleText.append(UString{this->sDiff});
     titleText.append({"]"});
     titleText = titleText.trim();
     UString subTitleText{"Beatmap by "};
-    subTitleText.append({this->sMapper});
+    subTitleText.append(UString{this->sMapper});
     subTitleText = subTitleText.trim();
     const UString playerText{this->buildPlayerString()};
 
