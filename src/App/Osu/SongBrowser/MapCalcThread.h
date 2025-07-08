@@ -13,10 +13,8 @@ class MapCalcThread {
    public:
     MapCalcThread() = default;
     ~MapCalcThread() {
-        if(instance.get() != nullptr) {
-            abort();
-            instance.reset();
-        }
+        // only clean up this instance's resources
+        abort_instance();
     }
 
     // non-copyable, non-movable
@@ -40,16 +38,40 @@ class MapCalcThread {
     static inline void start_calc(std::vector<DatabaseBeatmap*> maps_to_calc) {
         get_instance().start_calc_instance(std::move(maps_to_calc));
     }
-    static inline void abort() { get_instance().abort_instance(); }
+
+    static inline void abort() {
+        auto* inst = get_instance_ptr();
+        if(inst) {
+            inst->abort_instance();
+        }
+    }
+
+    // shutdown the singleton
+    static inline void shutdown() {
+        std::call_once(shutdown_flag, []() {
+            if(instance) {
+                instance->abort_instance();
+                instance.reset();
+            }
+        });
+    }
 
     // progress tracking
-    static inline u32 get_computed() { return get_instance().computed_count.load(); }
-    static inline u32 get_total() { return get_instance().total_count.load(); }
+    static inline u32 get_computed() {
+        auto* inst = get_instance_ptr();
+        return inst ? inst->computed_count.load() : 0;
+    }
+
+    static inline u32 get_total() {
+        auto* inst = get_instance_ptr();
+        return inst ? inst->total_count.load() : 0;
+    }
 
     static inline bool is_finished() {
-        const auto& instance = get_instance();
-        const u32 computed = instance.computed_count.load();
-        const u32 total = instance.total_count.load();
+        auto* inst = get_instance_ptr();
+        if(!inst) return true;
+        const u32 computed = inst->computed_count.load();
+        const u32 total = inst->total_count.load();
         return total > 0 && computed >= total;
     }
 
@@ -64,6 +86,7 @@ class MapCalcThread {
 
     // singleton access
     static MapCalcThread& get_instance();
+    static MapCalcThread* get_instance_ptr();
 
     std::thread worker_thread;
     std::atomic<bool> should_stop{true};
@@ -75,4 +98,5 @@ class MapCalcThread {
 
     static std::unique_ptr<MapCalcThread> instance;
     static std::once_flag instance_flag;
+    static std::once_flag shutdown_flag;
 };

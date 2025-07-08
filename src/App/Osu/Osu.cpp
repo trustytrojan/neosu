@@ -404,7 +404,7 @@ Osu::~Osu() {
     sct_abort();
     lct_set_map(NULL);
     loct_abort();
-    MapCalcThread::abort();
+    MapCalcThread::shutdown();
     kill_networking_thread();
 
     // "leak" UpdateHandler object, but not relevant since shutdown:

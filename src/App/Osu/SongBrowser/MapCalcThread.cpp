@@ -10,9 +10,10 @@
 // static member definitions
 std::unique_ptr<MapCalcThread> MapCalcThread::instance = nullptr;
 std::once_flag MapCalcThread::instance_flag;
+std::once_flag MapCalcThread::shutdown_flag;
 
 void MapCalcThread::start_calc_instance(std::vector<DatabaseBeatmap*> maps_to_calc) {
-    abort();
+    abort_instance();
 
     if(maps_to_calc.empty()) {
         return;
@@ -129,4 +130,9 @@ void MapCalcThread::run() {
 MapCalcThread& MapCalcThread::get_instance() {
     std::call_once(instance_flag, []() { instance = std::make_unique<MapCalcThread>(); });
     return *instance;
+}
+
+MapCalcThread* MapCalcThread::get_instance_ptr() {
+    // return existing instance without creating it
+    return instance.get();
 }
