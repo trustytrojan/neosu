@@ -315,9 +315,11 @@ endif
 
 if BUILD_MIMALLOC
 if WIN_PLATFORM
-MIMALLOC_LIBS = -L$(DEPS_PREFIX)/lib -l:libmimalloc.dll.a -L$(DEPS_PREFIX)/bin -lmimalloc -lmimalloc-redirect$(if $(filter x86_64,$(host_cpu)),,32)
+MIMALLOC_DYNAMIC_LIBS := -L$(DEPS_PREFIX)/lib -Wl,--whole-archive -l:libmimalloc.dll.a -Wl,--no-whole-archive -L$(DEPS_PREFIX)/bin -lmimalloc -lmimalloc-redirect$(if $(filter x86_64,$(host_cpu)),,32)
+MIMALLOC_OBJ :=
 else
-MIMALLOC_LIBS = $(DEPS_PREFIX)/lib/mimalloc$(if $(ENABLE_ASAN),-asan-debug,$(if $(ENABLE_DEBUG),-debug,)).o
+MIMALLOC_DYNAMIC_LIBS :=
+MIMALLOC_OBJ := $(DEPS_PREFIX)/lib/mimalloc$(if $(ENABLE_ASAN),-asan-debug,$(if $(ENABLE_DEBUG),-debug,)).o
 endif # WIN_PLATFORM
 $(DEPS_PREFIX)/mimalloc.built: $(DEPS_CACHE)/mimalloc-$(MIMALLOC_VERSION).source
 	rm -rf $(DEPS_PREFIX)/mimalloc
@@ -326,7 +328,7 @@ $(DEPS_PREFIX)/mimalloc.built: $(DEPS_CACHE)/mimalloc-$(MIMALLOC_VERSION).source
 	$(MKDIR_P) $(DEPS_PREFIX)/mimalloc/out/"$(if $(ENABLE_DEBUG),debug,release)" && \
 	cd $(DEPS_PREFIX)/mimalloc/out/"$(if $(ENABLE_DEBUG),debug,release)" && \
 	env PKG_CONFIG="$(PKG_CONFIG)" \
-		LDFLAGS="$(LDFLAGS) -xnone" $(CMAKE) \
+		LDFLAGS="$(LDFLAGS) $(WINPTHREAD_LDFLAGS) -xnone" $(CMAKE) \
 		-D CMAKE_C_COMPILER="$(CC)" \
 		-D CMAKE_C_FLAGS="$(CFLAGS) -Wno-array-bounds" \
 		-D CMAKE_SYSTEM_NAME="$(CMAKE_SYSTEM_NAME)" \
@@ -349,7 +351,8 @@ $(DEPS_PREFIX)/mimalloc.built: $(DEPS_CACHE)/mimalloc-$(MIMALLOC_VERSION).source
 	make install
 	touch $@
 else
-MIMALLOC_LIBS :=
+MIMALLOC_OBJ :=
+MIMALLOC_DYNAMIC_LIBS :=
 $(DEPS_PREFIX)/mimalloc.built:
 	$(MKDIR_P) $(DEPS_PREFIX) && touch $@
 endif # BUILD_MIMALLOC
@@ -847,9 +850,10 @@ neosu_CXXFLAGS := \
 
 # Wl,--start-group with no --end-group is a stupid hack.
 neosu_LDFLAGS := \
-	$(MIMALLOC_LIBS) \
+	$(MIMALLOC_OBJ) \
 	-Wl,-rpath='$$ORIGIN/lib',-rpath='$$ORIGIN' \
 	-Wl,--start-group \
+	$(MIMALLOC_DYNAMIC_LIBS) \
 	$(CURL_CERT_BUNDLE_INCLUDE) \
 	$(CURL_LIBS) \
 	$(SDL3_LIBS) \

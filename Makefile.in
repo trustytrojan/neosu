@@ -991,9 +991,12 @@ CURL_CERT_BUNDLE_INCLUDE := -Wa,-I$(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle/
 @BUILD_CURL_TRUE@lbq := '('
 @BUILD_CURL_TRUE@rb := )
 @BUILD_CURL_TRUE@rbq := ')'
-@BUILD_MIMALLOC_FALSE@MIMALLOC_LIBS := 
-@BUILD_MIMALLOC_TRUE@@WIN_PLATFORM_FALSE@MIMALLOC_LIBS = $(DEPS_PREFIX)/lib/mimalloc$(if $(ENABLE_ASAN),-asan-debug,$(if $(ENABLE_DEBUG),-debug,)).o
-@BUILD_MIMALLOC_TRUE@@WIN_PLATFORM_TRUE@MIMALLOC_LIBS = -L$(DEPS_PREFIX)/lib -l:libmimalloc.dll.a -L$(DEPS_PREFIX)/bin -lmimalloc -lmimalloc-redirect$(if $(filter x86_64,$(host_cpu)),,32)
+@BUILD_MIMALLOC_FALSE@MIMALLOC_DYNAMIC_LIBS := 
+@BUILD_MIMALLOC_TRUE@@WIN_PLATFORM_FALSE@MIMALLOC_DYNAMIC_LIBS := 
+@BUILD_MIMALLOC_TRUE@@WIN_PLATFORM_TRUE@MIMALLOC_DYNAMIC_LIBS := -L$(DEPS_PREFIX)/lib -Wl,--whole-archive -l:libmimalloc.dll.a -Wl,--no-whole-archive -L$(DEPS_PREFIX)/bin -lmimalloc -lmimalloc-redirect$(if $(filter x86_64,$(host_cpu)),,32)
+@BUILD_MIMALLOC_FALSE@MIMALLOC_OBJ := 
+@BUILD_MIMALLOC_TRUE@@WIN_PLATFORM_FALSE@MIMALLOC_OBJ := $(DEPS_PREFIX)/lib/mimalloc$(if $(ENABLE_ASAN),-asan-debug,$(if $(ENABLE_DEBUG),-debug,)).o
+@BUILD_MIMALLOC_TRUE@@WIN_PLATFORM_TRUE@MIMALLOC_OBJ := 
 @USE_SOLOUD_TRUE@FFMPEG_INSTALL_LIBS := `find $(DEPS_CACHE)/ffmpeg-$(FFMPEG_VERSION)/$(SYSNAME)$(host_cpu)/lib '(' -name '*avutil*' -o -name '*avcodec*' -o -name '*avformat*' -o -name '*swresample*' ')' -printf '%p '`
 @USE_SOLOUD_TRUE@FFMPEG_INCDIR := $(DEPS_CACHE)/ffmpeg-$(FFMPEG_VERSION)/$(SYSNAME)$(host_cpu)/include
 @WIN_PLATFORM_TRUE@DISCORDSDK_CFLAGS := -I$(DEPS_CACHE)/discordsdk-$(DISCORDSDK_VERSION)/include
@@ -1073,9 +1076,10 @@ neosu_CXXFLAGS := \
 
 # Wl,--start-group with no --end-group is a stupid hack.
 neosu_LDFLAGS := \
-	$(MIMALLOC_LIBS) \
+	$(MIMALLOC_OBJ) \
 	-Wl,-rpath='$$ORIGIN/lib',-rpath='$$ORIGIN' \
 	-Wl,--start-group \
+	$(MIMALLOC_DYNAMIC_LIBS) \
 	$(CURL_CERT_BUNDLE_INCLUDE) \
 	$(CURL_LIBS) \
 	$(SDL3_LIBS) \
@@ -5146,7 +5150,7 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source: $(DEPS_CACHE)/curl-$(CUR
 @BUILD_MIMALLOC_TRUE@	$(MKDIR_P) $(DEPS_PREFIX)/mimalloc/out/"$(if $(ENABLE_DEBUG),debug,release)" && \
 @BUILD_MIMALLOC_TRUE@	cd $(DEPS_PREFIX)/mimalloc/out/"$(if $(ENABLE_DEBUG),debug,release)" && \
 @BUILD_MIMALLOC_TRUE@	env PKG_CONFIG="$(PKG_CONFIG)" \
-@BUILD_MIMALLOC_TRUE@		LDFLAGS="$(LDFLAGS) -xnone" $(CMAKE) \
+@BUILD_MIMALLOC_TRUE@		LDFLAGS="$(LDFLAGS) $(WINPTHREAD_LDFLAGS) -xnone" $(CMAKE) \
 @BUILD_MIMALLOC_TRUE@		-D CMAKE_C_COMPILER="$(CC)" \
 @BUILD_MIMALLOC_TRUE@		-D CMAKE_C_FLAGS="$(CFLAGS) -Wno-array-bounds" \
 @BUILD_MIMALLOC_TRUE@		-D CMAKE_SYSTEM_NAME="$(CMAKE_SYSTEM_NAME)" \

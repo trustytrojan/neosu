@@ -6804,12 +6804,13 @@ esac
 fi
 
 
-
 printf "%s\n" "#define MCENGINE_PLATFORM_WINDOWS 1" >>confdefs.h
 
  ;;
 esac
 fi
+
+
 
 PKG_CONFIG="$PWD/build/pkg-config"
 

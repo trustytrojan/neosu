@@ -407,9 +407,10 @@ __EOF__
         AC_SUBST([NASMOBJ],[win64])
     ])
 
-    AC_SUBST([WINPTHREAD_LDFLAGS])
     AC_DEFINE([MCENGINE_PLATFORM_WINDOWS], [1], [Define if compiling for Windows.])
 ])
+
+AC_SUBST([WINPTHREAD_LDFLAGS])
 
 PKG_CONFIG="$PWD/build/pkg-config"
 AC_SUBST([PKG_CONFIG])
