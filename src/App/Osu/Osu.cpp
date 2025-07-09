@@ -1856,12 +1856,12 @@ void Osu::onSpeedChange(UString oldValue, UString newValue) {
 
 void Osu::onDTPresetChange(UString oldValue, UString newValue) {
     cv_speed_override.setValue(cv_mod_doubletime_dummy.getBool() ? 1.5f : -1.f);
-    osu->getModSelector()->speedSlider->setValue(cv_speed_override.getFloat(), false, false);
+    osu->getModSelector()->speedSlider->setValue(cv_speed_override.getFloat() == -1 ? cv_speed_override.getFloat() : cv_speed_override.getFloat() + 1.0f, false, false);
 }
 
 void Osu::onHTPresetChange(UString oldValue, UString newValue) {
     cv_speed_override.setValue(cv_mod_halftime_dummy.getBool() ? 0.75f : -1.f);
-    osu->getModSelector()->speedSlider->setValue(cv_speed_override.getFloat(), false, false);
+    osu->getModSelector()->speedSlider->setValue(cv_speed_override.getFloat() == -1 ? cv_speed_override.getFloat() : cv_speed_override.getFloat() + 1.0f, false, false);
 }
 
 void Osu::onThumbnailsToggle(UString oldValue, UString newValue) {
