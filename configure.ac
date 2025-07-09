@@ -386,16 +386,16 @@ __EOF__
     DLLEXT=".dll"
     LIBPREFIX=""
 
-    AS_IF([test "$host_cpu" = "i686"], [ # uber compatibility configuration, works on winxp
+    AS_IF([test "$host_cpu" = "i686"], [ # uber compatibility configuration, works on vista (winxp should work, but curl's openssl depends on vista+, can be fixed in the future)
         d3dcompiler_lib="-ld3dcompiler_43"
         ubercompat=on
         with_mimalloc="no"
         LDFLAGS="$LDFLAGS -m32"
         WINPTHREAD_LDFLAGS="-lwinpthread"
-        # winxp
-        CPPFLAGS="$CPPFLAGS -DWINVER=0x0501 -D_WIN32_WINNT=0x0501 -D_WIN32_WINDOWS=0x0501 -D_WIN32_IE=0x0501"
-        CFLAGS="$CFLAGS -m32 -fno-omit-frame-pointer -momit-leaf-frame-pointer -DWINVER=0x0501 -D_WIN32_WINNT=0x0501 -D_WIN32_WINDOWS=0x0501 -D_WIN32_IE=0x0501 -mfpmath=sse"
-        CXXFLAGS="$CXXFLAGS -m32 -fno-omit-frame-pointer -momit-leaf-frame-pointer -DWINVER=0x0501 -D_WIN32_WINNT=0x0501 -D_WIN32_WINDOWS=0x0501 -D_WIN32_IE=0x0501 -mfpmath=sse"
+        # vista (winxp should work, but curl's openssl depends on vista+, can be fixed in the future)
+        CPPFLAGS="$CPPFLAGS -DWINVER=0x0600 -D_WIN32_WINNT=0x0600 -D_WIN32_WINDOWS=0x0600 -D_WIN32_IE=0x0600"
+        CFLAGS="$CFLAGS -m32 -fno-omit-frame-pointer -momit-leaf-frame-pointer -DWINVER=0x0600 -D_WIN32_WINNT=0x0600 -D_WIN32_WINDOWS=0x0600 -D_WIN32_IE=0x0600 -mfpmath=sse"
+        CXXFLAGS="$CXXFLAGS -m32 -fno-omit-frame-pointer -momit-leaf-frame-pointer -DWINVER=0x0600 -D_WIN32_WINNT=0x0600 -D_WIN32_WINDOWS=0x0600 -D_WIN32_IE=0x0600 -mfpmath=sse"
         AC_SUBST([NASMOBJ],[win32])
     ], [
         d3dcompiler_lib="-ld3dcompiler_47"
@@ -403,7 +403,8 @@ __EOF__
         CPPFLAGS="$CPPFLAGS -DWINVER=0x0A00 -D_WIN32_WINNT=0x0A00 -D_WIN32_WINDOWS=0x0A00 -D_WIN32_IE=0x0A00"
         CFLAGS="$CFLAGS -DWINVER=0x0A00 -D_WIN32_WINNT=0x0A00 -D_WIN32_WINDOWS=0x0A00 -D_WIN32_IE=0x0A00"
         CXXFLAGS="$CXXFLAGS -DWINVER=0x0A00 -D_WIN32_WINNT=0x0A00 -D_WIN32_WINDOWS=0x0A00 -D_WIN32_IE=0x0A00"
-        WINPTHREAD_LDFLAGS="-Wl,-Bstatic,--whole-archive -lwinpthread -Wl,--no-whole-archive,-Bdynamic"
+        #WINPTHREAD_LDFLAGS="-Wl,-Bstatic,--whole-archive -lwinpthread -Wl,--no-whole-archive,-Bdynamic" # figure out how to make this not overwrite the neosu resources
+        WINPTHREAD_LDFLAGS="-lwinpthread"
         AC_SUBST([NASMOBJ],[win64])
     ])
 
@@ -448,7 +449,8 @@ AC_SUBST([CXX])
 
 AS_IF([test "$host_cpu" = "x86_64"], [COMMON_FLAGS="$COMMON_FLAGS -mcmodel=small"])
 
-COMMON_FLAGS="$COMMON_FLAGS -ffunction-sections -fdata-sections -fwrapv -fno-strict-aliasing -fno-semantic-interposition -ftls-model=initial-exec"
+CPPFLAGS="$CPPFLAGS -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64"
+COMMON_FLAGS="$COMMON_FLAGS -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64 -ffunction-sections -fdata-sections -fwrapv -fno-strict-aliasing -fno-semantic-interposition -ftls-model=initial-exec"
 CXXFLAGS="$CXXFLAGS $COMMON_FLAGS -fno-exceptions" # -fno-rtti
 CFLAGS="$CFLAGS $COMMON_FLAGS"
 AS_IF([! { test "x$enable_clang" = "xyes" && test "$host_os" = "linux-gnu" ; } && { test -z "$ubercompat" || test "x$enable_static" = "xyes" ; }], [
@@ -723,7 +725,7 @@ AS_IF([test "$SYSNAME" = "linux"], [
         PKG_CHECK_AUTO([CURL], [libcurl >= $CURL_MIN_VERSION], [have_curl=yes], [have_curl=no])
     ])
 ], [
-    AC_SUBST([EXTRA_WIN_LIBS], [["-lopengl32 -lwbemuuid -lcomctl32 -lxinput9_1_0"]])
+    AC_SUBST([EXTRA_WIN_LIBS], [["-lopengl32 -lwbemuuid -lcomctl32"]])
     have_blkid="not required"
     have_curl="no"
 ])
@@ -854,19 +856,18 @@ AM_CONDITIONAL([STRIPBINS], [test "x$enable_strip" != "xno" && ! { test "$SYSNAM
 
 # need dynamic winpthread for old windows 32bit compat builds
 # the way im searching for the right .dlls to copy is so disgusting and needs to be fixed somehow
-AS_IF([test -n "$ubercompat"], [
-    AS_IF([test "x$enable_static" = "xyes"], [ # still need winpthread dynamic, breaks otherwise for reasons i dont understand
-        WINSHARED_DLLS="$($CC -print-prog-name=ld | sed -e 's|/bin/.*||' | tr -d '\n' | find -files0-from - \
-            -iregex ".*$host_cpu"'.*libwinpthread-1.dll' \
-            -printf '%h/%f ')"
-    ], [
-        WINSHARED_DLLS="$($CC -print-prog-name=ld | sed -e 's|/bin/.*||' | tr -d '\n' | find -files0-from - \
-            '(' -iregex ".*$host_cpu"'.*libwinpthread-1.dll' -o -iregex ".*$host_cpu"'.*libgcc_.*.dll' -o -iregex ".*$host_cpu"'.*libstdc.*.dll' ')' \
-            -printf '%h/%f ')"
-    ])
-
-    AC_SUBST([WINSHARED_DLLS])
+# also need this for 64bit so that the winpthread resources don't override neosu's...
+AS_IF([test "x$enable_static" = "xyes"], [ # still need winpthread dynamic, breaks otherwise for reasons i dont understand
+    WINSHARED_DLLS="$($CC -print-prog-name=ld | sed -e 's|/bin/.*||' | tr -d '\n' | find -files0-from - \
+        -iregex ".*$host_cpu"'.*libwinpthread-1.dll' \
+        -printf '%h/%f ')"
+], [
+    WINSHARED_DLLS="$($CC -print-prog-name=ld | sed -e 's|/bin/.*||' | tr -d '\n' | find -files0-from - \
+        '(' -iregex ".*$host_cpu"'.*libwinpthread-1.dll' -o -iregex ".*$host_cpu"'.*libgcc_.*.dll' -o -iregex ".*$host_cpu"'.*libstdc.*.dll' ')' \
+        -printf '%h/%f ')"
 ])
+
+AC_SUBST([WINSHARED_DLLS])
 AC_SUBST([ubercompat])
 AM_CONDITIONAL([WINSHARED_DLLS_NEEDED], [test -n "$WINSHARED_DLLS"])
 

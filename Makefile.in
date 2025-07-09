@@ -94,7 +94,7 @@ target_triplet = @target@
 bin_PROGRAMS = neosu$(EXEEXT)
 @BUILD_CURL_TRUE@@WIN_PLATFORM_TRUE@am__append_1 = -I$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/include -DWITH_GZFILEOP -DCURL_STATICLIB
 @BUILD_CURL_TRUE@@WIN_PLATFORM_TRUE@am__append_2 = -L$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib $(shell find $(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib -type f -not $(lbq) $(lbq) -name '*libz.a' $(rbq) -o $(lbq) -name '*dll*' $(rbq) $(rbq) -execdir printf '%s ' '{''}' ';' | $(SED) -e 's|./lib|-l|g' -e 's|\.a||g' -e 's|-lcurl|-l:libcurl.a|g') $\
-@BUILD_CURL_TRUE@@WIN_PLATFORM_TRUE@			-lws2_32 -lwldap32 -lcrypt32
+@BUILD_CURL_TRUE@@WIN_PLATFORM_TRUE@			-lws2_32 -lwldap32 -lcrypt32 -lbcrypt
 
 @BUILD_CURL_TRUE@@WIN_PLATFORM_FALSE@am__append_3 = -I$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/include -DWITH_GZFILEOP -DCURL_STATICLIB
 @BUILD_CURL_TRUE@@WIN_PLATFORM_FALSE@am__append_4 = -L$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib $(shell find $(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib -type f -not $(lbq) $(lbq) -name '*libz.a' $(rbq) -o $(lbq) -name '*dll*' $(rbq) $(rbq) -execdir printf '%s ' '{''}' ';' | $(SED) -e 's|./lib|-l|g' -e 's|\.a||g' -e 's|-lcurl|-l:libcurl.a|g') $\
@@ -5476,7 +5476,9 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source: $(DEPS_CACHE)/curl-$(CUR
 @BUILD_LIBARCHIVE_TRUE@	rm -rf $(DEPS_PREFIX)/libarchive
 @BUILD_LIBARCHIVE_TRUE@	$(MKDIR_P) $(DEPS_PREFIX)/libarchive/build $(DEPS_PREFIX)/lib/pkgconfig
 @BUILD_LIBARCHIVE_TRUE@	$(TAR) xf $(DEPS_CACHE)/libarchive-$(LIBARCHIVE_VERSION).tar.gz -C $(DEPS_PREFIX)/libarchive --strip-components=1 && \
-@BUILD_LIBARCHIVE_TRUE@	cd $(DEPS_PREFIX)/libarchive/build && PKG_CONFIG="$(PKG_CONFIG)" \
+@BUILD_LIBARCHIVE_TRUE@	cd $(DEPS_PREFIX)/libarchive && \
+@BUILD_LIBARCHIVE_TRUE@	$(SED) -i -e 's|time_t ctime_sec, mtime_sec;|int64_t ctime_sec, mtime_sec;|' libarchive/archive_match.c && cd build && \
+@BUILD_LIBARCHIVE_TRUE@	PKG_CONFIG="$(PKG_CONFIG)" \
 @BUILD_LIBARCHIVE_TRUE@	../configure lt_cv_prog_gnu_ld=yes --host=$(host) --build=$(build) --prefix="$(DEPS_PREFIX)" \
 @BUILD_LIBARCHIVE_TRUE@		$(if $(STATICBUILD),--enable-static --disable-shared,--enable-shared --disable-static) \
 @BUILD_LIBARCHIVE_TRUE@		--disable-tools --disable-tests --with-gnu-ld --disable-bsdtar --disable-bsdcat --disable-bsdcpio \
@@ -5495,7 +5497,7 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source: $(DEPS_CACHE)/curl-$(CUR
 # making sure deps are built before main compile
 $(neosu_OBJECTS): src/config.h $(BUILT_SOURCES)
 
-@WIN_PLATFORM_TRUE@neosu_resource.o: $(srcdir)/$(ASSETS_DIR)/resource.rc $(srcdir)/$(ASSETS_DIR)/icon.ico
+@WIN_PLATFORM_TRUE@neosu_resource.o: $(srcdir)/$(ASSETS_DIR)/resource.rc $(srcdir)/$(ASSETS_DIR)/neosu.manifest $(srcdir)/$(ASSETS_DIR)/icon.ico
 @WIN_PLATFORM_TRUE@	$(WINDRES) -I $(srcdir)/$(ASSETS_DIR) -i $(srcdir)/$(ASSETS_DIR)/resource.rc -o neosu_resource.o
 
 compile_commands.json: mostlyclean-compile

@@ -182,7 +182,6 @@ target_link_libraries(neosu PRIVATE
     ${LIBARCHIVE_STATIC_LIBRARIES}
     wbemuuid
     comctl32
-    xinput9_1_0
 )
 
 # Installation

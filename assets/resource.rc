@@ -1,1 +1,41 @@
+#include <windows.h>
+
+// application icon
 1 ICON "icon.ico"
+
+// version information
+1 VERSIONINFO
+FILEVERSION 38,0,0,0
+PRODUCTVERSION 38,0,0,0
+FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
+#ifdef _DEBUG
+FILEFLAGS VS_FF_DEBUG
+#else
+FILEFLAGS 0
+#endif
+FILEOS VOS_NT_WINDOWS32
+FILETYPE VFT_APP
+FILESUBTYPE VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"  // US English, Unicode
+        BEGIN
+            VALUE "CompanyName", "neosu"
+            VALUE "FileDescription", "cookie clicker with extra features"
+            VALUE "FileVersion", "38.00.0.0"
+            VALUE "InternalName", "neosu"
+            VALUE "LegalCopyright", "Copyright (C) 2025"
+            VALUE "OriginalFilename", "neosu.exe"
+            VALUE "ProductName", "neosu"
+            VALUE "ProductVersion", "38.00"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200  // US English, Unicode
+    END
+END
+
+// application manifest
+1 24 "neosu.manifest"

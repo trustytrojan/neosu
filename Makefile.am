@@ -293,7 +293,7 @@ rbq := ')'
 if WIN_PLATFORM
 CURL_CFLAGS += -I$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/include -DWITH_GZFILEOP -DCURL_STATICLIB
 CURL_LIBS += -L$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib $(shell find $(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib -type f -not $(lbq) $(lbq) -name '*libz.a' $(rbq) -o $(lbq) -name '*dll*' $(rbq) $(rbq) -execdir printf '%s ' '{''}' ';' | $(SED) -e 's|./lib|-l|g' -e 's|\.a||g' -e 's|-lcurl|-l:libcurl.a|g') $\
-			-lws2_32 -lwldap32 -lcrypt32
+			-lws2_32 -lwldap32 -lcrypt32 -lbcrypt
 
 $(DEPS_PREFIX)/curl.built: $(DEPS_CACHE)/curl-$(CURL_VERSION)-windows-binary.source
 	$(MKDIR_P) $(DEPS_PREFIX)
@@ -753,7 +753,9 @@ $(DEPS_PREFIX)/libarchive.built: $(DEPS_CACHE)/libarchive-$(LIBARCHIVE_VERSION).
 	rm -rf $(DEPS_PREFIX)/libarchive
 	$(MKDIR_P) $(DEPS_PREFIX)/libarchive/build $(DEPS_PREFIX)/lib/pkgconfig
 	$(TAR) xf $(DEPS_CACHE)/libarchive-$(LIBARCHIVE_VERSION).tar.gz -C $(DEPS_PREFIX)/libarchive --strip-components=1 && \
-	cd $(DEPS_PREFIX)/libarchive/build && PKG_CONFIG="$(PKG_CONFIG)" \
+	cd $(DEPS_PREFIX)/libarchive && \
+	$(SED) -i -e 's|time_t ctime_sec, mtime_sec;|int64_t ctime_sec, mtime_sec;|' libarchive/archive_match.c && cd build && \
+	PKG_CONFIG="$(PKG_CONFIG)" \
 	../configure lt_cv_prog_gnu_ld=yes --host=$(host) --build=$(build) --prefix="$(DEPS_PREFIX)" \
 		$(if $(STATICBUILD),--enable-static --disable-shared,--enable-shared --disable-static) \
 		--disable-tools --disable-tests --with-gnu-ld --disable-bsdtar --disable-bsdcat --disable-bsdcpio \
@@ -805,7 +807,7 @@ BUILT_SOURCES := \
 $(neosu_OBJECTS): src/config.h $(BUILT_SOURCES)
 
 if WIN_PLATFORM
-neosu_resource.o: $(srcdir)/$(ASSETS_DIR)/resource.rc $(srcdir)/$(ASSETS_DIR)/icon.ico
+neosu_resource.o: $(srcdir)/$(ASSETS_DIR)/resource.rc $(srcdir)/$(ASSETS_DIR)/neosu.manifest $(srcdir)/$(ASSETS_DIR)/icon.ico
 	$(WINDRES) -I $(srcdir)/$(ASSETS_DIR) -i $(srcdir)/$(ASSETS_DIR)/resource.rc -o neosu_resource.o
 
 neosu_LDADD = neosu_resource.o
