@@ -666,8 +666,8 @@ BUILD_GLM_FALSE
 BUILD_GLM_TRUE
 BUILD_MPG123_FALSE
 BUILD_MPG123_TRUE
-NEED_CURL_FALSE
-NEED_CURL_TRUE
+BUILD_CURL_FALSE
+BUILD_CURL_TRUE
 BUILD_LIBARCHIVE_FALSE
 BUILD_LIBARCHIVE_TRUE
 BUILD_LZMA_FALSE
@@ -10641,7 +10641,9 @@ fi ;;
 esac
 fi
 
-    # this has too many transitive dependencies for me to bother building atm, so just download prebuilt for windows and require system for linux
+    if test "x$enable_system_deps" != "xno"
+then :
+
 
     if test "x$enable_static" = "xyes"
 then :
@@ -10706,11 +10708,11 @@ fi
         # Put the nasty error message in config.log where it belongs
         echo "$CURL_PKG_ERRORS" >&5
 
-        as_fn_error $? "Missing curl, required for linux builds." "$LINENO" 5
+        have_curl=no
 elif test $pkg_failed = untried; then
         { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
 printf "%s\n" "no" >&6; }
-        as_fn_error $? "Missing curl, required for linux builds." "$LINENO" 5
+        have_curl=no
 else
         CURL_CFLAGS=$pkg_cv_CURL_CFLAGS
         CURL_LIBS=$pkg_cv_CURL_LIBS
@@ -10779,11 +10781,11 @@ fi
         # Put the nasty error message in config.log where it belongs
         echo "$CURL_PKG_ERRORS" >&5
 
-        as_fn_error $? "Missing curl, required for linux builds." "$LINENO" 5
+        have_curl=no
 elif test $pkg_failed = untried; then
         { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
 printf "%s\n" "no" >&6; }
-        as_fn_error $? "Missing curl, required for linux builds." "$LINENO" 5
+        have_curl=no
 else
         CURL_CFLAGS=$pkg_cv_CURL_CFLAGS
         CURL_LIBS=$pkg_cv_CURL_LIBS
@@ -10794,6 +10796,8 @@ fi ;;
 esac
 fi
 
+
+fi
 
 else case e in #(
   e)
@@ -12601,11 +12605,11 @@ else
 fi
 
  if test "x$have_curl" != "xyes"; then
-  NEED_CURL_TRUE=
-  NEED_CURL_FALSE='#'
+  BUILD_CURL_TRUE=
+  BUILD_CURL_FALSE='#'
 else
-  NEED_CURL_TRUE='#'
-  NEED_CURL_FALSE=
+  BUILD_CURL_TRUE='#'
+  BUILD_CURL_FALSE=
 fi
 
  if test "$with_soloud" = "yes" && test "x$have_mpg123" != "xyes"; then
@@ -12910,8 +12914,8 @@ if test -z "${BUILD_LIBARCHIVE_TRUE}" && test -z "${BUILD_LIBARCHIVE_FALSE}"; th
   as_fn_error $? "conditional \"BUILD_LIBARCHIVE\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${NEED_CURL_TRUE}" && test -z "${NEED_CURL_FALSE}"; then
-  as_fn_error $? "conditional \"NEED_CURL\" was never defined.
+if test -z "${BUILD_CURL_TRUE}" && test -z "${BUILD_CURL_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_CURL\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_MPG123_TRUE}" && test -z "${BUILD_MPG123_FALSE}"; then
@@ -14319,7 +14323,7 @@ Dependencies:
     zlib:               ${have_zlib-build from source}
     freetype2:          ${have_freetype2-build from source}
     fmt:                ${have_fmt-build from source}
-    curl:               ${have_curl-build from source}
+    curl:               ${have_curl-download}
     liblzma:            ${have_liblzma-build from source}
     libarchive:         ${have_libarchive-build from source}
     mpg123:             ${have_mpg123-build from source}
@@ -14366,7 +14370,7 @@ Dependencies:
     zlib:               ${have_zlib-build from source}
     freetype2:          ${have_freetype2-build from source}
     fmt:                ${have_fmt-build from source}
-    curl:               ${have_curl-build from source}
+    curl:               ${have_curl-download}
     liblzma:            ${have_liblzma-build from source}
     libarchive:         ${have_libarchive-build from source}
     mpg123:             ${have_mpg123-build from source}

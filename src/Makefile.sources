@@ -2,6 +2,7 @@
 neosu_SOURCES = \
 	libraries/MD5.cpp \
 	libraries/cJSON.cpp \
+	libraries/curl_blob.cpp \
 	libraries/glad/glad.cpp \
 	libraries/glad_glx/glad_glx.cpp \
 	libraries/glad_wgl/glad_wgl.cpp \

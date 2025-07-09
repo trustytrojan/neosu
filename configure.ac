@@ -718,8 +718,9 @@ AC_SUBST([BASS_VERSION], [20250611]) # just mark the date so we can invalidate t
 
 AS_IF([test "$SYSNAME" = "linux"], [
     PKG_CHECK_AUTO([BLKID], [blkid], [have_blkid=yes], [AC_MSG_ERROR([Missing blkid, required for linux builds.])])
-    # this has too many transitive dependencies for me to bother building atm, so just download prebuilt for windows and require system for linux
-    PKG_CHECK_AUTO([CURL], [libcurl >= $CURL_MIN_VERSION], [have_curl=yes], [AC_MSG_ERROR([Missing curl, required for linux builds.])])
+    AS_IF([test "x$enable_system_deps" != "xno"], [
+        PKG_CHECK_AUTO([CURL], [libcurl >= $CURL_MIN_VERSION], [have_curl=yes], [have_curl=no])
+    ])
 ], [
     AC_SUBST([EXTRA_WIN_LIBS], [["-lopengl32 -lwbemuuid -lcomctl32 -lxinput9_1_0"]])
     have_blkid="not required"
@@ -835,7 +836,7 @@ AM_CONDITIONAL([BUILD_FREETYPE2], [test "x$have_freetype2" != "xyes"])
 AM_CONDITIONAL([BUILD_FMT], [test "x$have_fmt" != "xyes"])
 AM_CONDITIONAL([BUILD_LZMA], [test "x$have_liblzma" != "xyes"])
 AM_CONDITIONAL([BUILD_LIBARCHIVE], [test "x$have_libarchive" != "xyes"])
-AM_CONDITIONAL([NEED_CURL], [test "x$have_curl" != "xyes"])
+AM_CONDITIONAL([BUILD_CURL], [test "x$have_curl" != "xyes"])
 AM_CONDITIONAL([BUILD_MPG123], [test "$with_soloud" = "yes" && test "x$have_mpg123" != "xyes"])
 AM_CONDITIONAL([BUILD_GLM], [test "x$have_glm" != "xyes"])
 AM_CONDITIONAL([BUILD_MIMALLOC], [{ test "x$enable_debug" != "xyes" || test "x$with_mimalloc" = "xyes"; } &&
@@ -916,7 +917,7 @@ Dependencies:
     zlib:               ${have_zlib-build from source}
     freetype2:          ${have_freetype2-build from source}
     fmt:                ${have_fmt-build from source}
-    curl:               ${have_curl-build from source}
+    curl:               ${have_curl-download}
     liblzma:            ${have_liblzma-build from source}
     libarchive:         ${have_libarchive-build from source}
     mpg123:             ${have_mpg123-build from source}

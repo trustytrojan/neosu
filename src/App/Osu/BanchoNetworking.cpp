@@ -84,6 +84,7 @@ void disconnect() {
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
         curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curldummy);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
 
         curl_easy_setopt_CAINFO_BLOB_embedded(curl);
 
@@ -232,6 +233,7 @@ static void send_api_request(CURL *curl, APIRequest api_out) {
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
 
     curl_easy_setopt_CAINFO_BLOB_embedded(curl);
 
@@ -269,6 +271,7 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
 
     curl_easy_setopt_CAINFO_BLOB_embedded(curl);
 

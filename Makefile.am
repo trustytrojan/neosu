@@ -30,6 +30,12 @@ $(DEPS_CACHE)/SDL3-$(SDL3_VERSION).source:
 	$(WGET) -qO $(DEPS_CACHE)/SDL3-$(SDL3_VERSION).tar.gz "https://github.com/libsdl-org/SDL/archive/$(SDL3_VERSION).tar.gz" && \
 	touch $@
 
+# always needed (if not on host (on linux, on windows we use prebuilt))
+$(DEPS_CACHE)/curl-$(CURL_VERSION).source:
+	$(MKDIR_P) $(DEPS_CACHE)
+	$(WGET) -qO $(DEPS_CACHE)/curl-$(CURL_VERSION).tar.gz "https://github.com/curl/curl/releases/download/curl-$(subst .,_,$(CURL_VERSION))/curl-$(CURL_VERSION).tar.gz" && \
+	touch $@
+
 # always needed (if not on host)
 $(DEPS_CACHE)/libjpeg-$(LIBJPEG_VERSION).source:
 	$(MKDIR_P) $(DEPS_CACHE)
@@ -243,7 +249,7 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsx86_64.zip:
 	$(MKDIR_P) $(DEPS_CACHE)/curl-$(CURL_VERSION) && \
 	$(WGET) -qO $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsx86_64.zip "https://curl.se/windows/dl-$(CURL_VERSION)_2/curl-$(CURL_VERSION)_2-win64-mingw.zip"
 
-$(DEPS_CACHE)/curl-$(CURL_VERSION).source: $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsi686.zip $\
+$(DEPS_CACHE)/curl-$(CURL_VERSION)-windows-binary.source: $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsi686.zip $\
 											$(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsx86_64.zip
 	cd $(DEPS_CACHE)/curl-$(CURL_VERSION) && \
 	$(MKDIR_P) windowsi686/bin && $(UNZIP) -qjo curl-windowsi686.zip "*/bin/*.dll" -d windowsi686/bin && \
@@ -252,6 +258,22 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION).source: $(DEPS_CACHE)/curl-$(CURL_VERSION)/cu
 	$(MKDIR_P) windowsx86_64/bin && $(UNZIP) -qjo curl-windowsx86_64.zip "*/bin/*.dll" -d windowsx86_64/bin && \
 	$(MKDIR_P) windowsx86_64/lib && $(UNZIP) -qjo curl-windowsx86_64.zip "*/lib/*.a" -d windowsx86_64/lib && \
 	$(MKDIR_P) windowsx86_64/include && $(UNZIP) -qo curl-windowsx86_64.zip "*/include/*" -d windowsx86_64/include && mv windowsx86_64/include/*/*/* windowsx86_64/include/
+	touch $@
+
+$(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-linuxi686.tar.xz:
+	$(MKDIR_P) $(DEPS_CACHE)/curl-$(CURL_VERSION) && \
+	$(WGET) -qO $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-linuxi686.tar.xz "https://github.com/stunnel/static-curl/releases/download/$(CURL_VERSION)/curl-windows-i686-dev-$(CURL_VERSION).tar.xz"
+
+$(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-linuxx86_64.tar.xz:
+	$(MKDIR_P) $(DEPS_CACHE)/curl-$(CURL_VERSION) && \
+	$(WGET) -qO $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-linuxx86_64.tar.xz "https://github.com/stunnel/static-curl/releases/download/$(CURL_VERSION)/curl-linux-x86_64-dev-$(CURL_VERSION).tar.xz"
+
+$(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source: $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-linuxi686.tar.xz $\
+											$(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-linuxx86_64.tar.xz
+	cd $(DEPS_CACHE)/curl-$(CURL_VERSION) && \
+	$(MKDIR_P) linuxx86_64 && $(TAR) xf curl-linuxx86_64.tar.xz -C linuxx86_64 --strip-components=1 --wildcards --no-anchored include lib/'*'.a lib64/'*'.a && \
+	mv linuxx86_64/lib64/* linuxx86_64/lib/ && \
+	$(MKDIR_P) linuxi686 && $(TAR) xf curl-linuxi686.tar.xz -C linuxi686 --strip-components=1 --wildcards --no-anchored include lib/'*'.a && \
 	touch $@
 
 #####################################################################################################################################################
@@ -263,17 +285,26 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION).source: $(DEPS_CACHE)/curl-$(CURL_VERSION)/cu
 #####################################################################################################################################################
 
 CURL_CFLAGS += -DCURL_CERT_BUNDLE_PATH="\"$(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle/cacert.pem\""
-if WIN_PLATFORM
-if NEED_CURL
+CURL_CERT_BUNDLE_INCLUDE := -Wa,-I$(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle/ -I$(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle/
+if BUILD_CURL
 lb := (
 lbq := '('
 rb := )
 rbq := ')'
-CURL_CFLAGS += -I$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/include -DCURL_STATICLIB
-CURL_LIBS += -L$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib $(shell find $(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib -type f -not $(lbq) $(lbq) -name '*libz.a' $(rbq) -o $(lbq) -name '*dll*' $(rbq) $(rbq) -execdir printf '%s ' '{''}' ';' | $(SED) -e 's|./lib|-l|g' -e 's|.a||g' -e 's|-lcurl|-l:libcurl.a|g') $\
+if WIN_PLATFORM
+CURL_CFLAGS += -I$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/include -DWITH_GZFILEOP -DCURL_STATICLIB
+CURL_LIBS += -L$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib $(shell find $(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib -type f -not $(lbq) $(lbq) -name '*libz.a' $(rbq) -o $(lbq) -name '*dll*' $(rbq) $(rbq) -execdir printf '%s ' '{''}' ';' | $(SED) -e 's|./lib|-l|g' -e 's|\.a||g' -e 's|-lcurl|-l:libcurl.a|g') $\
 			-lws2_32 -lwldap32 -lcrypt32
 
-$(DEPS_PREFIX)/curl.built: $(DEPS_CACHE)/curl-$(CURL_VERSION).source
+$(DEPS_PREFIX)/curl.built: $(DEPS_CACHE)/curl-$(CURL_VERSION)-windows-binary.source
+	$(MKDIR_P) $(DEPS_PREFIX)
+	touch $@
+else
+CURL_CFLAGS += -I$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/include -DWITH_GZFILEOP -DCURL_STATICLIB
+CURL_LIBS += -L$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib $(shell find $(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib -type f -not $(lbq) $(lbq) -name '*libz.a' $(rbq) -o $(lbq) -name '*dll*' $(rbq) $(rbq) -execdir printf '%s ' '{''}' ';' | $(SED) -e 's|./lib|-l|g' -e 's|\.a||g' -e 's|-lcurl|-l:libcurl.a|g') $\
+			-ldl -pthread
+
+$(DEPS_PREFIX)/curl.built: $(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source
 	$(MKDIR_P) $(DEPS_PREFIX)
 	touch $@
 endif
@@ -791,6 +822,7 @@ neosu_CXXFLAGS := \
 	$(NEOSU_CXXFLAGS) \
 	$(NEOSU_INCLUDE_FLAGS) \
 	$(BUNDLED_INCLUDES) \
+	$(CURL_CERT_BUNDLE_INCLUDE) \
 	$(CURL_CFLAGS) \
 	$(SDL3_CFLAGS) \
 	$(AUDIO_CFLAGS) \
@@ -819,6 +851,7 @@ neosu_LDFLAGS := \
 	$(MIMALLOC_LIBS) \
 	-Wl,-rpath='$$ORIGIN/lib',-rpath='$$ORIGIN' \
 	-Wl,--start-group \
+	$(CURL_CERT_BUNDLE_INCLUDE) \
 	$(CURL_LIBS) \
 	$(SDL3_LIBS) \
 	$(AUDIO_LIBS) \

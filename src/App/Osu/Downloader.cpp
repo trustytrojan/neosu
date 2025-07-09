@@ -97,6 +97,7 @@ void* do_downloads(void* arg) {
         curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, update_download_progress);
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
         curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
 
         curl_easy_setopt_CAINFO_BLOB_embedded(curl);
 

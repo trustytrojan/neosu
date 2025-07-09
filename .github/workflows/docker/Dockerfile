@@ -10,7 +10,7 @@ RUN update-alternatives --install /usr/bin/gcc gcc /usr/lib/gcc-14/bin/gcc 90 \
 RUN apt-get -y update && \
     apt-get -y install pkgconf autoconf build-essential \
     libx11-dev libxi-dev libglu1-mesa-dev libjpeg-dev libfreetype-dev \
-    zlib1g-dev nasm cmake meson ccache unzip zip patchelf libltdl-dev libcurl4 && \
+    zlib1g-dev nasm cmake meson ccache unzip zip patchelf libltdl-dev libssl-dev libcurl4 && \
     rm -rf /var/lib/apt/lists/*
 
 FROM main-deps AS main-build
