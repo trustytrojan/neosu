@@ -278,9 +278,9 @@ AS_IF([test "x$enable_asan" = "xyes" || test "x$enable_tsan" = "xyes"], [
     ])
 
     AS_IF([test -z "$LLVMMINGW" && test -n "$enable_clang"],[
-        LDFLAGS="$LDFLAGS -static-libasan"
-        CFLAGS="$CFLAGS -static-libasan -fsanitize-address-use-after-scope -fsanitize-address-use-after-return=always"
-        CXXFLAGS="$CXXFLAGS -static-libasan -fsanitize-address-use-after-scope -fsanitize-address-use-after-return=always"
+        LDFLAGS="$LDFLAGS"
+        CFLAGS="$CFLAGS -fsanitize-address-use-after-scope -fsanitize-address-use-after-return=always"
+        CXXFLAGS="$CXXFLAGS -fsanitize-address-use-after-scope -fsanitize-address-use-after-return=always"
     ])
     enable_debug="yes"
     ENABLE_ASAN=$enable_asan
@@ -298,9 +298,9 @@ AC_SUBST([PKG_CONFIG_PATH_CUSTOM])
 AS_IF([test "x$enable_clang" = "xyes"], [
     CC=clang
     CXX=clang++
-    CXXFLAGS="$CXXFLAGS -Qunused-arguments -fuse-ld=lld -Wno-c2x-extensions -rtlib=compiler-rt -stdlib=libc++"
-    CFLAGS="$CFLAGS -Qunused-arguments -fuse-ld=lld -rtlib=compiler-rt"
-    LDFLAGS="$LDFLAGS -fuse-ld=lld -rtlib=compiler-rt"
+    CXXFLAGS="$CXXFLAGS -Qunused-arguments -fuse-ld=lld -Wno-c2x-extensions"
+    CFLAGS="$CFLAGS -Qunused-arguments -fuse-ld=lld"
+    LDFLAGS="$LDFLAGS -fuse-ld=lld"
     CLANG=yes
     AC_SUBST([CLANG])
 ],[

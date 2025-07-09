@@ -6527,9 +6527,9 @@ fi
     if test -z "$LLVMMINGW" && test -n "$enable_clang"
 then :
 
-        LDFLAGS="$LDFLAGS -static-libasan"
-        CFLAGS="$CFLAGS -static-libasan -fsanitize-address-use-after-scope -fsanitize-address-use-after-return=always"
-        CXXFLAGS="$CXXFLAGS -static-libasan -fsanitize-address-use-after-scope -fsanitize-address-use-after-return=always"
+        LDFLAGS="$LDFLAGS"
+        CFLAGS="$CFLAGS -fsanitize-address-use-after-scope -fsanitize-address-use-after-return=always"
+        CXXFLAGS="$CXXFLAGS -fsanitize-address-use-after-scope -fsanitize-address-use-after-return=always"
 
 fi
     enable_debug="yes"
@@ -6551,9 +6551,9 @@ then :
 
     CC=clang
     CXX=clang++
-    CXXFLAGS="$CXXFLAGS -Qunused-arguments -fuse-ld=lld -Wno-c2x-extensions -rtlib=compiler-rt -stdlib=libc++"
-    CFLAGS="$CFLAGS -Qunused-arguments -fuse-ld=lld -rtlib=compiler-rt"
-    LDFLAGS="$LDFLAGS -fuse-ld=lld -rtlib=compiler-rt"
+    CXXFLAGS="$CXXFLAGS -Qunused-arguments -fuse-ld=lld -Wno-c2x-extensions"
+    CFLAGS="$CFLAGS -Qunused-arguments -fuse-ld=lld"
+    LDFLAGS="$LDFLAGS -fuse-ld=lld"
     CLANG=yes
 
 

@@ -260,20 +260,19 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-windows-binary.source: $(DEPS_CACHE)/curl-$(C
 	$(MKDIR_P) windowsx86_64/include && $(UNZIP) -qo curl-windowsx86_64.zip "*/include/*" -d windowsx86_64/include && mv windowsx86_64/include/*/*/* windowsx86_64/include/
 	touch $@
 
-$(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-linuxi686.tar.xz:
-	$(MKDIR_P) $(DEPS_CACHE)/curl-$(CURL_VERSION) && \
-	$(WGET) -qO $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-linuxi686.tar.xz "https://github.com/stunnel/static-curl/releases/download/$(CURL_VERSION)/curl-windows-i686-dev-$(CURL_VERSION).tar.xz"
+# TODO
+# $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-linuxi686.tar.xz:
+# 	$(MKDIR_P) $(DEPS_CACHE)/curl-$(CURL_VERSION) && \
+# 	$(WGET) -qO $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-linuxi686.tar.xz "https://github.com/stunnel/static-curl/releases/download/8.13.0/curl-linux-i686-dev-8.13.0.tar.xz"
 
 $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-linuxx86_64.tar.xz:
 	$(MKDIR_P) $(DEPS_CACHE)/curl-$(CURL_VERSION) && \
 	$(WGET) -qO $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-linuxx86_64.tar.xz "https://github.com/stunnel/static-curl/releases/download/$(CURL_VERSION)/curl-linux-x86_64-dev-$(CURL_VERSION).tar.xz"
 
-$(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source: $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-linuxi686.tar.xz $\
-											$(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-linuxx86_64.tar.xz
+$(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source: $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-linuxx86_64.tar.xz
 	cd $(DEPS_CACHE)/curl-$(CURL_VERSION) && \
 	$(MKDIR_P) linuxx86_64 && $(TAR) xf curl-linuxx86_64.tar.xz -C linuxx86_64 --strip-components=1 --wildcards --no-anchored include lib/'*'.a lib64/'*'.a && \
 	mv linuxx86_64/lib64/* linuxx86_64/lib/ && \
-	$(MKDIR_P) linuxi686 && $(TAR) xf curl-linuxi686.tar.xz -C linuxi686 --strip-components=1 --wildcards --no-anchored include lib/'*'.a && \
 	touch $@
 
 #####################################################################################################################################################
