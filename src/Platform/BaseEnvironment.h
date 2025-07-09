@@ -78,7 +78,8 @@ consteval FEAT getFeatures() {
 #ifdef MCENGINE_FEATURE_STEAMWORKS
         FEAT::STEAM |
 #endif
-#if defined(MCENGINE_PLATFORM_WINDOWS) || defined(MCENGINE_FEATURE_DISCORD) // TODO: this define is never set, only windows supports discord rpc atm
+#if defined(MCENGINE_PLATFORM_WINDOWS) || \
+    defined(MCENGINE_FEATURE_DISCORD)  // TODO: this define is never set, only windows supports discord rpc atm
         FEAT::DISCORD |
 #endif
 #if defined(MCENGINE_PLATFORM_WASM) || defined(MCENGINE_FEATURE_MAINCALLBACKS)
@@ -113,8 +114,7 @@ consteval REND getRenderers() {
 #ifdef MCENGINE_FEATURE_DIRECTX11
         REND::DX11 |
 #endif
-#if !(defined(MCENGINE_FEATURE_OPENGL) || defined(MCENGINE_FEATURE_GLES32) || \
-      defined(MCENGINE_FEATURE_DIRECTX11))
+#if !(defined(MCENGINE_FEATURE_OPENGL) || defined(MCENGINE_FEATURE_GLES32) || defined(MCENGINE_FEATURE_DIRECTX11))
 #error "No renderer is defined! Check the build configuration, or \"config.h\"."
 #endif
         REND::NONE;
@@ -269,6 +269,10 @@ typedef void* HWND;
 
 #ifndef isatty
 #define isatty _isatty
+#endif
+
+#ifndef strcasecmp
+#define strcasecmp _stricmp
 #endif
 
 #if defined(_MSC_VER)

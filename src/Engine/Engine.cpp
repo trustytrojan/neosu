@@ -46,9 +46,6 @@ Console *Engine::console = NULL;
 ConsoleBox *Engine::consoleBox = NULL;
 
 Engine::Engine(i32 argc, char **argv) {
-    // XXX: run curl_global_cleanup() after waiting for network threads to terminate
-    curl_global_init(CURL_GLOBAL_DEFAULT);
-
     engine = this;
 
     this->iArgc = argc;

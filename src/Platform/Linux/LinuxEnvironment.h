@@ -108,7 +108,6 @@ class LinuxEnvironment : public Environment {
    private:
     static int getFilesInFolderFilter(const struct dirent *entry);
     static int getFoldersInFolderFilter(const struct dirent *entry);
-    static int winExplorerIshEntryComparator(const struct dirent **a, const struct dirent **b);
 
     void setWindowResizableInt(bool resizable, Vector2 windowSize);
     Vector2 getWindowSizeServer();

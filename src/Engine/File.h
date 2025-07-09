@@ -21,7 +21,11 @@ class DirectoryCache;
 
 class File {
    public:
-    static constexpr std::string_view PREF_PATHSEP = Env::cfg(OS::WINDOWS) ? "\\" : "/";
+#ifdef MCENGINE_PLATFORM_WINDOWS
+#define PREF_PATHSEP "\\"
+#else
+#define PREF_PATHSEP "/"
+#endif
 
     enum class TYPE : uint8_t { READ, WRITE };
 

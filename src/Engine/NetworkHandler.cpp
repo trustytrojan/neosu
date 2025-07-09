@@ -8,11 +8,21 @@
 #include "ConVar.h"
 #include "Engine.h"
 
-NetworkHandler::NetworkHandler() {}
+std::once_flag NetworkHandler::curl_init_flag;
 
-NetworkHandler::~NetworkHandler() {}
+NetworkHandler::NetworkHandler() {
+    std::call_once(curl_init_flag, []() {
+        // XXX: run curl_global_cleanup() after waiting for network threads to terminate
+        curl_global_init(CURL_GLOBAL_DEFAULT);
+    });
+}
 
-UString NetworkHandler::httpGet(UString url, long timeout, long connectTimeout) {
+NetworkHandler::~NetworkHandler() {
+    // XXX: run after waiting for network threads to terminate
+    //curl_global_cleanup();
+}
+
+UString NetworkHandler::httpGet(const UString &url, long timeout, long connectTimeout) {
     CURL *curl = curl_easy_init();
 
     if(curl != NULL) {
@@ -20,26 +30,26 @@ UString NetworkHandler::httpGet(UString url, long timeout, long connectTimeout) 
         curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, connectTimeout);
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlStringWriteCallback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &curlReadBuffer);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &this->curlReadBuffer);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
 
         curl_easy_setopt_CAINFO_BLOB_embedded(curl);
 
         CURLcode res = curl_easy_perform(curl);
         if(res != CURLE_OK) {
-            debugLog("Error while fetching %s: %s\n", url.toUtf8(), curl_easy_strerror(res));
+            debugLogF("Error while fetching {:s}: {:s}\n", url.toUtf8(), curl_easy_strerror(res));
         }
 
         curl_easy_cleanup(curl);
 
-        return UString(this->curlReadBuffer.c_str());
+        return UString{this->curlReadBuffer};
     } else {
-        debugLog("NetworkHandler::httpGet() error, curl == NULL!\n");
-        return "";
+        debugLogF("ERROR: curl == NULL!\n");
+        return {""};
     }
 }
 
-std::string NetworkHandler::httpDownload(UString url, long timeout, long connectTimeout) {
+std::string NetworkHandler::httpDownload(const UString &url, long timeout, long connectTimeout) {
     CURL *curl = curl_easy_init();
 
     if(curl != NULL) {
@@ -58,15 +68,15 @@ std::string NetworkHandler::httpDownload(UString url, long timeout, long connect
         CURLcode res = curl_easy_perform(curl);
         if(res != CURLE_OK) {
             curlWriteBuffer = std::stringstream();
-            debugLog("NetworkHandler::httpDownload() error, code %u!\n", static_cast<unsigned int>(res));
+            debugLogF("ERROR ({}): {:s}\n", static_cast<unsigned int>(res), curl_easy_strerror(res));
         }
 
         curl_easy_cleanup(curl);
 
-        return curlWriteBuffer.str();
+        return std::string{curlWriteBuffer.str()};
     } else {
-        debugLog("NetworkHandler::httpDownload() error, curl == NULL!\n");
-        return std::string("");
+        debugLogF("ERROR: curl == NULL!\n");
+        return {""};
     }
 }
 

@@ -270,8 +270,7 @@ class OptionsMenuKeyBindLabel : public CBaseUILabel {
         CBaseUILabel::mouse_update(propagate_clicks);
 
         const KEYCODE newKeyCode = (KEYCODE)this->key->getInt();
-        if (this->keyCode == newKeyCode)
-            return;
+        if(this->keyCode == newKeyCode) return;
 
         this->keyCode = newKeyCode;
 
@@ -878,11 +877,11 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
         this->addSubSection("Tablet");
 #ifndef MCENGINE_FEATURE_SDL
 
-            this->addCheckbox(
-                "Windows Ink Workaround",
-                "Enable this if your tablet cursor is stuck in a tiny area on the top left of the screen.\nIf this "
-                "doesn't fix it, use \"Ignore Raw Input/Sensitivity\" below.",
-                &cv_win_ink_workaround);
+        this->addCheckbox(
+            "Windows Ink Workaround",
+            "Enable this if your tablet cursor is stuck in a tiny area on the top left of the screen.\nIf this "
+            "doesn't fix it, use \"Ignore Raw Input/Sensitivity\" below.",
+            &cv_win_ink_workaround);
 #endif
         this->addCheckbox(
             "Ignore Raw Input/Sensitivity",
@@ -2289,12 +2288,7 @@ void OptionsMenu::onRawInputToAbsoluteWindowChange(CBaseUICheckbox *checkbox) {
 void OptionsMenu::openCurrentSkinFolder() {
     auto current_skin = cv_skin.getString();
     if(current_skin == UString("default")) {
-#ifdef _WIN32
-        // ................yeah
-        env->openDirectory(MCENGINE_DATA_DIR "materials\\default");
-#else
-        env->openDirectory(MCENGINE_DATA_DIR "materials/default");
-#endif
+        env->openDirectory(MCENGINE_DATA_DIR "materials" PREF_PATHSEP "default");
     } else {
         std::string neosuSkinFolder = MCENGINE_DATA_DIR "skins/";
         neosuSkinFolder.append(current_skin.toUtf8());
@@ -2328,36 +2322,17 @@ void OptionsMenu::onSkinSelect() {
     skinFolder.append(cv_osu_folder_sub_skins.getString());
 
     std::vector<std::string> skinFolders;
-    for(auto skin : env->getFoldersInFolder(MCENGINE_DATA_DIR "skins/")) {
-        skinFolders.push_back(skin);
-    }
-    for(auto skin : env->getFoldersInFolder(skinFolder.toUtf8())) {
-        skinFolders.push_back(skin);
+    for(const auto &dir :
+        {env->getFoldersInFolder(MCENGINE_DATA_DIR "skins/"), env->getFoldersInFolder(skinFolder.toUtf8())}) {
+        for(const auto &skin : dir) {
+            skinFolders.push_back(skin);
+            debugLogF("{:s}\n", skin);
+        }
     }
 
     if(cv_sort_skins_by_name.getBool()) {
-        // Sort skins only by alphanum characters, ignore the others
-        std::sort(skinFolders.begin(), skinFolders.end(), [](std::string a, std::string b) {
-            int i = 0;
-            int j = 0;
-            while(i < a.length() && j < b.length()) {
-                if(!isalnum((u8)a[i])) {
-                    i++;
-                    continue;
-                }
-                if(!isalnum((u8)b[j])) {
-                    j++;
-                    continue;
-                }
-                char la = tolower(a[i]);
-                char lb = tolower(b[j]);
-                if(la != lb) return la < lb;
-
-                i++;
-                j++;
-            }
-
-            return false;
+        std::ranges::stable_sort(skinFolders, [](const std::string &a, const std::string &b) {
+            return strcasecmp(a.c_str(), b.c_str()) < 0;
         });
     }
 
