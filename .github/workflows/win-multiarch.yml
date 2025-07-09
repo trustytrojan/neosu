@@ -1,0 +1,66 @@
+name: win-multiarch
+on:
+  push:
+    branches:
+      - master
+      - mcosu-ng
+  workflow_dispatch:
+
+jobs:
+  matrix-prep:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - id: set-matrix
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" || "${{ github.ref }}" == "refs/heads/master" ]]; then
+            echo "matrix={\"arch\":[\"x64\",\"x32\"],\"include\":[{\"arch\":\"x64\",\"host\":\"x86_64-w64-mingw32\"},{\"arch\":\"x32\",\"host\":\"i686-w64-mingw32\"}]}" >> $GITHUB_OUTPUT
+          else
+            echo "matrix={\"arch\":[\"x64\"],\"include\":[{\"arch\":\"x64\",\"host\":\"x86_64-w64-mingw32\"}]}" >> $GITHUB_OUTPUT
+          fi
+  build:
+    needs: matrix-prep
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    strategy:
+      matrix: ${{ fromJson(needs.matrix-prep.outputs.matrix) }}
+    defaults:
+      run:
+        working-directory: .
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up build directory
+        run: |
+          mkdir -p "$(pwd)"/build
+
+      - name: ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ccache-win-${{ matrix.arch }}-${{ github.sha }}
+          restore-keys: |
+            ccache-win-${{ matrix.arch }}-
+
+      - name: Installing dependencies
+        run: |
+          echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
+          pacman -Syu --noconfirm base-devel libx11 libxi glu \
+            libjpeg-turbo libglvnd freetype2 sdl3 zlib wget \
+            cmake meson nasm git autoconf automake libtool autoconf-archive \
+            mingw-w64-gcc ccache unzip wine
+          useradd user -G wheel && echo "user ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+      - name: Building neosu
+        run: |
+          autoreconf
+          ./configure --host=${{ matrix.host }}
+          make -j$(nproc) install
+
+#          ./configure --disable-system-deps --enable-static --disable-native --with-audio="bass,soloud" --host=${{ matrix.host }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: neosu-win-${{ matrix.arch }}
+          path: ./dist
