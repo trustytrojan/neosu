@@ -34,9 +34,8 @@ class MapCalcThread {
         u32 avg_bpm{};
     };
 
-    // copy (take by value) to avoid lifetime issues
-    static inline void start_calc(std::vector<DatabaseBeatmap*> maps_to_calc) {
-        get_instance().start_calc_instance(std::move(maps_to_calc));
+    static inline void start_calc(const std::vector<DatabaseBeatmap*> &maps_to_calc) {
+        get_instance().start_calc_instance(maps_to_calc);
     }
 
     static inline void abort() {
@@ -81,7 +80,7 @@ class MapCalcThread {
    private:
     void run();
 
-    void start_calc_instance(std::vector<DatabaseBeatmap*> maps_to_calc);
+    void start_calc_instance(const std::vector<DatabaseBeatmap*> &maps_to_calc);
     void abort_instance();
 
     // singleton access
@@ -94,7 +93,7 @@ class MapCalcThread {
     std::atomic<u32> total_count{0};
     std::vector<mct_result> results{};
 
-    std::vector<DatabaseBeatmap*> maps_to_process{};
+    const std::vector<DatabaseBeatmap*> *maps_to_process{nullptr};
 
     static std::unique_ptr<MapCalcThread> instance;
     static std::once_flag instance_flag;

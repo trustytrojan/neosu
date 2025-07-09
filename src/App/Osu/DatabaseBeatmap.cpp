@@ -463,14 +463,14 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
     }
 
     // sort timingpoints by time
-    if(c.timingpoints.size() > 0) std::ranges::sort(c.timingpoints, TimingPointSortComparator());
+    if(c.timingpoints.size() > 1) std::ranges::sort(c.timingpoints, TimingPointSortComparator());
 
     return c;
 }
 
 DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::calculateSliderTimesClicksTicks(
-    int beatmapVersion, std::vector<SLIDER> &sliders, zarray<DatabaseBeatmap::TIMINGPOINT> &timingpoints, float sliderMultiplier,
-    float sliderTickRate) {
+    int beatmapVersion, std::vector<SLIDER> &sliders, zarray<DatabaseBeatmap::TIMINGPOINT> &timingpoints,
+    float sliderMultiplier, float sliderTickRate) {
     std::atomic<bool> dead;
     dead = false;
     return calculateSliderTimesClicksTicks(beatmapVersion, sliders, timingpoints, sliderMultiplier, sliderTickRate,
@@ -478,8 +478,8 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
 }
 
 DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::calculateSliderTimesClicksTicks(
-    int beatmapVersion, std::vector<SLIDER> &sliders, zarray<DatabaseBeatmap::TIMINGPOINT> &timingpoints, float sliderMultiplier,
-    float sliderTickRate, const std::atomic<bool> &dead) {
+    int beatmapVersion, std::vector<SLIDER> &sliders, zarray<DatabaseBeatmap::TIMINGPOINT> &timingpoints,
+    float sliderMultiplier, float sliderTickRate, const std::atomic<bool> &dead) {
     CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT r;
     {
         r.errorCode = 0;
@@ -626,7 +626,9 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
         };
 
         // 5) sort scoringTimes from earliest to latest
-        std::ranges::sort(s.scoringTimesForStarCalc, sliderScoringTimeComparator);
+        if(s.scoringTimesForStarCalc.size() > 1) {
+            std::ranges::sort(s.scoringTimesForStarCalc, sliderScoringTimeComparator);
+        }
     }
 
     return r;
@@ -730,13 +732,16 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(P
     // sort hitobjects by time
     constexpr auto diffHitObjectSortComparator = [](const OsuDifficultyHitObject &a,
                                                     const OsuDifficultyHitObject &b) -> bool {
-        if(a.time == b.time)
-            return &a < &b;
-        else
-            return a.time < b.time;
+        if(a.time != b.time) return a.time < b.time;
+        if(a.type != b.type) return static_cast<int>(a.type) < static_cast<int>(b.type);
+        if(a.pos.x != b.pos.x) return a.pos.x < b.pos.x;
+        if(a.pos.y != b.pos.y) return a.pos.y < b.pos.y;
+        return false;  // equivalent
     };
 
-    std::ranges::sort(result.diffobjects, diffHitObjectSortComparator);
+    if(result.diffobjects.size() > 1) {
+        std::ranges::sort(result.diffobjects, diffHitObjectSortComparator);
+    }
 
     if(dead.load()) {
         result.errorCode = 6;
@@ -1120,7 +1125,9 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
     // sort timingpoints and calculate BPM range
     if(this->timingpoints.size() > 0) {
         // sort timingpoints by time
-        std::ranges::sort(this->timingpoints, TimingPointSortComparator());
+        if(this->timingpoints.size() > 1) {
+            std::ranges::sort(this->timingpoints, TimingPointSortComparator());
+        }
 
         if(this->iMostCommonBPM == 0) {
             if(cv_debug.getBool()) debugLog("DatabaseBeatmap::loadMetadata() : calculating BPM range ...\n");
@@ -1236,7 +1243,9 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
                 return a->click_time < b->click_time;
         }
     };
-    std::sort(result.hitobjects.begin(), result.hitobjects.end(), HitObjectSortComparator());
+    if(result.hitobjects.size() > 1) {
+        std::ranges::sort(result.hitobjects, HitObjectSortComparator());
+    }
 
     // update beatmap length stat
     if(databaseBeatmap->iLengthMS == 0 && result.hitobjects.size() > 0)

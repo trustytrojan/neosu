@@ -12,7 +12,7 @@ std::unique_ptr<MapCalcThread> MapCalcThread::instance = nullptr;
 std::once_flag MapCalcThread::instance_flag;
 std::once_flag MapCalcThread::shutdown_flag;
 
-void MapCalcThread::start_calc_instance(std::vector<DatabaseBeatmap*> maps_to_calc) {
+void MapCalcThread::start_calc_instance(const std::vector<DatabaseBeatmap*> &maps_to_calc) {
     abort_instance();
 
     if(maps_to_calc.empty()) {
@@ -20,9 +20,9 @@ void MapCalcThread::start_calc_instance(std::vector<DatabaseBeatmap*> maps_to_ca
     }
 
     this->should_stop = false;
-    this->maps_to_process = std::move(maps_to_calc);
+    this->maps_to_process = &maps_to_calc;
     this->computed_count = 0;
-    this->total_count = static_cast<u32>(this->maps_to_process.size()) + 1;
+    this->total_count = static_cast<u32>(this->maps_to_process->size()) + 1;
     this->results.clear();
 
     this->worker_thread = std::thread(&MapCalcThread::run, this);
@@ -41,13 +41,14 @@ void MapCalcThread::abort_instance() {
 
     this->total_count = 0;
     this->computed_count = 0;
+    this->maps_to_process = nullptr;
 }
 
 void MapCalcThread::run() {
     std::vector<f64> aimStrains;
     std::vector<f64> speedStrains;
 
-    for(auto diff2 : this->maps_to_process) {
+    for(const auto & diff2 : *this->maps_to_process) {
         // pause handling
         while(osu->should_pause_background_threads.load() && !this->should_stop.load()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -61,6 +62,10 @@ void MapCalcThread::run() {
         speedStrains.clear();
 
         mct_result result{.diff2 = diff2};
+
+        if(this->should_stop.load()) {
+            return;
+        }
 
         auto c = DatabaseBeatmap::loadPrimitiveObjects(diff2->sFilePath, this->should_stop);
 

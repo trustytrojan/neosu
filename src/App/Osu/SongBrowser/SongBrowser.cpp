@@ -1770,7 +1770,7 @@ void SongBrowser::addBeatmapSet(BeatmapSet *mapset) {
                     children = &this->lengthCollectionButtons[6]->getChildren();
                 }
 
-                auto it = std::lower_bound(children->begin(), children->end(), songButton, sort_by_length);
+                auto it = std::lower_bound(children->begin(), children->end(), diff_btn, sort_by_length);
                 children->insert(it, diff_btn);
             }
         }

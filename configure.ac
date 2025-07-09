@@ -503,6 +503,8 @@ AS_IF([test "x$enable_debug" = "xyes"], [
     NEOSU_CPPFLAGS="$NEOSU_CPPFLAGS -D_DEBUG"
     AS_IF([test -z "$CLANG"], [
         NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -Wcast-align=strict -Wpacked-not-aligned"
+        # CPPFLAGS="$CPPFLAGS -D_GLIBCXX_DEBUG"
+        # CXXFLAGS="$CXXFLAGS -D_GLIBCXX_DEBUG"
     ])
     AS_IF([test "$SYSNAME" = "windows"], [
         AS_IF([test "x$enable_clang" = "xyes"], [

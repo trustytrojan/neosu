@@ -97,7 +97,10 @@ OsuDifficultyHitObject &OsuDifficultyHitObject::operator=(OsuDifficultyHitObject
     // self-assignment check
     if(this == &dobj) return *this;
 
-    // move
+    SAFE_DELETE(this->curve);
+    this->scheduledCurveAllocControlPoints.clear();
+
+    // move all data
     this->type = dobj.type;
     this->pos = dobj.pos;
     this->time = dobj.time;
@@ -116,9 +119,11 @@ OsuDifficultyHitObject &OsuDifficultyHitObject::operator=(OsuDifficultyHitObject
     this->stack = dobj.stack;
     this->originalPos = dobj.originalPos;
 
-    // reset source
+    // completely reset source object to prevent any potential reuse
     dobj.curve = NULL;
     dobj.scheduledCurveAlloc = false;
+    dobj.scheduledCurveAllocControlPoints.clear();
+    dobj.type = TYPE::INVALID;
 
     return *this;
 }

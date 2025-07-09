@@ -48,8 +48,9 @@ class OsuDifficultyHitObject {
     ~OsuDifficultyHitObject();
 
     OsuDifficultyHitObject(const OsuDifficultyHitObject &) = delete;
-    OsuDifficultyHitObject(OsuDifficultyHitObject &&dobj) noexcept;
+    OsuDifficultyHitObject &operator=(const OsuDifficultyHitObject &) = delete;
 
+    OsuDifficultyHitObject(OsuDifficultyHitObject &&dobj) noexcept;
     OsuDifficultyHitObject &operator=(OsuDifficultyHitObject &&dobj) noexcept;
 
     void updateStackPosition(f32 stackOffset);
@@ -180,7 +181,9 @@ class DifficultyCalculator {
         [[nodiscard]] inline const DiffObject *get_previous(int backwardsIdx) const {
             int foo = this->prevObjectIndex - backwardsIdx;
             if(foo < 0) foo = 0;  // msvc
-            return (this->objects.size() > 0 && this->prevObjectIndex - backwardsIdx < (int)this->objects.size() ? &this->objects[foo] : NULL);
+            return (this->objects.size() > 0 && this->prevObjectIndex - backwardsIdx < (int)this->objects.size()
+                        ? &this->objects[foo]
+                        : NULL);
         }
         [[nodiscard]] inline f64 get_strain(Skills::Skill type) const {
             return this->strains[Skills::skillToIndex(type)] * (type == Skills::Skill::SPEED ? this->rhythm : 1.0);
