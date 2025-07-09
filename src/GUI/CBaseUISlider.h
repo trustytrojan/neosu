@@ -32,7 +32,7 @@ class CBaseUISlider : public CBaseUIElement {
 
     // callbacks, either void or with ourself as the argument
     typedef fastdelegate::FastDelegate1<CBaseUISlider *> SliderChangeCallback;
-    CBaseUISlider *setChangeCallback(SliderChangeCallback changeCallback) {
+    CBaseUISlider *setChangeCallback(const SliderChangeCallback& changeCallback) {
         this->sliderChangeCallback = changeCallback;
         return this;
     }

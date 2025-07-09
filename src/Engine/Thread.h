@@ -24,6 +24,7 @@
 #include <functional>
 #include <stop_token>
 #include <thread>
+#include <utility>
 
 class McThread final
 {
@@ -47,7 +48,7 @@ public:
 		{
 #endif
 			// wrap the legacy function for jthreads
-			this->thread = std::jthread([start_routine, arg](std::stop_token) -> void { start_routine(arg); });
+			this->thread = std::jthread([start_routine, arg](const std::stop_token&) -> void { start_routine(arg); });
 			this->bReady = true;
 #ifdef __EXCEPTIONS
 		}
@@ -70,7 +71,7 @@ public:
 		try
 		{
 #endif
-			this->thread = std::jthread([start_routine, arg](std::stop_token token) -> void { start_routine(arg, token); });
+			this->thread = std::jthread([start_routine, arg](std::stop_token token) -> void { start_routine(arg, std::move(token)); });
 			this->bReady = true;
 #ifdef __EXCEPTIONS
 		}

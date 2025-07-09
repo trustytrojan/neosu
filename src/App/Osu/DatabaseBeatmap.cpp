@@ -27,8 +27,8 @@
 #include "Spinner.h"
 
 DatabaseBeatmap::DatabaseBeatmap(std::string filePath, std::string folder, BeatmapType type) {
-    this->sFilePath = filePath;
-    this->sFolder = folder;
+    this->sFilePath = std::move(filePath);
+    this->sFolder = std::move(folder);
     this->type = type;
 
     // raw metadata (note the special default values)
@@ -116,13 +116,13 @@ DatabaseBeatmap::~DatabaseBeatmap() {
     }
 }
 
-DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const std::string osuFilePath) {
+DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const std::string& osuFilePath) {
     std::atomic<bool> dead;
     dead = false;
     return loadPrimitiveObjects(osuFilePath, dead);
 }
 
-DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const std::string osuFilePath,
+DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const std::string& osuFilePath,
                                                                            const std::atomic<bool> &dead) {
     PRIMITIVE_CONTAINER c;
     {
@@ -635,7 +635,7 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
     return r;
 }
 
-DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(const std::string osuFilePath, float AR,
+DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(const std::string& osuFilePath, float AR,
                                                                                float CS, float speedMultiplier,
                                                                                bool calculateStarsInaccurately) {
     std::atomic<bool> dead;
@@ -643,7 +643,7 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(c
     return loadDifficultyHitObjects(osuFilePath, AR, CS, speedMultiplier, calculateStarsInaccurately, dead);
 }
 
-DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(const std::string osuFilePath, float AR,
+DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(const std::string& osuFilePath, float AR,
                                                                                float CS, float speedMultiplier,
                                                                                bool calculateStarsInaccurately,
                                                                                const std::atomic<bool> &dead) {

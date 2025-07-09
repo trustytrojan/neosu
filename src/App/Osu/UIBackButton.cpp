@@ -1,5 +1,7 @@
 #include "UIBackButton.h"
 
+#include <utility>
+
 #include "AnimationHandler.h"
 #include "ConVar.h"
 #include "Engine.h"
@@ -11,7 +13,7 @@
 
 
 UIBackButton::UIBackButton(float xPos, float yPos, float xSize, float ySize, UString name)
-    : CBaseUIButton(xPos, yPos, xSize, ySize, name, "") {
+    : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), "") {
     this->fAnimation = 0.0f;
     this->fImageScale = 1.0f;
 }

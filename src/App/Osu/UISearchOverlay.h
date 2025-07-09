@@ -1,4 +1,6 @@
 #pragma once
+#include <utility>
+
 #include "CBaseUIElement.h"
 
 class UISearchOverlay : public CBaseUIElement {
@@ -11,8 +13,8 @@ class UISearchOverlay : public CBaseUIElement {
     void setOffsetRight(int offsetRight) { this->iOffsetRight = offsetRight; }
 
     void setSearchString(UString searchString, UString hardcodedSearchString = "") {
-        this->sSearchString = searchString;
-        this->sHardcodedSearchString = hardcodedSearchString;
+        this->sSearchString = std::move(searchString);
+        this->sHardcodedSearchString = std::move(hardcodedSearchString);
     }
     void setNumFoundResults(int numFoundResults) { this->iNumFoundResults = numFoundResults; }
 

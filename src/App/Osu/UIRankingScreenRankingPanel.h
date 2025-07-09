@@ -13,7 +13,7 @@ class UIRankingScreenRankingPanel : public CBaseUIImage {
     void draw() override;
 
     void setScore(LiveScore *score);
-    void setScore(FinishedScore score);
+    void setScore(const FinishedScore& score);
 
    private:
     void drawHitImage(SkinImage *img, float scale, Vector2 pos);

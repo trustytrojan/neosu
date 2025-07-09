@@ -1,5 +1,7 @@
 #include "CBaseUIWindow.h"
 
+#include <utility>
+
 #include "AnimationHandler.h"
 #include "CBaseUIBoxShadow.h"
 #include "CBaseUIButton.h"
@@ -14,7 +16,7 @@
 
 
 
-CBaseUIWindow::CBaseUIWindow(float xPos, float yPos, float xSize, float ySize, UString name)
+CBaseUIWindow::CBaseUIWindow(float xPos, float yPos, float xSize, float ySize, const UString& name)
     : CBaseUIElement(xPos, yPos, xSize, ySize, name) {
     const float dpiScale = env->getDPIScale();
 
@@ -339,7 +341,7 @@ void CBaseUIWindow::onChar(KeyboardEvent &e) {
 }
 
 CBaseUIWindow *CBaseUIWindow::setTitle(UString text) {
-    this->sTitle = text;
+    this->sTitle = std::move(text);
     this->updateTitleBarMetrics();
     return this;
 }

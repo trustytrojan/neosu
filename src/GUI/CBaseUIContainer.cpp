@@ -1,11 +1,13 @@
 #include "CBaseUIContainer.h"
 
+#include <utility>
+
 #include "Engine.h"
 
 
 
 CBaseUIContainer::CBaseUIContainer(float Xpos, float Ypos, float Xsize, float Ysize, UString name)
-    : CBaseUIElement(Xpos, Ypos, Xsize, Ysize, name) {}
+    : CBaseUIElement(Xpos, Ypos, Xsize, Ysize, std::move(name)) {}
 
 CBaseUIContainer::~CBaseUIContainer() { this->clear(); }
 
@@ -119,7 +121,7 @@ CBaseUIContainer *CBaseUIContainer::deleteBaseUIElement(CBaseUIElement *element)
     return this;
 }
 
-CBaseUIElement *CBaseUIContainer::getBaseUIElement(UString name) {
+CBaseUIElement *CBaseUIContainer::getBaseUIElement(const UString& name) {
     for(size_t i = 0; i < this->vElements.size(); i++) {
         if(this->vElements[i]->getName() == name) return this->vElements[i];
     }

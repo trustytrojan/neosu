@@ -9,13 +9,15 @@
 
 #include "CBaseUITextField.h"
 
+#include <utility>
+
 #include "CBaseUIContainer.h"
 #include "Engine.h"
 #include "ResourceManager.h"
 
-CBaseUITextField::CBaseUITextField(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
+CBaseUITextField::CBaseUITextField(float xPos, float yPos, float xSize, float ySize, const UString& name, UString text)
     : CBaseUIScrollView(xPos, yPos, xSize, ySize, name) {
-    this->textObject = new TextObject(2, 1, xSize, ySize, text);
+    this->textObject = new TextObject(2, 1, xSize, ySize, std::move(text));
     this->textObject->setParentSize(this->vSize);
     this->getContainer()->addBaseUIElement(this->textObject);
     this->setScrollSizeToContent(0);
@@ -37,7 +39,7 @@ void CBaseUITextField::onResized() {
     this->setScrollSizeToContent(0);
 }
 
-CBaseUITextField *CBaseUITextField::append(UString text) {
+CBaseUITextField *CBaseUITextField::append(const UString& text) {
     UString oldText = this->textObject->getText();
     oldText.append(text);
     this->textObject->setText(oldText);
@@ -56,7 +58,7 @@ CBaseUITextField::TextObject::TextObject(float xPos, float yPos, float xSize, fl
     // colors
     this->textColor = 0xffffffff;
 
-    this->setText(text);
+    this->setText(std::move(text));
 }
 
 void CBaseUITextField::TextObject::draw() {
@@ -104,7 +106,7 @@ void CBaseUITextField::TextObject::updateStringMetrics() {
 }
 
 CBaseUIElement *CBaseUITextField::TextObject::setText(UString text) {
-    this->sText = text;
+    this->sText = std::move(text);
     this->updateStringMetrics();
     return this;
 }

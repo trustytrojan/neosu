@@ -1,6 +1,7 @@
 #include "LoudnessCalcThread.h"
 
 #include <chrono>
+#include <utility>
 
 #include "DatabaseBeatmap.h"
 #include "Engine.h"
@@ -18,7 +19,7 @@ struct LoudnessCalcThread {
    public:
     LoudnessCalcThread(std::vector<BeatmapDifficulty*> maps_to_calc) {
         this->dead = false;
-        this->maps = maps_to_calc;
+        this->maps = std::move(maps_to_calc);
         this->nb_total = this->maps.size() + 1;
         this->thr = std::thread(&LoudnessCalcThread::run, this);
     }

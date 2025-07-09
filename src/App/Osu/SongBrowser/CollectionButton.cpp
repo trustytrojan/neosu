@@ -1,5 +1,7 @@
 #include "CollectionButton.h"
 
+#include <utility>
+
 #include "SongBrowser.h"
 #include "SongButton.h"
 // ---
@@ -20,10 +22,10 @@
 
 CollectionButton::CollectionButton(SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu,
                                    float xPos, float yPos, float xSize, float ySize, UString name,
-                                   UString collectionName, std::vector<SongButton *> children)
-    : Button(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, name) {
+                                   const UString& collectionName, std::vector<SongButton *> children)
+    : Button(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, std::move(name)) {
     this->sCollectionName = collectionName.utf8View();
-    this->children = children;
+    this->children = std::move(children);
 
     this->fTitleScale = 0.35f;
 
@@ -137,7 +139,7 @@ void CollectionButton::onContextMenu(UString text, int id) {
         UIContextMenu::clampToBottomScreenEdge(this->contextMenu);
     } else if(id == 2) {
         if(keyboard->isShiftDown())
-            this->onDeleteCollectionConfirmed(text, id);
+            this->onDeleteCollectionConfirmed(std::move(text), id);
         else {
             this->contextMenu->begin(0, true);
             {

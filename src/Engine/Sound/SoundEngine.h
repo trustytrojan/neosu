@@ -37,7 +37,7 @@ class SoundEngine {
     bool isWASAPI() { return this->currentOutputDevice.driver == OutputDriver::BASS_WASAPI; }
     bool hasExclusiveOutput();
 
-    void setOutputDevice(OUTPUT_DEVICE device);
+    void setOutputDevice(const OUTPUT_DEVICE& device);
     void setVolume(float volume);
 
     OUTPUT_DEVICE getDefaultDevice();
@@ -48,8 +48,8 @@ class SoundEngine {
     [[nodiscard]] inline float getVolume() const { return this->fVolume; }
 
     void updateOutputDevices(bool printInfo);
-    bool initializeOutputDevice(OUTPUT_DEVICE device);
-    bool init_bass_mixer(OUTPUT_DEVICE device);
+    bool initializeOutputDevice(const OUTPUT_DEVICE& device);
+    bool init_bass_mixer(const OUTPUT_DEVICE& device);
 
     Sound::SOUNDHANDLE g_bassOutputMixer = 0;
     void onFreqChanged(UString oldValue, UString newValue);

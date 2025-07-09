@@ -10,7 +10,7 @@ class TooltipOverlay : public OsuScreen {
     void mouse_update(bool *propagate_clicks) override;
 
     void begin();
-    void addLine(UString text);
+    void addLine(const UString& text);
     void end();
 
    private:

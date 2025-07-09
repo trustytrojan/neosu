@@ -9,7 +9,7 @@
 #include "Skin.h"
 #include "SkinImage.h"
 
-ScoreboardSlot::ScoreboardSlot(SCORE_ENTRY score, int index) {
+ScoreboardSlot::ScoreboardSlot(const SCORE_ENTRY& score, int index) {
     this->avatar = new UIAvatar(score.player_id, 0, 0, 0, 0);
     this->score = score;
     this->index = index;

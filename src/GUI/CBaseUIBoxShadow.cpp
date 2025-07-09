@@ -2,6 +2,8 @@
 
 #include "CBaseUIBoxShadow.h"
 
+#include <utility>
+
 #include "ConVar.h"
 #include "Engine.h"
 #include "GaussianBlurKernel.h"
@@ -16,7 +18,7 @@
 
 CBaseUIBoxShadow::CBaseUIBoxShadow(Color color, float radius, float xPos, float yPos, float xSize, float ySize,
                                    UString name)
-    : CBaseUIElement(xPos, yPos, xSize, ySize, name) {
+    : CBaseUIElement(xPos, yPos, xSize, ySize, std::move(name)) {
     this->shadowColor = color;
     this->color = color;
     this->fRadius = radius;

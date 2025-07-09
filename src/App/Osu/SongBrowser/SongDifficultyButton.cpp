@@ -1,5 +1,7 @@
 #include "SongDifficultyButton.h"
 
+#include <utility>
+
 #include "ScoreButton.h"
 #include "SongBrowser.h"
 // ---
@@ -23,7 +25,7 @@
 SongDifficultyButton::SongDifficultyButton(SongBrowser *songBrowser, CBaseUIScrollView *view,
                                            UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize,
                                            UString name, DatabaseBeatmap *diff2, SongButton *parentSongButton)
-    : SongButton(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, name, NULL) {
+    : SongButton(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, std::move(name), NULL) {
     this->databaseBeatmap = diff2;  // NOTE: can't use parent constructor for passing this argument, as it would
                                       // otherwise try to build a full button (and not just a diff button)
     this->parentSongButton = parentSongButton;

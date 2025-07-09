@@ -1,5 +1,7 @@
 #include "NotificationOverlay.h"
 
+#include <utility>
+
 #include "AnimationHandler.h"
 #include "ConVar.h"
 #include "Engine.h"
@@ -23,7 +25,7 @@ static const f64 TOAST_OUTER_Y_MARGIN = 10.0;
 static const f64 TOAST_SCREEN_BOTTOM_MARGIN = 20.0;
 static const f64 TOAST_SCREEN_RIGHT_MARGIN = 10.0;
 
-ToastElement::ToastElement(UString text, Color borderColor_arg) : CBaseUIButton(0, 0, 0, 0, "", "") {
+ToastElement::ToastElement(const UString& text, Color borderColor_arg) : CBaseUIButton(0, 0, 0, 0, "", "") {
     this->grabs_clicks = true;
 
     // TODO: animations
@@ -217,7 +219,7 @@ void NotificationOverlay::addNotification(UString text, Color textColor, bool wa
 
     float fadeOutTime = 0.4f;
 
-    this->notification1.text = text;
+    this->notification1.text = std::move(text);
     this->notification1.textColor = textColor;
 
     if(!waitForKey)
@@ -240,7 +242,7 @@ void NotificationOverlay::addNotification(UString text, Color textColor, bool wa
     anim->moveQuadOut(&this->notification1.backgroundAnim, 1.0f, 0.15f, 0.0f, true);
 }
 
-void NotificationOverlay::addToast(UString text, Color borderColor, ToastClickCallback callback) {
+void NotificationOverlay::addToast(UString text, Color borderColor, const ToastClickCallback& callback) {
     auto toast = new ToastElement(text, borderColor);
     toast->setClickCallback(callback);
     this->toasts.push_back(toast);

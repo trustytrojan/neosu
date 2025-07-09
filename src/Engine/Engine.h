@@ -64,10 +64,10 @@ class Engine {
     void toggleFullscreen();
     void disableFullscreen();
 
-    void showMessageInfo(UString title, UString message);
-    void showMessageWarning(UString title, UString message);
-    void showMessageError(UString title, UString message);
-    void showMessageErrorFatal(UString title, UString message);
+    void showMessageInfo(const UString& title, const UString& message);
+    void showMessageWarning(const UString& title, const UString& message);
+    void showMessageError(const UString& title, const UString& message);
+    void showMessageErrorFatal(const UString& title, const UString& message);
 
     // engine specifics
     void blackout() { this->bBlackout = true; }

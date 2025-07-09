@@ -15,7 +15,7 @@ class UIButton : public CBaseUIButton {
     void setUseDefaultSkin() { this->bDefaultSkin = true; }
     void setAlphaAddOnHover(float alphaAddOnHover) { this->fAlphaAddOnHover = alphaAddOnHover; }
 
-    void setTooltipText(UString text);
+    void setTooltipText(const UString& text);
 
     void onMouseInside() override;
     void onMouseOutside() override;

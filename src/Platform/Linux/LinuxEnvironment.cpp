@@ -166,21 +166,6 @@ std::string LinuxEnvironment::getUserDataPath() {
         return std::string("");
 }
 
-bool LinuxEnvironment::fileExists(std::string filename) { return std::ifstream(filename.c_str()).good(); }
-
-bool LinuxEnvironment::directoryExists(std::string directoryName) {
-    DIR *dir = opendir(directoryName.c_str());
-    if(dir) {
-        closedir(dir);
-        return true;
-    } else if(ENOENT == errno)  // not a directory
-    {
-    } else  // something else broke
-    {
-    }
-    return false;
-}
-
 bool LinuxEnvironment::createDirectory(std::string directoryName) { return mkdir(directoryName.c_str(), 0755) != -1; }
 
 bool LinuxEnvironment::renameFile(std::string oldFileName, std::string newFileName) {
@@ -258,7 +243,7 @@ std::vector<UString> LinuxEnvironment::getLogicalDrives() {
 }
 
 std::string LinuxEnvironment::getFolderFromFilePath(std::string filepath) {
-    if(this->directoryExists(filepath))  // indirect check if this is already a valid directory (and not a file)
+    if(Environment::directoryExists(filepath))  // indirect check if this is already a valid directory (and not a file)
         return filepath;
     else
         return std::string(dirname((char *)filepath.c_str()));
@@ -836,7 +821,7 @@ void LinuxEnvironment::handleSelectionRequest(XSelectionRequestEvent &evt) {
 }
 
 void LinuxEnvironment::setClipBoardTextInt(UString clipText) {
-    this->sLocalClipboardContent = clipText;
+    this->sLocalClipboardContent = std::move(clipText);
     XSetSelectionOwner(this->display, XA_PRIMARY, this->window, CurrentTime);
     XSetSelectionOwner(this->display, this->atom_CLIPBOARD, this->window, CurrentTime);
 }
@@ -866,8 +851,9 @@ UString LinuxEnvironment::getClipboardTextInt() {
 #endif
 
 #include <filesystem>
+#include <utility>
 
-std::string fix_filename_casing(std::string directory, std::string filename) {
+std::string fix_filename_casing(const std::string& directory, std::string filename) {
 #ifdef _WIN32
     return filename;
 #else

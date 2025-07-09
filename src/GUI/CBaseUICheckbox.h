@@ -18,7 +18,7 @@ class CBaseUICheckbox : public CBaseUIButton {
     CBaseUICheckbox *setWidthToContent(int horizontalBorderSize = 1);
 
     typedef fastdelegate::FastDelegate1<CBaseUICheckbox *> CheckboxChangeCallback;
-    CBaseUICheckbox *setChangeCallback(CheckboxChangeCallback clickCallback) {
+    CBaseUICheckbox *setChangeCallback(const CheckboxChangeCallback& clickCallback) {
         this->changeCallback = clickCallback;
         return this;
     }

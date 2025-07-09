@@ -1,5 +1,7 @@
 #include "UIPauseMenuButton.h"
 
+#include <utility>
+
 #include "AnimationHandler.h"
 #include "Engine.h"
 #include "Osu.h"
@@ -10,8 +12,8 @@
 
 UIPauseMenuButton::UIPauseMenuButton(std::function<Image *()> getImageFunc, float xPos, float yPos, float xSize,
                                      float ySize, UString name)
-    : CBaseUIButton(xPos, yPos, xSize, ySize, name) {
-    this->getImageFunc = getImageFunc;
+    : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name)) {
+    this->getImageFunc = std::move(getImageFunc);
 
     this->vScale = Vector2(1, 1);
     this->fScaleMultiplier = 1.1f;

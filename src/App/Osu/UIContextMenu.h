@@ -14,7 +14,7 @@ class UIContextMenu : public CBaseUIScrollView {
     static void clampToRightScreenEdge(UIContextMenu *menu);
 
    public:
-    UIContextMenu(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, UString name = "",
+    UIContextMenu(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, const UString& name = "",
                   CBaseUIScrollView *parent = NULL);
 
     void draw() override;
@@ -78,7 +78,7 @@ class UIContextMenuButton : public CBaseUIButton {
 
     [[nodiscard]] inline int getID() const { return this->iID; }
 
-    void setTooltipText(UString text);
+    void setTooltipText(const UString& text);
 
    private:
     int iID;

@@ -233,7 +233,7 @@ void SoundEngine::updateOutputDevices(bool printInfo) {
 
 // The BASS mixer is used for every sound driver, but it's useful to be able to
 // initialize it later on some drivers where we know the best available frequency.
-bool SoundEngine::init_bass_mixer(OUTPUT_DEVICE device) {
+bool SoundEngine::init_bass_mixer(const OUTPUT_DEVICE& device) {
     auto bass_flags = BASS_DEVICE_STEREO | BASS_DEVICE_FREQ | BASS_DEVICE_NOSPEAKER;
     auto freq = cv_snd_freq.getInt();
 
@@ -278,7 +278,7 @@ bool SoundEngine::init_bass_mixer(OUTPUT_DEVICE device) {
     return true;
 }
 
-bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
+bool SoundEngine::initializeOutputDevice(const OUTPUT_DEVICE& device) {
     debugLog("SoundEngine: initializeOutputDevice( %s ) ...\n", device.name.toUtf8());
 
     this->shutdown();
@@ -580,7 +580,7 @@ bool SoundEngine::hasExclusiveOutput() {
     return this->isASIO() || (this->isWASAPI() && cv_win_snd_wasapi_exclusive.getBool());
 }
 
-void SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
+void SoundEngine::setOutputDevice(const OUTPUT_DEVICE& device) {
     bool was_playing = false;
     unsigned long prevMusicPositionMS = 0;
     if(osu->getSelectedBeatmap()->getMusic() != NULL) {

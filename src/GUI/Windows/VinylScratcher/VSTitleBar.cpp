@@ -1,5 +1,7 @@
 #include "VSTitleBar.h"
 
+#include <utility>
+
 #include "AnimationHandler.h"
 #include "CBaseUIButton.h"
 #include "CBaseUIContainer.h"
@@ -13,7 +15,7 @@
 class VSTitleBarButton : public CBaseUIButton {
    public:
     VSTitleBarButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
-        : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {
+        : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), std::move(text)) {
         ;
     }
     ~VSTitleBarButton() override { ; }
@@ -213,7 +215,7 @@ void VSTitleBar::onFocusStolen() {
 }
 
 void VSTitleBar::setTitle(UString title, bool reverse) {
-    this->title->setText(title);
+    this->title->setText(std::move(title));
     if(anim->isAnimating(&this->fRot)) return;
 
     this->iFlip = 1;

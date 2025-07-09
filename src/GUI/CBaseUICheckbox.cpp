@@ -7,11 +7,13 @@
 
 #include "CBaseUICheckbox.h"
 
+#include <utility>
+
 #include "Engine.h"
 #include "Font.h"
 
 CBaseUICheckbox::CBaseUICheckbox(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
-    : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {
+    : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), std::move(text)) {
     this->bChecked = false;
     this->changeCallback = NULL;
 

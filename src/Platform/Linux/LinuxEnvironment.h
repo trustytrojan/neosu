@@ -30,8 +30,6 @@ class LinuxEnvironment : public Environment {
     std::string getUserDataPath() override;
 
     // file IO
-    bool fileExists(std::string filename) override;
-    bool directoryExists(std::string directoryName) override;
     bool createDirectory(std::string directoryName) override;
     bool renameFile(std::string oldFileName, std::string newFileName) override;
     bool deleteFile(std::string filePath) override;
@@ -166,4 +164,4 @@ using EnvironmentImpl = LinuxEnvironment;
 
 #endif
 
-std::string fix_filename_casing(std::string directory, std::string filename);
+std::string fix_filename_casing(const std::string& directory, std::string filename);

@@ -180,7 +180,7 @@ void UIRankingScreenRankingPanel::setScore(LiveScore *score) {
     this->bPerfect = (score->getComboFull() > 0 && this->iCombo >= score->getComboFull());
 }
 
-void UIRankingScreenRankingPanel::setScore(FinishedScore score) {
+void UIRankingScreenRankingPanel::setScore(const FinishedScore& score) {
     this->iScore = score.score;
     this->iNum300s = score.num300s;
     this->iNum300gs = score.numGekis;

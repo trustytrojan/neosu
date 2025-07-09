@@ -1,11 +1,13 @@
 #include "CBaseUIButton.h"
 
+#include <utility>
+
 #include "Engine.h"
 #include "Mouse.h"
 #include "ResourceManager.h"
 
 CBaseUIButton::CBaseUIButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
-    : CBaseUIElement(xPos, yPos, xSize, ySize, name) {
+    : CBaseUIElement(xPos, yPos, xSize, ySize, std::move(name)) {
     this->font = resourceManager->getFont("FONT_DEFAULT");
 
     // settings
@@ -19,7 +21,7 @@ CBaseUIButton::CBaseUIButton(float xPos, float yPos, float xSize, float ySize, U
     this->textColor = argb(255, 255, 255, 255);
     this->textBrightColor = this->textDarkColor = argb(0, 0, 0, 0);
 
-    this->setText(text);
+    this->setText(std::move(text));
 }
 
 void CBaseUIButton::draw() {

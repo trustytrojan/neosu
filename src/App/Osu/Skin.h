@@ -12,7 +12,7 @@ class Skin {
    public:
     static void unpack(const char *filepath);
 
-    Skin(UString name, std::string filepath, bool isDefaultSkin = false);
+    Skin(const UString& name, std::string filepath, bool isDefaultSkin = false);
     virtual ~Skin();
 
     void update();
@@ -20,7 +20,7 @@ class Skin {
     bool isReady();
 
     void load();
-    void loadBeatmapOverride(std::string filepath);
+    void loadBeatmapOverride(const std::string& filepath);
     void reloadSounds();
 
     void setAnimationSpeed(float animationSpeed) { this->animationSpeedMultiplier = animationSpeed; }
@@ -324,15 +324,15 @@ class Skin {
 
     bool parseSkinINI(std::string filepath);
 
-    bool compareFilenameWithSkinElementName(std::string filename, std::string skinElementName);
+    bool compareFilenameWithSkinElementName(const std::string& filename, const std::string& skinElementName);
 
     SkinImage *createSkinImage(std::string skinElementName, Vector2 baseSizeForScaling2x, float osuSize,
                                bool ignoreDefaultSkin = false, std::string animationSeparator = "-");
-    void checkLoadImage(Image **addressOfPointer, std::string skinElementName, std::string resourceName,
-                        bool ignoreDefaultSkin = false, std::string fileExtension = "png",
+    void checkLoadImage(Image **addressOfPointer, const std::string& skinElementName, const std::string& resourceName,
+                        bool ignoreDefaultSkin = false, const std::string& fileExtension = "png",
                         bool forceLoadMipmaps = false);
 
-    void checkLoadSound(Sound **addressOfPointer, std::string skinElementName, std::string resourceName,
+    void checkLoadSound(Sound **addressOfPointer, const std::string& skinElementName, std::string resourceName,
                         bool isOverlayable = false, bool isSample = false, bool loop = false,
                         bool fallback_to_default = true, float hardcodedVolumeMultiplier = -1.0f);
 

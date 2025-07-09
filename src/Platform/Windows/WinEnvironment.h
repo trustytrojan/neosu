@@ -30,8 +30,6 @@ class WinEnvironment : public Environment {
     std::string getUserDataPath();
 
     // file IO
-    bool fileExists(std::string filename);
-    bool directoryExists(std::string directoryName);
     bool createDirectory(std::string directoryName);
     bool renameFile(std::string oldFileName, std::string newFileName);
     bool deleteFile(std::string filePath);

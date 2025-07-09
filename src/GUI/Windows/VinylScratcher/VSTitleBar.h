@@ -26,7 +26,7 @@ class VSTitleBar : public CBaseUIElement {
     void draw() override;
     void mouse_update(bool *propagate_clicks) override;
 
-    void setSeekCallback(SeekCallback callback) { this->seekCallback = callback; }
+    void setSeekCallback(const SeekCallback& callback) { this->seekCallback = callback; }
     void setTitle(UString title, bool reverse = false);
 
     [[nodiscard]] inline bool isSeeking() const { return this->bIsSeeking; }

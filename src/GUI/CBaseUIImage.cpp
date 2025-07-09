@@ -7,14 +7,16 @@
 
 #include "CBaseUIImage.h"
 
+#include <utility>
+
 #include "Engine.h"
 #include "ResourceManager.h"
 
 CBaseUIImage::CBaseUIImage(std::string imageResourceName, float xPos, float yPos, float xSize, float ySize,
                            UString name)
-    : CBaseUIElement(xPos, yPos, xSize, ySize, name) {
+    : CBaseUIElement(xPos, yPos, xSize, ySize, std::move(name)) {
     this->bScaleToFit = true;  // must be up here because it's used in setImage()
-    this->setImage(resourceManager->getImage(imageResourceName));
+    this->setImage(resourceManager->getImage(std::move(imageResourceName)));
 
     this->fRot = 0.0f;
     this->vScale.x = 1.0f;

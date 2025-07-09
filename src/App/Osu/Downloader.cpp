@@ -271,7 +271,7 @@ i32 extract_beatmapset_id(const u8* data, size_t data_s) {
     return -1;
 }
 
-bool extract_beatmapset(const u8* data, size_t data_s, std::string map_dir) {
+bool extract_beatmapset(const u8* data, size_t data_s, const std::string& map_dir) {
     debugLog("Extracting beatmapset (%d bytes)\n", data_s);
 
     Archive archive(data, data_s);

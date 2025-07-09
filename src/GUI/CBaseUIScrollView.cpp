@@ -12,7 +12,7 @@
 
 
 
-CBaseUIScrollView::CBaseUIScrollView(float xPos, float yPos, float xSize, float ySize, UString name)
+CBaseUIScrollView::CBaseUIScrollView(float xPos, float yPos, float xSize, float ySize, const UString& name)
     : CBaseUIElement(xPos, yPos, xSize, ySize, name) {
     this->grabs_clicks = true;
 

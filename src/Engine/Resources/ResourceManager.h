@@ -68,7 +68,7 @@ class ResourceManager final {
     // fonts
     McFont *loadFont(std::string filepath, std::string resourceName, int fontSize = 16, bool antialiasing = true,
                      int fontDPI = 96);
-    McFont *loadFont(std::string filepath, std::string resourceName, std::vector<wchar_t> characters, int fontSize = 16,
+    McFont *loadFont(std::string filepath, std::string resourceName, const std::vector<wchar_t>& characters, int fontSize = 16,
                      bool antialiasing = true, int fontDPI = 96);
 
     // sounds

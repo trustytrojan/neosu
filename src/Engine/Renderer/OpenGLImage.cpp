@@ -7,6 +7,8 @@
 
 #include "OpenGLImage.h"
 
+#include <utility>
+
 #if defined(MCENGINE_FEATURE_OPENGL) || defined(MCENGINE_FEATURE_OPENGLES)
 
 #include "ConVar.h"
@@ -16,7 +18,7 @@
 #include "OpenGLHeaders.h"
 #include "ResourceManager.h"
 
-OpenGLImage::OpenGLImage(std::string filepath, bool mipmapped, bool keepInSystemMemory) : Image(filepath, mipmapped) {
+OpenGLImage::OpenGLImage(std::string filepath, bool mipmapped, bool keepInSystemMemory) : Image(std::move(filepath), mipmapped) {
     this->GLTexture = 0;
     this->iTextureUnitBackup = 0;
 }

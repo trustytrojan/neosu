@@ -61,7 +61,7 @@ void logout_user(u32 user_id) {
     }
 }
 
-UserInfo* find_user(UString username) {
+UserInfo* find_user(const UString& username) {
     for(auto pair : online_users) {
         if(pair.second->name == username) {
             return pair.second;
@@ -71,7 +71,7 @@ UserInfo* find_user(UString username) {
     return NULL;
 }
 
-UserInfo* find_user_starting_with(UString prefix, UString last_match) {
+UserInfo* find_user_starting_with(UString prefix, const UString& last_match) {
     bool matched = last_match.length() == 0;
     for(auto pair : online_users) {
         auto user = pair.second;

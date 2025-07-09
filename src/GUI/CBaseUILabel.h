@@ -7,7 +7,7 @@ class CBaseUILabel : public CBaseUIElement {
 
    public:
     CBaseUILabel(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, UString name = "",
-                 UString text = "");
+                 const UString& text = "");
     ~CBaseUILabel() override { ; }
 
     void draw() override;

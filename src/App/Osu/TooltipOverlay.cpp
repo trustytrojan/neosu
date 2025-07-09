@@ -84,7 +84,7 @@ void TooltipOverlay::begin() {
     this->bDelayFadeout = true;
 }
 
-void TooltipOverlay::addLine(UString text) { this->lines.push_back(text); }
+void TooltipOverlay::addLine(const UString& text) { this->lines.push_back(text); }
 
 void TooltipOverlay::end() {
     anim->moveLinear(&this->fAnim, 1.0f, (1.0f - this->fAnim) * cv_tooltip_anim_duration.getFloat(), true);

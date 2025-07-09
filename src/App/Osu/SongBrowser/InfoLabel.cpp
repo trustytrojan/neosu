@@ -1,6 +1,7 @@
 #include "InfoLabel.h"
 
 #include <algorithm>
+#include <utility>
 
 #include "SongBrowser.h"
 // ---
@@ -20,7 +21,7 @@
 #include "TooltipOverlay.h"
 
 InfoLabel::InfoLabel(float xPos, float yPos, float xSize, float ySize, UString name)
-    : CBaseUIButton(xPos, yPos, xSize, ySize, name, "") {
+    : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), "") {
     this->font = osu->getSubTitleFont();
 
     this->iMargin = 8;

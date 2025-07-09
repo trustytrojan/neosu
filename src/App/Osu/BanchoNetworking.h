@@ -44,7 +44,7 @@ void disconnect();
 void reconnect();
 
 // Send an API request.
-void send_api_request(APIRequest request);
+void send_api_request(const APIRequest& request);
 
 // Send a packet to Bancho. Do not free it after calling this.
 void send_packet(Packet &packet);

@@ -114,35 +114,6 @@ std::string WinEnvironment::getExecutablePath() {
     return {""};
 }
 
-bool WinEnvironment::fileExists(std::string filename) {
-    auto temp = UString(filename);
-#ifdef _UNICODE
-    const wchar_t *winFilename = temp.wc_str();
-#else
-    const char *winFilename = temp.c_str();
-#endif
-    WIN32_FIND_DATA FindFileData;
-
-    HANDLE handle = FindFirstFile(winFilename, &FindFileData);
-    if(handle == INVALID_HANDLE_VALUE)
-        return std::ifstream(std::filesystem::path(temp.unicodeView())).good();
-    else {
-        FindClose(handle);
-        return true;
-    }
-}
-
-bool WinEnvironment::directoryExists(std::string filename) {
-    auto temp = UString(filename);
-#ifdef _UNICODE
-    const wchar_t *winFilename = temp.wc_str();
-#else
-    const char *winFilename = tmep.c_str();
-#endif
-    DWORD dwAttrib = GetFileAttributes(winFilename);
-    return (dwAttrib != INVALID_FILE_ATTRIBUTES && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
-}
-
 bool WinEnvironment::createDirectory(std::string directoryName) {
     auto temp = UString(directoryName);
 #ifdef _UNICODE

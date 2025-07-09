@@ -6,10 +6,10 @@
 #include "Rect.h"
 #include "cbase.h"
 
-#ifdef MCENGINE_PLATFORM_WINDOWS // temp, for isatty
+#ifdef MCENGINE_PLATFORM_WINDOWS  // temp, for isatty
 #include <io.h>
 #else
-#include <unistd.h> // isatty libc++
+#include <unistd.h>  // isatty libc++
 #endif
 
 class Environment;
@@ -38,8 +38,15 @@ class Environment {
     virtual std::string getUserDataPath() = 0;
 
     // file IO
-    virtual bool fileExists(std::string fileName) = 0;
-    virtual bool directoryExists(std::string directoryName) = 0;
+    // modifies the input filename! (checks case insensitively past the last slash)
+    static bool fileExists(std::string &filename);
+    // modifies the input directoryName! (checks case insensitively past the last slash)
+    static bool directoryExists(std::string &directoryName);
+
+    // same as the above, but for string literals (so we can't check insensitively and modify the input)
+    static bool fileExists(const std::string &filename);
+    static bool directoryExists(const std::string &directoryName);
+
     virtual bool createDirectory(std::string directoryName) = 0;
     virtual bool renameFile(std::string oldFileName, std::string newFileName) = 0;
     virtual bool deleteFile(std::string filePath) = 0;
@@ -103,7 +110,6 @@ class Environment {
     virtual UString keyCodeToString(KEYCODE keyCode) = 0;
 
    public:
-
     // window
     virtual void setFullscreenWindowedBorderless(bool fullscreenWindowedBorderless);
     virtual bool isFullscreenWindowedBorderless() { return this->bFullscreenWindowedBorderless; }

@@ -13,8 +13,8 @@ class SkinImage {
     };
 
    public:
-    SkinImage(Skin *skin, std::string skinElementName, Vector2 baseSizeForScaling2x, float osuSize,
-              std::string animationSeparator = "-", bool ignoreDefaultSkin = false);
+    SkinImage(Skin *skin, const std::string& skinElementName, Vector2 baseSizeForScaling2x, float osuSize,
+              const std::string& animationSeparator = "-", bool ignoreDefaultSkin = false);
     virtual ~SkinImage();
 
     virtual void draw(Vector2 pos,
@@ -62,8 +62,8 @@ class SkinImage {
     bool is_2x;
 
    private:
-    bool load(std::string skinElementName, std::string animationSeparator, bool ignoreDefaultSkin);
-    bool loadImage(std::string skinElementName, bool ignoreDefaultSkin);
+    bool load(const std::string& skinElementName, const std::string& animationSeparator, bool ignoreDefaultSkin);
+    bool loadImage(const std::string& skinElementName, bool ignoreDefaultSkin);
 
     float getScale();
     float getImageScale();

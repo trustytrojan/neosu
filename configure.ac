@@ -857,14 +857,16 @@ AM_CONDITIONAL([STRIPBINS], [test "x$enable_strip" != "xno" && ! { test "$SYSNAM
 # need dynamic winpthread for old windows 32bit compat builds
 # the way im searching for the right .dlls to copy is so disgusting and needs to be fixed somehow
 # also need this for 64bit so that the winpthread resources don't override neosu's...
-AS_IF([test "x$enable_static" = "xyes"], [ # still need winpthread dynamic, breaks otherwise for reasons i dont understand
-    WINSHARED_DLLS="$($CC -print-prog-name=ld | sed -e 's|/bin/.*||' | tr -d '\n' | find -files0-from - \
-        -iregex ".*$host_cpu"'.*libwinpthread-1.dll' \
-        -printf '%h/%f ')"
-], [
-    WINSHARED_DLLS="$($CC -print-prog-name=ld | sed -e 's|/bin/.*||' | tr -d '\n' | find -files0-from - \
-        '(' -iregex ".*$host_cpu"'.*libwinpthread-1.dll' -o -iregex ".*$host_cpu"'.*libgcc_.*.dll' -o -iregex ".*$host_cpu"'.*libstdc.*.dll' ')' \
-        -printf '%h/%f ')"
+AS_IF([test "$SYSNAME" = "windows"], [
+    AS_IF([test "x$enable_static" = "xyes"], [ # still need winpthread dynamic, breaks otherwise for reasons i dont understand
+        WINSHARED_DLLS="$($CC -print-prog-name=ld | sed -e 's|/bin/.*||' | tr -d '\n' | find -files0-from - \
+            -iregex ".*$host_cpu"'.*libwinpthread-1.dll' \
+            -printf '%h/%f ')"
+    ], [
+        WINSHARED_DLLS="$($CC -print-prog-name=ld | sed -e 's|/bin/.*||' | tr -d '\n' | find -files0-from - \
+            '(' -iregex ".*$host_cpu"'.*libwinpthread-1.dll' -o -iregex ".*$host_cpu"'.*libgcc_.*.dll' -o -iregex ".*$host_cpu"'.*libstdc.*.dll' ')' \
+            -printf '%h/%f ')"
+    ])
 ])
 
 AC_SUBST([WINSHARED_DLLS])

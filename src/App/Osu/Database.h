@@ -69,7 +69,7 @@ struct alignas(1) TIMINGPOINT {
 
     BeatmapSet *addBeatmapSet(std::string beatmapFolderPath, i32 set_id_override = -1);
 
-    int addScore(FinishedScore score);
+    int addScore(const FinishedScore& score);
     void deleteScore(MD5Hash beatmapMD5Hash, u64 scoreUnixTimestamp);
     void sortScoresInPlace(std::vector<FinishedScore> &scores);
     void sortScores(MD5Hash beatmapMD5Hash);
@@ -77,8 +77,8 @@ struct alignas(1) TIMINGPOINT {
 
     std::vector<UString> getPlayerNamesWithPPScores();
     std::vector<UString> getPlayerNamesWithScoresForUserSwitcher();
-    PlayerPPScores getPlayerPPScores(UString playerName);
-    PlayerStats calculatePlayerStats(UString playerName);
+    PlayerPPScores getPlayerPPScores(const UString& playerName);
+    PlayerStats calculatePlayerStats(const UString& playerName);
     static float getWeightForIndex(int i);
     static float getBonusPPForNumScores(size_t numScores);
     static unsigned long long getRequiredScoreForLevel(int level);
@@ -103,7 +103,7 @@ struct alignas(1) TIMINGPOINT {
     std::unordered_map<MD5Hash, std::vector<FinishedScore>> online_scores;
     std::string getOsuSongsFolder();
 
-    BeatmapSet *loadRawBeatmap(std::string beatmapPath);  // only used for raw loading without db
+    BeatmapSet *loadRawBeatmap(const std::string& beatmapPath);  // only used for raw loading without db
 
     void loadDB();
     std::mutex peppy_overrides_mtx;

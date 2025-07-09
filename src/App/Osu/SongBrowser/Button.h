@@ -1,4 +1,6 @@
 #pragma once
+#include <utility>
+
 #include "CBaseUIButton.h"
 
 class DatabaseBeatmap;
@@ -28,7 +30,7 @@ class Button : public CBaseUIButton {
     void resetAnimations();
 
     void setTargetRelPosY(float targetRelPosY);
-    void setChildren(std::vector<SongButton *> children) { this->children = children; }
+    void setChildren(std::vector<SongButton *> children) { this->children = std::move(children); }
     void setOffsetPercent(float offsetPercent) { this->fOffsetPercent = offsetPercent; }
     void setHideIfSelected(bool hideIfSelected) { this->bHideIfSelected = hideIfSelected; }
     void setIsSearchMatch(bool isSearchMatch) { this->bIsSearchMatch = isSearchMatch; }

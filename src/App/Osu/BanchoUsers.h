@@ -44,8 +44,8 @@ extern std::vector<u32> friends;
 extern std::vector<u32> stats_requests;
 
 void logout_user(u32 user_id);
-UserInfo* find_user(UString username);
-UserInfo* find_user_starting_with(UString prefix, UString last_match);
+UserInfo* find_user(const UString& username);
+UserInfo* find_user_starting_with(UString prefix, const UString& last_match);
 UserInfo* try_get_user_info(u32 user_id, bool wants_presence = false);
 UserInfo* get_user_info(u32 user_id, bool wants_presence = false);
 

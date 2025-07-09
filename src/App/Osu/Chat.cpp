@@ -1,6 +1,7 @@
 #include "Chat.h"
 
 #include <regex>
+#include <utility>
 
 #include "AnimationHandler.h"
 #include "Bancho.h"
@@ -35,7 +36,7 @@
 
 ChatChannel::ChatChannel(Chat *chat, UString name_arg) {
     this->chat = chat;
-    this->name = name_arg;
+    this->name = std::move(name_arg);
 
     this->ui = new CBaseUIScrollView(0, 0, 0, 0, "");
     this->ui->setDrawFrame(false);
@@ -356,7 +357,7 @@ void Chat::mouse_update(bool *propagate_clicks) {
     this->input_box->focus(false);
 }
 
-void Chat::handle_command(UString msg) {
+void Chat::handle_command(const UString& msg) {
     if(msg == UString("/clear")) {
         this->selected_channel->messages.clear();
         this->updateLayout(osu->getScreenSize());
@@ -740,7 +741,7 @@ void Chat::switchToChannel(ChatChannel *chan) {
     this->updateButtonLayout(this->getSize());
 }
 
-void Chat::addChannel(UString channel_name, bool switch_to) {
+void Chat::addChannel(const UString& channel_name, bool switch_to) {
     for(auto chan : this->channels) {
         if(chan->name == channel_name) {
             if(switch_to) {
@@ -768,7 +769,7 @@ void Chat::addChannel(UString channel_name, bool switch_to) {
     }
 }
 
-void Chat::addMessage(UString channel_name, ChatMessage msg, bool mark_unread) {
+void Chat::addMessage(UString channel_name, const ChatMessage& msg, bool mark_unread) {
     bool is_pm = msg.author_id > 0 && channel_name[0] != '#' && msg.author_name != bancho.username;
     if(is_pm) {
         // If it's a PM, the channel title should be the one who sent the message
@@ -821,11 +822,11 @@ void Chat::addSystemMessage(UString msg) {
                                                        .tms = time(NULL),
                                                        .author_id = 0,
                                                        .author_name = "",
-                                                       .text = msg,
+                                                       .text = std::move(msg),
                                                    });
 }
 
-void Chat::removeChannel(UString channel_name) {
+void Chat::removeChannel(const UString& channel_name) {
     ChatChannel *chan = NULL;
     for(auto c : this->channels) {
         if(c->name == channel_name) {
@@ -1052,7 +1053,7 @@ void Chat::leave(UString channel_name) {
     soundEngine->play(osu->getSkin()->closeChatTab);
 }
 
-void Chat::send_message(UString msg) {
+void Chat::send_message(const UString& msg) {
     Packet packet;
     packet.id = this->selected_channel->name[0] == '#' ? SEND_PUBLIC_MESSAGE : SEND_PRIVATE_MESSAGE;
     write_string(&packet, (char *)bancho.username.toUtf8());

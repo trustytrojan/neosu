@@ -1,5 +1,7 @@
 #include "VSMusicBrowser.h"
 
+#include <utility>
+
 #include "AnimationHandler.h"
 #include "CBaseUIButton.h"
 #include "CBaseUIContainer.h"
@@ -145,7 +147,7 @@ struct VSMusicBrowserNaturalSortStringComparator {
 class VSMusicBrowserButton : public CBaseUIButton {
    public:
     VSMusicBrowserButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
-        : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {
+        : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), std::move(text)) {
         this->bSelected = false;
         this->bIsDirectory = false;
         this->bPlaying = false;
@@ -389,7 +391,7 @@ void VSMusicBrowser::updatePlayingSelection(bool fromInvalidSelection) {
     }
 }
 
-void VSMusicBrowser::updateFolder(std::string baseFolder, size_t fromDepth) {
+void VSMusicBrowser::updateFolder(const std::string& baseFolder, size_t fromDepth) {
     if(this->columns.size() < 1) return;
 
     // remove all columns > fromDepth

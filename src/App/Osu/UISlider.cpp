@@ -1,12 +1,14 @@
 #include "UISlider.h"
 
+#include <utility>
+
 #include "AnimationHandler.h"
 #include "Osu.h"
 #include "ResourceManager.h"
 #include "Skin.h"
 
 UISlider::UISlider(float xPos, float yPos, float xSize, float ySize, UString name)
-    : CBaseUISlider(xPos, yPos, xSize, ySize, name) {
+    : CBaseUISlider(xPos, yPos, xSize, ySize, std::move(name)) {
     this->setBlockSize(20, 20);
 }
 

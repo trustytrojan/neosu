@@ -34,7 +34,7 @@ class UpdateHandler {
     // async
     void _requestUpdate();
     bool _downloadUpdate();
-    void _installUpdate(std::string zipFilePath);
+    void _installUpdate(const std::string& zipFilePath);
 
     std::thread* updateThread = NULL;
     bool _m_bKYS;

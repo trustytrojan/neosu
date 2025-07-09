@@ -1,5 +1,7 @@
 #include "ConsoleBox.h"
 
+#include <utility>
+
 #include "AnimationHandler.h"
 #include "CBaseUIBoxShadow.h"
 #include "CBaseUIButton.h"
@@ -19,9 +21,9 @@
 class ConsoleBoxTextbox : public CBaseUITextbox {
    public:
     ConsoleBoxTextbox(float xPos, float yPos, float xSize, float ySize, UString name)
-        : CBaseUITextbox(xPos, yPos, xSize, ySize, name) {}
+        : CBaseUITextbox(xPos, yPos, xSize, ySize, std::move(name)) {}
 
-    void setSuggestion(UString suggestion) { this->sSuggestion = suggestion; }
+    void setSuggestion(UString suggestion) { this->sSuggestion = std::move(suggestion); }
 
    protected:
     void drawText() override {
@@ -49,8 +51,8 @@ class ConsoleBoxSuggestionButton : public CBaseUIButton {
    public:
     ConsoleBoxSuggestionButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text,
                                UString helpText, ConsoleBox *consoleBox)
-        : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {
-        this->sHelpText = helpText;
+        : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), std::move(text)) {
+        this->sHelpText = std::move(helpText);
         this->consoleBox = consoleBox;
     }
 
@@ -526,7 +528,7 @@ void ConsoleBox::onResolutionChange(Vector2 newResolution) {
     this->suggestion->setSizeX(newResolution.x - 10 * dpiScale);
 }
 
-void ConsoleBox::processCommand(UString command) {
+void ConsoleBox::processCommand(const UString& command) {
     this->clearSuggestions();
     this->iSelectedHistory = -1;
 
@@ -535,7 +537,7 @@ void ConsoleBox::processCommand(UString command) {
     Console::processCommand(command);
 }
 
-void ConsoleBox::execConfigFile(std::string filename) { Console::execConfigFile(filename); }
+void ConsoleBox::execConfigFile(std::string filename) { Console::execConfigFile(std::move(filename)); }
 
 bool ConsoleBox::isBusy() {
     return (this->textbox->isBusy() || this->suggestion->isBusy()) && this->textbox->isVisible();

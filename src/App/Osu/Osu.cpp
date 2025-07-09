@@ -1,6 +1,7 @@
 #include "Osu.h"
 
 #include <sstream>
+#include <utility>
 
 #include "AnimationHandler.h"
 #include "BackgroundImageHandler.h"
@@ -1431,7 +1432,7 @@ void Osu::onPlayEnd(FinishedScore score, bool quit, bool aborted) {
     if(!quit) {
         if(!cv_mod_endless.getBool()) {
             // NOTE: the order of these two calls matters
-            this->rankingScreen->setScore(score);
+            this->rankingScreen->setScore(std::move(score));
             this->rankingScreen->setBeatmapInfo(this->getSelectedBeatmap(),
                                                 this->getSelectedBeatmap()->getSelectedDifficulty2());
 
@@ -2059,7 +2060,7 @@ void Osu::onLetterboxingOffsetChange(UString oldValue, UString newValue) { this-
 
 void Osu::onUserCardChange(UString new_username) {
     // NOTE: force update options textbox to avoid shutdown inconsistency
-    this->getOptionsMenu()->setUsername(new_username);
+    this->getOptionsMenu()->setUsername(std::move(new_username));
     this->userButton->setID(bancho.user_id);
 }
 

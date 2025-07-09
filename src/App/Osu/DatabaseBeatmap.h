@@ -154,9 +154,9 @@ class DatabaseBeatmap {
     DatabaseBeatmap(std::vector<DatabaseBeatmap *> *difficulties, BeatmapType type);
     ~DatabaseBeatmap();
 
-    static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string osuFilePath, float AR, float CS,
+    static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string& osuFilePath, float AR, float CS,
                                                         float speedMultiplier, bool calculateStarsInaccurately = false);
-    static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string osuFilePath, float AR, float CS,
+    static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string& osuFilePath, float AR, float CS,
                                                         float speedMultiplier, bool calculateStarsInaccurately,
                                                         const std::atomic<bool> &dead);
     static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(PRIMITIVE_CONTAINER &c, float AR, float CS,
@@ -323,8 +323,8 @@ class DatabaseBeatmap {
     friend class Database;
     friend class BackgroundImageHandler;
 
-    static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string osuFilePath);
-    static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string osuFilePath, const std::atomic<bool> &dead);
+    static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string& osuFilePath);
+    static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string& osuFilePath, const std::atomic<bool> &dead);
     static CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT calculateSliderTimesClicksTicks(
         int beatmapVersion, std::vector<SLIDER> &sliders, zarray<DatabaseBeatmap::TIMINGPOINT> &timingpoints,
         float sliderMultiplier, float sliderTickRate);

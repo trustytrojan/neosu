@@ -1,4 +1,6 @@
 #pragma once
+#include <utility>
+
 #include "KeyboardListener.h"
 #include "cbase.h"
 
@@ -18,7 +20,7 @@ class CBaseUIElement : public KeyboardListener {
         this->vSize.y = ySize;
         this->vmSize.x = this->vSize.x;
         this->vmSize.y = this->vSize.y;
-        this->sName = name;
+        this->sName = std::move(name);
     }
     ~CBaseUIElement() override { ; }
 
@@ -141,7 +143,7 @@ class CBaseUIElement : public KeyboardListener {
         return this;
     }
     virtual CBaseUIElement *setName(UString name) {
-        this->sName = name;
+        this->sName = std::move(name);
         return this;
     }
 

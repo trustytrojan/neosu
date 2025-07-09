@@ -1,5 +1,7 @@
 #include "VSControlBar.h"
 
+#include <utility>
+
 #include "AnimationHandler.h"
 #include "CBaseUICheckbox.h"
 #include "CBaseUIContainer.h"
@@ -12,7 +14,7 @@
 class VSControlBarButton : public CBaseUIButton {
    public:
     VSControlBarButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
-        : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {
+        : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), std::move(text)) {
         ;
     }
     ~VSControlBarButton() override { ; }
@@ -76,7 +78,7 @@ class VSControlBarButton : public CBaseUIButton {
 class VSControlBarSlider : public CBaseUISlider {
    public:
     VSControlBarSlider(float xPos, float yPos, float xSize, float ySize, UString name)
-        : CBaseUISlider(xPos, yPos, xSize, ySize, name) {
+        : CBaseUISlider(xPos, yPos, xSize, ySize, std::move(name)) {
         ;
     }
     ~VSControlBarSlider() override { ; }
@@ -113,7 +115,7 @@ class VSControlBarSlider : public CBaseUISlider {
 class VSControlBarCheckbox : public CBaseUICheckbox {
    public:
     VSControlBarCheckbox(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
-        : CBaseUICheckbox(xPos, yPos, xSize, ySize, name, text) {
+        : CBaseUICheckbox(xPos, yPos, xSize, ySize, std::move(name), std::move(text)) {
         ;
     }
     ~VSControlBarCheckbox() override { ; }

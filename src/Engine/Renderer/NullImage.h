@@ -10,9 +10,11 @@
 
 #include "Image.h"
 
+#include <utility>
+
 class NullImage : public Image {
    public:
-    NullImage(std::string filePath, bool mipmapped = false, bool keepInSystemMemory = false) : Image(filePath, mipmapped, keepInSystemMemory) { ; }
+    NullImage(std::string filePath, bool mipmapped = false, bool keepInSystemMemory = false) : Image(std::move(filePath), mipmapped, keepInSystemMemory) { ; }
     NullImage(int width, int height, bool mipmapped = false, bool keepInSystemMemory = false) : Image(width, height, mipmapped, keepInSystemMemory) { ; }
     ~NullImage() override { this->destroy(); }
 

@@ -72,7 +72,7 @@ static void run_sct() {
     sct_computed++;
 }
 
-void sct_calc(std::vector<FinishedScore> scores_to_calc) {
+void sct_calc(const std::vector<FinishedScore>& scores_to_calc) {
     return;  // TODO @kiwec: disabled for now
 
     sct_abort();

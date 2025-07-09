@@ -4,6 +4,7 @@
 // ---
 
 #include <chrono>
+#include <utility>
 
 #include "AnimationHandler.h"
 #include "Bancho.h"
@@ -543,7 +544,7 @@ void ScoreButton::onContextMenu(UString text, int id) {
 
     if(id == 3) {
         if(keyboard->isShiftDown())
-            this->onDeleteScoreConfirmed(text, 1);
+            this->onDeleteScoreConfirmed(std::move(text), 1);
         else
             this->onDeleteScoreClicked();
 
@@ -585,7 +586,7 @@ void ScoreButton::onDeleteScoreConfirmed(UString text, int id) {
     osu->getSongBrowser()->onScoreContextMenu(this, 2);
 }
 
-void ScoreButton::setScore(const FinishedScore &score, DatabaseBeatmap *diff2, int index, UString titleString,
+void ScoreButton::setScore(const FinishedScore &score, DatabaseBeatmap *diff2, int index, const UString& titleString,
                            float weight) {
     this->score = score;
     this->score.beatmap_hash = diff2->getMD5Hash();

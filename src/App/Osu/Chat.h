@@ -47,18 +47,18 @@ class Chat : public OsuScreen {
 
     void mark_as_read(ChatChannel *chan);
     void switchToChannel(ChatChannel *chan);
-    void addChannel(UString channel_name, bool switch_to = false);
-    void addMessage(UString channel_name, ChatMessage msg, bool mark_unread = true);
+    void addChannel(const UString& channel_name, bool switch_to = false);
+    void addMessage(UString channel_name, const ChatMessage& msg, bool mark_unread = true);
     void addSystemMessage(UString msg);
-    void removeChannel(UString channel_name);
+    void removeChannel(const UString& channel_name);
     void updateLayout(Vector2 newResolution);
     void updateButtonLayout(Vector2 screen);
     void updateUserList();
 
     void join(UString channel_name);
     void leave(UString channel_name);
-    void handle_command(UString msg);
-    void send_message(UString msg);
+    void handle_command(const UString& msg);
+    void send_message(const UString& msg);
     void onDisconnect();
 
     CBaseUIContainer *setVisible(bool visible) override;

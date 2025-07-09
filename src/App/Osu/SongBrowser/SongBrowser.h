@@ -167,7 +167,7 @@ class SongBrowser : public ScreenBackable {
 
     void onSortClicked(CBaseUIButton *button);
     void onSortChange(UString text, int id = -1);
-    void onSortChangeInt(UString text, bool autoScroll);
+    void onSortChangeInt(const UString& text, bool autoScroll);
 
     void onGroupNoGrouping();
     void onGroupCollections(bool autoScroll = true);

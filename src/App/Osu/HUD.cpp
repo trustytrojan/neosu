@@ -711,7 +711,7 @@ void HUD::drawPlayfieldBorder(Vector2 playfieldCenter, Vector2 playfieldSize, fl
     g->popTransform();
 }
 
-void HUD::drawLoadingSmall(UString text) {
+void HUD::drawLoadingSmall(const UString& text) {
     const float scale = Osu::getImageScale(osu->getSkin()->getLoadingSpinner(), 29);
 
     g->setColor(0xffffffff);
@@ -1312,7 +1312,7 @@ std::vector<SCORE_ENTRY> HUD::getCurrentScores() {
     }
 
     auto sorting_type = bancho.is_in_a_multi_room() ? bancho.room.win_condition : SCOREV1;
-    std::sort(scores.begin(), scores.end(), [sorting_type](SCORE_ENTRY a, SCORE_ENTRY b) {
+    std::sort(scores.begin(), scores.end(), [sorting_type](const SCORE_ENTRY& a, const SCORE_ENTRY& b) {
         if(sorting_type == ACCURACY) {
             return a.accuracy > b.accuracy;
         } else if(sorting_type == COMBO) {
@@ -1890,7 +1890,7 @@ void HUD::drawStatistics(int misses, int sliderbreaks, int maxPossibleCombo, flo
     g->popTransform();
 }
 
-void HUD::drawStatisticText(const UString text) {
+void HUD::drawStatisticText(const UString& text) {
     if(text.length() < 1) return;
 
     g->pushTransform();

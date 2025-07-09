@@ -1,5 +1,7 @@
 #include "ModSelector.h"
 
+#include <utility>
+
 #include "AnimationHandler.h"
 #include "Bancho.h"
 #include "BanchoNetworking.h"
@@ -40,7 +42,7 @@
 class ModSelectorOverrideSliderDescButton : public CBaseUIButton {
    public:
     ModSelectorOverrideSliderDescButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
-        : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {}
+        : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), std::move(text)) {}
 
     void mouse_update(bool *propagate_clicks) override {
         if(!this->bVisible) return;
@@ -53,7 +55,7 @@ class ModSelectorOverrideSliderDescButton : public CBaseUIButton {
         }
     }
 
-    void setTooltipText(UString tooltipText) { this->sTooltipText = tooltipText; }
+    void setTooltipText(UString tooltipText) { this->sTooltipText = std::move(tooltipText); }
 
    private:
     void drawText() override {
@@ -81,7 +83,7 @@ class ModSelectorOverrideSliderDescButton : public CBaseUIButton {
 class ModSelectorOverrideSliderLockButton : public CBaseUICheckbox {
    public:
     ModSelectorOverrideSliderLockButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
-        : CBaseUICheckbox(xPos, yPos, xSize, ySize, name, text) {
+        : CBaseUICheckbox(xPos, yPos, xSize, ySize, std::move(name), std::move(text)) {
         this->fAnim = 1.0f;
     }
 
@@ -1011,7 +1013,7 @@ UIModSelectorModButton *ModSelector::setModButtonOnGrid(int x, int y, int state,
     UIModSelectorModButton *modButton = this->getModButtonOnGrid(x, y);
 
     if(modButton != NULL) {
-        modButton->setState(state, initialState, modCvar, modName, tooltipText, getImageFunc);
+        modButton->setState(state, initialState, modCvar, std::move(modName), tooltipText, std::move(getImageFunc));
         modButton->setVisible(true);
     }
 
@@ -1027,7 +1029,7 @@ UIModSelectorModButton *ModSelector::getModButtonOnGrid(int x, int y) {
         return NULL;
 }
 
-ModSelector::OVERRIDE_SLIDER ModSelector::addOverrideSlider(UString text, UString labelText, ConVar *cvar, float min,
+ModSelector::OVERRIDE_SLIDER ModSelector::addOverrideSlider(UString text, const UString& labelText, ConVar *cvar, float min,
                                                             float max, UString tooltipText, ConVar *lockCvar) {
     int height = 25;
 
@@ -1036,8 +1038,8 @@ ModSelector::OVERRIDE_SLIDER ModSelector::addOverrideSlider(UString text, UStrin
         os.lock = new ModSelectorOverrideSliderLockButton(0, 0, height, height, "", "");
         os.lock->setChangeCallback(fastdelegate::MakeDelegate(this, &ModSelector::onOverrideSliderLockChange));
     }
-    os.desc = new ModSelectorOverrideSliderDescButton(0, 0, 100, height, "", text);
-    os.desc->setTooltipText(tooltipText);
+    os.desc = new ModSelectorOverrideSliderDescButton(0, 0, 100, height, "", std::move(text));
+    os.desc->setTooltipText(std::move(tooltipText));
     os.slider = new UISlider(0, 0, 100, height, "");
     os.label = new CBaseUILabel(0, 0, 100, height, labelText, labelText);
     os.cvar = cvar;
@@ -1074,7 +1076,7 @@ ModSelector::OVERRIDE_SLIDER ModSelector::addOverrideSlider(UString text, UStrin
     return os;
 }
 
-UIButton *ModSelector::addActionButton(UString text) {
+UIButton *ModSelector::addActionButton(const UString& text) {
     UIButton *actionButton = new UIButton(50, 50, 100, 100, text, text);
     this->actionButtons.push_back(actionButton);
     this->addBaseUIElement(actionButton);
@@ -1082,7 +1084,7 @@ UIButton *ModSelector::addActionButton(UString text) {
     return actionButton;
 }
 
-CBaseUILabel *ModSelector::addExperimentalLabel(UString text) {
+CBaseUILabel *ModSelector::addExperimentalLabel(const UString& text) {
     CBaseUILabel *label = new CBaseUILabel(0, 0, 0, 25, text, text);
     label->setFont(osu->getSubTitleFont());
     label->setWidthToContent(0);
@@ -1098,7 +1100,7 @@ CBaseUILabel *ModSelector::addExperimentalLabel(UString text) {
     return label;
 }
 
-UICheckbox *ModSelector::addExperimentalCheckbox(UString text, UString tooltipText, ConVar *cvar) {
+UICheckbox *ModSelector::addExperimentalCheckbox(const UString& text, UString tooltipText, ConVar *cvar) {
     UICheckbox *checkbox = new UICheckbox(0, 0, 0, 35, text, text);
     checkbox->setTooltipText(tooltipText);
     checkbox->setWidthToContent(0);

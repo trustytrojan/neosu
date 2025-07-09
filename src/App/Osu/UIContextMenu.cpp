@@ -1,5 +1,7 @@
 #include "UIContextMenu.h"
 
+#include <utility>
+
 #include "AnimationHandler.h"
 #include "CBaseUIContainer.h"
 #include "CBaseUIScrollView.h"
@@ -16,7 +18,7 @@ static float button_sound_cooldown = 0.f;
 
 UIContextMenuButton::UIContextMenuButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text,
                                          int id)
-    : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {
+    : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), std::move(text)) {
     this->iID = id;
 }
 
@@ -44,14 +46,14 @@ void UIContextMenuButton::onMouseInside() {
 
 void UIContextMenuButton::onMouseDownInside() { soundEngine->play(osu->getSkin()->clickButton); }
 
-void UIContextMenuButton::setTooltipText(UString text) { this->tooltipTextLines = text.split("\n"); }
+void UIContextMenuButton::setTooltipText(const UString& text) { this->tooltipTextLines = text.split("\n"); }
 
 UIContextMenuTextbox::UIContextMenuTextbox(float xPos, float yPos, float xSize, float ySize, UString name, int id)
-    : CBaseUITextbox(xPos, yPos, xSize, ySize, name) {
+    : CBaseUITextbox(xPos, yPos, xSize, ySize, std::move(name)) {
     this->iID = id;
 }
 
-UIContextMenu::UIContextMenu(float xPos, float yPos, float xSize, float ySize, UString name, CBaseUIScrollView *parent)
+UIContextMenu::UIContextMenu(float xPos, float yPos, float xSize, float ySize, const UString& name, CBaseUIScrollView *parent)
     : CBaseUIScrollView(xPos, yPos, xSize, ySize, name) {
     this->parent = parent;
 

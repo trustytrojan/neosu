@@ -141,7 +141,7 @@ void UIUserContextMenuScreen::on_action(UString text, int user_action) {
     this->menu->setVisible(false);
 }
 
-UIUserLabel::UIUserLabel(u32 user_id, UString username) : CBaseUILabel() {
+UIUserLabel::UIUserLabel(u32 user_id, const UString& username) : CBaseUILabel() {
     this->user_id = user_id;
     this->setText(username);
     this->setDrawFrame(false);

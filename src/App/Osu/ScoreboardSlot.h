@@ -4,7 +4,7 @@
 #include "UIAvatar.h"
 
 struct ScoreboardSlot {
-    ScoreboardSlot(SCORE_ENTRY score, int index);
+    ScoreboardSlot(const SCORE_ENTRY& score, int index);
     ~ScoreboardSlot();
 
     void draw();

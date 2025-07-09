@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <utility>
 
 #include "Beatmap.h"
 #include "DatabaseBeatmap.h"
@@ -10,7 +11,7 @@
 #include "ResourceManager.h"
 
 UIRankingScreenInfoLabel::UIRankingScreenInfoLabel(float xPos, float yPos, float xSize, float ySize, UString name)
-    : CBaseUIElement(xPos, yPos, xSize, ySize, name) {
+    : CBaseUIElement(xPos, yPos, xSize, ySize, std::move(name)) {
     this->font = osu->getSubTitleFont();
 
     this->iMargin = 10;

@@ -2,6 +2,8 @@
 
 #include <string.h>
 
+#include <utility>
+
 #include "Archival.h"
 #include "Beatmap.h"
 #include "ConVar.h"
@@ -86,9 +88,9 @@ void Skin::unpack(const char *filepath) {
     }
 }
 
-Skin::Skin(UString name, std::string filepath, bool isDefaultSkin) {
+Skin::Skin(const UString& name, std::string filepath, bool isDefaultSkin) {
     this->sName = name.utf8View();
-    this->sFilePath = filepath;
+    this->sFilePath = std::move(filepath);
     this->bIsDefaultSkin = isDefaultSkin;
 
     this->bReady = false;
@@ -1089,7 +1091,7 @@ void Skin::load() {
         osu->getNotificationOverlay()->addNotification("Error: Couldn't load DEFAULT skin.ini!!!", 0xffff0000);
 }
 
-void Skin::loadBeatmapOverride(std::string filepath) {
+void Skin::loadBeatmapOverride(const std::string& filepath) {
     // debugLog("Skin::loadBeatmapOverride( %s )\n", filepath.c_str());
     //  TODO: beatmap skin support
 }
@@ -1344,7 +1346,7 @@ Color Skin::getComboColorForCounter(int i, int offset) {
         return argb(255, 0, 255, 0);
 }
 
-void Skin::setBeatmapComboColors(std::vector<Color> colors) { this->beatmapComboColors = colors; }
+void Skin::setBeatmapComboColors(std::vector<Color> colors) { this->beatmapComboColors = std::move(colors); }
 
 void Skin::playHitCircleSound(int sampleType, float pan, long delta) {
     if(this->iSampleVolume <= 0) {
@@ -1500,8 +1502,8 @@ SkinImage *Skin::createSkinImage(std::string skinElementName, Vector2 baseSizeFo
     return skinImage;
 }
 
-void Skin::checkLoadImage(Image **addressOfPointer, std::string skinElementName, std::string resourceName,
-                          bool ignoreDefaultSkin, std::string fileExtension, bool forceLoadMipmaps) {
+void Skin::checkLoadImage(Image **addressOfPointer, const std::string& skinElementName, const std::string& resourceName,
+                          bool ignoreDefaultSkin, const std::string& fileExtension, bool forceLoadMipmaps) {
     if(*addressOfPointer != m_missingTexture) return;  // we are already loaded
 
     // NOTE: only the default skin is loaded with a resource name (it must never be unloaded by other instances), and it
@@ -1617,7 +1619,7 @@ void Skin::checkLoadImage(Image **addressOfPointer, std::string skinElementName,
     }
 }
 
-void Skin::checkLoadSound(Sound **addressOfPointer, std::string skinElementName, std::string resourceName,
+void Skin::checkLoadSound(Sound **addressOfPointer, const std::string& skinElementName, std::string resourceName,
                           bool isOverlayable, bool isSample, bool loop, bool fallback_to_default,
                           float hardcodedVolumeMultiplier) {
     if(*addressOfPointer != NULL) return;  // we are already loaded
@@ -1628,7 +1630,7 @@ void Skin::checkLoadSound(Sound **addressOfPointer, std::string skinElementName,
     // random skin support
     this->randomizeFilePath();
 
-    auto try_load_sound = [=](std::string base_path, std::string filename, std::string resource_name, bool loop) {
+    auto try_load_sound = [=](const std::string& base_path, const std::string& filename, const std::string& resource_name, bool loop) {
         const char *extensions[] = {".wav", ".mp3", ".ogg"};
         for(int i = 0; i < 3; i++) {
             std::string fn = filename;
@@ -1652,7 +1654,7 @@ void Skin::checkLoadSound(Sound **addressOfPointer, std::string skinElementName,
     // load default skin
     if(fallback_to_default) {
         std::string defaultpath = MCENGINE_DATA_DIR "materials/default/";
-        std::string defaultResourceName = resourceName;
+        std::string defaultResourceName = std::move(resourceName);
         defaultResourceName.append("_DEFAULT");
         *addressOfPointer = try_load_sound(defaultpath, skinElementName, defaultResourceName, loop);
     }
@@ -1692,7 +1694,7 @@ void Skin::checkLoadSound(Sound **addressOfPointer, std::string skinElementName,
     this->filepathsForExport.push_back(sound->getFilePath());
 }
 
-bool Skin::compareFilenameWithSkinElementName(std::string filename, std::string skinElementName) {
+bool Skin::compareFilenameWithSkinElementName(const std::string& filename, const std::string& skinElementName) {
     if(filename.length() == 0 || skinElementName.length() == 0) return false;
     return filename.substr(0, filename.find_last_of('.')) == skinElementName;
 }

@@ -1,5 +1,7 @@
 #include "OpenGLShader.h"
 
+#include <utility>
+
 #ifdef MCENGINE_FEATURE_OPENGL
 
 #include "ConVar.h"
@@ -7,8 +9,8 @@
 #include "OpenGLHeaders.h"
 
 OpenGLShader::OpenGLShader(std::string vertexShader, std::string fragmentShader, bool source) : Shader() {
-    this->sVsh = vertexShader;
-    this->sFsh = fragmentShader;
+    this->sVsh = std::move(vertexShader);
+    this->sFsh = std::move(fragmentShader);
     this->bSource = source;
 
     this->iProgram = 0;
@@ -149,7 +151,7 @@ void OpenGLShader::setUniformMatrix4fv(UString name, float *v) {
         debugLog("OpenGLShader Warning: Can't find uniform %s\n", name.toUtf8());
 }
 
-int OpenGLShader::getAttribLocation(UString name) {
+int OpenGLShader::getAttribLocation(const UString& name) {
     if(!this->bReady) return -1;
 
     return glGetAttribLocation(this->iProgram, name.toUtf8());
@@ -170,7 +172,7 @@ int OpenGLShader::getAndCacheUniformLocation(const UString &name) {
     return id;
 }
 
-bool OpenGLShader::compile(std::string vertexShader, std::string fragmentShader, bool source) {
+bool OpenGLShader::compile(const std::string& vertexShader, const std::string& fragmentShader, bool source) {
     // load & compile shaders
     debugLog("OpenGLShader: Compiling %s ...\n", (source ? "vertex source" : vertexShader.c_str()));
     this->iVertexShader = source ? this->createShaderFromString(vertexShader, GL_VERTEX_SHADER_ARB)
@@ -217,7 +219,7 @@ bool OpenGLShader::compile(std::string vertexShader, std::string fragmentShader,
     return true;
 }
 
-int OpenGLShader::createShaderFromString(std::string shaderSource, int shaderType) {
+int OpenGLShader::createShaderFromString(const std::string& shaderSource, int shaderType) {
     const int shader = glCreateShaderObjectARB(shaderType);
 
     if(shader == 0) {
@@ -253,7 +255,7 @@ int OpenGLShader::createShaderFromString(std::string shaderSource, int shaderTyp
     return shader;
 }
 
-int OpenGLShader::createShaderFromFile(std::string fileName, int shaderType) {
+int OpenGLShader::createShaderFromFile(const std::string& fileName, int shaderType) {
     // load file
     std::ifstream inFile(fileName.c_str());
     if(!inFile) {

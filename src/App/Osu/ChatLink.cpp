@@ -2,6 +2,7 @@
 
 #include <codecvt>
 #include <regex>
+#include <utility>
 
 #include "Bancho.h"
 #include "Lobby.h"
@@ -13,7 +14,7 @@
 #include "TooltipOverlay.h"
 #include "UIUserContextMenu.h"
 
-ChatLink::ChatLink(float xPos, float yPos, float xSize, float ySize, UString link, UString label)
+ChatLink::ChatLink(float xPos, float yPos, float xSize, float ySize, const UString& link, UString label)
     : CBaseUILabel(xPos, yPos, xSize, ySize, link, label) {
     this->link = link;
     this->setDrawFrame(false);

@@ -53,6 +53,7 @@
 #include "VertexArrayObject.h"
 
 #include <chrono>
+#include <utility>
 
 const Color highlightColor = argb(255, 0, 255, 0);
 const Color defaultColor = argb(255, 255, 255, 255);
@@ -3105,7 +3106,7 @@ void SongBrowser::onSortClicked(CBaseUIButton *button) {
 
 void SongBrowser::onSortChange(UString text, int id) { this->onSortChangeInt(text, true); }
 
-void SongBrowser::onSortChangeInt(UString text, bool autoScroll) {
+void SongBrowser::onSortChangeInt(const UString& text, bool autoScroll) {
     SORTING_METHOD *sortingMethod = &this->sortingMethods[3];
     for(size_t i = 0; i < this->sortingMethods.size(); i++) {
         if(this->sortingMethods[i].name == text) {
@@ -3341,7 +3342,7 @@ void SongBrowser::onSelectionOptions() {
     }
 }
 
-void SongBrowser::onModeChange(UString text) { this->onModeChange2(text); }
+void SongBrowser::onModeChange(UString text) { this->onModeChange2(std::move(text)); }
 
 void SongBrowser::onModeChange2(UString text, int id) { cv_mod_fposu.setValue(id == 2 || text == UString("fposu")); }
 

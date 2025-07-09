@@ -1,11 +1,13 @@
 #include "UISearchOverlay.h"
 
+#include <utility>
+
 #include "Engine.h"
 #include "Osu.h"
 #include "ResourceManager.h"
 
 UISearchOverlay::UISearchOverlay(float xPos, float yPos, float xSize, float ySize, UString name)
-    : CBaseUIElement(xPos, yPos, xSize, ySize, name) {
+    : CBaseUIElement(xPos, yPos, xSize, ySize, std::move(name)) {
     this->font = resourceManager->getFont("FONT_DEFAULT");
 
     this->iOffsetRight = 0;

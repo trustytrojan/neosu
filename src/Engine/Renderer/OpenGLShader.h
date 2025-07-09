@@ -32,7 +32,7 @@ class OpenGLShader : public Shader {
     void setUniformMatrix4fv(UString name, float *v) override;
 
     // ILLEGAL:
-    int getAttribLocation(UString name);
+    int getAttribLocation(const UString& name);
     int getAndCacheUniformLocation(const UString &name);
 
    private:
@@ -40,9 +40,9 @@ class OpenGLShader : public Shader {
     void initAsync() override;
     void destroy() override;
 
-    bool compile(std::string vertexShader, std::string fragmentShader, bool source);
-    int createShaderFromString(std::string shaderSource, int shaderType);
-    int createShaderFromFile(std::string fileName, int shaderType);
+    bool compile(const std::string& vertexShader, const std::string& fragmentShader, bool source);
+    int createShaderFromString(const std::string& shaderSource, int shaderType);
+    int createShaderFromFile(const std::string& fileName, int shaderType);
 
     std::string sVsh, sFsh;
 

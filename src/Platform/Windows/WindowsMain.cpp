@@ -101,7 +101,7 @@ void WindowsMain::handle_osz(const char *osz_path) {
     std::string mapset_dir = MCENGINE_DATA_DIR "maps\\";
     mapset_dir.append(std::to_string(set_id));
     mapset_dir.append("\\");
-    if(!env->directoryExists(mapset_dir)) {
+    if(!Environment::directoryExists(mapset_dir)) {
         env->createDirectory(mapset_dir);
     }
     if(!extract_beatmapset(reinterpret_cast<const u8 *>(osz.readFile()), osz.getFileSize(), mapset_dir)) {

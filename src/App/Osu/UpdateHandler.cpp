@@ -144,7 +144,7 @@ bool UpdateHandler::_downloadUpdate() {
     return true;
 }
 
-void UpdateHandler::_installUpdate(std::string zipFilePath) {
+void UpdateHandler::_installUpdate(const std::string& zipFilePath) {
     debugLog("UpdateHandler::installUpdate( %s )\n", zipFilePath.c_str());
     this->status = STATUS::STATUS_INSTALLING_UPDATE;
 

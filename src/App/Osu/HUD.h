@@ -45,7 +45,7 @@ class HUD : public OsuScreen {
     void drawHitErrorBar(Beatmap *beatmap);
     void drawPlayfieldBorder(Vector2 playfieldCenter, Vector2 playfieldSize, float hitcircleDiameter);
     void drawPlayfieldBorder(Vector2 playfieldCenter, Vector2 playfieldSize, float hitcircleDiameter, float borderSize);
-    void drawLoadingSmall(UString text);
+    void drawLoadingSmall(const UString& text);
     void drawBeatmapImportSpinner();
     void drawScoreNumber(unsigned long long number, float scale = 1.0f, bool drawLeadingZeroes = false);
     void drawComboNumber(unsigned long long number, float scale = 1.0f, bool drawLeadingZeroes = false);
@@ -149,7 +149,7 @@ class HUD : public OsuScreen {
                                float beatmapPercentFinishedPlayable, const std::vector<BREAK> &breaks);
     void drawInputOverlay(int numK1, int numK2, int numM1, int numM2);
 
-    void drawStatisticText(const UString text);
+    void drawStatisticText(const UString& text);
 
     float getCursorScaleFactor();
     float getCursorTrailScaleFactor();

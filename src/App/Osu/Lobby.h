@@ -42,8 +42,8 @@ class Lobby : public OsuScreen {
     CBaseUIContainer* setVisible(bool visible) override;
 
     void addRoom(Room* room);
-    void joinRoom(u32 id, UString password);
-    void updateRoom(Room room);
+    void joinRoom(u32 id, const UString& password);
+    void updateRoom(const Room& room);
     void removeRoom(u32 room_id);
     void updateLayout(Vector2 newResolution);
 

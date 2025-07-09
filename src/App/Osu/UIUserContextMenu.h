@@ -32,7 +32,7 @@ class UIUserContextMenuScreen : public OsuScreen {
 
 class UIUserLabel : public CBaseUILabel {
    public:
-    UIUserLabel(u32 user_id, UString username);
+    UIUserLabel(u32 user_id, const UString& username);
 
     void onMouseUpInside() override;
 

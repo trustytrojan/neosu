@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include <fstream>
+#include <utility>
 
 #include "Bancho.h"  // md5
 #include "BanchoFile.h"
@@ -233,7 +234,7 @@ BeatmapSet *Database::addBeatmapSet(std::string beatmapFolderPath, i32 set_id_ov
     return beatmap;
 }
 
-int Database::addScore(FinishedScore score) {
+int Database::addScore(const FinishedScore& score) {
     this->addScoreRaw(score);
     this->sortScores(score.beatmap_hash);
 
@@ -379,7 +380,7 @@ std::vector<UString> Database::getPlayerNamesWithScoresForUserSwitcher() {
     return names;
 }
 
-Database::PlayerPPScores Database::getPlayerPPScores(UString playerName) {
+Database::PlayerPPScores Database::getPlayerPPScores(const UString& playerName) {
     std::lock_guard<std::mutex> lock(this->scores_mtx);
     PlayerPPScores ppScores;
     ppScores.totalScore = 0;
@@ -443,7 +444,7 @@ Database::PlayerPPScores Database::getPlayerPPScores(UString playerName) {
     return ppScores;
 }
 
-Database::PlayerStats Database::calculatePlayerStats(UString playerName) {
+Database::PlayerStats Database::calculatePlayerStats(const UString& playerName) {
     if(!this->bDidScoresChangeForStats && playerName == this->prevPlayerStats.name) return this->prevPlayerStats;
 
     const PlayerPPScores ps = this->getPlayerPPScores(playerName);
@@ -1668,7 +1669,7 @@ void Database::saveScores() {
     debugLog("Saved %d scores in %f seconds.\n", nb_scores, (Timing::getTimeReal() - startTime));
 }
 
-BeatmapSet *Database::loadRawBeatmap(std::string beatmapPath) {
+BeatmapSet *Database::loadRawBeatmap(const std::string& beatmapPath) {
     if(cv_debug.getBool()) debugLog("BeatmapDatabase::loadRawBeatmap() : %s\n", beatmapPath.c_str());
 
     // try loading all diffs

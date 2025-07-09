@@ -1,6 +1,7 @@
 #include "RoomScreen.h"
 
 #include <sstream>
+#include <utility>
 
 #include "BackgroundImageHandler.h"
 #include "Bancho.h"
@@ -646,7 +647,7 @@ void RoomScreen::on_room_updated(Room room) {
 }
 
 void RoomScreen::on_match_started(Room room) {
-    bancho.room = room;
+    bancho.room = std::move(room);
     if(osu->getSelectedBeatmap() == NULL) {
         debugLog("We received MATCH_STARTED without being ready, wtf!\n");
         return;

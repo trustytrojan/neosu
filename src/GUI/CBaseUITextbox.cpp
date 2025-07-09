@@ -5,6 +5,8 @@
 
 #include "CBaseUITextbox.h"
 
+#include <utility>
+
 #include "App.h"
 #include "ConVar.h"
 #include "Cursors.h"
@@ -19,7 +21,7 @@
 
 
 CBaseUITextbox::CBaseUITextbox(float xPos, float yPos, float xSize, float ySize, UString name)
-    : CBaseUIElement(xPos, yPos, xSize, ySize, name) {
+    : CBaseUIElement(xPos, yPos, xSize, ySize, std::move(name)) {
     this->setKeepActive(true);
 
     this->grabs_clicks = true;

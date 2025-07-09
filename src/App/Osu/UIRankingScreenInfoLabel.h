@@ -1,4 +1,6 @@
 #pragma once
+#include <utility>
+
 #include "CBaseUIElement.h"
 
 class McFont;
@@ -14,12 +16,12 @@ class UIRankingScreenInfoLabel : public CBaseUIElement {
 
     void setFromBeatmap(Beatmap *beatmap, DatabaseBeatmap *diff2);
 
-    void setArtist(std::string artist) { this->sArtist = artist; }
-    void setTitle(std::string title) { this->sTitle = title; }
-    void setDiff(std::string diff) { this->sDiff = diff; }
-    void setMapper(std::string mapper) { this->sMapper = mapper; }
-    void setPlayer(std::string player) { this->sPlayer = player; }
-    void setDate(std::string date) { this->sDate = date; }
+    void setArtist(std::string artist) { this->sArtist = std::move(artist); }
+    void setTitle(std::string title) { this->sTitle = std::move(title); }
+    void setDiff(std::string diff) { this->sDiff = std::move(diff); }
+    void setMapper(std::string mapper) { this->sMapper = std::move(mapper); }
+    void setPlayer(std::string player) { this->sPlayer = std::move(player); }
+    void setDate(std::string date) { this->sDate = std::move(date); }
 
     float getMinimumWidth();
     float getMinimumHeight();

@@ -1,4 +1,6 @@
 #pragma once
+#include <utility>
+
 #include "CBaseUIElement.h"
 
 class McFont;
@@ -15,12 +17,12 @@ class CBaseUIButton : public CBaseUIElement {
 
     // callbacks, either void or with ourself as the argument
     typedef fastdelegate::FastDelegate0<> ButtonClickVoidCallback;
-    CBaseUIButton *setClickCallback(ButtonClickVoidCallback clickCallback) {
+    CBaseUIButton *setClickCallback(const ButtonClickVoidCallback& clickCallback) {
         this->clickVoidCallback = clickCallback;
         return this;
     }
     typedef fastdelegate::FastDelegate1<CBaseUIButton *> ButtonClickCallback;
-    CBaseUIButton *setClickCallback(ButtonClickCallback clickCallback) {
+    CBaseUIButton *setClickCallback(const ButtonClickCallback& clickCallback) {
         this->clickCallback = clickCallback;
         return this;
     }
@@ -63,7 +65,7 @@ class CBaseUIButton : public CBaseUIElement {
     }
 
     CBaseUIButton *setText(UString text) {
-        this->sText = text;
+        this->sText = std::move(text);
         this->updateStringMetrics();
         return this;
     }

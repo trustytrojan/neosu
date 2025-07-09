@@ -56,7 +56,7 @@ bool Bancho::submit_scores() {
     }
 }
 
-void update_channel(UString name, UString topic, i32 nb_members) {
+void update_channel(const UString& name, const UString& topic, i32 nb_members) {
     Bancho::Channel *chan;
     auto name_str = std::string(name.toUtf8());
     auto it = chat_channels.find(name_str);

@@ -15,7 +15,7 @@ class UIModSelectorModButton : public CBaseUIButton {
     void resetState();
 
     void setState(int state);
-    void setState(unsigned int state, bool initialState, ConVar *cvar, UString modName, UString tooltipText,
+    void setState(unsigned int state, bool initialState, ConVar *cvar, UString modName, const UString& tooltipText,
                   std::function<SkinImage *()> getImageFunc);
     void setBaseScale(float xScale, float yScale);
     void setAvailable(bool available) { this->bAvailable = available; }

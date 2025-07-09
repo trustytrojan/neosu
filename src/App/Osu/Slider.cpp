@@ -1,5 +1,7 @@
 #include "Slider.h"
 
+#include <utility>
+
 #include "AnimationHandler.h"
 #include "Bancho.h"
 #include "Beatmap.h"
@@ -31,8 +33,8 @@ Slider::Slider(char stype, int repeat, float pixelLength, std::vector<Vector2> p
     this->cType = stype;
     this->iRepeat = repeat;
     this->fPixelLength = pixelLength;
-    this->points = points;
-    this->hitSounds = hitSounds;
+    this->points = std::move(points);
+    this->hitSounds = std::move(hitSounds);
     this->fSliderTime = sliderTime;
     this->fSliderTimeWithoutRepeats = sliderTimeWithoutRepeats;
 

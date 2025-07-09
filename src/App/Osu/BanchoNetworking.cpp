@@ -209,7 +209,7 @@ size_t curl_write(void *contents, size_t size, size_t nmemb, void *userp) {
     return realsize;
 }
 
-static void send_api_request(CURL *curl, APIRequest api_out) {
+static void send_api_request(CURL *curl, const APIRequest& api_out) {
     // XXX: Use download()
 
     Packet response;
@@ -511,7 +511,7 @@ void receive_bancho_packets() {
     }
 }
 
-void send_api_request(APIRequest request) {
+void send_api_request(const APIRequest& request) {
     if(bancho.user_id <= 0) {
         debugLog("Cannot send API request of type %u since we are not logged in.\n",
                  static_cast<unsigned int>(request.type));

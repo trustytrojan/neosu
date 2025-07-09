@@ -1,5 +1,7 @@
 #include "SongButton.h"
 
+#include <utility>
+
 #include "CollectionButton.h"
 #include "ScoreButton.h"
 #include "SongBrowser.h"
@@ -21,7 +23,7 @@
 
 SongButton::SongButton(SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu, float xPos,
                        float yPos, float xSize, float ySize, UString name, DatabaseBeatmap *databaseBeatmap)
-    : Button(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, name) {
+    : Button(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, std::move(name)) {
     this->databaseBeatmap = databaseBeatmap;
 
     // settings

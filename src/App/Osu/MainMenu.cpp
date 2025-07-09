@@ -1,5 +1,7 @@
 #include "MainMenu.h"
 
+#include <utility>
+
 #include "AnimationHandler.h"
 #include "BackgroundImageHandler.h"
 #include "Bancho.h"
@@ -1287,7 +1289,7 @@ void MainMenu::writeVersionFile() {
 }
 
 MainMenuButton *MainMenu::addMainMenuButton(UString text) {
-    MainMenuButton *button = new MainMenuButton(this->vSize.x, 0, 1, 1, "", text);
+    MainMenuButton *button = new MainMenuButton(this->vSize.x, 0, 1, 1, "", std::move(text));
     button->setFont(osu->getSubTitleFont());
     button->setVisible(false);
 
@@ -1403,7 +1405,7 @@ void MainMenu::onVersionPressed() {
 }
 
 MainMenuCubeButton::MainMenuCubeButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
-    : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {}
+    : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), std::move(text)) {}
 
 void MainMenuCubeButton::draw() {
     // draw nothing
@@ -1427,7 +1429,7 @@ void MainMenuCubeButton::onMouseOutside() {
 }
 
 MainMenuButton::MainMenuButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
-    : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {}
+    : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), std::move(text)) {}
 
 void MainMenuButton::onMouseDownInside() {
     if(g_main_menu->cube->isMouseInside()) return;

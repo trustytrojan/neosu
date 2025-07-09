@@ -9,8 +9,8 @@
 
 
 
-SkinImage::SkinImage(Skin *skin, std::string skinElementName, Vector2 baseSizeForScaling2x, float osuSize,
-                     std::string animationSeparator, bool ignoreDefaultSkin) {
+SkinImage::SkinImage(Skin *skin, const std::string& skinElementName, Vector2 baseSizeForScaling2x, float osuSize,
+                     const std::string& animationSeparator, bool ignoreDefaultSkin) {
     this->skin = skin;
     this->vBaseSizeForScaling2x = baseSizeForScaling2x;
     this->fOsuSize = osuSize;
@@ -53,7 +53,7 @@ SkinImage::SkinImage(Skin *skin, std::string skinElementName, Vector2 baseSizeFo
         this->fFrameDuration = 1.0f / (float)this->images.size();
 }
 
-bool SkinImage::load(std::string skinElementName, std::string animationSeparator, bool ignoreDefaultSkin) {
+bool SkinImage::load(const std::string& skinElementName, const std::string& animationSeparator, bool ignoreDefaultSkin) {
     std::string animatedSkinElementStartName = skinElementName;
     animatedSkinElementStartName.append(animationSeparator);
     animatedSkinElementStartName.append("0");
@@ -84,7 +84,7 @@ bool SkinImage::load(std::string skinElementName, std::string animationSeparator
     return this->images.size() > 0;  // if any image was found
 }
 
-bool SkinImage::loadImage(std::string skinElementName, bool ignoreDefaultSkin) {
+bool SkinImage::loadImage(const std::string& skinElementName, bool ignoreDefaultSkin) {
     std::string filepath1 = this->skin->getFilePath();
     filepath1.append(skinElementName);
     filepath1.append("@2x.png");

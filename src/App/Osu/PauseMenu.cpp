@@ -1,5 +1,7 @@
 #include "PauseMenu.h"
 
+#include <utility>
+
 #include "AnimationHandler.h"
 #include "Bancho.h"
 #include "Beatmap.h"
@@ -397,7 +399,7 @@ void PauseMenu::setContinueEnabled(bool continueEnabled) {
 }
 
 UIPauseMenuButton *PauseMenu::addButton(std::function<Image *()> getImageFunc, UString btn_name) {
-    UIPauseMenuButton *button = new UIPauseMenuButton(getImageFunc, 0, 0, 0, 0, btn_name);
+    UIPauseMenuButton *button = new UIPauseMenuButton(std::move(getImageFunc), 0, 0, 0, 0, std::move(btn_name));
     this->addBaseUIElement(button);
     this->buttons.push_back(button);
     return button;

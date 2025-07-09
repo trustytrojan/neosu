@@ -1,5 +1,7 @@
 #include "UIModSelectorModButton.h"
 
+#include <utility>
+
 #include "AnimationHandler.h"
 #include "Bancho.h"
 #include "BanchoNetworking.h"
@@ -18,7 +20,7 @@
 
 UIModSelectorModButton::UIModSelectorModButton(ModSelector *osuModSelector, float xPos, float yPos, float xSize,
                                                float ySize, UString name)
-    : CBaseUIButton(xPos, yPos, xSize, ySize, name, "") {
+    : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), "") {
     this->osuModSelector = osuModSelector;
     this->iState = 0;
     this->vScale = this->vBaseScale = Vector2(1, 1);
@@ -244,7 +246,7 @@ void UIModSelectorModButton::setState(int state) {
 }
 
 void UIModSelectorModButton::setState(unsigned int state, bool initialState, ConVar *cvar, UString modName,
-                                      UString tooltipText, std::function<SkinImage *()> getImageFunc) {
+                                      const UString& tooltipText, std::function<SkinImage *()> getImageFunc) {
     // dynamically add new state
     while(this->states.size() < state + 1) {
         STATE t;
@@ -252,9 +254,9 @@ void UIModSelectorModButton::setState(unsigned int state, bool initialState, Con
         this->states.push_back(t);
     }
     this->states[state].cvar = cvar;
-    this->states[state].modName = modName;
+    this->states[state].modName = std::move(modName);
     this->states[state].tooltipTextLines = tooltipText.split("\n");
-    this->states[state].getImageFunc = getImageFunc;
+    this->states[state].getImageFunc = std::move(getImageFunc);
 
     // set initial state image
     if(this->states.size() == 1)

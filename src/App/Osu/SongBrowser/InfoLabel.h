@@ -1,4 +1,6 @@
 #pragma once
+#include <utility>
+
 #include "CBaseUIButton.h"
 
 class McFont;
@@ -15,10 +17,10 @@ class InfoLabel : public CBaseUIButton {
 
     void setFromBeatmap(Beatmap *beatmap, DatabaseBeatmap *diff2);
 
-    void setArtist(std::string artist) { this->sArtist = artist; }
-    void setTitle(std::string title) { this->sTitle = title; }
-    void setDiff(std::string diff) { this->sDiff = diff; }
-    void setMapper(std::string mapper) { this->sMapper = mapper; }
+    void setArtist(std::string artist) { this->sArtist = std::move(artist); }
+    void setTitle(std::string title) { this->sTitle = std::move(title); }
+    void setDiff(std::string diff) { this->sDiff = std::move(diff); }
+    void setMapper(std::string mapper) { this->sMapper = std::move(mapper); }
 
     void setLengthMS(unsigned long lengthMS) { this->iLengthMS = lengthMS; }
     void setBPM(int minBPM, int maxBPM, int mostCommonBPM) {

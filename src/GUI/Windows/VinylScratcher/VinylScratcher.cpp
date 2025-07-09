@@ -1,5 +1,7 @@
 #include "VinylScratcher.h"
 
+#include <utility>
+
 #include "AnimationHandler.h"
 #include "CBaseUIButton.h"
 #include "CBaseUIContainer.h"
@@ -187,7 +189,7 @@ void VinylScratcher::onResized() {
 }
 
 bool VinylScratcher::tryPlayFile(std::string filepath) {
-    VinylScratcher::stream2->rebuild(filepath);
+    VinylScratcher::stream2->rebuild(std::move(filepath));
 
     if(soundEngine->play(VinylScratcher::stream2)) {
         soundEngine->stop(VinylScratcher::stream2);

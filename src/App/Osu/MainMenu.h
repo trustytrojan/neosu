@@ -1,4 +1,6 @@
 #pragma once
+#include <utility>
+
 #include "CBaseUIButton.h"
 #include "MouseListener.h"
 #include "OsuScreen.h"
@@ -23,7 +25,7 @@ class ConVar;
 class MainMenuPauseButton : public CBaseUIButton {
    public:
     MainMenuPauseButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
-        : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {
+        : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), std::move(text)) {
         this->bIsPaused = true;
     }
 

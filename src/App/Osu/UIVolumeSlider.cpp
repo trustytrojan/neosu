@@ -7,13 +7,15 @@
 
 #include "UIVolumeSlider.h"
 
+#include <utility>
+
 #include "AnimationHandler.h"
 #include "Engine.h"
 #include "Osu.h"
 #include "ResourceManager.h"
 
 UIVolumeSlider::UIVolumeSlider(float xPos, float yPos, float xSize, float ySize, UString name)
-    : CBaseUISlider(xPos, yPos, xSize, ySize, name) {
+    : CBaseUISlider(xPos, yPos, xSize, ySize, std::move(name)) {
     this->type = TYPE::MASTER;
     this->bSelected = false;
 

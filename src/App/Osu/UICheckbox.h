@@ -7,7 +7,7 @@ class UICheckbox : public CBaseUICheckbox {
 
     void mouse_update(bool *propagate_clicks) override;
 
-    void setTooltipText(UString text);
+    void setTooltipText(const UString& text);
 
    private:
     void onFocusStolen() override;

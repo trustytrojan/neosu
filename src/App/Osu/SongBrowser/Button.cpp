@@ -1,5 +1,7 @@
 #include "Button.h"
 
+#include <utility>
+
 #include "SongBrowser.h"
 // ---
 
@@ -24,7 +26,7 @@ float Button::lastHoverSoundTime = 0;
 
 Button::Button(SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu, float xPos, float yPos,
                float xSize, float ySize, UString name)
-    : CBaseUIButton(xPos, yPos, xSize, ySize, name, "") {
+    : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), "") {
     this->view = view;
     this->songBrowser = songBrowser;
     this->contextMenu = contextMenu;

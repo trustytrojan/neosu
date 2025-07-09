@@ -32,7 +32,7 @@ class VSMusicBrowser : public CBaseUIElement {
 
     void onInvalidFile();
 
-    void setFileClickedCallback(FileClickedCallback callback) { this->fileClickedCallback = callback; }
+    void setFileClickedCallback(const FileClickedCallback& callback) { this->fileClickedCallback = callback; }
 
    protected:
     void onMoved() override;
@@ -50,7 +50,7 @@ class VSMusicBrowser : public CBaseUIElement {
     };
 
    private:
-    void updateFolder(std::string baseFolder, size_t fromDepth);
+    void updateFolder(const std::string& baseFolder, size_t fromDepth);
     void updateDrives();
     void updatePlayingSelection(bool fromInvalidSelection = false);
 

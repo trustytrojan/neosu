@@ -15,6 +15,7 @@
 #include <cstddef>
 #include <cstring>
 #include <mutex>
+#include <utility>
 
 #include "Engine.h"
 #include "Environment.h"
@@ -225,7 +226,7 @@ void Image::saveToImage(unsigned char *data, unsigned int width, unsigned int he
     fclose(fp);
 }
 
-Image::Image(std::string filepath, bool mipmapped, bool keepInSystemMemory) : Resource(filepath) {
+Image::Image(std::string filepath, bool mipmapped, bool keepInSystemMemory) : Resource(std::move(filepath)) {
     this->bMipmapped = mipmapped;
     this->bKeepInSystemMemory = keepInSystemMemory;
 

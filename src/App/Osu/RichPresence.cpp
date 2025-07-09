@@ -26,7 +26,7 @@ const UString RichPresence::KEY_DISCORD_DETAILS = "details";
 UString last_status = "[neosu]\nWaking up";
 Action last_action = IDLE;
 
-void crop_to(UString str, char* output, int max_len) {
+void crop_to(const UString& str, char* output, int max_len) {
     if(str.lengthUtf8() < max_len) {
         strcpy(output, str.toUtf8());
     } else {

@@ -1,5 +1,7 @@
 #include "UIButton.h"
 
+#include <utility>
+
 #include "AnimationHandler.h"
 #include "Engine.h"
 #include "Osu.h"
@@ -13,7 +15,7 @@
 static float button_sound_cooldown = 0.f;
 
 UIButton::UIButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
-    : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {
+    : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), std::move(text)) {
     this->bDefaultSkin = false;
     this->color = 0xffffffff;
     this->backupColor = this->color;
@@ -135,4 +137,4 @@ void UIButton::animateClickColor() {
     anim->moveLinear(&this->fAnim, 0.0f, 0.5f, true);
 }
 
-void UIButton::setTooltipText(UString text) { this->tooltipTextLines = text.split("\n"); }
+void UIButton::setTooltipText(const UString& text) { this->tooltipTextLines = text.split("\n"); }

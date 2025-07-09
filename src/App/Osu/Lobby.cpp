@@ -1,5 +1,7 @@
 #include "Lobby.h"
 
+#include <utility>
+
 #include "Bancho.h"
 #include "BanchoNetworking.h"
 #include "BanchoUsers.h"
@@ -199,7 +201,7 @@ void Lobby::addRoom(Room* room) {
     this->updateLayout(this->getSize());
 }
 
-void Lobby::joinRoom(u32 id, UString password) {
+void Lobby::joinRoom(u32 id, const UString& password) {
     Packet packet;
     packet.id = JOIN_ROOM;
     write<u32>(&packet, id);
@@ -218,7 +220,7 @@ void Lobby::joinRoom(u32 id, UString password) {
     osu->getNotificationOverlay()->addNotification("Joining room...");
 }
 
-void Lobby::updateRoom(Room room) {
+void Lobby::updateRoom(const Room& room) {
     for(auto old_room : this->rooms) {
         if(old_room->id == room.id) {
             *old_room = room;

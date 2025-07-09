@@ -3,7 +3,7 @@
 
 class CBaseUITextField : public CBaseUIScrollView {
    public:
-    CBaseUITextField(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, UString name = "",
+    CBaseUITextField(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, const UString& name = "",
                      UString text = "");
     ~CBaseUITextField() override { ; }
 
@@ -14,7 +14,7 @@ class CBaseUITextField : public CBaseUIScrollView {
         return this;
     }
 
-    CBaseUITextField *append(UString text);
+    CBaseUITextField *append(const UString& text);
 
     void onResized() override;
 

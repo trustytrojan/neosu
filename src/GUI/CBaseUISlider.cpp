@@ -1,5 +1,7 @@
 #include "CBaseUISlider.h"
 
+#include <utility>
+
 #include "AnimationHandler.h"
 #include "Engine.h"
 #include "Keyboard.h"
@@ -11,7 +13,7 @@
 
 
 CBaseUISlider::CBaseUISlider(float xPos, float yPos, float xSize, float ySize, UString name)
-    : CBaseUIElement(xPos, yPos, xSize, ySize, name) {
+    : CBaseUIElement(xPos, yPos, xSize, ySize, std::move(name)) {
     this->grabs_clicks = true;
 
     this->bDrawFrame = true;

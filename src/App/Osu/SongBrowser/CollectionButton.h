@@ -4,7 +4,7 @@
 class CollectionButton : public Button {
    public:
     CollectionButton(SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu, float xPos,
-                     float yPos, float xSize, float ySize, UString name, UString collectionName,
+                     float yPos, float xSize, float ySize, UString name, const UString& collectionName,
                      std::vector<SongButton *> children);
 
     void draw() override;

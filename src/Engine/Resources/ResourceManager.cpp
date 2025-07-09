@@ -13,6 +13,7 @@
 #include "Resource.h"
 
 #include <algorithm>
+#include <utility>
 
 ResourceManager::ResourceManager() {
     this->bNextLoadAsync = false;
@@ -219,7 +220,7 @@ Image *ResourceManager::loadImageAbs(std::string absoluteFilepath, std::string r
     if(res != nullptr) return res;
 
     // create instance and load it
-    Image *img = g->createImage(absoluteFilepath, mipmapped, keepInSystemMemory);
+    Image *img = g->createImage(std::move(absoluteFilepath), mipmapped, keepInSystemMemory);
     setResourceName(img, resourceName);
 
     loadResource(img, true);
@@ -228,7 +229,7 @@ Image *ResourceManager::loadImageAbs(std::string absoluteFilepath, std::string r
 }
 
 Image *ResourceManager::loadImageAbsUnnamed(std::string absoluteFilepath, bool mipmapped, bool keepInSystemMemory) {
-    Image *img = g->createImage(absoluteFilepath, mipmapped, keepInSystemMemory);
+    Image *img = g->createImage(std::move(absoluteFilepath), mipmapped, keepInSystemMemory);
 
     loadResource(img, true);
 
@@ -265,7 +266,7 @@ McFont *ResourceManager::loadFont(std::string filepath, std::string resourceName
     return fnt;
 }
 
-McFont *ResourceManager::loadFont(std::string filepath, std::string resourceName, std::vector<wchar_t> characters,
+McFont *ResourceManager::loadFont(std::string filepath, std::string resourceName, const std::vector<wchar_t>& characters,
                                   int fontSize, bool antialiasing, int fontDPI) {
     auto res = checkIfExistsAndHandle<McFont>(resourceName);
     if(res != nullptr) return res;
@@ -300,7 +301,7 @@ Sound *ResourceManager::loadSoundAbs(std::string filepath, std::string resourceN
     if(res != nullptr) return res;
 
     // create instance and load it
-    Sound *snd = new Sound(filepath, stream, threeD, loop);
+    Sound *snd = new Sound(std::move(filepath), stream, threeD, loop);
     setResourceName(snd, resourceName);
 
     loadResource(snd, true);
@@ -339,7 +340,7 @@ Shader *ResourceManager::createShader(std::string vertexShader, std::string frag
     if(res != nullptr) return res;
 
     // create instance and load it
-    Shader *shader = g->createShaderFromSource(vertexShader, fragmentShader);
+    Shader *shader = g->createShaderFromSource(std::move(vertexShader), std::move(fragmentShader));
     setResourceName(shader, resourceName);
 
     loadResource(shader, true);
@@ -348,7 +349,7 @@ Shader *ResourceManager::createShader(std::string vertexShader, std::string frag
 }
 
 Shader *ResourceManager::createShader(std::string vertexShader, std::string fragmentShader) {
-    Shader *shader = g->createShaderFromSource(vertexShader, fragmentShader);
+    Shader *shader = g->createShaderFromSource(std::move(vertexShader), std::move(fragmentShader));
 
     loadResource(shader, true);
 

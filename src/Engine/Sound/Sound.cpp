@@ -1,6 +1,7 @@
 #include "Sound.h"
 
 #include <sstream>
+#include <utility>
 
 #include "Bancho.h"
 #include "ConVar.h"
@@ -10,7 +11,7 @@
 #include "ResourceManager.h"
 #include "SoundEngine.h"
 
-Sound::Sound(std::string filepath, bool stream, bool overlayable, bool loop) : Resource(filepath) {
+Sound::Sound(std::string filepath, bool stream, bool overlayable, bool loop) : Resource(std::move(filepath)) {
     this->sample = 0;
     this->stream = 0;
     this->bStream = stream;
@@ -436,6 +437,6 @@ bool Sound::isPlaying() {
 bool Sound::isFinished() { return this->bReady && this->bStarted && !this->isPlaying(); }
 
 void Sound::rebuild(std::string newFilePath) {
-    this->sFilePath = newFilePath;
+    this->sFilePath = std::move(newFilePath);
     resourceManager->reloadResource(this);
 }
