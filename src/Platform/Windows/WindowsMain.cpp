@@ -308,18 +308,18 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> & /*
     mainloopPtrHack = this;
     // @spec: TEST THIS?
     // see: Engine.h:250
-// #ifdef _MSC_VER
-//     // When building with MSVC, vprintf() is not returning the correct value unless we have a console allocated.
-//     FILE *dummy;
-// #ifdef _DEBUG
-//     AllocConsole();
-//     freopen_s(&dummy, "CONOUT$", "w", stdout);
-//     freopen_s(&dummy, "CONOUT$", "w", stderr);
-// #else
-//     freopen_s(&dummy, "NUL", "w", stdout);
-//     freopen_s(&dummy, "NUL", "w", stderr);
-// #endif
-// #endif
+    // #ifdef _MSC_VER
+    //     // When building with MSVC, vprintf() is not returning the correct value unless we have a console allocated.
+    //     FILE *dummy;
+    // #ifdef _DEBUG
+    //     AllocConsole();
+    //     freopen_s(&dummy, "CONOUT$", "w", stdout);
+    //     freopen_s(&dummy, "CONOUT$", "w", stderr);
+    // #else
+    //     freopen_s(&dummy, "NUL", "w", stdout);
+    //     freopen_s(&dummy, "NUL", "w", stderr);
+    // #endif
+    // #endif
 
     // register .osk, .osr, .osz, and neosu:// protocol
     register_neosu_file_associations();
@@ -395,6 +395,10 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> & /*
 
     HINSTANCE hInstance = GetModuleHandle(NULL);
 
+    auto hIcon =
+        static_cast<HICON>(LoadImage(hInstance, MAKEINTRESOURCE(1), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED));
+    auto hIconSm = static_cast<HICON>(LoadImage(hInstance, MAKEINTRESOURCE(1), IMAGE_ICON, 16, 16, LR_SHARED));
+
     // prepare window class
     WNDCLASSEXW wc;
 
@@ -404,14 +408,12 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> & /*
     wc.cbClsExtra = 0;
     wc.cbWndExtra = 0;
     wc.hInstance = hInstance;
-    wc.hIcon = NULL;
+    wc.hIcon = hIcon;  // Set the large icon
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     wc.hbrBackground = (HBRUSH)CreateSolidBrush(0x00000000);
     wc.lpszMenuName = NULL;
     wc.lpszClassName = WINDOW_TITLE;
-    // wc.hIconSm			= LoadIcon(hInstance, MAKEINTRESOURCE(1)); // NOTE: load icon named "1" in
-    // /Main/WinIcon.rc file, must link to WinIcon.o which was created with windres.exe
-    wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
+    wc.hIconSm = hIconSm;  // Set the small icon
 
     // register window class
     if(!RegisterClassExW(&wc)) {
@@ -1114,8 +1116,10 @@ HWND WindowsMain::createWinWindow(HINSTANCE hInstance) {
     SetWindowLongPtrW(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
     // NOTE: Hardcoded "1" from resource.rc
-    HICON hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(1));
-    SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+    auto hIcon =
+        static_cast<HICON>(LoadImage(hInstance, MAKEINTRESOURCE(1), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED));
+    auto hIconSm = static_cast<HICON>(LoadImage(hInstance, MAKEINTRESOURCE(1), IMAGE_ICON, 16, 16, LR_SHARED));
+    SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIconSm);
     SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
 
     return hwnd;
