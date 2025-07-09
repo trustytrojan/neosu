@@ -32,6 +32,14 @@ Changelog::Changelog() : ScreenBackable() {
     v38_00.changes.emplace_back("- Added support for older osu!.db versions (~2014)");
     v38_00.changes.emplace_back("- Fixed beatmap downloads sometimes not getting saved correctly");
     v38_00.changes.emplace_back("- Fixed LOGOUT packet triggering errors on some servers");
+    v38_00.changes.emplace_back("- Greatly optimized skin dropdown list performance, for users with many skins");
+    v38_00.changes.emplace_back("- Improved clarity of beatmap background thumbnails (enabled mipmapping to reduce aliasing)");
+    v38_00.changes.emplace_back("- Added CJK/Unicode font support (skin dropdowns, chat, other text)");
+    v38_00.changes.emplace_back("  - Missing font fallback list is currently hardcoded, will be expanded and improved in the future");
+    v38_00.changes.emplace_back("- Fixed letterboxed mode cutting off GUI/HUD elements strangely");
+    v38_00.changes.emplace_back("- Fixed crashing on partially corrupt scores databases");
+    v38_00.changes.emplace_back("- Added support for raw input/sensitivity on Linux");
+
     // TODO: Fix F9 screen bugs
     // TODO: Check for performance regressions
     // Spectating is not included in this release (feature cvar: cv_enable_spectating)
