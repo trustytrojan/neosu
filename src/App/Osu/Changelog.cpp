@@ -40,6 +40,7 @@ Changelog::Changelog() : ScreenBackable() {
     v38_00.changes.emplace_back("- Fixed crashing on partially corrupt scores databases");
     v38_00.changes.emplace_back("- Added support for raw input/sensitivity on Linux");
     v38_00.changes.emplace_back("- Allowed left/right CTRL/ALT/SHIFT keys to be mapped independently");
+    v38_00.changes.emplace_back("- Added option to disable cursor confinement during gameplay - \"Confine Cursor (NEVER)\"");
 
     // TODO: Fix F9 screen bugs
     // TODO: Check for performance regressions

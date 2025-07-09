@@ -6,26 +6,11 @@ on:
       - mcosu-ng
   workflow_dispatch:
 
+#TODO: re-add linux x32 support, need curl dependencies
 
 jobs:
-  matrix-prep:
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-    steps:
-      - id: set-matrix
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" || "${{ github.ref }}" == "refs/heads/master" ]]; then
-            echo "matrix={\"arch\":[\"x64\",\"x32\"],\"include\":[{\"arch\":\"x64\",\"host\":\"x86_64-pc-linux-gnu\"},{\"arch\":\"x32\",\"host\":\"i686-pc-linux-gnu\"}]}" >> $GITHUB_OUTPUT
-          else
-            echo "matrix={\"arch\":[\"x64\"],\"include\":[{\"arch\":\"x64\",\"host\":\"x86_64-pc-linux-gnu\"}]}" >> $GITHUB_OUTPUT
-          fi
-
   build:
-    needs: matrix-prep
     runs-on: ubuntu-latest
-    strategy:
-      matrix: ${{ fromJson(needs.matrix-prep.outputs.matrix) }}
     defaults:
       run:
         working-directory: .
@@ -47,9 +32,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./.ccache
-          key: ccache-linux-${{ matrix.arch }}-${{ github.sha }}
+          key: ccache-linux-x64-${{ github.sha }}
           restore-keys: |
-            ccache-linux-${{ matrix.arch }}-
+            ccache-linux-x64-
 
       - name: Build neosu with Docker
         run: |
@@ -57,7 +42,7 @@ jobs:
           -f .github/workflows/docker/Dockerfile \
           -t neosu-builder .
           docker run --rm \
-            -e HOST=${{ matrix.host }} \
+            -e HOST=x86_64-pc-linux-gnu \
             -e CCACHE_DIR=/ccache \
             --mount type=bind,source="$(pwd)"/build,target=/build \
             --mount type=bind,source="$(pwd)",target=/src,readonly \
@@ -66,5 +51,5 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: neosu-linux-${{ matrix.arch }}
+          name: neosu-linux-x64
           path: ./build/dist
