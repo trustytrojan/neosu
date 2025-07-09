@@ -100,7 +100,7 @@ void BackgroundImageHandler::handleLoadImageForEntry(ENTRY &entry) {
     // start image load
     resourceManager->requestNextLoadAsync();
     resourceManager->requestNextLoadUnmanaged();
-    entry.image = resourceManager->loadImageAbsUnnamed(fullBackgroundImageFilePath);
+    entry.image = resourceManager->loadImageAbsUnnamed(fullBackgroundImageFilePath, true);
 }
 
 Image *BackgroundImageHandler::getLoadBackgroundImage(const DatabaseBeatmap *beatmap) {
