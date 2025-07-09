@@ -2326,7 +2326,6 @@ void OptionsMenu::onSkinSelect() {
         {env->getFoldersInFolder(MCENGINE_DATA_DIR "skins/"), env->getFoldersInFolder(skinFolder.toUtf8())}) {
         for(const auto &skin : dir) {
             skinFolders.push_back(skin);
-            debugLogF("{:s}\n", skin);
         }
     }
 
