@@ -234,7 +234,6 @@ AS_IF([test "$renderer" = "opengl"], [
     AC_DEFINE([MCENGINE_FEATURE_OPENGL], [1], [Defined if the OpenGLLegacy backend is to be used.])
 ])
 
-audiobackendcnt=0
 AUDBACKENDLIST=""
 
 with_bass=unset
@@ -253,7 +252,6 @@ AS_VAR_SET_IF([with_audio],
         done])
 
 AS_IF([test "$with_bass" = "yes" || { test "$with_bass" = "unset" && ! { test "$with_soloud" = "yes"; } ; } ], [
-    ((audiobackendcnt++))
     AUDBACKENDLIST="${AUDBACKENDLIST} BASS"
     with_bass=yes
     AC_DEFINE([MCENGINE_FEATURE_BASS], [1], [Define if the BASS audio backend is desired.])
@@ -261,7 +259,9 @@ AS_IF([test "$with_bass" = "yes" || { test "$with_bass" = "unset" && ! { test "$
     with_bass=no
 ])
 AS_IF([test "$with_soloud" = "yes"], [
-    ((audiobackendcnt++))
+    AS_IF([test "$with_bass" = "yes"], [
+        make_audio_shortcuts=yes
+    ])
     AUDBACKENDLIST="${AUDBACKENDLIST} SoLoud"
     AC_DEFINE([MCENGINE_FEATURE_SOLOUD], [1], [Define if the SoLoud audio backend is desired.])
 ])
@@ -378,8 +378,10 @@ $host_cpu-w64-mingw32-pkg-config $PKGTYPE "\$@"
 __EOF__
     ])
 
+    AC_CHECK_TOOL([WINDRES], [windres], [windres])
+
     CMAKE_SYSTEM_NAME="Windows"
-    CMAKERCOPT="-DCMAKE_RC_COMPILER=$host_cpu-w64-mingw32-windres"
+    CMAKERCOPT="-DCMAKE_RC_COMPILER=$WINDRES"
     SYSNAME="windows"
     DLLEXT=".dll"
     LIBPREFIX=""
@@ -866,7 +868,7 @@ AS_IF([test -n "$ubercompat"], [
 AC_SUBST([ubercompat])
 AM_CONDITIONAL([WINSHARED_DLLS_NEEDED], [test -n "$WINSHARED_DLLS"])
 
-AM_CONDITIONAL([AUDIO_SHORTCUTS], [test "$audiobackendcnt" > 1 && test -n "$WINE" && test "$SYSNAME" = "windows"])
+AM_CONDITIONAL([AUDIO_SHORTCUTS], [test -n "$make_audio_shortcuts" && test -n "$WINE" && test "$SYSNAME" = "windows"])
 
 # output makefile
 AC_CONFIG_FILES([Makefile])

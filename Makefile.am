@@ -270,7 +270,7 @@ lbq := '('
 rb := )
 rbq := ')'
 CURL_CFLAGS += -I$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/include -DCURL_STATICLIB
-CURL_LIBS += -L$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib $(shell find $(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib -type f -not $(lbq) $(lbq) -name '*libz.a' $(rbq) -o $(lbq) -name '*dll*' $(rbq) $(rbq) -execdir printf '%s ' '{''}' ';' | sed -e 's|./lib|-l|g' -e 's|.a||g' -e 's|-lcurl|-l:libcurl.a|g') $\
+CURL_LIBS += -L$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib $(shell find $(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib -type f -not $(lbq) $(lbq) -name '*libz.a' $(rbq) -o $(lbq) -name '*dll*' $(rbq) $(rbq) -execdir printf '%s ' '{''}' ';' | $(SED) -e 's|./lib|-l|g' -e 's|.a||g' -e 's|-lcurl|-l:libcurl.a|g') $\
 			-lws2_32 -lwldap32 -lcrypt32
 
 $(DEPS_PREFIX)/curl.built: $(DEPS_CACHE)/curl-$(CURL_VERSION).source
@@ -771,6 +771,15 @@ BUILT_SOURCES := \
 # making sure deps are built before main compile
 $(neosu_OBJECTS): src/config.h $(BUILT_SOURCES)
 
+if WIN_PLATFORM
+neosu_resource.o: $(srcdir)/$(ASSETS_DIR)/resource.rc $(srcdir)/$(ASSETS_DIR)/icon.ico
+	$(WINDRES) -I $(srcdir)/$(ASSETS_DIR) -i $(srcdir)/$(ASSETS_DIR)/resource.rc -o neosu_resource.o
+
+neosu_LDADD = neosu_resource.o
+else
+neosu_LDADD =
+endif
+
 # add all paths with sources as an include ("-I") flag
 NEOSU_INCLUDE_FLAGS := $(shell find $(srcdir)/src -not -path '*/.*' -type d -printf "-I%p ")
 
@@ -853,7 +862,7 @@ compile_commands.json: mostlyclean-compile
 $(abs_top_srcdir)/.clangd: compile_commands.json
 	@if [ -f $@ ]; then \
 		if grep -q "CompilationDatabase:" $@; then \
-			sed -i 's|CompilationDatabase:.*|CompilationDatabase: $(shell realpath --relative-to=$(abs_top_srcdir) $(CURDIR))|g' $@; \
+			$(SED) -i 's|CompilationDatabase:.*|CompilationDatabase: $(shell realpath --relative-to=$(abs_top_srcdir) $(CURDIR))|g' $@; \
 		else \
 			echo "CompileFlags:" >> $@; \
 			echo "    CompilationDatabase: $(shell realpath --relative-to=$(abs_top_srcdir) $(CURDIR))" >> $@; \
@@ -1005,6 +1014,8 @@ EXTRA_DIST := \
 	$(ASSETS_DIR)/shaders \
 	$(ASSETS_DIR)/fonts \
 	$(ASSETS_DIR)/materials \
+	$(ASSETS_DIR)/icon.ico \
+	$(ASSETS_DIR)/resource.rc \
 	autogen.sh
 
 MAINTAINERCLEANFILES = $(top_srcdir)/src/Makefile.sources
