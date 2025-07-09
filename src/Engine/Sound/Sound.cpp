@@ -382,6 +382,7 @@ u32 Sound::getPositionMS() {
         return 0;
     }
     if(this->bPaused) {
+        this->interpolator.reset(this->paused_position_ms, Timing::getTimeReal(), this->getSpeed());
         return this->paused_position_ms;
     }
 
@@ -393,6 +394,7 @@ u32 Sound::getPositionMS() {
     }
     if(positionBytes < 0) {
         // The stream ended and got freed by BASS_STREAM_AUTOFREE -> invalid handle!
+        this->interpolator.reset(this->length, Timing::getTimeReal(), this->getSpeed());
         return this->length;
     }
 

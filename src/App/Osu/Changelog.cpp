@@ -36,11 +36,12 @@ Changelog::Changelog() : ScreenBackable() {
     v38_00.changes.emplace_back("- Improved clarity of beatmap background thumbnails (enabled mipmapping to reduce aliasing)");
     v38_00.changes.emplace_back("- Added CJK/Unicode font support (skin dropdowns, chat, other text)");
     v38_00.changes.emplace_back("  - Missing font fallback list is currently hardcoded, will be expanded and improved in the future");
+    v38_00.changes.emplace_back("- Added support for raw input/sensitivity on Linux");
+    v38_00.changes.emplace_back("- Added option to disable cursor confinement during gameplay - \"Confine Cursor (NEVER)\"");
+    v38_00.changes.emplace_back("- Allowed left/right CTRL/ALT/SHIFT keys to be mapped independently");
     v38_00.changes.emplace_back("- Fixed letterboxed mode cutting off GUI/HUD elements strangely");
     v38_00.changes.emplace_back("- Fixed crashing on partially corrupt scores databases");
-    v38_00.changes.emplace_back("- Added support for raw input/sensitivity on Linux");
-    v38_00.changes.emplace_back("- Allowed left/right CTRL/ALT/SHIFT keys to be mapped independently");
-    v38_00.changes.emplace_back("- Added option to disable cursor confinement during gameplay - \"Confine Cursor (NEVER)\"");
+    v38_00.changes.emplace_back("- Fixed rate change slider having a much smaller range than it should");
 
     // TODO: Fix F9 screen bugs
     // TODO: Check for performance regressions
