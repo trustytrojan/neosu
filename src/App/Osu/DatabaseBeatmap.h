@@ -54,7 +54,7 @@ class DatabaseBeatmap {
 
         int maxPossibleCombo{};
 
-        LOAD_DIFFOBJ_RESULT() : diffobjects(){}
+        LOAD_DIFFOBJ_RESULT() : diffobjects() {}
     };
 
     struct LOAD_GAMEPLAY_RESULT {
@@ -223,7 +223,9 @@ class DatabaseBeatmap {
     [[nodiscard]] inline float getSliderTickRate() const { return this->fSliderTickRate; }
     [[nodiscard]] inline float getSliderMultiplier() const { return this->fSliderMultiplier; }
 
-    [[nodiscard]] inline const zarray<DatabaseBeatmap::TIMINGPOINT> &getTimingpoints() const { return this->timingpoints; }
+    [[nodiscard]] inline const zarray<DatabaseBeatmap::TIMINGPOINT> &getTimingpoints() const {
+        return this->timingpoints;
+    }
 
     std::string getFullSoundFilePath();
 
@@ -323,14 +325,12 @@ class DatabaseBeatmap {
 
     static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string osuFilePath);
     static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string osuFilePath, const std::atomic<bool> &dead);
-    static CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT calculateSliderTimesClicksTicks(int beatmapVersion,
-                                                                                      std::vector<SLIDER> &sliders,
-                                                                                      zarray<DatabaseBeatmap::TIMINGPOINT> &timingpoints,
-                                                                                      float sliderMultiplier,
-                                                                                      float sliderTickRate);
     static CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT calculateSliderTimesClicksTicks(
-        int beatmapVersion, std::vector<SLIDER> &sliders, zarray<DatabaseBeatmap::TIMINGPOINT> &timingpoints, float sliderMultiplier,
-        float sliderTickRate, const std::atomic<bool> &dead);
+        int beatmapVersion, std::vector<SLIDER> &sliders, zarray<DatabaseBeatmap::TIMINGPOINT> &timingpoints,
+        float sliderMultiplier, float sliderTickRate);
+    static CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT calculateSliderTimesClicksTicks(
+        int beatmapVersion, std::vector<SLIDER> &sliders, zarray<DatabaseBeatmap::TIMINGPOINT> &timingpoints,
+        float sliderMultiplier, float sliderTickRate, const std::atomic<bool> &dead);
 
     std::vector<DatabaseBeatmap *> *difficulties = NULL;
     BeatmapType type;
@@ -348,7 +348,11 @@ class DatabaseBeatmap {
             bool b_inherited = b.msPerBeat >= 0;
             if(a_inherited != b_inherited) return a_inherited;
 
-            return &a < &b;
+            if(a.sampleType != b.sampleType) return static_cast<int>(a.sampleType) < static_cast<int>(b.sampleType);
+            if(a.sampleSet != b.sampleSet) return a.sampleSet < b.sampleSet;
+            if(a.kiai != b.kiai) return a.kiai;
+
+            return false;  // equivalent
         }
     };
 };
@@ -360,7 +364,7 @@ class DatabaseBeatmapBackgroundImagePathLoader : public Resource {
     [[nodiscard]] inline const std::string &getLoadedBackgroundImageFileName() const {
         return this->sLoadedBackgroundImageFileName;
     }
-	[[nodiscard]] Type getResType() const override { return APPDEFINED; } // TODO: handle this better?
+    [[nodiscard]] Type getResType() const override { return APPDEFINED; }  // TODO: handle this better?
    private:
     void init() override;
     void initAsync() override;

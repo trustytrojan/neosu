@@ -621,8 +621,9 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
 
         constexpr auto sliderScoringTimeComparator = [](const OsuDifficultyHitObject::SLIDER_SCORING_TIME &a,
                                                         const OsuDifficultyHitObject::SLIDER_SCORING_TIME &b) -> bool {
-            if(a.time == b.time) return &a < &b;
-            return a.time < b.time;
+            if(a.time != b.time) return a.time < b.time;
+            if(a.type != b.type) return static_cast<int>(a.type) < static_cast<int>(b.type);
+            return false; // equivalent
         };
 
         // 5) sort scoringTimes from earliest to latest
