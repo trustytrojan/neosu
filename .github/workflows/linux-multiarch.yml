@@ -6,11 +6,26 @@ on:
       - mcosu-ng
   workflow_dispatch:
 
-#TODO: re-add linux x32 support, need curl dependencies
 
 jobs:
-  build:
+  matrix-prep:
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - id: set-matrix
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" || "${{ github.ref }}" == "refs/heads/master" ]]; then
+            echo "matrix={\"arch\":[\"x64\",\"x32\"],\"include\":[{\"arch\":\"x64\",\"host\":\"x86_64-pc-linux-gnu\"},{\"arch\":\"x32\",\"host\":\"i686-pc-linux-gnu\"}]}" >> $GITHUB_OUTPUT
+          else
+            echo "matrix={\"arch\":[\"x64\"],\"include\":[{\"arch\":\"x64\",\"host\":\"x86_64-pc-linux-gnu\"}]}" >> $GITHUB_OUTPUT
+          fi
+
+  build:
+    needs: matrix-prep
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.matrix-prep.outputs.matrix) }}
     defaults:
       run:
         working-directory: .
@@ -25,16 +40,16 @@ jobs:
 
       - name: Set up build directory
         run: |
-          mkdir -p "$(pwd)"/build
+          mkdir -p "$(pwd)"/build-out
           mkdir -p "$(pwd)"/.ccache
 
       - name: ccache
         uses: actions/cache@v4
         with:
           path: ./.ccache
-          key: ccache-linux-x64-${{ github.sha }}
+          key: ccache-linux-${{ matrix.arch }}-${{ github.sha }}
           restore-keys: |
-            ccache-linux-x64-
+            ccache-linux-${{ matrix.arch }}-
 
       - name: Build neosu with Docker
         run: |
@@ -42,14 +57,14 @@ jobs:
           -f .github/workflows/docker/Dockerfile \
           -t neosu-builder .
           docker run --rm \
-            -e HOST=x86_64-pc-linux-gnu \
+            -e HOST=${{ matrix.host }} \
             -e CCACHE_DIR=/ccache \
-            --mount type=bind,source="$(pwd)"/build,target=/build \
-            --mount type=bind,source="$(pwd)",target=/src,readonly \
+            --mount type=bind,source="$(pwd)"/build-out,target=/src/build-out \
+            --mount type=bind,source="$(pwd)",target=/src \
             --mount type=bind,source="$(pwd)"/.ccache,target=/ccache \
             neosu-builder
 
       - uses: actions/upload-artifact@v4
         with:
-          name: neosu-linux-x64
-          path: ./build/dist
+          name: neosu-linux-${{ matrix.arch }}
+          path: build-out/dist

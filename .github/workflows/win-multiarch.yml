@@ -55,9 +55,9 @@ jobs:
 
       - name: Building neosu
         run: |
-          autoreconf
-          ./configure --host=${{ matrix.host }}
-          make -j$(nproc) install
+          MAKEFLAGS="-j$(nproc)" ./autogen.sh
+          MAKEFLAGS="-j$(nproc)" ./configure --host=${{ matrix.host }}
+          MAKEFLAGS="-j$(nproc)" make install
 
 #          ./configure --disable-system-deps --enable-static --disable-native --with-audio="bass,soloud" --host=${{ matrix.host }}
       - uses: actions/upload-artifact@v4

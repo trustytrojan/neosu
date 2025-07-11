@@ -249,7 +249,7 @@ void UIModSelectorModButton::setState(unsigned int state, bool initialState, Con
                                       const UString& tooltipText, std::function<SkinImage *()> getImageFunc) {
     // dynamically add new state
     while(this->states.size() < state + 1) {
-        STATE t;
+        STATE t{};
         t.getImageFunc = NULL;
         this->states.push_back(t);
     }

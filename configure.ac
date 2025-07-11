@@ -18,8 +18,8 @@ AC_DEFUN([AX_COUNT_CPUS], [
     AC_CHECK_PROG([GETCONF], [getconf], [getconf])
     AS_IF([test -n "$GETCONF"],
         [n_cpus=$($GETCONF _NPROCESSORS_ONLN 2>/dev/null)],
-        [n_cpus=1])
-    AS_IF([test -z "$n_cpus" -o "$n_cpus" -le "0"], [n_cpus=1])
+        [n_cpus=4])
+    AS_IF([test -z "$n_cpus" -o "$n_cpus" -le "0"], [n_cpus=4])
     AC_SUBST([CPU_COUNT], [$n_cpus])
 ])
 AX_COUNT_CPUS
@@ -330,7 +330,13 @@ EOF
 #!/usr/bin/env sh
 $CXX -m32 "\$@"
 EOF
-        [[ "x$enable_clang" = "xyes" ]] && NEOSU_LDFLAGS="$NEOSU_LDFLAGS -latomic"
+        AS_IF([ "x$enable_clang" = "xyes" ], [
+            NEOSU_LDFLAGS="$NEOSU_LDFLAGS -latomic"
+        ],[
+            # ld complains about libcrypto.a(libcrypto-lib-cast-586.o): warning: relocation against `CAST_S_table1' in read-only section `.text'
+            NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -fno-PIE -no-pie"
+            NEOSU_LDFLAGS="$NEOSU_LDFLAGS -no-pie"
+        ])
         AC_SUBST([NASMOBJ],[elf32])
     ],[
         install -Dm755 /dev/stdin $PWD/build/$target-$CC <<EOF
