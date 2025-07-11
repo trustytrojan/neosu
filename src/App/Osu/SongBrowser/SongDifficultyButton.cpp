@@ -190,7 +190,7 @@ void SongDifficultyButton::updateGrade() {
         return;
     }
 
-    std::lock_guard<std::mutex> lock(db->scores_mtx);
+    std::scoped_lock lock(db->scores_mtx);
     auto db_scores = db->getScores();
     for(auto &score : (*db_scores)[this->databaseBeatmap->getMD5Hash()]) {
         if(score.grade < this->grade) {

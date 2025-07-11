@@ -35,7 +35,7 @@ static std::mutex threads_mtx;
 static std::vector<DownloadThread*> threads;
 
 void abort_downloads() {
-    std::lock_guard<std::mutex> lock(threads_mtx);
+    std::scoped_lock lock(threads_mtx);
     for(auto thread : threads) {
         thread->running = false;
     }
@@ -46,7 +46,7 @@ int update_download_progress(void* clientp, curl_off_t dltotal, curl_off_t dlnow
     (void)ultotal;
     (void)ulnow;
 
-    std::lock_guard<std::mutex> lock(threads_mtx);
+    std::scoped_lock lock(threads_mtx);
     auto result = (DownloadResult*)clientp;
     if(dltotal == 0) {
         result->progress = 0.f;

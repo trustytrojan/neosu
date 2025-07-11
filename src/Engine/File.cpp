@@ -58,7 +58,7 @@ class DirectoryCache final {
 
     // look up a file with case-insensitive matching
     std::pair<std::string, File::FILETYPE> lookup(const fs::path &dirPath, const std::string &filename) {
-        std::lock_guard<std::mutex> lock(this->mutex);
+        std::scoped_lock lock(this->mutex);
 
         std::string dirKey(dirPath.string());
         auto it = this->cache.find(dirKey);

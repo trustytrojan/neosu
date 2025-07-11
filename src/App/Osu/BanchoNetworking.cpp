@@ -60,7 +60,7 @@ size_t curldummy(void *buffer, size_t size, size_t nmemb, void *userp) {
 }
 
 void disconnect() {
-    std::lock_guard<std::mutex> lock(outgoing_mutex);
+    std::scoped_lock lock(outgoing_mutex);
 
     // Logout
     // This is a blocking call, but we *do* want this to block when quitting the game.
@@ -469,7 +469,7 @@ static void handle_api_response(Packet packet) {
 }
 
 void receive_api_responses() {
-    std::lock_guard<std::mutex> lock(api_responses_mutex);
+    std::scoped_lock lock(api_responses_mutex);
     while(!api_response_queue.empty()) {
         Packet incoming = api_response_queue.front();
         api_response_queue.erase(api_response_queue.begin());
@@ -480,7 +480,7 @@ void receive_api_responses() {
 }
 
 void receive_bancho_packets() {
-    std::lock_guard<std::mutex> lock(incoming_mutex);
+    std::scoped_lock lock(incoming_mutex);
     while(!incoming_queue.empty()) {
         Packet incoming = incoming_queue.front();
         incoming_queue.erase(incoming_queue.begin());
@@ -518,7 +518,7 @@ void send_api_request(const APIRequest& request) {
         return;
     }
 
-    std::lock_guard<std::mutex> lock(api_requests_mutex);
+    std::scoped_lock lock(api_requests_mutex);
 
     // Jank way to do things... remove outdated requests now
     api_request_queue.erase(std::remove_if(api_request_queue.begin(), api_request_queue.end(),

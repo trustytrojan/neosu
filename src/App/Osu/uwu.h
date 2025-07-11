@@ -19,7 +19,7 @@ struct lazy_promise {
     ~lazy_promise() {
         // signal thread to stop
         {
-            std::lock_guard<std::mutex> lock(this->funcs_mtx);
+            std::scoped_lock lock(this->funcs_mtx);
             this->keep_running = false;
         }
         this->cv.notify_one();
@@ -32,7 +32,7 @@ struct lazy_promise {
 
     void enqueue(Func func) {
         {
-            std::lock_guard<std::mutex> lock(this->funcs_mtx);
+            std::scoped_lock lock(this->funcs_mtx);
 
             // start thread lazily on first enqueue to avoid construction races
             if(!this->thread_started) {
@@ -46,12 +46,12 @@ struct lazy_promise {
     }
 
     Ret get() {
-        std::lock_guard<std::mutex> lock(this->ret_mtx);
+        std::scoped_lock lock(this->ret_mtx);
         return this->ret;
     }
 
     void set(Ret ret) {
-        std::lock_guard<std::mutex> lock(this->ret_mtx);
+        std::scoped_lock lock(this->ret_mtx);
         this->ret = ret;
     }
 

@@ -355,7 +355,7 @@ void ScoreButton::mouse_update(bool *propagate_clicks) {
             this->score.ppv2_aim_stars = info.aim_stars;
             this->score.ppv2_speed_stars = info.speed_stars;
 
-            std::lock_guard<std::mutex> lock(db->scores_mtx);
+            std::scoped_lock lock(db->scores_mtx);
             for(auto &other : db->scores[this->score.beatmap_hash]) {
                 if(other.unixTimestamp == this->score.unixTimestamp) {
                     other = this->score;

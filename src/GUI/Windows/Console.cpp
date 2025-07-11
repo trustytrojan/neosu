@@ -210,7 +210,7 @@ void Console::mouse_update(bool *propagate_clicks) {
 }
 
 void Console::log(UString text, Color textColor) {
-    std::lock_guard<std::mutex> lk(g_consoleLogMutex);
+    std::scoped_lock lk(g_consoleLogMutex);
 
     if(text.length() < 1) return;
 

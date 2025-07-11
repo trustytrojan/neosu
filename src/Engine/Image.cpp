@@ -30,7 +30,7 @@ std::atomic<bool> zlib_initialized{false};
 
 void garbage_zlib() {
     if(zlib_initialized.load(std::memory_order_acquire)) return;
-    std::lock_guard<std::mutex> lock(zlib_init_mutex);
+    std::scoped_lock lock(zlib_init_mutex);
     if(zlib_initialized.load(std::memory_order_relaxed)) return;
     uLong dummy_crc = crc32(0L, Z_NULL, 0);
     const char test_data[] = "shit";

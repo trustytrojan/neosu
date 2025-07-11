@@ -2484,7 +2484,7 @@ void SongBrowser::rebuildScoreButtons() {
 
     std::vector<FinishedScore> scores;
     if(validBeatmap) {
-        std::lock_guard<std::mutex> lock(db->scores_mtx);
+        std::scoped_lock lock(db->scores_mtx);
         auto diff2 = this->beatmap->getSelectedDifficulty2();
         auto local_scores = db->scores[diff2->getMD5Hash()];
         auto local_best = max_element(local_scores.begin(), local_scores.end(),

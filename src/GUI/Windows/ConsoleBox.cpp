@@ -189,7 +189,7 @@ void ConsoleBox::draw() {
 }
 
 void ConsoleBox::drawLogOverlay() {
-    std::lock_guard<std::mutex> logGuard(this->logMutex);
+    std::scoped_lock logGuard(this->logMutex);
 
     const float dpiScale = this->getDPIScale();
 
@@ -336,7 +336,7 @@ void ConsoleBox::mouse_update(bool *propagate_clicks) {
                                 0.5f);
 
         if(this->fLogYPos == this->logFont->getHeight() * (cv_console_overlay_lines.getInt() + 1)) {
-            std::lock_guard<std::mutex> logGuard(this->logMutex);
+            std::scoped_lock logGuard(this->logMutex);
             this->log_entries.clear();
         }
     }
@@ -628,7 +628,7 @@ void ConsoleBox::toggle(KeyboardEvent &e) {
 }
 
 void ConsoleBox::log(UString text, Color textColor) {
-    std::lock_guard<std::mutex> logGuard(this->logMutex);
+    std::scoped_lock logGuard(this->logMutex);
 
     // remove illegal chars
     {
