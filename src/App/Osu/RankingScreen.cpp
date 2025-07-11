@@ -258,7 +258,7 @@ void RankingScreen::draw() {
 
         float maxStringWidth = 0.0f;
         for(int i = 0; i < this->enabledExperimentalMods.size(); i++) {
-            UString experimentalModName = this->enabledExperimentalMods[i]->getName();
+            UString experimentalModName{this->enabledExperimentalMods[i]->getName()};
             experimentalModName.insert(0, prefix);
             const float width = experimentalModFont->getStringWidth(experimentalModName);
             if(width > maxStringWidth) maxStringWidth = width;
@@ -283,7 +283,7 @@ void RankingScreen::draw() {
         {
             g->translate((int)experimentalModPos.x, (int)experimentalModPos.y);
             for(int i = 0; i < this->enabledExperimentalMods.size(); i++) {
-                UString experimentalModName = this->enabledExperimentalMods[i]->getName();
+                UString experimentalModName{this->enabledExperimentalMods[i]->getName()};
                 experimentalModName.insert(0, prefix);
 
                 g->translate(1.5f, 1.5f);
@@ -438,8 +438,7 @@ void RankingScreen::onWatchClicked() {
 }
 
 void RankingScreen::setScore(FinishedScore score) {
-    auto current_name = cv_name.getString();
-    bool is_same_player = !score.playerName.compare(current_name.toUtf8());
+    bool is_same_player = !score.playerName.compare(cv_name.getString());
 
     this->score = score;
 
@@ -524,7 +523,7 @@ void RankingScreen::setBeatmapInfo(Beatmap *beatmap, DatabaseBeatmap *diff2) {
     this->score.diff2 = diff2;
     this->songInfo->setFromBeatmap(beatmap, diff2);
 
-    UString local_name = cv_name.getString();
+    UString local_name{cv_name.getString()};
     this->songInfo->setPlayer(this->bIsUnranked ? "neosu" : local_name.toUtf8());
 
     // @PPV3: update m_score.ppv3_score, this->score.ppv3_aim_stars, this->score.ppv3_speed_stars,

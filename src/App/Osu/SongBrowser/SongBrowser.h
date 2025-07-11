@@ -81,8 +81,8 @@ class SongBrowser : public ScreenBackable {
     void onDifficultySelected(DatabaseBeatmap *diff2, bool play = false);
 
     void onScoreContextMenu(ScoreButton *scoreButton, int id);
-    void onSongButtonContextMenu(SongButton *songButton, UString text, int id);
-    void onCollectionButtonContextMenu(CollectionButton *collectionButton, UString text, int id);
+    void onSongButtonContextMenu(SongButton *songButton, const UString& text, int id);
+    void onCollectionButtonContextMenu(CollectionButton *collectionButton, const UString& text, int id);
 
     void highlightScore(u64 unixTimestamp);
     void selectRandomBeatmap();
@@ -158,15 +158,15 @@ class SongBrowser : public ScreenBackable {
                                                                        bool doRebuildSongButtons = true);
 
     void onSortScoresClicked(CBaseUIButton *button);
-    void onSortScoresChange(UString text, int id = -1);
+    void onSortScoresChange(const UString& text, int id = -1);
     void onWebClicked(CBaseUIButton *button);
 
     void onQuickGroupClicked(CBaseUIButton *button);
     void onGroupClicked(CBaseUIButton *button);
-    void onGroupChange(UString text, int id = -1);
+    void onGroupChange(const UString& text, int id = -1);
 
     void onSortClicked(CBaseUIButton *button);
-    void onSortChange(UString text, int id = -1);
+    void onSortChange(const UString& text, int id = -1);
     void onSortChangeInt(const UString& text, bool autoScroll);
 
     void onGroupNoGrouping();
@@ -186,8 +186,8 @@ class SongBrowser : public ScreenBackable {
     void onSelectionRandom();
     void onSelectionOptions();
 
-    void onModeChange(UString text);
-    void onModeChange2(UString text, int id = -1);
+    void onModeChange(const UString& text);
+    void onModeChange2(const UString& text, int id = -1);
 
     void onScoreClicked(CBaseUIButton *button);
 

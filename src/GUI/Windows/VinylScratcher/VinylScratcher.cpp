@@ -135,7 +135,7 @@ void VinylScratcher::onFinished() {
     cv_vs_percent.setValue(0.0f);
 }
 
-void VinylScratcher::onFileClicked(std::string filepath, bool reverse) {
+void VinylScratcher::onFileClicked(const std::string& filepath, bool reverse) {
     // check if the file is valid and can be played, if it's valid then play it
     if(tryPlayFile(filepath)) {
         soundEngine->stop(this->stream);

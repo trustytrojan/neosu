@@ -85,7 +85,7 @@ void UIUserContextMenuScreen::open(u32 user_id) {
 
 void UIUserContextMenuScreen::close() { this->menu->setVisible(false); }
 
-void UIUserContextMenuScreen::on_action(UString text, int user_action) {
+void UIUserContextMenuScreen::on_action(const UString& text, int user_action) {
     auto user_info = get_user_info(this->user_id);
     int slot_number = -1;
     if(bancho.is_in_a_multi_room()) {

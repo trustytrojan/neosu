@@ -275,7 +275,6 @@ extern AnimationHandler *animationHandler;
 
 extern Engine *engine;
 
-void _exit(void);
 void _restart(void);
 void _printsize(void);
 void _fullscreen(void);

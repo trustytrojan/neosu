@@ -201,7 +201,7 @@ LegacyReplay::Info LegacyReplay::from_bytes(u8* data, int s_data) {
 bool LegacyReplay::load_from_disk(FinishedScore* score, bool update_db) {
     if(score->peppy_replay_tms > 0) {
         auto osu_folder = cv_osu_folder.getString();
-        auto path = UString::format("%s/Data/r/%s-%llu.osr", osu_folder.toUtf8(), score->beatmap_hash.hash,
+        auto path = UString::format("%s/Data/r/%s-%llu.osr", osu_folder, score->beatmap_hash.hash,
                                     score->peppy_replay_tms);
 
         FILE* replay_file = fopen(path.toUtf8(), "rb");

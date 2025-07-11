@@ -24,12 +24,12 @@ class UIContextMenu : public CBaseUIScrollView {
     void onKeyDown(KeyboardEvent &e) override;
     void onChar(KeyboardEvent &e) override;
 
-    typedef fastdelegate::FastDelegate2<UString, int> ButtonClickCallback;
-    void setClickCallback(ButtonClickCallback clickCallback) { this->clickCallback = clickCallback; }
+    typedef fastdelegate::FastDelegate2<const UString &, int> ButtonClickCallback;
+    void setClickCallback(const ButtonClickCallback& clickCallback) { this->clickCallback = clickCallback; }
 
     void begin(int minWidth = 0, bool bigStyle = false);
-    UIContextMenuButton *addButton(UString text, int id = -1);
-    UIContextMenuTextbox *addTextbox(UString text, int id = -1);
+    UIContextMenuButton *addButton(const UString& text, int id = -1);
+    UIContextMenuTextbox *addTextbox(const UString& text, int id = -1);
 
     void end(bool invertAnimation, bool clampUnderflowAndOverflowAndEnableScrollingIfNecessary);
 

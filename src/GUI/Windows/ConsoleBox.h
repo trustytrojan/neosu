@@ -24,7 +24,7 @@ class ConsoleBox : public CBaseUIElement {
 
     void onResolutionChange(Vector2 newResolution);
 
-    void processCommand(const UString& command);
+    void processCommand(const std::string& command);
     void execConfigFile(std::string filename);
 
     void log(UString text, Color textColor = 0xffffffff);
@@ -86,7 +86,7 @@ class ConsoleBox : public CBaseUIElement {
     std::vector<LOG_ENTRY> log_entries;
     McFont *logFont;
 
-    std::vector<UString> commandHistory;
+    std::vector<std::string> commandHistory;
     int iSelectedHistory;
 
     std::mutex logMutex;

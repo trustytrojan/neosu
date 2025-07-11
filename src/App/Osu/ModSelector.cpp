@@ -1008,7 +1008,7 @@ void ModSelector::updateExperimentalLayout() {
 }
 
 UIModSelectorModButton *ModSelector::setModButtonOnGrid(int x, int y, int state, bool initialState, ConVar *modCvar,
-                                                        UString modName, UString tooltipText,
+                                                        UString modName, const UString& tooltipText,
                                                         std::function<SkinImage *()> getImageFunc) {
     UIModSelectorModButton *modButton = this->getModButtonOnGrid(x, y);
 
@@ -1100,7 +1100,7 @@ CBaseUILabel *ModSelector::addExperimentalLabel(const UString& text) {
     return label;
 }
 
-UICheckbox *ModSelector::addExperimentalCheckbox(const UString& text, UString tooltipText, ConVar *cvar) {
+UICheckbox *ModSelector::addExperimentalCheckbox(const UString& text, const UString& tooltipText, ConVar *cvar) {
     UICheckbox *checkbox = new UICheckbox(0, 0, 0, 35, text, text);
     checkbox->setTooltipText(tooltipText);
     checkbox->setWidthToContent(0);

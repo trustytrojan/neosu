@@ -325,8 +325,8 @@ bool extract_beatmapset(const u8* data, size_t data_s, const std::string& map_di
 
 void download_beatmapset(u32 set_id, float* progress) {
     // Check if we already have downloaded it
-    auto map_dir = UString::format(MCENGINE_DATA_DIR "maps/%d/", set_id);
-    if(env->directoryExists(map_dir.toUtf8())) {
+    auto map_dir = fmt::format(MCENGINE_DATA_DIR "maps/{}/", set_id);
+    if(env->directoryExists(map_dir)) {
         *progress = 1.f;
         return;
     }
@@ -334,18 +334,18 @@ void download_beatmapset(u32 set_id, float* progress) {
     std::vector<u8> data;
 
     auto scheme = cv_use_https.getBool() ? "https://" : "http://";
-    auto download_url = UString::format("%sosu.%s/d/", scheme, bancho.endpoint.toUtf8());
-    if(cv_beatmap_mirror_override.getString().lengthUtf8() > 0) {
+    auto download_url = fmt::format("{:s}osu.{:s}/d/", scheme, bancho.endpoint.toUtf8());
+    if(cv_beatmap_mirror_override.getString().length() > 0) {
         download_url = cv_beatmap_mirror_override.getString();
     }
-    download_url.append(UString::format("%d", set_id));
+    download_url.append(fmt::format("{:d}", set_id));
 
     int response_code = 0;
-    download(download_url.toUtf8(), progress, data, &response_code);
+    download(download_url.c_str(), progress, data, &response_code);
     if(response_code != 200) return;
 
     // Download succeeded: save map to disk
-    if(!extract_beatmapset(data.data(), data.size(), map_dir.toUtf8())) {
+    if(!extract_beatmapset(data.data(), data.size(), map_dir)) {
         *progress = -1.f;
         return;
     }

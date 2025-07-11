@@ -326,8 +326,8 @@ class Skin {
 
     bool compareFilenameWithSkinElementName(const std::string& filename, const std::string& skinElementName);
 
-    SkinImage *createSkinImage(std::string skinElementName, Vector2 baseSizeForScaling2x, float osuSize,
-                               bool ignoreDefaultSkin = false, std::string animationSeparator = "-");
+    SkinImage *createSkinImage(const std::string& skinElementName, Vector2 baseSizeForScaling2x, float osuSize,
+                               bool ignoreDefaultSkin = false, const std::string& animationSeparator = "-");
     void checkLoadImage(Image **addressOfPointer, const std::string& skinElementName, const std::string& resourceName,
                         bool ignoreDefaultSkin = false, const std::string& fileExtension = "png",
                         bool forceLoadMipmaps = false);

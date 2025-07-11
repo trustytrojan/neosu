@@ -85,12 +85,12 @@ SoundEngine::SoundEngine() {
 OUTPUT_DEVICE SoundEngine::getWantedDevice() {
     auto wanted_name = cv_snd_output_device.getString();
     for(auto device : this->outputDevices) {
-        if(device.enabled && device.name == wanted_name) {
+        if(device.enabled && device.name.utf8View() == wanted_name) {
             return device;
         }
     }
 
-    debugLog("Could not find sound device '%s', initializing default one instead.\n", wanted_name.toUtf8());
+    debugLogF("Could not find sound device '{:s}', initializing default one instead.\n", wanted_name);
     return this->getDefaultDevice();
 }
 

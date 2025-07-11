@@ -294,7 +294,7 @@ void HUD::drawDummy() {
     if(cv_draw_inputoverlay.getBool()) this->drawInputOverlay(0, 0, 0, 0);
 
     SCORE_ENTRY scoreEntry;
-    scoreEntry.name = cv_name.getString();
+    scoreEntry.name = cv_name.getString().c_str();
     scoreEntry.combo = 420;
     scoreEntry.score = 12345678;
     scoreEntry.accuracy = 1.0f;
@@ -1266,7 +1266,7 @@ std::vector<SCORE_ENTRY> HUD::getCurrentScores() {
     } else {
         std::lock_guard<std::mutex> lock(db->scores_mtx);
         std::vector<FinishedScore> *singleplayer_scores = &((*db->getScores())[this->beatmap_md5]);
-        bool is_online = cv_songbrowser_scores_sortingtype.getString() == UString("Online Leaderboard");
+        bool is_online = cv_songbrowser_scores_sortingtype.getString() == "Online Leaderboard";
         if(is_online) {
             auto search = db->online_scores.find(this->beatmap_md5);
             if(search != db->online_scores.end()) {
@@ -1298,7 +1298,7 @@ std::vector<SCORE_ENTRY> HUD::getCurrentScores() {
             playerScoreEntry.name = osu->watched_user_name;
             playerScoreEntry.player_id = osu->watched_user_id;
         } else {
-            playerScoreEntry.name = cv_name.getString();
+            playerScoreEntry.name = cv_name.getString().c_str();
             playerScoreEntry.player_id = bancho.user_id;
         }
         playerScoreEntry.entry_id = 0;

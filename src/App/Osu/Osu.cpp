@@ -239,7 +239,7 @@ Osu::Osu() {
     // Initialize skin after sound engine has started, or else sounds won't load properly
     cv_skin.setCallback(fastdelegate::MakeDelegate(this, &Osu::onSkinChange));
     cv_skin_reload.setCallback(fastdelegate::MakeDelegate(this, &Osu::onSkinReload));
-    this->onSkinChange("", cv_skin.getString());
+    this->onSkinChange("", cv_skin.getString().c_str());
 
     // Convar callbacks that should be set after loading the config
     cv_mod_mafham.setCallback(fastdelegate::MakeDelegate(this, &Osu::onModMafhamChange));
@@ -288,13 +288,13 @@ Osu::Osu() {
 
     // load skin
     {
-        UString skinFolder = cv_osu_folder.getString();
+        std::string skinFolder{cv_osu_folder.getString()};
         skinFolder.append("/");
         skinFolder.append(cv_osu_folder_sub_skins.getString());
         skinFolder.append(cv_skin.getString());
         skinFolder.append("/");
         if(this->skin == NULL)  // the skin may already be loaded by Console::execConfigFile() above
-            this->onSkinChange("", cv_skin.getString());
+            this->onSkinChange("", cv_skin.getString().c_str());
 
         // enable async skin loading for user-action skin changes (but not during startup)
         cv_skin_async.setValue(1.0f);
@@ -1080,9 +1080,8 @@ void Osu::onKeyDown(KeyboardEvent &key) {
                         score.player_id = bancho.user_id;
                         score.playerName = bancho.username.toUtf8();
                     } else {
-                        auto local_name = cv_name.getString();
                         score.player_id = 0;
-                        score.playerName = local_name.toUtf8();
+                        score.playerName = cv_name.getString(); // local name
                     }
 
                     double percentFinished = beatmap->getPercentFinished();
@@ -1673,7 +1672,7 @@ void Osu::updateWindowsKeyDisable() {
 
 void Osu::fireResolutionChanged() { this->onResolutionChanged(g_vInternalResolution); }
 
-void Osu::onWindowedResolutionChanged(UString oldValue, UString args) {
+void Osu::onWindowedResolutionChanged(const UString& oldValue, const UString& args) {
     if(env->isFullscreen()) return;
     if(args.length() < 7) return;
 
@@ -1695,7 +1694,7 @@ void Osu::onWindowedResolutionChanged(UString oldValue, UString args) {
     env->center();
 }
 
-void Osu::onInternalResolutionChanged(UString oldValue, UString args) {
+void Osu::onInternalResolutionChanged(const UString& oldValue, const UString& args) {
     if(!env->isFullscreen()) return;
     if(args.length() < 7) return;
 
@@ -1794,7 +1793,7 @@ bool Osu::onShutdown() {
 
 void Osu::onSkinReload() {
     this->bSkinLoadWasReload = true;
-    this->onSkinChange("", cv_skin.getString());
+    this->onSkinChange("", cv_skin.getString().c_str());
 }
 
 void Osu::onSkinChange(const UString &oldValue, const UString &newValue) {
@@ -1803,26 +1802,28 @@ void Osu::onSkinChange(const UString &oldValue, const UString &newValue) {
         if(newValue.length() < 1) return;
     }
 
-    if(newValue == UString("default")) {
-        this->skinScheduledToLoad = new Skin(newValue, MCENGINE_DATA_DIR "materials/default/", true);
+    std::string newString{newValue.utf8View()};
+
+    if(newString == "default") {
+        this->skinScheduledToLoad = new Skin(newString.c_str(), MCENGINE_DATA_DIR "materials/default/", true);
         if(this->skin == NULL) this->skin = this->skinScheduledToLoad;
         this->bSkinLoadScheduled = true;
         return;
     }
 
     std::string neosuSkinFolder = MCENGINE_DATA_DIR "skins/";
-    neosuSkinFolder.append(newValue.toUtf8());
+    neosuSkinFolder.append(newString);
     neosuSkinFolder.append("/");
     if(env->directoryExists(neosuSkinFolder)) {
-        this->skinScheduledToLoad = new Skin(newValue, neosuSkinFolder, false);
+        this->skinScheduledToLoad = new Skin(newString.c_str(), neosuSkinFolder, false);
     } else {
-        UString ppySkinFolder = cv_osu_folder.getString();
+        std::string ppySkinFolder{cv_osu_folder.getString()};
         ppySkinFolder.append("/");
         ppySkinFolder.append(cv_osu_folder_sub_skins.getString());
-        ppySkinFolder.append(newValue);
+        ppySkinFolder.append(newString);
         ppySkinFolder.append("/");
-        std::string sf = ppySkinFolder.toUtf8();
-        this->skinScheduledToLoad = new Skin(newValue, sf, false);
+        std::string sf = ppySkinFolder;
+        this->skinScheduledToLoad = new Skin(newString.c_str(), sf, false);
     }
 
     // initial load
@@ -1930,7 +1931,7 @@ void Osu::updateCursorVisibility() {
     }
 }
 
-void Osu::onRawInputChange(UString /*old*/, UString newValue) {
+void Osu::onRawInputChange(const UString& /*old*/, const UString& newValue) {
     bool newBool = newValue.toBool();
     float sens = cv_mouse_sensitivity.getFloat();
     if(!newBool && (sens < 0.999 || sens > 1.001)) {
@@ -1939,7 +1940,7 @@ void Osu::onRawInputChange(UString /*old*/, UString newValue) {
     }
 }
 
-void Osu::onSensitivityChange(UString /*old*/, UString newValue) {
+void Osu::onSensitivityChange(const UString& /*old*/, const UString& newValue) {
     float newFloat = newValue.toFloat();
     if(!cv_mouse_raw_input.getBool() && (newFloat < 0.999 || newFloat > 1.001)) {
         cv_mouse_raw_input.setValue(true, false);
@@ -2058,9 +2059,9 @@ void Osu::onModFPoSu3DSpheresAAChange(const UString &oldValue, const UString &ne
 
 void Osu::onLetterboxingOffsetChange(const UString &oldValue, const UString &newValue) { this->updateMouseSettings(); }
 
-void Osu::onUserCardChange(UString new_username) {
+void Osu::onUserCardChange(const UString& new_username) {
     // NOTE: force update options textbox to avoid shutdown inconsistency
-    this->getOptionsMenu()->setUsername(std::move(new_username));
+    this->getOptionsMenu()->setUsername(new_username);
     this->userButton->setID(bancho.user_id);
 }
 

@@ -12,6 +12,10 @@
 #define DEFINE_CONVARS
 #include "ConVar.h"
 #include "KeyboardKeys.h"
+
+struct dummyEngine{inline void shutdown() {;}};
+dummyEngine *engine{};
+
 extern void _borderless();
 extern void _center();
 extern void _dpiinfo();
@@ -71,7 +75,7 @@ CONVAR(cmd_dumpcommands, "dumpcommands", FCVAR_HIDDEN, _dumpcommands);
 CONVAR(cmd_echo, "echo", FCVAR_BANCHO_COMPATIBLE, _echo);
 CONVAR(cmd_errortest, "errortest", FCVAR_BANCHO_COMPATIBLE, _errortest);
 CONVAR(cmd_exec, "exec", FCVAR_BANCHO_COMPATIBLE, _exec);
-CONVAR(cmd_exit, "exit", FCVAR_BANCHO_COMPATIBLE, _exit);
+CONVAR(cmd_exit, "exit", FCVAR_BANCHO_COMPATIBLE, []() -> void {engine ? engine->shutdown() : (void)0;});
 CONVAR(cmd_find, "find", FCVAR_BANCHO_COMPATIBLE, _find);
 CONVAR(cmd_focus, "focus", FCVAR_BANCHO_COMPATIBLE, _focus);
 CONVAR(cmd_fullscreen, "fullscreen", FCVAR_BANCHO_COMPATIBLE, _fullscreen);
@@ -84,7 +88,7 @@ CONVAR(cmd_resizable_toggle, "resizable_toggle", FCVAR_BANCHO_COMPATIBLE, _toggl
 CONVAR(cmd_restart, "restart", FCVAR_BANCHO_COMPATIBLE, _restart);
 CONVAR(cmd_save, "save", FCVAR_BANCHO_COMPATIBLE, _save);
 CONVAR(cmd_showconsolebox, "showconsolebox");
-CONVAR(cmd_shutdown, "shutdown", FCVAR_BANCHO_COMPATIBLE, _exit);
+CONVAR(cmd_shutdown, "shutdown", FCVAR_BANCHO_COMPATIBLE, []() -> void {engine ? engine->shutdown() : (void)0;});
 CONVAR(cmd_spectate, "spectate", FCVAR_HIDDEN, spectate_by_username);
 
 CONVAR(cv_BOSS_KEY, "osu_key_boss", (int)KEY_INSERT, FCVAR_BANCHO_COMPATIBLE);

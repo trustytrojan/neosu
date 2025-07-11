@@ -547,7 +547,7 @@ void WinEnvironment::disableFullscreen() {
     f32 width = 1280.f;
     f32 height = 720.f;
     {
-        UString res = cv_windowed_resolution.getString();
+        UString res{cv_windowed_resolution.getString()};
         if(res.length() >= 7) {
             std::vector<UString> resolution = res.split("x");
             if(resolution.size() == 2) {

@@ -110,20 +110,20 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     void onRawInputToAbsoluteWindowChange(CBaseUICheckbox *checkbox);
     void openCurrentSkinFolder();
     void onSkinSelect();
-    void onSkinSelect2(UString skinName, int id = -1);
+    void onSkinSelect2(const UString& skinName, int id = -1);
     void onSkinReload();
     void onSkinRandom();
     void onResolutionSelect();
-    void onResolutionSelect2(UString resolution, int id = -1);
+    void onResolutionSelect2(const UString& resolution, int id = -1);
     void onOutputDeviceSelect();
-    void onOutputDeviceSelect2(UString outputDeviceName, int id = -1);
+    void onOutputDeviceSelect2(const UString& outputDeviceName, int id = -1);
     void onOutputDeviceResetClicked();
     void onOutputDeviceResetUpdate();
     void onOutputDeviceRestart();
     void onLogInClicked();
     void onCM360CalculatorLinkClicked();
     void onNotelockSelect();
-    void onNotelockSelect2(UString notelockType, int id = -1);
+    void onNotelockSelect2(const UString& notelockType, int id = -1);
     void onNotelockSelectResetClicked();
     void onNotelockSelectResetUpdate();
 
@@ -174,7 +174,7 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     OPTIONS_ELEMENT addButtonButton(const UString& text1, const UString& text2);
     OPTIONS_ELEMENT addButtonButtonLabel(const UString& text1, const UString& text2, const UString& labelText, bool withResetButton = false);
     OptionsMenuKeyBindButton *addKeyBindButton(const UString& text, ConVar *cvar);
-    CBaseUICheckbox *addCheckbox(UString text, ConVar *cvar);
+    CBaseUICheckbox *addCheckbox(const UString& text, ConVar *cvar);
     CBaseUICheckbox *addCheckbox(const UString& text, const UString& tooltipText = "", ConVar *cvar = NULL);
     UISlider *addSlider(const UString& text, float min = 0.0f, float max = 1.0f, ConVar *cvar = NULL, float label1Width = 0.0f,
                         bool allowOverscale = false, bool allowUnderscale = false);

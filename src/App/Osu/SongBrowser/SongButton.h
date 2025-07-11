@@ -27,9 +27,9 @@ class SongButton : public Button {
     void onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected) override;
     void onRightMouseUpInside() override;
 
-    void onContextMenu(UString text, int id = -1);
-    void onAddToCollectionConfirmed(UString text, int id = -1);
-    void onCreateNewCollectionConfirmed(UString text, int id = -1);
+    void onContextMenu(const UString& text, int id = -1);
+    void onAddToCollectionConfirmed(const UString& text, int id = -1);
+    void onCreateNewCollectionConfirmed(const UString& text, int id = -1);
 
     void drawBeatmapBackgroundThumbnail(Image *image);
     void drawGrade();

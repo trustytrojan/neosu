@@ -849,7 +849,7 @@ void RoomScreen::onChangeWinConditionClicked() {
     this->contextMenu->setVisible(true);
 }
 
-void RoomScreen::onWinConditionSelected(UString win_condition_str, int win_condition) {
+void RoomScreen::onWinConditionSelected(const UString &win_condition_str, int win_condition) {
     bancho.room.win_condition = win_condition;
 
     Packet packet;
@@ -860,7 +860,7 @@ void RoomScreen::onWinConditionSelected(UString win_condition_str, int win_condi
     this->updateLayout(osu->getScreenSize());
 }
 
-void RoomScreen::set_new_password(UString new_password) {
+void RoomScreen::set_new_password(const UString &new_password) {
     bancho.room.has_password = new_password.length() > 0;
     bancho.room.password = new_password;
 

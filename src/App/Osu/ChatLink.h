@@ -5,7 +5,7 @@
 
 class ChatLink : public CBaseUILabel {
    public:
-    ChatLink(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, const UString& link = "", UString label = "");
+    ChatLink(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, const UString& link = "", const UString& label = "");
 
     void mouse_update(bool *propagate_clicks) override;
     void onMouseUpInside() override;

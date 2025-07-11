@@ -3509,8 +3509,7 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
         score.playerName = bancho.username.toUtf8();
         score.server = bancho.endpoint.toUtf8();
     } else {
-        auto local_name = cv_name.getString();
-        score.playerName = local_name.toUtf8();
+        score.playerName = cv_name.getString();;
     }
     score.passed = isComplete && !isZero && !osu->getScore()->hasDied();
     score.grade = score.passed ? osu->getScore()->getGrade() : FinishedScore::Grade::F;

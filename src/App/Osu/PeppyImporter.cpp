@@ -195,7 +195,7 @@ static UString get_osu_folder_from_registry() {
 }
 
 void import_settings_from_osu_stable() {
-    auto osu_folder = cv_osu_folder.getString();
+    UString osu_folder{cv_osu_folder.getString()};
     if(osu_folder.isWhitespaceOnly()) {
         osu_folder = get_osu_folder_from_registry();
         if(!osu_folder.isWhitespaceOnly()) {

@@ -9,7 +9,7 @@ class McFont;
 
 class Console : public CBaseUIWindow {
    public:
-    static void processCommand(UString command);
+    static void processCommand(std::string command);
     static void execConfigFile(std::string filename);
 
    public:
@@ -24,7 +24,7 @@ class Console : public CBaseUIWindow {
     // events
     void onResized() override;
 
-    static std::vector<UString> g_commandQueue;
+    static std::vector<std::string> g_commandQueue;
 
    private:
     CBaseUIScrollView *log_view;

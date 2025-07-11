@@ -67,7 +67,7 @@ struct alignas(1) TIMINGPOINT {
     void cancel();
     void save();
 
-    BeatmapSet *addBeatmapSet(std::string beatmapFolderPath, i32 set_id_override = -1);
+    BeatmapSet *addBeatmapSet(const std::string& beatmapFolderPath, i32 set_id_override = -1);
 
     int addScore(const FinishedScore& score);
     void deleteScore(MD5Hash beatmapMD5Hash, u64 scoreUnixTimestamp);

@@ -24,7 +24,7 @@ class UIUserContextMenuScreen : public OsuScreen {
 
     void open(u32 user_id);
     void close();
-    void on_action(UString text, int user_action);
+    void on_action(const UString& text, int user_action);
 
     u32 user_id;
     UIContextMenu *menu = NULL;

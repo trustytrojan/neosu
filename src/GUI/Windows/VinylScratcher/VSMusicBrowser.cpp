@@ -257,7 +257,7 @@ class VSMusicBrowserButton : public CBaseUIButton {
 
 class VSMusicBrowserColumnScrollView : public CBaseUIScrollView {
    public:
-    VSMusicBrowserColumnScrollView(float xPos, float yPos, float xSize, float ySize, UString name)
+    VSMusicBrowserColumnScrollView(float xPos, float yPos, float xSize, float ySize, const UString& name)
         : CBaseUIScrollView(xPos, yPos, xSize, ySize, name) {
         this->fAnim = 0.0f;
 

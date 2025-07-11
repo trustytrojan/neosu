@@ -204,7 +204,7 @@ void Database::save() {
     this->saveScores();
 }
 
-BeatmapSet *Database::addBeatmapSet(std::string beatmapFolderPath, i32 set_id_override) {
+BeatmapSet *Database::addBeatmapSet(const std::string &beatmapFolderPath, i32 set_id_override) {
     BeatmapSet *beatmap = this->loadRawBeatmap(beatmapFolderPath);
     if(beatmap == NULL) return NULL;
 
@@ -229,12 +229,12 @@ BeatmapSet *Database::addBeatmapSet(std::string beatmapFolderPath, i32 set_id_ov
     osu->songBrowser2->addBeatmapSet(beatmap);
 
     // XXX: Very slow
-    osu->songBrowser2->onSortChangeInt(cv_songbrowser_sortingtype.getString(), false);
+    osu->songBrowser2->onSortChangeInt(cv_songbrowser_sortingtype.getString().c_str(), false);
 
     return beatmap;
 }
 
-int Database::addScore(const FinishedScore& score) {
+int Database::addScore(const FinishedScore &score) {
     this->addScoreRaw(score);
     this->sortScores(score.beatmap_hash);
 
@@ -258,7 +258,7 @@ int Database::addScore(const FinishedScore& score) {
     }
 
     // return sorted index
-    std::lock_guard<std::mutex> lock(this->scores_mtx);
+    std::scoped_lock lock(this->scores_mtx);
     for(int i = 0; i < this->scores[score.beatmap_hash].size(); i++) {
         if(this->scores[score.beatmap_hash][i].unixTimestamp == score.unixTimestamp) return i;
     }
@@ -267,8 +267,8 @@ int Database::addScore(const FinishedScore& score) {
 }
 
 bool Database::addScoreRaw(const FinishedScore &score) {
-    std::lock_guard<std::mutex> lock(this->scores_mtx);
-    for(auto other : this->scores[score.beatmap_hash]) {
+    std::scoped_lock lock(this->scores_mtx);
+    for(const auto &other : this->scores[score.beatmap_hash]) {
         if(other.unixTimestamp == score.unixTimestamp) {
             // Score has already been added
             return false;
@@ -284,7 +284,7 @@ bool Database::addScoreRaw(const FinishedScore &score) {
 }
 
 void Database::deleteScore(MD5Hash beatmapMD5Hash, u64 scoreUnixTimestamp) {
-    std::lock_guard<std::mutex> lock(this->scores_mtx);
+    std::scoped_lock lock(this->scores_mtx);
     for(int i = 0; i < this->scores[beatmapMD5Hash].size(); i++) {
         if(this->scores[beatmapMD5Hash][i].unixTimestamp == scoreUnixTimestamp) {
             this->scores[beatmapMD5Hash].erase(this->scores[beatmapMD5Hash].begin() + i);
@@ -297,13 +297,13 @@ void Database::deleteScore(MD5Hash beatmapMD5Hash, u64 scoreUnixTimestamp) {
 void Database::sortScoresInPlace(std::vector<FinishedScore> &scores) {
     if(scores.size() < 2) return;
 
-    if(cv_songbrowser_scores_sortingtype.getString() == UString("Online Leaderboard")) {
+    if(cv_songbrowser_scores_sortingtype.getString() == "Online Leaderboard") {
         // Online scores are already sorted
         return;
     }
 
     for(int i = 0; i < this->scoreSortingMethods.size(); i++) {
-        if(cv_songbrowser_scores_sortingtype.getString() == this->scoreSortingMethods[i].name) {
+        if(cv_songbrowser_scores_sortingtype.getString() == this->scoreSortingMethods[i].name.utf8View()) {
             struct COMPARATOR_WRAPPER {
                 SCORE_SORTING_COMPARATOR *comp;
                 bool operator()(FinishedScore const &a, FinishedScore const &b) const {
@@ -319,17 +319,17 @@ void Database::sortScoresInPlace(std::vector<FinishedScore> &scores) {
     }
 
     if(cv_debug.getBool()) {
-        debugLog("ERROR: Invalid score sortingtype \"%s\"\n", cv_songbrowser_scores_sortingtype.getString().toUtf8());
+        debugLog("ERROR: Invalid score sortingtype \"%s\"\n", cv_songbrowser_scores_sortingtype.getString());
     }
 }
 
 void Database::sortScores(MD5Hash beatmapMD5Hash) {
-    std::lock_guard<std::mutex> lock(this->scores_mtx);
+    std::scoped_lock lock(this->scores_mtx);
     this->sortScoresInPlace(this->scores[beatmapMD5Hash]);
 }
 
 std::vector<UString> Database::getPlayerNamesWithPPScores() {
-    std::lock_guard<std::mutex> lock(this->scores_mtx);
+    std::scoped_lock lock(this->scores_mtx);
     std::vector<MD5Hash> keys;
     keys.reserve(this->scores.size());
 
@@ -345,8 +345,7 @@ std::vector<UString> Database::getPlayerNamesWithPPScores() {
     }
 
     // always add local user, even if there were no scores
-    auto local_name = cv_name.getString();
-    tempNames.insert(std::string(local_name.toUtf8()));
+    tempNames.insert(cv_name.getString());
 
     std::vector<UString> names;
     names.reserve(tempNames.size());
@@ -358,7 +357,7 @@ std::vector<UString> Database::getPlayerNamesWithPPScores() {
 }
 
 std::vector<UString> Database::getPlayerNamesWithScoresForUserSwitcher() {
-    std::lock_guard<std::mutex> lock(this->scores_mtx);
+    std::scoped_lock lock(this->scores_mtx);
     std::unordered_set<std::string> tempNames;
     for(auto kv : this->scores) {
         const MD5Hash &key = kv.first;
@@ -368,8 +367,7 @@ std::vector<UString> Database::getPlayerNamesWithScoresForUserSwitcher() {
     }
 
     // always add local user, even if there were no scores
-    auto local_name = cv_name.getString();
-    tempNames.insert(std::string(local_name.toUtf8()));
+    tempNames.insert(cv_name.getString());
 
     std::vector<UString> names;
     names.reserve(tempNames.size());
@@ -380,8 +378,8 @@ std::vector<UString> Database::getPlayerNamesWithScoresForUserSwitcher() {
     return names;
 }
 
-Database::PlayerPPScores Database::getPlayerPPScores(const UString& playerName) {
-    std::lock_guard<std::mutex> lock(this->scores_mtx);
+Database::PlayerPPScores Database::getPlayerPPScores(const UString &playerName) {
+    std::scoped_lock lock(this->scores_mtx);
     PlayerPPScores ppScores;
     ppScores.totalScore = 0;
     if(this->getProgress() < 1.0f) return ppScores;
@@ -444,7 +442,7 @@ Database::PlayerPPScores Database::getPlayerPPScores(const UString& playerName) 
     return ppScores;
 }
 
-Database::PlayerStats Database::calculatePlayerStats(const UString& playerName) {
+Database::PlayerStats Database::calculatePlayerStats(const UString &playerName) {
     if(!this->bDidScoresChangeForStats && playerName == this->prevPlayerStats.name) return this->prevPlayerStats;
 
     const PlayerPPScores ps = this->getPlayerPPScores(playerName);
@@ -533,7 +531,7 @@ int Database::getLevelForScore(unsigned long long score, int maxLevel) {
 DatabaseBeatmap *Database::getBeatmapDifficulty(const MD5Hash &md5hash) {
     if(this->isLoading()) return NULL;
 
-    std::lock_guard<std::mutex> lock(this->beatmap_difficulties_mtx);
+    std::scoped_lock lock(this->beatmap_difficulties_mtx);
     auto it = this->beatmap_difficulties.find(md5hash);
     if(it == this->beatmap_difficulties.end()) {
         return NULL;
@@ -545,7 +543,7 @@ DatabaseBeatmap *Database::getBeatmapDifficulty(const MD5Hash &md5hash) {
 DatabaseBeatmap *Database::getBeatmapDifficulty(i32 map_id) {
     if(this->isLoading()) return NULL;
 
-    std::lock_guard<std::mutex> lock(this->beatmap_difficulties_mtx);
+    std::scoped_lock lock(this->beatmap_difficulties_mtx);
     for(auto pair : this->beatmap_difficulties) {
         if(pair.second->getID() == map_id) {
             return pair.second;
@@ -571,14 +569,14 @@ DatabaseBeatmap *Database::getBeatmapSet(i32 set_id) {
 std::string Database::getOsuSongsFolder() {
     std::string songs_folder;
 
-    if(cv_songs_folder.getString().findChar(':') == -1) {
+    if(cv_songs_folder.getString().find(':') == std::string::npos) {
         // Relative path (yes, the check is Windows-only)
-        songs_folder = cv_osu_folder.getString().toUtf8();
+        songs_folder = cv_osu_folder.getString();
         songs_folder.append("/");
-        songs_folder.append(cv_songs_folder.getString().toUtf8());
+        songs_folder.append(cv_songs_folder.getString());
     } else {
         // Absolute path
-        songs_folder = cv_songs_folder.getString().toUtf8();
+        songs_folder = cv_songs_folder.getString();
     }
 
     songs_folder.append("/");
@@ -586,10 +584,10 @@ std::string Database::getOsuSongsFolder() {
 }
 
 void Database::loadDB() {
-    std::lock_guard<std::mutex> lock(this->beatmap_difficulties_mtx);
+    std::scoped_lock lock(this->beatmap_difficulties_mtx);
     this->peppy_overrides_mtx.lock();
 
-    std::string osuDbFilePath = cv_osu_folder.getString().toUtf8();
+    std::string osuDbFilePath = cv_osu_folder.getString();
     osuDbFilePath.append("/osu!.db");
     BanchoFile::Reader db(osuDbFilePath.c_str());
     BanchoFile::Reader neosu_maps("neosu_maps.db");
@@ -1462,7 +1460,7 @@ u32 Database::importOldNeosuScores() {
 u32 Database::importPeppyScores() {
     int nb_imported = 0;
 
-    std::string scoresPath = cv_osu_folder.getString().toUtf8();
+    std::string scoresPath = cv_osu_folder.getString();
     scoresPath.append("/scores.db");
     BanchoFile::Reader db(scoresPath.c_str());
 
@@ -1569,7 +1567,7 @@ void Database::saveScores() {
 
     const double startTime = Timing::getTimeReal();
 
-    std::lock_guard<std::mutex> lock(this->scores_mtx);
+    std::scoped_lock lock(this->scores_mtx);
     BanchoFile::Writer db("neosu_scores.db");
     db.write_bytes((u8 *)"NEOSC", 5);
     db.write<u32>(NEOSU_SCORE_DB_VERSION);
@@ -1669,7 +1667,7 @@ void Database::saveScores() {
     debugLog("Saved %d scores in %f seconds.\n", nb_scores, (Timing::getTimeReal() - startTime));
 }
 
-BeatmapSet *Database::loadRawBeatmap(const std::string& beatmapPath) {
+BeatmapSet *Database::loadRawBeatmap(const std::string &beatmapPath) {
     if(cv_debug.getBool()) debugLog("BeatmapDatabase::loadRawBeatmap() : %s\n", beatmapPath.c_str());
 
     // try loading all diffs

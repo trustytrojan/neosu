@@ -267,7 +267,7 @@ void Lobby::on_create_room_clicked() {
     osu->getNotificationOverlay()->addNotification("Creating room...");
 }
 
-void Lobby::on_room_join_with_password(UString password) { this->joinRoom(this->room_to_join, password); }
+void Lobby::on_room_join_with_password(const UString& password) { this->joinRoom(this->room_to_join, password); }
 
 void Lobby::on_room_join_failed() {
     // Updating layout will reset is_loading to false

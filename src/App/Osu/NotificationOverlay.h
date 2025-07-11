@@ -37,7 +37,7 @@ class NotificationOverlay : public OsuScreen {
     void onChar(KeyboardEvent &e) override;
 
     typedef fastdelegate::FastDelegate0<> ToastClickCallback;
-    void addToast(UString text, Color borderColor = 0xffdd0000, const ToastClickCallback& callback = NULL);
+    void addToast(const UString& text, Color borderColor = 0xffdd0000, const ToastClickCallback& callback = NULL);
 
     void addNotification(UString text, Color textColor = 0xffffffff, bool waitForKey = false, float duration = -1.0f);
     void setDisallowWaitForKeyLeftClick(bool disallowWaitForKeyLeftClick) {

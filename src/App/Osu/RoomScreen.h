@@ -66,8 +66,8 @@ class RoomScreen : public OsuScreen {
     void onSelectMapClicked();
     void onChangePasswordClicked();
     void onChangeWinConditionClicked();
-    void onWinConditionSelected(UString win_condition_str, int win_condition);
-    void set_new_password(UString new_password);
+    void onWinConditionSelected(const UString &win_condition_str, int win_condition);
+    void set_new_password(const UString &new_password);
     void onFreemodCheckboxChanged(CBaseUICheckbox *checkbox);
 
     CBaseUILabel *map_label = NULL;

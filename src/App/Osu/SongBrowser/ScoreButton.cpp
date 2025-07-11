@@ -531,7 +531,7 @@ void ScoreButton::onRightMouseUpInside() {
     }
 }
 
-void ScoreButton::onContextMenu(UString text, int id) {
+void ScoreButton::onContextMenu(const UString& text, int id) {
     if(id == 1) {
         this->onUseModsClicked();
         return;
@@ -544,7 +544,7 @@ void ScoreButton::onContextMenu(UString text, int id) {
 
     if(id == 3) {
         if(keyboard->isShiftDown())
-            this->onDeleteScoreConfirmed(std::move(text), 1);
+            this->onDeleteScoreConfirmed(text, 1);
         else
             this->onDeleteScoreClicked();
 
@@ -577,7 +577,7 @@ void ScoreButton::onDeleteScoreClicked() {
     }
 }
 
-void ScoreButton::onDeleteScoreConfirmed(UString text, int id) {
+void ScoreButton::onDeleteScoreConfirmed(const UString& text, int id) {
     if(id != 1) return;
 
     debugLog("Deleting score\n");

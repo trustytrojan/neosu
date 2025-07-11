@@ -393,11 +393,9 @@ void Skin::load() {
 
             // regular skins
             {
-                auto osu_folder = cv_osu_folder.getString();
-                auto osu_folder_sub_skins = cv_osu_folder_sub_skins.getString();
-                std::string skinFolder = osu_folder.toUtf8();
+                std::string skinFolder = cv_osu_folder.getString();
                 skinFolder.append("/");
-                skinFolder.append(osu_folder_sub_skins.toUtf8());
+                skinFolder.append(cv_osu_folder_sub_skins.getString());
                 std::vector<std::string> skinFolders = env->getFoldersInFolder(skinFolder);
 
                 for(int i = 0; i < skinFolders.size(); i++) {
@@ -1085,7 +1083,7 @@ void Skin::load() {
     debugLog("Skin: HitCircleOverlap = %i\n", this->iHitCircleOverlap);
 
     // delayed error notifications due to resource loading potentially blocking engine time
-    if(!parseSkinIni1Status && parseSkinIni2Status && cv_skin.getString() != UString("default"))
+    if(!parseSkinIni1Status && parseSkinIni2Status && cv_skin.getString() != "default")
         osu->getNotificationOverlay()->addNotification("Error: Couldn't load skin.ini!", 0xffff0000);
     else if(!parseSkinIni2Status)
         osu->getNotificationOverlay()->addNotification("Error: Couldn't load DEFAULT skin.ini!!!", 0xffff0000);
@@ -1489,8 +1487,8 @@ void Skin::randomizeFilePath() {
         this->sFilePath = this->filepathsForRandomSkin[rand() % this->filepathsForRandomSkin.size()];
 }
 
-SkinImage *Skin::createSkinImage(std::string skinElementName, Vector2 baseSizeForScaling2x, float osuSize,
-                                 bool ignoreDefaultSkin, std::string animationSeparator) {
+SkinImage *Skin::createSkinImage(const std::string& skinElementName, Vector2 baseSizeForScaling2x, float osuSize,
+                                 bool ignoreDefaultSkin, const std::string& animationSeparator) {
     SkinImage *skinImage =
         new SkinImage(this, skinElementName, baseSizeForScaling2x, osuSize, animationSeparator, ignoreDefaultSkin);
     this->images.push_back(skinImage);

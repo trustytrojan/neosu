@@ -14,7 +14,7 @@
 #include "TooltipOverlay.h"
 #include "UIUserContextMenu.h"
 
-ChatLink::ChatLink(float xPos, float yPos, float xSize, float ySize, const UString& link, UString label)
+ChatLink::ChatLink(float xPos, float yPos, float xSize, float ySize, const UString& link, const UString& label)
     : CBaseUILabel(xPos, yPos, xSize, ySize, link, label) {
     this->link = link;
     this->setDrawFrame(false);

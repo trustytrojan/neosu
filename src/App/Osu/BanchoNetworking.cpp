@@ -145,8 +145,8 @@ void reconnect() {
     // Will be reenabled after the login succeeds
     cv_mp_autologin.setValue(false);
 
-    bancho.username = cv_name.getString();
-    bancho.endpoint = cv_mp_server.getString();
+    bancho.username = cv_name.getString().c_str();
+    bancho.endpoint = cv_mp_server.getString().c_str();
 
     // Admins told me they don't want any clients to connect
     const char *server_blacklist[] = {
@@ -160,7 +160,7 @@ void reconnect() {
         }
     }
 
-    UString password = cv_mp_password.getString();
+    UString password{cv_mp_password.getString()};
     if(password.length() == 0) {
         // No password: don't try to log in
         return;

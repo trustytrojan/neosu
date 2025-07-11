@@ -361,7 +361,7 @@ void Engine::onUpdate() {
             for(size_t i = 0; i < Console::g_commandQueue.size(); i++) {
                 Console::processCommand(Console::g_commandQueue[i]);
             }
-            Console::g_commandQueue = std::vector<UString>();  // reset
+            Console::g_commandQueue.clear();  // reset
         }
     }
 
@@ -590,8 +590,6 @@ void Engine::logToConsole(std::optional<Color> color, const UString &msg) {
 //**********************//
 //	Engine ConCommands	//
 //**********************//
-
-void _exit(void) { engine->shutdown(); }
 
 void _restart(void) { engine->restart(); }
 

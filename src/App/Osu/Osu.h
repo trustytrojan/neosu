@@ -177,8 +177,8 @@ class Osu : public App, public MouseListener {
     void fireResolutionChanged();
 
     // callbacks
-    void onWindowedResolutionChanged(UString oldValue, UString args);
-    void onInternalResolutionChanged(UString oldValue, UString args);
+    void onWindowedResolutionChanged(const UString& oldValue, const UString& args);
+    void onInternalResolutionChanged(const UString& oldValue, const UString& args);
     void onSensitivityChange(const UString &oldValue, const UString &newValue);
     void onRawInputChange(const UString &oldValue, const UString &newValue);
 
@@ -209,7 +209,7 @@ class Osu : public App, public MouseListener {
 
     void onLetterboxingOffsetChange(const UString &oldValue, const UString &newValue);
 
-    void onUserCardChange(UString new_username);
+    void onUserCardChange(const UString& new_username);
 
     // interfaces
     VolumeOverlay *volumeOverlay = NULL;

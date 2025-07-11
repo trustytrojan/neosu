@@ -256,7 +256,7 @@ void ConsoleBox::mouse_update(bool *propagate_clicks) {
     this->textbox->mouse_update(propagate_clicks);
 
     if(this->textbox->hitEnter()) {
-        this->processCommand(this->textbox->getText());
+        this->processCommand(this->textbox->getText().toUtf8());
         this->textbox->clear();
         this->textbox->setSuggestion("");
     }
@@ -345,7 +345,7 @@ void ConsoleBox::mouse_update(bool *propagate_clicks) {
 void ConsoleBox::onSuggestionClicked(CBaseUIButton *suggestion) {
     UString text = suggestion->getName();
 
-    ConVar *temp = convar->getConVarByName(text, false);
+    ConVar *temp = convar->getConVarByName(text.toUtf8(), false);
     if(temp != NULL && (temp->hasValue() || temp->hasCallbackArgs())) text.append(" ");
 
     this->textbox->setSuggestion("");
@@ -380,7 +380,7 @@ void ConsoleBox::onKeyDown(KeyboardEvent &e) {
             if(this->iSelectedSuggestion > -1 && this->iSelectedSuggestion < this->vSuggestionButtons.size()) {
                 UString command = this->vSuggestionButtons[this->iSelectedSuggestion]->getName();
 
-                ConVar *temp = convar->getConVarByName(command, false);
+                ConVar *temp = convar->getConVarByName(command.toUtf8(), false);
                 if(temp != NULL && (temp->hasValue() || temp->hasCallbackArgs())) command.append(" ");
 
                 this->textbox->setSuggestion("");
@@ -407,7 +407,7 @@ void ConsoleBox::onKeyDown(KeyboardEvent &e) {
             if(this->iSelectedSuggestion > -1 && this->iSelectedSuggestion < this->vSuggestionButtons.size()) {
                 UString command = this->vSuggestionButtons[this->iSelectedSuggestion]->getName();
 
-                ConVar *temp = convar->getConVarByName(command, false);
+                ConVar *temp = convar->getConVarByName(command.toUtf8(), false);
                 if(temp != NULL && (temp->hasValue() || temp->hasCallbackArgs())) command.append(" ");
 
                 this->textbox->setSuggestion("");
@@ -436,7 +436,7 @@ void ConsoleBox::onKeyDown(KeyboardEvent &e) {
                 this->iSelectedHistory++;
 
             if(this->iSelectedHistory > -1 && this->iSelectedHistory < this->commandHistory.size()) {
-                UString text = this->commandHistory[this->iSelectedHistory];
+                UString text{this->commandHistory[this->iSelectedHistory]};
                 this->textbox->setSuggestion("");
                 this->textbox->setText(text);
                 this->textbox->setCursorPosRight();
@@ -450,7 +450,7 @@ void ConsoleBox::onKeyDown(KeyboardEvent &e) {
                 this->iSelectedHistory--;
 
             if(this->iSelectedHistory > -1 && this->iSelectedHistory < this->commandHistory.size()) {
-                UString text = this->commandHistory[this->iSelectedHistory];
+                UString text{this->commandHistory[this->iSelectedHistory]};
                 this->textbox->setSuggestion("");
                 this->textbox->setText(text);
                 this->textbox->setCursorPosRight();
@@ -471,9 +471,9 @@ void ConsoleBox::onChar(KeyboardEvent &e) {
         // rebuild suggestion list
         this->clearSuggestions();
 
-        std::vector<ConVar *> suggestions = convar->getConVarByLetter(this->textbox->getText());
+        std::vector<ConVar *> suggestions = convar->getConVarByLetter(this->textbox->getText().toUtf8());
         for(size_t i = 0; i < suggestions.size(); i++) {
-            UString suggestionText = suggestions[i]->getName();
+            UString suggestionText{suggestions[i]->getName()};
 
             if(suggestions[i]->hasValue()) {
                 switch(suggestions[i]->getType()) {
@@ -494,7 +494,7 @@ void ConsoleBox::onChar(KeyboardEvent &e) {
                         break;
                     case ConVar::CONVAR_TYPE::CONVAR_TYPE_STRING:
                         suggestionText.append(" ");
-                        suggestionText.append(suggestions[i]->getString());
+                        suggestionText.append(suggestions[i]->getString().c_str());
                         // suggestionText.append(" ( def. \"");
                         // suggestionText.append(suggestions[i]->getDefaultString());
                         // suggestionText.append("\" )");
@@ -502,13 +502,13 @@ void ConsoleBox::onChar(KeyboardEvent &e) {
                 }
             }
 
-            this->addSuggestion(suggestionText, suggestions[i]->getHelpstring(), suggestions[i]->getName());
+            this->addSuggestion(suggestionText, suggestions[i]->getHelpstring().c_str(), suggestions[i]->getName().c_str());
         }
         this->suggestion->setVisible(suggestions.size() > 0);
 
         if(suggestions.size() > 0) {
             this->suggestion->scrollToElement(this->suggestion->getContainer()->getElements()[0]);
-            this->textbox->setSuggestion(suggestions[0]->getName());
+            this->textbox->setSuggestion(suggestions[0]->getName().c_str());
         } else
             this->textbox->setSuggestion("");
 
@@ -528,7 +528,7 @@ void ConsoleBox::onResolutionChange(Vector2 newResolution) {
     this->suggestion->setSizeX(newResolution.x - 10 * dpiScale);
 }
 
-void ConsoleBox::processCommand(const UString& command) {
+void ConsoleBox::processCommand(const std::string& command) {
     this->clearSuggestions();
     this->iSelectedHistory = -1;
 

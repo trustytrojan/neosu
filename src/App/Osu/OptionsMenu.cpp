@@ -501,7 +501,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addLabel("2) osu! > Options > \"Open osu! folder\"")->setTextColor(0xff666666);
     this->addLabel("3) Copy paste the full path into the textbox:")->setTextColor(0xff666666);
     this->addLabel("");
-    this->osuFolderTextbox = this->addTextbox(cv_osu_folder.getString(), &cv_osu_folder);
+    this->osuFolderTextbox = this->addTextbox(cv_osu_folder.getString().c_str(), &cv_osu_folder);
     this->addSpacer();
     this->addCheckbox(
         "Use osu!.db database (read-only)",
@@ -1190,8 +1190,8 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
             fastdelegate::MakeDelegate(this, &OptionsMenu::onCM360CalculatorLinkClicked));
         cm360CalculatorLinkButton->setColor(0xff10667b);
         this->addLabel("");
-        this->dpiTextbox = this->addTextbox(cv_fposu_mouse_dpi.getString(), "DPI:", &cv_fposu_mouse_dpi);
-        this->cm360Textbox = this->addTextbox(cv_fposu_mouse_cm_360.getString(), "cm per 360:", &cv_fposu_mouse_cm_360);
+        this->dpiTextbox = this->addTextbox(cv_fposu_mouse_dpi.getString().c_str(), "DPI:", &cv_fposu_mouse_dpi);
+        this->cm360Textbox = this->addTextbox(cv_fposu_mouse_cm_360.getString().c_str(), "cm per 360:", &cv_fposu_mouse_cm_360);
         this->addLabel("");
         this->addCheckbox("Invert Vertical", &cv_fposu_invert_vertical);
         this->addCheckbox("Invert Horizontal", &cv_fposu_invert_horizontal);
@@ -1210,13 +1210,13 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addLabel("If the server admins don't explicitly allow neosu,")->setTextColor(0xff666666);
     this->addLabel("you might get banned!")->setTextColor(0xff666666);
     this->addLabel("");
-    this->serverTextbox = this->addTextbox(cv_mp_server.getString(), &cv_mp_server);
+    this->serverTextbox = this->addTextbox(cv_mp_server.getString().c_str(), &cv_mp_server);
     this->submitScoresCheckbox = this->addCheckbox("Submit scores", &cv_submit_scores);
     this->elements.back().render_condition = RenderCondition::SCORE_SUBMISSION_POLICY;
 
     this->addSubSection("Login details (username/password)");
-    this->nameTextbox = this->addTextbox(cv_name.getString(), &cv_name);
-    this->passwordTextbox = this->addTextbox(cv_mp_password.getString(), &cv_mp_password);
+    this->nameTextbox = this->addTextbox(cv_name.getString().c_str(), &cv_name);
+    this->passwordTextbox = this->addTextbox(cv_mp_password.getString().c_str(), &cv_mp_password);
     this->passwordTextbox->is_password = true;
     this->logInButton = this->addButton("Log in");
     this->logInButton->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onLogInClicked));
@@ -1279,7 +1279,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
 
     // HACKHACK: force current value update
     if(this->sliderQualitySlider != NULL)
-        this->onHighQualitySlidersConVarChange("", cv_options_high_quality_sliders.getString());
+        this->onHighQualitySlidersConVarChange("", cv_options_high_quality_sliders.getString().c_str());
 }
 
 OptionsMenu::~OptionsMenu() {
@@ -1730,10 +1730,10 @@ void OptionsMenu::updateLayout() {
                 if(this->elements[i].cvar != NULL) {
                     if(this->elements[i].elements.size() == 1) {
                         CBaseUITextbox *textboxPointer = dynamic_cast<CBaseUITextbox *>(this->elements[i].elements[0]);
-                        if(textboxPointer != NULL) textboxPointer->setText(this->elements[i].cvar->getString());
+                        if(textboxPointer != NULL) textboxPointer->setText(this->elements[i].cvar->getString().c_str());
                     } else if(this->elements[i].elements.size() == 2) {
                         CBaseUITextbox *textboxPointer = dynamic_cast<CBaseUITextbox *>(this->elements[i].elements[1]);
-                        if(textboxPointer != NULL) textboxPointer->setText(this->elements[i].cvar->getString());
+                        if(textboxPointer != NULL) textboxPointer->setText(this->elements[i].cvar->getString().c_str());
                     }
                 }
                 break;
@@ -2204,7 +2204,7 @@ void OptionsMenu::updateFposuCMper360() {
 void OptionsMenu::updateSkinNameLabel() {
     if(this->skinLabel == NULL) return;
 
-    this->skinLabel->setText(cv_skin.getString());
+    this->skinLabel->setText(cv_skin.getString().c_str());
     this->skinLabel->setTextColor(0xffffffff);
 }
 
@@ -2288,19 +2288,16 @@ void OptionsMenu::onRawInputToAbsoluteWindowChange(CBaseUICheckbox *checkbox) {
 
 void OptionsMenu::openCurrentSkinFolder() {
     auto current_skin = cv_skin.getString();
-    if(current_skin == UString("default")) {
+    if(strcasecmp(current_skin.c_str(), "default") == 0) {
         env->openDirectory(MCENGINE_DATA_DIR "materials" PREF_PATHSEP "default");
     } else {
         std::string neosuSkinFolder = MCENGINE_DATA_DIR "skins/";
-        neosuSkinFolder.append(current_skin.toUtf8());
+        neosuSkinFolder.append(current_skin);
         if(env->directoryExists(neosuSkinFolder)) {
             env->openDirectory(neosuSkinFolder);
         } else {
-            UString skinFolder = cv_osu_folder.getString();
-            skinFolder.append("/");
-            skinFolder.append(cv_osu_folder_sub_skins.getString());
-            skinFolder.append(current_skin);
-            env->openDirectory(skinFolder.toUtf8());
+            std::string currentSkinFolder = fmt::format("{}/{}{}", cv_osu_folder.getString(), cv_osu_folder_sub_skins.getString(), current_skin);
+            env->openDirectory(currentSkinFolder);
         }
     }
 }
@@ -2318,13 +2315,13 @@ void OptionsMenu::onSkinSelect() {
 
     if(osu->isSkinLoading()) return;
 
-    UString skinFolder = cv_osu_folder.getString();
+    std::string skinFolder{cv_osu_folder.getString()};
     skinFolder.append("/");
     skinFolder.append(cv_osu_folder_sub_skins.getString());
 
     std::vector<std::string> skinFolders;
     for(const auto &dir :
-        {env->getFoldersInFolder(MCENGINE_DATA_DIR "skins/"), env->getFoldersInFolder(skinFolder.toUtf8())}) {
+        {env->getFoldersInFolder(MCENGINE_DATA_DIR "skins/"), env->getFoldersInFolder(skinFolder)}) {
         for(const auto &skin : dir) {
             skinFolders.push_back(skin);
         }
@@ -2348,16 +2345,14 @@ void OptionsMenu::onSkinSelect() {
 
         this->contextMenu->begin();
 
-        const UString defaultText = "default";
-        CBaseUIButton *buttonDefault = this->contextMenu->addButton(defaultText);
-        if(defaultText == cv_skin.getString()) buttonDefault->setTextBrightColor(0xff00ff00);
+        CBaseUIButton *buttonDefault = this->contextMenu->addButton("default");
+        if(cv_skin.getString() == "default") buttonDefault->setTextBrightColor(0xff00ff00);
 
         for(int i = 0; i < skinFolders.size(); i++) {
             if(skinFolders[i].compare(".") == 0 || skinFolders[i].compare("..") == 0) continue;
 
             CBaseUIButton *button = this->contextMenu->addButton(skinFolders[i].c_str());
-            auto skin = cv_skin.getString();
-            if(skinFolders[i].compare(skin.toUtf8()) == 0) button->setTextBrightColor(0xff00ff00);
+            if(skinFolders[i].compare(cv_skin.getString()) == 0) button->setTextBrightColor(0xff00ff00);
         }
         this->contextMenu->end(false, !this->bVisible);
         this->contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSkinSelect2));
@@ -2376,7 +2371,7 @@ void OptionsMenu::onSkinSelect() {
     }
 }
 
-void OptionsMenu::onSkinSelect2(UString skinName, int id) {
+void OptionsMenu::onSkinSelect2(const UString& skinName, int id) {
     cv_skin.setValue(std::move(skinName));
     this->updateSkinNameLabel();
 }
@@ -2485,7 +2480,7 @@ void OptionsMenu::onResolutionSelect() {
     this->options->setScrollSizeToContent();
 }
 
-void OptionsMenu::onResolutionSelect2(UString resolution, int id) {
+void OptionsMenu::onResolutionSelect2(const UString& resolution, int id) {
     if(env->isFullscreen()) {
         cv_resolution.setValue(resolution);
     } else {
@@ -2515,7 +2510,7 @@ void OptionsMenu::onOutputDeviceSelect() {
     this->options->setScrollSizeToContent();
 }
 
-void OptionsMenu::onOutputDeviceSelect2(UString outputDeviceName, int id) {
+void OptionsMenu::onOutputDeviceSelect2(const UString& outputDeviceName, int id) {
     if(outputDeviceName == soundEngine->getOutputDeviceName()) {
         debugLog("SoundEngine::setOutputDevice() \"%s\" already is the current device.\n", outputDeviceName.toUtf8());
         return;
@@ -2574,7 +2569,7 @@ void OptionsMenu::onNotelockSelect() {
     this->options->setScrollSizeToContent();
 }
 
-void OptionsMenu::onNotelockSelect2(UString notelockType, int id) {
+void OptionsMenu::onNotelockSelect2(const UString& notelockType, int id) {
     cv_notelock_type.setValue(id);
     this->updateNotelockSelectLabel();
 
@@ -2618,7 +2613,7 @@ void OptionsMenu::onSliderChange(CBaseUISlider *slider) {
 
                 if(this->elements[i].elements.size() == 3) {
                     CBaseUILabel *labelPointer = dynamic_cast<CBaseUILabel *>(this->elements[i].elements[2]);
-                    labelPointer->setText(this->elements[i].cvar->getString());
+                    labelPointer->setText(this->elements[i].cvar->getString().c_str());
                 }
 
                 this->onResetUpdate(this->elements[i].resetButton);
@@ -2639,7 +2634,7 @@ void OptionsMenu::onSliderChangeOneDecimalPlace(CBaseUISlider *slider) {
 
                 if(this->elements[i].elements.size() == 3) {
                     CBaseUILabel *labelPointer = dynamic_cast<CBaseUILabel *>(this->elements[i].elements[2]);
-                    labelPointer->setText(this->elements[i].cvar->getString());
+                    labelPointer->setText(this->elements[i].cvar->getString().c_str());
                 }
 
                 this->onResetUpdate(this->elements[i].resetButton);
@@ -2660,7 +2655,7 @@ void OptionsMenu::onSliderChangeTwoDecimalPlaces(CBaseUISlider *slider) {
 
                 if(this->elements[i].elements.size() == 3) {
                     CBaseUILabel *labelPointer = dynamic_cast<CBaseUILabel *>(this->elements[i].elements[2]);
-                    labelPointer->setText(this->elements[i].cvar->getString());
+                    labelPointer->setText(this->elements[i].cvar->getString().c_str());
                 }
 
                 this->onResetUpdate(this->elements[i].resetButton);
@@ -2701,7 +2696,7 @@ void OptionsMenu::onSliderChangeInt(CBaseUISlider *slider) {
 
                 if(this->elements[i].elements.size() == 3) {
                     CBaseUILabel *labelPointer = dynamic_cast<CBaseUILabel *>(this->elements[i].elements[2]);
-                    labelPointer->setText(this->elements[i].cvar->getString());
+                    labelPointer->setText(this->elements[i].cvar->getString().c_str());
                 }
 
                 this->onResetUpdate(this->elements[i].resetButton);
@@ -2721,9 +2716,9 @@ void OptionsMenu::onSliderChangeIntMS(CBaseUISlider *slider) {
 
                 if(this->elements[i].elements.size() == 3) {
                     CBaseUILabel *labelPointer = dynamic_cast<CBaseUILabel *>(this->elements[i].elements[2]);
-                    UString text = this->elements[i].cvar->getString();
+                    std::string text = this->elements[i].cvar->getString();
                     text.append(" ms");
-                    labelPointer->setText(text);
+                    labelPointer->setText(text.c_str());
                 }
 
                 this->onResetUpdate(this->elements[i].resetButton);
@@ -3338,7 +3333,7 @@ OptionsMenuKeyBindButton *OptionsMenu::addKeyBindButton(const UString& text, Con
     return bindButton;
 }
 
-CBaseUICheckbox *OptionsMenu::addCheckbox(UString text, ConVar *cvar) { return this->addCheckbox(text, "", cvar); }
+CBaseUICheckbox *OptionsMenu::addCheckbox(const UString& text, ConVar *cvar) { return this->addCheckbox(text, "", cvar); }
 
 CBaseUICheckbox *OptionsMenu::addCheckbox(const UString& text, const UString& tooltipText, ConVar *cvar) {
     UICheckbox *checkbox = new UICheckbox(0, 0, this->options->getSize().x, 50, text, text);
@@ -3516,7 +3511,7 @@ void OptionsMenu::save() {
             bool cvar_found = false;
             auto parts = line.split(" ");
             for(auto convar : convar->getConVarArray()) {
-                if(convar->getName() == parts[0]) {
+                if(UString{convar->getName()} == parts[0]) {
                     cvar_found = true;
                     break;
                 }
@@ -3542,14 +3537,14 @@ void OptionsMenu::save() {
         out << "\n";
 
         if(this->fullscreenCheckbox->isChecked()) {
-            out << cmd_fullscreen.getName().toUtf8() << "\n";
+            out << cmd_fullscreen.getName() << "\n";
         }
         out << "\n";
 
         for(auto convar : convar->getConVarArray()) {
             if(!convar->hasValue()) continue;
             if(convar->getString() == convar->getDefaultString()) continue;
-            out << convar->getName().toUtf8() << " " << convar->getString().toUtf8() << "\n";
+            out << convar->getName() << " " << convar->getString() << "\n";
         }
 
         out.close();

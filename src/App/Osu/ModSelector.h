@@ -93,7 +93,7 @@ class ModSelector : public OsuScreen {
     };
 
     UIModSelectorModButton *setModButtonOnGrid(int x, int y, int state, bool initialState, ConVar *modCvar,
-                                               UString modName, UString tooltipText,
+                                               UString modName, const UString& tooltipText,
                                                std::function<SkinImage *()> getImageFunc);
     UIModSelectorModButton *getModButtonOnGrid(int x, int y);
 
@@ -106,7 +106,7 @@ class ModSelector : public OsuScreen {
     UString getOverrideSliderLabelText(OVERRIDE_SLIDER s, bool active);
 
     CBaseUILabel *addExperimentalLabel(const UString& text);
-    UICheckbox *addExperimentalCheckbox(const UString& text, UString tooltipText, ConVar *cvar = NULL);
+    UICheckbox *addExperimentalCheckbox(const UString& text, const UString& tooltipText, ConVar *cvar = NULL);
     void onCheckboxChange(CBaseUICheckbox *checkbox);
 
     UIButton *addActionButton(const UString& text);

@@ -242,7 +242,7 @@ void NotificationOverlay::addNotification(UString text, Color textColor, bool wa
     anim->moveQuadOut(&this->notification1.backgroundAnim, 1.0f, 0.15f, 0.0f, true);
 }
 
-void NotificationOverlay::addToast(UString text, Color borderColor, const ToastClickCallback& callback) {
+void NotificationOverlay::addToast(const UString& text, Color borderColor, const ToastClickCallback& callback) {
     auto toast = new ToastElement(text, borderColor);
     toast->setClickCallback(callback);
     this->toasts.push_back(toast);

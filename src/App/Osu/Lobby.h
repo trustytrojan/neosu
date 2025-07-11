@@ -49,7 +49,7 @@ class Lobby : public OsuScreen {
 
     void on_create_room_clicked();
 
-    void on_room_join_with_password(UString password);
+    void on_room_join_with_password(const UString& password);
     void on_room_join_failed();
 
     std::vector<Room*> rooms;

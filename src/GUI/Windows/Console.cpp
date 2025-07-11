@@ -15,7 +15,7 @@
 
 #define CONSOLE_BORDER 6
 
-std::vector<UString> Console::g_commandQueue;
+std::vector<std::string> Console::g_commandQueue;
 std::mutex g_consoleLogMutex;
 
 Console::Console() : CBaseUIWindow(350, 100, 620, 550, "Console") {
@@ -80,15 +80,15 @@ Console::Console() : CBaseUIWindow(350, 100, 620, 550, "Console") {
 
 Console::~Console() {}
 
-void Console::processCommand(UString command) {
+void Console::processCommand(std::string command) {
     if(command.length() < 1) return;
 
-    // remove empty space at beginning if it exists
-    if(command.find(" ", 0, 1) != -1) command.erase(0, 1);
+    // remove whitespace from beginning/end of string
+    trim(&command);
 
     // handle multiple commands separated by semicolons
-    if(command.find(";") != -1 && command.find("echo") == -1) {
-        const std::vector<UString> commands = command.split(";");
+    if(command.find(';') != std::string::npos && command.find("echo") == std::string::npos) {
+        const std::vector<std::string> commands = UString{command}.split<std::string>(";");
         for(size_t i = 0; i < commands.size(); i++) {
             processCommand(commands[i]);
         }
@@ -97,36 +97,42 @@ void Console::processCommand(UString command) {
     }
 
     // separate convar name and value
-    const std::vector<UString> tokens = command.split(" ");
-    UString commandName;
-    UString commandValue;
+    const std::vector<std::string> tokens = UString{command}.split<std::string>(" ");
+    std::string commandName;
+    std::string commandValue;
     for(size_t i = 0; i < tokens.size(); i++) {
         if(i == 0)
             commandName = tokens[i];
         else {
             commandValue.append(tokens[i]);
-            if(i < (int)(tokens.size() - 1)) commandValue.append(" ");
+            if(i < (tokens.size() - 1)) commandValue.append(" ");
         }
     }
 
     // get convar
     ConVar *var = convar->getConVarByName(commandName, false);
     if(var == NULL) {
-        debugLog("Unknown command: %s\n", commandName.toUtf8());
+        debugLog("Unknown command: %s\n", commandName);
         return;
     }
 
     // set new value (this handles all callbacks internally)
-    if(commandValue.length() > 0)
-        var->setValue(commandValue);
-    else {
+    // except for help, don't set a value for that, just run the callback
+    if(commandValue.length() > 0) {
+        if(commandName == "help") {
+            var->execArgs(UString{commandValue});
+        } else {
+            var->setValue(UString{commandValue});
+        }
+    } else {
         var->exec();
         var->execArgs("");
+        var->execFloat(var->getFloat());
     }
 
     // log
     if(cv_console_logging.getBool()) {
-        UString logMessage;
+        std::string logMessage;
 
         bool doLog = false;
         if(commandValue.length() < 1) {
@@ -135,8 +141,7 @@ void Console::processCommand(UString command) {
             logMessage = commandName;
 
             if(var->hasValue()) {
-                logMessage.append(UString::format(" = %s ( def. \"%s\" , ", var->getString().toUtf8(),
-                                                  var->getDefaultString().toUtf8()));
+                logMessage.append(fmt::format(" = {:s} ( def. \"{:s}\" , ", var->getString(), var->getDefaultString()));
                 logMessage.append(ConVar::typeToString(var->getType()));
                 logMessage.append(", ");
                 logMessage.append(ConVarHandler::flagsToString(var->getFlags()));
@@ -155,14 +160,14 @@ void Console::processCommand(UString command) {
             logMessage.append(var->getString());
         }
 
-        if(logMessage.length() > 0 && doLog) debugLog("%s\n", logMessage.toUtf8());
+        if(logMessage.length() > 0 && doLog) debugLogF("{:s}\n", logMessage);
     }
 }
 
 void Console::execConfigFile(std::string filename) {
     // handle extension
     filename.insert(0, MCENGINE_DATA_DIR "cfg/");
-    if(filename.find(".cfg", (filename.length() - 4), filename.length()) == -1) filename.append(".cfg");
+    if(filename.find(".cfg", (filename.length() - 4), filename.length()) == std::string::npos) filename.append(".cfg");
 
     File configFile(filename, File::TYPE::READ);
     if(!configFile.canRead()) {
@@ -190,7 +195,7 @@ void Console::execConfigFile(std::string filename) {
     }
 
     // process the collected commands
-    for(const auto &cmd : cmds) processCommand(cmd);
+    for(const auto &cmd : cmds) processCommand(cmd.toUtf8());
 }
 
 void Console::mouse_update(bool *propagate_clicks) {
@@ -199,7 +204,7 @@ void Console::mouse_update(bool *propagate_clicks) {
 
     // TODO: this needs proper callbacks in the textbox class
     if(this->textbox->hitEnter()) {
-        processCommand(this->textbox->getText());
+        processCommand(this->textbox->getText().toUtf8());
         this->textbox->clear();
     }
 }

@@ -16,11 +16,6 @@
 #include "SoundEngine.h"
 #include "SpectatorScreen.h"
 
-#if (defined(_CLANGD) || defined(Q_CREATOR_RUN) || defined(__INTELLISENSE__) || defined(__CDT_PARSER__))
-#pragma GCC diagnostic ignored "-Wunknown-pragmas"
-#pragma GCC diagnostic ignored "-Wunused-function"
-#endif
-
 static std::vector<ConVar *> &_getGlobalConVarArray() {
     static std::vector<ConVar *> g_vConVars;  // (singleton)
     return g_vConVars;
@@ -34,26 +29,26 @@ static std::unordered_map<std::string, ConVar *> &_getGlobalConVarMap() {
 void ConVar::addConVar(ConVar *c) {
     if(_getGlobalConVarArray().size() < 1) _getGlobalConVarArray().reserve(1024);
 
-    std::string cname_str{c->getName().utf8View()};
+    const std::string &cname_str = c->getName();
 
     if(_getGlobalConVarMap().find(cname_str) == _getGlobalConVarMap().end()) {
         _getGlobalConVarArray().push_back(c);
         _getGlobalConVarMap()[cname_str] = c;
     } else {
-        printf("FATAL: Duplicate ConVar name (\"%s\")\n", c->getName().toUtf8());
+        printf("FATAL: Duplicate ConVar name (\"%s\")\n", cname_str.c_str());
         std::exit(100);
     }
 }
 
-static ConVar *_getConVar(const UString &name) {
-    const auto result = _getGlobalConVarMap().find(std::string{name.utf8View()});
+static ConVar *_getConVar(const ConVarString &name) {
+    const auto result = _getGlobalConVarMap().find(name);
     if(result != _getGlobalConVarMap().end())
         return result->second;
     else
         return NULL;
 }
 
-std::string ConVar::getFancyDefaultValue() {
+ConVarString ConVar::getFancyDefaultValue() {
     switch(this->getType()) {
         case ConVar::CONVAR_TYPE::CONVAR_TYPE_BOOL:
             return this->fDefaultDefaultValue == 0 ? "false" : "true";
@@ -62,8 +57,8 @@ std::string ConVar::getFancyDefaultValue() {
         case ConVar::CONVAR_TYPE::CONVAR_TYPE_FLOAT:
             return std::to_string(this->fDefaultDefaultValue);
         case ConVar::CONVAR_TYPE::CONVAR_TYPE_STRING: {
-            std::string out = "\"";
-            out.append(this->sDefaultDefaultValue.toUtf8());
+            ConVarString out = "\"";
+            out.append(this->sDefaultDefaultValue);
             out.append("\"");
             return out;
         }
@@ -72,7 +67,7 @@ std::string ConVar::getFancyDefaultValue() {
     return "unreachable";
 }
 
-UString ConVar::typeToString(CONVAR_TYPE type) {
+ConVarString ConVar::typeToString(CONVAR_TYPE type) {
     switch(type) {
         case ConVar::CONVAR_TYPE::CONVAR_TYPE_BOOL:
             return "bool";
@@ -104,9 +99,9 @@ void ConVar::initBase(uint8_t flags) {
 }
 
 // command-only constructor
-ConVar::ConVar(UString name) {
+ConVar::ConVar(const UString &name) {
     this->initBase(FCVAR_BANCHO_COMPATIBLE);
-    this->sName = this->sDefaultValue = this->sDefaultDefaultValue = std::move(name);
+    this->sName = this->sDefaultValue = this->sDefaultDefaultValue = name.utf8View();
     this->type = CONVAR_TYPE::CONVAR_TYPE_STRING;
     ConVar::addConVar(this);
 }
@@ -137,7 +132,7 @@ void ConVar::execArgs(const UString &args) {
     if(auto *cb = std::get_if<NativeConVarCallbackArgs>(&this->callback)) (*cb)(args);
 }
 
-void ConVar::execInt(float args) {
+void ConVar::execFloat(float args) {
     if(!this->isUnlocked()) return;
 
     if(auto *cb = std::get_if<NativeConVarCallbackFloat>(&this->callback)) (*cb)(args);
@@ -156,7 +151,7 @@ void ConVar::setDefaultString(const UString &defaultValue) {
     this->setDefaultStringInt(defaultValue);
 }
 
-void ConVar::setDefaultStringInt(const UString &defaultValue) { this->sDefaultValue = defaultValue; }
+void ConVar::setDefaultStringInt(const UString &defaultValue) { this->sDefaultValue = defaultValue.utf8View(); }
 
 void ConVar::setDefaultFloat(float defaultValue) {
     if(this->isFlagSet(FCVAR_PRIVATE)) return;
@@ -166,7 +161,7 @@ void ConVar::setDefaultFloat(float defaultValue) {
 
 void ConVar::setDefaultFloatInt(float defaultValue) {
     this->fDefaultValue = defaultValue;
-    this->sDefaultValue = UString::format("%g", defaultValue);
+    this->sDefaultValue = fmt::format("{:g}", defaultValue);
 }
 
 bool ConVar::isUnlocked() const {
@@ -183,11 +178,11 @@ bool ConVar::isUnlocked() const {
 bool ConVar::gameplayCompatCheck() const {
     if(osu && this->isFlagSet(FCVAR_GAMEPLAY)) {
         if(bancho.is_playing_a_multi_map()) {
-            debugLog("Can't edit %s while in a multiplayer match.\n", this->sName.toUtf8());
+            debugLog("Can't edit %s while in a multiplayer match.\n", this->sName);
             return false;
         } else {
             if(osu->isInPlayMode()) {
-                debugLog("%s affects gameplay: won't submit score.\n", this->sName.toUtf8());
+                debugLog("%s affects gameplay: won't submit score.\n", this->sName);
             }
             osu->getScore()->setCheated();
         }
@@ -215,16 +210,16 @@ const std::vector<ConVar *> &ConVarHandler::getConVarArray() const { return _get
 
 int ConVarHandler::getNumConVars() const { return _getGlobalConVarArray().size(); }
 
-ConVar *ConVarHandler::getConVarByName(const UString &name, bool warnIfNotFound) const {
+ConVar *ConVarHandler::getConVarByName(const ConVarString &name, bool warnIfNotFound) const {
     ConVar *found = _getConVar(name);
     if(found != NULL) return found;
 
     if(warnIfNotFound) {
-        UString errormsg = UString("ENGINE: ConVar \"");
+        ConVarString errormsg = ConVarString("ENGINE: ConVar \"");
         errormsg.append(name);
         errormsg.append("\" does not exist...\n");
-        debugLog(errormsg.toUtf8());
-        engine->showMessageWarning("Engine Error", errormsg);
+        Engine::logRaw("{:s}", errormsg.c_str());
+        engine->showMessageWarning("Engine Error", errormsg.c_str());
     }
 
     if(!warnIfNotFound)
@@ -233,7 +228,7 @@ ConVar *ConVarHandler::getConVarByName(const UString &name, bool warnIfNotFound)
         return &_emptyDummyConVar;
 }
 
-std::vector<ConVar *> ConVarHandler::getConVarByLetter(const UString &letters) const {
+std::vector<ConVar *> ConVarHandler::getConVarByLetter(const ConVarString &letters) const {
     std::unordered_set<std::string> matchingConVarNames;
     std::vector<ConVar *> matchingConVars;
     {
@@ -245,10 +240,8 @@ std::vector<ConVar *> ConVarHandler::getConVarByLetter(const UString &letters) c
         for(size_t i = 0; i < convars.size(); i++) {
             if(convars[i]->isFlagSet(FCVAR_HIDDEN)) continue;
 
-            if(convars[i]->getName().find(letters, 0, letters.length()) == 0) {
-                if(letters.length() > 1)
-                    matchingConVarNames.insert(
-                        std::string(convars[i]->getName().toUtf8(), convars[i]->getName().lengthUtf8()));
+            if(convars[i]->getName().find(letters) != std::string::npos) {
+                if(letters.length() > 1) matchingConVarNames.insert(convars[i]->getName());
 
                 matchingConVars.push_back(convars[i]);
             }
@@ -259,8 +252,8 @@ std::vector<ConVar *> ConVarHandler::getConVarByLetter(const UString &letters) c
             for(size_t i = 0; i < convars.size(); i++) {
                 if(convars[i]->isFlagSet(FCVAR_HIDDEN)) continue;
 
-                if(convars[i]->getName().find(letters) != -1) {
-                    std::string stdName(convars[i]->getName().toUtf8(), convars[i]->getName().lengthUtf8());
+                if(convars[i]->getName().find(letters) != std::string::npos) {
+                    const ConVarString &stdName = convars[i]->getName();
                     if(matchingConVarNames.find(stdName) == matchingConVarNames.end()) {
                         matchingConVarNames.insert(stdName);
                         matchingConVars.push_back(convars[i]);
@@ -274,8 +267,8 @@ std::vector<ConVar *> ConVarHandler::getConVarByLetter(const UString &letters) c
     return matchingConVars;
 }
 
-UString ConVarHandler::flagsToString(uint8_t flags) {
-    UString string;
+ConVarString ConVarHandler::flagsToString(uint8_t flags) {
+    ConVarString string;
     {
         if(flags == 0) {
             string.append("no flags");
@@ -318,7 +311,7 @@ bool ConVarHandler::isVanilla() {
 
 static void _find(const UString &args) {
     if(args.length() < 1) {
-        debugLog("Usage:  find <string>");
+        Engine::logRaw("Usage:  find <string>\n");
         return;
     }
 
@@ -328,8 +321,8 @@ static void _find(const UString &args) {
     for(size_t i = 0; i < convars.size(); i++) {
         if(convars[i]->isFlagSet(FCVAR_HIDDEN)) continue;
 
-        const UString name = convars[i]->getName();
-        if(name.find(args, 0, name.length()) != -1) matchingConVars.push_back(convars[i]);
+        const ConVarString &name = convars[i]->getName();
+        if(name.find(args.toUtf8()) != std::string::npos) matchingConVars.push_back(convars[i]);
     }
 
     if(matchingConVars.size() > 0) {
@@ -340,52 +333,43 @@ static void _find(const UString &args) {
     }
 
     if(matchingConVars.size() < 1) {
-        UString thelog = "No commands found containing \"";
-        thelog.append(args);
-        thelog.append("\".\n");
-        debugLog("%s", thelog.toUtf8());
+        Engine::logRaw("No commands found containing {:s}.\n", args);
         return;
     }
 
-    debugLog("----------------------------------------------\n");
+    Engine::logRaw("----------------------------------------------\n");
     {
         UString thelog = "[ find : ";
         thelog.append(args);
         thelog.append(" ]\n");
-        debugLog("%s", thelog.toUtf8());
+        Engine::logRaw("{:s}", thelog.toUtf8());
 
         for(size_t i = 0; i < matchingConVars.size(); i++) {
-            UString tstring = matchingConVars[i]->getName();
-            tstring.append("\n");
-            debugLog("%s", tstring.toUtf8());
+            Engine::logRaw("{:s}\n", matchingConVars[i]->getName());
         }
     }
-    debugLog("----------------------------------------------\n");
+    Engine::logRaw("----------------------------------------------\n");
 }
 
 static void _help(const UString &args) {
-    UString argsCopy{args};
-    argsCopy = argsCopy.trim();
+    std::string trimmedArgs{args.trim().utf8View()};
 
-    if(argsCopy.length() < 1) {
-        debugLog("Usage:  help <cvarname>\nTo get a list of all available commands, type \"listcommands\".\n");
+    if(trimmedArgs.length() < 1) {
+        Engine::logRaw("Usage:  help <cvarname>\nTo get a list of all available commands, type \"listcommands\".\n");
         return;
     }
 
-    const std::vector<ConVar *> matches = convar->getConVarByLetter(argsCopy);
+    const std::vector<ConVar *> matches = convar->getConVarByLetter(trimmedArgs);
 
     if(matches.size() < 1) {
-        UString thelog = "ConVar \"";
-        thelog.append(argsCopy);
-        thelog.append("\" does not exist.\n");
-        debugLog("%s", thelog.toUtf8());
+        Engine::logRaw("ConVar {:s} does not exist.\n", trimmedArgs);
         return;
     }
 
     // use closest match
     size_t index = 0;
     for(size_t i = 0; i < matches.size(); i++) {
-        if(matches[i]->getName() == argsCopy) {
+        if(matches[i]->getName() == trimmedArgs) {
             index = i;
             break;
         }
@@ -393,33 +377,30 @@ static void _help(const UString &args) {
     ConVar *match = matches[index];
 
     if(match->getHelpstring().length() < 1) {
-        UString thelog = "ConVar \"";
-        thelog.append(match->getName());
-        thelog.append("\" does not have a helpstring.\n");
-        debugLog("%s", thelog.toUtf8());
+        Engine::logRaw("ConVar {:s} does not have a helpstring.\n", match->getName());
         return;
     }
 
-    UString thelog = match->getName();
+    ConVarString thelog{match->getName()};
     {
         if(match->hasValue()) {
-            auto &cv_str = match->getString();
-            auto &default_str = match->getDefaultString();
-            thelog.append(UString::format(" = %s ( def. \"%s\" , ", cv_str.toUtf8(), default_str.toUtf8()));
+            const auto &cv_str = match->getString();
+            const auto &default_str = match->getDefaultString();
+            thelog.append(fmt::format(" = {:s} ( def. \"{:s}\" , ", cv_str.c_str(), default_str.c_str()));
             thelog.append(ConVar::typeToString(match->getType()));
             thelog.append(", ");
-            thelog.append(ConVarHandler::flagsToString(match->getFlags()));
+            thelog.append(ConVarHandler::flagsToString(match->getFlags()).c_str());
             thelog.append(" )");
         }
 
         thelog.append(" - ");
-        thelog.append(match->getHelpstring());
+        thelog.append(match->getHelpstring().c_str());
     }
-    debugLog("%s", thelog.toUtf8());
+    Engine::logRaw("{:s}\n", thelog);
 }
 
 static void _listcommands(void) {
-    debugLog("----------------------------------------------\n");
+    Engine::logRaw("----------------------------------------------\n");
     {
         std::vector<ConVar *> convars = convar->getConVarArray();
         struct CONVAR_SORT_COMPARATOR {
@@ -432,29 +413,29 @@ static void _listcommands(void) {
 
             ConVar *var = convars[i];
 
-            UString tstring = var->getName();
+            ConVarString tstring{var->getName()};
             {
                 if(var->hasValue()) {
-                    auto var_str = var->getString();
-                    auto default_str = var->getDefaultString();
-                    tstring.append(UString::format(" = %s ( def. \"%s\" , ", var_str.toUtf8(), default_str.toUtf8()));
+                    const auto &var_str = var->getString();
+                    const auto &default_str = var->getDefaultString();
+                    tstring.append(fmt::format(" = {:s} ( def. \"{:s}\" , ", var_str.c_str(), default_str.c_str()));
                     tstring.append(ConVar::typeToString(var->getType()));
                     tstring.append(", ");
-                    tstring.append(ConVarHandler::flagsToString(var->getFlags()));
+                    tstring.append(ConVarHandler::flagsToString(var->getFlags()).c_str());
                     tstring.append(" )");
                 }
 
                 if(var->getHelpstring().length() > 0) {
                     tstring.append(" - ");
-                    tstring.append(var->getHelpstring());
+                    tstring.append(var->getHelpstring().c_str());
                 }
 
                 tstring.append("\n");
             }
-            debugLog("%s", tstring.toUtf8());
+            Engine::logRaw("{:s}", tstring);
         }
     }
-    debugLog("----------------------------------------------\n");
+    Engine::logRaw("----------------------------------------------\n");
 }
 
 static void _dumpcommands(void) {
@@ -466,7 +447,7 @@ static void _dumpcommands(void) {
 
     FILE *file = fopen("commands.htm", "w");
     if(file == NULL) {
-        debugLog("Failed to open commands.htm for writing\n");
+        Engine::logRaw("Failed to open commands.htm for writing\n");
         return;
     }
 
@@ -477,9 +458,9 @@ static void _dumpcommands(void) {
         if(var->isFlagSet(FCVAR_PRIVATE)) continue;
 
         std::string cmd = "<h4>";
-        cmd.append(var->getName().toUtf8());
+        cmd.append(var->getName());
         cmd.append("</h4>\n");
-        cmd.append(var->getHelpstring().toUtf8());
+        cmd.append(var->getHelpstring());
         cmd.append("<pre>{");
         cmd.append("\n    \"default\": ");
         cmd.append(var->getFancyDefaultValue());
@@ -495,16 +476,14 @@ static void _dumpcommands(void) {
     fflush(file);
     fclose(file);
 
-    debugLog("Commands dumped to commands.htm\n");
+    Engine::logRaw("Commands dumped to commands.htm\n");
 }
 
 void _exec(const UString &args) { Console::execConfigFile(args.toUtf8()); }
 
 void _echo(const UString &args) {
     if(args.length() > 0) {
-        UString argsCopy{args};
-        argsCopy.append("\n");
-        debugLog("%s", argsCopy.toUtf8());
+        Engine::logRaw("{:s}\n", args.toUtf8());
     }
 }
 
@@ -536,7 +515,7 @@ void _osuOptionsSliderQualityWrapper(const UString &oldValue, const UString &new
     cv_slider_curve_points_separation.setValue(value);
 };
 
-void spectate_by_username(UString username) {
+void spectate_by_username(const UString &username) {
     auto user = find_user(username);
     if(user == NULL) {
         debugLog("Couldn't find user \"%s\"!", username.toUtf8());
@@ -576,11 +555,7 @@ void loudness_cb(const UString &oldValue, const UString &newValue) {
 
 void _save(void) { db->save(); }
 
-#if !(defined(_CLANGD) || defined(Q_CREATOR_RUN) || defined(__INTELLISENSE__) || defined(__CDT_PARSER__))
-// clangd gets confused when trying to infer callback invocability
 #undef CONVARDEFS_H
 #define DEFINE_CONVARS
 
 #include "ConVarDefs.h"
-#endif
-

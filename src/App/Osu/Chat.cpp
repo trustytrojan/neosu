@@ -1026,7 +1026,7 @@ void Chat::updateUserList() {
     this->user_list->setScrollSizeToContent();
 }
 
-void Chat::join(UString channel_name) {
+void Chat::join(const UString &channel_name) {
     // XXX: Open the channel immediately, without letting the user send messages in it.
     //      Would require a way to signal if a channel is joined or not.
     //      Would allow to keep open the tabs of the channels we got kicked out of.
@@ -1036,7 +1036,7 @@ void Chat::join(UString channel_name) {
     send_packet(packet);
 }
 
-void Chat::leave(UString channel_name) {
+void Chat::leave(const UString &channel_name) {
     bool send_leave_packet = channel_name[0] == '#';
     if(channel_name == UString("#lobby")) send_leave_packet = false;
     if(channel_name == UString("#multiplayer")) send_leave_packet = false;

@@ -287,6 +287,6 @@ void UserCard::setID(u32 new_id) {
         this->avatar->on_screen = true;
         this->sText = my->name;
     } else {
-        this->sText = cv_name.getString();
+        this->sText = cv_name.getString().c_str();
     }
 }

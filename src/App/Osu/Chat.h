@@ -55,8 +55,8 @@ class Chat : public OsuScreen {
     void updateButtonLayout(Vector2 screen);
     void updateUserList();
 
-    void join(UString channel_name);
-    void leave(UString channel_name);
+    void join(const UString &channel_name);
+    void leave(const UString &channel_name);
     void handle_command(const UString& msg);
     void send_message(const UString& msg);
     void onDisconnect();

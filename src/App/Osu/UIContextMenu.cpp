@@ -182,7 +182,7 @@ void UIContextMenu::begin(int minWidth, bool bigStyle) {
     this->containedTextbox = NULL;
 }
 
-UIContextMenuButton *UIContextMenu::addButton(UString text, int id) {
+UIContextMenuButton *UIContextMenu::addButton(const UString& text, int id) {
     const int buttonHeight = 30 * Osu::getUIScale() * (this->bBigStyle ? 1.27f : 1.0f);
     const int margin = 9 * Osu::getUIScale();
 
@@ -210,7 +210,7 @@ UIContextMenuButton *UIContextMenu::addButton(UString text, int id) {
     return button;
 }
 
-UIContextMenuTextbox *UIContextMenu::addTextbox(UString text, int id) {
+UIContextMenuTextbox *UIContextMenu::addTextbox(const UString& text, int id) {
     const int buttonHeight = 30 * Osu::getUIScale() * (this->bBigStyle ? 1.27f : 1.0f);
     const int margin = 9 * Osu::getUIScale();
 

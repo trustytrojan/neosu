@@ -124,7 +124,7 @@ class SongBrowserBackgroundSearchMatcher : public Resource {
 
 class ScoresStillLoadingElement : public CBaseUILabel {
    public:
-    ScoresStillLoadingElement(UString text) : CBaseUILabel(0, 0, 0, 0, "", text) {
+    ScoresStillLoadingElement(const UString& text) : CBaseUILabel(0, 0, 0, 0, "", text) {
         this->sIconString.insert(0, Icons::GLOBE);
     }
 
@@ -172,7 +172,7 @@ class ScoresStillLoadingElement : public CBaseUILabel {
 
 class NoRecordsSetElement : public CBaseUILabel {
    public:
-    NoRecordsSetElement(UString text) : CBaseUILabel(0, 0, 0, 0, "", text) {
+    NoRecordsSetElement(const UString& text) : CBaseUILabel(0, 0, 0, 0, "", text) {
         this->sIconString.insert(0, Icons::TROPHY);
     }
 
@@ -743,7 +743,7 @@ void SongBrowser::draw() {
     this->carousel->draw();
 
     // draw search
-    this->search->setSearchString(this->sSearchString, cv_songbrowser_search_hardcoded_filter.getString());
+    this->search->setSearchString(this->sSearchString, cv_songbrowser_search_hardcoded_filter.getString().c_str());
     this->search->setDrawNumResults(this->bInSearch);
     this->search->setNumFoundResults(this->visibleSongButtons.size());
     this->search->setSearching(!this->backgroundSearchMatcher->isDead());
@@ -1385,7 +1385,7 @@ CBaseUIContainer *SongBrowser::setVisible(bool visible) {
         }
 
         // update user name/stats
-        osu->onUserCardChange(cv_name.getString());
+        osu->onUserCardChange(cv_name.getString().c_str());
 
         // HACKHACK: workaround for BaseUI framework deficiency (missing mouse events. if a mouse button is being held,
         // and then suddenly a BaseUIElement gets put under it and set visible, and then the mouse button is released,
@@ -2480,7 +2480,7 @@ void SongBrowser::rebuildScoreButtons() {
     this->localBestContainer->setVisible(false);
 
     const bool validBeatmap = (this->beatmap != NULL && this->beatmap->getSelectedDifficulty2() != NULL);
-    bool is_online = cv_songbrowser_scores_sortingtype.getString() == UString("Online Leaderboard");
+    bool is_online = cv_songbrowser_scores_sortingtype.getString() == "Online Leaderboard";
 
     std::vector<FinishedScore> scores;
     if(validBeatmap) {
@@ -2776,14 +2776,14 @@ void SongBrowser::onDatabaseLoadingFinished() {
     // build collections
     this->recreateCollectionsButtons();
 
-    this->onSortChange(cv_songbrowser_sortingtype.getString());
-    this->onSortScoresChange(cv_songbrowser_scores_sortingtype.getString());
+    this->onSortChange(cv_songbrowser_sortingtype.getString().c_str());
+    this->onSortScoresChange(cv_songbrowser_scores_sortingtype.getString().c_str());
 
     // update rich presence (discord total pp)
     RichPresence::onSongBrowser();
 
     // update user name/stats
-    osu->onUserCardChange(cv_name.getString());
+    osu->onUserCardChange(cv_name.getString().c_str());
 
     if(cv_songbrowser_search_hardcoded_filter.getString().length() > 0) this->onSearchUpdate();
 
@@ -2805,7 +2805,7 @@ void SongBrowser::onDatabaseLoadingFinished() {
 
 void SongBrowser::onSearchUpdate() {
     const bool hasHardcodedSearchStringChanged =
-        (this->sPrevHardcodedSearchString != cv_songbrowser_search_hardcoded_filter.getString());
+        (this->sPrevHardcodedSearchString != cv_songbrowser_search_hardcoded_filter.getString().c_str());
     const bool hasSearchStringChanged = (this->sPrevSearchString != this->sSearchString);
 
     const bool prevInSearch = this->bInSearch;
@@ -2824,7 +2824,7 @@ void SongBrowser::onSearchUpdate() {
             this->backgroundSearchMatcher->revive();
             this->backgroundSearchMatcher->release();
             this->backgroundSearchMatcher->setSongButtonsAndSearchString(
-                this->songButtons, this->sSearchString, cv_songbrowser_search_hardcoded_filter.getString());
+                this->songButtons, this->sSearchString, cv_songbrowser_search_hardcoded_filter.getString().c_str());
 
             resourceManager->requestNextLoadAsync();
             resourceManager->loadResource(this->backgroundSearchMatcher);
@@ -2862,7 +2862,7 @@ void SongBrowser::onSearchUpdate() {
     }
 
     this->sPrevSearchString = this->sSearchString;
-    this->sPrevHardcodedSearchString = cv_songbrowser_search_hardcoded_filter.getString();
+    this->sPrevHardcodedSearchString = cv_songbrowser_search_hardcoded_filter.getString().c_str();
 }
 
 void SongBrowser::rebuildSongButtonsAndVisibleSongButtonsWithSearchMatchSupport(bool scrollToTop,
@@ -2973,13 +2973,13 @@ void SongBrowser::onSortScoresClicked(CBaseUIButton *button) {
     this->contextMenu->begin(button->getSize().x);
     {
         CBaseUIButton *button = this->contextMenu->addButton("Online Leaderboard");
-        if(cv_songbrowser_scores_sortingtype.getString() == UString("Online Leaderboard"))
+        if(cv_songbrowser_scores_sortingtype.getString() == "Online Leaderboard")
             button->setTextBrightColor(0xff00ff00);
 
         const std::vector<Database::SCORE_SORTING_METHOD> &scoreSortingMethods = db->getScoreSortingMethods();
         for(size_t i = 0; i < scoreSortingMethods.size(); i++) {
             CBaseUIButton *button = this->contextMenu->addButton(scoreSortingMethods[i].name);
-            if(scoreSortingMethods[i].name == cv_songbrowser_scores_sortingtype.getString())
+            if(scoreSortingMethods[i].name.utf8View() == cv_songbrowser_scores_sortingtype.getString())
                 button->setTextBrightColor(0xff00ff00);
         }
     }
@@ -2987,7 +2987,7 @@ void SongBrowser::onSortScoresClicked(CBaseUIButton *button) {
     this->contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onSortScoresChange));
 }
 
-void SongBrowser::onSortScoresChange(UString text, int id) {
+void SongBrowser::onSortScoresChange(const UString& text, int id) {
     cv_songbrowser_scores_sortingtype.setValue(text);  // NOTE: remember
     this->scoreSortButton->setText(text);
     this->rebuildScoreButtons();
@@ -3040,7 +3040,7 @@ void SongBrowser::onGroupClicked(CBaseUIButton *button) {
     this->contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onGroupChange));
 }
 
-void SongBrowser::onGroupChange(UString text, int id) {
+void SongBrowser::onGroupChange(const UString& text, int id) {
     this->groupByCollectionBtn->setTextBrightColor(defaultColor);
     this->groupByArtistBtn->setTextBrightColor(defaultColor);
     this->groupByDifficultyBtn->setTextBrightColor(defaultColor);
@@ -3104,7 +3104,7 @@ void SongBrowser::onSortClicked(CBaseUIButton *button) {
     this->contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onSortChange));
 }
 
-void SongBrowser::onSortChange(UString text, int id) { this->onSortChangeInt(text, true); }
+void SongBrowser::onSortChange(const UString& text, int id) { this->onSortChangeInt(text, true); }
 
 void SongBrowser::onSortChangeInt(const UString& text, bool autoScroll) {
     SORTING_METHOD *sortingMethod = &this->sortingMethods[3];
@@ -3342,9 +3342,9 @@ void SongBrowser::onSelectionOptions() {
     }
 }
 
-void SongBrowser::onModeChange(UString text) { this->onModeChange2(std::move(text)); }
+void SongBrowser::onModeChange(const UString& text) { this->onModeChange2(text); }
 
-void SongBrowser::onModeChange2(UString text, int id) { cv_mod_fposu.setValue(id == 2 || text == UString("fposu")); }
+void SongBrowser::onModeChange2(const UString& text, int id) { cv_mod_fposu.setValue(id == 2 || text == UString("fposu")); }
 
 void SongBrowser::onScoreClicked(CBaseUIButton *button) {
     ScoreButton *scoreButton = (ScoreButton *)button;
@@ -3370,7 +3370,7 @@ void SongBrowser::onScoreContextMenu(ScoreButton *scoreButton, int id) {
     }
 }
 
-void SongBrowser::onSongButtonContextMenu(SongButton *songButton, UString text, int id) {
+void SongBrowser::onSongButtonContextMenu(SongButton *songButton, const UString& text, int id) {
     // debugLog("SongBrowser::onSongButtonContextMenu(%p, %s, %i)\n", songButton, text.toUtf8(), id);
 
     struct CollectionManagementHelper {
@@ -3490,7 +3490,7 @@ void SongBrowser::onSongButtonContextMenu(SongButton *songButton, UString text, 
             this->recreateCollectionsButtons();
             this->rebuildSongButtonsAndVisibleSongButtonsWithSearchMatchSupport(
                 false, false);  // (last false = skipping rebuildSongButtons() here)
-            this->onSortChangeInt(cv_songbrowser_sortingtype.getString(),
+            this->onSortChangeInt(cv_songbrowser_sortingtype.getString().c_str(),
                                   false);  // (because this does the rebuildSongButtons())
         }
         if(previouslySelectedCollectionName.length() > 0) {
@@ -3505,7 +3505,7 @@ void SongBrowser::onSongButtonContextMenu(SongButton *songButton, UString text, 
     }
 }
 
-void SongBrowser::onCollectionButtonContextMenu(CollectionButton *collectionButton, UString text, int id) {
+void SongBrowser::onCollectionButtonContextMenu(CollectionButton *collectionButton, const UString& text, int id) {
     std::string collection_name = text.toUtf8();
 
     if(id == 2) {  // delete collection
@@ -3530,7 +3530,7 @@ void SongBrowser::onCollectionButtonContextMenu(CollectionButton *collectionButt
         }
     } else if(id == 3) {  // collection has been renamed
         // update UI
-        this->onSortChangeInt(cv_songbrowser_sortingtype.getString(), false);
+        this->onSortChangeInt(cv_songbrowser_sortingtype.getString().c_str(), false);
     }
 }
 

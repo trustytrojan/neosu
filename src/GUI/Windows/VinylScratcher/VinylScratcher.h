@@ -27,7 +27,7 @@ class VinylScratcher : public CBaseUIWindow {
 
    private:
     void onFinished();
-    void onFileClicked(std::string filepath, bool reverse);
+    void onFileClicked(const std::string& filepath, bool reverse);
     void onVolumeChanged(CBaseUISlider *slider);
     void onSeek();
     void onPlayClicked();

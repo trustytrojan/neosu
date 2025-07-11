@@ -105,7 +105,7 @@ void CollectionButton::triggerContextMenu(Vector2 pos) {
     }
 }
 
-void CollectionButton::onContextMenu(UString text, int id) {
+void CollectionButton::onContextMenu(const UString& text, int id) {
     if(id == 1) {
         this->contextMenu->begin(0, true);
         {
@@ -139,7 +139,7 @@ void CollectionButton::onContextMenu(UString text, int id) {
         UIContextMenu::clampToBottomScreenEdge(this->contextMenu);
     } else if(id == 2) {
         if(keyboard->isShiftDown())
-            this->onDeleteCollectionConfirmed(std::move(text), id);
+            this->onDeleteCollectionConfirmed(text, id);
         else {
             this->contextMenu->begin(0, true);
             {
@@ -161,7 +161,7 @@ void CollectionButton::onContextMenu(UString text, int id) {
     }
 }
 
-void CollectionButton::onRenameCollectionConfirmed(UString text, int id) {
+void CollectionButton::onRenameCollectionConfirmed(const UString& text, int id) {
     if(text.length() > 0) {
         std::string new_name = text.toUtf8();
         auto collection = get_or_create_collection(this->sCollectionName);
@@ -173,7 +173,7 @@ void CollectionButton::onRenameCollectionConfirmed(UString text, int id) {
     }
 }
 
-void CollectionButton::onDeleteCollectionConfirmed(UString text, int id) {
+void CollectionButton::onDeleteCollectionConfirmed(const UString& text, int id) {
     if(id != 2) return;
 
     // just forward it

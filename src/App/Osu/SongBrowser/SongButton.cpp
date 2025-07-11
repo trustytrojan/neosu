@@ -295,7 +295,7 @@ void SongButton::triggerContextMenu(Vector2 pos) {
     }
 }
 
-void SongButton::onContextMenu(UString text, int id) {
+void SongButton::onContextMenu(const UString& text, int id) {
     if(id == 1 || id == 2) {
         // 1 = add map to collection
         // 2 = add set to collection
@@ -351,7 +351,7 @@ void SongButton::onContextMenu(UString text, int id) {
     }
 }
 
-void SongButton::onAddToCollectionConfirmed(UString text, int id) {
+void SongButton::onAddToCollectionConfirmed(const UString& text, int id) {
     if(id == -2 || id == -4) {
         this->contextMenu->begin(0, true);
         {
@@ -389,7 +389,7 @@ void SongButton::onAddToCollectionConfirmed(UString text, int id) {
     }
 }
 
-void SongButton::onCreateNewCollectionConfirmed(UString text, int id) {
+void SongButton::onCreateNewCollectionConfirmed(const UString& text, int id) {
     if(id == -2 || id == -4) {
         // just forward it
         osu->getSongBrowser()->onSongButtonContextMenu(this, text, id);

@@ -91,7 +91,7 @@ void PromptScreen::onChar(KeyboardEvent &e) {
     e.consume();
 }
 
-void PromptScreen::prompt(UString msg, PromptResponseCallback callback) {
+void PromptScreen::prompt(const UString &msg, const PromptResponseCallback &callback) {
     this->prompt_label->setText(msg);
     this->prompt_input->setText("");
     this->prompt_input->focus();
