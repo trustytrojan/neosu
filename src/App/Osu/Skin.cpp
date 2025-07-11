@@ -443,8 +443,7 @@ void Skin::load() {
 
     // skin ini
     this->randomizeFilePath();
-    this->sSkinIniFilePath = this->sFilePath;
-    this->sSkinIniFilePath.append(fix_filename_casing(this->sFilePath, "skin.ini"));
+	this->sSkinIniFilePath = this->sFilePath + "skin.ini";
 
     bool parseSkinIni1Status = true;
     bool parseSkinIni2Status = true;
@@ -1633,11 +1632,11 @@ void Skin::checkLoadSound(Sound **addressOfPointer, const std::string& skinEleme
         for(int i = 0; i < 3; i++) {
             std::string fn = filename;
             fn.append(extensions[i]);
-            fn = fix_filename_casing(base_path, fn);
 
             std::string path = base_path;
             path.append(fn);
 
+            // this check will fix up the filename casing
             if(env->fileExists(path)) {
                 if(cv_skin_async.getBool()) {
                     resourceManager->requestNextLoadAsync();

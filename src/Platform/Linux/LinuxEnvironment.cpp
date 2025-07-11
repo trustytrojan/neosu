@@ -130,15 +130,6 @@ void LinuxEnvironment::restart() {
     this->shutdown();
 }
 
-std::string LinuxEnvironment::getExecutablePath() {
-    char buf[4096];
-    memset(buf, '\0', 4096);
-    if(readlink("/proc/self/exe", buf, 4095) != -1)
-        return std::string(buf);
-    else
-        return std::string("");
-}
-
 void LinuxEnvironment::openURLInDefaultBrowser(UString url) {
     if(fork() == 0) exit(execl("/usr/bin/xdg-open", "xdg-open", url.toUtf8(), (char *)nullptr));
 }
@@ -158,112 +149,10 @@ UString LinuxEnvironment::getUsername() {
         return UString("");
 }
 
-std::string LinuxEnvironment::getUserDataPath() {
-    passwd *pwd = getpwuid(getuid());
-    if(pwd != nullptr && pwd->pw_dir != nullptr)
-        return std::string(pwd->pw_dir);
-    else
-        return std::string("");
-}
-
-bool LinuxEnvironment::createDirectory(std::string directoryName) { return mkdir(directoryName.c_str(), 0755) != -1; }
-
-bool LinuxEnvironment::renameFile(std::string oldFileName, std::string newFileName) {
-    return rename(oldFileName.c_str(), newFileName.c_str()) != -1;
-}
-
-bool LinuxEnvironment::deleteFile(std::string filePath) { return remove(filePath.c_str()) == 0; }
-
-std::vector<std::string> LinuxEnvironment::getFilesInFolder(std::string folder) {
-    std::vector<std::string> files;
-
-    struct dirent **namelist{};
-    int n = scandir(folder.c_str(), &namelist, getFilesInFolderFilter, alphasort);
-    if(n < 0) {
-        /// debugLog("error, scandir() returned %i!\n", n);
-        return files;
-    }
-
-    for(int i = 0; i < n; i++) {
-        std::string uName = &(namelist[i]->d_name)[0];
-        std::string fullName = folder;
-        fullName.append(uName);
-        free(namelist[i]);
-
-        struct stat stDirInfo{};
-        int lstatret = lstat(fullName.c_str(), &stDirInfo);
-        if(lstatret < 0) {
-            // perror (name);
-            // debugLog("error, lstat() returned %i!\n", lstatret);
-            continue;
-        }
-
-        if(!S_ISDIR(stDirInfo.st_mode)) files.push_back(uName);
-    }
-    free(static_cast<void *>(namelist));
-
-    return files;
-}
-
-std::vector<std::string> LinuxEnvironment::getFoldersInFolder(std::string folder) {
-    std::vector<std::string> folders;
-
-    struct dirent **namelist{};
-    int n = scandir(folder.c_str(), &namelist, getFoldersInFolderFilter, alphasort);
-    if(n < 0) {
-        /// debugLog("error, scandir() returned %i!\n", n);
-        return folders;
-    }
-
-    for(int i = 0; i < n; i++) {
-        std::string uName = &(namelist[i]->d_name)[0];
-        std::string fullName = folder;
-        fullName.append(uName);
-        free(namelist[i]);
-
-        struct stat stDirInfo{};
-        int lstatret = lstat(fullName.c_str(), &stDirInfo);
-        if(lstatret < 0) {
-            /// perror (name);
-            /// debugLog("error, lstat() returned %i!\n", lstatret);
-            continue;
-        }
-
-        if(S_ISDIR(stDirInfo.st_mode)) folders.push_back(uName);
-    }
-    free(static_cast<void *>(namelist));
-
-    return folders;
-}
-
 std::vector<UString> LinuxEnvironment::getLogicalDrives() {
     std::vector<UString> drives;
     drives.emplace_back("/");
     return drives;
-}
-
-std::string LinuxEnvironment::getFolderFromFilePath(std::string filepath) {
-    if(Environment::directoryExists(filepath))  // indirect check if this is already a valid directory (and not a file)
-        return filepath;
-    else
-        return std::string(dirname((char *)filepath.c_str()));
-}
-
-std::string LinuxEnvironment::getFileExtensionFromFilePath(std::string filepath, bool includeDot) {
-    const int idx = filepath.find_last_of('.');
-    if(idx != -1)
-        return filepath.substr(idx + 1);
-    else
-        return std::string("");
-}
-
-std::string LinuxEnvironment::getFileNameFromFilePath(std::string filePath) {
-    if(filePath.length() < 1) return filePath;
-
-    const size_t lastSlashIndex = filePath.find_last_of('/');
-    if(lastSlashIndex != std::string::npos) return filePath.substr(lastSlashIndex + 1);
-
-    return filePath;
 }
 
 UString LinuxEnvironment::getClipBoardText() { return this->getClipboardTextInt(); }
@@ -675,13 +564,6 @@ UString LinuxEnvironment::keyCodeToString(KEYCODE keyCode) {
 
 // helper functions
 
-int LinuxEnvironment::getFilesInFolderFilter(const struct dirent *entry) { return 1; }
-
-int LinuxEnvironment::getFoldersInFolderFilter(const struct dirent *entry) {
-    if(!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")) return 0;
-    return 1;
-}
-
 Cursor LinuxEnvironment::makeBlankCursor() {
     static char data[1] = {0};
     Cursor cursor;
@@ -854,22 +736,3 @@ UString LinuxEnvironment::getClipboardTextInt() {
 }
 
 #endif
-
-#include <filesystem>
-#include <utility>
-
-std::string fix_filename_casing(const std::string &directory, std::string filename) {
-#ifdef _WIN32
-    return filename;
-#else
-    if(!std::filesystem::exists(directory) || !std::filesystem::is_directory(directory)) return filename;
-
-    std::filesystem::path dir = directory;
-    for(auto &entry : std::filesystem::directory_iterator(dir)) {
-        if(entry.is_regular_file() && !strcasecmp(entry.path().filename().string().c_str(), filename.c_str())) {
-            return entry.path().filename().string();
-        }
-    }
-    return filename;
-#endif
-}

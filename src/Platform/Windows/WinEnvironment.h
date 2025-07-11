@@ -21,24 +21,16 @@ class WinEnvironment : public Environment {
     // system
     void shutdown();
     void restart();
-    std::string getExecutablePath();
     void openURLInDefaultBrowser(UString url);
     void openDirectory(std::string path);
 
     // user
     UString getUsername();
-    std::string getUserDataPath();
 
     // file IO
-    bool createDirectory(std::string directoryName);
-    bool renameFile(std::string oldFileName, std::string newFileName);
-    bool deleteFile(std::string filePath);
-    std::vector<std::string> getFilesInFolder(std::string folder);
-    std::vector<std::string> getFoldersInFolder(std::string folder);
+    std::vector<std::string> getFilesInFolder(const std::string &folder) noexcept override;
+    std::vector<std::string> getFoldersInFolder(const std::string &folder) noexcept override;
     std::vector<UString> getLogicalDrives();
-    std::string getFolderFromFilePath(std::string filepath);
-    std::string getFileExtensionFromFilePath(std::string filepath, bool includeDot = false);
-    std::string getFileNameFromFilePath(std::string filePath);
 
     // clipboard
     UString getClipBoardText();

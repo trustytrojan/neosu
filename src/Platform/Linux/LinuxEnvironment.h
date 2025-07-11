@@ -21,24 +21,14 @@ class LinuxEnvironment : public Environment {
     // system
     void shutdown() override;
     void restart() override;
-    std::string getExecutablePath() override;
     void openURLInDefaultBrowser(UString url) override;
     void openDirectory(std::string path) override;
 
     // user
     UString getUsername() override;
-    std::string getUserDataPath() override;
 
     // file IO
-    bool createDirectory(std::string directoryName) override;
-    bool renameFile(std::string oldFileName, std::string newFileName) override;
-    bool deleteFile(std::string filePath) override;
-    std::vector<std::string> getFilesInFolder(std::string folder) override;
-    std::vector<std::string> getFoldersInFolder(std::string folder) override;
     std::vector<UString> getLogicalDrives() override;
-    std::string getFolderFromFilePath(std::string filepath) override;
-    std::string getFileExtensionFromFilePath(std::string filepath, bool includeDot = false) override;
-    std::string getFileNameFromFilePath(std::string filePath) override;
 
     // clipboard
     UString getClipBoardText() override;
@@ -104,9 +94,6 @@ class LinuxEnvironment : public Environment {
     void handleSelectionRequest(XSelectionRequestEvent &evt);
 
    private:
-    static int getFilesInFolderFilter(const struct dirent *entry);
-    static int getFoldersInFolderFilter(const struct dirent *entry);
-
     void setWindowResizableInt(bool resizable, Vector2 windowSize);
     Vector2 getWindowSizeServer();
 
@@ -163,5 +150,3 @@ class LinuxEnvironment : public Environment {
 using EnvironmentImpl = LinuxEnvironment;
 
 #endif
-
-std::string fix_filename_casing(const std::string& directory, std::string filename);

@@ -58,6 +58,7 @@ class DownloadManager {
         }
 
         while(!this->shutting_down.load()) {
+            Timing::sleepMS(100);  // wait 100ms between every download
             std::shared_ptr<DownloadRequest> request;
 
             // wait for work or shutdown

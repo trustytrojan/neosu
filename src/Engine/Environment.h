@@ -29,13 +29,13 @@ class Environment {
     // system
     virtual void shutdown() = 0;
     virtual void restart() = 0;
-    virtual std::string getExecutablePath() = 0;
+    static const std::string &getExecutablePath();
     virtual void openURLInDefaultBrowser(UString url) = 0;
     virtual void openDirectory(std::string path) = 0;
 
     // user
     virtual UString getUsername() = 0;
-    virtual std::string getUserDataPath() = 0;
+    static const std::string &getUserDataPath();
 
     // file IO
     // modifies the input filename! (checks case insensitively past the last slash)
@@ -47,15 +47,17 @@ class Environment {
     static bool fileExists(const std::string &filename);
     static bool directoryExists(const std::string &directoryName);
 
-    virtual bool createDirectory(std::string directoryName) = 0;
-    virtual bool renameFile(std::string oldFileName, std::string newFileName) = 0;
-    virtual bool deleteFile(std::string filePath) = 0;
-    virtual std::vector<std::string> getFilesInFolder(std::string folder) = 0;
-    virtual std::vector<std::string> getFoldersInFolder(std::string folder) = 0;
+    static bool createDirectory(const std::string &directoryName);
+    static bool renameFile(const std::string &oldFileName, const std::string &newFileName);
+    static bool deleteFile(const std::string &filePath);
+    // i can't make these as fast as the win32 api version in a generic way
+    virtual std::vector<std::string> getFilesInFolder(const std::string &folder) noexcept;
+    virtual std::vector<std::string> getFoldersInFolder(const std::string &folder) noexcept;
+    static std::string getFolderFromFilePath(const std::string &filepath) noexcept;
+    static std::string getFileExtensionFromFilePath(const std::string &filepath, bool includeDot = false) noexcept;
+    static std::string getFileNameFromFilePath(const std::string &filePath) noexcept;
+
     virtual std::vector<UString> getLogicalDrives() = 0;
-    virtual std::string getFolderFromFilePath(std::string filepath) = 0;
-    virtual std::string getFileExtensionFromFilePath(std::string filepath, bool includeDot = false) = 0;
-    virtual std::string getFileNameFromFilePath(std::string filePath) = 0;
 
     static inline bool isaTTY() { return isatty(fileno(stdout)) != 0; }
 
@@ -117,4 +119,11 @@ class Environment {
 
    protected:
     bool bFullscreenWindowedBorderless;
+
+   private:
+    // for getting files in folder/ folders in folder
+    static std::vector<std::string> enumerateDirectory(const std::string &pathToEnum,
+                                                       /* enum SDL_PathType */ unsigned int type) noexcept;
+    static std::string getThingFromPathHelper(
+        const std::string &path, bool folder) noexcept;  // code sharing for getFolderFromFilePath/getFileNameFromFilePath
 };

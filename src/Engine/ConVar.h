@@ -63,8 +63,6 @@ class ConVar {
                                         >;
 
    private:
-    [[nodiscard]] float getRaw() const { return this->fValue.load(); }  // forward def
-
     // type detection helper
     template <typename T>
     static constexpr CONVAR_TYPE getTypeFor() {

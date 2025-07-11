@@ -8,7 +8,7 @@
 bool CBaseUIElement::isVisibleOnScreen() {
     if(!isVisible()) return false;
     const McRect visrect{{0, 0}, engine->getScreenSize()};
-    const Vector2 visrectCenter{visrect.getCenter()};
+    const Vector2 &visrectCenter = visrect.getCenter();
     const Vector2 elemPosNudgedIn{Vector2{this->vPos.x, this->vPos.y}.nudge(visrectCenter, -5.0f)};
     return visrect.contains(elemPosNudgedIn);
 }

@@ -92,61 +92,6 @@ UString WinEnvironment::getUsername() {
     return UString("");
 }
 
-std::string WinEnvironment::getUserDataPath() {
-#ifdef _UNICODE
-    wchar_t path[PATH_MAX]{};
-#else
-    char path[PATH_MAX]{};
-#endif
-    if(SUCCEEDED(SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path))) return UString{path}.toUtf8();
-
-    return {""};
-}
-
-std::string WinEnvironment::getExecutablePath() {
-#ifdef _UNICODE
-    wchar_t path[PATH_MAX]{};
-#else
-    char path[PATH_MAX]{};
-#endif
-    if(GetModuleFileName(NULL, &path[0], MAX_PATH)) return UString{&path[0]}.toUtf8();
-
-    return {""};
-}
-
-bool WinEnvironment::createDirectory(std::string directoryName) {
-    auto temp = UString(directoryName);
-#ifdef _UNICODE
-    const wchar_t *winDirectoryName = temp.wc_str();
-#else
-    const char *winDirectoryName = temp.c_str();
-#endif
-    return CreateDirectory(winDirectoryName, NULL);
-}
-
-bool WinEnvironment::renameFile(std::string oldFileName, std::string newFileName) {
-    auto temp1 = UString(oldFileName);
-    auto temp2 = UString(newFileName);
-#ifdef _UNICODE
-    const wchar_t *winNewFilename = temp1.wc_str();
-    const wchar_t *winOldFilename = temp2.wc_str();
-#else
-    const char *winNewFilename = temp1.c_str();
-    const char *winOldFilename = temp2.c_str();
-#endif
-    return MoveFile(winNewFilename, winOldFilename);
-}
-
-bool WinEnvironment::deleteFile(std::string filePath) {
-    auto temp = UString(filePath);
-#ifdef _UNICODE
-    const wchar_t *winFilename = temp.wc_str();
-#else
-    const char *winFilename = temp.c_str();
-#endif
-    return DeleteFile(winFilename);
-}
-
 UString WinEnvironment::getClipBoardText() {
     UString result = "";
     HANDLE clip = NULL;
@@ -281,7 +226,7 @@ UString WinEnvironment::openFolderWindow(UString title, UString initialpath) {
     return fn.lpstrFile;
 }
 
-std::vector<std::string> WinEnvironment::getFilesInFolder(std::string folder) {
+std::vector<std::string> WinEnvironment::getFilesInFolder(const std::string &folderOrig) noexcept {
     // Since we want to avoid wide strings in the codebase as much as possible,
     // we convert wide paths to UTF-8 (as they fucking should be).
     // We can't just use FindFirstFileA, because then any path with unicode
@@ -290,6 +235,7 @@ std::vector<std::string> WinEnvironment::getFilesInFolder(std::string folder) {
     // you have to use std::filesystem::u8path() or convert it back to a wstring
     // before using the windows API.
 
+    std::string folder{folderOrig};
     folder.append("*.*");
     WIN32_FIND_DATAW data;
     std::wstring buffer;
@@ -323,7 +269,7 @@ std::vector<std::string> WinEnvironment::getFilesInFolder(std::string folder) {
     return files;
 }
 
-std::vector<std::string> WinEnvironment::getFoldersInFolder(std::string folder) {
+std::vector<std::string> WinEnvironment::getFoldersInFolder(const std::string &folderOrig) noexcept {
     // Since we want to avoid wide strings in the codebase as much as possible,
     // we convert wide paths to UTF-8 (as they fucking should be).
     // We can't just use FindFirstFileA, because then any path with unicode
@@ -332,6 +278,7 @@ std::vector<std::string> WinEnvironment::getFoldersInFolder(std::string folder) 
     // you have to use std::filesystem::u8path() or convert it back to a wstring
     // before using the windows API.
 
+    std::string folder{folderOrig};
     folder.append("*.*");
     WIN32_FIND_DATAW data;
     std::wstring buffer;
@@ -400,37 +347,6 @@ std::vector<UString> WinEnvironment::getLogicalDrives() {
     }
 
     return drives;
-}
-
-std::string WinEnvironment::getFolderFromFilePath(std::string filepath) {
-    auto temp = UString(filepath);
-#ifdef _UNICODE
-    wchar_t *aString = const_cast<wchar_t *>(UString(temp).wc_str());
-#else
-    char *aString = (char *)filepath.c_str();
-#endif
-    path_strip_filename(aString);
-    return UString(aString).toUtf8();
-}
-
-std::string WinEnvironment::getFileExtensionFromFilePath(std::string filepath, bool includeDot) {
-    int idx = filepath.find_last_of('.');
-    if(idx != -1)
-        return filepath.substr(idx + 1);
-    else
-        return {""};
-}
-
-std::string WinEnvironment::getFileNameFromFilePath(std::string filePath) {
-    if(filePath.length() < 1) return filePath;
-
-    const size_t lastSlashIndex = filePath.find_last_of('/');
-    const size_t lastBackSlashIndex = filePath.find_last_of('\\');
-    size_t idx = 0;
-    if(lastSlashIndex != std::string::npos) idx = lastSlashIndex + 1;
-    if(lastBackSlashIndex != std::string::npos) idx = std::max(idx, lastBackSlashIndex + 1);
-
-    return filePath.substr(idx);
 }
 
 void WinEnvironment::showMessageInfo(UString title, UString message) {
@@ -924,33 +840,6 @@ void WinEnvironment::enableWindowsKey() {
 }
 
 // helper functions
-
-void WinEnvironment::path_strip_filename(TCHAR *Path) {
-    size_t Len = _tcslen(Path);
-
-    if(Len == 0) return;
-
-    size_t Idx = Len - 1;
-    while(TRUE) {
-        TCHAR Chr = Path[Idx];
-        if(Chr == TEXT('\\') || Chr == TEXT('/')) {
-            if(Idx == 0 || Path[Idx - 1] == ':') Idx++;
-
-            break;
-        } else if(Chr == TEXT(':')) {
-            Idx++;
-            break;
-        } else {
-            if(Idx == 0)
-                break;
-            else
-                Idx--;
-            ;
-        };
-    };
-
-    Path[Idx] = TEXT('\0');
-}
 
 void WinEnvironment::handleShowMessageFullscreen() {
     if(this->bFullScreen) {

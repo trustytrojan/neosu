@@ -5,7 +5,7 @@
 
 #include <sstream>
 
-//#include "ConVar.h"
+// #include "ConVar.h"
 #include "Engine.h"
 #include "Bancho.h"
 
@@ -28,7 +28,7 @@ NetworkHandler::~NetworkHandler() {
     s_banchoInstance.reset();
     bancho = nullptr;
     // XXX: run after waiting for network threads to terminate
-    //curl_global_cleanup();
+    // curl_global_cleanup();
 }
 
 UString NetworkHandler::httpGet(const UString &url, long timeout, long connectTimeout) {
@@ -72,7 +72,6 @@ std::string NetworkHandler::httpDownload(const UString &url, long timeout, long 
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlStringStreamWriteCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &curlWriteBuffer);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
-        curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
 
         curl_easy_setopt_CAINFO_BLOB_embedded(curl);
 
