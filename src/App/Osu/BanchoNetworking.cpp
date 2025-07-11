@@ -64,7 +64,7 @@ void disconnect() {
 
     // Logout
     // This is a blocking call, but we *do* want this to block when quitting the game.
-    if(bancho.is_online()) {
+    if(bancho->is_online()) {
         Packet packet;
         write<u16>(&packet, LOGOUT);
         write<u8>(&packet, 0);
@@ -72,12 +72,12 @@ void disconnect() {
         write<u32>(&packet, 0);
 
         CURL *curl = curl_easy_init();
-        auto version_header = UString::format("x-mcosu-ver: %s", bancho.neosu_version.toUtf8());
+        auto version_header = UString::format("x-mcosu-ver: %s", bancho->neosu_version.toUtf8());
         struct curl_slist *chunk = NULL;
         chunk = curl_slist_append(chunk, auth_header.c_str());
         chunk = curl_slist_append(chunk, version_header.toUtf8());
         auto scheme = cv_use_https.getBool() ? "https://" : "http://";
-        auto query_url = UString::format("%sc.%s/", scheme, bancho.endpoint.toUtf8());
+        auto query_url = UString::format("%sc.%s/", scheme, bancho->endpoint.toUtf8());
         curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, packet.memory);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, packet.pos);
@@ -85,6 +85,7 @@ void disconnect() {
         curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curldummy);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
+        curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
 
         curl_easy_setopt_CAINFO_BLOB_embedded(curl);
 
@@ -99,15 +100,15 @@ void disconnect() {
     free(outgoing.memory);
     outgoing = Packet();
 
-    bancho.user_id = 0;
-    bancho.is_spectating = false;
-    bancho.spectated_player_id = 0;
-    bancho.spectators.clear();
-    bancho.fellow_spectators.clear();
-    bancho.server_icon_url = "";
-    if(bancho.server_icon != NULL) {
-        resourceManager->destroyResource(bancho.server_icon);
-        bancho.server_icon = NULL;
+    bancho->user_id = 0;
+    bancho->spectating = false;
+    bancho->spectated_player_id = 0;
+    bancho->spectators.clear();
+    bancho->fellow_spectators.clear();
+    bancho->server_icon_url = "";
+    if(bancho->server_icon != NULL) {
+        resourceManager->destroyResource(bancho->server_icon);
+        bancho->server_icon = NULL;
     }
 
     std::vector<ConVar *> convars = convar->getConVarArray();
@@ -115,14 +116,14 @@ void disconnect() {
         var->resetDefaults();
     }
 
-    bancho.score_submission_policy = ServerPolicy::NO_PREFERENCE;
-    osu->optionsMenu->updateLayout();
+    bancho->score_submission_policy = ServerPolicy::NO_PREFERENCE;
+    osu->optionsMenu->scheduleLayoutUpdate();
 
     osu->optionsMenu->logInButton->setText("Log in");
     osu->optionsMenu->logInButton->setColor(0xff00ff00);
     osu->optionsMenu->logInButton->is_loading = false;
 
-    for(auto pair : online_users) {
+    for(auto &pair : online_users) {
         delete pair.second;
     }
     online_users.clear();
@@ -145,8 +146,8 @@ void reconnect() {
     // Will be reenabled after the login succeeds
     cv_mp_autologin.setValue(false);
 
-    bancho.username = cv_name.getString().c_str();
-    bancho.endpoint = cv_mp_server.getString().c_str();
+    bancho->username = cv_name.getString().c_str();
+    bancho->endpoint = cv_mp_server.getString().c_str();
 
     // Admins told me they don't want any clients to connect
     const char *server_blacklist[] = {
@@ -154,7 +155,7 @@ void reconnect() {
         "gatari.pw",
     };
     for(const char *endpoint : server_blacklist) {
-        if(!strcmp(endpoint, bancho.endpoint.toUtf8())) {
+        if(!strcmp(endpoint, bancho->endpoint.toUtf8())) {
             osu->notificationOverlay->addToast("This server does not allow neosu clients.");
             return;
         }
@@ -166,7 +167,7 @@ void reconnect() {
         return;
     }
     const char *pw = password.toUtf8();  // password needs to stay in scope!
-    bancho.pw_md5 = md5((u8 *)pw, strlen(pw));
+    bancho->pw_md5 = md5((u8 *)pw, strlen(pw));
 
     // Admins told me they don't want score submission enabled
     const char *submit_blacklist[] = {
@@ -174,8 +175,8 @@ void reconnect() {
         "ripple.moe",
     };
     for(const char *endpoint : submit_blacklist) {
-        if(!strcmp(endpoint, bancho.endpoint.toUtf8())) {
-            bancho.score_submission_policy = ServerPolicy::NO;
+        if(!strcmp(endpoint, bancho->endpoint.toUtf8())) {
+            bancho->score_submission_policy = ServerPolicy::NO;
             break;
         }
     }
@@ -209,7 +210,7 @@ size_t curl_write(void *contents, size_t size, size_t nmemb, void *userp) {
     return realsize;
 }
 
-static void send_api_request(CURL *curl, const APIRequest& api_out) {
+static void send_api_request(CURL *curl, const APIRequest &api_out) {
     // XXX: Use download()
 
     Packet response;
@@ -220,7 +221,7 @@ static void send_api_request(CURL *curl, const APIRequest& api_out) {
 
     struct curl_slist *chunk = NULL;
     auto scheme = cv_use_https.getBool() ? "https://" : "http://";
-    auto query_url = UString::format("%sosu.%s%s", scheme, bancho.endpoint.toUtf8(), api_out.path.toUtf8());
+    auto query_url = UString::format("%sosu.%s%s", scheme, bancho->endpoint.toUtf8(), api_out.path.toUtf8());
     curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
     if(api_out.type == SUBMIT_SCORE) {
         auto token_header = UString::format("token: %s", cho_token.toUtf8());
@@ -234,6 +235,7 @@ static void send_api_request(CURL *curl, const APIRequest& api_out) {
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
+    curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
 
     curl_easy_setopt_CAINFO_BLOB_embedded(curl);
 
@@ -256,7 +258,7 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
     response.memory = (u8 *)malloc(2048);
 
     struct curl_slist *chunk = NULL;
-    auto version_header = UString::format("x-mcosu-ver: %s", bancho.neosu_version.toUtf8());
+    auto version_header = UString::format("x-mcosu-ver: %s", bancho->neosu_version.toUtf8());
     chunk = curl_slist_append(chunk, version_header.toUtf8());
     if(!auth_header.empty()) {
         chunk = curl_slist_append(chunk, auth_header.c_str());
@@ -264,7 +266,7 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
 
     auto scheme = cv_use_https.getBool() ? "https://" : "http://";
-    auto query_url = UString::format("%sc.%s/", scheme, bancho.endpoint.toUtf8());
+    auto query_url = UString::format("%sc.%s/", scheme, bancho->endpoint.toUtf8());
     curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, outgoing.memory);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, outgoing.pos);
@@ -272,6 +274,7 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
+    curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
 
     curl_easy_setopt_CAINFO_BLOB_embedded(curl);
 
@@ -299,10 +302,10 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
     hres = curl_easy_header(curl, "x-mcosu-features", 0, CURLH_HEADER, -1, &header);
     if(hres == CURLHE_OK) {
         if(strstr(header->value, "submit=0") != NULL) {
-            bancho.score_submission_policy = ServerPolicy::NO;
+            bancho->score_submission_policy = ServerPolicy::NO;
             debugLog("Server doesn't want score submission. :(\n");
         } else if(strstr(header->value, "submit=1") != NULL) {
-            bancho.score_submission_policy = ServerPolicy::YES;
+            bancho->score_submission_policy = ServerPolicy::YES;
             debugLog("Server wants score submission! :D\n");
         }
     }
@@ -360,10 +363,10 @@ static void *do_networking() {
         }
 
         if(osu && osu->lobby->isVisible()) seconds_between_pings = 1;
-        if(bancho.is_spectating) seconds_between_pings = 1;
-        if(bancho.is_in_a_multi_room() && seconds_between_pings > 3) seconds_between_pings = 3;
+        if(bancho->spectating) seconds_between_pings = 1;
+        if(bancho->is_in_a_multi_room() && seconds_between_pings > 3) seconds_between_pings = 3;
         bool should_ping = difftime(time(NULL), last_packet_tms) > seconds_between_pings;
-        if(bancho.user_id <= 0) should_ping = false;
+        if(bancho->user_id <= 0) should_ping = false;
 
         outgoing_mutex.lock();
         if(try_logging_in) {
@@ -511,8 +514,8 @@ void receive_bancho_packets() {
     }
 }
 
-void send_api_request(const APIRequest& request) {
-    if(bancho.user_id <= 0) {
+void send_api_request(const APIRequest &request) {
+    if(bancho->user_id <= 0) {
         debugLog("Cannot send API request of type %u since we are not logged in.\n",
                  static_cast<unsigned int>(request.type));
         return;
@@ -529,7 +532,7 @@ void send_api_request(const APIRequest& request) {
 }
 
 void send_packet(Packet &packet) {
-    if(bancho.user_id <= 0) {
+    if(bancho->user_id <= 0) {
         // Don't queue any packets until we're logged in
         free(packet.memory);
         packet.memory = NULL;

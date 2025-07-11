@@ -28,15 +28,15 @@ void UIUserContextMenuScreen::stealFocus() {
 }
 
 void UIUserContextMenuScreen::open(u32 user_id) {
-    if(!bancho.is_online()) return;
+    if(!bancho->is_online()) return;
 
     this->close();
     this->user_id = user_id;
 
     int slot_number = -1;
-    if(bancho.is_in_a_multi_room()) {
+    if(bancho->is_in_a_multi_room()) {
         for(int i = 0; i < 16; i++) {
-            if(bancho.room.slots[i].player_id == user_id) {
+            if(bancho->room.slots[i].player_id == user_id) {
                 slot_number = i;
                 break;
             }
@@ -47,8 +47,8 @@ void UIUserContextMenuScreen::open(u32 user_id) {
 
     this->menu->addButton("View profile", VIEW_PROFILE);
 
-    if(user_id != bancho.user_id) {
-        if(bancho.room.is_host() && slot_number != -1) {
+    if(user_id != bancho->user_id) {
+        if(bancho->room.is_host() && slot_number != -1) {
             this->menu->addButton("Set as Host", UA_TRANSFER_HOST);
             this->menu->addButton("Kick", KICK);
         }
@@ -69,7 +69,7 @@ void UIUserContextMenuScreen::open(u32 user_id) {
         }
 
         if(cv_enable_spectating.getBool()) {
-            if(bancho.spectated_player_id == user_id) {
+            if(bancho->spectated_player_id == user_id) {
                 menu->addButton("Stop spectating", TOGGLE_SPECTATE);
             } else {
                 menu->addButton("Spectate", TOGGLE_SPECTATE);
@@ -88,9 +88,9 @@ void UIUserContextMenuScreen::close() { this->menu->setVisible(false); }
 void UIUserContextMenuScreen::on_action(const UString& text, int user_action) {
     auto user_info = get_user_info(this->user_id);
     int slot_number = -1;
-    if(bancho.is_in_a_multi_room()) {
+    if(bancho->is_in_a_multi_room()) {
         for(int i = 0; i < 16; i++) {
-            if(bancho.room.slots[i].player_id == this->user_id) {
+            if(bancho->room.slots[i].player_id == this->user_id) {
                 slot_number = i;
                 break;
             }
@@ -111,7 +111,7 @@ void UIUserContextMenuScreen::on_action(const UString& text, int user_action) {
     } else if(user_action == START_CHAT) {
         osu->chat->addChannel(user_info->name, true);
     } else if(user_action == VIEW_PROFILE) {
-        auto url = UString::format("https://osu.%s/u/%d", bancho.endpoint.toUtf8(), this->user_id);
+        auto url = UString::format("https://osu.%s/u/%d", bancho->endpoint.toUtf8(), this->user_id);
         osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
         env->openURLInDefaultBrowser(url.toUtf8());
     } else if(user_action == UA_ADD_FRIEND) {
@@ -131,7 +131,7 @@ void UIUserContextMenuScreen::on_action(const UString& text, int user_action) {
             friends.erase(it);
         }
     } else if(user_action == TOGGLE_SPECTATE) {
-        if(bancho.spectated_player_id == this->user_id) {
+        if(bancho->spectated_player_id == this->user_id) {
             stop_spectating();
         } else {
             start_spectating(this->user_id);

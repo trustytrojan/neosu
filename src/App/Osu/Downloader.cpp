@@ -2,9 +2,14 @@
 
 #include <curl/curl.h>
 
+#include <atomic>
+#include <condition_variable>
+#include <memory>
 #include <mutex>
+#include <queue>
 #include <sstream>
 #include <thread>
+#include <unordered_map>
 
 #include "Archival.h"
 #include "Bancho.h"
@@ -18,204 +23,219 @@
 #include "SongBrowser/SongBrowser.h"
 #include "curl_blob.h"
 
-struct DownloadResult {
-    std::string url;
-    std::vector<u8> data;
-    float progress = 0.f;
-    int response_code = 0;
-};
-
-struct DownloadThread {
-    bool running;
-    std::string endpoint;
-    std::vector<DownloadResult*> downloads;
-};
-
-static std::mutex threads_mtx;
-static std::vector<DownloadThread*> threads;
-
-void abort_downloads() {
-    std::scoped_lock lock(threads_mtx);
-    for(auto thread : threads) {
-        thread->running = false;
-    }
-}
-
-int update_download_progress(void* clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal,
-                             curl_off_t ulnow) {
-    (void)ultotal;
-    (void)ulnow;
-
-    std::scoped_lock lock(threads_mtx);
-    auto result = (DownloadResult*)clientp;
-    if(dltotal == 0) {
-        result->progress = 0.f;
-    } else if(dlnow > 0) {
-        result->progress = (float)dlnow / (float)dltotal;
-    }
-
-    return 0;
-}
-
-void* do_downloads(void* arg) {
-    auto thread = (DownloadThread*)arg;
-
-    Packet response;
-    CURL* curl = curl_easy_init();
-    if(!curl) {
-        debugLog("Failed to initialize cURL!\n");
-        goto end_thread;
-    }
-
-    while(thread->running) {
-        Timing::sleepMS(100);  // wait 100ms between every download
-
-        DownloadResult* result = NULL;
+class DownloadManager {
+   private:
+    struct DownloadRequest {
         std::string url;
+        std::atomic<float> progress{0.0f};
+        std::atomic<int> response_code{0};
+        std::vector<u8> data;
+        std::mutex data_mutex;
+        bool completed{false};
+    };
 
-        threads_mtx.lock();
-        for(auto download : thread->downloads) {
-            if(download->progress == 0.f) {
-                result = download;
-                url = download->url;
+    std::atomic<bool> shutting_down{false};
+    std::thread worker_thread;
+    std::mutex queue_mutex;
+    std::condition_variable queue_cv;
+    std::queue<std::shared_ptr<DownloadRequest>> download_queue;
+    std::unordered_map<std::string, std::shared_ptr<DownloadRequest>> active_downloads;
+    std::mutex active_mutex;
+
+    static int progress_callback(void* clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t, curl_off_t) {
+        auto* request = static_cast<DownloadRequest*>(clientp);
+        if(dltotal > 0) {
+            request->progress.store(static_cast<float>(dlnow) / static_cast<float>(dltotal));
+        }
+        return 0;
+    }
+
+    void worker_loop() {
+        CURL* curl = curl_easy_init();
+        if(!curl) {
+            debugLog("Failed to initialize cURL for download worker!\n");
+            return;
+        }
+
+        while(!this->shutting_down.load()) {
+            std::shared_ptr<DownloadRequest> request;
+
+            // wait for work or shutdown
+            {
+                std::unique_lock<std::mutex> lock(this->queue_mutex);
+                this->queue_cv.wait(lock,
+                                    [this] { return !this->download_queue.empty() || this->shutting_down.load(); });
+
+                if(this->shutting_down.load() && this->download_queue.empty()) {
+                    break;
+                }
+
+                if(!this->download_queue.empty()) {
+                    request = this->download_queue.front();
+                    this->download_queue.pop();
+                }
+            }
+
+            if(!request) {
+                continue;
+            }
+
+            if(this->shutting_down.load()) {
                 break;
             }
-        }
-        threads_mtx.unlock();
-        if(!result) continue;
 
-        free(response.memory);
-        response = Packet();
+            // perform download
+            Packet response{};
 
-        debugLog("Downloading %s\n", url.c_str());
-        curl_easy_reset(curl);
-        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-        curl_easy_setopt(curl, CURLOPT_USERAGENT, bancho.user_agent.toUtf8());
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&response);
-        curl_easy_setopt(curl, CURLOPT_XFERINFODATA, result);
-        curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, update_download_progress);
-        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-        curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
+            curl_easy_reset(curl);
+            curl_easy_setopt(curl, CURLOPT_URL, request->url.c_str());
+            curl_easy_setopt(curl, CURLOPT_USERAGENT, bancho->user_agent.toUtf8());
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+            curl_easy_setopt(curl, CURLOPT_XFERINFODATA, request.get());
+            curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, progress_callback);
+            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+            curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
+            curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
+            curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30L);
 
-        curl_easy_setopt_CAINFO_BLOB_embedded(curl);
+            curl_easy_setopt_CAINFO_BLOB_embedded(curl);
 
-        CURLcode res = curl_easy_perform(curl);
-        int response_code;
-        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
-        if(res == CURLE_OK) {
-            threads_mtx.lock();
-            result->progress = 1.f;
-            result->response_code = response_code;
-            result->data = std::vector<u8>(response.memory, response.memory + response.size);
-            threads_mtx.unlock();
-        } else {
-            debugLog("Failed to download %s: %s\n", url.c_str(), curl_easy_strerror(res));
+            debugLog("Downloading %s\n", request->url.c_str());
+            CURLcode res = curl_easy_perform(curl);
 
-            threads_mtx.lock();
-            result->response_code = response_code;
-            if(response_code == 429) {
-                result->progress = 0.f;
-            } else {
-                result->data = std::vector<u8>(response.memory, response.memory + response.size);
-                result->progress = -1.f;
+            long response_code = 0;
+            curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+
+            // update request with results
+            {
+                std::scoped_lock lock(request->data_mutex);
+                request->response_code.store(static_cast<int>(response_code));
+
+                if(res == CURLE_OK && response_code == 200) {
+                    request->data = std::vector<u8>(response.memory, response.memory + response.size);
+                    request->progress.store(1.0f);
+                    request->completed = true;
+                } else {
+                    if(res != CURLE_OK) {
+                        debugLog("Failed to download %s: %s\n", request->url.c_str(), curl_easy_strerror(res));
+                    }
+                    if(response_code == 429) {
+                        // rate limited, retry later (keep in active_downloads)
+                        request->progress.store(0.0f);
+
+                        // wait before retrying
+                        std::this_thread::sleep_for(std::chrono::seconds(5));
+
+                        // re-queue for retry
+                        {
+                            std::scoped_lock lock(this->queue_mutex);
+                            this->download_queue.push(request);
+                        }
+                        this->queue_cv.notify_one();
+
+                        free(response.memory);
+                        continue;
+                    } else {
+                        request->progress.store(-1.0f);
+                        request->completed = true;
+                    }
+                }
             }
-            threads_mtx.unlock();
 
-            if(response_code == 429) {
-                // Try again 5s later
-                Timing::sleepMS(5000);
+            free(response.memory);
+            // don't remove from active_downloads, keep completed requests cached (so future download requests can just
+            // grab the already-downloaded data)
+        }
+
+        curl_easy_cleanup(curl);
+    }
+
+   public:
+    DownloadManager() { this->worker_thread = std::thread(&DownloadManager::worker_loop, this); }
+
+    ~DownloadManager() { this->shutdown(); }
+
+    DownloadManager& operator=(const DownloadManager&) = delete;
+    DownloadManager& operator=(DownloadManager&&) = delete;
+    DownloadManager(const DownloadManager&) = delete;
+    DownloadManager(DownloadManager&&) = delete;
+
+    void shutdown() {
+        if(!this->shutting_down.exchange(true)) {
+            // signal shutdown and wake up worker
+            {
+                std::scoped_lock lock(this->queue_mutex);
+                // clear queue to prevent new work
+                while(!this->download_queue.empty()) {
+                    this->download_queue.pop();
+                }
+            }
+            this->queue_cv.notify_all();
+
+            if(this->worker_thread.joinable()) {
+                this->worker_thread.join();
             }
         }
     }
 
-end_thread:
-    curl_easy_cleanup(curl);
+    std::shared_ptr<DownloadRequest> start_download(const std::string& url) {
+        std::scoped_lock lock(this->active_mutex);
 
-    threads_mtx.lock();
-    std::vector<DownloadThread*> new_threads;
-    for(auto dt : threads) {
-        if(thread != dt) {
-            new_threads.push_back(dt);
+        // check if already downloading
+        auto it = this->active_downloads.find(url);
+        if(it != this->active_downloads.end()) {
+            return it->second;
         }
-    }
-    threads = std::move(new_threads);
-    threads_mtx.unlock();
 
-    free(response.memory);
-    for(auto result : thread->downloads) {
-        delete result;
+        // create new download request
+        auto request = std::make_shared<DownloadRequest>();
+        request->url = url;
+
+        this->active_downloads[url] = request;
+
+        // queue for download
+        {
+            std::scoped_lock queue_lock(this->queue_mutex);
+            this->download_queue.push(request);
+        }
+        this->queue_cv.notify_one();
+
+        return request;
     }
-    delete thread;
-    return NULL;
+};
+
+// global instance
+static std::unique_ptr<DownloadManager> g_download_manager;
+
+void abort_downloads() {
+    if(g_download_manager) {
+        g_download_manager->shutdown();  // this will block until the worker thread finishes
+        g_download_manager.reset();
+    }
 }
 
 void download(const char* url, float* progress, std::vector<u8>& out, int* response_code) {
-    char* hostname = NULL;
-    bool download_found = false;
-    DownloadThread* matching_thread = NULL;
-
-    CURLU* urlu = curl_url();
-    if(!urlu) {
-        *progress = -1.f;
-        return;
+    if(!g_download_manager) {
+        g_download_manager = std::make_unique<DownloadManager>();
     }
 
-    if(curl_url_set(urlu, CURLUPART_URL, url, 0) != CURLUE_OK) {
-        *progress = -1.f;
-        goto end;
-    }
+    auto request = g_download_manager->start_download(std::string(url));
 
-    if(curl_url_get(urlu, CURLUPART_HOST, &hostname, 0) != CURLUE_OK) {
-        *progress = -1.f;
-        goto end;
-    }
+    *progress = request->progress.load();
+    *response_code = request->response_code.load();
 
-    threads_mtx.lock();
-    for(auto thread : threads) {
-        if(thread->running && !strcmp(thread->endpoint.c_str(), hostname)) {
-            matching_thread = thread;
-            break;
+    if(request->completed) {
+        std::scoped_lock lock(request->data_mutex);
+        if(*response_code == 200) {
+            out = request->data;
         }
     }
-    if(matching_thread == NULL) {
-        matching_thread = new DownloadThread();
-        matching_thread->running = true;
-        matching_thread->endpoint = std::string(hostname);
-        auto dl_thread = std::thread(do_downloads, matching_thread);
-        dl_thread.detach();
-        threads.push_back(matching_thread);
-    }
-
-    for(int i = 0; i < matching_thread->downloads.size(); i++) {
-        DownloadResult* result = matching_thread->downloads[i];
-
-        if(result->url == url) {
-            *progress = result->progress;
-            *response_code = result->response_code;
-            if(*response_code != 0) {
-                out = result->data;
-                delete matching_thread->downloads[i];
-                matching_thread->downloads.erase(matching_thread->downloads.begin() + i);
-            }
-
-            download_found = true;
-            break;
-        }
-    }
-
-    if(!download_found) {
-        auto newdl = new DownloadResult{.url = url};
-        matching_thread->downloads.push_back(newdl);
-        *progress = 0.f;
-    }
-    threads_mtx.unlock();
-
-end:
-    curl_free(hostname);
-    curl_url_cleanup(urlu);
 }
+
+namespace {
+std::unordered_map<i32, i32> beatmap_to_beatmapset;
 
 i32 get_beatmapset_id_from_osu_file(const u8* osu_data, size_t s_osu_data) {
     i32 set_id = -1;
@@ -239,6 +259,8 @@ i32 get_beatmapset_id_from_osu_file(const u8* osu_data, size_t s_osu_data) {
 
     return -1;
 }
+
+}  // namespace
 
 i32 extract_beatmapset_id(const u8* data, size_t data_s) {
     debugLog("Reading beatmapset (%d bytes)\n", data_s);
@@ -334,7 +356,7 @@ void download_beatmapset(u32 set_id, float* progress) {
     std::vector<u8> data;
 
     auto scheme = cv_use_https.getBool() ? "https://" : "http://";
-    auto download_url = fmt::format("{:s}osu.{:s}/d/", scheme, bancho.endpoint.toUtf8());
+    auto download_url = fmt::format("{:s}osu.{:s}/d/", scheme, bancho->endpoint.toUtf8());
     if(cv_beatmap_mirror_override.getString().length() > 0) {
         download_url = cv_beatmap_mirror_override.getString();
     }
@@ -351,7 +373,6 @@ void download_beatmapset(u32 set_id, float* progress) {
     }
 }
 
-std::unordered_map<i32, i32> beatmap_to_beatmapset;
 DatabaseBeatmap* download_beatmap(i32 beatmap_id, MD5Hash beatmap_md5, float* progress) {
     static i32 queried_map_id = 0;
 
@@ -372,8 +393,8 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, MD5Hash beatmap_md5, float* pr
 
         APIRequest request;
         request.type = GET_BEATMAPSET_INFO;
-        request.path = UString::format("/web/osu-search-set.php?b=%d&u=%s&h=%s", beatmap_id, bancho.username.toUtf8(),
-                                       bancho.pw_md5.toUtf8());
+        request.path = UString::format("/web/osu-search-set.php?b=%d&u=%s&h=%s", beatmap_id, bancho->username.toUtf8(),
+                                       bancho->pw_md5.toUtf8());
         request.extra_int = beatmap_id;
         send_api_request(request);
 
@@ -447,8 +468,8 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, i32 beatmapset_id, float* prog
 
         APIRequest request;
         request.type = GET_BEATMAPSET_INFO;
-        request.path = UString::format("/web/osu-search-set.php?b=%d&u=%s&h=%s", beatmap_id, bancho.username.toUtf8(),
-                                       bancho.pw_md5.toUtf8());
+        request.path = UString::format("/web/osu-search-set.php?b=%d&u=%s&h=%s", beatmap_id, bancho->username.toUtf8(),
+                                       bancho->pw_md5.toUtf8());
         request.extra_int = beatmap_id;
         send_api_request(request);
 

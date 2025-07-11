@@ -341,7 +341,7 @@ CBaseUIContainer *PauseMenu::setVisible(bool visible) {
         if(this->bContinueEnabled) {
             RichPresence::setBanchoStatus("Taking a break", PAUSED);
 
-            if(!bancho.spectators.empty()) {
+            if(!bancho->spectators.empty()) {
                 Packet packet;
                 packet.id = OUT_SPECTATE_FRAMES;
                 write<i32>(&packet, 0);
@@ -359,7 +359,7 @@ CBaseUIContainer *PauseMenu::setVisible(bool visible) {
 
         RichPresence::onPlayStart();
 
-        if(!bancho.spectators.empty()) {
+        if(!bancho->spectators.empty()) {
             Packet packet;
             packet.id = OUT_SPECTATE_FRAMES;
             write<i32>(&packet, 0);

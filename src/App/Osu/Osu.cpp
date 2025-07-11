@@ -82,9 +82,9 @@ Osu::Osu() {
 
     srand(time(NULL));
 
-    bancho.neosu_version = UString::format("%.2f-" NEOSU_STREAM, cv_version.getFloat());
-    bancho.user_agent = UString::format("Mozilla/5.0 (compatible; neosu/%s; +https://" NEOSU_DOMAIN "/)",
-                                        bancho.neosu_version.toUtf8());
+    bancho->neosu_version = UString::format("%.2f-" NEOSU_STREAM, cv_version.getFloat());
+    bancho->user_agent = UString::format("Mozilla/5.0 (compatible; neosu/%s; +https://" NEOSU_DOMAIN "/)",
+                                        bancho->neosu_version.toUtf8());
 
     // experimental mods list
     this->experimentalMods.push_back(&cv_fposu_mod_strafing);
@@ -320,7 +320,7 @@ Osu::Osu() {
     this->user_actions = new UIUserContextMenuScreen();
     this->spectatorScreen = new SpectatorScreen();
 
-    this->userButton = new UserCard(bancho.user_id);
+    this->userButton = new UserCard(bancho->user_id);
 
     // the order in this vector will define in which order events are handled/consumed
     this->screens.push_back(this->volumeOverlay);
@@ -593,7 +593,7 @@ void Osu::draw() {
         Beatmap *beatmap = this->getSelectedBeatmap();
         Vector2 cursorPos = beatmap->getCursorPos();
         bool drawSecondTrail =
-            (cv_mod_autoplay.getBool() || cv_mod_autopilot.getBool() || beatmap->is_watching || bancho.is_spectating);
+            (cv_mod_autoplay.getBool() || cv_mod_autopilot.getBool() || beatmap->is_watching || bancho->spectating);
         bool updateAndDrawTrail = true;
         if(cv_mod_fposu.getBool()) {
             cursorPos = this->getScreenSize() / 2.0f;
@@ -674,7 +674,7 @@ void Osu::update() {
                         this->bSkipScheduled = true;
                         this->bClickedSkipButton = true;
 
-                        if(bancho.is_playing_a_multi_map()) {
+                        if(bancho->is_playing_a_multi_map()) {
                             Packet packet;
                             packet.id = MATCH_SKIP_REQUEST;
                             send_packet(packet);
@@ -694,8 +694,8 @@ void Osu::update() {
                     (cv_skip_intro_enabled.getBool() && this->getSelectedBeatmap()->iCurrentHitObjectIndex < 1);
                 bool can_skip_break =
                     (cv_skip_breaks_enabled.getBool() && this->getSelectedBeatmap()->iCurrentHitObjectIndex > 0);
-                if(bancho.is_playing_a_multi_map()) {
-                    can_skip_intro = bancho.room.all_players_skipped;
+                if(bancho->is_playing_a_multi_map()) {
+                    can_skip_intro = bancho->room.all_players_skipped;
                     can_skip_break = false;
                 }
 
@@ -718,8 +718,8 @@ void Osu::update() {
         // scrubbing/seeking
         this->bSeeking = (this->bSeekKey || this->getSelectedBeatmap()->is_watching);
         this->bSeeking &= !this->getSelectedBeatmap()->isPaused() && !this->volumeOverlay->isBusy();
-        this->bSeeking &= !bancho.is_playing_a_multi_map() && !this->bClickedSkipButton;
-        this->bSeeking &= !bancho.is_spectating;
+        this->bSeeking &= !bancho->is_playing_a_multi_map() && !this->bClickedSkipButton;
+        this->bSeeking &= !bancho->spectating;
         if(this->bSeeking) {
             const float mousePosX = (int)mouse->getPos().x;
             const float percent = std::clamp<float>(mousePosX / (float)this->getScreenWidth(), 0.0f, 1.0f);
@@ -753,7 +753,7 @@ void Osu::update() {
         if(this->bQuickRetryDown && this->fQuickRetryTime != 0.0f && engine->getTime() > this->fQuickRetryTime) {
             this->fQuickRetryTime = 0.0f;
 
-            if(!bancho.is_playing_a_multi_map()) {
+            if(!bancho->is_playing_a_multi_map()) {
                 this->getSelectedBeatmap()->restart(true);
                 this->getSelectedBeatmap()->update();
                 this->pauseMenu->setVisible(false);
@@ -772,7 +772,7 @@ void Osu::update() {
         this->bToggleModSelectionScheduled = false;
         this->modSelector->setVisible(!this->modSelector->isVisible());
 
-        if(bancho.is_in_a_multi_room()) {
+        if(bancho->is_in_a_multi_room()) {
             this->room->setVisible(!this->modSelector->isVisible());
         } else if(!this->isInPlayMode() && this->songBrowser2 != NULL) {
             this->songBrowser2->setVisible(!this->modSelector->isVisible());
@@ -785,18 +785,18 @@ void Osu::update() {
 
         if(this->songBrowser2 != NULL) this->songBrowser2->setVisible(!this->songBrowser2->isVisible());
 
-        if(bancho.is_in_a_multi_room()) {
+        if(bancho->is_in_a_multi_room()) {
             // We didn't select a map; revert to previously selected one
             auto diff2 = this->songBrowser2->lastSelectedBeatmap;
             if(diff2 != NULL) {
-                bancho.room.map_name = UString::format("%s - %s [%s]", diff2->getArtist().c_str(),
+                bancho->room.map_name = UString::format("%s - %s [%s]", diff2->getArtist().c_str(),
                                                        diff2->getTitle().c_str(), diff2->getDifficultyName().c_str());
-                bancho.room.map_md5 = diff2->getMD5Hash();
-                bancho.room.map_id = diff2->getID();
+                bancho->room.map_md5 = diff2->getMD5Hash();
+                bancho->room.map_id = diff2->getID();
 
                 Packet packet;
                 packet.id = MATCH_CHANGE_SETTINGS;
-                bancho.room.pack(&packet);
+                bancho->room.pack(&packet);
                 send_packet(packet);
 
                 this->room->on_map_change();
@@ -895,48 +895,48 @@ bool Osu::isInCriticalInteractiveSession() {
 void Osu::useMods(FinishedScore *score) { Replay::Mods::use(score->mods); }
 
 void Osu::updateMods() {
-    if(bancho.is_in_a_multi_room()) {
-        if(bancho.room.mods & (LegacyFlags::DoubleTime | LegacyFlags::Nightcore)) {
+    if(bancho->is_in_a_multi_room()) {
+        if(bancho->room.mods & (LegacyFlags::DoubleTime | LegacyFlags::Nightcore)) {
             cv_speed_override.setValue(1.5f);
-        } else if(bancho.room.mods & (LegacyFlags::HalfTime)) {
+        } else if(bancho->room.mods & (LegacyFlags::HalfTime)) {
             cv_speed_override.setValue(0.75f);
         } else {
             cv_speed_override.setValue(-1.f);
         }
 
-        cv_mod_nofail.setValue(bancho.room.mods & LegacyFlags::NoFail);
-        cv_mod_easy.setValue(bancho.room.mods & LegacyFlags::Easy);
-        cv_mod_touchdevice.setValue(bancho.room.mods & LegacyFlags::TouchDevice);
-        cv_mod_hidden.setValue(bancho.room.mods & LegacyFlags::Hidden);
-        cv_mod_hardrock.setValue(bancho.room.mods & LegacyFlags::HardRock);
-        cv_mod_suddendeath.setValue(bancho.room.mods & LegacyFlags::SuddenDeath);
-        cv_mod_relax.setValue(bancho.room.mods & LegacyFlags::Relax);
-        cv_mod_autoplay.setValue(bancho.room.mods & LegacyFlags::Autoplay);
-        cv_mod_spunout.setValue(bancho.room.mods & LegacyFlags::SpunOut);
-        cv_mod_autopilot.setValue(bancho.room.mods & LegacyFlags::Autopilot);
-        cv_mod_perfect.setValue(bancho.room.mods & LegacyFlags::Perfect);
-        cv_mod_target.setValue(bancho.room.mods & LegacyFlags::Target);
-        cv_mod_scorev2.setValue(bancho.room.win_condition == SCOREV2);
-        cv_mod_flashlight.setValue(bancho.room.mods & LegacyFlags::Flashlight);
+        cv_mod_nofail.setValue(bancho->room.mods & LegacyFlags::NoFail);
+        cv_mod_easy.setValue(bancho->room.mods & LegacyFlags::Easy);
+        cv_mod_touchdevice.setValue(bancho->room.mods & LegacyFlags::TouchDevice);
+        cv_mod_hidden.setValue(bancho->room.mods & LegacyFlags::Hidden);
+        cv_mod_hardrock.setValue(bancho->room.mods & LegacyFlags::HardRock);
+        cv_mod_suddendeath.setValue(bancho->room.mods & LegacyFlags::SuddenDeath);
+        cv_mod_relax.setValue(bancho->room.mods & LegacyFlags::Relax);
+        cv_mod_autoplay.setValue(bancho->room.mods & LegacyFlags::Autoplay);
+        cv_mod_spunout.setValue(bancho->room.mods & LegacyFlags::SpunOut);
+        cv_mod_autopilot.setValue(bancho->room.mods & LegacyFlags::Autopilot);
+        cv_mod_perfect.setValue(bancho->room.mods & LegacyFlags::Perfect);
+        cv_mod_target.setValue(bancho->room.mods & LegacyFlags::Target);
+        cv_mod_scorev2.setValue(bancho->room.win_condition == SCOREV2);
+        cv_mod_flashlight.setValue(bancho->room.mods & LegacyFlags::Flashlight);
         cv_mod_nightmare.setValue(false);
         cv_mod_actual_flashlight.setValue(false);
 
-        if(bancho.room.freemods) {
+        if(bancho->room.freemods) {
             for(int i = 0; i < 16; i++) {
-                if(bancho.room.slots[i].player_id != bancho.user_id) continue;
+                if(bancho->room.slots[i].player_id != bancho->user_id) continue;
 
-                cv_mod_nofail.setValue(bancho.room.slots[i].mods & LegacyFlags::NoFail);
-                cv_mod_easy.setValue(bancho.room.slots[i].mods & LegacyFlags::Easy);
-                cv_mod_touchdevice.setValue(bancho.room.slots[i].mods & LegacyFlags::TouchDevice);
-                cv_mod_hidden.setValue(bancho.room.slots[i].mods & LegacyFlags::Hidden);
-                cv_mod_hardrock.setValue(bancho.room.slots[i].mods & LegacyFlags::HardRock);
-                cv_mod_suddendeath.setValue(bancho.room.slots[i].mods & LegacyFlags::SuddenDeath);
-                cv_mod_relax.setValue(bancho.room.slots[i].mods & LegacyFlags::Relax);
-                cv_mod_autoplay.setValue(bancho.room.slots[i].mods & LegacyFlags::Autoplay);
-                cv_mod_spunout.setValue(bancho.room.slots[i].mods & LegacyFlags::SpunOut);
-                cv_mod_autopilot.setValue(bancho.room.slots[i].mods & LegacyFlags::Autopilot);
-                cv_mod_perfect.setValue(bancho.room.slots[i].mods & LegacyFlags::Perfect);
-                cv_mod_target.setValue(bancho.room.slots[i].mods & LegacyFlags::Target);
+                cv_mod_nofail.setValue(bancho->room.slots[i].mods & LegacyFlags::NoFail);
+                cv_mod_easy.setValue(bancho->room.slots[i].mods & LegacyFlags::Easy);
+                cv_mod_touchdevice.setValue(bancho->room.slots[i].mods & LegacyFlags::TouchDevice);
+                cv_mod_hidden.setValue(bancho->room.slots[i].mods & LegacyFlags::Hidden);
+                cv_mod_hardrock.setValue(bancho->room.slots[i].mods & LegacyFlags::HardRock);
+                cv_mod_suddendeath.setValue(bancho->room.slots[i].mods & LegacyFlags::SuddenDeath);
+                cv_mod_relax.setValue(bancho->room.slots[i].mods & LegacyFlags::Relax);
+                cv_mod_autoplay.setValue(bancho->room.slots[i].mods & LegacyFlags::Autoplay);
+                cv_mod_spunout.setValue(bancho->room.slots[i].mods & LegacyFlags::SpunOut);
+                cv_mod_autopilot.setValue(bancho->room.slots[i].mods & LegacyFlags::Autopilot);
+                cv_mod_perfect.setValue(bancho->room.slots[i].mods & LegacyFlags::Perfect);
+                cv_mod_target.setValue(bancho->room.slots[i].mods & LegacyFlags::Target);
             }
         }
     }
@@ -1021,7 +1021,7 @@ void Osu::onKeyDown(KeyboardEvent &key) {
     // F8 toggle chat
     if(key == (KEYCODE)cv_TOGGLE_CHAT.getInt()) {
         // When options menu is open, instead of toggling chat, close options menu and open chat
-        if(bancho.is_online() && this->optionsMenu->isVisible()) {
+        if(bancho->is_online() && this->optionsMenu->isVisible()) {
             this->optionsMenu->setVisible(false);
             this->chat->user_wants_chat = true;
             this->chat->updateVisibility();
@@ -1034,7 +1034,7 @@ void Osu::onKeyDown(KeyboardEvent &key) {
     // F9 toggle extended chat
     if(key == (KEYCODE)cv_TOGGLE_EXTENDED_CHAT.getInt()) {
         // When options menu is open, instead of toggling chat, close options menu and open chat
-        if(bancho.is_online() && this->optionsMenu->isVisible()) {
+        if(bancho->is_online() && this->optionsMenu->isVisible()) {
             this->optionsMenu->setVisible(false);
             this->chat->user_wants_chat = true;
             this->chat->user_list->setVisible(true);
@@ -1070,15 +1070,15 @@ void Osu::onKeyDown(KeyboardEvent &key) {
         // instant replay
         if((beatmap->isPaused() || beatmap->hasFailed())) {
             if(!key.isConsumed() && key == (KEYCODE)cv_INSTANT_REPLAY.getInt()) {
-                if(!beatmap->is_watching && !bancho.is_spectating) {
+                if(!beatmap->is_watching && !bancho->spectating) {
                     FinishedScore score;
                     score.replay = beatmap->live_replay;
                     score.beatmap_hash = beatmap->getSelectedDifficulty2()->getMD5Hash();
                     score.mods = this->getScore()->mods;
 
-                    if(bancho.is_online()) {
-                        score.player_id = bancho.user_id;
-                        score.playerName = bancho.username.toUtf8();
+                    if(bancho->is_online()) {
+                        score.player_id = bancho->user_id;
+                        score.playerName = bancho->username.toUtf8();
                     } else {
                         score.player_id = 0;
                         score.playerName = cv_name.getString(); // local name
@@ -1155,7 +1155,7 @@ void Osu::onKeyDown(KeyboardEvent &key) {
                         key.consume();
                     }
                 } else {
-                    if(bancho.is_playing_a_multi_map()) {
+                    if(bancho->is_playing_a_multi_map()) {
                         cv_draw_scoreboard_mp.setValue(!cv_draw_scoreboard_mp.getBool());
                         this->notificationOverlay->addNotification(
                             cv_draw_scoreboard_mp.getBool() ? "Scoreboard is shown." : "Scoreboard is hidden.",
@@ -1178,14 +1178,14 @@ void Osu::onKeyDown(KeyboardEvent &key) {
                ((KEY_F1 != (KEYCODE)cv_RIGHT_CLICK.getInt() && KEY_F1 != (KEYCODE)cv_RIGHT_CLICK_2.getInt()) ||
                 (!this->bKeyboardKey2Down && !this->bKeyboardKey22Down)) &&
                !this->bF1 && !this->getSelectedBeatmap()->hasFailed() &&
-               !bancho.is_playing_a_multi_map())  // only if not failed though
+               !bancho->is_playing_a_multi_map())  // only if not failed though
             {
                 this->bF1 = true;
                 this->toggleModSelection(true);
             }
 
             // quick save/load
-            if(!bancho.is_playing_a_multi_map()) {
+            if(!bancho->is_playing_a_multi_map()) {
                 if(key == (KEYCODE)cv_QUICK_SAVE.getInt())
                     this->fQuickSaveTime = this->getSelectedBeatmap()->getPercentFinished();
 
@@ -1198,7 +1198,7 @@ void Osu::onKeyDown(KeyboardEvent &key) {
             }
 
             // quick seek
-            if(!bancho.is_playing_a_multi_map()) {
+            if(!bancho->is_playing_a_multi_map()) {
                 const bool backward = (key == (KEYCODE)cv_SEEK_TIME_BACKWARD.getInt());
                 const bool forward = (key == (KEYCODE)cv_SEEK_TIME_FORWARD.getInt());
 
@@ -1254,7 +1254,7 @@ void Osu::onKeyDown(KeyboardEvent &key) {
         if(this->isInPlayMode()) {
             // toggle pause menu
             if((key == (KEYCODE)cv_GAME_PAUSE.getInt() || key == KEY_ESCAPE) && !this->bEscape) {
-                if(!bancho.is_playing_a_multi_map() || this->iMultiplayerClientNumEscPresses > 1) {
+                if(!bancho->is_playing_a_multi_map() || this->iMultiplayerClientNumEscPresses > 1) {
                     if(this->iMultiplayerClientNumEscPresses > 1) {
                         this->getSelectedBeatmap()->stop(true);
                         this->room->ragequit();
@@ -1399,7 +1399,7 @@ void Osu::toggleModSelection(bool waitForF1KeyUp) {
 }
 
 void Osu::toggleSongBrowser() {
-    if(bancho.is_spectating) return;
+    if(bancho->spectating) return;
     this->bToggleSongBrowserScheduled = true;
 }
 
@@ -1451,7 +1451,7 @@ void Osu::onPlayEnd(FinishedScore score, bool quit, bool aborted) {
     if(this->songBrowser2 != NULL) this->songBrowser2->onPlayEnd(quit);
 
     // When playing in multiplayer, screens are toggled in Room
-    if(!bancho.is_playing_a_multi_map()) {
+    if(!bancho->is_playing_a_multi_map()) {
         if(quit) {
             this->toggleSongBrowser();
         } else {
@@ -1756,7 +1756,7 @@ void Osu::onFocusGained() {
 
 void Osu::onFocusLost() {
     if(this->isInPlayMode() && !this->getSelectedBeatmap()->isPaused() && cv_pause_on_focus_loss.getBool()) {
-        if(!bancho.is_playing_a_multi_map() && !this->getSelectedBeatmap()->is_watching && !bancho.is_spectating) {
+        if(!bancho->is_playing_a_multi_map() && !this->getSelectedBeatmap()->is_watching && !bancho->spectating) {
             this->getSelectedBeatmap()->pause(false);
             this->pauseMenu->setVisible(true);
             this->modSelector->setVisible(false);
@@ -1908,7 +1908,7 @@ void Osu::updateCursorVisibility() {
     this->bShouldCursorBeVisible = false;
 
     if(this->isInPlayMode()) {
-        if(cv_mod_autoplay.getBool() || cv_mod_autopilot.getBool() || bancho.is_spectating) {
+        if(cv_mod_autoplay.getBool() || cv_mod_autopilot.getBool() || bancho->spectating) {
             this->bShouldCursorBeVisible = true;
         }
         if(this->getSelectedBeatmap()->is_watching) {
@@ -1956,7 +1956,7 @@ void Osu::updateConfineCursor() {
        ((cv_confine_cursor_fullscreen.getBool() && env->isFullscreen()) ||
         (cv_confine_cursor_windowed.getBool() && !env->isFullscreen()) ||
         (this->isInPlayMode() && !this->pauseMenu->isVisible() && !this->getModAuto() && !this->getModAutopilot() &&
-         !this->getSelectedBeatmap()->is_watching && !bancho.is_spectating))) {
+         !this->getSelectedBeatmap()->is_watching && !bancho->spectating))) {
         McRect clipWindow =
             (cv_resolution_enabled.getBool() && cv_letterboxing.getBool())
                 ? McRect{static_cast<float>(-mouse->getOffset().x), static_cast<float>(-mouse->getOffset().y),
@@ -2062,7 +2062,7 @@ void Osu::onLetterboxingOffsetChange(const UString &oldValue, const UString &new
 void Osu::onUserCardChange(const UString& new_username) {
     // NOTE: force update options textbox to avoid shutdown inconsistency
     this->getOptionsMenu()->setUsername(new_username);
-    this->userButton->setID(bancho.user_id);
+    this->userButton->setID(bancho->user_id);
 }
 
 float Osu::getImageScaleToFitResolution(Vector2 size, Vector2 resolution) {

@@ -30,7 +30,7 @@ bool download_avatar(u32 user_id) {
         }
     }
 
-    auto server_dir = UString::format(MCENGINE_DATA_DIR "avatars/%s", bancho.endpoint.toUtf8());
+    auto server_dir = UString::format(MCENGINE_DATA_DIR "avatars/%s", bancho->endpoint.toUtf8());
     if(!env->directoryExists(server_dir.toUtf8())) {
         env->createDirectory(server_dir.toUtf8());
     }
@@ -38,7 +38,7 @@ bool download_avatar(u32 user_id) {
     float progress = -1.f;
     std::vector<u8> data;
     auto scheme = cv_use_https.getBool() ? "https://" : "http://";
-    auto img_url = UString::format("%sa.%s/%d", scheme, bancho.endpoint.toUtf8(), user_id);
+    auto img_url = UString::format("%sa.%s/%d", scheme, bancho->endpoint.toUtf8(), user_id);
     int response_code;
     download(img_url.toUtf8(), &progress, data, &response_code);
     if(progress == -1.f) blacklist.push_back(user_id);
@@ -60,7 +60,7 @@ UIAvatar::UIAvatar(u32 player_id, float xPos, float yPos, float xSize, float ySi
     : CBaseUIButton(xPos, yPos, xSize, ySize, "avatar", "") {
     this->player_id = player_id;
 
-    this->avatar_path = UString::format(MCENGINE_DATA_DIR "avatars/%s/%d", bancho.endpoint.toUtf8(), player_id).toUtf8();
+    this->avatar_path = UString::format(MCENGINE_DATA_DIR "avatars/%s/%d", bancho->endpoint.toUtf8(), player_id).toUtf8();
     this->setClickCallback(fastdelegate::MakeDelegate(this, &UIAvatar::onAvatarClicked));
 
     struct stat attr;

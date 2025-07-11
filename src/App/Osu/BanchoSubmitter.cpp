@@ -80,7 +80,7 @@ void submit_score(FinishedScore score) {
         curl_mime_data(part, score.beatmap_hash.hash, CURL_ZERO_TERMINATED);
     }
     {
-        auto unique_ids = UString::format("%s|%s", bancho.install_id.toUtf8(), bancho.disk_uuid.toUtf8());
+        auto unique_ids = UString::format("%s|%s", bancho->install_id.toUtf8(), bancho->disk_uuid.toUtf8());
         part = curl_mime_addpart(request.mime);
         curl_mime_name(part, "c1");
         curl_mime_data(part, unique_ids.toUtf8(), unique_ids.lengthUtf8());
@@ -88,7 +88,7 @@ void submit_score(FinishedScore score) {
     {
         part = curl_mime_addpart(request.mime);
         curl_mime_name(part, "pass");
-        curl_mime_data(part, bancho.pw_md5.hash, 32);
+        curl_mime_data(part, bancho->pw_md5.hash, 32);
     }
     {
         auto osu_version = UString::format("%d", OSU_VERSION_DATEONLY);
@@ -105,8 +105,8 @@ void submit_score(FinishedScore score) {
     }
     {
         size_t s_client_hashes_encrypted = 0;
-        u8 *client_hashes_encrypted = encrypt(iv, (u8 *)bancho.client_hashes.toUtf8(),
-                                              bancho.client_hashes.lengthUtf8(), &s_client_hashes_encrypted);
+        u8 *client_hashes_encrypted = encrypt(iv, (u8 *)bancho->client_hashes.toUtf8(),
+                                              bancho->client_hashes.lengthUtf8(), &s_client_hashes_encrypted);
         const char *client_hashes_b64 =
             (const char *)base64_encode(client_hashes_encrypted, s_client_hashes_encrypted, NULL);
         part = curl_mime_addpart(request.mime);
@@ -117,7 +117,7 @@ void submit_score(FinishedScore score) {
     {
         UString score_data;
         score_data.append(score.diff2->getMD5Hash().hash);
-        score_data.append(UString::format(":%s", bancho.username.toUtf8()));
+        score_data.append(UString::format(":%s", bancho->username.toUtf8()));
         {
             auto idiot_check = UString::format("chickenmcnuggets%d", score.num300s + score.num100s);
             idiot_check.append(UString::format("o15%d%d", score.num50s, score.numGekis));
@@ -125,10 +125,10 @@ void submit_score(FinishedScore score) {
             idiot_check.append(UString::format("uu%s", score.diff2->getMD5Hash().toUtf8()));
             idiot_check.append(UString::format("%d%s", score.comboMax, score.perfect ? "True" : "False"));
             idiot_check.append(
-                UString::format("%s%d%s", bancho.username.toUtf8(), score.score, GRADES[(int)score.grade]));
+                UString::format("%s%d%s", bancho->username.toUtf8(), score.score, GRADES[(int)score.grade]));
             idiot_check.append(UString::format("%dQ%s", score.mods.to_legacy(), score.passed ? "True" : "False"));
             idiot_check.append(UString::format("0%d%s", OSU_VERSION_DATEONLY, score_time));
-            idiot_check.append(bancho.client_hashes);
+            idiot_check.append(bancho->client_hashes);
 
             auto idiot_hash = md5((u8 *)idiot_check.toUtf8(), idiot_check.lengthUtf8());
             score_data.append(":");

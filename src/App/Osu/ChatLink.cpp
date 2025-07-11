@@ -55,11 +55,11 @@ void ChatLink::onMouseUpInside() {
 
     // This lazy escaping is only good for endpoint URLs, not anything more serious
     UString escaped_endpoint;
-    for(int i = 0; i < bancho.endpoint.length(); i++) {
-        if(bancho.endpoint[i] == L'.') {
+    for(int i = 0; i < bancho->endpoint.length(); i++) {
+        if(bancho->endpoint[i] == L'.') {
             escaped_endpoint.append("\\.");
         } else {
-            escaped_endpoint.append(bancho.endpoint[i]);
+            escaped_endpoint.append(bancho->endpoint[i]);
         }
     }
 

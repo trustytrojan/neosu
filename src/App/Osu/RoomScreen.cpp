@@ -156,7 +156,7 @@ RoomScreen::RoomScreen() : OsuScreen() {
     this->freemod->setDrawFrame(false);
     this->freemod->setDrawBackground(false);
     this->freemod->setChangeCallback(fastdelegate::MakeDelegate(this, &RoomScreen::onFreemodCheckboxChanged));
-    this->mods = new UIModList(&bancho.room.mods);
+    this->mods = new UIModList(&bancho->room.mods);
     INIT_LABEL(this->no_mods_selected, "No mods selected.", false);
 
     this->ready_btn = new UIButton(0, 0, 300, 50, "start_game_btn", "Start game");
@@ -211,15 +211,15 @@ void RoomScreen::draw() {
     if(!this->bVisible) return;
 
     static i32 current_map_id = -1;
-    if(bancho.room.map_id == -1 || bancho.room.map_id == 0) {
+    if(bancho->room.map_id == -1 || bancho->room.map_id == 0) {
         this->map_title->setText("Host is selecting a map...");
         this->map_title->setSizeToContent(0, 0);
         this->ready_btn->is_loading = true;
-    } else if(bancho.room.map_id != current_map_id) {
+    } else if(bancho->room.map_id != current_map_id) {
         float progress = -1.f;
-        auto beatmap = download_beatmap(bancho.room.map_id, bancho.room.map_md5, &progress);
+        auto beatmap = download_beatmap(bancho->room.map_id, bancho->room.map_md5, &progress);
         if(progress == -1.f) {
-            auto error_str = UString::format("Failed to download Beatmap #%d :(", bancho.room.map_id);
+            auto error_str = UString::format("Failed to download Beatmap #%d :(", bancho->room.map_id);
             this->map_title->setText(error_str);
             this->map_title->setSizeToContent(0, 0);
             this->ready_btn->is_loading = true;
@@ -229,7 +229,7 @@ void RoomScreen::draw() {
             this->map_title->setSizeToContent(0, 0);
             this->ready_btn->is_loading = true;
         } else if(beatmap != NULL) {
-            current_map_id = bancho.room.map_id;
+            current_map_id = bancho->room.map_id;
             this->on_map_change();
         }
     }
@@ -253,14 +253,14 @@ void RoomScreen::draw() {
 void RoomScreen::mouse_update(bool *propagate_clicks) {
     if(!this->bVisible || osu->songBrowser2->isVisible()) return;
 
-    const bool room_name_changed = this->room_name_ipt->getText() != bancho.room.name;
-    if(bancho.room.is_host() && room_name_changed) {
+    const bool room_name_changed = this->room_name_ipt->getText() != bancho->room.name;
+    if(bancho->room.is_host() && room_name_changed) {
         // XXX: should only update 500ms after last input
-        bancho.room.name = this->room_name_ipt->getText();
+        bancho->room.name = this->room_name_ipt->getText();
 
         Packet packet;
         packet.id = MATCH_CHANGE_SETTINGS;
-        bancho.room.pack(&packet);
+        bancho->room.pack(&packet);
         send_packet(packet);
 
         // Update room name in rich presence info
@@ -286,7 +286,7 @@ void RoomScreen::onKeyDown(KeyboardEvent &key) {
 
     if(key.getKeyCode() == KEY_F1) {
         key.consume();
-        if(bancho.room.freemods || bancho.room.is_host()) {
+        if(bancho->room.freemods || bancho->room.is_host()) {
             osu->modSelector->setVisible(!osu->modSelector->isVisible());
             this->bVisible = !osu->modSelector->isVisible();
         }
@@ -322,7 +322,7 @@ CBaseUIContainer *RoomScreen::setVisible(bool visible) {
 }
 
 void RoomScreen::updateSettingsLayout(Vector2 newResolution) {
-    const bool is_host = bancho.room.is_host();
+    const bool is_host = bancho->room.is_host();
     int settings_y = 10;
 
     this->settings->getContainer()->empty();
@@ -330,7 +330,7 @@ void RoomScreen::updateSettingsLayout(Vector2 newResolution) {
     this->settings->setSize(round(newResolution.x * 0.4), newResolution.y);
 
     // Room name (title)
-    this->room_name->setText(bancho.room.name);
+    this->room_name->setText(bancho->room.name);
     this->room_name->setSizeToContent();
     ADD_ELEMENT(this->room_name);
     if(is_host) {
@@ -340,8 +340,8 @@ void RoomScreen::updateSettingsLayout(Vector2 newResolution) {
     // Host name
     if(!is_host) {
         UString host_str = "Host: None";
-        if(bancho.room.host_id > 0) {
-            auto host = get_user_info(bancho.room.host_id, true);
+        if(bancho->room.host_id > 0) {
+            auto host = get_user_info(bancho->room.host_id, true);
             host_str = UString::format("Host: %s", host->name.toUtf8());
         }
         this->host->setText(host_str);
@@ -356,13 +356,13 @@ void RoomScreen::updateSettingsLayout(Vector2 newResolution) {
     }
 
     // Win condition
-    if(bancho.room.win_condition == SCOREV1) {
+    if(bancho->room.win_condition == SCOREV1) {
         this->win_condition->setText("Win condition: Score");
-    } else if(bancho.room.win_condition == ACCURACY) {
+    } else if(bancho->room.win_condition == ACCURACY) {
         this->win_condition->setText("Win condition: Accuracy");
-    } else if(bancho.room.win_condition == COMBO) {
+    } else if(bancho->room.win_condition == COMBO) {
         this->win_condition->setText("Win condition: Combo");
-    } else if(bancho.room.win_condition == SCOREV2) {
+    } else if(bancho->room.win_condition == SCOREV2) {
         this->win_condition->setText("Win condition: ScoreV2");
     }
     if(is_host) {
@@ -388,17 +388,17 @@ void RoomScreen::updateSettingsLayout(Vector2 newResolution) {
     // Mods
     settings_y += 10;
     ADD_ELEMENT(mods_label);
-    if(is_host || bancho.room.freemods) {
+    if(is_host || bancho->room.freemods) {
         ADD_BUTTON(this->select_mods_btn, mods_label);
     }
     if(is_host) {
-        this->freemod->setChecked(bancho.room.freemods);
+        this->freemod->setChecked(bancho->room.freemods);
         ADD_ELEMENT(this->freemod);
     }
-    if(bancho.room.mods == 0) {
+    if(bancho->room.mods == 0) {
         ADD_ELEMENT(this->no_mods_selected);
     } else {
-        this->mods->flags = &bancho.room.mods;
+        this->mods->flags = &bancho->room.mods;
         this->mods->setSize(300, 90);
         ADD_ELEMENT(this->mods);
     }
@@ -407,16 +407,16 @@ void RoomScreen::updateSettingsLayout(Vector2 newResolution) {
     int nb_ready = 0;
     bool is_ready = false;
     for(u8 i = 0; i < 16; i++) {
-        if(bancho.room.slots[i].has_player() && bancho.room.slots[i].is_ready()) {
+        if(bancho->room.slots[i].has_player() && bancho->room.slots[i].is_ready()) {
             nb_ready++;
-            if(bancho.room.slots[i].player_id == bancho.user_id) {
+            if(bancho->room.slots[i].player_id == bancho->user_id) {
                 is_ready = true;
             }
         }
     }
     if(is_host && is_ready && nb_ready > 1) {
-        auto force_start_str = UString::format("Force start (%d/%d)", nb_ready, bancho.room.nb_players);
-        if(bancho.room.all_players_ready()) {
+        auto force_start_str = UString::format("Force start (%d/%d)", nb_ready, bancho->room.nb_players);
+        if(bancho->room.all_players_ready()) {
             force_start_str = UString("Start game");
         }
         this->ready_btn->setText(force_start_str);
@@ -444,25 +444,25 @@ void RoomScreen::updateLayout(Vector2 newResolution) {
     this->slotlist->clear();
     int y_total = 10;
     for(int i = 0; i < 16; i++) {
-        if(bancho.room.slots[i].has_player()) {
-            auto user_info = get_user_info(bancho.room.slots[i].player_id, true);
+        if(bancho->room.slots[i].has_player()) {
+            auto user_info = get_user_info(bancho->room.slots[i].player_id, true);
             auto username = user_info->name;
-            if(bancho.room.slots[i].is_player_playing()) {
+            if(bancho->room.slots[i].is_player_playing()) {
                 username = UString::format("[playing] %s", user_info->name.toUtf8());
             }
 
             const float SLOT_HEIGHT = 40.f;
-            auto avatar = new UIAvatar(bancho.room.slots[i].player_id, 10, y_total, SLOT_HEIGHT, SLOT_HEIGHT);
+            auto avatar = new UIAvatar(bancho->room.slots[i].player_id, 10, y_total, SLOT_HEIGHT, SLOT_HEIGHT);
             this->slotlist->getContainer()->addBaseUIElement(avatar);
 
-            auto user_box = new UIUserLabel(bancho.room.slots[i].player_id, username);
+            auto user_box = new UIUserLabel(bancho->room.slots[i].player_id, username);
             user_box->setFont(this->lfont);
             user_box->setPos(avatar->getRelPos().x + avatar->getSize().x + 10, y_total);
 
             auto color = 0xffffffff;
-            if(bancho.room.slots[i].is_ready()) {
+            if(bancho->room.slots[i].is_ready()) {
                 color = 0xff00ff00;
-            } else if(bancho.room.slots[i].no_map()) {
+            } else if(bancho->room.slots[i].no_map()) {
                 color = 0xffdd0000;
             }
             user_box->setTextColor(color);
@@ -470,7 +470,7 @@ void RoomScreen::updateLayout(Vector2 newResolution) {
             user_box->setSize(user_box->getSize().x, SLOT_HEIGHT);
             this->slotlist->getContainer()->addBaseUIElement(user_box);
 
-            auto user_mods = new UIModList(&bancho.room.slots[i].mods);
+            auto user_mods = new UIModList(&bancho->room.slots[i].mods);
             user_mods->setPos(user_box->getPos().x + user_box->getSize().x + 30, y_total);
             user_mods->setSize(350, SLOT_HEIGHT);
             this->slotlist->getContainer()->addBaseUIElement(user_mods);
@@ -484,7 +484,7 @@ void RoomScreen::updateLayout(Vector2 newResolution) {
 // Exit to main menu
 void RoomScreen::ragequit(bool play_sound) {
     this->bVisible = false;
-    bancho.match_started = false;
+    bancho->match_started = false;
 
     Packet packet;
     packet.id = EXIT_ROOM;
@@ -493,7 +493,7 @@ void RoomScreen::ragequit(bool play_sound) {
     osu->modSelector->resetMods();
     osu->modSelector->updateButtons();
 
-    bancho.room = Room();
+    bancho->room = Room();
     osu->mainMenu->setVisible(true);
     osu->chat->removeChannel("#multiplayer");
     osu->chat->updateVisibility();
@@ -509,23 +509,23 @@ void RoomScreen::on_map_change() {
     // Results screen has map background and such showing, so prevent map from changing while we're on it.
     if(osu->rankingScreen->isVisible()) return;
 
-    debugLog("Map changed to ID %d, MD5 %s: %s\n", bancho.room.map_id, bancho.room.map_md5.hash,
-             bancho.room.map_name.toUtf8());
+    debugLog("Map changed to ID %d, MD5 %s: %s\n", bancho->room.map_id, bancho->room.map_md5.hash,
+             bancho->room.map_name.toUtf8());
     this->ready_btn->is_loading = true;
 
     // Deselect current map
     this->pauseButton->setPaused(true);
     osu->songBrowser2->beatmap->deselect();
 
-    if(bancho.room.map_id == 0) {
+    if(bancho->room.map_id == 0) {
         this->map_title->setText("(no map selected)");
         this->map_title->setSizeToContent(0, 0);
         this->ready_btn->is_loading = true;
     } else {
-        auto beatmap = db->getBeatmapDifficulty(bancho.room.map_md5);
+        auto beatmap = db->getBeatmapDifficulty(bancho->room.map_md5);
         if(beatmap != NULL) {
             osu->songBrowser2->onDifficultySelected(beatmap, false);
-            this->map_title->setText(bancho.room.map_name);
+            this->map_title->setText(bancho->room.map_name);
             this->map_title->setSizeToContent(0, 0);
             auto attributes = UString::format("AR: %.1f, CS: %.1f, HP: %.1f, OD: %.1f", beatmap->getAR(),
                                               beatmap->getCS(), beatmap->getHP(), beatmap->getOD());
@@ -556,7 +556,7 @@ void RoomScreen::on_map_change() {
 }
 
 void RoomScreen::on_room_joined(Room room) {
-    bancho.room = room;
+    bancho->room = room;
     debugLog("Joined room #%d\nPlayers:\n", room.id);
     for(int i = 0; i < 16; i++) {
         if(room.slots[i].has_player()) {
@@ -589,34 +589,34 @@ void RoomScreen::on_room_joined(Room room) {
     osu->previous_mods = Replay::Mods::from_cvars();
 
     osu->modSelector->resetMods();
-    osu->modSelector->enableModsFromFlags(bancho.room.mods);
+    osu->modSelector->enableModsFromFlags(bancho->room.mods);
 }
 
 void RoomScreen::on_room_updated(Room room) {
-    if(bancho.is_playing_a_multi_map() || !bancho.is_in_a_multi_room()) return;
+    if(bancho->is_playing_a_multi_map() || !bancho->is_in_a_multi_room()) return;
 
-    if(bancho.room.nb_players < room.nb_players) {
+    if(bancho->room.nb_players < room.nb_players) {
         soundEngine->play(osu->getSkin()->roomJoined);
-    } else if(bancho.room.nb_players > room.nb_players) {
+    } else if(bancho->room.nb_players > room.nb_players) {
         soundEngine->play(osu->getSkin()->roomQuit);
     }
-    if(bancho.room.nb_ready() < room.nb_ready()) {
+    if(bancho->room.nb_ready() < room.nb_ready()) {
         soundEngine->play(osu->getSkin()->roomReady);
-    } else if(bancho.room.nb_ready() > room.nb_ready()) {
+    } else if(bancho->room.nb_ready() > room.nb_ready()) {
         soundEngine->play(osu->getSkin()->roomNotReady);
     }
-    if(!bancho.room.all_players_ready() && room.all_players_ready()) {
+    if(!bancho->room.all_players_ready() && room.all_players_ready()) {
         soundEngine->play(osu->getSkin()->matchConfirm);
     }
 
-    bool was_host = bancho.room.is_host();
-    bool map_changed = bancho.room.map_id != room.map_id;
-    bancho.room = room;
+    bool was_host = bancho->room.is_host();
+    bool map_changed = bancho->room.map_id != room.map_id;
+    bancho->room = room;
 
     Slot *player_slot = NULL;
     for(int i = 0; i < 16; i++) {
-        if(bancho.room.slots[i].player_id == bancho.user_id) {
-            player_slot = &bancho.room.slots[i];
+        if(bancho->room.slots[i].player_id == bancho->user_id) {
+            player_slot = &bancho->room.slots[i];
             break;
         }
     }
@@ -630,9 +630,9 @@ void RoomScreen::on_room_updated(Room room) {
         this->on_map_change();
     }
 
-    if(!was_host && bancho.room.is_host()) {
-        if(this->room_name_ipt->getText() != bancho.room.name) {
-            this->room_name_ipt->setText(bancho.room.name);
+    if(!was_host && bancho->room.is_host()) {
+        if(this->room_name_ipt->getText() != bancho->room.name) {
+            this->room_name_ipt->setText(bancho->room.name);
 
             // Update room name in rich presence info
             RichPresence::onMultiplayerLobby();
@@ -641,13 +641,13 @@ void RoomScreen::on_room_updated(Room room) {
 
     osu->modSelector->updateButtons();
     osu->modSelector->resetMods();
-    osu->modSelector->enableModsFromFlags(bancho.room.mods | player_slot->mods);
+    osu->modSelector->enableModsFromFlags(bancho->room.mods | player_slot->mods);
 
     this->updateLayout(osu->getScreenSize());
 }
 
 void RoomScreen::on_match_started(Room room) {
-    bancho.room = std::move(room);
+    bancho->room = std::move(room);
     if(osu->getSelectedBeatmap() == NULL) {
         debugLog("We received MATCH_STARTED without being ready, wtf!\n");
         return;
@@ -657,7 +657,7 @@ void RoomScreen::on_match_started(Room room) {
 
     if(osu->getSelectedBeatmap()->play()) {
         this->bVisible = false;
-        bancho.match_started = true;
+        bancho->match_started = true;
         osu->songBrowser2->bHasSelectedAndIsPlaying = true;
         osu->chat->updateVisibility();
 
@@ -671,7 +671,7 @@ void RoomScreen::on_match_score_updated(Packet *packet) {
     auto frame = read<ScoreFrame>(packet);
     if(frame.slot_id > 15) return;
 
-    auto slot = &bancho.room.slots[frame.slot_id];
+    auto slot = &bancho->room.slots[frame.slot_id];
     slot->last_update_tms = frame.time;
     slot->num300 = frame.num300;
     slot->num100 = frame.num100;
@@ -696,24 +696,24 @@ void RoomScreen::on_match_score_updated(Packet *packet) {
 }
 
 void RoomScreen::on_all_players_loaded() {
-    bancho.room.all_players_loaded = true;
+    bancho->room.all_players_loaded = true;
     osu->chat->updateVisibility();
 }
 
 void RoomScreen::on_player_failed(i32 slot_id) {
     if(slot_id < 0 || slot_id > 15) return;
-    bancho.room.slots[slot_id].died = true;
+    bancho->room.slots[slot_id].died = true;
 }
 
 FinishedScore RoomScreen::get_approximate_score() {
     FinishedScore score;
-    score.player_id = bancho.user_id;
-    score.playerName = bancho.username.toUtf8();
+    score.player_id = bancho->user_id;
+    score.playerName = bancho->username.toUtf8();
     score.diff2 = osu->getSelectedBeatmap()->getSelectedDifficulty2();
 
     for(int i = 0; i < 16; i++) {
-        auto slot = &bancho.room.slots[i];
-        if(slot->player_id != bancho.user_id) continue;
+        auto slot = &bancho->room.slots[i];
+        if(slot->player_id != bancho->user_id) continue;
 
         score.mods = Replay::Mods::from_legacy(slot->mods);
         score.passed = !slot->died;
@@ -736,12 +736,12 @@ FinishedScore RoomScreen::get_approximate_score() {
 
 // All players have finished.
 void RoomScreen::on_match_finished() {
-    if(!bancho.is_playing_a_multi_map()) return;
-    memcpy(bancho.last_scores, bancho.room.slots, sizeof(bancho.room.slots));
+    if(!bancho->is_playing_a_multi_map()) return;
+    memcpy(bancho->last_scores, bancho->room.slots, sizeof(bancho->room.slots));
 
     osu->onPlayEnd(this->get_approximate_score(), false, false);
 
-    bancho.match_started = false;
+    bancho->match_started = false;
     osu->rankingScreen->setVisible(true);
     osu->chat->updateVisibility();
 
@@ -749,29 +749,29 @@ void RoomScreen::on_match_finished() {
     RichPresence::onMultiplayerLobby();
 }
 
-void RoomScreen::on_all_players_skipped() { bancho.room.all_players_skipped = true; }
+void RoomScreen::on_all_players_skipped() { bancho->room.all_players_skipped = true; }
 
 void RoomScreen::on_player_skip(i32 user_id) {
     for(int i = 0; i < 16; i++) {
-        if(bancho.room.slots[i].player_id == user_id) {
-            bancho.room.slots[i].skipped = true;
+        if(bancho->room.slots[i].player_id == user_id) {
+            bancho->room.slots[i].skipped = true;
             break;
         }
     }
 }
 
 void RoomScreen::on_match_aborted() {
-    if(!bancho.is_playing_a_multi_map()) return;
+    if(!bancho->is_playing_a_multi_map()) return;
     osu->onPlayEnd(this->get_approximate_score(), false, true);
     this->bVisible = true;
-    bancho.match_started = false;
+    bancho->match_started = false;
 
     // Display room presence instead of map again
     RichPresence::onMultiplayerLobby();
 }
 
 void RoomScreen::onClientScoreChange(bool force) {
-    if(!bancho.is_playing_a_multi_map()) return;
+    if(!bancho->is_playing_a_multi_map()) return;
 
     // Update at most once every 250ms
     bool should_update = difftime(time(NULL), this->last_packet_tms) > 0.25;
@@ -792,14 +792,14 @@ void RoomScreen::onReadyButtonClick() {
     int nb_ready = 0;
     bool is_ready = false;
     for(u8 i = 0; i < 16; i++) {
-        if(bancho.room.slots[i].has_player() && bancho.room.slots[i].is_ready()) {
+        if(bancho->room.slots[i].has_player() && bancho->room.slots[i].is_ready()) {
             nb_ready++;
-            if(bancho.room.slots[i].player_id == bancho.user_id) {
+            if(bancho->room.slots[i].player_id == bancho->user_id) {
                 is_ready = true;
             }
         }
     }
-    if(bancho.room.is_host() && is_ready && nb_ready > 1) {
+    if(bancho->room.is_host() && is_ready && nb_ready > 1) {
         Packet packet;
         packet.id = START_MATCH;
         send_packet(packet);
@@ -817,16 +817,16 @@ void RoomScreen::onSelectModsClicked() {
 }
 
 void RoomScreen::onSelectMapClicked() {
-    if(!bancho.room.is_host()) return;
+    if(!bancho->room.is_host()) return;
 
     soundEngine->play(osu->getSkin()->getMenuHit());
 
     Packet packet;
     packet.id = MATCH_CHANGE_SETTINGS;
-    bancho.room.map_id = -1;
-    bancho.room.map_name = "";
-    bancho.room.map_md5 = "";
-    bancho.room.pack(&packet);
+    bancho->room.map_id = -1;
+    bancho->room.map_name = "";
+    bancho->room.map_md5 = "";
+    bancho->room.pack(&packet);
     send_packet(packet);
 
     osu->songBrowser2->setVisible(true);
@@ -850,35 +850,35 @@ void RoomScreen::onChangeWinConditionClicked() {
 }
 
 void RoomScreen::onWinConditionSelected(const UString &win_condition_str, int win_condition) {
-    bancho.room.win_condition = win_condition;
+    bancho->room.win_condition = win_condition;
 
     Packet packet;
     packet.id = MATCH_CHANGE_SETTINGS;
-    bancho.room.pack(&packet);
+    bancho->room.pack(&packet);
     send_packet(packet);
 
     this->updateLayout(osu->getScreenSize());
 }
 
 void RoomScreen::set_new_password(const UString &new_password) {
-    bancho.room.has_password = new_password.length() > 0;
-    bancho.room.password = new_password;
+    bancho->room.has_password = new_password.length() > 0;
+    bancho->room.password = new_password;
 
     Packet packet;
     packet.id = CHANGE_ROOM_PASSWORD;
-    bancho.room.pack(&packet);
+    bancho->room.pack(&packet);
     send_packet(packet);
 }
 
 void RoomScreen::onFreemodCheckboxChanged(CBaseUICheckbox *checkbox) {
-    if(!bancho.room.is_host()) return;
+    if(!bancho->room.is_host()) return;
 
-    bancho.room.freemods = checkbox->isChecked();
+    bancho->room.freemods = checkbox->isChecked();
 
     Packet packet;
     packet.id = MATCH_CHANGE_SETTINGS;
-    bancho.room.pack(&packet);
+    bancho->room.pack(&packet);
     send_packet(packet);
 
-    this->on_room_updated(bancho.room);
+    this->on_room_updated(bancho->room);
 }

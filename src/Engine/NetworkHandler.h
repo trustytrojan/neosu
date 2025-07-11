@@ -1,8 +1,10 @@
 #pragma once
 #include "UString.h"
 
+#include <memory>
 #include <mutex>
 
+struct Bancho;
 class NetworkHandler {
    public:
     NetworkHandler();
@@ -23,4 +25,7 @@ class NetworkHandler {
     static size_t curlStringStreamWriteCallback(void *contents, size_t size, size_t nmemb, void *userp);
 
     static std::once_flag curl_init_flag;
+    static std::unique_ptr<Bancho> s_banchoInstance;
 };
+
+extern Bancho* bancho;

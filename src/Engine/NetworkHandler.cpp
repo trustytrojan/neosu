@@ -5,8 +5,12 @@
 
 #include <sstream>
 
-#include "ConVar.h"
+//#include "ConVar.h"
 #include "Engine.h"
+#include "Bancho.h"
+
+std::unique_ptr<Bancho> NetworkHandler::s_banchoInstance = nullptr;
+Bancho *bancho = nullptr;
 
 std::once_flag NetworkHandler::curl_init_flag;
 
@@ -15,9 +19,14 @@ NetworkHandler::NetworkHandler() {
         // XXX: run curl_global_cleanup() after waiting for network threads to terminate
         curl_global_init(CURL_GLOBAL_DEFAULT);
     });
+    s_banchoInstance = std::make_unique<Bancho>();
+    bancho = s_banchoInstance.get();
+    runtime_assert(bancho, "Bancho handler failed to initialize!");
 }
 
 NetworkHandler::~NetworkHandler() {
+    s_banchoInstance.reset();
+    bancho = nullptr;
     // XXX: run after waiting for network threads to terminate
     //curl_global_cleanup();
 }
@@ -32,6 +41,7 @@ UString NetworkHandler::httpGet(const UString &url, long timeout, long connectTi
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlStringWriteCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &this->curlReadBuffer);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
+        curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
 
         curl_easy_setopt_CAINFO_BLOB_embedded(curl);
 
@@ -62,6 +72,7 @@ std::string NetworkHandler::httpDownload(const UString &url, long timeout, long 
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlStringStreamWriteCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &curlWriteBuffer);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
+        curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
 
         curl_easy_setopt_CAINFO_BLOB_embedded(curl);
 

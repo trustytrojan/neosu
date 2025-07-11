@@ -106,6 +106,10 @@ Engine::Engine(i32 argc, char **argv) {
         g->init();  // needs init() separation due to potential graphics access
 
         // make unique_ptrs for the rest
+        s_networkHandlerInstance = std::make_unique<NetworkHandler>();
+        networkHandler = s_networkHandlerInstance.get();
+        runtime_assert(networkHandler, "Network handler failed to initialize!");
+
         s_resourceManagerInstance = std::make_unique<ResourceManager>();
         resourceManager = s_resourceManagerInstance.get();
         runtime_assert(resourceManager, "Resource manager menu failed to initialize!");
@@ -117,10 +121,6 @@ Engine::Engine(i32 argc, char **argv) {
         s_animationHandlerInstance = std::make_unique<AnimationHandler>();
         animationHandler = s_animationHandlerInstance.get();
         runtime_assert(animationHandler, "Animation handler failed to initialize!");
-
-        s_networkHandlerInstance = std::make_unique<NetworkHandler>();
-        networkHandler = s_networkHandlerInstance.get();
-        runtime_assert(networkHandler, "Network handler failed to initialize!");
 
         init_discord_sdk();
 
@@ -152,10 +152,6 @@ Engine::~Engine() {
 
     destroy_discord_sdk();
 
-    debugLog("Engine: Freeing network handler...\n");
-    s_networkHandlerInstance.reset();
-    networkHandler = NULL;
-
     debugLog("Engine: Freeing animation handler...\n");
     s_animationHandlerInstance.reset();
     animationHandler = NULL;
@@ -167,6 +163,10 @@ Engine::~Engine() {
     debugLog("Engine: Freeing Sound...\n");
     s_soundEngineInstance.reset();
     soundEngine = NULL;
+
+    debugLog("Engine: Freeing network handler...\n");
+    s_networkHandlerInstance.reset();
+    networkHandler = NULL;
 
     debugLog("Engine: Freeing graphics...\n");
     s_graphicsInstance.reset();

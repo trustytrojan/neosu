@@ -42,7 +42,6 @@
 #include "UIButton.h"
 #include "UserCard.h"
 
-Bancho bancho;
 std::unordered_map<std::string, Bancho::Channel *> chat_channels;
 bool print_new_channels = true;
 
@@ -56,7 +55,7 @@ bool Bancho::submit_scores() {
     }
 }
 
-void update_channel(const UString& name, const UString& topic, i32 nb_members) {
+void update_channel(const UString &name, const UString &topic, i32 nb_members) {
     Bancho::Channel *chan;
     auto name_str = std::string(name.toUtf8());
     auto it = chat_channels.find(name_str);
@@ -198,26 +197,26 @@ UString get_disk_uuid() {
 void handle_packet(Packet *packet) {
     // XXX: This is a bit of a mess, should at least group packets by type for readability
     if(packet->id == USER_ID) {
-        bancho.user_id = read<u32>(packet);
-        if(bancho.user_id > 0) {
-            debugLog("Logged in as user #%d.\n", bancho.user_id);
+        bancho->user_id.store(read<i32>(packet));
+        if(bancho->user_id > 0) {
+            debugLog("Logged in as user #%d.\n", bancho->user_id.load());
             osu->optionsMenu->logInButton->setText("Disconnect");
             osu->optionsMenu->logInButton->setColor(0xffff0000);
             osu->optionsMenu->logInButton->is_loading = false;
             cv_mp_autologin.setValue(true);
             print_new_channels = true;
 
-            auto avatar_dir = UString::format(MCENGINE_DATA_DIR "avatars/%s", bancho.endpoint.toUtf8());
+            auto avatar_dir = UString::format(MCENGINE_DATA_DIR "avatars/%s", bancho->endpoint.toUtf8());
             if(!env->directoryExists(avatar_dir.toUtf8())) {
                 env->createDirectory(avatar_dir.toUtf8());
             }
 
-            auto replays_dir = UString::format(MCENGINE_DATA_DIR "replays/%s", bancho.endpoint.toUtf8());
+            auto replays_dir = UString::format(MCENGINE_DATA_DIR "replays/%s", bancho->endpoint.toUtf8());
             if(!env->directoryExists(replays_dir.toUtf8())) {
                 env->createDirectory(replays_dir.toUtf8());
             }
 
-            osu->onUserCardChange(bancho.username);
+            osu->onUserCardChange(bancho->username);
 
             // XXX: We should toggle between "offline" sorting options and "online" ones
             //      Online ones would be "Local scores", "Global", "Country", "Selected mods" etc
@@ -225,30 +224,30 @@ void handle_packet(Packet *packet) {
             osu->songBrowser2->onSortScoresChange(UString("Online Leaderboard"), 0);
 
             // If server sent a score submission policy, update options menu to hide the checkbox
-            osu->optionsMenu->updateLayout();
+            osu->optionsMenu->scheduleLayoutUpdate();
         } else {
             cv_mp_autologin.setValue(false);
             osu->optionsMenu->logInButton->setText("Log in");
             osu->optionsMenu->logInButton->setColor(0xff00ff00);
             osu->optionsMenu->logInButton->is_loading = false;
 
-            debugLog("Failed to log in, server returned code %d.\n", bancho.user_id);
-            UString errmsg = UString::format("Failed to log in: %s (code %d)\n", cho_token.toUtf8(), bancho.user_id);
-            if(bancho.user_id == -2) {
+            debugLog("Failed to log in, server returned code %d.\n", bancho->user_id.load());
+            UString errmsg = UString::format("Failed to log in: %s (code %d)\n", cho_token.toUtf8(), bancho->user_id.load());
+            if(bancho->user_id == -2) {
                 errmsg = "Client version is too old to connect to this server.";
-            } else if(bancho.user_id == -3 || bancho.user_id == -4) {
+            } else if(bancho->user_id == -3 || bancho->user_id == -4) {
                 errmsg = "You are banned from this server.";
-            } else if(bancho.user_id == -6) {
+            } else if(bancho->user_id == -6) {
                 errmsg = "You need to buy supporter to connect to this server.";
-            } else if(bancho.user_id == -7) {
+            } else if(bancho->user_id == -7) {
                 errmsg = "You need to reset your password to connect to this server.";
-            } else if(bancho.user_id == -8) {
+            } else if(bancho->user_id == -8) {
                 errmsg = "Open the verification link sent to your email, then log in again.";
             } else {
                 if(cho_token == UString("user-already-logged-in")) {
                     errmsg = "Already logged in on another client.";
                 } else if(cho_token == UString("unknown-username")) {
-                    errmsg = UString::format("No account by the username '%s' exists.", bancho.username.toUtf8());
+                    errmsg = UString::format("No account by the username '%s' exists.", bancho->username.toUtf8());
                 } else if(cho_token == UString("incorrect-credentials")) {
                     errmsg = "This username is not registered.";
                 } else if(cho_token == UString("incorrect-password")) {
@@ -295,10 +294,10 @@ void handle_packet(Packet *packet) {
         user->global_rank = read<u32>(packet);
         user->pp = read<u16>(packet);
 
-        if(stats_user_id == bancho.user_id) {
+        if(stats_user_id == bancho->user_id) {
             osu->userButton->updateUserStats();
         }
-        if(stats_user_id == bancho.spectated_player_id) {
+        if(stats_user_id == bancho->spectated_player_id) {
             osu->spectatorScreen->userCard->updateUserStats();
         }
 
@@ -306,7 +305,7 @@ void handle_packet(Packet *packet) {
     } else if(packet->id == USER_LOGOUT) {
         i32 logged_out_id = read<u32>(packet);
         read<u8>(packet);
-        if(logged_out_id == bancho.user_id) {
+        if(logged_out_id == bancho->user_id) {
             debugLog("Logged out.\n");
             disconnect();
         } else {
@@ -316,8 +315,8 @@ void handle_packet(Packet *packet) {
         i32 extra = read<i32>(packet);
         (void)extra;  // this is mania seed or something we can't use
 
-        if(bancho.is_spectating) {
-            UserInfo *info = get_user_info(bancho.spectated_player_id, true);
+        if(bancho->spectating) {
+            UserInfo *info = get_user_info(bancho->spectated_player_id, true);
             auto beatmap = osu->getSelectedBeatmap();
 
             u16 nb_frames = read<u16>(packet);
@@ -383,33 +382,33 @@ void handle_packet(Packet *packet) {
         }
     } else if(packet->id == SPECTATOR_JOINED) {
         i32 spectator_id = read<u32>(packet);
-        if(std::find(bancho.spectators.begin(), bancho.spectators.end(), spectator_id) == bancho.spectators.end()) {
+        if(std::find(bancho->spectators.begin(), bancho->spectators.end(), spectator_id) == bancho->spectators.end()) {
             debugLog("Spectator joined: user id %d\n", spectator_id);
-            bancho.spectators.push_back(spectator_id);
+            bancho->spectators.push_back(spectator_id);
         }
     } else if(packet->id == SPECTATOR_LEFT) {
         i32 spectator_id = read<u32>(packet);
-        auto it = std::find(bancho.spectators.begin(), bancho.spectators.end(), spectator_id);
-        if(it != bancho.spectators.end()) {
+        auto it = std::find(bancho->spectators.begin(), bancho->spectators.end(), spectator_id);
+        if(it != bancho->spectators.end()) {
             debugLog("Spectator left: user id %d\n", spectator_id);
-            bancho.spectators.erase(it);
+            bancho->spectators.erase(it);
         }
     } else if(packet->id == SPECTATOR_CANT_SPECTATE) {
         i32 spectator_id = read<u32>(packet);
         debugLog("Spectator can't spectate: user id %d\n", spectator_id);
     } else if(packet->id == FELLOW_SPECTATOR_JOINED) {
         i32 spectator_id = read<u32>(packet);
-        if(std::find(bancho.fellow_spectators.begin(), bancho.fellow_spectators.end(), spectator_id) ==
-           bancho.fellow_spectators.end()) {
+        if(std::find(bancho->fellow_spectators.begin(), bancho->fellow_spectators.end(), spectator_id) ==
+           bancho->fellow_spectators.end()) {
             debugLog("Fellow spectator joined: user id %d\n", spectator_id);
-            bancho.fellow_spectators.push_back(spectator_id);
+            bancho->fellow_spectators.push_back(spectator_id);
         }
     } else if(packet->id == FELLOW_SPECTATOR_LEFT) {
         i32 spectator_id = read<u32>(packet);
-        auto it = std::find(bancho.fellow_spectators.begin(), bancho.fellow_spectators.end(), spectator_id);
-        if(it != bancho.fellow_spectators.end()) {
+        auto it = std::find(bancho->fellow_spectators.begin(), bancho->fellow_spectators.end(), spectator_id);
+        if(it != bancho->fellow_spectators.end()) {
             debugLog("Fellow spectator left: user id %d\n", spectator_id);
-            bancho.fellow_spectators.erase(it);
+            bancho->fellow_spectators.erase(it);
         }
     } else if(packet->id == GET_ATTENTION) {
         // (nothing to do)
@@ -420,7 +419,7 @@ void handle_packet(Packet *packet) {
         auto room = Room(packet);
         if(osu->lobby->isVisible()) {
             osu->lobby->updateRoom(room);
-        } else if(room.id == bancho.room.id) {
+        } else if(room.id == bancho->room.id) {
             osu->room->on_room_updated(room);
         }
     } else if(packet->id == ROOM_CREATED) {
@@ -431,7 +430,7 @@ void handle_packet(Packet *packet) {
         osu->lobby->removeRoom(room_id);
     } else if(packet->id == ROOM_JOIN_SUCCESS) {
         // Sanity, in case some trolley admins do funny business
-        if(bancho.is_spectating) {
+        if(bancho->spectating) {
             stop_spectating();
         }
         if(osu->isInPlayMode()) {
@@ -503,7 +502,7 @@ void handle_packet(Packet *packet) {
         UString icon = read_string(packet);
         auto urls = icon.split("|");
         if(urls.size() == 2 && ((urls[0].find("http://") == 0) || urls[0].find("https://") == 0)) {
-            bancho.server_icon_url = urls[0];
+            bancho->server_icon_url = urls[0];
         }
     } else if(packet->id == MATCH_PLAYER_SKIPPED) {
         i32 user_id = read<u32>(packet);
@@ -539,7 +538,7 @@ void handle_packet(Packet *packet) {
 
         // Some servers send "restart" packets when password is incorrect
         // So, don't retry unless actually logged in
-        if(bancho.is_online()) {
+        if(bancho->is_online()) {
             reconnect();
         }
     } else if(packet->id == MATCH_INVITE) {
@@ -562,7 +561,7 @@ void handle_packet(Packet *packet) {
     } else if(packet->id == ROOM_PASSWORD_CHANGED) {
         UString new_password = read_string(packet);
         debugLog("Room changed password to %s\n", new_password.toUtf8());
-        bancho.room.password = new_password;
+        bancho->room.password = new_password;
     } else if(packet->id == SILENCE_END) {
         i32 delta = read<u32>(packet);
         debugLog("Silence ends in %d seconds.\n", delta);
@@ -602,10 +601,10 @@ Packet build_login_packet() {
     // username\npasswd_md5\nosu_version|utc_offset|display_city|client_hashes|pm_private\n
     Packet packet;
 
-    write_bytes(&packet, (u8 *)bancho.username.toUtf8(), bancho.username.lengthUtf8());
+    write_bytes(&packet, (u8 *)bancho->username.toUtf8(), bancho->username.lengthUtf8());
     write<u8>(&packet, '\n');
 
-    write_bytes(&packet, (u8 *)bancho.pw_md5.hash, 32);
+    write_bytes(&packet, (u8 *)bancho->pw_md5.hash, 32);
     write<u8>(&packet, '\n');
 
     write_bytes(&packet, (u8 *)OSU_VERSION, strlen(OSU_VERSION));
@@ -646,17 +645,17 @@ Packet build_login_packet() {
     MD5Hash adapters_md5 = md5((u8 *)adapters, strlen(adapters));
 
     // XXX: Should remove '|' from the disk UUID just to be safe
-    bancho.disk_uuid = get_disk_uuid();
-    MD5Hash disk_md5 = md5((u8 *)bancho.disk_uuid.toUtf8(), bancho.disk_uuid.lengthUtf8());
+    bancho->disk_uuid = get_disk_uuid();
+    MD5Hash disk_md5 = md5((u8 *)bancho->disk_uuid.toUtf8(), bancho->disk_uuid.lengthUtf8());
 
     // XXX: Not implemented, I'm lazy so just reusing disk signature
-    bancho.install_id = bancho.disk_uuid;
-    MD5Hash install_md5 = md5((u8 *)bancho.install_id.toUtf8(), bancho.install_id.lengthUtf8());
+    bancho->install_id = bancho->disk_uuid;
+    MD5Hash install_md5 = md5((u8 *)bancho->install_id.toUtf8(), bancho->install_id.lengthUtf8());
     ;
 
-    bancho.client_hashes = UString::format("%s:%s:%s:%s:%s:", osu_path_md5.hash, adapters, adapters_md5.hash,
-                                           install_md5.hash, disk_md5.hash);
-    write_bytes(&packet, (u8 *)bancho.client_hashes.toUtf8(), bancho.client_hashes.lengthUtf8());
+    bancho->client_hashes = UString::format("%s:%s:%s:%s:%s:", osu_path_md5.hash, adapters, adapters_md5.hash,
+                                            install_md5.hash, disk_md5.hash);
+    write_bytes(&packet, (u8 *)bancho->client_hashes.toUtf8(), bancho->client_hashes.lengthUtf8());
 
     // Allow PMs from strangers
     write<u8>(&packet, '|');

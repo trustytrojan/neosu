@@ -264,8 +264,8 @@ void MainMenu::draw() {
     if(!this->bVisible) return;
 
     // load server icon
-    if(bancho.is_online() && bancho.server_icon_url.length() > 0 && bancho.server_icon == NULL) {
-        auto icon_path = UString::format(MCENGINE_DATA_DIR "avatars/%s", bancho.endpoint.toUtf8());
+    if(bancho->is_online() && bancho->server_icon_url.length() > 0 && bancho->server_icon == NULL) {
+        auto icon_path = UString::format(MCENGINE_DATA_DIR "avatars/%s", bancho->endpoint.toUtf8());
         if(!env->directoryExists(icon_path.toUtf8())) {
             env->createDirectory(icon_path.toUtf8());
         }
@@ -274,8 +274,8 @@ void MainMenu::draw() {
         float progress = -1.f;
         std::vector<u8> data;
         int response_code;
-        download(bancho.server_icon_url.toUtf8(), &progress, data, &response_code);
-        if(progress == -1.f) bancho.server_icon_url = "";
+        download(bancho->server_icon_url.toUtf8(), &progress, data, &response_code);
+        if(progress == -1.f) bancho->server_icon_url = "";
         if(!data.empty()) {
             FILE *file = fopen(icon_path.toUtf8(), "wb");
             if(file != NULL) {
@@ -284,7 +284,7 @@ void MainMenu::draw() {
                 fclose(file);
             }
 
-            bancho.server_icon = resourceManager->loadImageAbs(icon_path.toUtf8(), icon_path.toUtf8());
+            bancho->server_icon = resourceManager->loadImageAbs(icon_path.toUtf8(), icon_path.toUtf8());
         }
     }
 
@@ -734,8 +734,8 @@ void MainMenu::draw() {
     // neosu/server logo
     {
         auto logo = this->logo_img;
-        if(bancho.server_icon != NULL && bancho.server_icon->isReady() && cv_main_menu_use_server_logo.getBool()) {
-            logo = bancho.server_icon;
+        if(bancho->server_icon != NULL && bancho->server_icon->isReady() && cv_main_menu_use_server_logo.getBool()) {
+            logo = bancho->server_icon;
         }
 
         float alpha = (1.0f - this->fMainMenuAnimFriendPercent) * (1.0f - this->fMainMenuAnimFriendPercent) *
@@ -1102,7 +1102,7 @@ CBaseUIContainer *MainMenu::setVisible(bool visible) {
     if(visible) {
         RichPresence::onMainMenu();
 
-        if(!bancho.spectators.empty()) {
+        if(!bancho->spectators.empty()) {
             Packet packet;
             packet.id = OUT_SPECTATE_FRAMES;
             write<i32>(&packet, 0);
@@ -1354,7 +1354,7 @@ void MainMenu::onPlayButtonPressed() {
 }
 
 void MainMenu::onMultiplayerButtonPressed() {
-    if(bancho.user_id <= 0) {
+    if(bancho->user_id <= 0) {
         osu->optionsMenu->askForLoginDetails();
         return;
     }

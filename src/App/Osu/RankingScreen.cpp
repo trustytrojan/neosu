@@ -409,7 +409,7 @@ CBaseUIContainer *RankingScreen::setVisible(bool visible) {
             soundEngine->stop(osu->getSkin()->getApplause());
         }
 
-        if(bancho.is_in_a_multi_room()) {
+        if(bancho->is_in_a_multi_room()) {
             // We backed out of the ranking screen, display the room again
             osu->room->setVisible(true);
             osu->chat->updateVisibility();
@@ -442,8 +442,8 @@ void RankingScreen::setScore(FinishedScore score) {
 
     this->score = score;
 
-    this->retry_btn->bVisible2 = is_same_player && !bancho.is_in_a_multi_room();
-    this->watch_btn->bVisible2 = !bancho.is_in_a_multi_room();
+    this->retry_btn->bVisible2 = is_same_player && !bancho->is_in_a_multi_room();
+    this->watch_btn->bVisible2 = !bancho->is_in_a_multi_room();
 
     this->bIsUnranked = false;
 

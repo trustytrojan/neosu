@@ -293,7 +293,7 @@ bool SoundEngine::initializeOutputDevice(const OUTPUT_DEVICE& device) {
         debugLog("SoundEngine: Output Device = \"%s\"\n", this->currentOutputDevice.name.toUtf8());
 
         if(osu && osu->optionsMenu) {
-            osu->optionsMenu->updateLayout();
+            osu->optionsMenu->scheduleLayoutUpdate();
         }
 
         return true;
@@ -442,7 +442,7 @@ bool SoundEngine::initializeOutputDevice(const OUTPUT_DEVICE& device) {
     debugLog("SoundEngine: Output Device = \"%s\"\n", this->currentOutputDevice.name.toUtf8());
 
     if(osu && osu->optionsMenu) {
-        osu->optionsMenu->updateLayout();
+        osu->optionsMenu->scheduleLayoutUpdate();
     }
 
     return true;

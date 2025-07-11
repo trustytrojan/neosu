@@ -108,7 +108,7 @@ void UIModSelectorModButton::onClicked() {
         this->iState = (this->iState + 1) % this->states.size();
 
         // HACK: In multi, skip "Actual Flashlight" mod
-        if(bancho.is_in_a_multi_room() && this->states[0].modName == UString("fl")) {
+        if(bancho->is_in_a_multi_room() && this->states[0].modName == UString("fl")) {
             this->iState = this->iState % this->states.size() - 1;
         }
 
@@ -124,30 +124,30 @@ void UIModSelectorModButton::onClicked() {
     // set new state
     this->setState(this->iState);
 
-    if(bancho.is_online()) {
+    if(bancho->is_online()) {
         RichPresence::updateBanchoMods();
     }
 
-    if(bancho.is_in_a_multi_room()) {
+    if(bancho->is_in_a_multi_room()) {
         for(int i = 0; i < 16; i++) {
-            if(bancho.room.slots[i].player_id != bancho.user_id) continue;
+            if(bancho->room.slots[i].player_id != bancho->user_id) continue;
 
-            bancho.room.slots[i].mods = this->osuModSelector->getModFlags();
-            if(bancho.room.is_host()) {
-                bancho.room.mods = this->osuModSelector->getModFlags();
-                if(bancho.room.freemods) {
+            bancho->room.slots[i].mods = this->osuModSelector->getModFlags();
+            if(bancho->room.is_host()) {
+                bancho->room.mods = this->osuModSelector->getModFlags();
+                if(bancho->room.freemods) {
                     // When freemod is enabled, we only want to force DT, HT, or Target.
-                    bancho.room.mods &= LegacyFlags::DoubleTime | LegacyFlags::HalfTime | LegacyFlags::Target;
+                    bancho->room.mods &= LegacyFlags::DoubleTime | LegacyFlags::HalfTime | LegacyFlags::Target;
                 }
             }
 
             debugLog("Sending mod change to server.\n");
             Packet packet;
             packet.id = MATCH_CHANGE_MODS;
-            write<u32>(&packet, bancho.room.slots[i].mods);
+            write<u32>(&packet, bancho->room.slots[i].mods);
             send_packet(packet);
 
-            osu->room->on_room_updated(bancho.room);
+            osu->room->on_room_updated(bancho->room);
             break;
         }
     }

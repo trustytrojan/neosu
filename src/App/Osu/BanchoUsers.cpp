@@ -47,7 +47,7 @@ void logout_user(u32 user_id) {
     for(auto it = online_users.begin(); it != online_users.end(); it++) {
         if(it->first == user_id) {
             debugLog("%s has disconnected.\n", it->second->name.toUtf8());
-            if(it->first == bancho.spectated_player_id) {
+            if(it->first == bancho->spectated_player_id) {
                 stop_spectating();
             }
 

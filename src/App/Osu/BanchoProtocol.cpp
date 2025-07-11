@@ -99,7 +99,7 @@ void Room::pack(Packet *packet) {
     write<u32>(packet, this->seed);
 }
 
-bool Room::is_host() { return this->host_id == bancho.user_id; }
+bool Room::is_host() { return this->host_id == bancho->user_id; }
 
 void read_bytes(Packet *packet, u8 *bytes, size_t n) {
     if(packet->pos + n > packet->size) {
@@ -231,7 +231,7 @@ void write_hash(Packet *packet, MD5Hash hash) {
 ScoreFrame ScoreFrame::get() {
     u8 slot_id = 0;
     for(u8 i = 0; i < 16; i++) {
-        if(bancho.room.slots[i].player_id == bancho.user_id) {
+        if(bancho->room.slots[i].player_id == bancho->user_id) {
             slot_id = i;
             break;
         }

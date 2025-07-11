@@ -366,8 +366,8 @@ void ModSelector::updateButtons(bool initial) {
     this->getModButtonOnGrid(4, 0)->setAvailable(true);
     this->getModButtonOnGrid(5, 2)->setAvailable(true);
 
-    if(bancho.is_in_a_multi_room()) {
-        if(bancho.room.freemods && !bancho.room.is_host()) {
+    if(bancho->is_in_a_multi_room()) {
+        if(bancho->room.freemods && !bancho->room.is_host()) {
             this->getModButtonOnGrid(2, 0)->setAvailable(false);  // Disable DC/HT
             this->getModButtonOnGrid(2, 1)->setAvailable(false);  // Disable DT/NC
             this->getModButtonOnGrid(4, 2)->setAvailable(false);  // Disable Target
@@ -420,7 +420,7 @@ void ModSelector::draw() {
     const float experimentalModsAnimationTranslation =
         -(this->experimentalContainer->getSize().x + 2.0f) * (1.0f - this->fExperimentalAnimation);
 
-    if(bancho.is_in_a_multi_room()) {
+    if(bancho->is_in_a_multi_room()) {
         // get mod button element bounds
         Vector2 modGridButtonsStart = Vector2(osu->getScreenWidth(), osu->getScreenHeight());
         Vector2 modGridButtonsSize = Vector2(0, osu->getScreenHeight());
@@ -546,7 +546,7 @@ void ModSelector::draw() {
     }
 
     // draw experimental mods
-    if(!bancho.is_in_a_multi_room()) {
+    if(!bancho->is_in_a_multi_room()) {
         g->pushTransform();
         {
             g->translate(experimentalModsAnimationTranslation, 0);
@@ -585,7 +585,7 @@ void ModSelector::mouse_update(bool *propagate_clicks) {
     // update
     OsuScreen::mouse_update(propagate_clicks);
 
-    if(!bancho.is_in_a_multi_room()) {
+    if(!bancho->is_in_a_multi_room()) {
         this->overrideSliderContainer->mouse_update(propagate_clicks);
 
         // override slider tooltips (ALT)
@@ -871,7 +871,7 @@ void ModSelector::updateLayout() {
         const float modGridMaxY = start.y + size.y * this->iGridHeight +
                                   offset.y * (this->iGridHeight - 1);  // exact bottom of the mod buttons
 
-        this->nonVanillaWarning->setVisible(!convar->isVanilla() && bancho.submit_scores());
+        this->nonVanillaWarning->setVisible(!convar->isVanilla() && bancho->submit_scores());
         this->nonVanillaWarning->setSizeToContent();
         this->nonVanillaWarning->setSize(Vector2(osu->getScreenWidth(), 20 * uiScale));
         this->nonVanillaWarning->setPos(
@@ -1004,7 +1004,7 @@ void ModSelector::updateExperimentalLayout() {
     this->experimentalContainer->setPosY(-1);
     this->experimentalContainer->setScrollSizeToContent(1 * dpiScale);
     this->experimentalContainer->getContainer()->update_pos();
-    this->experimentalContainer->setVisible(!bancho.is_in_a_multi_room());
+    this->experimentalContainer->setVisible(!bancho->is_in_a_multi_room());
 }
 
 UIModSelectorModButton *ModSelector::setModButtonOnGrid(int x, int y, int state, bool initialState, ConVar *modCvar,
@@ -1124,25 +1124,25 @@ void ModSelector::resetModsUserInitiated() {
     soundEngine->play(osu->getSkin()->getCheckOff());
     this->resetModsButton->animateClickColor();
 
-    if(bancho.is_online()) {
+    if(bancho->is_online()) {
         RichPresence::updateBanchoMods();
     }
 
-    if(bancho.is_in_a_multi_room()) {
+    if(bancho->is_in_a_multi_room()) {
         for(int i = 0; i < 16; i++) {
-            if(bancho.room.slots[i].player_id != bancho.user_id) continue;
+            if(bancho->room.slots[i].player_id != bancho->user_id) continue;
 
-            if(bancho.room.is_host()) {
-                bancho.room.mods = this->getModFlags();
+            if(bancho->room.is_host()) {
+                bancho->room.mods = this->getModFlags();
             } else {
-                this->enableModsFromFlags(bancho.room.mods);
+                this->enableModsFromFlags(bancho->room.mods);
             }
 
-            bancho.room.slots[i].mods = bancho.room.mods;
+            bancho->room.slots[i].mods = bancho->room.mods;
 
             Packet packet;
             packet.id = MATCH_CHANGE_MODS;
-            write<u32>(&packet, bancho.room.slots[i].mods);
+            write<u32>(&packet, bancho->room.slots[i].mods);
             send_packet(packet);
 
             osu->room->updateLayout(osu->getScreenSize());

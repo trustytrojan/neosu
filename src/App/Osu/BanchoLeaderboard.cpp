@@ -18,7 +18,7 @@
 FinishedScore parse_score(char *score_line) {
     FinishedScore score;
     score.client = "peppy-unknown";
-    score.server = bancho.endpoint.toUtf8();
+    score.server = bancho->endpoint.toUtf8();
 
     auto tokens = UString(score_line).split("|");
     if(tokens.size() < 15) return score;
@@ -77,7 +77,7 @@ void fetch_online_scores(DatabaseBeatmap *beatmap) {
     curl_free(encoded_filename);
     curl_easy_cleanup(curl);
     path.append(UString::format("&m=0&i=%d&mods=%d&h=&a=0&us=%s&ha=%s", beatmap->getSetID(),
-                                osu->modSelector->getModFlags(), bancho.username.toUtf8(), bancho.pw_md5.toUtf8())
+                                osu->modSelector->getModFlags(), bancho->username.toUtf8(), bancho->pw_md5.toUtf8())
                     .toUtf8());
 
     APIRequest request;

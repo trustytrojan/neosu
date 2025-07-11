@@ -95,6 +95,7 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
 
     void setVisibleInt(bool visible, bool fromOnBack = false);
     void scheduleSearchUpdate();
+    void scheduleLayoutUpdate() { this->bSearchLayoutUpdateScheduled = true; }
 
     void askForLoginDetails();
     void updateOsuFolder();
@@ -110,20 +111,20 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     void onRawInputToAbsoluteWindowChange(CBaseUICheckbox *checkbox);
     void openCurrentSkinFolder();
     void onSkinSelect();
-    void onSkinSelect2(const UString& skinName, int id = -1);
+    void onSkinSelect2(const UString &skinName, int id = -1);
     void onSkinReload();
     void onSkinRandom();
     void onResolutionSelect();
-    void onResolutionSelect2(const UString& resolution, int id = -1);
+    void onResolutionSelect2(const UString &resolution, int id = -1);
     void onOutputDeviceSelect();
-    void onOutputDeviceSelect2(const UString& outputDeviceName, int id = -1);
+    void onOutputDeviceSelect2(const UString &outputDeviceName, int id = -1);
     void onOutputDeviceResetClicked();
     void onOutputDeviceResetUpdate();
     void onOutputDeviceRestart();
     void onLogInClicked();
     void onCM360CalculatorLinkClicked();
     void onNotelockSelect();
-    void onNotelockSelect2(const UString& notelockType, int id = -1);
+    void onNotelockSelect2(const UString &notelockType, int id = -1);
     void onNotelockSelectResetClicked();
     void onNotelockSelectResetUpdate();
 
@@ -166,20 +167,21 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
 
     // options
     void addSpacer();
-    CBaseUILabel *addSection(const UString& text);
-    CBaseUILabel *addSubSection(const UString& text, UString searchTags = "");
-    CBaseUILabel *addLabel(const UString& text);
-    UIButton *addButton(const UString& text);
-    OPTIONS_ELEMENT addButton(const UString& text, const UString& labelText, bool withResetButton = false);
-    OPTIONS_ELEMENT addButtonButton(const UString& text1, const UString& text2);
-    OPTIONS_ELEMENT addButtonButtonLabel(const UString& text1, const UString& text2, const UString& labelText, bool withResetButton = false);
-    OptionsMenuKeyBindButton *addKeyBindButton(const UString& text, ConVar *cvar);
-    CBaseUICheckbox *addCheckbox(const UString& text, ConVar *cvar);
-    CBaseUICheckbox *addCheckbox(const UString& text, const UString& tooltipText = "", ConVar *cvar = NULL);
-    UISlider *addSlider(const UString& text, float min = 0.0f, float max = 1.0f, ConVar *cvar = NULL, float label1Width = 0.0f,
-                        bool allowOverscale = false, bool allowUnderscale = false);
+    CBaseUILabel *addSection(const UString &text);
+    CBaseUILabel *addSubSection(const UString &text, UString searchTags = "");
+    CBaseUILabel *addLabel(const UString &text);
+    UIButton *addButton(const UString &text);
+    OPTIONS_ELEMENT addButton(const UString &text, const UString &labelText, bool withResetButton = false);
+    OPTIONS_ELEMENT addButtonButton(const UString &text1, const UString &text2);
+    OPTIONS_ELEMENT addButtonButtonLabel(const UString &text1, const UString &text2, const UString &labelText,
+                                         bool withResetButton = false);
+    OptionsMenuKeyBindButton *addKeyBindButton(const UString &text, ConVar *cvar);
+    CBaseUICheckbox *addCheckbox(const UString &text, ConVar *cvar);
+    CBaseUICheckbox *addCheckbox(const UString &text, const UString &tooltipText = "", ConVar *cvar = NULL);
+    UISlider *addSlider(const UString &text, float min = 0.0f, float max = 1.0f, ConVar *cvar = NULL,
+                        float label1Width = 0.0f, bool allowOverscale = false, bool allowUnderscale = false);
     CBaseUITextbox *addTextbox(UString text, ConVar *cvar = NULL);
-    CBaseUITextbox *addTextbox(UString text, const UString& labelText, ConVar *cvar = NULL);
+    CBaseUITextbox *addTextbox(UString text, const UString &labelText, ConVar *cvar = NULL);
     CBaseUIElement *addSkinPreview();
     CBaseUIElement *addSliderPreview();
 
@@ -268,6 +270,7 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     bool bASIOBufferChangeScheduled;
     bool bWASAPIBufferChangeScheduled;
     bool bWASAPIPeriodChangeScheduled;
+    std::atomic<bool> bSearchLayoutUpdateScheduled;
 
     int iNumResetAllKeyBindingsPressed;
     int iNumResetEverythingPressed;

@@ -453,6 +453,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->bASIOBufferChangeScheduled = false;
     this->bWASAPIBufferChangeScheduled = false;
     this->bWASAPIPeriodChangeScheduled = false;
+    this->bSearchLayoutUpdateScheduled = false;
 
     this->iNumResetAllKeyBindingsPressed = 0;
     this->iNumResetEverythingPressed = 0;
@@ -1380,6 +1381,8 @@ void OptionsMenu::draw() {
 }
 
 void OptionsMenu::mouse_update(bool *propagate_clicks) {
+    if (this->bSearchLayoutUpdateScheduled) this->updateLayout();
+
     // force context menu focus
     this->contextMenu->mouse_update(propagate_clicks);
     if(!*propagate_clicks) return;
@@ -1691,6 +1694,7 @@ bool OptionsMenu::isBusy() {
 }
 
 void OptionsMenu::updateLayout() {
+    this->bSearchLayoutUpdateScheduled = false;
     this->updating_layout = true;
 
     // set all elements to the current convar values, and update the reset button states
@@ -1805,7 +1809,7 @@ void OptionsMenu::updateLayout() {
         if(this->elements[i].render_condition == RenderCondition::ASIO_ENABLED && !soundEngine->isASIO()) continue;
         if(this->elements[i].render_condition == RenderCondition::WASAPI_ENABLED && !soundEngine->isWASAPI()) continue;
         if(this->elements[i].render_condition == RenderCondition::SCORE_SUBMISSION_POLICY &&
-           bancho.score_submission_policy != ServerPolicy::NO_PREFERENCE)
+           bancho->score_submission_policy != ServerPolicy::NO_PREFERENCE)
             continue;
 
         // searching logic happens here:
@@ -2541,7 +2545,7 @@ void OptionsMenu::onLogInClicked() {
     if(this->logInButton->is_loading) return;
     soundEngine->play(osu->getSkin()->getMenuHit());
 
-    if(bancho.user_id > 0) {
+    if(bancho->user_id > 0) {
         disconnect();
     } else {
         reconnect();
