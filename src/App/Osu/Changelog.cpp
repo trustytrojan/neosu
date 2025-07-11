@@ -42,6 +42,7 @@ Changelog::Changelog() : ScreenBackable() {
     v38_00.changes.emplace_back("- Fixed letterboxed mode cutting off GUI/HUD elements strangely");
     v38_00.changes.emplace_back("- Fixed crashing on partially corrupt scores databases");
     v38_00.changes.emplace_back("- Fixed rate change slider having a much smaller range than it should");
+    v38_00.changes.emplace_back("- Fixed leaderboard scores showing the wrong AR/OD for non-HT/DT rate-changed plays");
 
     // TODO: Fix F9 screen bugs
     // TODO: Check for performance regressions

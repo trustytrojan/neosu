@@ -531,7 +531,7 @@ void ScoreButton::onRightMouseUpInside() {
     }
 }
 
-void ScoreButton::onContextMenu(const UString& text, int id) {
+void ScoreButton::onContextMenu(const UString &text, int id) {
     if(id == 1) {
         this->onUseModsClicked();
         return;
@@ -577,7 +577,7 @@ void ScoreButton::onDeleteScoreClicked() {
     }
 }
 
-void ScoreButton::onDeleteScoreConfirmed(const UString& text, int id) {
+void ScoreButton::onDeleteScoreConfirmed(const UString &text, int id) {
     if(id != 1) return;
 
     debugLog("Deleting score\n");
@@ -586,7 +586,7 @@ void ScoreButton::onDeleteScoreConfirmed(const UString& text, int id) {
     osu->getSongBrowser()->onScoreContextMenu(this, 2);
 }
 
-void ScoreButton::setScore(const FinishedScore &score, DatabaseBeatmap *diff2, int index, const UString& titleString,
+void ScoreButton::setScore(const FinishedScore &score, DatabaseBeatmap *diff2, int index, const UString &titleString,
                            float weight) {
     this->score = score;
     this->score.beatmap_hash = diff2->getMD5Hash();
@@ -644,42 +644,31 @@ void ScoreButton::setScore(const FinishedScore &score, DatabaseBeatmap *diff2, i
         if(HP == -1.f) HP = beatmapValuesForModsLegacy.HP;
         if(CS == -1.f) CS = beatmapValuesForModsLegacy.CS;
 
-        const float compensatedCS = std::round(CS * 100.0f) / 100.0f;
-        const float compensatedAR = std::round(GameRules::getRawApproachRateForSpeedMultiplier(
-                                                   GameRules::getRawApproachTime(AR), score.mods.speed) *
-                                               100.0f) /
-                                    100.0f;
-        const float compensatedOD = std::round(GameRules::getRawOverallDifficultyForSpeedMultiplier(
-                                                   GameRules::getRawHitWindow300(OD), score.mods.speed) *
-                                               100.0f) /
-                                    100.0f;
-        const float compensatedHP = std::round(HP * 100.0f) / 100.0f;
-
         // only show these values if they are not default (or default with applied mods)
         // only show these values if they are not default with applied mods
 
         if(beatmapValuesForModsLegacy.CS != CS) {
             if(this->sCustom.length() > 0) this->sCustom.append(", ");
 
-            this->sCustom.append(UString::format("CS:%.4g", compensatedCS));
+            this->sCustom.append(UString::format("CS:%.4g", CS));
         }
 
         if(beatmapValuesForModsLegacy.AR != AR) {
             if(this->sCustom.length() > 0) this->sCustom.append(", ");
 
-            this->sCustom.append(UString::format("AR:%.4g", compensatedAR));
+            this->sCustom.append(UString::format("AR:%.4g", AR));
         }
 
         if(beatmapValuesForModsLegacy.OD != OD) {
             if(this->sCustom.length() > 0) this->sCustom.append(", ");
 
-            this->sCustom.append(UString::format("OD:%.4g", compensatedOD));
+            this->sCustom.append(UString::format("OD:%.4g", OD));
         }
 
         if(beatmapValuesForModsLegacy.HP != HP) {
             if(this->sCustom.length() > 0) this->sCustom.append(", ");
 
-            this->sCustom.append(UString::format("HP:%.4g", compensatedHP));
+            this->sCustom.append(UString::format("HP:%.4g", HP));
         }
     }
 
