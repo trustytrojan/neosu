@@ -1797,7 +1797,7 @@ void Osu::onSkinReload() {
     this->onSkinChange("", cv_skin.getString());
 }
 
-void Osu::onSkinChange(UString oldValue, UString newValue) {
+void Osu::onSkinChange(const UString &oldValue, const UString &newValue) {
     if(this->skin != NULL) {
         if(this->bSkinLoadScheduled || this->skinScheduledToLoad != NULL) return;
         if(newValue.length() < 1) return;
@@ -1838,9 +1838,9 @@ void Osu::updateAnimationSpeed() {
     }
 }
 
-void Osu::onAnimationSpeedChange(UString oldValue, UString newValue) { this->updateAnimationSpeed(); }
+void Osu::onAnimationSpeedChange(const UString &oldValue, const UString &newValue) { this->updateAnimationSpeed(); }
 
-void Osu::onSpeedChange(UString oldValue, UString newValue) {
+void Osu::onSpeedChange(const UString &oldValue, const UString &newValue) {
     float speed = newValue.toFloat();
     this->getSelectedBeatmap()->setSpeed(speed >= 0.0f ? speed : this->getSelectedBeatmap()->getSpeedMultiplier());
     this->updateAnimationSpeed();
@@ -1855,23 +1855,23 @@ void Osu::onSpeedChange(UString oldValue, UString newValue) {
     osu->getModSelector()->updateOverrideSliderLabels();
 }
 
-void Osu::onDTPresetChange(UString oldValue, UString newValue) {
+void Osu::onDTPresetChange(const UString &oldValue, const UString &newValue) {
     cv_speed_override.setValue(cv_mod_doubletime_dummy.getBool() ? 1.5f : -1.f);
     osu->getModSelector()->speedSlider->setValue(cv_speed_override.getFloat() == -1 ? cv_speed_override.getFloat() : cv_speed_override.getFloat() + 1.0f, false, false);
 }
 
-void Osu::onHTPresetChange(UString oldValue, UString newValue) {
+void Osu::onHTPresetChange(const UString &oldValue, const UString &newValue) {
     cv_speed_override.setValue(cv_mod_halftime_dummy.getBool() ? 0.75f : -1.f);
     osu->getModSelector()->speedSlider->setValue(cv_speed_override.getFloat() == -1 ? cv_speed_override.getFloat() : cv_speed_override.getFloat() + 1.0f, false, false);
 }
 
-void Osu::onThumbnailsToggle(UString oldValue, UString newValue) {
+void Osu::onThumbnailsToggle(const UString &oldValue, const UString &newValue) {
     osu->getSongBrowser()->thumbnailYRatio = cv_draw_songbrowser_thumbnails.getBool() ? 1.333333f : 0.f;
 }
 
-void Osu::onPlayfieldChange(UString oldValue, UString newValue) { this->getSelectedBeatmap()->onModUpdate(); }
+void Osu::onPlayfieldChange(const UString &oldValue, const UString &newValue) { this->getSelectedBeatmap()->onModUpdate(); }
 
-void Osu::onUIScaleChange(UString oldValue, UString newValue) {
+void Osu::onUIScaleChange(const UString &oldValue, const UString &newValue) {
     const float oldVal = oldValue.toFloat();
     const float newVal = newValue.toFloat();
 
@@ -1882,7 +1882,7 @@ void Osu::onUIScaleChange(UString oldValue, UString newValue) {
     }
 }
 
-void Osu::onUIScaleToDPIChange(UString oldValue, UString newValue) {
+void Osu::onUIScaleToDPIChange(const UString &oldValue, const UString &newValue) {
     const bool oldVal = oldValue.toFloat() > 0.0f;
     const bool newVal = newValue.toFloat() > 0.0f;
 
@@ -1893,7 +1893,7 @@ void Osu::onUIScaleToDPIChange(UString oldValue, UString newValue) {
     }
 }
 
-void Osu::onLetterboxingChange(UString oldValue, UString newValue) {
+void Osu::onLetterboxingChange(const UString &oldValue, const UString &newValue) {
     if(cv_resolution_enabled.getBool()) {
         bool oldVal = oldValue.toFloat() > 0.0f;
         bool newVal = newValue.toFloat() > 0.0f;
@@ -2046,17 +2046,17 @@ void Osu::onKey2Change(bool pressed, bool isMouse) {
     }
 }
 
-void Osu::onModMafhamChange(UString oldValue, UString newValue) { this->rebuildRenderTargets(); }
+void Osu::onModMafhamChange(const UString &oldValue, const UString &newValue) { this->rebuildRenderTargets(); }
 
-void Osu::onModFPoSuChange(UString oldValue, UString newValue) { this->rebuildRenderTargets(); }
+void Osu::onModFPoSuChange(const UString &oldValue, const UString &newValue) { this->rebuildRenderTargets(); }
 
-void Osu::onModFPoSu3DChange(UString oldValue, UString newValue) { this->rebuildRenderTargets(); }
+void Osu::onModFPoSu3DChange(const UString &oldValue, const UString &newValue) { this->rebuildRenderTargets(); }
 
-void Osu::onModFPoSu3DSpheresChange(UString oldValue, UString newValue) { this->rebuildRenderTargets(); }
+void Osu::onModFPoSu3DSpheresChange(const UString &oldValue, const UString &newValue) { this->rebuildRenderTargets(); }
 
-void Osu::onModFPoSu3DSpheresAAChange(UString oldValue, UString newValue) { this->rebuildRenderTargets(); }
+void Osu::onModFPoSu3DSpheresAAChange(const UString &oldValue, const UString &newValue) { this->rebuildRenderTargets(); }
 
-void Osu::onLetterboxingOffsetChange(UString oldValue, UString newValue) { this->updateMouseSettings(); }
+void Osu::onLetterboxingOffsetChange(const UString &oldValue, const UString &newValue) { this->updateMouseSettings(); }
 
 void Osu::onUserCardChange(UString new_username) {
     // NOTE: force update options textbox to avoid shutdown inconsistency

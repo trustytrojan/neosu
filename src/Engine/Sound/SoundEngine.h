@@ -52,7 +52,7 @@ class SoundEngine {
     bool init_bass_mixer(const OUTPUT_DEVICE& device);
 
     Sound::SOUNDHANDLE g_bassOutputMixer = 0;
-    void onFreqChanged(UString oldValue, UString newValue);
+    void onFreqChanged(const UString &oldValue, const UString &newValue);
 
    private:
     std::vector<OUTPUT_DEVICE> outputDevices;
@@ -67,4 +67,4 @@ class SoundEngine {
 DWORD ASIO_clamp(BASS_ASIO_INFO info, DWORD buflen);
 #endif
 
-void _RESTART_SOUND_ENGINE_ON_CHANGE(UString oldValue, UString newValue);
+void _RESTART_SOUND_ENGINE_ON_CHANGE(const UString &oldValue, const UString &newValue);

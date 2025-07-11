@@ -23,9 +23,9 @@ class VolumeOverlay : public OsuScreen {
     void volumeUp(int multiplier = 1) { this->onVolumeChange(multiplier); }
     void volumeDown(int multiplier = 1) { this->onVolumeChange(-multiplier); }
     void onVolumeChange(int multiplier);
-    void onMasterVolumeChange(UString oldValue, UString newValue);
+    void onMasterVolumeChange(const UString &oldValue, const UString &newValue);
     void onEffectVolumeChange();
-    void onMusicVolumeChange(UString oldValue, UString newValue);
+    void onMusicVolumeChange(const UString &oldValue, const UString &newValue);
 
     float fLastVolume;
     float fVolumeChangeTime;

@@ -7,46 +7,44 @@
 
 // NOLINTBEGIN(misc-definitions-in-headers)
 
-#if !defined(CONVAR_H) && (defined(_CLANGD) || defined(Q_CREATOR_RUN) || defined(__INTELLISENSE__) || defined(__CDT_PARSER__))
+#if !defined(CONVAR_H) && \
+    (defined(_CLANGD) || defined(Q_CREATOR_RUN) || defined(__INTELLISENSE__) || defined(__CDT_PARSER__))
 #define DEFINE_CONVARS
 #include "ConVar.h"
 #include "KeyboardKeys.h"
-
-void _borderless();
-void _center();
-void _dpiinfo();
-void _dumpcommands();
-void _echo();
-void _errortest();
-void _exec();
-void _exit();
-void _find();
-void _focus();
-void _fullscreen();
-void _fullscreen_windowed_borderless(UString, UString);
-void _help();
-void _listcommands();
-void _maximize();
-void _minimize();
-void _monitor(UString, UString);
-void _printsize();
-void _toggleresizable();
-void _restart();
-void _save();
-void _exit();
+extern void _borderless();
+extern void _center();
+extern void _dpiinfo();
+extern void _dumpcommands();
+extern void _echo();
+extern void _errortest();
+extern void _exec();
+extern void _find();
+extern void _focus();
+extern void _fullscreen();
+extern void _fullscreen_windowed_borderless(const UString&, const UString&);
+extern void _help();
+extern void _listcommands();
+extern void _maximize();
+extern void _minimize();
+extern void _monitor(const UString&, const UString&);
+extern void _printsize();
+extern void _toggleresizable();
+extern void _restart();
+extern void _save();
 
 #define OSU_VERSION_DATEONLY 0
 
-void spectate_by_username();
-void loudness_cb(UString, UString);
-void _osuOptionsSliderQualityWrapper(UString, UString);
+extern void spectate_by_username();
+extern void loudness_cb(const UString&, const UString&);
+extern void _osuOptionsSliderQualityWrapper(const UString&, const UString&);
 namespace RichPresence {
-void onRichPresenceChange(UString, UString);
+extern void onRichPresenceChange(const UString&, const UString&);
 }
-void _osu_songbrowser_search_hardcoded_filter(UString, UString);
-void _vsync(UString, UString);
-void _vprof(UString, UString);
-void _volume(UString, UString);
+extern void _osu_songbrowser_search_hardcoded_filter(const UString&, const UString&);
+extern void _vsync(const UString&, const UString&);
+extern void _vprof(const UString&, const UString&);
+extern void _volume(const UString&, const UString&);
 #endif
 
 // ########################################################################################################################

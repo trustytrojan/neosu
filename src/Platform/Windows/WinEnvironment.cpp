@@ -969,11 +969,11 @@ void WinEnvironment::enumerateMonitors() {
     EnumDisplayMonitors(NULL, NULL, WinEnvironment::monitorEnumProc, 0);
 }
 
-void WinEnvironment::onProcessPriorityChange(UString oldValue, UString newValue) {
+void WinEnvironment::onProcessPriorityChange(const UString &oldValue, const UString &newValue) {
     setProcessPriority(newValue.toInt());
 }
 
-void WinEnvironment::onDisableWindowsKeyChange(UString oldValue, UString newValue) {
+void WinEnvironment::onDisableWindowsKeyChange(const UString &oldValue, const UString &newValue) {
     if(newValue.toInt())
         disableWindowsKey();
     else

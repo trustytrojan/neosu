@@ -41,7 +41,7 @@ class VSControlBar : public CBaseUIElement {
    private:
     void onRepeatCheckboxChanged(CBaseUICheckbox *box);
     void onShuffleCheckboxChanged(CBaseUICheckbox *box);
-    void onVolumeChanged(UString oldValue, UString newValue);
+    void onVolumeChanged(const UString &oldValue, const UString &newValue);
 
     CBaseUIContainer *container;
 

@@ -3014,7 +3014,7 @@ void OptionsMenu::onNightcoreToggle(CBaseUICheckbox *checkbox) {
     osu->updateMods();
 }
 
-void OptionsMenu::onUseSkinsSoundSamplesChange(UString oldValue, UString newValue) { osu->reloadSkin(); }
+void OptionsMenu::onUseSkinsSoundSamplesChange(const UString &oldValue, const UString &newValue) { osu->reloadSkin(); }
 
 void OptionsMenu::onHighQualitySlidersCheckboxChange(CBaseUICheckbox *checkbox) {
     this->onCheckboxChange(checkbox);
@@ -3023,7 +3023,7 @@ void OptionsMenu::onHighQualitySlidersCheckboxChange(CBaseUICheckbox *checkbox) 
     if(checkbox->isChecked()) this->sliderQualitySlider->setValue(1.0f, false);
 }
 
-void OptionsMenu::onHighQualitySlidersConVarChange(UString oldValue, UString newValue) {
+void OptionsMenu::onHighQualitySlidersConVarChange(const UString &oldValue, const UString &newValue) {
     const bool enabled = newValue.toFloat() > 0;
     for(int i = 0; i < this->elements.size(); i++) {
         bool contains = false;

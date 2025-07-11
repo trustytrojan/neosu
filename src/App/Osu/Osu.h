@@ -166,7 +166,7 @@ class Osu : public App, public MouseListener {
 
     static Vector2 g_vInternalResolution;
 
-    void updateModsForConVarTemplate(UString oldValue, UString newValue) {
+    void updateModsForConVarTemplate(const UString &oldValue, const UString &newValue) {
         (void)oldValue;
         (void)newValue;
         this->updateMods();
@@ -179,35 +179,35 @@ class Osu : public App, public MouseListener {
     // callbacks
     void onWindowedResolutionChanged(UString oldValue, UString args);
     void onInternalResolutionChanged(UString oldValue, UString args);
-    void onSensitivityChange(UString oldValue, UString newValue);
-    void onRawInputChange(UString oldValue, UString newValue);
+    void onSensitivityChange(const UString &oldValue, const UString &newValue);
+    void onRawInputChange(const UString &oldValue, const UString &newValue);
 
     void onSkinReload();
-    void onSkinChange(UString oldValue, UString newValue);
-    void onAnimationSpeedChange(UString oldValue, UString newValue);
+    void onSkinChange(const UString &oldValue, const UString &newValue);
+    void onAnimationSpeedChange(const UString &oldValue, const UString &newValue);
     void updateAnimationSpeed();
 
-    void onSpeedChange(UString oldValue, UString newValue);
-    void onDTPresetChange(UString oldValue, UString newValue);
-    void onHTPresetChange(UString oldValue, UString newValue);
-    void onThumbnailsToggle(UString oldValue, UString newValue);
+    void onSpeedChange(const UString &oldValue, const UString &newValue);
+    void onDTPresetChange(const UString &oldValue, const UString &newValue);
+    void onHTPresetChange(const UString &oldValue, const UString &newValue);
+    void onThumbnailsToggle(const UString &oldValue, const UString &newValue);
 
-    void onPlayfieldChange(UString oldValue, UString newValue);
+    void onPlayfieldChange(const UString &oldValue, const UString &newValue);
 
-    void onUIScaleChange(UString oldValue, UString newValue);
-    void onUIScaleToDPIChange(UString oldValue, UString newValue);
-    void onLetterboxingChange(UString oldValue, UString newValue);
+    void onUIScaleChange(const UString &oldValue, const UString &newValue);
+    void onUIScaleToDPIChange(const UString &oldValue, const UString &newValue);
+    void onLetterboxingChange(const UString &oldValue, const UString &newValue);
 
     void onKey1Change(bool pressed, bool mouse);
     void onKey2Change(bool pressed, bool mouse);
 
-    void onModMafhamChange(UString oldValue, UString newValue);
-    void onModFPoSuChange(UString oldValue, UString newValue);
-    void onModFPoSu3DChange(UString oldValue, UString newValue);
-    void onModFPoSu3DSpheresChange(UString oldValue, UString newValue);
-    void onModFPoSu3DSpheresAAChange(UString oldValue, UString newValue);
+    void onModMafhamChange(const UString &oldValue, const UString &newValue);
+    void onModFPoSuChange(const UString &oldValue, const UString &newValue);
+    void onModFPoSu3DChange(const UString &oldValue, const UString &newValue);
+    void onModFPoSu3DSpheresChange(const UString &oldValue, const UString &newValue);
+    void onModFPoSu3DSpheresAAChange(const UString &oldValue, const UString &newValue);
 
-    void onLetterboxingOffsetChange(UString oldValue, UString newValue);
+    void onLetterboxingOffsetChange(const UString &oldValue, const UString &newValue);
 
     void onUserCardChange(UString new_username);
 

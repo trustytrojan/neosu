@@ -45,9 +45,9 @@ class ModFPoSu {
     void makePlayfield();
     void makeBackgroundCube();
 
-    void onCurvedChange(UString oldValue, UString newValue);
-    void onDistanceChange(UString oldValue, UString newValue);
-    void onNoclipChange(UString oldValue, UString newValue);
+    void onCurvedChange(const UString &oldValue, const UString &newValue);
+    void onDistanceChange(const UString &oldValue, const UString &newValue);
+    void onNoclipChange(const UString &oldValue, const UString &newValue);
 
    private:
     struct VertexPair {

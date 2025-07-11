@@ -108,8 +108,8 @@ class WinEnvironment : public Environment {
     void path_strip_filename(TCHAR *Path);
     void handleShowMessageFullscreen();
     void enumerateMonitors();
-    void onProcessPriorityChange(UString oldValue, UString newValue);
-    void onDisableWindowsKeyChange(UString oldValue, UString newValue);
+    void onProcessPriorityChange(const UString &oldValue, const UString &newValue);
+    void onDisableWindowsKeyChange(const UString &oldValue, const UString &newValue);
 
     HWND hwnd;
     HINSTANCE hInstance;

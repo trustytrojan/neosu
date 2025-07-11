@@ -650,11 +650,11 @@ void ModFPoSu::makeBackgroundCube() {
     this->vaoCube->addTexcoord(0.0f, 1.0f);
 }
 
-void ModFPoSu::onCurvedChange(UString oldValue, UString newValue) { this->makePlayfield(); }
+void ModFPoSu::onCurvedChange(const UString &oldValue, const UString &newValue) { this->makePlayfield(); }
 
-void ModFPoSu::onDistanceChange(UString oldValue, UString newValue) { this->makePlayfield(); }
+void ModFPoSu::onDistanceChange(const UString &oldValue, const UString &newValue) { this->makePlayfield(); }
 
-void ModFPoSu::onNoclipChange(UString oldValue, UString newValue) {
+void ModFPoSu::onNoclipChange(const UString &oldValue, const UString &newValue) {
     if(cv_fposu_noclip.getBool())
         this->camera->setPos(this->vPrevNoclipCameraPos);
     else {

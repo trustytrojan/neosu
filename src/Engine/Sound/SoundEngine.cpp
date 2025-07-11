@@ -655,7 +655,7 @@ void SoundEngine::setVolume(float volume) {
     }
 }
 
-void SoundEngine::onFreqChanged(UString oldValue, UString newValue) {
+void SoundEngine::onFreqChanged(const UString &oldValue, const UString &newValue) {
     (void)oldValue;
     (void)newValue;
     if(!this->isReady()) return;
