@@ -109,7 +109,7 @@ ConVar::ConVar(const UString &name) {
 void ConVar::exec() {
     if(!this->isUnlocked()) return;
 
-    if(osu != NULL) {
+    if(osu != nullptr) {
         auto is_vanilla = convar->isVanilla();
 
         auto beatmap = osu->getSelectedBeatmap();
@@ -117,12 +117,9 @@ void ConVar::exec() {
             beatmap->vanilla &= is_vanilla;
         }
 
-        Bancho *banchoPtr = bancho;
-        if(banchoPtr) {
-            auto mod_selector = osu->modSelector;
-            if(mod_selector && mod_selector->nonVanillaWarning) {
-                mod_selector->nonVanillaWarning->setVisible(!is_vanilla && banchoPtr->submit_scores());
-            }
+        auto mod_selector = osu->modSelector;
+        if(mod_selector && mod_selector->nonVanillaWarning) {
+            mod_selector->nonVanillaWarning->setVisible(!is_vanilla && bancho->submit_scores());
         }
     }
 
@@ -169,23 +166,18 @@ void ConVar::setDefaultFloatInt(float defaultValue) {
 
 bool ConVar::isUnlocked() const {
     if(this->isFlagSet(FCVAR_PRIVATE)) return true;
-    Bancho *banchoPtr = bancho;
-    if(banchoPtr) {
-        if(!banchoPtr->is_online()) return true;
+    if(!bancho || !bancho->is_online()) return true;
 
-        if(banchoPtr->is_in_a_multi_room()) {
-            return this->isFlagSet(FCVAR_BANCHO_COMPATIBLE);
-        } else {
-            return true;
-        }
+    if(bancho->is_in_a_multi_room()) {
+        return this->isFlagSet(FCVAR_BANCHO_COMPATIBLE);
+    } else {
+        return true;
     }
-    return true;
 }
 
 bool ConVar::gameplayCompatCheck() const {
     if(osu && this->isFlagSet(FCVAR_GAMEPLAY)) {
-        Bancho *banchoPtr = bancho;
-        if(banchoPtr && banchoPtr->is_playing_a_multi_map()) {
+        if(bancho->is_playing_a_multi_map()) {
             debugLog("Can't edit %s while in a multiplayer match.\n", this->sName);
             return false;
         } else {
