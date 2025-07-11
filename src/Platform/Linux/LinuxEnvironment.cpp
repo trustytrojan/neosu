@@ -782,23 +782,28 @@ void LinuxEnvironment::handleSelectionRequest(XSelectionRequestEvent &evt) {
     reply.time = evt.time;
 
     char *data = nullptr;
-    int property_format = 0, data_nitems = 0;
+    int property_format = 0;
+    size_t data_size = 0, data_nitems = 0;
+
     if(evt.selection == XA_PRIMARY || evt.selection == this->atom_CLIPBOARD) {
         if(evt.target == XA_STRING) {
             // format data according to system locale
             data = strdup((const char *)this->sLocalClipboardContent.toUtf8());
             data_nitems = strlen(data);
+            data_size = data_nitems;
             property_format = 8;  // bits/item
         } else if(evt.target == this->atom_UTF8_STRING) {
             // translate to utf8
             data = strdup((const char *)this->sLocalClipboardContent.toUtf8());
             data_nitems = strlen(data);
+            data_size = data_nitems;
             property_format = 8;  // bits/item
         } else if(evt.target == this->atom_TARGETS) {
             // another application wants to know what we are able to send
             data_nitems = 2;
-            property_format = 32;  // atoms are 32-bit
-            data = (char *)malloc(data_nitems * 4);
+            property_format = 32;                    // atoms are 32-bit values, but may be stored in larger types
+            data_size = data_nitems * sizeof(Atom);  // allocate based on actual Atom size
+            data = (char *)malloc(data_size);
             ((Atom *)data)[0] = this->atom_UTF8_STRING;
             ((Atom *)data)[1] = XA_STRING;
         }
@@ -809,9 +814,9 @@ void LinuxEnvironment::handleSelectionRequest(XSelectionRequestEvent &evt) {
         const size_t MAX_REASONABLE_SELECTION_SIZE = 1000000;
 
         // for very big chunks of data, we should use the "INCR" protocol, which is a pain in the asshole
-        if(evt.property != None && strlen(data) < MAX_REASONABLE_SELECTION_SIZE) {
+        if(evt.property != None && data_size < MAX_REASONABLE_SELECTION_SIZE) {
             XChangeProperty(evt.display, evt.requestor, evt.property, evt.target, property_format /* 8 or 32 */,
-                            PropModeReplace, (const unsigned char *)data, data_nitems);
+                            PropModeReplace, (const unsigned char *)data, static_cast<int>(data_nitems));
             reply.property = evt.property;  // " == success"
         }
         free(data);
@@ -853,7 +858,7 @@ UString LinuxEnvironment::getClipboardTextInt() {
 #include <filesystem>
 #include <utility>
 
-std::string fix_filename_casing(const std::string& directory, std::string filename) {
+std::string fix_filename_casing(const std::string &directory, std::string filename) {
 #ifdef _WIN32
     return filename;
 #else
