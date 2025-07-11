@@ -251,7 +251,7 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-windows-binary.source: $(DEPS_CACHE)/curl-$(C
 	$(MKDIR_P) windowsi686/include && $(UNZIP) -qo curl-windowsi686.zip "*/include/*" -d windowsi686/include && mv windowsi686/include/*/*/* windowsi686/include/ && \
 	$(MKDIR_P) windowsx86_64/bin && $(UNZIP) -qjo curl-windowsx86_64.zip "*/bin/*.dll" -d windowsx86_64/bin && \
 	$(MKDIR_P) windowsx86_64/lib && $(UNZIP) -qjo curl-windowsx86_64.zip "*/lib/*.a" -d windowsx86_64/lib && \
-	$(MKDIR_P) windowsx86_64/include && $(UNZIP) -qo curl-windowsx86_64.zip "*/include/*" -d windowsx86_64/include && mv windowsx86_64/include/*/*/* windowsx86_64/include/
+	$(MKDIR_P) windowsx86_64/include && $(UNZIP) -qo curl-windowsx86_64.zip "*/include/*" -d windowsx86_64/include && mv windowsx86_64/include/*/*/* windowsx86_64/include/ && \
 	rm -rf windows*/lib/libz.a && \
 	touch $@
 
