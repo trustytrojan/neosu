@@ -38,6 +38,7 @@ typedef uint64_t QWORD;
 #include "Timing.h"
 #include "WinEnvironment.h"
 #include "WinGLLegacyInterface.h"
+#include "FPSLimiter.h"
 
 #define WINDOW_TITLE L"neosu"
 #define WM_NEOSU_PROTOCOL (WM_USER + 1)
@@ -468,10 +469,6 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> & /*
     }
 
     // create timers
-    Timer *frameTimer = new Timer();
-    frameTimer->start();
-    frameTimer->update();
-
     Timer *deltaTimer = new Timer();
     deltaTimer->start();
     deltaTimer->update();
@@ -497,7 +494,6 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> & /*
 
     DragAcceptFiles(hwnd, TRUE);
 
-    frameTimer->update();
     deltaTimer->update();
 
     // main loop
@@ -603,43 +599,17 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> & /*
         {
             VPROF_BUDGET("FPSLimiter", VPROF_BUDGETGROUP_SLEEP);
 
-            frameTimer->update();
-
-            if((!cv_fps_unlimited.getBool() && cv_fps_max.getInt() > 0) || inBackground) {
-                double delayStart = frameTimer->getElapsedTime();
-                double delayTime;
-                if(inBackground)
-                    delayTime = (1.0 / (double)cv_fps_max_background.getFloat()) - frameTimer->getDelta();
-                else
-                    delayTime = (1.0 / (double)cv_fps_max.getFloat()) - frameTimer->getDelta();
-
-                const bool didSleep = delayTime > 0.0;
-                while(delayTime > 0.0) {
-                    if(inBackground)  // real waiting (very inaccurate, but very good for little background cpu
-                                      // utilization)
-                        Timing::sleepMS((1.f / cv_fps_max_background.getFloat()) * 1000.0f);
-                    else  // more or less "busy" waiting, but giving away the rest of the timeslice at least
-                        Timing::sleep(0);
-
-                    // decrease the delayTime by the time we spent in this loop
-                    // if the loop is executed more than once, note how delayStart now gets the value of the previous
-                    // iteration from getElapsedTime() this works because the elapsed time is only updated in update().
-                    // now we can easily calculate the time the Sleep() took and subtract it from the delayTime
-                    delayStart = frameTimer->getElapsedTime();
-                    frameTimer->update();
-                    delayTime -= (frameTimer->getElapsedTime() - delayStart);
-                }
-
-                if(!didSleep && cv_fps_max_yield.getBool()) Timing::sleep(0);  // yes, there is a zero in there
-            } else if(cv_fps_unlimited_yield.getBool())
-                Timing::sleep(0);  // yes, there is a zero in there
+            // delay the next frame
+            const int target_fps =
+                inBackground ? cv_fps_max_background.getInt()
+                             : (cv_fps_unlimited.getBool() || cv_fps_max.getInt() <= 0 ? 0 : cv_fps_max.getInt());
+            FPSLimiter::limit_frames(target_fps);
         }
     }
 
     CoUninitialize();
 
     // release the timers
-    SAFE_DELETE(frameTimer);
     SAFE_DELETE(deltaTimer);
 
     const bool isRestartScheduled = baseEnv->isRestartScheduled();

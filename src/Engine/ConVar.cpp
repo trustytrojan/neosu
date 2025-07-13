@@ -284,7 +284,7 @@ ConVarString ConVarHandler::flagsToString(uint8_t flags) {
 }
 
 bool ConVarHandler::isVanilla() {
-    for(auto cv : _getGlobalConVarArray()) {
+    for(const auto &cv : _getGlobalConVarArray()) {
         if(cv->isFlagSet(FCVAR_BANCHO_SUBMITTABLE)) continue;
         if(cv->getString() != cv->getDefaultString()) {
             return false;

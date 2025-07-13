@@ -12,7 +12,7 @@
 #include "XI2Handler.h"
 #include "Profiler.h"
 #include "Timing.h"
-#include "cbase.h"
+#include "FPSLimiter.h"
 
 #define XLIB_ILLEGAL_ACCESS
 #include <X11/X.h>
@@ -38,7 +38,7 @@
 //********************//
 
 LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> & /*argCmdline*/,
-                             const std::unordered_map<UString, std::optional<UString>> & /*argMap*/) {
+                     const std::unordered_map<UString, std::optional<UString>> & /*argMap*/) {
     this->dpy = XOpenDisplay(nullptr);
     if(this->dpy == nullptr) {
         printf("FATAL ERROR: XOpenDisplay() can't connect to X server!\n\n");
@@ -92,8 +92,8 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> & /*argC
 
     Screen *defaultScreen = DefaultScreenOfDisplay(this->dpy);
     this->clientWindow = XCreateWindow(this->dpy, this->rootWindow, defaultScreen->width / 2 - WINDOW_WIDTH / 2,
-                        defaultScreen->height / 2 - WINDOW_HEIGHT / 2, WINDOW_WIDTH, WINDOW_HEIGHT, 0, vi->depth,
-                        InputOutput, vi->visual, CWColormap | CWEventMask, &this->swa);
+                                       defaultScreen->height / 2 - WINDOW_HEIGHT / 2, WINDOW_WIDTH, WINDOW_HEIGHT, 0,
+                                       vi->depth, InputOutput, vi->visual, CWColormap | CWEventMask, &this->swa);
 
     XFree(vi);
 
@@ -116,7 +116,8 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> & /*argC
     // hint that compositing should be disabled (disable forced vsync)
     constexpr const unsigned char shouldBypassCompositor = 1;
     Atom _net_wm_bypass_compositor = XInternAtom(this->dpy, "_NET_WM_BYPASS_COMPOSITOR", false);
-    XChangeProperty(this->dpy, this->clientWindow, _net_wm_bypass_compositor, XA_CARDINAL, 32, PropModeReplace, &shouldBypassCompositor, 1);
+    XChangeProperty(this->dpy, this->clientWindow, _net_wm_bypass_compositor, XA_CARDINAL, 32, PropModeReplace,
+                    &shouldBypassCompositor, 1);
 
     // make window visible & set title
     XMapWindow(this->dpy, this->clientWindow);
@@ -124,7 +125,8 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> & /*argC
 
     // after the window is visible, center it again (if the window manager ignored the position of the window in
     // XCreateWindow(), because fuck you)
-    XMoveWindow(this->dpy, this->clientWindow, defaultScreen->width / 2 - WINDOW_WIDTH / 2, defaultScreen->height / 2 - WINDOW_HEIGHT / 2);
+    XMoveWindow(this->dpy, this->clientWindow, defaultScreen->width / 2 - WINDOW_WIDTH / 2,
+                defaultScreen->height / 2 - WINDOW_HEIGHT / 2);
 
     // get input method
     this->im = XOpenIM(this->dpy, nullptr, nullptr, nullptr);
@@ -134,7 +136,8 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> & /*argC
     }
 
     // get input context
-    this->ic = XCreateIC(this->im, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow, this->clientWindow, NULL);
+    this->ic = XCreateIC(this->im, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow,
+                         this->clientWindow, NULL);
     if(this->ic == nullptr) {
         printf("FATAL ERROR: XCreateIC() couldn't create input context!\n\n");
         return;
@@ -154,10 +157,6 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> & /*argC
     XSync(this->dpy, False);
 
     // create timers
-    auto *frameTimer = new Timer();
-    frameTimer->start();
-    frameTimer->update();
-
     auto *deltaTimer = new Timer();
     deltaTimer->start();
     deltaTimer->update();
@@ -167,7 +166,6 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> & /*argC
     engine = new Engine(argc, argv);
     engine->loadApp();
 
-    frameTimer->update();
     deltaTimer->update();
 
     // main loop
@@ -198,30 +196,14 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> & /*argC
         }
 
         // delay the next frame
-        frameTimer->update();
-        const bool inBackground = /*g_bMinimized ||*/ !this->bHasFocus;
-        if((!cv_fps_unlimited.getBool() && cv_fps_max.getInt() > 0) || inBackground) {
-            double delayStart = frameTimer->getElapsedTime();
-            double delayTime = 0;
-            if(inBackground)
-                delayTime = (1.f / cv_fps_max_background.getFloat()) - frameTimer->getDelta();
-            else
-                delayTime = (1.f / cv_fps_max.getFloat()) - frameTimer->getDelta();
+        {
+            VPROF_BUDGET("FPSLimiter", VPROF_BUDGETGROUP_SLEEP);
 
-            while(delayTime > 0.0) {
-                if(inBackground)  // real waiting (very inaccurate, but very good for little background cpu utilization)
-                    Timing::sleepMS((1.f / cv_fps_max_background.getFloat()) * 1000.0f);
-                else  // more or less "busy" waiting, but giving away the rest of the timeslice at least
-                    Timing::sleep(0);
-
-                // decrease the delayTime by the time we spent in this loop
-                // if the loop is executed more than once, note how delayStart now gets the value of the previous
-                // iteration from getElapsedTime() this works because the elapsed time is only updated in update(). now
-                // we can easily calculate the time the Sleep() took and subtract it from the delayTime
-                delayStart = frameTimer->getElapsedTime();
-                frameTimer->update();
-                delayTime -= (frameTimer->getElapsedTime() - delayStart);
-            }
+            // delay the next frame
+            const int target_fps =
+                !this->bHasFocus ? cv_fps_max_background.getInt()
+                                 : (cv_fps_unlimited.getBool() || cv_fps_max.getInt() <= 0 ? 0 : cv_fps_max.getInt());
+            FPSLimiter::limit_frames(target_fps);
         }
     }
 
@@ -230,6 +212,9 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> & /*argC
 
     // clean up environment
     SAFE_DELETE(baseEnv);
+
+    // release timer
+    SAFE_DELETE(deltaTimer);
 
     // destroy the window
     XDestroyWindow(this->dpy, this->clientWindow);
@@ -303,7 +288,8 @@ void LinuxMain::WndProc() {
             std::array<char, buffSize> buf{};
             Status status = 0;
             KeySym keysym = 0;
-            int length = Xutf8LookupString(this->ic, (XKeyPressedEvent *)&this->xev.xkey, buf.data(), buffSize, &keysym, &status);
+            int length = Xutf8LookupString(this->ic, (XKeyPressedEvent *)&this->xev.xkey, buf.data(), buffSize, &keysym,
+                                           &status);
 
             if(length > 0) {
                 buf[buffSize - 1] = 0;

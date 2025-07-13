@@ -97,6 +97,7 @@ neosu_SOURCES = \
 	src/Engine/DiscordInterface.cpp \
 	src/Engine/Engine.cpp \
 	src/Engine/Environment.cpp \
+	src/Engine/FPSLimiter.cpp \
 	src/Engine/File.cpp \
 	src/Engine/Font.cpp \
 	src/Engine/Graphics.cpp \
