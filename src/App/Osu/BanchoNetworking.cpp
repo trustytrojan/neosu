@@ -491,26 +491,26 @@ void receive_bancho_packets() {
         free(incoming.memory);
     }
 
-    // Request new user presences every second
+    // Request presence/stats every second
+    // XXX: Rather than every second, this should be done every time we're calling send_bancho_packet
+    //      But that function is on the networking thread, so requires extra brain power to do correctly
     static f64 last_presence_request = engine->getTime();
     if(engine->getTime() > last_presence_request + 1.f) {
-        request_presence_batch();
         last_presence_request = engine->getTime();
-    }
 
-    // Request user stats every 5 seconds
-    static f64 last_stats_request = engine->getTime();
-    if(engine->getTime() > last_stats_request + 5.f && !stats_requests.empty()) {
-        Packet packet;
-        packet.id = USER_STATS_REQUEST;
-        write<u16>(&packet, stats_requests.size());
-        for(auto user_id : stats_requests) {
-            write<u32>(&packet, user_id);
+        request_presence_batch();
+
+        if(!stats_requests.empty()) {
+            Packet packet;
+            packet.id = USER_STATS_REQUEST;
+            write<u16>(&packet, stats_requests.size());
+            for(auto user_id : stats_requests) {
+                write<u32>(&packet, user_id);
+            }
+            send_packet(packet);
+
+            stats_requests.clear();
         }
-        send_packet(packet);
-
-        stats_requests.clear();
-        last_stats_request = engine->getTime();
     }
 }
 

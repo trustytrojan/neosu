@@ -336,9 +336,10 @@ void Chat::mouse_update(bool *propagate_clicks) {
         UserCard2 *card = (UserCard2 *)elm;
         if(card->info->irc_user) continue;
 
+        bool is_outdated = card->info->stats_tms + 5000 < Timing::getTicksMS();
         bool is_above_bottom = card->getPos().y <= this->user_list->getPos().y + this->user_list->getSize().y;
         bool is_below_top = card->getPos().y + card->getSize().y >= this->user_list->getPos().y;
-        if(is_above_bottom && is_below_top) {
+        if(is_outdated && is_above_bottom && is_below_top) {
             if(std::find(stats_requests.begin(), stats_requests.end(), card->info->user_id) == stats_requests.end()) {
                 stats_requests.push_back(card->info->user_id);
             }
@@ -357,7 +358,7 @@ void Chat::mouse_update(bool *propagate_clicks) {
     this->input_box->focus(false);
 }
 
-void Chat::handle_command(const UString& msg) {
+void Chat::handle_command(const UString &msg) {
     if(msg == UString("/clear")) {
         this->selected_channel->messages.clear();
         this->updateLayout(osu->getScreenSize());
@@ -741,7 +742,7 @@ void Chat::switchToChannel(ChatChannel *chan) {
     this->updateButtonLayout(this->getSize());
 }
 
-void Chat::addChannel(const UString& channel_name, bool switch_to) {
+void Chat::addChannel(const UString &channel_name, bool switch_to) {
     for(auto chan : this->channels) {
         if(chan->name == channel_name) {
             if(switch_to) {
@@ -769,7 +770,7 @@ void Chat::addChannel(const UString& channel_name, bool switch_to) {
     }
 }
 
-void Chat::addMessage(UString channel_name, const ChatMessage& msg, bool mark_unread) {
+void Chat::addMessage(UString channel_name, const ChatMessage &msg, bool mark_unread) {
     bool is_pm = msg.author_id > 0 && channel_name[0] != '#' && msg.author_name != bancho->username;
     if(is_pm) {
         // If it's a PM, the channel title should be the one who sent the message
@@ -826,7 +827,7 @@ void Chat::addSystemMessage(UString msg) {
                                                    });
 }
 
-void Chat::removeChannel(const UString& channel_name) {
+void Chat::removeChannel(const UString &channel_name) {
     ChatChannel *chan = NULL;
     for(auto c : this->channels) {
         if(c->name == channel_name) {
@@ -967,7 +968,6 @@ void Chat::updateUserList() {
     f32 total_y = INITIAL_MARGIN;
 
     // XXX: Optimize so fps doesn't halve when F9 is open
-    // XXX: Fix scrollview 'jitter' on updateUserList()
 
     std::vector<UserInfo *> sorted_users;
     for(auto pair : online_users) {
@@ -1001,14 +1001,15 @@ void Chat::updateUserList() {
         return false;
     });
 
-    this->user_list->clear();
+    // Intentionally not calling this->user_list->clear(), because that would affect scroll position/animation
+    this->user_list->getContainer()->clear();
+
     for(auto user : sorted_users) {
         if(total_x + card_size.x + MARGIN > size.x) {
             total_x = INITIAL_MARGIN;
             total_y += card_size.y + MARGIN;
         }
 
-        //bool dummy = false;
         auto card = new UserCard2(user->user_id);
         card->setSize(card_size);
         card->setPos(total_x, total_y);
@@ -1053,7 +1054,7 @@ void Chat::leave(const UString &channel_name) {
     soundEngine->play(osu->getSkin()->closeChatTab);
 }
 
-void Chat::send_message(const UString& msg) {
+void Chat::send_message(const UString &msg) {
     Packet packet;
     packet.id = this->selected_channel->name[0] == '#' ? SEND_PUBLIC_MESSAGE : SEND_PRIVATE_MESSAGE;
     write_string(&packet, (char *)bancho->username.toUtf8());

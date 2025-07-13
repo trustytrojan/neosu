@@ -27,26 +27,26 @@ Changelog::Changelog() : ScreenBackable() {
     std::vector<CHANGELOG> changelogs;
 
     CHANGELOG v38_00;
-    v38_00.title = PACKAGE_VERSION " (2025-06-17)";
-    v38_00.changes.emplace_back("- Added user list interface (F9, aka. \"Extended Chat Console\")");
-    v38_00.changes.emplace_back("- Added support for older osu!.db versions (~2014)");
-    v38_00.changes.emplace_back("- Fixed beatmap downloads sometimes not getting saved correctly");
-    v38_00.changes.emplace_back("- Fixed LOGOUT packet triggering errors on some servers");
-    v38_00.changes.emplace_back("- Greatly optimized skin dropdown list performance, for users with many skins");
-    v38_00.changes.emplace_back("- Improved clarity of beatmap background thumbnails (enabled mipmapping to reduce aliasing)");
-    v38_00.changes.emplace_back("- Added CJK/Unicode font support (skin dropdowns, chat, other text)");
-    v38_00.changes.emplace_back("  - Missing font fallback list is currently hardcoded, will be expanded and improved in the future");
-    v38_00.changes.emplace_back("- Added support for raw input/sensitivity on Linux");
-    v38_00.changes.emplace_back("- Added option to disable cursor confinement during gameplay - \"Confine Cursor (NEVER)\"");
-    v38_00.changes.emplace_back("- Allowed left/right CTRL/ALT/SHIFT keys to be mapped independently");
-    v38_00.changes.emplace_back("- Fixed letterboxed mode cutting off GUI/HUD elements strangely");
-    v38_00.changes.emplace_back("- Fixed crashing on partially corrupt scores databases");
-    v38_00.changes.emplace_back("- Fixed rate change slider having a much smaller range than it should");
-    v38_00.changes.emplace_back("- Fixed leaderboard scores showing the wrong AR/OD for non-HT/DT rate-changed plays");
-
-    // TODO: Fix F9 screen bugs
-    // TODO: Check for performance regressions
-    // Spectating is not included in this release (feature cvar: cv_enable_spectating)
+    v38_00.title = "38.00 (2025-07-13)";
+    v38_00.changes = {
+        "- Added user list interface (F9, aka. \"Extended Chat Console\")",
+        "- Added support for older osu!.db versions (~2014)",
+        "- Fixed beatmap downloads sometimes not getting saved correctly",
+        "- Fixed LOGOUT packet triggering errors on some servers",
+        "- Greatly optimized skin dropdown list performance, for users with many skins",
+        "- Improved clarity of beatmap background thumbnails (enabled mipmapping to reduce aliasing)",
+        "- Added CJK/Unicode font support (skin dropdowns, chat, other text)",
+        "  - Missing font fallback list is currently hardcoded, will be expanded and improved in the future",
+        "- Added support for raw input/sensitivity on Linux",
+        "- Added option to disable cursor confinement during gameplay - \"Confine Cursor (NEVER)\"",
+        "- Allowed left/right CTRL/ALT/SHIFT keys to be mapped independently",
+        "- Fixed letterboxed mode cutting off GUI/HUD elements strangely",
+        "- Fixed crashing on partially corrupt scores databases",
+        "- Fixed rate change slider having a much smaller range than it should",
+        "- Fixed leaderboard scores showing the wrong AR/OD for non-HT/DT rate-changed plays",
+        // TODO: Check for performance regressions
+        // Spectating is not included in this release (feature cvar: cv_enable_spectating)
+    };
     changelogs.push_back(v38_00);
 
     CHANGELOG v37_03;
@@ -163,7 +163,8 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG v35_08;
     v35_08.title = "35.08 (2024-06-28)";
     v35_08.changes.emplace_back("- Added ability to import .osk and .osz files (drop them onto the neosu window)");
-    v35_08.changes.emplace_back("- Added persistent map database (downloaded or imported maps stay after restarting the game)");
+    v35_08.changes.emplace_back(
+        "- Added persistent map database (downloaded or imported maps stay after restarting the game)");
     v35_08.changes.emplace_back("- Added skin folder");
     v35_08.changes.emplace_back("- Now publishing 32-bit releases (for PCs running Windows 7)");
     v35_08.changes.emplace_back("- Fixed songs failing to restart");
@@ -213,7 +214,8 @@ Changelog::Changelog() : ScreenBackable() {
     v35_04.changes.emplace_back("- Fixed sliderslide and spinnerspin sounds not looping");
     v35_04.changes.emplace_back("- Improved sound engine reliability");
     v35_04.changes.emplace_back("- Re-added strain graphs");
-    v35_04.changes.emplace_back("- Removed sliderhead fadeout animation (set osu_slider_sliderhead_fadeout to 1 for old behavior)");
+    v35_04.changes.emplace_back(
+        "- Removed sliderhead fadeout animation (set osu_slider_sliderhead_fadeout to 1 for old behavior)");
     changelogs.push_back(v35_04);
 
     CHANGELOG v35_03;
@@ -226,7 +228,8 @@ Changelog::Changelog() : ScreenBackable() {
     v35_03.changes.emplace_back("- Fixed restarting map while watching a replay");
     v35_03.changes.emplace_back("- Improved sound engine reliability");
     v35_03.changes.emplace_back("- Re-added win_snd_wasapi_exclusive convar");
-    v35_03.changes.emplace_back("- User mods will no longer change when watching a replay or joining a multiplayer room");
+    v35_03.changes.emplace_back(
+        "- User mods will no longer change when watching a replay or joining a multiplayer room");
     changelogs.push_back(v35_03);
 
     CHANGELOG v35_02;
@@ -238,7 +241,8 @@ Changelog::Changelog() : ScreenBackable() {
     v35_01.title = "35.01 (2024-06-08)";
     v35_01.changes.emplace_back("- Added ability to get spectated");
     v35_01.changes.emplace_back("- Added use_https convar (to support plain HTTP servers)");
-    v35_01.changes.emplace_back("- Added restart_sound_engine_before_playing convar (\"fixes\" sound engine lagging after a while)");
+    v35_01.changes.emplace_back(
+        "- Added restart_sound_engine_before_playing convar (\"fixes\" sound engine lagging after a while)");
     v35_01.changes.emplace_back("- Fixed chat channels being unread after joining");
     v35_01.changes.emplace_back("- Fixed flashlight mod");
     v35_01.changes.emplace_back("- Fixed FPoSu mode");
@@ -307,7 +311,8 @@ Changelog::Changelog() : ScreenBackable() {
     v34_08.changes.emplace_back("- Added animations for the in-game scoreboard");
     v34_08.changes.emplace_back("- Added option to always pick Nightcore mod first");
     v34_08.changes.emplace_back("- Added osu_animation_speed_override cheat convar (code by Givikap120)");
-    v34_08.changes.emplace_back("- Added flashlight_always_hard convar to lock flashlight radius to the 200+ combo size");
+    v34_08.changes.emplace_back(
+        "- Added flashlight_always_hard convar to lock flashlight radius to the 200+ combo size");
     v34_08.changes.emplace_back("- Allowed scores to submit when using mirror mods");
     v34_08.changes.emplace_back("- Now playing a random song on game launch");
     v34_08.changes.emplace_back("- Small UI improvements");
@@ -330,7 +335,8 @@ Changelog::Changelog() : ScreenBackable() {
     v34_05.changes.emplace_back("- Added support for ASIO output");
     v34_05.changes.emplace_back("- Disabled ability to fail when using Relax (online)");
     v34_05.changes.emplace_back("- Enabled non-vanilla mods (disables score submission)");
-    v34_05.changes.emplace_back("- Fixed speed modifications not getting applied to song previews when switching songs");
+    v34_05.changes.emplace_back(
+        "- Fixed speed modifications not getting applied to song previews when switching songs");
     v34_05.changes.emplace_back("- Improved Nightcore/Daycore audio quality");
     v34_05.changes.emplace_back("- Improved behavior of speed modifier mod selection");
     v34_05.changes.emplace_back("- Improved WASAPI output latency");
@@ -370,7 +376,8 @@ Changelog::Changelog() : ScreenBackable() {
     v34_01.changes.emplace_back("- Added ability to close chat channels with /close");
     v34_01.changes.emplace_back("- Added \"Force Start\" button to avoid host accidentally starting the match");
     v34_01.changes.emplace_back("- Disabled force start when there are only two players in the room");
-    v34_01.changes.emplace_back("- Made tab button switch between endpoint, username and password fields in options menu");
+    v34_01.changes.emplace_back(
+        "- Made tab button switch between endpoint, username and password fields in options menu");
     v34_01.changes.emplace_back("- Fixed not being visible on peppy client when starting a match as host");
     v34_01.changes.emplace_back("- Fixed Daycore, Nightcore and Perfect mod selection");
     v34_01.changes.emplace_back("- Fixed mod selection sound playing twice");
@@ -414,7 +421,7 @@ Changelog::Changelog() : ScreenBackable() {
         for(int c = 0; c < changelogs[i].changes.size(); c++) {
             class CustomCBaseUILabel : public CBaseUIButton {
                public:
-                CustomCBaseUILabel(const UString& text) : CBaseUIButton(0, 0, 0, 0, "", text) { ; }
+                CustomCBaseUILabel(const UString &text) : CBaseUIButton(0, 0, 0, 0, "", text) { ; }
 
                 void draw() override {
                     if(this->bVisible && this->isMouseInside()) {

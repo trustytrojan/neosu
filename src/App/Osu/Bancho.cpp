@@ -232,7 +232,8 @@ void handle_packet(Packet *packet) {
             osu->optionsMenu->logInButton->is_loading = false;
 
             debugLog("Failed to log in, server returned code %d.\n", bancho->user_id.load());
-            UString errmsg = UString::format("Failed to log in: %s (code %d)\n", cho_token.toUtf8(), bancho->user_id.load());
+            UString errmsg =
+                UString::format("Failed to log in: %s (code %d)\n", cho_token.toUtf8(), bancho->user_id.load());
             if(bancho->user_id == -2) {
                 errmsg = "Client version is too old to connect to this server.";
             } else if(bancho->user_id == -3 || bancho->user_id == -4) {
@@ -280,7 +281,7 @@ void handle_packet(Packet *packet) {
 
         UserInfo *user = get_user_info(stats_user_id);
         user->irc_user = raw_id < 0;
-        user->has_stats = true;
+        user->stats_tms = Timing::getTicksMS();
         user->action = (Action)action;
         user->info_text = read_string(packet);
         user->map_md5 = read_hash(packet);

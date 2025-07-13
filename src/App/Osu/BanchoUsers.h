@@ -8,10 +8,8 @@ struct UserInfo {
     u32 user_id = 0;
     bool irc_user = false;
 
-    bool has_presence = false;
-    bool has_stats = false;
-
     // Presence (via USER_PRESENCE_REQUEST or USER_PRESENCE_REQUEST_ALL)
+    bool has_presence = false;
     UString name;
     u8 utc_offset = 0;
     u8 country = 0;
@@ -21,6 +19,7 @@ struct UserInfo {
     i32 global_rank = 0;
 
     // Stats (via USER_STATS_REQUEST)
+    u64 stats_tms = 0;
     Action action = UNKNOWN;
     GameMode mode = STANDARD;
     UString info_text = UString("Loading...");
