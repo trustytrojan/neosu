@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - master
-      - mcosu-ng
   workflow_dispatch:
 
 jobs:

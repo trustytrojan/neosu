@@ -22,7 +22,7 @@ void setcwdexe(const char *argv0) noexcept {
     // We only do this if MCENGINE_DATA_DIR is set to its default value, since if it's changed,
     // the packager clearly wants the executable in a different location.
     UString dataDir{MCENGINE_DATA_DIR};
-    if (dataDir != "./" && dataDir != ".\\") {
+    if(dataDir != "./" && dataDir != ".\\") {
         return;
     }
     namespace fs = std::filesystem;
@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
 
     // setup some common app metadata (SDL says these should be called as early as possible)
     SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_NAME_STRING, PACKAGE_NAME);
-    SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_VERSION_STRING, PACKAGE_VERSION);
+    SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_VERSION_STRING, fmt::format("{}", PACKAGE_VERSION).c_str());
     SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_IDENTIFIER_STRING,
                                fmt::format("com.mcengine.{}", lowerPackageName).c_str());
     SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_CREATOR_STRING, "kiwec/spectator/McKay");
