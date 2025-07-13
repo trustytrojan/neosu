@@ -82,30 +82,6 @@ ConVarString ConVar::typeToString(CONVAR_TYPE type) {
     return "";
 }
 
-void ConVar::initBase(uint8_t flags) {
-    this->fValue = 0.0f;
-    this->fDefaultDefaultValue = 0.0f;
-    this->fDefaultValue = 0.0f;
-
-    this->sDefaultDefaultValue = "";
-    this->sDefaultValue = "";
-
-    this->bHasValue = false;
-    this->type = CONVAR_TYPE::CONVAR_TYPE_FLOAT;
-    this->iFlags = flags;
-    this->iDefaultFlags = flags;
-
-    // callback/changeCallback are default-init to std::monostate (i.e. nothing)
-}
-
-// command-only constructor
-ConVar::ConVar(const UString &name) {
-    this->initBase(FCVAR_BANCHO_COMPATIBLE);
-    this->sName = this->sDefaultValue = this->sDefaultDefaultValue = name.utf8View();
-    this->type = CONVAR_TYPE::CONVAR_TYPE_STRING;
-    ConVar::addConVar(this);
-}
-
 void ConVar::exec() {
     if(!this->isUnlocked()) return;
 
@@ -148,10 +124,8 @@ void ConVar::resetDefaults() {
 void ConVar::setDefaultString(const UString &defaultValue) {
     if(this->isFlagSet(FCVAR_PRIVATE)) return;
 
-    this->setDefaultStringInt(defaultValue);
+    this->setDefaultStringInt(defaultValue.utf8View());
 }
-
-void ConVar::setDefaultStringInt(const UString &defaultValue) { this->sDefaultValue = defaultValue.utf8View(); }
 
 void ConVar::setDefaultFloat(float defaultValue) {
     if(this->isFlagSet(FCVAR_PRIVATE)) return;
