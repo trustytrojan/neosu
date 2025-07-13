@@ -1,11 +1,11 @@
 #include "LeaderboardPPCalcThread.h"
 
-#include <chrono>
 #include <mutex>
 #include <thread>
 
 #include "ConVar.h"
 #include "DatabaseBeatmap.h"
+#include "Timing.h"
 
 struct hitobject_cache {
     // Selectors
@@ -61,7 +61,7 @@ static void run_thread() {
             if(dead.load()) return;
             if(osu->should_pause_background_threads.load()) {
                 work_mtx.unlock();
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                Timing::sleepMS(100);
                 work_mtx.lock();
                 continue;
             }

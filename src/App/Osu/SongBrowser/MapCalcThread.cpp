@@ -1,11 +1,11 @@
 #include "MapCalcThread.h"
 
-#include <chrono>
 #include <thread>
 
 #include "DatabaseBeatmap.h"
 #include "DifficultyCalculator.h"
 #include "Osu.h"
+#include "Timing.h"
 
 // static member definitions
 std::unique_ptr<MapCalcThread> MapCalcThread::instance = nullptr;
@@ -51,8 +51,9 @@ void MapCalcThread::run() {
     for(const auto & diff2 : *this->maps_to_process) {
         // pause handling
         while(osu->should_pause_background_threads.load() && !this->should_stop.load()) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            Timing::sleepMS(100);
         }
+        Timing::sleep(0);
 
         if(this->should_stop.load()) {
             return;

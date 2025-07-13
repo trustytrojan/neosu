@@ -46,8 +46,9 @@ struct VolNormalization::LoudnessCalcThread {
 
         for(auto diff2 : this->maps) {
             while(osu->should_pause_background_threads.load() && !this->dead.load()) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                Timing::sleepMS(100);
             }
+            Timing::sleep(0);
 
             if(this->dead.load()) return;
             if(diff2->loudness.load() != 0.f) continue;
