@@ -389,9 +389,7 @@ class OptionsMenuResetButton : public CBaseUIButton {
 
         if(this->isMouseInside()) {
             osu->getTooltipOverlay()->begin();
-            {
-                osu->getTooltipOverlay()->addLine("Reset");
-            }
+            { osu->getTooltipOverlay()->addLine("Reset"); }
             osu->getTooltipOverlay()->end();
         }
     }
@@ -2166,7 +2164,7 @@ void OptionsMenu::updateOsuFolder() {
     newOsuFolder = newOsuFolder.trim();
     if(newOsuFolder.length() > 0) {
         if(newOsuFolder[newOsuFolder.length() - 1] != L'/' && newOsuFolder[newOsuFolder.length() - 1] != L'\\') {
-            newOsuFolder.append("/");
+            newOsuFolder.append(PREF_PATHSEP);
             this->osuFolderTextbox->setText(newOsuFolder);
         }
     }

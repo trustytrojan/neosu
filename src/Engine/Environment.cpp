@@ -43,11 +43,8 @@ const std::string &Environment::getUserDataPath() {
             userdataStr.pop_back();
         }
         userdataStr.append(PREF_PATHSEP);
+        SDL_free(path);
     }
-
-    SDL_free(path);
-
-    if(userdataStr.empty()) userdataStr = Env::cfg(OS::WINDOWS) ? "C:\\" : "/";  // TODO: fallback?
 
     return userdataStr;
 }

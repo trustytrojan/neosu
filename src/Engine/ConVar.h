@@ -332,9 +332,8 @@ class ConVar {
             if constexpr(std::is_convertible_v<std::decay_t<T>, float> && !std::is_same_v<std::decay_t<T>, UString>) {
                 const float f = std::forward<T>(value);
                 return std::make_pair(f, UString::fmt("{:g}", f));
-            }
-            else if constexpr(std::is_same_v<std::decay_t<T>, std::string_view>){
-                const float f = (!value.empty() && *value.cend() == '\0') ? std::strtof(value.begin(), nullptr) : 0.0f;
+            } else if constexpr(std::is_same_v<std::decay_t<T>, std::string_view>) {
+                const float f = (!value.empty() && value.back() == '\0') ? std::strtof(value.data(), nullptr) : 0.0f;
                 return std::make_pair(f, UString{value});
             } else {
                 const UString s = std::forward<T>(value);
