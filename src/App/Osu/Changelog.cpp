@@ -44,7 +44,6 @@ Changelog::Changelog() : ScreenBackable() {
         "- Fixed crashing on partially corrupt scores databases",
         "- Fixed rate change slider having a much smaller range than it should",
         "- Fixed leaderboard scores showing the wrong AR/OD for non-HT/DT rate-changed plays",
-        // TODO: Check for performance regressions
         // Spectating is not included in this release (feature cvar: cv_enable_spectating)
     };
     changelogs.push_back(v38_00);

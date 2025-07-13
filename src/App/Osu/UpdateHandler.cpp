@@ -79,7 +79,6 @@ void UpdateHandler::checkForUpdates() {
     if(!cv_auto_update.getBool() || cv_debug.getBool() ||
        (this->updateThread != NULL && this->updateThread->joinable()))
         return;
-    if constexpr(!Env::cfg(OS::WINDOWS)) return;  // only windows gets releases right now
 
     this->updateThread = new std::thread(UpdateHandler::run, (void *)this);
     this->updateThread->detach();
@@ -91,8 +90,7 @@ void UpdateHandler::_requestUpdate() {
     debugLog("UpdateHandler::requestUpdate()\n");
     this->status = STATUS::STATUS_CHECKING_FOR_UPDATE;
 
-    UString latestVersion =
-        networkHandler->httpGet("https://" NEOSU_DOMAIN "/update/" OS_NAME "/latest-version.txt");
+    UString latestVersion = networkHandler->httpGet("https://" NEOSU_DOMAIN "/update/" OS_NAME "/latest-version.txt");
     float fLatestVersion = strtof(latestVersion.toUtf8(), NULL);
     if(fLatestVersion == 0.f) {
         this->status = STATUS::STATUS_UP_TO_DATE;
@@ -144,7 +142,7 @@ bool UpdateHandler::_downloadUpdate() {
     return true;
 }
 
-void UpdateHandler::_installUpdate(const std::string& zipFilePath) {
+void UpdateHandler::_installUpdate(const std::string &zipFilePath) {
     debugLog("UpdateHandler::installUpdate( %s )\n", zipFilePath.c_str());
     this->status = STATUS::STATUS_INSTALLING_UPDATE;
 
