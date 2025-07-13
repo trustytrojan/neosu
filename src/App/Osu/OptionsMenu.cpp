@@ -16,6 +16,7 @@
 #include "Chat.h"
 #include "Circle.h"
 #include "ConVar.h"
+#include "Database.h"
 #include "Engine.h"
 #include "Environment.h"
 #include "File.h"
@@ -712,8 +713,10 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
 
     this->addSubSection("Volume");
 
-    this->addCheckbox("Normalize loudness across songs", &cv_normalize_loudness)
-        ->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onLoudnessNormalizationToggle));
+    if constexpr(Env::cfg(AUD::BASS)) {
+        this->addCheckbox("Normalize loudness across songs", &cv_normalize_loudness)
+            ->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onLoudnessNormalizationToggle));
+    }
 
     CBaseUISlider *masterVolumeSlider = this->addSlider("Master:", 0.0f, 1.0f, &cv_volume_master, 70.0f);
     masterVolumeSlider->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangePercent));
@@ -3026,9 +3029,9 @@ void OptionsMenu::onLoudnessNormalizationToggle(CBaseUICheckbox *checkbox) {
     }
 
     if(cv_normalize_loudness.getBool()) {
-        loct_calc(db->loudness_to_calc);
+        VolNormalization::start_calc(db->loudness_to_calc);
     } else {
-        loct_abort();
+        VolNormalization::abort();
     }
 }
 

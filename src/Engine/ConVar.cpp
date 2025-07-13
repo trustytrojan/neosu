@@ -521,9 +521,9 @@ void _osu_songbrowser_search_hardcoded_filter(const UString &oldValue, const USt
 
 void loudness_cb(const UString &oldValue, const UString &newValue) {
     // Restart loudness calc.
-    loct_abort();
+    VolNormalization::abort();
     if(db && cv_normalize_loudness.getBool()) {
-        loct_calc(db->loudness_to_calc);
+        VolNormalization::start_calc(db->loudness_to_calc);
     }
 }
 

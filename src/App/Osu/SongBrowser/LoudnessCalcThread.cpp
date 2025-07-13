@@ -1,5 +1,6 @@
 #include "LoudnessCalcThread.h"
 
+#include <atomic>
 #include <chrono>
 #include <utility>
 
@@ -8,16 +9,21 @@
 #include "Sound.h"
 #include "SoundEngine.h"
 
-struct LoudnessCalcThread {
+// static member definitions
+std::unique_ptr<VolNormalization> VolNormalization::instance = nullptr;
+std::once_flag VolNormalization::instance_flag;
+std::once_flag VolNormalization::shutdown_flag;
+
+struct VolNormalization::LoudnessCalcThread {
     std::thread thr;
-    std::atomic<bool> dead = true;
-    std::vector<BeatmapDifficulty*> maps;
+    std::atomic<bool> dead{true};
+    std::vector<DatabaseBeatmap *> maps;
 
-    std::atomic<u32> nb_computed = 0;
-    std::atomic<u32> nb_total = 0;
-
+    std::atomic<u32> nb_computed{0};
+    std::atomic<u32> nb_total{0};
+#ifdef MCENGINE_FEATURE_BASS // TODO:
    public:
-    LoudnessCalcThread(std::vector<BeatmapDifficulty*> maps_to_calc) {
+    LoudnessCalcThread(std::vector<DatabaseBeatmap *> maps_to_calc) {
         this->dead = false;
         this->maps = std::move(maps_to_calc);
         this->nb_total = this->maps.size() + 1;
@@ -97,35 +103,39 @@ struct LoudnessCalcThread {
 
         this->nb_computed++;
     }
+#else
+    LoudnessCalcThread(std::vector<DatabaseBeatmap *> maps_to_calc) { (void)maps_to_calc; }
+#endif
 };
 
-static std::vector<LoudnessCalcThread*> threads;
-
-u32 loct_computed() {
+u32 VolNormalization::get_computed_instance() {
+    if constexpr(!Env::cfg(AUD::BASS)) return 0;  // TODO
     u32 x = 0;
-    for(auto thr : threads) {
+    for(auto thr : this->threads) {
         x += thr->nb_computed.load();
     }
     return x;
 }
 
-u32 loct_total() {
+u32 VolNormalization::get_total_instance() {
+    if constexpr(!Env::cfg(AUD::BASS)) return 0;  // TODO
     u32 x = 0;
-    for(auto thr : threads) {
+    for(auto thr : this->threads) {
         x += thr->nb_total.load();
     }
     return x;
 }
 
-void loct_calc(std::vector<BeatmapDifficulty*> maps_to_calc) {
-    loct_abort();
+void VolNormalization::start_calc_instance(const std::vector<DatabaseBeatmap *> &maps_to_calc) {
+    if constexpr(!Env::cfg(AUD::BASS)) return;  // TODO
+    this->abort_instance();
     if(maps_to_calc.empty()) return;
     if(!cv_normalize_loudness.getBool()) return;
 
     i32 nb_threads = cv_loudness_calc_threads.getInt();
     if(nb_threads <= 0) {
         // dividing by 2 still burns cpu if hyperthreading is enabled, let's keep it at a sane amount of threads
-        nb_threads = std::max(std::thread::hardware_concurrency() / 4, 1u);
+        nb_threads = std::max(std::thread::hardware_concurrency() / 3, 1u);
     }
     if(maps_to_calc.size() < nb_threads) nb_threads = maps_to_calc.size();
     int chunk_size = maps_to_calc.size() / nb_threads;
@@ -135,17 +145,28 @@ void loct_calc(std::vector<BeatmapDifficulty*> maps_to_calc) {
     for(int i = 0; i < nb_threads; i++) {
         int cur_chunk_size = chunk_size + (i < remainder ? 1 : 0);
 
-        auto chunk = std::vector<BeatmapDifficulty*>(it, it + cur_chunk_size);
+        auto chunk = std::vector<DatabaseBeatmap *>(it, it + cur_chunk_size);
         it += cur_chunk_size;
 
         auto lct = new LoudnessCalcThread(chunk);
-        threads.push_back(lct);
+        this->threads.push_back(lct);
     }
 }
 
-void loct_abort() {
-    for(auto thr : threads) {
+void VolNormalization::abort_instance() {
+    if constexpr(!Env::cfg(AUD::BASS)) return;  // TODO
+    for(auto thr : this->threads) {
         delete thr;
     }
-    threads.clear();
+    this->threads.clear();
+}
+
+VolNormalization &VolNormalization::get_instance() {
+    std::call_once(instance_flag, []() { instance = std::make_unique<VolNormalization>(); });
+    return *instance;
+}
+
+VolNormalization *VolNormalization::get_instance_ptr() {
+    // return existing instance without creating it
+    return instance.get();
 }

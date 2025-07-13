@@ -116,12 +116,10 @@ HPLUGIN loadPlugin(const std::string &pluginname) {
     if(!env->fileExists(tryPath.toUtf8())) tryPath = UString::fmt("lib" PREF_PATHSEP "{}", LNAMESTR(pluginname));
 
     // make it a fully qualified path
-    // TODO (PORT): need getFolderFromFilePath to give a fully qualified path for this to work
-
-    // if (env->fileExists(tryPath.toUtf8()))
-    // 	tryPath = UString::fmt("{}{}", env->getFolderFromFilePath(tryPath.toUtf8()), LNAMESTR(pluginname));
-    // else
-    // 	tryPath = LNAMESTR(pluginname); // maybe bass will find it?
+    if (env->fileExists(tryPath.toUtf8()))
+    	tryPath = UString::fmt("{}{}", env->getFolderFromFilePath(tryPath.toUtf8()), LNAMESTR(pluginname));
+    else
+    	tryPath = LNAMESTR(pluginname); // maybe bass will find it?
 
     ret = BASS_PluginLoad(
         (const char *)tryPath.plat_str(),

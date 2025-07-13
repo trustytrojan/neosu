@@ -451,7 +451,7 @@ bool SoundEngine::initializeOutputDevice(const OUTPUT_DEVICE& device) {
 void SoundEngine::restart() { this->setOutputDevice(this->currentOutputDevice); }
 
 void SoundEngine::shutdown() {
-    loct_abort();
+    VolNormalization::abort();
 
     if(this->currentOutputDevice.driver == OutputDriver::BASS) {
         BASS_SetDevice(this->currentOutputDevice.id);
@@ -622,7 +622,7 @@ void SoundEngine::setOutputDevice(const OUTPUT_DEVICE& device) {
     }
 
     // resume loudness calc
-    loct_calc(db->loudness_to_calc);
+    VolNormalization::start_calc(db->loudness_to_calc);
 
     if(was_playing) {
         osu->music_unpause_scheduled = true;

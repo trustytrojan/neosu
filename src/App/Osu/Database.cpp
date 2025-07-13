@@ -104,7 +104,7 @@ class DatabaseLoader : public Resource {
     void init() override {
         this->bReady = true;
         MapCalcThread::start_calc(this->db->maps_to_recalc);
-        loct_calc(this->db->loudness_to_calc);
+        VolNormalization::start_calc(this->db->loudness_to_calc);
 
         sct_calc(this->db->scores_to_convert);
 
@@ -120,7 +120,7 @@ class DatabaseLoader : public Resource {
 
         // load database
         lct_set_map(NULL);
-        loct_abort();
+        VolNormalization::abort();
         MapCalcThread::abort();
         this->db->beatmapsets.clear();  // TODO @kiwec: this just leaks memory?
         this->db->loadDB();
@@ -169,7 +169,7 @@ Database::~Database() {
 
     sct_abort();
     lct_set_map(NULL);
-    loct_abort();
+    VolNormalization::abort();
     MapCalcThread::abort();
     for(int i = 0; i < this->beatmapsets.size(); i++) {
         delete this->beatmapsets[i];

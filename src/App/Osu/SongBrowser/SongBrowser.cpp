@@ -475,7 +475,7 @@ SongBrowser::SongBrowser() : ScreenBackable() {
 SongBrowser::~SongBrowser() {
     sct_abort();
     lct_set_map(NULL);
-    loct_abort();
+    VolNormalization::abort();
     MapCalcThread::abort();
     this->checkHandleKillBackgroundSearchMatcher();
 

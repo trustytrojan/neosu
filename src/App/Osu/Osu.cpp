@@ -403,7 +403,7 @@ Osu::Osu() {
 Osu::~Osu() {
     sct_abort();
     lct_set_map(NULL);
-    loct_abort();
+    VolNormalization::shutdown();
     MapCalcThread::shutdown();
     kill_networking_thread();
 
