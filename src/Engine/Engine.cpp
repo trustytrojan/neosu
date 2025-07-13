@@ -22,23 +22,14 @@
 
 Environment *env = NULL;
 
-std::unique_ptr<Mouse> Engine::s_mouseInstance = nullptr;
-std::unique_ptr<Keyboard> Engine::s_keyboardInstance = nullptr;
-std::unique_ptr<App> Engine::s_appInstance = nullptr;
-std::unique_ptr<Graphics> Engine::s_graphicsInstance = nullptr;
-std::unique_ptr<SoundEngine> Engine::s_soundEngineInstance = nullptr;
-std::unique_ptr<ResourceManager> Engine::s_resourceManagerInstance = nullptr;
-std::unique_ptr<NetworkHandler> Engine::s_networkHandlerInstance = nullptr;
-std::unique_ptr<AnimationHandler> Engine::s_animationHandlerInstance = nullptr;
-
-Mouse *mouse = nullptr;
-Keyboard *keyboard = nullptr;
-App *app = nullptr;
-Graphics *g = nullptr;
-SoundEngine *soundEngine = nullptr;
-ResourceManager *resourceManager = nullptr;
-NetworkHandler *networkHandler = nullptr;
-AnimationHandler *animationHandler = nullptr;
+std::unique_ptr<Mouse> mouse = nullptr;
+std::unique_ptr<Keyboard> keyboard = nullptr;
+std::unique_ptr<App> app = nullptr;
+std::unique_ptr<Graphics> g = nullptr;
+std::unique_ptr<SoundEngine> soundEngine = nullptr;
+std::unique_ptr<ResourceManager> resourceManager = nullptr;
+std::unique_ptr<NetworkHandler> networkHandler = nullptr;
+std::unique_ptr<AnimationHandler> animationHandler = nullptr;
 
 Engine *engine = NULL;
 
@@ -87,40 +78,33 @@ Engine::Engine(i32 argc, char **argv) {
     debugLog("\nEngine: Initializing subsystems ...\n");
     {
         // input devices
-        s_mouseInstance = std::make_unique<Mouse>();
-        mouse = s_mouseInstance.get();
-        runtime_assert(mouse, "Mouse failed to initialize!");
-        this->inputDevices.push_back(mouse);
-        this->mice.push_back(mouse);
+        mouse = std::make_unique<Mouse>();
+        runtime_assert(mouse.get(), "Mouse failed to initialize!");
+        this->inputDevices.push_back(mouse.get());
+        this->mice.push_back(mouse.get());
 
-        s_keyboardInstance = std::make_unique<Keyboard>();
-        keyboard = s_keyboardInstance.get();
-        runtime_assert(keyboard, "Keyboard failed to initialize!");
-        this->inputDevices.push_back(keyboard);
-        this->keyboards.push_back(keyboard);
+        keyboard = std::make_unique<Keyboard>();
+        runtime_assert(keyboard.get(), "Keyboard failed to initialize!");
+        this->inputDevices.push_back(keyboard.get());
+        this->keyboards.push_back(keyboard.get());
 
         // create graphics through environment
-        s_graphicsInstance.reset(env->createRenderer());
-        g = s_graphicsInstance.get();
-        runtime_assert(g, "Graphics failed to initialize!");
+        g.reset(env->createRenderer());
+        runtime_assert(g.get(), "Graphics failed to initialize!");
         g->init();  // needs init() separation due to potential graphics access
 
         // make unique_ptrs for the rest
-        s_networkHandlerInstance = std::make_unique<NetworkHandler>();
-        networkHandler = s_networkHandlerInstance.get();
-        runtime_assert(networkHandler, "Network handler failed to initialize!");
+        networkHandler = std::make_unique<NetworkHandler>();
+        runtime_assert(networkHandler.get(), "Network handler failed to initialize!");
 
-        s_resourceManagerInstance = std::make_unique<ResourceManager>();
-        resourceManager = s_resourceManagerInstance.get();
-        runtime_assert(resourceManager, "Resource manager menu failed to initialize!");
+        resourceManager = std::make_unique<ResourceManager>();
+        runtime_assert(resourceManager.get(), "Resource manager menu failed to initialize!");
 
-        s_soundEngineInstance = std::make_unique<SoundEngine>();
-        soundEngine = s_soundEngineInstance.get();
-        runtime_assert(soundEngine, "Sound engine failed to initialize!");
+        soundEngine = std::make_unique<SoundEngine>();
+        runtime_assert(soundEngine.get(), "Sound engine failed to initialize!");
 
-        s_animationHandlerInstance = std::make_unique<AnimationHandler>();
-        animationHandler = s_animationHandlerInstance.get();
-        runtime_assert(animationHandler, "Animation handler failed to initialize!");
+        animationHandler = std::make_unique<AnimationHandler>();
+        runtime_assert(animationHandler.get(), "Animation handler failed to initialize!");
 
         init_discord_sdk();
 
@@ -138,8 +122,7 @@ Engine::~Engine() {
 
     // reset() all static unique_ptrs
     debugLog("Engine: Freeing app...\n");
-    s_appInstance.reset();
-    app = NULL;
+    app.reset();
 
     if(this->console != NULL) showMessageErrorFatal("Engine Error", "this->console not set to NULL before shutdown!");
 
@@ -153,29 +136,24 @@ Engine::~Engine() {
     destroy_discord_sdk();
 
     debugLog("Engine: Freeing animation handler...\n");
-    s_animationHandlerInstance.reset();
-    animationHandler = NULL;
+    animationHandler.reset();
 
     debugLog("Engine: Freeing resource manager...\n");
-    s_resourceManagerInstance.reset();
-    resourceManager = NULL;
+    resourceManager.reset();
 
     debugLog("Engine: Freeing Sound...\n");
-    s_soundEngineInstance.reset();
-    soundEngine = NULL;
+    soundEngine.reset();
 
     debugLog("Engine: Freeing network handler...\n");
-    s_networkHandlerInstance.reset();
-    networkHandler = NULL;
+    networkHandler.reset();
 
     debugLog("Engine: Freeing graphics...\n");
-    s_graphicsInstance.reset();
-    g = NULL;
+    g.reset();
 
     debugLog("Engine: Freeing input devices...\n");
     // first remove the mouse and keyboard from the input devices
     std::erase_if(this->inputDevices,
-                  [](InputDevice *device) { return device == mouse || device == keyboard; });
+                  [](InputDevice *device) { return device == mouse.get() || device == keyboard.get(); });
 
     // delete remaining input devices (if any)
     for(auto *device : this->inputDevices) {
@@ -186,10 +164,8 @@ Engine::~Engine() {
     this->keyboards.clear();
 
     // reset the static unique_ptrs
-    s_mouseInstance.reset();
-    s_keyboardInstance.reset();
-    mouse = NULL;
-    keyboard = NULL;
+    mouse.reset();
+    keyboard.reset();
 
     debugLog("Engine: Freeing timer...\n");
     SAFE_DELETE(this->timer);
@@ -260,11 +236,10 @@ void Engine::loadApp() {
         //	Load App here  //
         //*****************//
 
-        s_appInstance = std::make_unique<Osu>();
-        app = s_appInstance.get();
-        runtime_assert(app, "App failed to initialize!");
+        app = std::make_unique<Osu>();
+        runtime_assert(app.get(), "App failed to initialize!");
         // start listening to the default keyboard input
-        keyboard->addListener(app);
+        keyboard->addListener(app.get());
     }
     debugLog("Engine: Loading app done.\n\n");
 }

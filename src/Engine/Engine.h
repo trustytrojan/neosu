@@ -73,18 +73,8 @@ class Engine {
     void blackout() { this->bBlackout = true; }
 
     // interfaces
-   private:
-    // singleton interface/instance decls
-    static std::unique_ptr<Mouse> s_mouseInstance;
-    static std::unique_ptr<Keyboard> s_keyboardInstance;
-    static std::unique_ptr<App> s_appInstance;
-    static std::unique_ptr<Graphics> s_graphicsInstance;
-    static std::unique_ptr<SoundEngine> s_soundEngineInstance;
-    static std::unique_ptr<ResourceManager> s_resourceManagerInstance;
-    static std::unique_ptr<NetworkHandler> s_networkHandlerInstance;
-    static std::unique_ptr<AnimationHandler> s_animationHandlerInstance;
-
    public:
+
     [[nodiscard]] inline const std::vector<Mouse *> &getMice() const { return this->mice; }
     [[nodiscard]] inline const std::vector<Keyboard *> &getKeyboards() const { return this->keyboards; }
 
@@ -264,14 +254,14 @@ class Engine {
     }
 };
 
-extern Mouse *mouse;
-extern Keyboard *keyboard;
-extern App *app;
-extern Graphics *g;
-extern SoundEngine *soundEngine;
-extern ResourceManager *resourceManager;
-extern NetworkHandler *networkHandler;
-extern AnimationHandler *animationHandler;
+extern std::unique_ptr<Mouse> mouse;
+extern std::unique_ptr<Keyboard> keyboard;
+extern std::unique_ptr<App> app;
+extern std::unique_ptr<Graphics> g;
+extern std::unique_ptr<SoundEngine> soundEngine;
+extern std::unique_ptr<ResourceManager> resourceManager;
+extern std::unique_ptr<NetworkHandler> networkHandler;
+extern std::unique_ptr<AnimationHandler> animationHandler;
 
 extern Engine *engine;
 

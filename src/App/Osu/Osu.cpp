@@ -225,12 +225,11 @@ Osu::Osu() {
 
     // Initialize sound here so we can load the preferred device from config
     // Avoids initializing the sound device twice, which can take a while depending on the driver
-    auto sound_engine = soundEngine;
-    sound_engine->updateOutputDevices(true);
-    sound_engine->initializeOutputDevice(sound_engine->getWantedDevice());
-    cv_snd_output_device.setValue(sound_engine->getOutputDeviceName());
-    cv_snd_freq.setCallback(fastdelegate::MakeDelegate(sound_engine, &SoundEngine::onFreqChanged));
-    cv_snd_restart.setCallback(fastdelegate::MakeDelegate(sound_engine, &SoundEngine::restart));
+    soundEngine->updateOutputDevices(true);
+    soundEngine->initializeOutputDevice(soundEngine->getWantedDevice());
+    cv_snd_output_device.setValue(soundEngine->getOutputDeviceName());
+    cv_snd_freq.setCallback(fastdelegate::MakeDelegate(soundEngine.get(), &SoundEngine::onFreqChanged));
+    cv_snd_restart.setCallback(fastdelegate::MakeDelegate(soundEngine.get(), &SoundEngine::restart));
     cv_win_snd_wasapi_exclusive.setCallback(_RESTART_SOUND_ENGINE_ON_CHANGE);
     cv_win_snd_wasapi_buffer_size.setCallback(_RESTART_SOUND_ENGINE_ON_CHANGE);
     cv_win_snd_wasapi_period_size.setCallback(_RESTART_SOUND_ENGINE_ON_CHANGE);
