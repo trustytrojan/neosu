@@ -287,7 +287,8 @@ class ConVar {
         this->type = getTypeFor<T>();
 
         // set default value
-        if constexpr(std::is_same_v<std::decay_t<T>, std::string_view> || std::is_same_v<std::decay_t<T>, const char *>)
+        if constexpr(std::is_same_v<std::decay_t<T>, std::string_view> ||
+                     std::is_same_v<std::decay_t<T>, const char *>)
             setDefaultStringInt(defaultValue);
         else
             setDefaultFloatInt(static_cast<float>(defaultValue));
@@ -297,7 +298,8 @@ class ConVar {
         this->sDefaultDefaultValue = this->sDefaultValue;
 
         // set initial value (without triggering callbacks)
-        if constexpr(std::is_same_v<std::decay_t<T>, std::string_view>)
+        if constexpr(std::is_same_v<std::decay_t<T>, std::string_view> ||
+                     std::is_same_v<std::decay_t<T>, const char *>)
             setValueInt(defaultValue);
         else
             setValueInt(static_cast<float>(defaultValue));
@@ -318,7 +320,7 @@ class ConVar {
     }
 
     void setDefaultFloatInt(float defaultValue);
-    inline void setDefaultStringInt(const std::string_view &defaultValue) { this->sDefaultValue = defaultValue; }
+    void setDefaultStringInt(const std::string_view &defaultValue);
 
     template <typename T>
     void setValueInt(T &&value,
@@ -333,7 +335,7 @@ class ConVar {
                 const float f = std::forward<T>(value);
                 return std::make_pair(f, UString::fmt("{:g}", f));
             } else if constexpr(std::is_same_v<std::decay_t<T>, std::string_view>) {
-                const float f = (!value.empty() && value.back() == '\0') ? std::strtof(value.data(), nullptr) : 0.0f;
+                const float f = !value.empty() ? std::strtof(std::string{value}.c_str(), nullptr) : 0.0f;
                 return std::make_pair(f, UString{value});
             } else {
                 const UString s = std::forward<T>(value);

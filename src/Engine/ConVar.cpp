@@ -138,6 +138,15 @@ void ConVar::setDefaultFloatInt(float defaultValue) {
     this->sDefaultValue = fmt::format("{:g}", defaultValue);
 }
 
+void ConVar::setDefaultStringInt(const std::string_view &defaultValue) {
+    this->sDefaultValue = defaultValue;
+    // also try to parse default float from the default string
+    const float f = std::strtof(this->sDefaultValue.c_str(), nullptr);
+    if(f != 0.0f) {
+        this->fDefaultValue = f;
+    }
+}
+
 bool ConVar::isUnlocked() const {
     if(this->isFlagSet(FCVAR_PRIVATE)) return true;
     if(!bancho || !bancho->is_online()) return true;

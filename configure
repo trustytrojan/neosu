@@ -601,7 +601,7 @@ MAKEFLAGS=
 # Identity of this package.
 PACKAGE_NAME='neosu'
 PACKAGE_TARNAME='neosu'
-PACKAGE_VERSION=38.00
+PACKAGE_VERSION='38.00'
 PACKAGE_STRING='neosu 38.00'
 PACKAGE_BUGREPORT=''
 PACKAGE_URL='https://github.com/kiwec/neosu'
@@ -2253,7 +2253,7 @@ printf "%s\n" "#define PACKAGE_NAME \"$PACKAGE_NAME\"" >>confdefs.h
 
 printf "%s\n" "#define PACKAGE_TARNAME \"$PACKAGE_TARNAME\"" >>confdefs.h
 
-printf "%s\n" "#define PACKAGE_VERSION $PACKAGE_VERSION" >>confdefs.h
+printf "%s\n" "#define PACKAGE_VERSION \"$PACKAGE_VERSION\"" >>confdefs.h
 
 printf "%s\n" "#define PACKAGE_STRING \"$PACKAGE_STRING\"" >>confdefs.h
 
