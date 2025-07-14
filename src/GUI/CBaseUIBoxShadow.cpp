@@ -37,7 +37,7 @@ void CBaseUIBoxShadow::draw() {
         this->bNeedsRedraw = false;
     }
 
-    if(cv_debug_box_shadows.getBool()) {
+    if(cv::debug_box_shadows.getBool()) {
         g->setColor(0xff00ff00);
         g->drawRect(this->vPos.x - this->fRadius, this->vPos.y - this->fRadius, this->blur->getSize().x,
                     this->blur->getSize().y);

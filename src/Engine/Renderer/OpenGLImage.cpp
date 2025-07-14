@@ -123,7 +123,7 @@ void OpenGLImage::initAsync() {
     if(this->GLTexture != 0) return;  // only load if we are not already loaded
 
     if(!this->bCreatedImage) {
-        if(cv_debug_rm.getBool()) debugLog("Resource Manager: Loading %s\n", this->sFilePath.c_str());
+        if(cv::debug_rm.getBool()) debugLog("Resource Manager: Loading %s\n", this->sFilePath.c_str());
 
         this->bAsyncReady = this->loadRawImage();
     }

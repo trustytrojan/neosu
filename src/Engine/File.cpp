@@ -203,7 +203,7 @@ File::FILETYPE File::existsCaseInsensitive(std::string &filePath, fs::path &path
     if(!(resolvedPath.back() == '/') && !(resolvedPath.back() == '\\')) resolvedPath.append("/");
     resolvedPath.append(resolvedName);
 
-    if(cv_debug_file.getBool())
+    if(cv::debug_file.getBool())
         debugLogF("File: Case-insensitive match found for {:s} -> {:s}\n", path.string(), resolvedPath);
 
     // now update the given paths with the actual found path
@@ -239,7 +239,7 @@ File::File(std::string filePath, TYPE type) : sFilePath(filePath), fileType(type
         if(!openForWriting()) return;
     }
 
-    if(cv_debug_file.getBool()) debugLogF("File: Opening {:s}\n", filePath);
+    if(cv::debug_file.getBool()) debugLogF("File: Opening {:s}\n", filePath);
 
     this->bReady = true;
 }
@@ -250,7 +250,7 @@ bool File::openForReading() {
     auto fileType = existsCaseInsensitive(this->sFilePath, path);
 
     if(fileType != File::FILETYPE::FILE) {
-        if(cv_debug_file.getBool())
+        if(cv::debug_file.getBool())
             debugLogF("File Error: Path {:s} {:s}\n", this->sFilePath,
                       fileType == File::FILETYPE::NONE ? "doesn't exist" : "is not a file");
         return false;
@@ -281,9 +281,9 @@ bool File::openForReading() {
     else if(this->iFileSize < 0) {
         debugLogF("File Error: FileSize is < 0\n");
         return false;
-    } else if(std::cmp_greater(this->iFileSize, 1024 * 1024 * cv_file_size_max.getInt()))  // size sanity check
+    } else if(std::cmp_greater(this->iFileSize, 1024 * 1024 * cv::file_size_max.getInt()))  // size sanity check
     {
-        debugLogF("File Error: FileSize of {:s} is > {} MB!!!\n", this->sFilePath, cv_file_size_max.getInt());
+        debugLogF("File Error: FileSize of {:s} is > {} MB!!!\n", this->sFilePath, cv::file_size_max.getInt());
         return false;
     }
 
@@ -355,7 +355,7 @@ std::string File::readString() {
 }
 
 const char *File::readFile() {
-    if(cv_debug_file.getBool()) debugLogF("File::readFile() on {:s}\n", this->sFilePath);
+    if(cv::debug_file.getBool()) debugLogF("File::readFile() on {:s}\n", this->sFilePath);
 
     // return cached buffer if already read
     if(!this->vFullBuffer.empty()) return this->vFullBuffer.data();

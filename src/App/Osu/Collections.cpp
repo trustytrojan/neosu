@@ -94,9 +94,9 @@ bool load_collections() {
 
     unload_collections();
 
-    auto osu_database_version = cv_database_version.getInt();
+    auto osu_database_version = cv::database_version.getInt();
 
-    std::string peppy_collections_path = cv_osu_folder.getString();
+    std::string peppy_collections_path = cv::osu_folder.getString();
     peppy_collections_path.append("collection.db");
 
     BanchoFile::Reader peppy_collections(peppy_collections_path.c_str());

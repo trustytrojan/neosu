@@ -25,11 +25,11 @@ void HitObject::drawHitResult(Skin *skin, float hitcircleDiameter, float rawHitc
 
     const float animPercent = 1.0f - animPercentInv;
 
-    const float fadeInEndPercent = cv_hitresult_fadein_duration.getFloat() / cv_hitresult_duration.getFloat();
+    const float fadeInEndPercent = cv::hitresult_fadein_duration.getFloat() / cv::hitresult_duration.getFloat();
 
     // determine color/transparency
     {
-        if(!cv_hitresult_delta_colorize.getBool() || result == LiveScore::HIT::HIT_MISS)
+        if(!cv::hitresult_delta_colorize.getBool() || result == LiveScore::HIT::HIT_MISS)
             g->setColor(0xffffffff);
         else {
             // NOTE: hitDeltaRangePercent is within -1.0f to 1.0f
@@ -41,21 +41,21 @@ void HitObject::drawHitResult(Skin *skin, float hitcircleDiameter, float rawHitc
             // OD brackets which are nonlinear of course)
             if(hitDeltaRangePercent != 0.0f) {
                 hitDeltaRangePercent =
-                    std::clamp<float>(hitDeltaRangePercent * cv_hitresult_delta_colorize_multiplier.getFloat(), -1.0f, 1.0f);
+                    std::clamp<float>(hitDeltaRangePercent * cv::hitresult_delta_colorize_multiplier.getFloat(), -1.0f, 1.0f);
 
-                const float rf = lerp3f(cv_hitresult_delta_colorize_early_r.getFloat() / 255.0f, 1.0f,
-                                        cv_hitresult_delta_colorize_late_r.getFloat() / 255.0f,
-                                        cv_hitresult_delta_colorize_interpolate.getBool()
+                const float rf = lerp3f(cv::hitresult_delta_colorize_early_r.getFloat() / 255.0f, 1.0f,
+                                        cv::hitresult_delta_colorize_late_r.getFloat() / 255.0f,
+                                        cv::hitresult_delta_colorize_interpolate.getBool()
                                             ? hitDeltaRangePercent / 2.0f + 0.5f
                                             : (hitDeltaRangePercent < 0.0f ? -1.0f : 1.0f));
-                const float gf = lerp3f(cv_hitresult_delta_colorize_early_g.getFloat() / 255.0f, 1.0f,
-                                        cv_hitresult_delta_colorize_late_g.getFloat() / 255.0f,
-                                        cv_hitresult_delta_colorize_interpolate.getBool()
+                const float gf = lerp3f(cv::hitresult_delta_colorize_early_g.getFloat() / 255.0f, 1.0f,
+                                        cv::hitresult_delta_colorize_late_g.getFloat() / 255.0f,
+                                        cv::hitresult_delta_colorize_interpolate.getBool()
                                             ? hitDeltaRangePercent / 2.0f + 0.5f
                                             : (hitDeltaRangePercent < 0.0f ? -1.0f : 1.0f));
-                const float bf = lerp3f(cv_hitresult_delta_colorize_early_b.getFloat() / 255.0f, 1.0f,
-                                        cv_hitresult_delta_colorize_late_b.getFloat() / 255.0f,
-                                        cv_hitresult_delta_colorize_interpolate.getBool()
+                const float bf = lerp3f(cv::hitresult_delta_colorize_early_b.getFloat() / 255.0f, 1.0f,
+                                        cv::hitresult_delta_colorize_late_b.getFloat() / 255.0f,
+                                        cv::hitresult_delta_colorize_interpolate.getBool()
                                             ? hitDeltaRangePercent / 2.0f + 0.5f
                                             : (hitDeltaRangePercent < 0.0f ? -1.0f : 1.0f));
 
@@ -63,9 +63,9 @@ void HitObject::drawHitResult(Skin *skin, float hitcircleDiameter, float rawHitc
             }
         }
 
-        const float fadeOutStartPercent = cv_hitresult_fadeout_start_time.getFloat() / cv_hitresult_duration.getFloat();
+        const float fadeOutStartPercent = cv::hitresult_fadeout_start_time.getFloat() / cv::hitresult_duration.getFloat();
         const float fadeOutDurationPercent =
-            cv_hitresult_fadeout_duration.getFloat() / cv_hitresult_duration.getFloat();
+            cv::hitresult_fadeout_duration.getFloat() / cv::hitresult_duration.getFloat();
 
         g->setAlpha(std::clamp<float>(animPercent < fadeInEndPercent
                                      ? animPercent / fadeInEndPercent
@@ -133,7 +133,7 @@ void HitObject::drawHitResult(Skin *skin, float hitcircleDiameter, float rawHitc
 
         // non-misses have a special scale animation (the type of which depends on hasParticle)
         float scale = 1.0f;
-        if(doScaleOrRotateAnim && cv_hitresult_animated.getBool()) {
+        if(doScaleOrRotateAnim && cv::hitresult_animated.getBool()) {
             if(!hasParticle) {
                 if(animPercent < fadeInEndPercent * 0.8f)
                     scale = std::lerp(0.6f, 1.1f, std::clamp<float>(animPercent / (fadeInEndPercent * 0.8f), 0.0f, 1.0f));
@@ -164,49 +164,49 @@ void HitObject::drawHitResult(Skin *skin, float hitcircleDiameter, float rawHitc
                         osuCoordScaleMultiplier;
 
                 float missScale = 1.0f + std::clamp<float>((1.0f - (animPercent / fadeInEndPercent)), 0.0f, 1.0f) *
-                                             (cv_hitresult_miss_fadein_scale.getFloat() - 1.0f);
-                if(!cv_hitresult_animated.getBool()) missScale = 1.0f;
+                                             (cv::hitresult_miss_fadein_scale.getFloat() - 1.0f);
+                if(!cv::hitresult_animated.getBool()) missScale = 1.0f;
 
                 // TODO: rotation anim (only for all non-animated skins), rot = rng(-0.15f, 0.15f), anim1 = 120 ms to
                 // rot, anim2 = rest to rot*2, all ease in
 
                 skin->getHit0()->drawRaw(rawPos + downAnim, (doScaleOrRotateAnim ? missScale : 1.0f) * hitImageScale *
-                                                                cv_hitresult_scale.getFloat());
+                                                                cv::hitresult_scale.getFloat());
             } break;
 
             case LiveScore::HIT::HIT_50:
                 skin->getHit50()->drawRaw(
-                    rawPos, (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv_hitresult_scale.getFloat());
+                    rawPos, (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv::hitresult_scale.getFloat());
                 break;
 
             case LiveScore::HIT::HIT_100:
                 skin->getHit100()->drawRaw(
-                    rawPos, (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv_hitresult_scale.getFloat());
+                    rawPos, (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv::hitresult_scale.getFloat());
                 break;
 
             case LiveScore::HIT::HIT_300:
-                if(cv_hitresult_draw_300s.getBool()) {
+                if(cv::hitresult_draw_300s.getBool()) {
                     skin->getHit300()->drawRaw(
-                        rawPos, (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv_hitresult_scale.getFloat());
+                        rawPos, (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv::hitresult_scale.getFloat());
                 }
                 break;
 
             case LiveScore::HIT::HIT_100K:
                 skin->getHit100k()->drawRaw(
-                    rawPos, (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv_hitresult_scale.getFloat());
+                    rawPos, (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv::hitresult_scale.getFloat());
                 break;
 
             case LiveScore::HIT::HIT_300K:
-                if(cv_hitresult_draw_300s.getBool()) {
+                if(cv::hitresult_draw_300s.getBool()) {
                     skin->getHit300k()->drawRaw(
-                        rawPos, (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv_hitresult_scale.getFloat());
+                        rawPos, (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv::hitresult_scale.getFloat());
                 }
                 break;
 
             case LiveScore::HIT::HIT_300G:
-                if(cv_hitresult_draw_300s.getBool()) {
+                if(cv::hitresult_draw_300s.getBool()) {
                     skin->getHit300g()->drawRaw(
-                        rawPos, (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv_hitresult_scale.getFloat());
+                        rawPos, (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv::hitresult_scale.getFloat());
                 }
                 break;
 
@@ -260,10 +260,10 @@ void HitObject::draw2() {
 }
 
 void HitObject::drawHitResultAnim(const HITRESULTANIM &hitresultanim) {
-    if((hitresultanim.time - cv_hitresult_duration.getFloat()) <
+    if((hitresultanim.time - cv::hitresult_duration.getFloat()) <
            engine->getTime()  // NOTE: this is written like that on purpose, don't change it ("future" results can be
                               // scheduled with it, e.g. for slider end)
-       && (hitresultanim.time + cv_hitresult_duration_max.getFloat() * (1.0f / osu->getAnimationSpeedMultiplier())) >
+       && (hitresultanim.time + cv::hitresult_duration_max.getFloat() * (1.0f / osu->getAnimationSpeedMultiplier())) >
               engine->getTime()) {
         Skin *skin = this->bm->getSkin();
         {
@@ -289,7 +289,7 @@ void HitObject::drawHitResultAnim(const HITRESULTANIM &hitresultanim) {
 
             const float animPercentInv =
                 1.0f - (((engine->getTime() - hitresultanim.time) * osu->getAnimationSpeedMultiplier()) /
-                        cv_hitresult_duration.getFloat());
+                        cv::hitresult_duration.getFloat());
 
             drawHitResult(this->bm, this->bm->osuCoords2Pixels(hitresultanim.rawPos), hitresultanim.result,
                           animPercentInv,
@@ -315,13 +315,13 @@ void HitObject::update(long curPos, f64 frame_time) {
     if(curPos >= (this->click_time - this->iApproachTime) && curPos < (this->click_time + this->duration)) {
         // approach circle scale
         const float scale = std::clamp<float>((float)this->iDelta / (float)this->iApproachTime, 0.0f, 1.0f);
-        this->fApproachScale = 1 + (scale * cv_approach_scale_multiplier.getFloat());
-        if(cv_mod_approach_different.getBool()) {
+        this->fApproachScale = 1 + (scale * cv::approach_scale_multiplier.getFloat());
+        if(cv::mod_approach_different.getBool()) {
             const float back_const = 1.70158;
 
             float time = 1.0f - scale;
             {
-                switch(cv_mod_approach_different_style.getInt()) {
+                switch(cv::mod_approach_different_style.getInt()) {
                     default:  // "Linear"
                         break;
                     case 1:  // "Gravity" / InBack
@@ -368,7 +368,7 @@ void HitObject::update(long curPos, f64 frame_time) {
                 // purpose
             }
             this->fApproachScale =
-                1 + std::lerp(cv_mod_approach_different_initial_size.getFloat() - 1.0f, 0.0f, time);
+                1 + std::lerp(cv::mod_approach_different_initial_size.getFloat() - 1.0f, 0.0f, time);
         }
 
         // hitobject body fadein
@@ -383,10 +383,10 @@ void HitObject::update(long curPos, f64 frame_time) {
 
         if(mods.flags & Replay::ModFlags::Hidden) {
             // hidden hitobject body fadein
-            const float fin_start_percent = cv_mod_hd_circle_fadein_start_percent.getFloat();
-            const float fin_end_percent = cv_mod_hd_circle_fadein_end_percent.getFloat();
-            const float fout_start_percent = cv_mod_hd_circle_fadeout_start_percent.getFloat();
-            const float fout_end_percent = cv_mod_hd_circle_fadeout_end_percent.getFloat();
+            const float fin_start_percent = cv::mod_hd_circle_fadein_start_percent.getFloat();
+            const float fin_end_percent = cv::mod_hd_circle_fadein_end_percent.getFloat();
+            const float fout_start_percent = cv::mod_hd_circle_fadeout_start_percent.getFloat();
+            const float fout_end_percent = cv::mod_hd_circle_fadeout_end_percent.getFloat();
             const long hiddenFadeInStart = this->click_time - (long)(this->iApproachTime * fin_start_percent);
             const long hiddenFadeInEnd = this->click_time - (long)(this->iApproachTime * fin_end_percent);
             this->fAlpha = std::clamp<float>(
@@ -411,15 +411,15 @@ void HitObject::update(long curPos, f64 frame_time) {
             0.0f, 1.0f);
 
         // hittable dim, see https://github.com/ppy/osu/pull/20572
-        if(cv_hitobject_hittable_dim.getBool() &&
-           (!(this->bi->getMods().flags & Replay::ModFlags::Mafham) || !cv_mod_mafham_ignore_hittable_dim.getBool())) {
+        if(cv::hitobject_hittable_dim.getBool() &&
+           (!(this->bi->getMods().flags & Replay::ModFlags::Mafham) || !cv::mod_mafham_ignore_hittable_dim.getBool())) {
             const long hittableDimFadeStart = this->click_time - (long)GameRules::getHitWindowMiss();
 
             // yes, this means the un-dim animation cuts into the already clickable range
-            const long hittableDimFadeEnd = hittableDimFadeStart + (long)cv_hitobject_hittable_dim_duration.getInt();
+            const long hittableDimFadeEnd = hittableDimFadeStart + (long)cv::hitobject_hittable_dim_duration.getInt();
 
             this->fHittableDimRGBColorMultiplierPercent =
-                std::lerp(cv_hitobject_hittable_dim_start_percent.getFloat(), 1.0f,
+                std::lerp(cv::hitobject_hittable_dim_start_percent.getFloat(), 1.0f,
                             std::clamp<float>(1.0f - (float)(hittableDimFadeEnd - curPos) /
                                                     (float)(hittableDimFadeEnd - hittableDimFadeStart),
                                          0.0f, 1.0f));
@@ -436,9 +436,9 @@ void HitObject::addHitResult(LiveScore::HIT result, long delta, bool isEndOfComb
                              float targetAngle, bool ignoreOnHitErrorBar, bool ignoreCombo, bool ignoreHealth,
                              bool addObjectDurationToSkinAnimationTimeStartOffset) {
     if(this->bm != NULL && osu->getModTarget() && result != LiveScore::HIT::HIT_MISS && targetDelta >= 0.0f) {
-        const float p300 = cv_mod_target_300_percent.getFloat();
-        const float p100 = cv_mod_target_100_percent.getFloat();
-        const float p50 = cv_mod_target_50_percent.getFloat();
+        const float p300 = cv::mod_target_300_percent.getFloat();
+        const float p100 = cv::mod_target_100_percent.getFloat();
+        const float p50 = cv::mod_target_50_percent.getFloat();
 
         if(targetDelta < p300 && (result == LiveScore::HIT::HIT_300 || result == LiveScore::HIT::HIT_100))
             result = LiveScore::HIT::HIT_300;
@@ -467,7 +467,7 @@ void HitObject::addHitResult(LiveScore::HIT result, long delta, bool isEndOfComb
 
     // currently a maximum of 2 simultaneous results are supported (for drawing, per hitobject)
     if(engine->getTime() >
-       this->hitresultanim1.time + cv_hitresult_duration_max.getFloat() * (1.0f / osu->getAnimationSpeedMultiplier()))
+       this->hitresultanim1.time + cv::hitresult_duration_max.getFloat() * (1.0f / osu->getAnimationSpeedMultiplier()))
         this->hitresultanim1 = hitresultanim;
     else
         this->hitresultanim2 = hitresultanim;

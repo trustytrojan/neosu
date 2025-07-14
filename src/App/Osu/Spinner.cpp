@@ -51,7 +51,7 @@ Spinner::Spinner(int x, int y, long time, int sampleType, bool isEndOfCombo, lon
 
     // spinners don't use AR-dependent fadein, instead they always fade in with hardcoded 400 ms (see
     // GameRules::getFadeInTime())
-    this->bUseFadeInTimeAsApproachTime = !cv_spinner_use_ar_fadein.getBool();
+    this->bUseFadeInTimeAsApproachTime = !cv::spinner_use_ar_fadein.getBool();
 }
 
 Spinner::~Spinner() {
@@ -63,7 +63,7 @@ Spinner::~Spinner() {
 
 void Spinner::draw() {
     HitObject::draw();
-    const float fadeOutMultiplier = cv_spinner_fade_out_time_multiplier.getFloat();
+    const float fadeOutMultiplier = cv::spinner_fade_out_time_multiplier.getFloat();
     const long fadeOutTimeMS = (long)(GameRules::getFadeOutTime(this->bm) * 1000.0f * fadeOutMultiplier);
     const long deltaEnd = this->iDelta + this->duration;
     if((this->bFinished || !this->bVisible) && (deltaEnd > 0 || (deltaEnd < -fadeOutTimeMS))) return;
@@ -402,16 +402,16 @@ void Spinner::onHit() {
     LiveScore::HIT result = LiveScore::HIT::HIT_NULL;
     if(this->fRatio >= 1.0f || (this->bi->getModsLegacy() & LegacyFlags::Autoplay))
         result = LiveScore::HIT::HIT_300;
-    else if(this->fRatio >= 0.9f && !cv_mod_ming3012.getBool() && !cv_mod_no100s.getBool())
+    else if(this->fRatio >= 0.9f && !cv::mod_ming3012.getBool() && !cv::mod_no100s.getBool())
         result = LiveScore::HIT::HIT_100;
-    else if(this->fRatio >= 0.75f && !cv_mod_no100s.getBool() && !cv_mod_no50s.getBool())
+    else if(this->fRatio >= 0.75f && !cv::mod_no100s.getBool() && !cv::mod_no50s.getBool())
         result = LiveScore::HIT::HIT_50;
     else
         result = LiveScore::HIT::HIT_MISS;
 
     // sound
     if(this->bm != NULL && result != LiveScore::HIT::HIT_MISS) {
-        if(cv_timingpoints_force.getBool()) this->bm->updateTimingPoints(this->click_time + this->duration);
+        if(cv::timingpoints_force.getBool()) this->bm->updateTimingPoints(this->click_time + this->duration);
 
         const Vector2 osuCoords = this->bm->pixels2OsuCoords(this->bm->osuCoords2Pixels(this->vRawPos));
 

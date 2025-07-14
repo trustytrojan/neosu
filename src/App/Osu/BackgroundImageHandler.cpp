@@ -39,9 +39,9 @@ void BackgroundImageHandler::update(bool allowEviction) {
                     continue;
                 }
             } else {
-                entry.evictionTime = engine->getTime() + cv_background_image_eviction_delay_seconds.getFloat();
+                entry.evictionTime = engine->getTime() + cv::background_image_eviction_delay_seconds.getFloat();
                 entry.evictionTimeFrameCount =
-                    engine->getFrameCount() + (unsigned long)std::max(0, cv_background_image_eviction_delay_frames.getInt());
+                    engine->getFrameCount() + (unsigned long)std::max(0, cv::background_image_eviction_delay_frames.getInt());
             }
         } else if(wasUsedLastFrame) {
             // check and handle scheduled loads
@@ -104,15 +104,15 @@ void BackgroundImageHandler::handleLoadImageForEntry(ENTRY &entry) {
 }
 
 Image *BackgroundImageHandler::getLoadBackgroundImage(const DatabaseBeatmap *beatmap) {
-    if(beatmap == NULL || !cv_load_beatmap_background_images.getBool() || !beatmap->draw_background) return NULL;
+    if(beatmap == NULL || !cv::load_beatmap_background_images.getBool() || !beatmap->draw_background) return NULL;
 
     // NOTE: no references to beatmap are kept anywhere (database can safely be deleted/reloaded without having to
     // notify the BackgroundImageHandler)
 
-    const float newLoadingTime = engine->getTime() + cv_background_image_loading_delay.getFloat();
-    const float newEvictionTime = engine->getTime() + cv_background_image_eviction_delay_seconds.getFloat();
+    const float newLoadingTime = engine->getTime() + cv::background_image_loading_delay.getFloat();
+    const float newEvictionTime = engine->getTime() + cv::background_image_eviction_delay_seconds.getFloat();
     const unsigned long newEvictionTimeFrameCount =
-        engine->getFrameCount() + (unsigned long)std::max(0, cv_background_image_eviction_delay_frames.getInt());
+        engine->getFrameCount() + (unsigned long)std::max(0, cv::background_image_eviction_delay_frames.getInt());
 
     // 1) if the path or image is already loaded, return image ref immediately (which may still be NULL) and keep track
     // of when it was last requested
@@ -143,7 +143,7 @@ Image *BackgroundImageHandler::getLoadBackgroundImage(const DatabaseBeatmap *bea
     // 2) not found in cache, so create a new entry which will get handled in the next update
     {
         // try evicting stale not-yet-loaded-nor-started-loading entries on overflow
-        const int maxCacheEntries = cv_background_image_cache_size.getInt();
+        const int maxCacheEntries = cv::background_image_cache_size.getInt();
         {
             if(this->cache.size() >= maxCacheEntries) {
                 for(size_t i = 0; i < this->cache.size(); i++) {

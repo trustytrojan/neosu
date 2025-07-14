@@ -131,7 +131,7 @@ class ResourceManager final {
         if(resourceName.empty()) return nullptr;
         auto it = this->mNameToResourceMap.find(resourceName);
         if(it != this->mNameToResourceMap.end()) return it->second->as<T>();
-        if(cv_debug_rm.getBool())
+        if(cv::debug_rm.getBool())
             debugLogF(R"(ResourceManager WARNING: Resource "{:s}" does not exist!)"
                       "\n",
                       resourceName);
@@ -142,7 +142,7 @@ class ResourceManager final {
         if(resourceName.empty()) return nullptr;
         auto it = this->mNameToResourceMap.find(resourceName);
         if(it == this->mNameToResourceMap.end()) return nullptr;
-        if(cv_debug_rm.getBool())
+        if(cv::debug_rm.getBool())
             debugLogF(R"(ResourceManager NOTICE: Resource "{:s}" already loaded.)"
                       "\n",
                       resourceName);

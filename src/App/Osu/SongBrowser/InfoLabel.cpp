@@ -58,7 +58,7 @@ InfoLabel::InfoLabel(float xPos, float yPos, float xSize, float ySize, UString n
 
 void InfoLabel::draw() {
     // debug bounding box
-    if(cv_debug.getBool()) {
+    if(cv::debug.getBool()) {
         g->setColor(0xffff0000);
         g->drawLine(this->vPos.x, this->vPos.y, this->vPos.x + this->vSize.x, this->vPos.y);
         g->drawLine(this->vPos.x, this->vPos.y, this->vPos.x, this->vPos.y + this->vSize.y);

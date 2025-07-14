@@ -95,15 +95,15 @@ void SongButton::draw() {
 }
 
 void SongButton::drawBeatmapBackgroundThumbnail(Image *image) {
-    if(!cv_draw_songbrowser_thumbnails.getBool() || osu->getSkin()->getVersion() < 2.2f) return;
+    if(!cv::draw_songbrowser_thumbnails.getBool() || osu->getSkin()->getVersion() < 2.2f) return;
 
     float alpha = 1.0f;
-    if(cv_songbrowser_thumbnail_fade_in_duration.getFloat() > 0.0f) {
+    if(cv::songbrowser_thumbnail_fade_in_duration.getFloat() > 0.0f) {
         if(image == NULL || !image->isReady())
             this->fThumbnailFadeInTime = engine->getTime();
         else if(this->fThumbnailFadeInTime > 0.0f && engine->getTime() > this->fThumbnailFadeInTime) {
             alpha = std::clamp<float>(
-                (engine->getTime() - this->fThumbnailFadeInTime) / cv_songbrowser_thumbnail_fade_in_duration.getFloat(),
+                (engine->getTime() - this->fThumbnailFadeInTime) / cv::songbrowser_thumbnail_fade_in_duration.getFloat(),
                 0.0f, 1.0f);
             alpha = 1.0f - (1.0f - alpha) * (1.0f - alpha);
         }
@@ -135,7 +135,7 @@ void SongButton::drawBeatmapBackgroundThumbnail(Image *image) {
     g->popTransform();
 
     // debug cliprect bounding box
-    if(cv_debug.getBool()) {
+    if(cv::debug.getBool()) {
         Vector2 clipRectPos = Vector2(clipRect.getX(), clipRect.getY() - 1);
         Vector2 clipRectSize = Vector2(clipRect.getWidth(), clipRect.getHeight());
 

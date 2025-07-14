@@ -87,7 +87,7 @@ Matrix4 Graphics::getWorldMatrix() { return this->worldTransformStack.top(); }
 Matrix4 Graphics::getProjectionMatrix() { return this->projectionTransformStack.top(); }
 
 void Graphics::push3DScene(McRect region) {
-    if(cv_r_debug_disable_3dscene.getBool()) return;
+    if(cv::r_debug_disable_3dscene.getBool()) return;
 
     // you can't yet stack 3d scenes!
     if(this->scene_stack.top()) {
@@ -121,7 +121,7 @@ void Graphics::push3DScene(McRect region) {
     Matrix4 projectionMatrix =
         trans2 * Camera::buildMatrixPerspectiveFov(
                      glm::radians(fov), ((float)engine->getScreenWidth()) / ((float)engine->getScreenHeight()),
-                     cv_r_3dscene_zn.getFloat(), cv_r_3dscene_zf.getFloat());
+                     cv::r_3dscene_zn.getFloat(), cv::r_3dscene_zf.getFloat());
     this->scene_projection_matrix = projectionMatrix;
 
     // set world matrix

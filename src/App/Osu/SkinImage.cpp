@@ -109,15 +109,15 @@ bool SkinImage::loadImage(const std::string& skinElementName, bool ignoreDefault
     // load user skin
 
     // check if an @2x version of this image exists
-    if(cv_skin_hd.getBool()) {
+    if(cv::skin_hd.getBool()) {
         // load user skin
 
         if(existsFilepath1) {
             IMAGE image;
 
-            if(cv_skin_async.getBool()) resourceManager->requestNextLoadAsync();
+            if(cv::skin_async.getBool()) resourceManager->requestNextLoadAsync();
 
-            image.img = resourceManager->loadImageAbsUnnamed(filepath1, cv_skin_mipmaps.getBool());
+            image.img = resourceManager->loadImageAbsUnnamed(filepath1, cv::skin_mipmaps.getBool());
             image.scale = 2.0f;
 
             this->images.push_back(image);
@@ -140,9 +140,9 @@ bool SkinImage::loadImage(const std::string& skinElementName, bool ignoreDefault
     if(existsFilepath2) {
         IMAGE image;
 
-        if(cv_skin_async.getBool()) resourceManager->requestNextLoadAsync();
+        if(cv::skin_async.getBool()) resourceManager->requestNextLoadAsync();
 
-        image.img = resourceManager->loadImageAbsUnnamed(filepath2, cv_skin_mipmaps.getBool());
+        image.img = resourceManager->loadImageAbsUnnamed(filepath2, cv::skin_mipmaps.getBool());
         image.scale = 1.0f;
 
         this->images.push_back(image);
@@ -165,13 +165,13 @@ bool SkinImage::loadImage(const std::string& skinElementName, bool ignoreDefault
     this->bIsFromDefaultSkin = true;
 
     // check if an @2x version of this image exists
-    if(cv_skin_hd.getBool()) {
+    if(cv::skin_hd.getBool()) {
         if(existsDefaultFilePath1) {
             IMAGE image;
 
-            if(cv_skin_async.getBool()) resourceManager->requestNextLoadAsync();
+            if(cv::skin_async.getBool()) resourceManager->requestNextLoadAsync();
 
-            image.img = resourceManager->loadImageAbsUnnamed(defaultFilePath1, cv_skin_mipmaps.getBool());
+            image.img = resourceManager->loadImageAbsUnnamed(defaultFilePath1, cv::skin_mipmaps.getBool());
             image.scale = 2.0f;
 
             this->images.push_back(image);
@@ -192,9 +192,9 @@ bool SkinImage::loadImage(const std::string& skinElementName, bool ignoreDefault
     if(existsDefaultFilePath2) {
         IMAGE image;
 
-        if(cv_skin_async.getBool()) resourceManager->requestNextLoadAsync();
+        if(cv::skin_async.getBool()) resourceManager->requestNextLoadAsync();
 
-        image.img = resourceManager->loadImageAbsUnnamed(defaultFilePath2, cv_skin_mipmaps.getBool());
+        image.img = resourceManager->loadImageAbsUnnamed(defaultFilePath2, cv::skin_mipmaps.getBool());
         image.scale = 1.0f;
 
         this->images.push_back(image);
@@ -320,7 +320,7 @@ void SkinImage::update(float speedMultiplier, bool useEngineTimeForAnimations, l
     this->iCurMusicPos = curMusicPos;
 
     const f64 frameDurationInSeconds =
-        (cv_skin_animation_fps_override.getFloat() > 0.0f ? (1.0f / cv_skin_animation_fps_override.getFloat())
+        (cv::skin_animation_fps_override.getFloat() > 0.0f ? (1.0f / cv::skin_animation_fps_override.getFloat())
                                                           : this->fFrameDuration) /
         speedMultiplier;
     if(frameDurationInSeconds == 0.f) {

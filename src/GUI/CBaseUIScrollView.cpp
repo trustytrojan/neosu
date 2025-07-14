@@ -44,7 +44,7 @@ CBaseUIScrollView::CBaseUIScrollView(float xPos, float yPos, float xSize, float 
     this->bBlockScrolling = false;
 
     this->bScrollResistanceCheck = false;
-    this->iScrollResistance = cv_ui_scrollview_resistance.getInt();  // TODO: dpi handling
+    this->iScrollResistance = cv::ui_scrollview_resistance.getInt();  // TODO: dpi handling
 
     this->container = new CBaseUIContainer(xPos, yPos, xSize, ySize, name);
 }
@@ -151,9 +151,9 @@ void CBaseUIScrollView::mouse_update(bool *propagate_clicks) {
         const Vector2 deltaToAdd = (mouse->getPos() - this->vMouseBackup2);
         // debugLog("+ (%f, %f)\n", deltaToAdd.x, deltaToAdd.y);
 
-        anim->moveQuadOut(&this->vKineticAverage.x, deltaToAdd.x, cv_ui_scrollview_kinetic_approach_time.getFloat(),
+        anim->moveQuadOut(&this->vKineticAverage.x, deltaToAdd.x, cv::ui_scrollview_kinetic_approach_time.getFloat(),
                           true);
-        anim->moveQuadOut(&this->vKineticAverage.y, deltaToAdd.y, cv_ui_scrollview_kinetic_approach_time.getFloat(),
+        anim->moveQuadOut(&this->vKineticAverage.y, deltaToAdd.y, cv::ui_scrollview_kinetic_approach_time.getFloat(),
                           true);
 
         this->vMouseBackup2 = mouse->getPos();
@@ -224,7 +224,7 @@ void CBaseUIScrollView::mouse_update(bool *propagate_clicks) {
 
         // calculate remaining kinetic energy
         if(!this->bScrollbarScrolling)
-            this->vVelocity = cv_ui_scrollview_kinetic_energy_multiplier.getFloat() * delta *
+            this->vVelocity = cv::ui_scrollview_kinetic_energy_multiplier.getFloat() * delta *
                                   (engine->getFrameTime() != 0.0 ? 1.0 / engine->getFrameTime() : 60.0) / 60.0 +
                               this->vScrollPos;
 
@@ -239,10 +239,10 @@ void CBaseUIScrollView::mouse_update(bool *propagate_clicks) {
     if(!keyboard->isAltDown() && this->bMouseInside && this->bEnabled) {
         if(mouse->getWheelDeltaVertical() != 0)
             this->scrollY(mouse->getWheelDeltaVertical() * this->fScrollMouseWheelMultiplier *
-                          cv_ui_scrollview_mousewheel_multiplier.getFloat());
+                          cv::ui_scrollview_mousewheel_multiplier.getFloat());
         if(mouse->getWheelDeltaHorizontal() != 0)
             this->scrollX(-mouse->getWheelDeltaHorizontal() * this->fScrollMouseWheelMultiplier *
-                          cv_ui_scrollview_mousewheel_multiplier.getFloat());
+                          cv::ui_scrollview_mousewheel_multiplier.getFloat());
     }
 
     // handle drag scrolling and rubber banding
@@ -353,7 +353,7 @@ void CBaseUIScrollView::scrollY(int delta, bool animated) {
        this->container->isBusy())
         return;
 
-    const bool allowOverscrollBounce = cv_ui_scrollview_mousewheel_overscrollbounce.getBool();
+    const bool allowOverscrollBounce = cv::ui_scrollview_mousewheel_overscrollbounce.getBool();
 
     // keep velocity (partially animated/finished scrolls should not get lost, especially multiple scroll() calls in
     // quick succession)
@@ -508,7 +508,7 @@ void CBaseUIScrollView::updateClipping() {
 void CBaseUIScrollView::updateScrollbars() {
     // update vertical scrollbar
     if(this->bVerticalScrolling && this->vScrollSize.y > this->vSize.y) {
-        const float verticalBlockWidth = cv_ui_scrollview_scrollbarwidth.getInt();
+        const float verticalBlockWidth = cv::ui_scrollview_scrollbarwidth.getInt();
 
         const float rawVerticalPercent = (this->vScrollPos.y > 0 ? -this->vScrollPos.y : std::abs(this->vScrollPos.y)) /
                                          (this->vScrollSize.y - this->vSize.y);
@@ -542,7 +542,7 @@ void CBaseUIScrollView::updateScrollbars() {
             std::clamp<float>((this->vScrollPos.x > 0 ? -this->vScrollPos.x : std::abs(this->vScrollPos.x)) /
                                   (this->vScrollSize.x - this->vSize.x),
                               0.0f, 1.0f);
-        const float horizontalBlockWidth = cv_ui_scrollview_scrollbarwidth.getInt();
+        const float horizontalBlockWidth = cv::ui_scrollview_scrollbarwidth.getInt();
         const float horizontalHeightPercent = (this->vSize.x - (horizontalBlockWidth * 2)) / this->vScrollSize.x;
         const float horizontalBlockHeight = std::max(horizontalHeightPercent * this->vSize.x, horizontalBlockWidth);
 

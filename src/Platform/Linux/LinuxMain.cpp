@@ -201,8 +201,8 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> & /*argC
 
             // delay the next frame
             const int target_fps =
-                !this->bHasFocus ? cv_fps_max_background.getInt()
-                                 : (cv_fps_unlimited.getBool() || cv_fps_max.getInt() <= 0 ? 0 : cv_fps_max.getInt());
+                !this->bHasFocus ? cv::fps_max_background.getInt()
+                                 : (cv::fps_unlimited.getBool() || cv::fps_max.getInt() <= 0 ? 0 : cv::fps_max.getInt());
             FPSLimiter::limit_frames(target_fps);
         }
     }

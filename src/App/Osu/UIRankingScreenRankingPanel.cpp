@@ -29,7 +29,7 @@ void UIRankingScreenRankingPanel::draw() {
     CBaseUIImage::draw();
     if(!this->bVisible) return;
 
-    const float uiScale = /*cv_ui_scale.getFloat()*/ 1.0f;  // NOTE: commented for now, doesn't really work due to
+    const float uiScale = /*cv::ui_scale.getFloat()*/ 1.0f;  // NOTE: commented for now, doesn't really work due to
                                                             // legacy layout expectations
 
     const float globalScoreScale = (osu->getSkin()->getVersion() > 1.0f ? 1.3f : 1.05f) * uiScale;
@@ -143,7 +143,7 @@ void UIRankingScreenRankingPanel::draw() {
 }
 
 void UIRankingScreenRankingPanel::drawHitImage(SkinImage *img, float scale, Vector2 pos) {
-    const float uiScale = /*cv_ui_scale.getFloat()*/ 1.0f;  // NOTE: commented for now, doesn't really work due to
+    const float uiScale = /*cv::ui_scale.getFloat()*/ 1.0f;  // NOTE: commented for now, doesn't really work due to
                                                             // legacy layout expectations
 
     /// img->setAnimationFrameForce(0);
@@ -153,7 +153,7 @@ void UIRankingScreenRankingPanel::drawHitImage(SkinImage *img, float scale, Vect
 }
 
 void UIRankingScreenRankingPanel::drawNumHits(int numHits, float scale, Vector2 pos) {
-    const float uiScale = /*cv_ui_scale.getFloat()*/ 1.0f;  // NOTE: commented for now, doesn't really work due to
+    const float uiScale = /*cv::ui_scale.getFloat()*/ 1.0f;  // NOTE: commented for now, doesn't really work due to
                                                             // legacy layout expectations
 
     g->pushTransform();

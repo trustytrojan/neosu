@@ -17,31 +17,31 @@ class GameRules {
 
     // this scales the fadeout duration with the current speed multiplier
     static float getFadeOutTime(Beatmap *beatmap) {
-        const float fade_out_time = cv_hitobject_fade_out_time.getFloat();
-        const float multiplier_min = cv_hitobject_fade_out_time_speed_multiplier_min.getFloat();
+        const float fade_out_time = cv::hitobject_fade_out_time.getFloat();
+        const float multiplier_min = cv::hitobject_fade_out_time_speed_multiplier_min.getFloat();
         return fade_out_time * (1.0f / std::max(osu->getAnimationSpeedMultiplier(), multiplier_min));
     }
 
-    static inline long getFadeInTime() { return (long)cv_hitobject_fade_in_time.getInt(); }
+    static inline long getFadeInTime() { return (long)cv::hitobject_fade_in_time.getInt(); }
 
     //********************//
     //	Hitobject Timing  //
     //********************//
 
     // ignore all mods and overrides
-    static inline float getRawMinApproachTime() { return cv_approachtime_min.getFloat(); }
-    static inline float getRawMidApproachTime() { return cv_approachtime_mid.getFloat(); }
-    static inline float getRawMaxApproachTime() { return cv_approachtime_max.getFloat(); }
+    static inline float getRawMinApproachTime() { return cv::approachtime_min.getFloat(); }
+    static inline float getRawMidApproachTime() { return cv::approachtime_mid.getFloat(); }
+    static inline float getRawMaxApproachTime() { return cv::approachtime_max.getFloat(); }
 
     // respect mods and overrides
     static inline float getMinApproachTime() {
-        return getRawMinApproachTime() * (cv_mod_millhioref.getBool() ? cv_mod_millhioref_multiplier.getFloat() : 1.0f);
+        return getRawMinApproachTime() * (cv::mod_millhioref.getBool() ? cv::mod_millhioref_multiplier.getFloat() : 1.0f);
     }
     static inline float getMidApproachTime() {
-        return getRawMidApproachTime() * (cv_mod_millhioref.getBool() ? cv_mod_millhioref_multiplier.getFloat() : 1.0f);
+        return getRawMidApproachTime() * (cv::mod_millhioref.getBool() ? cv::mod_millhioref_multiplier.getFloat() : 1.0f);
     }
     static inline float getMaxApproachTime() {
-        return getRawMaxApproachTime() * (cv_mod_millhioref.getBool() ? cv_mod_millhioref_multiplier.getFloat() : 1.0f);
+        return getRawMaxApproachTime() * (cv::mod_millhioref.getBool() ? cv::mod_millhioref_multiplier.getFloat() : 1.0f);
     }
 
     static inline float getMinHitWindow300() { return 80.f; }
@@ -177,8 +177,8 @@ class GameRules {
 
     static float getPlayfieldScaleFactor() {
         const int engineScreenWidth = osu->getScreenWidth();
-        const int topBorderSize = cv_playfield_border_top_percent.getFloat() * osu->getScreenHeight();
-        const int bottomBorderSize = cv_playfield_border_bottom_percent.getFloat() * osu->getScreenHeight();
+        const int topBorderSize = cv::playfield_border_top_percent.getFloat() * osu->getScreenHeight();
+        const int bottomBorderSize = cv::playfield_border_bottom_percent.getFloat() * osu->getScreenHeight();
         const int engineScreenHeight = osu->getScreenHeight() - bottomBorderSize - topBorderSize;
 
         return osu->getScreenWidth() / (float)OSU_COORD_WIDTH > engineScreenHeight / (float)OSU_COORD_HEIGHT
@@ -194,10 +194,10 @@ class GameRules {
 
     static Vector2 getPlayfieldOffset() {
         const Vector2 playfieldSize = getPlayfieldSize();
-        const int bottomBorderSize = cv_playfield_border_bottom_percent.getFloat() * osu->getScreenHeight();
+        const int bottomBorderSize = cv::playfield_border_bottom_percent.getFloat() * osu->getScreenHeight();
         int playfieldYOffset = (osu->getScreenHeight() / 2.0f - (playfieldSize.y / 2.0f)) - bottomBorderSize;
 
-        if(cv_mod_fps.getBool())
+        if(cv::mod_fps.getBool())
             playfieldYOffset =
                 0;  // first person mode doesn't need any offsets, cursor/crosshair should be centered on screen
 

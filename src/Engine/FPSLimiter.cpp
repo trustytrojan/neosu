@@ -26,7 +26,7 @@ void limit_frames(int target_fps) {
         if(next_frame_time > now) {
             const u64 sleep_time = next_frame_time - now;
             Timing::sleepNS(sleep_time);
-        } else if(cv_fps_max_yield.getBool()) {
+        } else if(cv::fps_max_yield.getBool()) {
             Timing::sleep(0);
             next_frame_time = Timing::getTicksNS();  // update "now" to reflect the time spent in yield
         } else {
@@ -35,7 +35,7 @@ void limit_frames(int target_fps) {
         }
         // set time for next frame
         next_frame_time += frame_time_ns;
-    } else if(cv_fps_unlimited_yield.getBool()) {
+    } else if(cv::fps_unlimited_yield.getBool()) {
         Timing::sleep(0);
     }
 }

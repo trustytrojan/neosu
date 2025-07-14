@@ -448,7 +448,7 @@ SongBrowser::SongBrowser() : ScreenBackable() {
     this->carousel->setDrawFrame(false);
     this->carousel->setHorizontalScrolling(false);
     this->carousel->setScrollResistance(15);
-    this->thumbnailYRatio = cv_draw_songbrowser_thumbnails.getBool() ? 1.333333f : 0.f;
+    this->thumbnailYRatio = cv::draw_songbrowser_thumbnails.getBool() ? 1.333333f : 0.f;
 
     // beatmap database
     db = new Database();
@@ -463,7 +463,7 @@ SongBrowser::SongBrowser() : ScreenBackable() {
     this->search = new UISearchOverlay(0, 0, 0, 0, "");
     this->search->setOffsetRight(10);
     this->fSearchWaitTime = 0.0f;
-    this->bInSearch = (cv_songbrowser_search_hardcoded_filter.getString().length() > 0);
+    this->bInSearch = (cv::songbrowser_search_hardcoded_filter.getString().length() > 0);
     this->searchPrevGroup = GROUP::GROUP_NO_GROUPING;
     this->backgroundSearchMatcher = new SongBrowserBackgroundSearchMatcher();
 
@@ -555,9 +555,9 @@ void SongBrowser::draw() {
     }
 
     // draw background image
-    if(cv_draw_songbrowser_background_image.getBool()) {
+    if(cv::draw_songbrowser_background_image.getBool()) {
         float alpha = 1.0f;
-        if(cv_songbrowser_background_fade_in_duration.getFloat() > 0.0f) {
+        if(cv::songbrowser_background_fade_in_duration.getFloat() > 0.0f) {
             // handle fadein trigger after handler is finished loading
             const bool ready = osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL &&
                                osu->getBackgroundImageHandler()->getLoadBackgroundImage(
@@ -570,14 +570,14 @@ void SongBrowser::draw() {
                 this->fBackgroundFadeInTime = engine->getTime();
             else if(this->fBackgroundFadeInTime > 0.0f && engine->getTime() > this->fBackgroundFadeInTime) {
                 alpha = std::clamp<float>((engine->getTime() - this->fBackgroundFadeInTime) /
-                                              cv_songbrowser_background_fade_in_duration.getFloat(),
+                                              cv::songbrowser_background_fade_in_duration.getFloat(),
                                           0.0f, 1.0f);
                 alpha = 1.0f - (1.0f - alpha) * (1.0f - alpha);
             }
         }
 
         drawSelectedBeatmapBackgroundImage(alpha);
-    } else if(cv_draw_songbrowser_menu_background_image.getBool()) {
+    } else if(cv::draw_songbrowser_menu_background_image.getBool()) {
         // menu-background
         Image *backgroundImage = osu->getSkin()->getMenuBackground();
         if(backgroundImage != NULL && backgroundImage != osu->getSkin()->getMissingTexture() &&
@@ -602,7 +602,7 @@ void SongBrowser::draw() {
         f32 mode_osu_scale = global_scale * (osu->getSkin()->mode_osu->is_2x ? 0.5f : 1.f);
 
         g->setColor(0xffffffff);
-        if(cv_avoid_flashes.getBool()) {
+        if(cv::avoid_flashes.getBool()) {
             g->setAlpha(0.1f);
         } else {
             // XXX: Flash based on song BPM
@@ -619,12 +619,12 @@ void SongBrowser::draw() {
     this->scoreBrowser->draw();
     this->localBestContainer->draw();
 
-    if(cv_debug.getBool()) {
+    if(cv::debug.getBool()) {
         this->scoreBrowser->getContainer()->draw_debug();
     }
 
     // draw strain graph of currently selected beatmap
-    if(cv_draw_songbrowser_strain_graph.getBool()) {
+    if(cv::draw_songbrowser_strain_graph.getBool()) {
         const std::vector<double> &aimStrains = this->getSelectedBeatmap()->aimStrains;
         const std::vector<double> &speedStrains = this->getSelectedBeatmap()->speedStrains;
         const float speedMultiplier = this->getSelectedBeatmap()->getSpeedMultiplier();
@@ -660,22 +660,22 @@ void SongBrowser::draw() {
 
                 const float msPerPixel = (float)lengthMS / graphWidth;
                 const float strainWidth = strainStepMS / msPerPixel;
-                const float strainHeightMultiplier = cv_hud_scrubbing_timeline_strains_height.getFloat() * dpiScale;
+                const float strainHeightMultiplier = cv::hud_scrubbing_timeline_strains_height.getFloat() * dpiScale;
 
                 McRect graphRect(0, osu->getScreenHeight() - (get_bottombar_height() + strainHeightMultiplier),
                                  graphWidth, strainHeightMultiplier);
 
                 const float alpha =
-                    (graphRect.contains(mouse->getPos()) ? 1.0f : cv_hud_scrubbing_timeline_strains_alpha.getFloat());
+                    (graphRect.contains(mouse->getPos()) ? 1.0f : cv::hud_scrubbing_timeline_strains_alpha.getFloat());
 
                 const Color aimStrainColor =
-                    argb(alpha, cv_hud_scrubbing_timeline_strains_aim_color_r.getInt() / 255.0f,
-                           cv_hud_scrubbing_timeline_strains_aim_color_g.getInt() / 255.0f,
-                           cv_hud_scrubbing_timeline_strains_aim_color_b.getInt() / 255.0f);
+                    argb(alpha, cv::hud_scrubbing_timeline_strains_aim_color_r.getInt() / 255.0f,
+                           cv::hud_scrubbing_timeline_strains_aim_color_g.getInt() / 255.0f,
+                           cv::hud_scrubbing_timeline_strains_aim_color_b.getInt() / 255.0f);
                 const Color speedStrainColor =
-                    argb(alpha, cv_hud_scrubbing_timeline_strains_speed_color_r.getInt() / 255.0f,
-                           cv_hud_scrubbing_timeline_strains_speed_color_g.getInt() / 255.0f,
-                           cv_hud_scrubbing_timeline_strains_speed_color_b.getInt() / 255.0f);
+                    argb(alpha, cv::hud_scrubbing_timeline_strains_speed_color_r.getInt() / 255.0f,
+                           cv::hud_scrubbing_timeline_strains_speed_color_g.getInt() / 255.0f,
+                           cv::hud_scrubbing_timeline_strains_speed_color_b.getInt() / 255.0f);
 
                 g->setDepthBuffer(true);
                 for(int i = 0; i < aimStrains.size(); i++) {
@@ -743,7 +743,7 @@ void SongBrowser::draw() {
     this->carousel->draw();
 
     // draw search
-    this->search->setSearchString(this->sSearchString, cv_songbrowser_search_hardcoded_filter.getString().c_str());
+    this->search->setSearchString(this->sSearchString, cv::songbrowser_search_hardcoded_filter.getString().c_str());
     this->search->setDrawNumResults(this->bInSearch);
     this->search->setNumFoundResults(this->visibleSongButtons.size());
     this->search->setSearching(!this->backgroundSearchMatcher->isDead());
@@ -770,9 +770,9 @@ void SongBrowser::draw() {
 
     // draw top bar
     this->topbarLeft->draw();
-    if(cv_debug.getBool()) this->topbarLeft->draw_debug();
+    if(cv::debug.getBool()) this->topbarLeft->draw_debug();
     this->topbarRight->draw();
-    if(cv_debug.getBool()) this->topbarRight->draw_debug();
+    if(cv::debug.getBool()) this->topbarRight->draw_debug();
 
     // NOTE: Intentionally not calling ScreenBackable::draw() here, since we're already drawing
     //       the back button in draw_bottombar().
@@ -1080,7 +1080,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
     if(!this->bVisible || key.isConsumed()) return;
 
     if(this->bVisible && this->bBeatmapRefreshScheduled &&
-       (key == KEY_ESCAPE || key == (KEYCODE)cv_GAME_PAUSE.getInt())) {
+       (key == KEY_ESCAPE || key == (KEYCODE)cv::GAME_PAUSE.getInt())) {
         db->cancel();
         key.consume();
         return;
@@ -1144,11 +1144,11 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
     if(key == KEY_LSHIFT || key == KEY_RSHIFT) this->bShiftPressed = true;
 
     // function hotkeys
-    if((key == KEY_F1 || key == (KEYCODE)cv_TOGGLE_MODSELECT.getInt()) && !this->bF1Pressed) {
+    if((key == KEY_F1 || key == (KEYCODE)cv::TOGGLE_MODSELECT.getInt()) && !this->bF1Pressed) {
         this->bF1Pressed = true;
         press_bottombar_button(1);
     }
-    if((key == KEY_F2 || key == (KEYCODE)cv_RANDOM_BEATMAP.getInt()) && !this->bF2Pressed) {
+    if((key == KEY_F2 || key == (KEYCODE)cv::RANDOM_BEATMAP.getInt()) && !this->bF2Pressed) {
         this->bF2Pressed = true;
         press_bottombar_button(2);
     }
@@ -1335,8 +1335,8 @@ void SongBrowser::onKeyUp(KeyboardEvent &key) {
     if(key == KEY_LEFT) this->bLeft = false;
     if(key == KEY_RIGHT) this->bRight = false;
 
-    if(key == KEY_F1 || key == (KEYCODE)cv_TOGGLE_MODSELECT.getInt()) this->bF1Pressed = false;
-    if(key == KEY_F2 || key == (KEYCODE)cv_RANDOM_BEATMAP.getInt()) this->bF2Pressed = false;
+    if(key == KEY_F1 || key == (KEYCODE)cv::TOGGLE_MODSELECT.getInt()) this->bF1Pressed = false;
+    if(key == KEY_F2 || key == (KEYCODE)cv::RANDOM_BEATMAP.getInt()) this->bF2Pressed = false;
     if(key == KEY_F3) this->bF3Pressed = false;
 }
 
@@ -1385,7 +1385,7 @@ CBaseUIContainer *SongBrowser::setVisible(bool visible) {
         }
 
         // update user name/stats
-        osu->onUserCardChange(cv_name.getString().c_str());
+        osu->onUserCardChange(cv::name.getString().c_str());
 
         // HACKHACK: workaround for BaseUI framework deficiency (missing mouse events. if a mouse button is being held,
         // and then suddenly a BaseUIElement gets put under it and set visible, and then the mouse button is released,
@@ -1801,7 +1801,7 @@ void SongBrowser::addSongButtonToAlphanumericGroup(SongButton *btn, std::vector<
     }
 
     auto it = std::lower_bound(children->begin(), children->end(), btn, this->sortingComparator);
-    if(cv_debug.getBool()) debugLog("Inserting %s at index %d\n", name.c_str(), it - children->begin());
+    if(cv::debug.getBool()) debugLog("Inserting %s at index %d\n", name.c_str(), it - children->begin());
     children->insert(it, btn);
 }
 
@@ -2314,7 +2314,7 @@ void SongBrowser::updateLayout() {
     bool is_widescreen = ((i32)(std::max(0, (i32)((screen.x - (screen.y * 4.f / 3.f)) / 2.f))) > 0);
     f32 global_scale = screen.x / (is_widescreen ? 1366.f : 1024.f);
 
-    const float uiScale = cv_ui_scale.getFloat();
+    const float uiScale = cv::ui_scale.getFloat();
     const float dpiScale = Osu::getUIScale();
 
     const int margin = 5 * dpiScale;
@@ -2412,7 +2412,7 @@ void SongBrowser::updateScoreBrowserLayout() {
     f32 global_scale = screen.x / (is_widescreen ? 1366.f : 1024.f);
 
     const bool shouldScoreBrowserBeVisible =
-        (cv_scores_enabled.getBool() && cv_songbrowser_scorebrowser_enabled.getBool());
+        (cv::scores_enabled.getBool() && cv::songbrowser_scorebrowser_enabled.getBool());
     if(shouldScoreBrowserBeVisible != this->scoreBrowser->isVisible())
         this->scoreBrowser->setVisible(shouldScoreBrowserBeVisible);
 
@@ -2480,7 +2480,7 @@ void SongBrowser::rebuildScoreButtons() {
     this->localBestContainer->setVisible(false);
 
     const bool validBeatmap = (this->beatmap != NULL && this->beatmap->getSelectedDifficulty2() != NULL);
-    bool is_online = cv_songbrowser_scores_sortingtype.getString() == "Online Leaderboard";
+    bool is_online = cv::songbrowser_scores_sortingtype.getString() == "Online Leaderboard";
 
     std::vector<FinishedScore> scores;
     if(validBeatmap) {
@@ -2599,7 +2599,7 @@ void SongBrowser::rebuildScoreButtons() {
 }
 
 void SongBrowser::scheduleSearchUpdate(bool immediately) {
-    this->fSearchWaitTime = engine->getTime() + (immediately ? 0.0f : cv_songbrowser_search_delay.getFloat());
+    this->fSearchWaitTime = engine->getTime() + (immediately ? 0.0f : cv::songbrowser_search_delay.getFloat());
 }
 
 void SongBrowser::checkHandleKillBackgroundSearchMatcher() {
@@ -2776,16 +2776,16 @@ void SongBrowser::onDatabaseLoadingFinished() {
     // build collections
     this->recreateCollectionsButtons();
 
-    this->onSortChange(cv_songbrowser_sortingtype.getString().c_str());
-    this->onSortScoresChange(cv_songbrowser_scores_sortingtype.getString().c_str());
+    this->onSortChange(cv::songbrowser_sortingtype.getString().c_str());
+    this->onSortScoresChange(cv::songbrowser_scores_sortingtype.getString().c_str());
 
     // update rich presence (discord total pp)
     RichPresence::onSongBrowser();
 
     // update user name/stats
-    osu->onUserCardChange(cv_name.getString().c_str());
+    osu->onUserCardChange(cv::name.getString().c_str());
 
-    if(cv_songbrowser_search_hardcoded_filter.getString().length() > 0) this->onSearchUpdate();
+    if(cv::songbrowser_search_hardcoded_filter.getString().length() > 0) this->onSearchUpdate();
 
     if(this->beatmap_to_reselect_after_db_load.hash[0] != 0) {
         auto beatmap = db->getBeatmapDifficulty(this->beatmap_to_reselect_after_db_load);
@@ -2805,12 +2805,12 @@ void SongBrowser::onDatabaseLoadingFinished() {
 
 void SongBrowser::onSearchUpdate() {
     const bool hasHardcodedSearchStringChanged =
-        (this->sPrevHardcodedSearchString != cv_songbrowser_search_hardcoded_filter.getString().c_str());
+        (this->sPrevHardcodedSearchString != cv::songbrowser_search_hardcoded_filter.getString().c_str());
     const bool hasSearchStringChanged = (this->sPrevSearchString != this->sSearchString);
 
     const bool prevInSearch = this->bInSearch;
     this->bInSearch =
-        (this->sSearchString.length() > 0 || cv_songbrowser_search_hardcoded_filter.getString().length() > 0);
+        (this->sSearchString.length() > 0 || cv::songbrowser_search_hardcoded_filter.getString().length() > 0);
     const bool hasInSearchChanged = (prevInSearch != this->bInSearch);
 
     if(this->bInSearch) {
@@ -2824,7 +2824,7 @@ void SongBrowser::onSearchUpdate() {
             this->backgroundSearchMatcher->revive();
             this->backgroundSearchMatcher->release();
             this->backgroundSearchMatcher->setSongButtonsAndSearchString(
-                this->songButtons, this->sSearchString, cv_songbrowser_search_hardcoded_filter.getString().c_str());
+                this->songButtons, this->sSearchString, cv::songbrowser_search_hardcoded_filter.getString().c_str());
 
             resourceManager->requestNextLoadAsync();
             resourceManager->loadResource(this->backgroundSearchMatcher);
@@ -2862,7 +2862,7 @@ void SongBrowser::onSearchUpdate() {
     }
 
     this->sPrevSearchString = this->sSearchString;
-    this->sPrevHardcodedSearchString = cv_songbrowser_search_hardcoded_filter.getString().c_str();
+    this->sPrevHardcodedSearchString = cv::songbrowser_search_hardcoded_filter.getString().c_str();
 }
 
 void SongBrowser::rebuildSongButtonsAndVisibleSongButtonsWithSearchMatchSupport(bool scrollToTop,
@@ -2973,13 +2973,13 @@ void SongBrowser::onSortScoresClicked(CBaseUIButton *button) {
     this->contextMenu->begin(button->getSize().x);
     {
         CBaseUIButton *button = this->contextMenu->addButton("Online Leaderboard");
-        if(cv_songbrowser_scores_sortingtype.getString() == "Online Leaderboard")
+        if(cv::songbrowser_scores_sortingtype.getString() == "Online Leaderboard")
             button->setTextBrightColor(0xff00ff00);
 
         const std::vector<Database::SCORE_SORTING_METHOD> &scoreSortingMethods = db->getScoreSortingMethods();
         for(size_t i = 0; i < scoreSortingMethods.size(); i++) {
             CBaseUIButton *button = this->contextMenu->addButton(scoreSortingMethods[i].name);
-            if(scoreSortingMethods[i].name.utf8View() == cv_songbrowser_scores_sortingtype.getString())
+            if(scoreSortingMethods[i].name.utf8View() == cv::songbrowser_scores_sortingtype.getString())
                 button->setTextBrightColor(0xff00ff00);
         }
     }
@@ -2988,7 +2988,7 @@ void SongBrowser::onSortScoresClicked(CBaseUIButton *button) {
 }
 
 void SongBrowser::onSortScoresChange(const UString& text, int id) {
-    cv_songbrowser_scores_sortingtype.setValue(text);  // NOTE: remember
+    cv::songbrowser_scores_sortingtype.setValue(text);  // NOTE: remember
     this->scoreSortButton->setText(text);
     this->rebuildScoreButtons();
     this->scoreBrowser->scrollToTop();
@@ -3119,7 +3119,7 @@ void SongBrowser::onSortChangeInt(const UString& text, bool autoScroll) {
     this->sortingComparator = sortingMethod->comparator;
     this->sortButton->setText(sortingMethod->name);
 
-    cv_songbrowser_sortingtype.setValue(sortingMethod->name);  // NOTE: remember persistently
+    cv::songbrowser_sortingtype.setValue(sortingMethod->name);  // NOTE: remember persistently
 
     // resort primitive master button array (all songbuttons, No Grouping)
     std::sort(this->songButtons.begin(), this->songButtons.end(), this->sortingComparator);
@@ -3301,11 +3301,11 @@ void SongBrowser::onAfterSortingOrGroupChange() {
 }
 
 void SongBrowser::onSelectionMode() {
-    if(cv_mod_fposu.getBool()) {
-        cv_mod_fposu.setValue(false);
+    if(cv::mod_fposu.getBool()) {
+        cv::mod_fposu.setValue(false);
         osu->getNotificationOverlay()->addToast("Enabled FPoSu mode.", 0xff00ff00);
     } else {
-        cv_mod_fposu.setValue(true);
+        cv::mod_fposu.setValue(true);
         osu->getNotificationOverlay()->addToast("Disabled FPoSu mode.", 0xff00ff00);
     }
 }
@@ -3344,7 +3344,7 @@ void SongBrowser::onSelectionOptions() {
 
 void SongBrowser::onModeChange(const UString& text) { this->onModeChange2(text); }
 
-void SongBrowser::onModeChange2(const UString& text, int id) { cv_mod_fposu.setValue(id == 2 || text == UString("fposu")); }
+void SongBrowser::onModeChange2(const UString& text, int id) { cv::mod_fposu.setValue(id == 2 || text == UString("fposu")); }
 
 void SongBrowser::onScoreClicked(CBaseUIButton *button) {
     ScoreButton *scoreButton = (ScoreButton *)button;
@@ -3490,7 +3490,7 @@ void SongBrowser::onSongButtonContextMenu(SongButton *songButton, const UString&
             this->recreateCollectionsButtons();
             this->rebuildSongButtonsAndVisibleSongButtonsWithSearchMatchSupport(
                 false, false);  // (last false = skipping rebuildSongButtons() here)
-            this->onSortChangeInt(cv_songbrowser_sortingtype.getString().c_str(),
+            this->onSortChangeInt(cv::songbrowser_sortingtype.getString().c_str(),
                                   false);  // (because this does the rebuildSongButtons())
         }
         if(previouslySelectedCollectionName.length() > 0) {
@@ -3530,7 +3530,7 @@ void SongBrowser::onCollectionButtonContextMenu(CollectionButton *collectionButt
         }
     } else if(id == 3) {  // collection has been renamed
         // update UI
-        this->onSortChangeInt(cv_songbrowser_sortingtype.getString().c_str(), false);
+        this->onSortChangeInt(cv::songbrowser_sortingtype.getString().c_str(), false);
     }
 }
 

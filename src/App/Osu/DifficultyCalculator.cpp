@@ -56,7 +56,7 @@ OsuDifficultyHitObject::OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time,
             // [Weriko Rank the dream (nerf) but loli].osu
 
             this->curve = SliderCurve::createCurve(this->osuSliderCurveType, controlPoints, this->pixelLength,
-                                                   cv_stars_slider_curve_points_separation.getFloat());
+                                                   cv::stars_slider_curve_points_separation.getFloat());
         } else {
             // new: delay curve creation to when it's needed, and also immediately delete afterwards (at the cost of
             // having to store a copy of the control points)
@@ -241,13 +241,13 @@ f64 DifficultyCalculator::calculateStarDiffForHitObjectsInt(std::vector<DiffObje
             // but this is a good middle ground for maps that aren't completely aspire and still have relatively normal
             // star counts on lazer see: DJ Noriken - Stargazer feat. YUC'e (PSYQUI Remix) (Hishiro Chizuru) [Starg-Azer
             // isn't so great? Are you kidding me?]
-            if(cv_stars_ignore_clamped_sliders.getBool()) {
-                if(slider.ho->curve->getPixelLength() >= cv_slider_curve_max_length.getFloat()) return;
+            if(cv::stars_ignore_clamped_sliders.getBool()) {
+                if(slider.ho->curve->getPixelLength() >= cv::slider_curve_max_length.getFloat()) return;
             }
 
             // NOTE: although this looks like a duplicate of the end tick time, this really does have a noticeable
             // impact on some maps due to precision issues see: Ocelot - KAEDE (Hollow Wings) [EX EX]
-            const f64 tailLeniency = (f64)cv_slider_end_inside_check_offset.getInt();
+            const f64 tailLeniency = (f64)cv::slider_end_inside_check_offset.getInt();
             const f64 totalDuration = (f64)slider.ho->spanDuration * slider.ho->repeats;
             f64 trackingEndTime = (f64)slider.ho->time + std::max(totalDuration - tailLeniency, totalDuration / 2.0);
 
@@ -347,7 +347,7 @@ f64 DifficultyCalculator::calculateStarDiffForHitObjectsInt(std::vector<DiffObje
 
     // calculate angles and travel/jump distances (before calculating strains)
     if(!isUsingCachedDiffObjects) {
-        const f32 starsSliderCurvePointsSeparation = cv_stars_slider_curve_points_separation.getFloat();
+        const f32 starsSliderCurvePointsSeparation = cv::stars_slider_curve_points_separation.getFloat();
         for(size_t i = 0; i < numDiffObjects; i++) {
             if(dead.load()) return 0.0;
 

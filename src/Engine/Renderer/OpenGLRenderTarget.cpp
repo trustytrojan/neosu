@@ -234,7 +234,7 @@ void OpenGLRenderTarget::enable() {
                g->getResolution().x, g->getResolution().y);
 
     // clear
-    if(cv_debug_rt.getBool())
+    if(cv::debug_rt.getBool())
         glClearColor(0.0f, 0.5f, 0.0f, 0.5f);
     else
         glClearColor(this->clearColor.Rf(), this->clearColor.Gf(), this->clearColor.Bf(), this->clearColor.Af());

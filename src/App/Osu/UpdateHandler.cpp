@@ -57,7 +57,7 @@ void *UpdateHandler::run(void *data) {
 UpdateHandler::UpdateHandler() {
     this->update_url = "";
 
-    this->status = cv_auto_update.getBool() ? STATUS::STATUS_CHECKING_FOR_UPDATE : STATUS::STATUS_UP_TO_DATE;
+    this->status = cv::auto_update.getBool() ? STATUS::STATUS_CHECKING_FOR_UPDATE : STATUS::STATUS_UP_TO_DATE;
     this->iNumRetries = 0;
     this->_m_bKYS = false;
 }
@@ -76,7 +76,7 @@ void UpdateHandler::wait() {
 }
 
 void UpdateHandler::checkForUpdates() {
-    if(!cv_auto_update.getBool() || cv_debug.getBool() ||
+    if(!cv::auto_update.getBool() || cv::debug.getBool() ||
        (this->updateThread != NULL && this->updateThread->joinable()))
         return;
 
@@ -98,7 +98,7 @@ void UpdateHandler::_requestUpdate() {
         return;
     }
 
-    float current_version = cv_version.getFloat();
+    float current_version = cv::version.getFloat();
     if(current_version >= fLatestVersion) {
         // We're already up to date
         this->status = STATUS::STATUS_UP_TO_DATE;

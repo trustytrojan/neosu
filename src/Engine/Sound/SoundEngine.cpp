@@ -83,7 +83,7 @@ SoundEngine::SoundEngine() {
 }
 
 OUTPUT_DEVICE SoundEngine::getWantedDevice() {
-    auto wanted_name = cv_snd_output_device.getString();
+    auto wanted_name = cv::snd_output_device.getString();
     for(auto device : this->outputDevices) {
         if(device.enabled && device.name.utf8View() == wanted_name) {
             return device;
@@ -235,7 +235,7 @@ void SoundEngine::updateOutputDevices(bool printInfo) {
 // initialize it later on some drivers where we know the best available frequency.
 bool SoundEngine::init_bass_mixer(const OUTPUT_DEVICE& device) {
     auto bass_flags = BASS_DEVICE_STEREO | BASS_DEVICE_FREQ | BASS_DEVICE_NOSPEAKER;
-    auto freq = cv_snd_freq.getInt();
+    auto freq = cv::snd_freq.getInt();
 
     // We initialize a "No sound" device for measuring loudness and mixing sounds,
     // regardless of the device we'll use for actual output.
@@ -284,12 +284,12 @@ bool SoundEngine::initializeOutputDevice(const OUTPUT_DEVICE& device) {
     this->shutdown();
 
     // We compensate for latency via BASS_ATTRIB_MIXER_LATENCY
-    cv_universal_offset_hardcoded.setValue(0.f);
+    cv::universal_offset_hardcoded.setValue(0.f);
 
     if(device.driver == OutputDriver::NONE || (device.driver == OutputDriver::BASS && device.id == 0)) {
         this->ready_since = -1.0;
         this->currentOutputDevice = device;
-        cv_snd_output_device.setValue(this->currentOutputDevice.name);
+        cv::snd_output_device.setValue(this->currentOutputDevice.name);
         debugLog("SoundEngine: Output Device = \"%s\"\n", this->currentOutputDevice.name.toUtf8());
 
         if(osu && osu->optionsMenu) {
@@ -313,14 +313,14 @@ bool SoundEngine::initializeOutputDevice(const OUTPUT_DEVICE& device) {
     // we only want to set these if their values have been explicitly modified (to avoid sideeffects in the default
     // case, and for my sanity)
     {
-        if(cv_snd_updateperiod.getFloat() != cv_snd_updateperiod.getDefaultFloat())
-            BASS_SetConfig(BASS_CONFIG_UPDATEPERIOD, cv_snd_updateperiod.getInt());
+        if(cv::snd_updateperiod.getFloat() != cv::snd_updateperiod.getDefaultFloat())
+            BASS_SetConfig(BASS_CONFIG_UPDATEPERIOD, cv::snd_updateperiod.getInt());
 
-        if(cv_snd_dev_buffer.getFloat() != cv_snd_dev_buffer.getDefaultFloat())
-            BASS_SetConfig(BASS_CONFIG_DEV_BUFFER, cv_snd_dev_buffer.getInt());
+        if(cv::snd_dev_buffer.getFloat() != cv::snd_dev_buffer.getDefaultFloat())
+            BASS_SetConfig(BASS_CONFIG_DEV_BUFFER, cv::snd_dev_buffer.getInt());
 
-        if(cv_snd_dev_period.getFloat() != cv_snd_dev_period.getDefaultFloat())
-            BASS_SetConfig(BASS_CONFIG_DEV_PERIOD, cv_snd_dev_period.getInt());
+        if(cv::snd_dev_period.getFloat() != cv::snd_dev_period.getDefaultFloat())
+            BASS_SetConfig(BASS_CONFIG_DEV_PERIOD, cv::snd_dev_period.getInt());
     }
 
     // When the driver is BASS, we can init the mixer immediately
@@ -342,10 +342,10 @@ bool SoundEngine::initializeOutputDevice(const OUTPUT_DEVICE& device) {
 
         double sample_rate = BASS_ASIO_GetRate();
         if(sample_rate == 0.0) {
-            sample_rate = cv_snd_freq.getFloat();
+            sample_rate = cv::snd_freq.getFloat();
             debugLog("ASIO: BASS_ASIO_GetRate() returned 0, using %f instead!\n", sample_rate);
         } else {
-            cv_snd_freq.setValue(sample_rate);
+            cv::snd_freq.setValue(sample_rate);
         }
         if(!init_bass_mixer(device)) {
             return false;
@@ -353,7 +353,7 @@ bool SoundEngine::initializeOutputDevice(const OUTPUT_DEVICE& device) {
 
         BASS_ASIO_INFO info{};
         BASS_ASIO_GetInfo(&info);
-        auto bufsize = cv_asio_buffer_size.getInt();
+        auto bufsize = cv::asio_buffer_size.getInt();
         bufsize = ASIO_clamp(info, bufsize);
 
         if(osu && osu->optionsMenu) {
@@ -376,7 +376,7 @@ bool SoundEngine::initializeOutputDevice(const OUTPUT_DEVICE& device) {
             return false;
         }
 
-        double wanted_latency = 1000.0 * cv_asio_buffer_size.getFloat() / sample_rate;
+        double wanted_latency = 1000.0 * cv::asio_buffer_size.getFloat() / sample_rate;
         double actual_latency = 1000.0 * (double)BASS_ASIO_GetLatency(false) / sample_rate;
         BASS_ChannelSetAttribute(g_bassOutputMixer, BASS_ATTRIB_MIXER_LATENCY, actual_latency / 1000.0);
         debugLog("ASIO: wanted %f ms, got %f ms latency. Sample rate: %f Hz\n", wanted_latency, actual_latency,
@@ -385,16 +385,16 @@ bool SoundEngine::initializeOutputDevice(const OUTPUT_DEVICE& device) {
 
     if(device.driver == OutputDriver::BASS_WASAPI) {
         const float bufferSize =
-            std::round(cv_win_snd_wasapi_buffer_size.getFloat() * 1000.0f) / 1000.0f;  // in seconds
+            std::round(cv::win_snd_wasapi_buffer_size.getFloat() * 1000.0f) / 1000.0f;  // in seconds
         const float updatePeriod =
-            std::round(cv_win_snd_wasapi_period_size.getFloat() * 1000.0f) / 1000.0f;  // in seconds
+            std::round(cv::win_snd_wasapi_period_size.getFloat() * 1000.0f) / 1000.0f;  // in seconds
 
         BASS_WASAPI_DEVICEINFO info;
         if(!BASS_WASAPI_GetDeviceInfo(device.id, &info)) {
             debugLog("WASAPI: Failed to get device info\n");
             return false;
         }
-        cv_snd_freq.setValue(info.mixfreq);
+        cv::snd_freq.setValue(info.mixfreq);
         if(!init_bass_mixer(device)) {
             return false;
         }
@@ -408,7 +408,7 @@ bool SoundEngine::initializeOutputDevice(const OUTPUT_DEVICE& device) {
         flags |= BASS_WASAPI_RAW;
 #endif
 
-        if(cv_win_snd_wasapi_exclusive.getBool()) {
+        if(cv::win_snd_wasapi_exclusive.getBool()) {
             // BASS_WASAPI_EXCLUSIVE makes neosu have exclusive output to the sound card
             // BASS_WASAPI_AUTOFORMAT chooses the best matching sample format, BASSWASAPI doesn't resample in exclusive
             // mode
@@ -432,13 +432,13 @@ bool SoundEngine::initializeOutputDevice(const OUTPUT_DEVICE& device) {
         }
 
         BASS_ChannelSetAttribute(g_bassOutputMixer, BASS_ATTRIB_MIXER_LATENCY,
-                                 cv_win_snd_wasapi_buffer_size.getFloat());
+                                 cv::win_snd_wasapi_buffer_size.getFloat());
     }
 #endif
 
     this->ready_since = engine->getTime();
     this->currentOutputDevice = device;
-    cv_snd_output_device.setValue(this->currentOutputDevice.name);
+    cv::snd_output_device.setValue(this->currentOutputDevice.name);
     debugLog("SoundEngine: Output Device = \"%s\"\n", this->currentOutputDevice.name.toUtf8());
 
     if(osu && osu->optionsMenu) {
@@ -481,7 +481,7 @@ bool SoundEngine::play(Sound *snd, float pan, float pitch) {
         return false;
     }
 
-    if(snd->isOverlayable() && cv_snd_restrict_play_frame.getBool()) {
+    if(snd->isOverlayable() && cv::snd_restrict_play_frame.getBool()) {
         if(engine->getTime() <= snd->fLastPlayTime) {
             return false;
         }
@@ -498,7 +498,7 @@ bool SoundEngine::play(Sound *snd, float pan, float pitch) {
     BASS_ChannelSetAttribute(channel, BASS_ATTRIB_PAN, pan);
     BASS_ChannelSetAttribute(channel, BASS_ATTRIB_NORAMP, snd->isStream() ? 0 : 1);
     if(pitch != 0.0f) {
-        f32 freq = cv_snd_freq.getFloat();
+        f32 freq = cv::snd_freq.getFloat();
         BASS_ChannelGetAttribute(channel, BASS_ATTRIB_FREQ, &freq);
         BASS_ChannelSetAttribute(channel, BASS_ATTRIB_FREQ, pow(2.0f, pitch) * freq);
     }
@@ -532,7 +532,7 @@ bool SoundEngine::play(Sound *snd, float pan, float pitch) {
         snd->fLastPlayTime = snd->fChannelCreationTime;
     }
 
-    if(cv_debug.getBool()) {
+    if(cv::debug.getBool()) {
         debugLog("Playing %s\n", snd->getFilePath().c_str());
     }
 
@@ -573,11 +573,11 @@ void SoundEngine::stop(Sound *snd) {
 
 bool SoundEngine::isReady() {
     if(this->ready_since == -1.0) return false;
-    return this->ready_since + (double)cv_snd_ready_delay.getFloat() < engine->getTime();
+    return this->ready_since + (double)cv::snd_ready_delay.getFloat() < engine->getTime();
 }
 
 bool SoundEngine::hasExclusiveOutput() {
-    return this->isASIO() || (this->isWASAPI() && cv_win_snd_wasapi_exclusive.getBool());
+    return this->isASIO() || (this->isWASAPI() && cv::win_snd_wasapi_exclusive.getBool());
 }
 
 void SoundEngine::setOutputDevice(const OUTPUT_DEVICE& device) {

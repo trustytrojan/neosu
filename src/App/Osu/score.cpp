@@ -111,7 +111,7 @@ void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject *hitObject, HI
     if(hit == LiveScore::HIT::HIT_MISS) {
         this->iCombo = 0;
 
-        if(!this->simulating && !ignoreOnHitErrorBar && cv_hiterrorbar_misses.getBool() &&
+        if(!this->simulating && !ignoreOnHitErrorBar && cv::hiterrorbar_misses.getBool() &&
            delta <= (long)beatmap->getHitWindow50()) {
             osu->getHUD()->addHitError(delta, true);
         }
@@ -228,8 +228,8 @@ void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject *hitObject, HI
         int numCustomNegatives = 0;
 
         int customStartIndex = -1;
-        if(cv_hud_statistics_hitdelta_chunksize.getInt() >= 0) {
-            customStartIndex += std::max(0, (int)this->hitdeltas.size() - cv_hud_statistics_hitdelta_chunksize.getInt());
+        if(cv::hud_statistics_hitdelta_chunksize.getInt() >= 0) {
+            customStartIndex += std::max(0, (int)this->hitdeltas.size() - cv::hud_statistics_hitdelta_chunksize.getInt());
         }
 
         for(int i = 0; i < this->hitdeltas.size(); i++) {
@@ -464,7 +464,7 @@ float LiveScore::calculateAccuracy(int num300s, int num100s, int num50s, int num
 }
 
 f64 FinishedScore::get_pp() const {
-    if(cv_use_ppv3.getBool() && this->ppv3_algorithm.size() > 0) {
+    if(cv::use_ppv3.getBool() && this->ppv3_algorithm.size() > 0) {
         return this->ppv3_score;
     }
 

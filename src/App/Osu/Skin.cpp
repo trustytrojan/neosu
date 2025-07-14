@@ -320,16 +320,16 @@ Skin::Skin(const UString& name, std::string filepath, bool isDefaultSkin) {
 
     // custom
     this->iSampleSet = 1;
-    this->iSampleVolume = (int)(cv_volume_effects.getFloat() * 100.0f);
+    this->iSampleVolume = (int)(cv::volume_effects.getFloat() * 100.0f);
 
-    this->bIsRandom = cv_skin_random.getBool();
-    this->bIsRandomElements = cv_skin_random_elements.getBool();
+    this->bIsRandom = cv::skin_random.getBool();
+    this->bIsRandomElements = cv::skin_random_elements.getBool();
 
     // load all files
     this->load();
 
     // convar callbacks
-    cv_ignore_beatmap_sample_volume.setCallback(
+    cv::ignore_beatmap_sample_volume.setCallback(
         fastdelegate::MakeDelegate(this, &Skin::onIgnoreBeatmapSampleVolumeChange));
 }
 
@@ -359,7 +359,7 @@ void Skin::update() {
     }
 
     // shitty check to not animate while paused with hitobjects in background
-    if(osu->isInPlayMode() && !osu->getSelectedBeatmap()->isPlaying() && !cv_skin_animation_force.getBool()) return;
+    if(osu->isInPlayMode() && !osu->getSelectedBeatmap()->isPlaying() && !cv::skin_animation_force.getBool()) return;
 
     const bool useEngineTimeForAnimations = !osu->isInPlayMode();
     const long curMusicPos = osu->getSelectedBeatmap()->getCurMusicPosWithOffsets();
@@ -393,9 +393,9 @@ void Skin::load() {
 
             // regular skins
             {
-                std::string skinFolder = cv_osu_folder.getString();
+                std::string skinFolder = cv::osu_folder.getString();
                 skinFolder.append("/");
-                skinFolder.append(cv_osu_folder_sub_skins.getString());
+                skinFolder.append(cv::osu_folder_sub_skins.getString());
                 std::vector<std::string> skinFolders = env->getFoldersInFolder(skinFolder);
 
                 for(int i = 0; i < skinFolders.size(); i++) {
@@ -1082,7 +1082,7 @@ void Skin::load() {
     debugLog("Skin: HitCircleOverlap = %i\n", this->iHitCircleOverlap);
 
     // delayed error notifications due to resource loading potentially blocking engine time
-    if(!parseSkinIni1Status && parseSkinIni2Status && cv_skin.getString() != "default")
+    if(!parseSkinIni1Status && parseSkinIni2Status && cv::skin.getString() != "default")
         osu->getNotificationOverlay()->addNotification("Error: Couldn't load skin.ini!", 0xffff0000);
     else if(!parseSkinIni2Status)
         osu->getNotificationOverlay()->addNotification("Error: Couldn't load DEFAULT skin.ini!!!", 0xffff0000);
@@ -1101,7 +1101,7 @@ void Skin::reloadSounds() {
         soundResources.push_back(sound);
     }
 
-    resourceManager->reloadResources(soundResources, cv_skin_async.getBool());
+    resourceManager->reloadResources(soundResources, cv::skin_async.getBool());
 }
 
 bool Skin::parseSkinINI(std::string filepath) {
@@ -1316,11 +1316,11 @@ void Skin::resetSampleVolume() {
 }
 
 void Skin::setSampleVolume(float volume, bool force) {
-    if(cv_ignore_beatmap_sample_volume.getBool() && (int)(cv_volume_effects.getFloat() * 100.0f) == this->iSampleVolume)
+    if(cv::ignore_beatmap_sample_volume.getBool() && (int)(cv::volume_effects.getFloat() * 100.0f) == this->iSampleVolume)
         return;
 
     const float newSampleVolume =
-        (!cv_ignore_beatmap_sample_volume.getBool() ? volume : 1.0f) * cv_volume_effects.getFloat();
+        (!cv::ignore_beatmap_sample_volume.getBool() ? volume : 1.0f) * cv::volume_effects.getFloat();
 
     if(!force && this->iSampleVolume == (int)(newSampleVolume * 100.0f)) return;
 
@@ -1332,10 +1332,10 @@ void Skin::setSampleVolume(float volume, bool force) {
 }
 
 Color Skin::getComboColorForCounter(int i, int offset) {
-    i += cv_skin_color_index_add.getInt();
+    i += cv::skin_color_index_add.getInt();
     i = std::max(i, 0);
 
-    if(this->beatmapComboColors.size() > 0 && !cv_ignore_beatmap_combo_colors.getBool())
+    if(this->beatmapComboColors.size() > 0 && !cv::ignore_beatmap_combo_colors.getBool())
         return this->beatmapComboColors[(i + offset) % this->beatmapComboColors.size()];
     else if(this->comboColors.size() > 0)
         return this->comboColors[i % this->comboColors.size()];
@@ -1350,24 +1350,24 @@ void Skin::playHitCircleSound(int sampleType, float pan, long delta) {
         return;
     }
 
-    if(!cv_sound_panning.getBool() || (cv_mod_fposu.getBool() && !cv_mod_fposu_sound_panning.getBool()) ||
-       (cv_mod_fps.getBool() && !cv_mod_fps_sound_panning.getBool())) {
+    if(!cv::sound_panning.getBool() || (cv::mod_fposu.getBool() && !cv::mod_fposu_sound_panning.getBool()) ||
+       (cv::mod_fps.getBool() && !cv::mod_fps_sound_panning.getBool())) {
         pan = 0.0f;
     } else {
-        pan *= cv_sound_panning_multiplier.getFloat();
+        pan *= cv::sound_panning_multiplier.getFloat();
     }
 
     f32 pitch = 0.f;
-    if(cv_snd_pitch_hitsounds.getBool()) {
+    if(cv::snd_pitch_hitsounds.getBool()) {
         auto bm = osu->getSelectedBeatmap();
         if(bm) {
             f32 range = bm->getHitWindow100();
-            pitch = (f32)delta / range * cv_snd_pitch_hitsounds_factor.getFloat();
+            pitch = (f32)delta / range * cv::snd_pitch_hitsounds_factor.getFloat();
         }
     }
 
     int actualSampleSet = this->iSampleSet;
-    if(cv_skin_force_hitsound_sample_set.getInt() > 0) actualSampleSet = cv_skin_force_hitsound_sample_set.getInt();
+    if(cv::skin_force_hitsound_sample_set.getInt() > 0) actualSampleSet = cv::skin_force_hitsound_sample_set.getInt();
 
     switch(actualSampleSet) {
         case 3:
@@ -1397,11 +1397,11 @@ void Skin::playHitCircleSound(int sampleType, float pan, long delta) {
 void Skin::playSliderTickSound(float pan) {
     if(this->iSampleVolume <= 0) return;
 
-    if(!cv_sound_panning.getBool() || (cv_mod_fposu.getBool() && !cv_mod_fposu_sound_panning.getBool()) ||
-       (cv_mod_fps.getBool() && !cv_mod_fps_sound_panning.getBool())) {
+    if(!cv::sound_panning.getBool() || (cv::mod_fposu.getBool() && !cv::mod_fposu_sound_panning.getBool()) ||
+       (cv::mod_fps.getBool() && !cv::mod_fps_sound_panning.getBool())) {
         pan = 0.0f;
     } else {
-        pan *= cv_sound_panning_multiplier.getFloat();
+        pan *= cv::sound_panning_multiplier.getFloat();
     }
 
     switch(this->iSampleSet) {
@@ -1418,11 +1418,11 @@ void Skin::playSliderTickSound(float pan) {
 }
 
 void Skin::playSliderSlideSound(float pan) {
-    if(!cv_sound_panning.getBool() || (cv_mod_fposu.getBool() && !cv_mod_fposu_sound_panning.getBool()) ||
-       (cv_mod_fps.getBool() && !cv_mod_fps_sound_panning.getBool())) {
+    if(!cv::sound_panning.getBool() || (cv::mod_fposu.getBool() && !cv::mod_fposu_sound_panning.getBool()) ||
+       (cv::mod_fps.getBool() && !cv::mod_fps_sound_panning.getBool())) {
         pan = 0.0f;
     } else {
-        pan *= cv_sound_panning_multiplier.getFloat();
+        pan *= cv::sound_panning_multiplier.getFloat();
     }
 
     switch(this->iSampleSet) {
@@ -1532,17 +1532,17 @@ void Skin::checkLoadImage(Image **addressOfPointer, const std::string& skinEleme
     const bool existsFilepath2 = env->fileExists(filepath2);
 
     // check if an @2x version of this image exists
-    if(cv_skin_hd.getBool()) {
+    if(cv::skin_hd.getBool()) {
         // load default skin
         if(!ignoreDefaultSkin) {
             if(existsDefaultFilePath1) {
                 std::string defaultResourceName = resourceName;
                 defaultResourceName.append("_DEFAULT");  // so we don't load the default skin twice
 
-                if(cv_skin_async.getBool()) resourceManager->requestNextLoadAsync();
+                if(cv::skin_async.getBool()) resourceManager->requestNextLoadAsync();
 
                 *addressOfPointer = resourceManager->loadImageAbs(defaultFilePath1, defaultResourceName,
-                                                                  cv_skin_mipmaps.getBool() || forceLoadMipmaps);
+                                                                  cv::skin_mipmaps.getBool() || forceLoadMipmaps);
                 (*addressOfPointer)->is_2x = true;
             } else {
                 // fallback to @1x
@@ -1550,10 +1550,10 @@ void Skin::checkLoadImage(Image **addressOfPointer, const std::string& skinEleme
                     std::string defaultResourceName = resourceName;
                     defaultResourceName.append("_DEFAULT");  // so we don't load the default skin twice
 
-                    if(cv_skin_async.getBool()) resourceManager->requestNextLoadAsync();
+                    if(cv::skin_async.getBool()) resourceManager->requestNextLoadAsync();
 
                     *addressOfPointer = resourceManager->loadImageAbs(defaultFilePath2, defaultResourceName,
-                                                                      cv_skin_mipmaps.getBool() || forceLoadMipmaps);
+                                                                      cv::skin_mipmaps.getBool() || forceLoadMipmaps);
                     (*addressOfPointer)->is_2x = false;
                 }
             }
@@ -1561,10 +1561,10 @@ void Skin::checkLoadImage(Image **addressOfPointer, const std::string& skinEleme
 
         // load user skin
         if(existsFilepath1) {
-            if(cv_skin_async.getBool()) resourceManager->requestNextLoadAsync();
+            if(cv::skin_async.getBool()) resourceManager->requestNextLoadAsync();
 
             *addressOfPointer =
-                resourceManager->loadImageAbs(filepath1, "", cv_skin_mipmaps.getBool() || forceLoadMipmaps);
+                resourceManager->loadImageAbs(filepath1, "", cv::skin_mipmaps.getBool() || forceLoadMipmaps);
             (*addressOfPointer)->is_2x = true;
             this->resources.push_back(*addressOfPointer);
 
@@ -1589,19 +1589,19 @@ void Skin::checkLoadImage(Image **addressOfPointer, const std::string& skinEleme
             std::string defaultResourceName = resourceName;
             defaultResourceName.append("_DEFAULT");  // so we don't load the default skin twice
 
-            if(cv_skin_async.getBool()) resourceManager->requestNextLoadAsync();
+            if(cv::skin_async.getBool()) resourceManager->requestNextLoadAsync();
 
             *addressOfPointer = resourceManager->loadImageAbs(defaultFilePath2, defaultResourceName,
-                                                              cv_skin_mipmaps.getBool() || forceLoadMipmaps);
+                                                              cv::skin_mipmaps.getBool() || forceLoadMipmaps);
             (*addressOfPointer)->is_2x = false;
         }
     }
 
     // load user skin
     if(existsFilepath2) {
-        if(cv_skin_async.getBool()) resourceManager->requestNextLoadAsync();
+        if(cv::skin_async.getBool()) resourceManager->requestNextLoadAsync();
 
-        *addressOfPointer = resourceManager->loadImageAbs(filepath2, "", cv_skin_mipmaps.getBool() || forceLoadMipmaps);
+        *addressOfPointer = resourceManager->loadImageAbs(filepath2, "", cv::skin_mipmaps.getBool() || forceLoadMipmaps);
         (*addressOfPointer)->is_2x = false;
         this->resources.push_back(*addressOfPointer);
     }
@@ -1638,7 +1638,7 @@ void Skin::checkLoadSound(Sound **addressOfPointer, const std::string& skinEleme
 
             // this check will fix up the filename casing
             if(env->fileExists(path)) {
-                if(cv_skin_async.getBool()) {
+                if(cv::skin_async.getBool()) {
                     resourceManager->requestNextLoadAsync();
                 }
                 return resourceManager->loadSoundAbs(path, resource_name, !isSample, isOverlayable, loop);
@@ -1658,7 +1658,7 @@ void Skin::checkLoadSound(Sound **addressOfPointer, const std::string& skinEleme
 
     // load user skin
     Sound *skin_sound = NULL;
-    if(cv_skin_use_skin_hitsounds.getBool() || !isSample) {
+    if(cv::skin_use_skin_hitsounds.getBool() || !isSample) {
         skin_sound = try_load_sound(this->sFilePath, skinElementName, "", loop);
         if(skin_sound != NULL) {
             *addressOfPointer = skin_sound;
@@ -1673,7 +1673,7 @@ void Skin::checkLoadSound(Sound **addressOfPointer, const std::string& skinEleme
 
     // force reload default skin sound anyway if the custom skin does not include it (e.g. audio device change)
     if(skin_sound == NULL) {
-        resourceManager->reloadResource(sound, cv_skin_async.getBool());
+        resourceManager->reloadResource(sound, cv::skin_async.getBool());
     } else {
         this->resources.push_back(sound);
     }

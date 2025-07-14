@@ -51,10 +51,10 @@ VisualProfiler::~VisualProfiler() { vprof = NULL; }
 
 void VisualProfiler::draw() {
     VPROF_BUDGET("VisualProfiler::draw", VPROF_BUDGETGROUP_DRAW);
-    if(!cv_vprof.getBool() || !this->bVisible) return;
+    if(!cv::vprof.getBool() || !this->bVisible) return;
 
     // draw miscellaneous debug infos
-    const int displayMode = cv_vprof_display_mode.getInt();
+    const int displayMode = cv::vprof_display_mode.getInt();
     if(displayMode != INFO_BLADE_DISPLAY_MODE::INFO_BLADE_DISPLAY_MODE_DEFAULT) {
         McFont *textFont = this->font;
         float textScale = 1.0f;
@@ -142,7 +142,7 @@ void VisualProfiler::draw() {
 
         if(this->textLines.size() > 0) {
             const Color textColor = 0xffffffff;
-            const int margin = cv_vprof_graph_margin.getFloat() * env->getDPIScale();
+            const int margin = cv::vprof_graph_margin.getFloat() * env->getDPIScale();
             const int marginBox = 6 * env->getDPIScale();
 
             int largestLineWidth = 0;
@@ -188,7 +188,7 @@ void VisualProfiler::draw() {
     }
 
     // draw profiler node tree extended details
-    if(cv_debug_vprof.getBool()) {
+    if(cv::debug_vprof.getBool()) {
         VPROF_BUDGET("DebugText", VPROF_BUDGETGROUP_DRAW);
 
         g->setColor(0xffcccccc);
@@ -234,9 +234,9 @@ void VisualProfiler::draw() {
     }
 
     // draw extended spike details tree (profiler node snapshot)
-    if(cv_vprof_spike.getBool() && !cv_debug_vprof.getBool()) {
+    if(cv::vprof_spike.getBool() && !cv::debug_vprof.getBool()) {
         if(this->spike.node.node != NULL) {
-            if(cv_vprof_spike.getInt() == 2) {
+            if(cv::vprof_spike.getInt() == 2) {
                 VPROF_BUDGET("DebugText", VPROF_BUDGETGROUP_DRAW);
 
                 g->setColor(0xffcccccc);
@@ -265,12 +265,12 @@ void VisualProfiler::draw() {
     }
 
     // draw graph
-    if(cv_vprof_graph.getBool()) {
+    if(cv::vprof_graph.getBool()) {
         VPROF_BUDGET("LineGraph", VPROF_BUDGETGROUP_DRAW);
 
         const int width = getGraphWidth();
         const int height = getGraphHeight();
-        const int margin = cv_vprof_graph_margin.getFloat() * env->getDPIScale();
+        const int margin = cv::vprof_graph_margin.getFloat() * env->getDPIScale();
 
         const int xPos = engine->getScreenWidth() - width - margin;
         const int yPos = engine->getScreenHeight() - height - margin +
@@ -308,7 +308,7 @@ void VisualProfiler::draw() {
             g->pushTransform();
             {
                 g->translate((int)(xPos + margin), (int)(yPos + this->font->getHeight() + margin));
-                drawStringWithShadow(this->font, UString::format("%g ms", cv_vprof_graph_range_max.getFloat()),
+                drawStringWithShadow(this->font, UString::format("%g ms", cv::vprof_graph_range_max.getFloat()),
                                      0xffffffff);
 
                 g->translate(0, (int)(height - this->font->getHeight() - 2 * margin));
@@ -334,9 +334,9 @@ void VisualProfiler::draw() {
         }
 
         // draw top spike text above graph
-        if(cv_vprof_spike.getBool() && !cv_debug_vprof.getBool()) {
+        if(cv::vprof_spike.getBool() && !cv::debug_vprof.getBool()) {
             if(this->spike.node.node != NULL) {
-                if(cv_vprof_spike.getInt() == 1) {
+                if(cv::vprof_spike.getInt() == 1) {
                     const int margin = 6 * env->getDPIScale();
 
                     g->setColor(0xffcccccc);
@@ -374,11 +374,11 @@ void VisualProfiler::drawStringWithShadow(McFont *font, const UString &string, C
 void VisualProfiler::mouse_update(bool *propagate_clicks) {
     VPROF_BUDGET("VisualProfiler::update", VPROF_BUDGETGROUP_UPDATE);
     CBaseUIElement::mouse_update(propagate_clicks);
-    if(!cv_vprof.getBool() || !this->bVisible) return;
+    if(!cv::vprof.getBool() || !this->bVisible) return;
 
     const bool isFrozen = (keyboard->isShiftDown() && (!this->bRequiresAltShiftKeysToFreeze || keyboard->isAltDown()));
 
-    if(cv_debug_vprof.getBool() || cv_vprof_spike.getBool()) {
+    if(cv::debug_vprof.getBool() || cv::vprof_spike.getBool()) {
         if(!isFrozen) {
             SPIKE spike;
             {
@@ -393,7 +393,7 @@ void VisualProfiler::mouse_update(bool *propagate_clicks) {
             collectProfilerNodesRecursive(this->profile->getRoot(), 0, this->nodes, spike);
 
             // run spike collector and updater
-            if(cv_vprof_spike.getBool()) {
+            if(cv::vprof_spike.getBool()) {
                 const int graphWidth = getGraphWidth();
 
                 this->spikes.push_back(spike);
@@ -444,7 +444,7 @@ void VisualProfiler::mouse_update(bool *propagate_clicks) {
             // hardcoded colors for some groups
             if(strcmp(group.name, VPROF_BUDGETGROUP_ROOT) ==
                0)  // NOTE: VPROF_BUDGETGROUP_ROOT is used for drawing the profiling overhead time if
-                   // cv_vprof_graph_draw_overhead is enabled
+                   // cv::vprof_graph_draw_overhead is enabled
                 group.color = 0xffffffff;
             else if(strcmp(group.name, VPROF_BUDGETGROUP_SLEEP) == 0)
                 group.color = 0xff5555bb;
@@ -470,8 +470,8 @@ void VisualProfiler::mouse_update(bool *propagate_clicks) {
         const int numGroups = this->groups.size();
         const int graphWidth = getGraphWidth();
         const int graphHeight = getGraphHeight();
-        const float maxRange = cv_vprof_graph_range_max.getFloat();
-        const float alpha = cv_vprof_graph_alpha.getFloat();
+        const float maxRange = cv::vprof_graph_range_max.getFloat();
+        const float alpha = cv::vprof_graph_alpha.getFloat();
 
         // lazy rebuild line vao if parameters change
         if(this->bScheduledForceRebuildLineVao || this->iPrevVaoWidth != graphWidth ||
@@ -520,7 +520,7 @@ void VisualProfiler::mouse_update(bool *propagate_clicks) {
                 // all paths below VPROF_MAIN(), or there is a serious problem with measuring time via
                 // engine->getTimeReal()
                 double profilingOverheadTime = 0.0;
-                if(cv_vprof_graph_draw_overhead.getBool()) {
+                if(cv::vprof_graph_draw_overhead.getBool()) {
                     const int rootGroupID = 0;
                     double sumGroupTimes = 0.0;
                     {
@@ -561,20 +561,20 @@ void VisualProfiler::mouse_update(bool *propagate_clicks) {
 }
 
 void VisualProfiler::incrementInfoBladeDisplayMode() {
-    cv_vprof_display_mode.setValue((cv_vprof_display_mode.getInt() + 1) %
+    cv::vprof_display_mode.setValue((cv::vprof_display_mode.getInt() + 1) %
                                    INFO_BLADE_DISPLAY_MODE::INFO_BLADE_DISPLAY_MODE_COUNT);
 }
 
 void VisualProfiler::decrementInfoBladeDisplayMode() {
-    if(cv_vprof_display_mode.getInt() - 1 < INFO_BLADE_DISPLAY_MODE::INFO_BLADE_DISPLAY_MODE_DEFAULT)
-        cv_vprof_display_mode.setValue(INFO_BLADE_DISPLAY_MODE::INFO_BLADE_DISPLAY_MODE_COUNT - 1);
+    if(cv::vprof_display_mode.getInt() - 1 < INFO_BLADE_DISPLAY_MODE::INFO_BLADE_DISPLAY_MODE_DEFAULT)
+        cv::vprof_display_mode.setValue(INFO_BLADE_DISPLAY_MODE::INFO_BLADE_DISPLAY_MODE_COUNT - 1);
     else
-        cv_vprof_display_mode.setValue(cv_vprof_display_mode.getInt() - 1);
+        cv::vprof_display_mode.setValue(cv::vprof_display_mode.getInt() - 1);
 }
 
 void VisualProfiler::addInfoBladeAppTextLine(const UString &text) {
-    if(!cv_vprof.getBool() || !this->bVisible ||
-       cv_vprof_display_mode.getInt() != INFO_BLADE_DISPLAY_MODE::INFO_BLADE_DISPLAY_MODE_APP_INFO)
+    if(!cv::vprof.getBool() || !this->bVisible ||
+       cv::vprof_display_mode.getInt() != INFO_BLADE_DISPLAY_MODE::INFO_BLADE_DISPLAY_MODE_APP_INFO)
         return;
 
     this->appTextLines.push_back(text);
@@ -591,7 +591,7 @@ void VisualProfiler::setProfile(ProfilerProfile *profile) {
     }
 }
 
-bool VisualProfiler::isEnabled() { return cv_vprof.getBool(); }
+bool VisualProfiler::isEnabled() { return cv::vprof.getBool(); }
 
 void VisualProfiler::collectProfilerNodesRecursive(const ProfilerNode *node, int depth, std::vector<NODE> &nodes,
                                                    SPIKE &spike) {
@@ -644,9 +644,9 @@ void VisualProfiler::collectProfilerNodesSpikeRecursive(const ProfilerNode *node
     }
 }
 
-int VisualProfiler::getGraphWidth() { return (cv_vprof_graph_width.getFloat() * env->getDPIScale()); }
+int VisualProfiler::getGraphWidth() { return (cv::vprof_graph_width.getFloat() * env->getDPIScale()); }
 
-int VisualProfiler::getGraphHeight() { return (cv_vprof_graph_height.getFloat() * env->getDPIScale()); }
+int VisualProfiler::getGraphHeight() { return (cv::vprof_graph_height.getFloat() * env->getDPIScale()); }
 
 void VisualProfiler::addTextLine(const UString &text, McFont *font, std::vector<TEXT_LINE> &textLines) {
     TEXT_LINE textLine;

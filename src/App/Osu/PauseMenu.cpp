@@ -60,8 +60,8 @@ void PauseMenu::draw() {
     if(!this->bVisible && !isAnimating) return;
 
     // draw dim
-    if(cv_pause_dim_background.getBool()) {
-        g->setColor(argb(this->fDimAnim * cv_pause_dim_alpha.getFloat(), 0.078f, 0.078f, 0.078f));
+    if(cv::pause_dim_background.getBool()) {
+        g->setColor(argb(this->fDimAnim * cv::pause_dim_alpha.getFloat(), 0.078f, 0.078f, 0.078f));
         g->fillRect(0, 0, osu->getScreenWidth(), osu->getScreenHeight());
     }
 
@@ -178,14 +178,14 @@ void PauseMenu::onKeyDown(KeyboardEvent &e) {
     OsuScreen::onKeyDown(e);  // only used for options menu
     if(!this->bVisible || e.isConsumed()) return;
 
-    if(e == (KEYCODE)cv_LEFT_CLICK.getInt() || e == (KEYCODE)cv_RIGHT_CLICK.getInt() ||
-       e == (KEYCODE)cv_LEFT_CLICK_2.getInt() || e == (KEYCODE)cv_RIGHT_CLICK_2.getInt()) {
+    if(e == (KEYCODE)cv::LEFT_CLICK.getInt() || e == (KEYCODE)cv::RIGHT_CLICK.getInt() ||
+       e == (KEYCODE)cv::LEFT_CLICK_2.getInt() || e == (KEYCODE)cv::RIGHT_CLICK_2.getInt()) {
         bool fireButtonClick = false;
-        if((e == (KEYCODE)cv_LEFT_CLICK.getInt() || e == (KEYCODE)cv_LEFT_CLICK_2.getInt()) && !this->bClick1Down) {
+        if((e == (KEYCODE)cv::LEFT_CLICK.getInt() || e == (KEYCODE)cv::LEFT_CLICK_2.getInt()) && !this->bClick1Down) {
             this->bClick1Down = true;
             fireButtonClick = true;
         }
-        if((e == (KEYCODE)cv_RIGHT_CLICK.getInt() || e == (KEYCODE)cv_RIGHT_CLICK_2.getInt()) && !this->bClick2Down) {
+        if((e == (KEYCODE)cv::RIGHT_CLICK.getInt() || e == (KEYCODE)cv::RIGHT_CLICK_2.getInt()) && !this->bClick2Down) {
             this->bClick2Down = true;
             fireButtonClick = true;
         }
@@ -258,15 +258,15 @@ void PauseMenu::onKeyDown(KeyboardEvent &e) {
 
     // consume ALL events, except for a few special binds which are allowed through (e.g. for unpause or changing the
     // local offset in Osu.cpp)
-    if(e != KEY_ESCAPE && e != (KEYCODE)cv_GAME_PAUSE.getInt() && e != (KEYCODE)cv_INCREASE_LOCAL_OFFSET.getInt() &&
-       e != (KEYCODE)cv_DECREASE_LOCAL_OFFSET.getInt())
+    if(e != KEY_ESCAPE && e != (KEYCODE)cv::GAME_PAUSE.getInt() && e != (KEYCODE)cv::INCREASE_LOCAL_OFFSET.getInt() &&
+       e != (KEYCODE)cv::DECREASE_LOCAL_OFFSET.getInt())
         e.consume();
 }
 
 void PauseMenu::onKeyUp(KeyboardEvent &e) {
-    if(e == (KEYCODE)cv_LEFT_CLICK.getInt() || e == (KEYCODE)cv_LEFT_CLICK_2.getInt()) this->bClick1Down = false;
+    if(e == (KEYCODE)cv::LEFT_CLICK.getInt() || e == (KEYCODE)cv::LEFT_CLICK_2.getInt()) this->bClick1Down = false;
 
-    if(e == (KEYCODE)cv_RIGHT_CLICK.getInt() || e == (KEYCODE)cv_RIGHT_CLICK_2.getInt()) this->bClick2Down = false;
+    if(e == (KEYCODE)cv::RIGHT_CLICK.getInt() || e == (KEYCODE)cv::RIGHT_CLICK_2.getInt()) this->bClick2Down = false;
 }
 
 void PauseMenu::onChar(KeyboardEvent &e) {
@@ -387,7 +387,7 @@ CBaseUIContainer *PauseMenu::setVisible(bool visible) {
     osu->updateWindowsKeyDisable();
 
     anim->moveQuadOut(&this->fDimAnim, (this->bVisible ? 1.0f : 0.0f),
-                      cv_pause_anim_duration.getFloat() * (this->bVisible ? 1.0f - this->fDimAnim : this->fDimAnim),
+                      cv::pause_anim_duration.getFloat() * (this->bVisible ? 1.0f - this->fDimAnim : this->fDimAnim),
                       true);
     osu->chat->updateVisibility();
     return this;

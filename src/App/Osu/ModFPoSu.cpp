@@ -48,9 +48,9 @@ ModFPoSu::ModFPoSu() {
     this->hitcircleShader = NULL;
 
     // convar callbacks
-    cv_fposu_curved.setCallback(fastdelegate::MakeDelegate(this, &ModFPoSu::onCurvedChange));
-    cv_fposu_distance.setCallback(fastdelegate::MakeDelegate(this, &ModFPoSu::onDistanceChange));
-    cv_fposu_noclip.setCallback(fastdelegate::MakeDelegate(this, &ModFPoSu::onNoclipChange));
+    cv::fposu_curved.setCallback(fastdelegate::MakeDelegate(this, &ModFPoSu::onCurvedChange));
+    cv::fposu_distance.setCallback(fastdelegate::MakeDelegate(this, &ModFPoSu::onDistanceChange));
+    cv::fposu_noclip.setCallback(fastdelegate::MakeDelegate(this, &ModFPoSu::onNoclipChange));
 
     // init
     this->makePlayfield();
@@ -60,11 +60,11 @@ ModFPoSu::ModFPoSu() {
 ModFPoSu::~ModFPoSu() { anim->deleteExistingAnimation(&this->fZoomFOVAnimPercent); }
 
 void ModFPoSu::draw() {
-    if(!cv_mod_fposu.getBool()) return;
+    if(!cv::mod_fposu.getBool()) return;
 
-    const float fov = std::lerp(cv_fposu_fov.getFloat(), cv_fposu_zoom_fov.getFloat(), this->fZoomFOVAnimPercent);
+    const float fov = std::lerp(cv::fposu_fov.getFloat(), cv::fposu_zoom_fov.getFloat(), this->fZoomFOVAnimPercent);
     Matrix4 projectionMatrix =
-        cv_fposu_vertical_fov.getBool()
+        cv::fposu_vertical_fov.getBool()
             ? Camera::buildMatrixPerspectiveFovVertical(
                   glm::radians(fov), ((float)osu->getScreenWidth() / (float)osu->getScreenHeight()), 0.05f, 1000.0f)
             : Camera::buildMatrixPerspectiveFovHorizontal(
@@ -96,7 +96,7 @@ void ModFPoSu::draw() {
                     g->setDepthBuffer(true);
                     {
                         // axis lines at (0, 0, 0)
-                        if(cv_fposu_noclip.getBool()) {
+                        if(cv::fposu_noclip.getBool()) {
                             static VertexArrayObject vao(Graphics::PRIMITIVE::PRIMITIVE_LINES);
                             vao.empty();
                             {
@@ -123,12 +123,12 @@ void ModFPoSu::draw() {
                         }
 
                         // cube
-                        if(cv_fposu_cube.getBool()) {
+                        if(cv::fposu_cube.getBool()) {
                             osu->getSkin()->getBackgroundCube()->bind();
                             {
-                                g->setColor(argb(255, std::clamp<int>(cv_fposu_cube_tint_r.getInt(), 0, 255),
-                                                  std::clamp<int>(cv_fposu_cube_tint_g.getInt(), 0, 255),
-                                                  std::clamp<int>(cv_fposu_cube_tint_b.getInt(), 0, 255)));
+                                g->setColor(argb(255, std::clamp<int>(cv::fposu_cube_tint_r.getInt(), 0, 255),
+                                                  std::clamp<int>(cv::fposu_cube_tint_g.getInt(), 0, 255),
+                                                  std::clamp<int>(cv::fposu_cube_tint_b.getInt(), 0, 255)));
                                 g->drawVAO(this->vaoCube);
                             }
                             osu->getSkin()->getBackgroundCube()->unbind();
@@ -136,7 +136,7 @@ void ModFPoSu::draw() {
                     }
                     g->setDepthBuffer(false);
 
-                    if(cv_fposu_transparent_playfield.getBool()) g->setBlending(true);
+                    if(cv::fposu_transparent_playfield.getBool()) g->setBlending(true);
 
                     Matrix4 worldMatrix = this->modelMatrix;
                     g->setWorldMatrixMul(worldMatrix);
@@ -151,7 +151,7 @@ void ModFPoSu::draw() {
 
                     // (no setBlending(false), since we are already at the end)
                 }
-                if(!cv_fposu_transparent_playfield.getBool()) g->setBlending(true);
+                if(!cv::fposu_transparent_playfield.getBool()) g->setBlending(true);
             }
             g->popTransform();
         }
@@ -166,9 +166,9 @@ void ModFPoSu::draw() {
 }
 
 void ModFPoSu::update() {
-    if(!cv_mod_fposu.getBool()) return;
+    if(!cv::mod_fposu.getBool()) return;
 
-    if(cv_fposu_noclip.getBool()) this->noclipMove();
+    if(cv::fposu_noclip.getBool()) this->noclipMove();
 
     this->modelMatrix = Matrix4();
     {
@@ -179,34 +179,34 @@ void ModFPoSu::update() {
 
         // rotate around center
         {
-            this->modelMatrix.translate(0, 0, cv_fposu_distance.getFloat());  // (compensate for mesh offset)
+            this->modelMatrix.translate(0, 0, cv::fposu_distance.getFloat());  // (compensate for mesh offset)
             {
-                this->modelMatrix.rotateX(cv_fposu_playfield_rotation_x.getFloat());
-                this->modelMatrix.rotateY(cv_fposu_playfield_rotation_y.getFloat());
-                this->modelMatrix.rotateZ(cv_fposu_playfield_rotation_z.getFloat());
+                this->modelMatrix.rotateX(cv::fposu_playfield_rotation_x.getFloat());
+                this->modelMatrix.rotateY(cv::fposu_playfield_rotation_y.getFloat());
+                this->modelMatrix.rotateZ(cv::fposu_playfield_rotation_z.getFloat());
             }
-            this->modelMatrix.translate(0, 0, -cv_fposu_distance.getFloat());  // (restore)
+            this->modelMatrix.translate(0, 0, -cv::fposu_distance.getFloat());  // (restore)
         }
 
         // NOTE: slightly move back by default to avoid aliasing with background cube
-        this->modelMatrix.translate(cv_fposu_playfield_position_x.getFloat(), cv_fposu_playfield_position_y.getFloat(),
-                                    -0.0015f + cv_fposu_playfield_position_z.getFloat());
+        this->modelMatrix.translate(cv::fposu_playfield_position_x.getFloat(), cv::fposu_playfield_position_y.getFloat(),
+                                    -0.0015f + cv::fposu_playfield_position_z.getFloat());
 
-        if(cv_fposu_mod_strafing.getBool()) {
+        if(cv::fposu_mod_strafing.getBool()) {
             if(osu->isInPlayMode()) {
                 const long curMusicPos = osu->getSelectedBeatmap()->getCurMusicPos();
 
                 const float speedMultiplierCompensation = 1.0f / osu->getSelectedBeatmap()->getSpeedMultiplier();
 
                 const float x = std::sin((curMusicPos / 1000.0f) * 5 * speedMultiplierCompensation *
-                                         cv_fposu_mod_strafing_frequency_x.getFloat()) *
-                                cv_fposu_mod_strafing_strength_x.getFloat();
+                                         cv::fposu_mod_strafing_frequency_x.getFloat()) *
+                                cv::fposu_mod_strafing_strength_x.getFloat();
                 const float y = std::sin((curMusicPos / 1000.0f) * 5 * speedMultiplierCompensation *
-                                         cv_fposu_mod_strafing_frequency_y.getFloat()) *
-                                cv_fposu_mod_strafing_strength_y.getFloat();
+                                         cv::fposu_mod_strafing_frequency_y.getFloat()) *
+                                cv::fposu_mod_strafing_strength_y.getFloat();
                 const float z = std::sin((curMusicPos / 1000.0f) * 5 * speedMultiplierCompensation *
-                                         cv_fposu_mod_strafing_frequency_z.getFloat()) *
-                                cv_fposu_mod_strafing_strength_z.getFloat();
+                                         cv::fposu_mod_strafing_frequency_z.getFloat()) *
+                                cv::fposu_mod_strafing_strength_z.getFloat();
 
                 this->modelMatrix.translate(x, y, z);
             }
@@ -217,31 +217,31 @@ void ModFPoSu::update() {
         (osu->getModAuto() || osu->getModAutopilot() || osu->getSelectedBeatmap()->is_watching || bancho->spectating);
 
     this->bCrosshairIntersectsScreen = true;
-    if(!cv_fposu_absolute_mode.getBool() && !isAutoCursor)
+    if(!cv::fposu_absolute_mode.getBool() && !isAutoCursor)
     {
         // regular mouse position mode
 
         // calculate mouse delta
         Vector2 rawDelta = mouse->getRawDelta() /
-                           cv_mouse_sensitivity.getFloat();  // HACKHACK: undo engine mouse sensitivity multiplier
+                           cv::mouse_sensitivity.getFloat();  // HACKHACK: undo engine mouse sensitivity multiplier
 
         // apply fposu mouse sensitivity multiplier
-        const double countsPerCm = (double)cv_fposu_mouse_dpi.getInt() / 2.54;
-        const double cmPer360 = cv_fposu_mouse_cm_360.getFloat();
+        const double countsPerCm = (double)cv::fposu_mouse_dpi.getInt() / 2.54;
+        const double cmPer360 = cv::fposu_mouse_cm_360.getFloat();
         const double countsPer360 = cmPer360 * countsPerCm;
         const double multiplier = 360.0 / countsPer360;
         rawDelta *= multiplier;
 
         // apply zoom_sensitivity_ratio if zoomed
-        if(this->bZoomed && cv_fposu_zoom_sensitivity_ratio.getFloat() > 0.0f)
+        if(this->bZoomed && cv::fposu_zoom_sensitivity_ratio.getFloat() > 0.0f)
             // see https://www.reddit.com/r/GlobalOffensive/comments/3vxkav/how_zoomed_sensitivity_works/
             rawDelta *=
-                (cv_fposu_zoom_fov.getFloat() / cv_fposu_fov.getFloat()) * cv_fposu_zoom_sensitivity_ratio.getFloat();
+                (cv::fposu_zoom_fov.getFloat() / cv::fposu_fov.getFloat()) * cv::fposu_zoom_sensitivity_ratio.getFloat();
 
         // update camera
         if(rawDelta.x != 0.0f)
-            this->camera->rotateY(rawDelta.x * (cv_fposu_invert_horizontal.getBool() ? 1.0f : -1.0f));
-        if(rawDelta.y != 0.0f) this->camera->rotateX(rawDelta.y * (cv_fposu_invert_vertical.getBool() ? 1.0f : -1.0f));
+            this->camera->rotateY(rawDelta.x * (cv::fposu_invert_horizontal.getBool() ? 1.0f : -1.0f));
+        if(rawDelta.y != 0.0f) this->camera->rotateX(rawDelta.y * (cv::fposu_invert_vertical.getBool() ? 1.0f : -1.0f));
 
         // calculate ray-mesh intersection and set new mouse pos
         Vector2 newMousePos = this->intersectRayMesh(this->camera->getPos(), this->camera->getViewDirection());
@@ -271,10 +271,10 @@ void ModFPoSu::update() {
 }
 
 void ModFPoSu::noclipMove() {
-    const float noclipSpeed = cv_fposu_noclipspeed.getFloat() * (keyboard->isShiftDown() ? 3.0f : 1.0f) *
+    const float noclipSpeed = cv::fposu_noclipspeed.getFloat() * (keyboard->isShiftDown() ? 3.0f : 1.0f) *
                               (keyboard->isControlDown() ? 0.2f : 1);
-    const float noclipAccelerate = cv_fposu_noclipaccelerate.getFloat();
-    const float friction = cv_fposu_noclipfriction.getFloat();
+    const float noclipAccelerate = cv::fposu_noclipaccelerate.getFloat();
+    const float friction = cv::fposu_noclipfriction.getFloat();
 
     // build direction vector based on player key inputs
     Vector3 wishdir;
@@ -338,11 +338,11 @@ void ModFPoSu::noclipMove() {
 }
 
 void ModFPoSu::onKeyDown(KeyboardEvent &key) {
-    if(key == (KEYCODE)cv_FPOSU_ZOOM.getInt() && !this->bZoomKeyDown) {
+    if(key == (KEYCODE)cv::FPOSU_ZOOM.getInt() && !this->bZoomKeyDown) {
         this->bZoomKeyDown = true;
 
-        if(!this->bZoomed || cv_fposu_zoom_toggle.getBool()) {
-            if(!cv_fposu_zoom_toggle.getBool())
+        if(!this->bZoomed || cv::fposu_zoom_toggle.getBool()) {
+            if(!cv::fposu_zoom_toggle.getBool())
                 this->bZoomed = true;
             else
                 this->bZoomed = !this->bZoomed;
@@ -363,10 +363,10 @@ void ModFPoSu::onKeyDown(KeyboardEvent &key) {
 }
 
 void ModFPoSu::onKeyUp(KeyboardEvent &key) {
-    if(key == (KEYCODE)cv_FPOSU_ZOOM.getInt()) {
+    if(key == (KEYCODE)cv::FPOSU_ZOOM.getInt()) {
         this->bZoomKeyDown = false;
 
-        if(this->bZoomed && !cv_fposu_zoom_toggle.getBool()) {
+        if(this->bZoomed && !cv::fposu_zoom_toggle.getBool()) {
             this->bZoomed = false;
             this->handleZoomedChange();
         }
@@ -382,10 +382,10 @@ void ModFPoSu::onKeyUp(KeyboardEvent &key) {
 void ModFPoSu::handleZoomedChange() {
     if(this->bZoomed)
         anim->moveQuadOut(&this->fZoomFOVAnimPercent, 1.0f,
-                          (1.0f - this->fZoomFOVAnimPercent) * cv_fposu_zoom_anim_duration.getFloat(), true);
+                          (1.0f - this->fZoomFOVAnimPercent) * cv::fposu_zoom_anim_duration.getFloat(), true);
     else
         anim->moveQuadOut(&this->fZoomFOVAnimPercent, 0.0f,
-                          this->fZoomFOVAnimPercent * cv_fposu_zoom_anim_duration.getFloat(), true);
+                          this->fZoomFOVAnimPercent * cv::fposu_zoom_anim_duration.getFloat(), true);
 }
 
 void ModFPoSu::setMousePosCompensated(Vector2 newMousePos) {
@@ -507,7 +507,7 @@ void ModFPoSu::makePlayfield() {
 
     const float topTC = 1.0f;
     const float bottomTC = 0.0f;
-    const float dist = -cv_fposu_distance.getFloat();
+    const float dist = -cv::fposu_distance.getFloat();
 
     VertexPair vp1 = VertexPair(Vector3(-0.5, 0.5, dist), Vector3(-0.5, -0.5, dist), 0);
     VertexPair vp2 = VertexPair(Vector3(0.5, 0.5, dist), Vector3(0.5, -0.5, dist), 1);
@@ -557,7 +557,7 @@ void ModFPoSu::makePlayfield() {
 void ModFPoSu::makeBackgroundCube() {
     this->vaoCube->clear();
 
-    const float size = cv_fposu_cube_size.getFloat();
+    const float size = cv::fposu_cube_size.getFloat();
 
     // front
     this->vaoCube->addVertex(-size, -size, -size);
@@ -655,7 +655,7 @@ void ModFPoSu::onCurvedChange(const UString &oldValue, const UString &newValue) 
 void ModFPoSu::onDistanceChange(const UString &oldValue, const UString &newValue) { this->makePlayfield(); }
 
 void ModFPoSu::onNoclipChange(const UString &oldValue, const UString &newValue) {
-    if(cv_fposu_noclip.getBool())
+    if(cv::fposu_noclip.getBool())
         this->camera->setPos(this->vPrevNoclipCameraPos);
     else {
         this->vPrevNoclipCameraPos = this->camera->getPos();
@@ -670,7 +670,7 @@ float ModFPoSu::subdivide(std::list<VertexPair> &meshList, const std::list<Verte
     Vector3 middlePoint =
         Vector3(std::lerp(a.x, b.x, 0.5f), std::lerp(a.y, b.y, 0.5f), std::lerp(a.z, b.z, 0.5f));
 
-    if(cv_fposu_curved.getBool()) middlePoint.setLength(edgeDistance);
+    if(cv::fposu_curved.getBool()) middlePoint.setLength(edgeDistance);
 
     Vector3 top, bottom;
     top = bottom = middlePoint;

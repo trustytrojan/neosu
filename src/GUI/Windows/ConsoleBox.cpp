@@ -27,7 +27,7 @@ class ConsoleBoxTextbox : public CBaseUITextbox {
 
    protected:
     void drawText() override {
-        if(cv_consolebox_draw_preview.getBool()) {
+        if(cv::consolebox_draw_preview.getBool()) {
             if(this->sSuggestion.length() > 0 && this->sSuggestion.find(this->sText) == 0) {
                 g->setColor(0xff444444);
                 g->pushTransform();
@@ -60,7 +60,7 @@ class ConsoleBoxSuggestionButton : public CBaseUIButton {
     void drawText() override {
         if(this->font == NULL || this->sText.length() < 1) return;
 
-        if(cv_consolebox_draw_helptext.getBool()) {
+        if(cv::consolebox_draw_helptext.getBool()) {
             if(this->sHelpText.length() > 0) {
                 const UString helpTextSeparator = "-";
                 const int helpTextOffset = std::round(2.0f * this->font->getStringWidth(helpTextSeparator) *
@@ -150,7 +150,7 @@ ConsoleBox::ConsoleBox() : CBaseUIElement(0, 0, 0, 0, "") {
     this->clearSuggestions();
 
     // convar callbacks
-    cmd_showconsolebox.setCallback(fastdelegate::MakeDelegate(this, &ConsoleBox::show));
+    cv::cmd::showconsolebox.setCallback(fastdelegate::MakeDelegate(this, &ConsoleBox::show));
 }
 
 ConsoleBox::~ConsoleBox() {
@@ -168,7 +168,7 @@ void ConsoleBox::draw() {
     {
         if(mouse->isMiddleDown()) g->translate(0, mouse->getPos().y - engine->getScreenHeight());
 
-        if(cv_console_overlay.getBool() || this->textbox->isVisible()) this->drawLogOverlay();
+        if(cv::console_overlay.getBool() || this->textbox->isVisible()) this->drawLogOverlay();
 
         if(anim->isAnimating(&this->fConsoleAnimation)) {
             g->push3DScene(McRect(this->textbox->getPos().x, this->textbox->getPos().y, this->textbox->getSize().x,
@@ -193,13 +193,13 @@ void ConsoleBox::drawLogOverlay() {
 
     const float dpiScale = this->getDPIScale();
 
-    const float logScale = std::round(dpiScale + 0.255f) * cv_console_overlay_scale.getFloat();
+    const float logScale = std::round(dpiScale + 0.255f) * cv::console_overlay_scale.getFloat();
 
     const int shadowOffset = 1 * logScale;
 
     g->setColor(0xff000000);
     const float alpha =
-        1.0f - (this->fLogYPos / (this->logFont->getHeight() * (cv_console_overlay_lines.getInt() + 1)));
+        1.0f - (this->fLogYPos / (this->logFont->getHeight() * (cv::console_overlay_lines.getInt() + 1)));
     if(this->fLogYPos != 0.0f) g->setAlpha(alpha);
 
     g->pushTransform();
@@ -301,7 +301,7 @@ void ConsoleBox::mouse_update(bool *propagate_clicks) {
     if(this->bSuggestionAnimateOut) {
         if(this->fSuggestionAnimation <= this->fSuggestionY) {
             this->suggestion->setPosY(engine->getScreenHeight() - (this->fSuggestionY - this->fSuggestionAnimation));
-            this->fSuggestionAnimation += cv_consolebox_animspeed.getFloat();
+            this->fSuggestionAnimation += cv::consolebox_animspeed.getFloat();
         } else {
             this->bSuggestionAnimateOut = false;
             this->fSuggestionAnimation = this->fSuggestionY;
@@ -313,7 +313,7 @@ void ConsoleBox::mouse_update(bool *propagate_clicks) {
     if(this->bSuggestionAnimateIn) {
         if(this->fSuggestionAnimation >= 0) {
             this->suggestion->setPosY(engine->getScreenHeight() - (this->fSuggestionY - this->fSuggestionAnimation));
-            this->fSuggestionAnimation -= cv_consolebox_animspeed.getFloat();
+            this->fSuggestionAnimation -= cv::consolebox_animspeed.getFloat();
         } else {
             this->bSuggestionAnimateIn = false;
             this->fSuggestionAnimation = 0.0f;
@@ -332,10 +332,10 @@ void ConsoleBox::mouse_update(bool *propagate_clicks) {
     bool forceVisible = this->bForceLogVisible.exchange(false);
     if(!forceVisible && engine->getTime() > this->fLogTime) {
         if(!anim->isAnimating(&this->fLogYPos) && this->fLogYPos == 0.0f)
-            anim->moveQuadInOut(&this->fLogYPos, this->logFont->getHeight() * (cv_console_overlay_lines.getFloat() + 1),
+            anim->moveQuadInOut(&this->fLogYPos, this->logFont->getHeight() * (cv::console_overlay_lines.getFloat() + 1),
                                 0.5f);
 
-        if(this->fLogYPos == this->logFont->getHeight() * (cv_console_overlay_lines.getInt() + 1)) {
+        if(this->fLogYPos == this->logFont->getHeight() * (cv::console_overlay_lines.getInt() + 1)) {
             std::scoped_lock logGuard(this->logMutex);
             this->log_entries.clear();
         }
@@ -649,7 +649,7 @@ void ConsoleBox::log(UString text, Color textColor) {
         this->log_entries.push_back(logEntry);
     }
 
-    while(this->log_entries.size() > cv_console_overlay_lines.getInt()) {
+    while(this->log_entries.size() > cv::console_overlay_lines.getInt()) {
         this->log_entries.erase(this->log_entries.begin());
     }
 

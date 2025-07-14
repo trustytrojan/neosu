@@ -53,11 +53,11 @@ WinEnvironment::WinEnvironment(HWND hwnd, HINSTANCE hinstance) : Environment() {
     }
 
     // convar callbacks
-    cv_win_processpriority.setCallback(fastdelegate::MakeDelegate(this, &WinEnvironment::onProcessPriorityChange));
-    cv_win_disable_windows_key.setCallback(
+    cv::win_processpriority.setCallback(fastdelegate::MakeDelegate(this, &WinEnvironment::onProcessPriorityChange));
+    cv::win_disable_windows_key.setCallback(
         fastdelegate::MakeDelegate(this, &WinEnvironment::onDisableWindowsKeyChange));
 
-    setProcessPriority(cv_win_processpriority.getInt());
+    setProcessPriority(cv::win_processpriority.getInt());
 }
 
 WinEnvironment::~WinEnvironment() { enableWindowsKey(); }
@@ -463,7 +463,7 @@ void WinEnvironment::disableFullscreen() {
     f32 width = 1280.f;
     f32 height = 720.f;
     {
-        UString res{cv_windowed_resolution.getString()};
+        UString res{cv::windowed_resolution.getString()};
         if(res.length() >= 7) {
             std::vector<UString> resolution = res.split("x");
             if(resolution.size() == 2) {
@@ -891,7 +891,7 @@ BOOL CALLBACK WinEnvironment::monitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor,
     else
         WinEnvironment::vMonitors.push_back(monitorRect);
 
-    if(cv_debug_env.getBool())
+    if(cv::debug_env.getBool())
         debugLog("Monitor %i: (right = %ld, bottom = %ld, left = %ld, top = %ld), isPrimaryMonitor = %i\n",
                  WinEnvironment::vMonitors.size(), lprcMonitor->right, lprcMonitor->bottom, lprcMonitor->left,
                  lprcMonitor->top, (int)isPrimaryMonitor);

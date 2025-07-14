@@ -91,7 +91,7 @@ void UserCard::draw() {
     g->popTransform();
     g->popClipRect();
 
-    if(cv_scores_enabled.getBool()) {
+    if(cv::scores_enabled.getBool()) {
         // draw performance (pp), and accuracy
         McFont *performanceFont = osu->getSubTitleFont();
         const float performanceScale = 0.3f;
@@ -112,12 +112,12 @@ void UserCard::draw() {
             g->scale(scale, scale);
             g->translate((int)(this->vPos.x + iconWidth + usernamePaddingLeft), yCounter);
             g->setColor(0xffffffff);
-            if(cv_user_draw_pp.getBool()) g->drawString(performanceFont, performanceString);
+            if(cv::user_draw_pp.getBool()) g->drawString(performanceFont, performanceString);
 
             yCounter += performanceFont->getHeight() * scale + paddingMiddle;
 
             g->translate(0, performanceFont->getHeight() * scale + paddingMiddle);
-            if(cv_user_draw_accuracy.getBool()) g->drawString(performanceFont, accuracyString);
+            if(cv::user_draw_accuracy.getBool()) g->drawString(performanceFont, accuracyString);
         }
         g->popTransform();
 
@@ -139,12 +139,12 @@ void UserCard::draw() {
             g->scale(scale * 0.9f, scale);
             g->translate((int)(this->vPos.x + iconWidth + usernamePaddingLeft), yCounter);
             g->setColor(0xffffffff);
-            if(cv_user_draw_level.getBool()) g->drawString(scoreFont, scoreString);
+            if(cv::user_draw_level.getBool()) g->drawString(scoreFont, scoreString);
         }
         g->popTransform();
 
         // draw level percentage bar (to next level)
-        if(cv_user_draw_level_bar.getBool()) {
+        if(cv::user_draw_level_bar.getBool()) {
             const float barBorder = 1.f;
             const float barHeight = (int)(this->vSize.y - 2 * barBorder) * 0.15f;
             const float barWidth = (int)((this->vSize.x - 2 * barBorder) * 0.61f);
@@ -287,6 +287,6 @@ void UserCard::setID(u32 new_id) {
         this->avatar->on_screen = true;
         this->sText = my->name;
     } else {
-        this->sText = cv_name.getString().c_str();
+        this->sText = cv::name.getString().c_str();
     }
 }

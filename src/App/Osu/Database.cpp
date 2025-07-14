@@ -229,7 +229,7 @@ BeatmapSet *Database::addBeatmapSet(const std::string &beatmapFolderPath, i32 se
     osu->songBrowser2->addBeatmapSet(beatmap);
 
     // XXX: Very slow
-    osu->songBrowser2->onSortChangeInt(cv_songbrowser_sortingtype.getString().c_str(), false);
+    osu->songBrowser2->onSortChangeInt(cv::songbrowser_sortingtype.getString().c_str(), false);
 
     return beatmap;
 }
@@ -240,7 +240,7 @@ int Database::addScore(const FinishedScore &score) {
 
     this->bDidScoresChangeForStats = true;
 
-    if(cv_scores_save_immediately.getBool()) this->saveScores();
+    if(cv::scores_save_immediately.getBool()) this->saveScores();
 
     // @PPV3: use new replay format
 
@@ -297,13 +297,13 @@ void Database::deleteScore(MD5Hash beatmapMD5Hash, u64 scoreUnixTimestamp) {
 void Database::sortScoresInPlace(std::vector<FinishedScore> &scores) {
     if(scores.size() < 2) return;
 
-    if(cv_songbrowser_scores_sortingtype.getString() == "Online Leaderboard") {
+    if(cv::songbrowser_scores_sortingtype.getString() == "Online Leaderboard") {
         // Online scores are already sorted
         return;
     }
 
     for(int i = 0; i < this->scoreSortingMethods.size(); i++) {
-        if(cv_songbrowser_scores_sortingtype.getString() == this->scoreSortingMethods[i].name.utf8View()) {
+        if(cv::songbrowser_scores_sortingtype.getString() == this->scoreSortingMethods[i].name.utf8View()) {
             struct COMPARATOR_WRAPPER {
                 SCORE_SORTING_COMPARATOR *comp;
                 bool operator()(FinishedScore const &a, FinishedScore const &b) const {
@@ -318,8 +318,8 @@ void Database::sortScoresInPlace(std::vector<FinishedScore> &scores) {
         }
     }
 
-    if(cv_debug.getBool()) {
-        debugLog("ERROR: Invalid score sortingtype \"%s\"\n", cv_songbrowser_scores_sortingtype.getString());
+    if(cv::debug.getBool()) {
+        debugLog("ERROR: Invalid score sortingtype \"%s\"\n", cv::songbrowser_scores_sortingtype.getString());
     }
 }
 
@@ -345,7 +345,7 @@ std::vector<UString> Database::getPlayerNamesWithPPScores() {
     }
 
     // always add local user, even if there were no scores
-    tempNames.insert(cv_name.getString());
+    tempNames.insert(cv::name.getString());
 
     std::vector<UString> names;
     names.reserve(tempNames.size());
@@ -367,7 +367,7 @@ std::vector<UString> Database::getPlayerNamesWithScoresForUserSwitcher() {
     }
 
     // always add local user, even if there were no scores
-    tempNames.insert(cv_name.getString());
+    tempNames.insert(cv::name.getString());
 
     std::vector<UString> names;
     names.reserve(tempNames.size());
@@ -417,7 +417,7 @@ Database::PlayerPPScores Database::getPlayerPPScores(const UString &playerName) 
 
             auto uses_rx_or_ap =
                 (score.mods.flags & Replay::ModFlags::Relax) || (score.mods.flags & Replay::ModFlags::Autopilot);
-            if(uses_rx_or_ap && !cv_user_include_relax_and_autopilot_for_stats.getBool()) continue;
+            if(uses_rx_or_ap && !cv::user_include_relax_and_autopilot_for_stats.getBool()) continue;
 
             if(uName != playerName) continue;
 
@@ -467,7 +467,7 @@ Database::PlayerStats Database::calculatePlayerStats(const UString &playerName) 
 
     // bonus pp
     // https://osu.ppy.sh/wiki/en/Performance_points
-    if(cv_scores_bonus_pp.getBool()) pp += getBonusPPForNumScores(ps.ppScores.size());
+    if(cv::scores_bonus_pp.getBool()) pp += getBonusPPForNumScores(ps.ppScores.size());
 
     // normalize accuracy
     if(ps.ppScores.size() > 0) acc /= (20.0f * (1.0f - getWeightForIndex(ps.ppScores.size())));
@@ -569,14 +569,14 @@ DatabaseBeatmap *Database::getBeatmapSet(i32 set_id) {
 std::string Database::getOsuSongsFolder() {
     std::string songs_folder;
 
-    if(cv_songs_folder.getString().find(':') == std::string::npos) {
+    if(cv::songs_folder.getString().find(':') == std::string::npos) {
         // Relative path (yes, the check is Windows-only)
-        songs_folder = cv_osu_folder.getString();
+        songs_folder = cv::osu_folder.getString();
         songs_folder.append("/");
-        songs_folder.append(cv_songs_folder.getString());
+        songs_folder.append(cv::songs_folder.getString());
     } else {
         // Absolute path
-        songs_folder = cv_songs_folder.getString();
+        songs_folder = cv::songs_folder.getString();
     }
 
     songs_folder.append("/");
@@ -587,7 +587,7 @@ void Database::loadDB() {
     std::scoped_lock lock(this->beatmap_difficulties_mtx);
     this->peppy_overrides_mtx.lock();
 
-    std::string osuDbFilePath = cv_osu_folder.getString();
+    std::string osuDbFilePath = cv::osu_folder.getString();
     osuDbFilePath.append("/osu!.db");
     BanchoFile::Reader db(osuDbFilePath.c_str());
     BanchoFile::Reader neosu_maps("neosu_maps.db");
@@ -753,7 +753,7 @@ void Database::loadDB() {
                  this->iFolderCount, playerName.c_str(), this->iNumBeatmapsToLoad);
 
         // hard cap upper db version
-        if(this->iVersion > cv_database_version.getInt() && !cv_database_ignore_version.getBool()) {
+        if(this->iVersion > cv::database_version.getInt() && !cv::database_ignore_version.getBool()) {
             osu->getNotificationOverlay()->addToast(
                 UString::format("osu!.db version unknown (%i), osu!stable maps will not get loaded.", this->iVersion),
                 0xffffff00);
@@ -765,7 +765,7 @@ void Database::loadDB() {
         for(int i = 0; i < this->iNumBeatmapsToLoad; i++) {
             if(this->bInterruptLoad.load()) break;  // cancellation point
 
-            if(cv_debug.getBool()) debugLog("Database: Reading beatmap %i/%i ...\n", (i + 1), this->iNumBeatmapsToLoad);
+            if(cv::debug.getBool()) debugLog("Database: Reading beatmap %i/%i ...\n", (i + 1), this->iNumBeatmapsToLoad);
 
             // update progress (another thread checks if progress >= 1.f to know when we're done)
             u32 db_pos_sum = db.total_pos + neosu_maps.total_pos;
@@ -1460,7 +1460,7 @@ u32 Database::importOldNeosuScores() {
 u32 Database::importPeppyScores() {
     int nb_imported = 0;
 
-    std::string scoresPath = cv_osu_folder.getString();
+    std::string scoresPath = cv::osu_folder.getString();
     scoresPath.append("/scores.db");
     BanchoFile::Reader db(scoresPath.c_str());
 
@@ -1668,7 +1668,7 @@ void Database::saveScores() {
 }
 
 BeatmapSet *Database::loadRawBeatmap(const std::string &beatmapPath) {
-    if(cv_debug.getBool()) debugLog("BeatmapDatabase::loadRawBeatmap() : %s\n", beatmapPath.c_str());
+    if(cv::debug.getBool()) debugLog("BeatmapDatabase::loadRawBeatmap() : %s\n", beatmapPath.c_str());
 
     // try loading all diffs
     std::vector<BeatmapDifficulty *> *diffs2 = new std::vector<BeatmapDifficulty *>();
@@ -1685,7 +1685,7 @@ BeatmapSet *Database::loadRawBeatmap(const std::string &beatmapPath) {
         if(diff2->loadMetadata()) {
             diffs2->push_back(diff2);
         } else {
-            if(cv_debug.getBool()) {
+            if(cv::debug.getBool()) {
                 debugLog("BeatmapDatabase::loadRawBeatmap() : Couldn't loadMetadata(), deleting object.\n");
             }
             SAFE_DELETE(diff2);

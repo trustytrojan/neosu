@@ -281,7 +281,7 @@ bool ConVarHandler::isVanilla() {
 
         if(osu->getModNightmare()) return false;
         if(osu->getModEZ() && osu->getModHR()) return false;
-        f32 speed = cv_speed_override.getFloat();
+        f32 speed = cv::speed_override.getFloat();
         if(speed != -1.f && speed != 0.75 && speed != 1.0 && speed != 1.5) return false;
     }
 
@@ -470,12 +470,13 @@ void _echo(const UString &args) {
     }
 }
 
-void _volume(const UString &oldValue, const UString &newValue) {
-    (void)oldValue;
+void _volume(const UString &/*oldValue*/, const UString &newValue) {
+    if (!soundEngine) return;
     soundEngine->setVolume(newValue.toFloat());
 }
 
 void _RESTART_SOUND_ENGINE_ON_CHANGE(const UString &oldValue, const UString &newValue) {
+    if (!soundEngine) return;
     const int oldValueMS = std::round(oldValue.toFloat() * 1000.0f);
     const int newValueMS = std::round(newValue.toFloat() * 1000.0f);
 
@@ -495,7 +496,7 @@ void _vprof(const UString &oldValue, const UString &newValue) {
 
 void _osuOptionsSliderQualityWrapper(const UString &oldValue, const UString &newValue) {
     float value = std::lerp(1.0f, 2.5f, 1.0f - newValue.toFloat());
-    cv_slider_curve_points_separation.setValue(value);
+    cv::slider_curve_points_separation.setValue(value);
 };
 
 void spectate_by_username(const UString &username) {
@@ -525,13 +526,13 @@ void _fullscreen_windowed_borderless(const UString &oldValue, const UString &new
 void _monitor(const UString &oldValue, const UString &newValue) { env->setMonitor(newValue.toInt()); }
 
 void _osu_songbrowser_search_hardcoded_filter(const UString &oldValue, const UString &newValue) {
-    if(newValue.length() == 1 && newValue.isWhitespaceOnly()) cv_songbrowser_search_hardcoded_filter.setValue("");
+    if(newValue.length() == 1 && newValue.isWhitespaceOnly()) cv::songbrowser_search_hardcoded_filter.setValue("");
 }
 
 void loudness_cb(const UString &oldValue, const UString &newValue) {
     // Restart loudness calc.
     VolNormalization::abort();
-    if(db && cv_normalize_loudness.getBool()) {
+    if(db && cv::normalize_loudness.getBool()) {
         VolNormalization::start_calc(db->loudness_to_calc);
     }
 }

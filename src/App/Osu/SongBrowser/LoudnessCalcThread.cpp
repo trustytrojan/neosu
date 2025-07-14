@@ -131,9 +131,9 @@ void VolNormalization::start_calc_instance(const std::vector<DatabaseBeatmap *> 
     if constexpr(!Env::cfg(AUD::BASS)) return;  // TODO
     this->abort_instance();
     if(maps_to_calc.empty()) return;
-    if(!cv_normalize_loudness.getBool()) return;
+    if(!cv::normalize_loudness.getBool()) return;
 
-    i32 nb_threads = cv_loudness_calc_threads.getInt();
+    i32 nb_threads = cv::loudness_calc_threads.getInt();
     if(nb_threads <= 0) {
         // dividing by 2 still burns cpu if hyperthreading is enabled, let's keep it at a sane amount of threads
         nb_threads = std::max(std::thread::hardware_concurrency() / 3, 1u);

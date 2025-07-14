@@ -85,7 +85,7 @@ void OpenGLVertexArrayObject::init() {
     // handle full loads
 
     unsigned int vertexAttribArrayIndexCounter = 0;
-    if(cv_r_opengl_legacy_vao_use_vertex_array.getBool()) {
+    if(cv::r_opengl_legacy_vao_use_vertex_array.getBool()) {
         // build and bind vertex array
         glGenVertexArrays(1, &this->iVertexArray);
         glBindVertexArray(this->iVertexArray);
@@ -98,7 +98,7 @@ void OpenGLVertexArrayObject::init() {
         glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3) * this->vertices.size(), &(this->vertices[0]),
                      usageToOpenGL(this->usage));
 
-        if(cv_r_opengl_legacy_vao_use_vertex_array.getBool()) {
+        if(cv::r_opengl_legacy_vao_use_vertex_array.getBool()) {
             glEnableVertexAttribArray(vertexAttribArrayIndexCounter);
             glVertexAttribPointer(vertexAttribArrayIndexCounter, 3, GL_FLOAT, GL_FALSE, 0, (char*)NULL);
             vertexAttribArrayIndexCounter++;
@@ -117,7 +117,7 @@ void OpenGLVertexArrayObject::init() {
         glBufferData(GL_ARRAY_BUFFER, sizeof(Vector2) * this->texcoords[0].size(), &(this->texcoords[0][0]),
                      usageToOpenGL(this->usage));
 
-        if(cv_r_opengl_legacy_vao_use_vertex_array.getBool()) {
+        if(cv::r_opengl_legacy_vao_use_vertex_array.getBool()) {
             if(this->iNumTexcoords > 0) {
                 glEnableVertexAttribArray(vertexAttribArrayIndexCounter);
                 glVertexAttribPointer(vertexAttribArrayIndexCounter, 2, GL_FLOAT, GL_FALSE, 0, (char*)NULL);
@@ -139,7 +139,7 @@ void OpenGLVertexArrayObject::init() {
         glBufferData(GL_ARRAY_BUFFER, sizeof(Color) * this->colors.size(), &(this->colors[0]),
                      usageToOpenGL(this->usage));
 
-        if(cv_r_opengl_legacy_vao_use_vertex_array.getBool()) {
+        if(cv::r_opengl_legacy_vao_use_vertex_array.getBool()) {
             if(this->iNumColors > 0) {
                 glEnableVertexAttribArray(vertexAttribArrayIndexCounter);
                 glVertexAttribPointer(vertexAttribArrayIndexCounter, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, (char*)NULL);
@@ -157,7 +157,7 @@ void OpenGLVertexArrayObject::init() {
         glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3) * this->normals.size(), &(this->normals[0]),
                      usageToOpenGL(this->usage));
 
-        if(cv_r_opengl_legacy_vao_use_vertex_array.getBool()) {
+        if(cv::r_opengl_legacy_vao_use_vertex_array.getBool()) {
             if(this->iNumNormals > 0) {
                 glEnableVertexAttribArray(vertexAttribArrayIndexCounter);
                 glVertexAttribPointer(vertexAttribArrayIndexCounter, 3, GL_FLOAT, GL_FALSE, 0, (char*)NULL);
@@ -166,7 +166,7 @@ void OpenGLVertexArrayObject::init() {
         }
     }
 
-    if(cv_r_opengl_legacy_vao_use_vertex_array.getBool()) {
+    if(cv::r_opengl_legacy_vao_use_vertex_array.getBool()) {
         glBindVertexArray(0);
     }
 
@@ -218,7 +218,7 @@ void OpenGLVertexArrayObject::draw() {
 
     if(start > end || std::abs(end - start) == 0) return;
 
-    if(cv_r_opengl_legacy_vao_use_vertex_array.getBool()) {
+    if(cv::r_opengl_legacy_vao_use_vertex_array.getBool()) {
         // set vao
         glBindVertexArray(this->iVertexArray);
 

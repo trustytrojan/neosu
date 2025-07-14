@@ -129,21 +129,21 @@ class Osu : public App, public MouseListener {
     float getScoreMultiplier();
     float getAnimationSpeedMultiplier();
 
-    [[nodiscard]] inline bool getModAuto() const { return cv_mod_autoplay.getBool(); }
-    [[nodiscard]] inline bool getModAutopilot() const { return cv_mod_autopilot.getBool(); }
-    [[nodiscard]] inline bool getModRelax() const { return cv_mod_relax.getBool(); }
-    [[nodiscard]] inline bool getModSpunout() const { return cv_mod_spunout.getBool(); }
-    [[nodiscard]] inline bool getModTarget() const { return cv_mod_target.getBool(); }
-    [[nodiscard]] inline bool getModScorev2() const { return cv_mod_scorev2.getBool(); }
-    [[nodiscard]] inline bool getModFlashlight() const { return cv_mod_flashlight.getBool(); }
-    [[nodiscard]] inline bool getModNF() const { return cv_mod_nofail.getBool(); }
-    [[nodiscard]] inline bool getModHD() const { return cv_mod_hidden.getBool(); }
-    [[nodiscard]] inline bool getModHR() const { return cv_mod_hardrock.getBool(); }
-    [[nodiscard]] inline bool getModEZ() const { return cv_mod_easy.getBool(); }
-    [[nodiscard]] inline bool getModSD() const { return cv_mod_suddendeath.getBool(); }
-    [[nodiscard]] inline bool getModSS() const { return cv_mod_perfect.getBool(); }
-    [[nodiscard]] inline bool getModNightmare() const { return cv_mod_nightmare.getBool(); }
-    [[nodiscard]] inline bool getModTD() const { return cv_mod_touchdevice.getBool() || cv_mod_touchdevice_always.getBool(); }
+    [[nodiscard]] inline bool getModAuto() const { return cv::mod_autoplay.getBool(); }
+    [[nodiscard]] inline bool getModAutopilot() const { return cv::mod_autopilot.getBool(); }
+    [[nodiscard]] inline bool getModRelax() const { return cv::mod_relax.getBool(); }
+    [[nodiscard]] inline bool getModSpunout() const { return cv::mod_spunout.getBool(); }
+    [[nodiscard]] inline bool getModTarget() const { return cv::mod_target.getBool(); }
+    [[nodiscard]] inline bool getModScorev2() const { return cv::mod_scorev2.getBool(); }
+    [[nodiscard]] inline bool getModFlashlight() const { return cv::mod_flashlight.getBool(); }
+    [[nodiscard]] inline bool getModNF() const { return cv::mod_nofail.getBool(); }
+    [[nodiscard]] inline bool getModHD() const { return cv::mod_hidden.getBool(); }
+    [[nodiscard]] inline bool getModHR() const { return cv::mod_hardrock.getBool(); }
+    [[nodiscard]] inline bool getModEZ() const { return cv::mod_easy.getBool(); }
+    [[nodiscard]] inline bool getModSD() const { return cv::mod_suddendeath.getBool(); }
+    [[nodiscard]] inline bool getModSS() const { return cv::mod_perfect.getBool(); }
+    [[nodiscard]] inline bool getModNightmare() const { return cv::mod_nightmare.getBool(); }
+    [[nodiscard]] inline bool getModTD() const { return cv::mod_touchdevice.getBool() || cv::mod_touchdevice_always.getBool(); }
 
     [[nodiscard]] inline std::vector<ConVar *> getExperimentalMods() const { return this->experimentalMods; }
 

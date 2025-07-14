@@ -249,7 +249,7 @@ void SpectatorScreen::mouse_update(bool *propagate_clicks) {
 void SpectatorScreen::draw() {
     if(!this->isVisible()) return;
 
-    if(cv_draw_spectator_background_image.getBool()) {
+    if(cv::draw_spectator_background_image.getBool()) {
         SongBrowser::drawSelectedBeatmapBackgroundImage(1.0);
     }
 

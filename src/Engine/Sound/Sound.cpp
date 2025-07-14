@@ -59,11 +59,11 @@ HCHANNEL Sound::getChannel() {
 void Sound::init() { this->bReady = this->bAsyncReady.load(); }
 
 void Sound::initAsync() {
-    if(cv_debug_rm.getBool()) debugLog("Resource Manager: Loading %s\n", this->sFilePath.c_str());
+    if(cv::debug_rm.getBool()) debugLog("Resource Manager: Loading %s\n", this->sFilePath.c_str());
 
     // HACKHACK: workaround for BASS crashes on malformed WAV files
     {
-        const int minWavFileSize = cv_snd_wav_file_min_size.getInt();
+        const int minWavFileSize = cv::snd_wav_file_min_size.getInt();
         if(minWavFileSize > 0) {
             auto fileExtensionLowerCase = UString(env->getFileExtensionFromFilePath(this->sFilePath).c_str());
             fileExtensionLowerCase.lowerCase();
@@ -82,7 +82,7 @@ void Sound::initAsync() {
 
     if(this->bStream) {
         u32 flags = BASS_STREAM_DECODE | BASS_SAMPLE_FLOAT | BASS_STREAM_PRESCAN;
-        if(cv_snd_async_buffer.getInt() > 0) flags |= BASS_ASYNCFILE;
+        if(cv::snd_async_buffer.getInt() > 0) flags |= BASS_ASYNCFILE;
         if constexpr(Env::cfg(OS::WINDOWS)) flags |= BASS_UNICODE;
 
         if(this->bInterrupted.load()) return;
@@ -205,7 +205,7 @@ void Sound::setPositionMS(unsigned long ms) {
         if(this->isPlaying()) {
             if(!BASS_Mixer_ChannelSetPosition(this->stream, target_pos,
                                               BASS_POS_BYTE | BASS_POS_DECODETO | BASS_POS_MIXER_RESET)) {
-                if(cv_debug.getBool()) {
+                if(cv::debug.getBool()) {
                     debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms,
                              BASS_ErrorGetCode(), this->sFilePath.c_str());
                 }
@@ -213,7 +213,7 @@ void Sound::setPositionMS(unsigned long ms) {
             this->fLastPlayTime = this->fChannelCreationTime - ((f64)ms / 1000.0);
         } else {
             if(!BASS_ChannelSetPosition(this->stream, target_pos, BASS_POS_BYTE | BASS_POS_DECODETO | BASS_POS_FLUSH)) {
-                if(cv_debug.getBool()) {
+                if(cv::debug.getBool()) {
                     debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms,
                              BASS_ErrorGetCode(), this->sFilePath.c_str());
                 }
@@ -234,7 +234,7 @@ void Sound::setPositionMS(unsigned long ms) {
         this->paused_position_ms = ms;
 
         if(!BASS_ChannelSetPosition(this->stream, target_pos, BASS_POS_BYTE | BASS_POS_DECODETO | BASS_POS_FLUSH)) {
-            if(cv_debug.getBool()) {
+            if(cv::debug.getBool()) {
                 debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms,
                          BASS_ErrorGetCode(), this->sFilePath.c_str());
             }
@@ -265,7 +265,7 @@ void Sound::setPositionMS_fast(u32 ms) {
 
     if(this->isPlaying()) {
         if(!BASS_Mixer_ChannelSetPosition(this->stream, target_pos, BASS_POS_BYTE | BASS_POS_MIXER_RESET)) {
-            if(cv_debug.getBool()) {
+            if(cv::debug.getBool()) {
                 debugLog("Sound::setPositionMS_fast( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms,
                          BASS_ErrorGetCode(), this->sFilePath.c_str());
             }
@@ -273,7 +273,7 @@ void Sound::setPositionMS_fast(u32 ms) {
         this->fLastPlayTime = this->fChannelCreationTime - ((f64)ms / 1000.0);
     } else {
         if(!BASS_ChannelSetPosition(this->stream, target_pos, BASS_POS_BYTE | BASS_POS_FLUSH)) {
-            if(cv_debug.getBool()) {
+            if(cv::debug.getBool()) {
                 debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms,
                          BASS_ErrorGetCode(), this->sFilePath.c_str());
             }
@@ -303,13 +303,13 @@ void Sound::setSpeed(float speed) {
 
     speed = std::clamp<float>(speed, 0.05f, 50.0f);
 
-    float freq = cv_snd_freq.getFloat();
+    float freq = cv::snd_freq.getFloat();
     BASS_ChannelGetAttribute(this->stream, BASS_ATTRIB_FREQ, &freq);
 
     BASS_ChannelSetAttribute(this->stream, BASS_ATTRIB_TEMPO, 1.0f);
     BASS_ChannelSetAttribute(this->stream, BASS_ATTRIB_TEMPO_FREQ, freq);
 
-    if(cv_nightcore_enjoyer.getBool()) {
+    if(cv::nightcore_enjoyer.getBool()) {
         BASS_ChannelSetAttribute(this->stream, BASS_ATTRIB_TEMPO_FREQ, speed * freq);
     } else {
         BASS_ChannelSetAttribute(this->stream, BASS_ATTRIB_TEMPO, (speed - 1.0f) * 100.0f);
@@ -418,7 +418,7 @@ u32 Sound::getLengthMS() {
 float Sound::getSpeed() { return this->fSpeed; }
 
 float Sound::getFrequency() {
-    auto default_freq = cv_snd_freq.getFloat();
+    auto default_freq = cv::snd_freq.getFloat();
     if(!this->bReady) return default_freq;
     if(!this->bStream) {
         engine->showMessageError("Programmer Error", "Called getFrequency on a sample!");

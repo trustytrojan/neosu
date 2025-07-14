@@ -34,7 +34,7 @@ struct info_cache {
 
 static BeatmapDifficulty* diff = NULL;
 
-static std::condition_variable cv;
+static std::condition_variable cond;
 static std::thread thr;
 static std::atomic<bool> dead = true;
 
@@ -54,7 +54,7 @@ static void run_thread() {
 
     for(;;) {
         std::unique_lock<std::mutex> lock(work_mtx);
-        cv.wait(lock, [] { return !work.empty() || dead.load(); });
+        cond.wait(lock, [] { return !work.empty() || dead.load(); });
         if(dead.load()) return;
 
         while(!work.empty()) {
@@ -220,7 +220,7 @@ void lct_set_map(DatabaseBeatmap* new_diff) {
 
     if(diff != NULL) {
         dead = true;
-        cv.notify_one();
+        cond.notify_one();
         thr.join();
         cache.clear();
 
@@ -288,7 +288,7 @@ pp_info lct_get_pp(pp_calc_request rqt) {
         work.push_back(rqt);
     }
     work_mtx.unlock();
-    cv.notify_one();
+    cond.notify_one();
 
     pp_info placeholder;
     placeholder.total_stars = -1.0;

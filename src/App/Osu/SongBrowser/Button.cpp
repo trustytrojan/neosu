@@ -68,7 +68,7 @@ void Button::draw() {
     this->drawMenuButtonBackground();
 
     // debug inner bounding box
-    if(cv_debug.getBool()) {
+    if(cv::debug.getBool()) {
         // scaling
         const Vector2 pos = this->getActualPos();
         const Vector2 size = this->getActualSize();
@@ -81,7 +81,7 @@ void Button::draw() {
     }
 
     // debug outer/actual bounding box
-    if(cv_debug.getBool()) {
+    if(cv::debug.getBool()) {
         g->setColor(0xffff0000);
         g->drawLine(this->vPos.x, this->vPos.y, this->vPos.x + this->vSize.x, this->vPos.y);
         g->drawLine(this->vPos.x, this->vPos.y, this->vPos.x, this->vPos.y + this->vSize.y);
@@ -144,7 +144,7 @@ void Button::mouse_update(bool *propagate_clicks) {
 }
 
 void Button::updateLayoutEx() {
-    const float uiScale = cv_ui_scale.getFloat();
+    const float uiScale = cv::ui_scale.getFloat();
 
     Image *menuButtonBackground = osu->getSkin()->getMenuButtonBackground();
     {
@@ -349,15 +349,15 @@ void Button::setMoveAwayState(Button::MOVE_AWAY_STATE moveAwayState, bool animat
 }
 
 Color Button::getActiveBackgroundColor() const {
-    return argb(std::clamp<int>(cv_songbrowser_button_active_color_a.getInt(), 0, 255),
-                 std::clamp<int>(cv_songbrowser_button_active_color_r.getInt(), 0, 255),
-                 std::clamp<int>(cv_songbrowser_button_active_color_g.getInt(), 0, 255),
-                 std::clamp<int>(cv_songbrowser_button_active_color_b.getInt(), 0, 255));
+    return argb(std::clamp<int>(cv::songbrowser_button_active_color_a.getInt(), 0, 255),
+                 std::clamp<int>(cv::songbrowser_button_active_color_r.getInt(), 0, 255),
+                 std::clamp<int>(cv::songbrowser_button_active_color_g.getInt(), 0, 255),
+                 std::clamp<int>(cv::songbrowser_button_active_color_b.getInt(), 0, 255));
 }
 
 Color Button::getInactiveBackgroundColor() const {
-    return argb(std::clamp<int>(cv_songbrowser_button_inactive_color_a.getInt(), 0, 255),
-                 std::clamp<int>(cv_songbrowser_button_inactive_color_r.getInt(), 0, 255),
-                 std::clamp<int>(cv_songbrowser_button_inactive_color_g.getInt(), 0, 255),
-                 std::clamp<int>(cv_songbrowser_button_inactive_color_b.getInt(), 0, 255));
+    return argb(std::clamp<int>(cv::songbrowser_button_inactive_color_a.getInt(), 0, 255),
+                 std::clamp<int>(cv::songbrowser_button_inactive_color_r.getInt(), 0, 255),
+                 std::clamp<int>(cv::songbrowser_button_inactive_color_g.getInt(), 0, 255),
+                 std::clamp<int>(cv::songbrowser_button_inactive_color_b.getInt(), 0, 255));
 }

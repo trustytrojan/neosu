@@ -183,10 +183,10 @@ void ScoreButton::draw() {
         g->translate(0.75f, 0.75f);
         g->setColor(0xff000000);
         g->setAlpha(0.75f);
-        g->drawString(scoreFont, (cv_scores_sort_by_pp.getBool() ? string : this->sScoreScore));
+        g->drawString(scoreFont, (cv::scores_sort_by_pp.getBool() ? string : this->sScoreScore));
         g->translate(-0.75f, -0.75f);
         g->setColor(0xffffffff);
-        g->drawString(scoreFont, (cv_scores_sort_by_pp.getBool() ? string : this->sScoreScore));
+        g->drawString(scoreFont, (cv::scores_sort_by_pp.getBool() ? string : this->sScoreScore));
     }
     g->popTransform();
 

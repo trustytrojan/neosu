@@ -30,13 +30,13 @@ void AnimationHandler::update() {
         // calculate percentage
         float percent = std::clamp<float>((engine->getTime() - animation.fStartTime) / (animation.fDuration), 0.0f, 1.0f);
 
-        if(cv_debug_anim.getBool()) debugLog("animation #%i, percent = %f\n", i, percent);
+        if(cv::debug_anim.getBool()) debugLog("animation #%i, percent = %f\n", i, percent);
 
         // check if finished
         if(percent >= 1.0f) {
             *animation.fBase = animation.fTarget;
 
-            if(cv_debug_anim.getBool())
+            if(cv::debug_anim.getBool())
                 debugLog("removing animation #%i, dtime = %f\n", i, engine->getTime() - animation.fStartTime);
 
             this->vAnimations.erase(this->vAnimations.begin() + i);

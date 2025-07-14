@@ -235,9 +235,9 @@ class VSMusicBrowserButton : public CBaseUIButton {
 
     void setSelected(bool selected) {
         if(selected && !this->bSelected)
-            anim->moveQuadInOut(&this->fSelectionAnim, 1.0f, cv_vs_browser_animspeed.getFloat(), 0.0f, true);
+            anim->moveQuadInOut(&this->fSelectionAnim, 1.0f, cv::vs_browser_animspeed.getFloat(), 0.0f, true);
         else if(!selected)
-            anim->moveQuadInOut(&this->fSelectionAnim, 0.0f, cv_vs_browser_animspeed.getFloat(), 0.0f, true);
+            anim->moveQuadInOut(&this->fSelectionAnim, 0.0f, cv::vs_browser_animspeed.getFloat(), 0.0f, true);
 
         this->bSelected = selected;
     }
@@ -262,7 +262,7 @@ class VSMusicBrowserColumnScrollView : public CBaseUIScrollView {
         this->fAnim = 0.0f;
 
         // spawn animation
-        anim->moveQuadInOut(&this->fAnim, 1.0f, cv_vs_browser_animspeed.getFloat(), 0.0f, true);
+        anim->moveQuadInOut(&this->fAnim, 1.0f, cv::vs_browser_animspeed.getFloat(), 0.0f, true);
     }
 
     ~VSMusicBrowserColumnScrollView() override { anim->deleteExistingAnimation(&this->fAnim); }

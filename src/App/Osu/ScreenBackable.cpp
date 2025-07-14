@@ -35,7 +35,7 @@ void ScreenBackable::onKeyDown(KeyboardEvent &e) {
     OsuScreen::onKeyDown(e);
     if(!this->bVisible || e.isConsumed()) return;
 
-    if(e == KEY_ESCAPE || e == (KEYCODE)cv_GAME_PAUSE.getInt()) {
+    if(e == KEY_ESCAPE || e == (KEYCODE)cv::GAME_PAUSE.getInt()) {
         soundEngine->play(osu->getSkin()->menuBack);
         this->onBack();
         e.consume();

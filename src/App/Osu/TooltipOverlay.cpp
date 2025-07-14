@@ -76,7 +76,7 @@ void TooltipOverlay::mouse_update(bool *propagate_clicks) {
     if(this->bDelayFadeout)
         this->bDelayFadeout = false;
     else if(this->fAnim > 0.0f)
-        anim->moveLinear(&this->fAnim, 0.0f, (this->fAnim)*cv_tooltip_anim_duration.getFloat(), true);
+        anim->moveLinear(&this->fAnim, 0.0f, (this->fAnim)*cv::tooltip_anim_duration.getFloat(), true);
 }
 
 void TooltipOverlay::begin() {
@@ -87,5 +87,5 @@ void TooltipOverlay::begin() {
 void TooltipOverlay::addLine(const UString& text) { this->lines.push_back(text); }
 
 void TooltipOverlay::end() {
-    anim->moveLinear(&this->fAnim, 1.0f, (1.0f - this->fAnim) * cv_tooltip_anim_duration.getFloat(), true);
+    anim->moveLinear(&this->fAnim, 1.0f, (1.0f - this->fAnim) * cv::tooltip_anim_duration.getFloat(), true);
 }

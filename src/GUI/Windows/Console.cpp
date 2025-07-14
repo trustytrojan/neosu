@@ -20,7 +20,7 @@ std::mutex g_consoleLogMutex;
 
 Console::Console() : CBaseUIWindow(350, 100, 620, 550, "Console") {
     // convar bindings
-    cmd_clear.setCallback(fastdelegate::MakeDelegate(this, &Console::clear));
+    cv::cmd::clear.setCallback(fastdelegate::MakeDelegate(this, &Console::clear));
 
     // resources
     this->logFont = resourceManager->getFont("FONT_CONSOLE");
@@ -131,7 +131,7 @@ void Console::processCommand(std::string command) {
     }
 
     // log
-    if(cv_console_logging.getBool()) {
+    if(cv::console_logging.getBool()) {
         std::string logMessage;
 
         bool doLog = false;

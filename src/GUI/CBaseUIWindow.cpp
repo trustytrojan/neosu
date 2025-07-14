@@ -439,7 +439,7 @@ void CBaseUIWindow::close() {
 
     this->bAnimIn = false;
     this->fAnimation = 1.0f;
-    anim->moveQuadInOut(&this->fAnimation, 0.0f, cv_ui_window_animspeed.getFloat());
+    anim->moveQuadInOut(&this->fAnimation, 0.0f, cv::ui_window_animspeed.getFloat());
 
     this->onClosed();
 }
@@ -452,7 +452,7 @@ void CBaseUIWindow::open() {
     if(!this->bCoherenceMode) {
         this->bAnimIn = true;
         this->fAnimation = 0.001f;
-        anim->moveQuadOut(&this->fAnimation, 1.0f, cv_ui_window_animspeed.getFloat());
+        anim->moveQuadOut(&this->fAnimation, 1.0f, cv::ui_window_animspeed.getFloat());
     } else
         this->fAnimation = 1.0f;
 }

@@ -37,7 +37,7 @@ CBaseUITextbox::CBaseUITextbox(float xPos, float yPos, float xSize, float ySize,
     this->bDrawBackground = true;
 
     this->iTextJustification = 0;
-    this->iTextAddX = cv_ui_textbox_text_offset_x.getInt();
+    this->iTextAddX = cv::ui_textbox_text_offset_x.getInt();
     this->iTextAddY = 0;
     this->fTextScrollAddX = 0;
     this->iSelectX = 0;
@@ -166,12 +166,12 @@ void CBaseUITextbox::mouse_update(bool *propagate_clicks) {
             this->bLine = true;
             this->fLinetime = engine->getTime();
         } else {
-            if((engine->getTime() - this->fLinetime) >= cv_ui_textbox_caret_blink_time.getFloat() && !this->bLine) {
+            if((engine->getTime() - this->fLinetime) >= cv::ui_textbox_caret_blink_time.getFloat() && !this->bLine) {
                 this->bLine = true;
                 this->fLinetime = engine->getTime();
             }
 
-            if((engine->getTime() - this->fLinetime) >= cv_ui_textbox_caret_blink_time.getFloat() && this->bLine) {
+            if((engine->getTime() - this->fLinetime) >= cv::ui_textbox_caret_blink_time.getFloat() && this->bLine) {
                 this->bLine = false;
                 this->fLinetime = engine->getTime();
             }
@@ -212,9 +212,9 @@ void CBaseUITextbox::mouse_update(bool *propagate_clicks) {
                     // TODO: animations which don't suck for usability
                     this->fTextScrollAddX =
                         std::clamp<int>(this->fTextScrollAddX + scrollspeed, 0,
-                                   this->fTextWidth - this->vSize.x + cv_ui_textbox_text_offset_x.getInt() * 2);
+                                   this->fTextWidth - this->vSize.x + cv::ui_textbox_text_offset_x.getInt() * 2);
                     /// animation->moveSmoothEnd(&m_fTextScrollAddX, clampi(this->fTextScrollAddX+scrollspeed, 0,
-                    /// m_fTextWidth-m_vSize.x+cv_ui_textbox_text_offset_x.getInt()*2), 1);
+                    /// m_fTextWidth-m_vSize.x+cv::ui_textbox_text_offset_x.getInt()*2), 1);
                 }
 
                 if(mouseX > this->vSize.x * 0.85f) {
@@ -223,9 +223,9 @@ void CBaseUITextbox::mouse_update(bool *propagate_clicks) {
                     // TODO: animations which don't suck for usability
                     this->fTextScrollAddX =
                         std::clamp<int>(this->fTextScrollAddX - scrollspeed, 0,
-                                   this->fTextWidth - this->vSize.x + cv_ui_textbox_text_offset_x.getInt() * 2);
+                                   this->fTextWidth - this->vSize.x + cv::ui_textbox_text_offset_x.getInt() * 2);
                     /// animation->moveSmoothEnd(&m_fTextScrollAddX, clampi(this->fTextScrollAddX-scrollspeed, 0,
-                    /// m_fTextWidth-m_vSize.x+cv_ui_textbox_text_offset_x.getInt()*2), 1);
+                    /// m_fTextWidth-m_vSize.x+cv::ui_textbox_text_offset_x.getInt()*2), 1);
                 }
             }
 
@@ -397,7 +397,7 @@ void CBaseUITextbox::onKeyDown(KeyboardEvent &e) {
                 this->iCaretX = 0;
                 this->fTextScrollAddX = this->fTextWidth < this->vSize.x ? 0
                                                                          : this->fTextWidth - this->vSize.x +
-                                                                               cv_ui_textbox_text_offset_x.getInt() * 2;
+                                                                               cv::ui_textbox_text_offset_x.getInt() * 2;
             }
             break;
 
@@ -469,9 +469,9 @@ void CBaseUITextbox::handleCaretKeyboardMove() {
                               this->font->getStringWidth(this->getVisibleText().substr(0, this->iCaretPosition)) +
                               this->fTextScrollAddX;
     if(caretPosition < 0)
-        this->fTextScrollAddX += std::abs(caretPosition) + cv_ui_textbox_text_offset_x.getInt();
-    else if(caretPosition > (this->vSize.x - cv_ui_textbox_text_offset_x.getInt()))
-        this->fTextScrollAddX -= std::abs(caretPosition - this->vSize.x) + cv_ui_textbox_text_offset_x.getInt();
+        this->fTextScrollAddX += std::abs(caretPosition) + cv::ui_textbox_text_offset_x.getInt();
+    else if(caretPosition > (this->vSize.x - cv::ui_textbox_text_offset_x.getInt()))
+        this->fTextScrollAddX -= std::abs(caretPosition - this->vSize.x) + cv::ui_textbox_text_offset_x.getInt();
 }
 
 void CBaseUITextbox::handleCaretKeyboardDelete() {
@@ -479,8 +479,8 @@ void CBaseUITextbox::handleCaretKeyboardDelete() {
         const int caretPosition = this->iTextAddX +
                                   this->font->getStringWidth(this->getVisibleText().substr(0, this->iCaretPosition)) +
                                   this->fTextScrollAddX;
-        if(caretPosition < (this->vSize.x - cv_ui_textbox_text_offset_x.getInt()))
-            this->fTextScrollAddX += std::abs(this->vSize.x - cv_ui_textbox_text_offset_x.getInt() - caretPosition);
+        if(caretPosition < (this->vSize.x - cv::ui_textbox_text_offset_x.getInt()))
+            this->fTextScrollAddX += std::abs(this->vSize.x - cv::ui_textbox_text_offset_x.getInt() - caretPosition);
     }
 }
 
@@ -529,23 +529,23 @@ CBaseUITextbox *CBaseUITextbox::setText(UString text) {
     this->fTextWidth = this->font->getStringWidth(this->getVisibleText());
     switch(this->iTextJustification) {
         case 0:  // left
-            this->iTextAddX = cv_ui_textbox_text_offset_x.getInt();
+            this->iTextAddX = cv::ui_textbox_text_offset_x.getInt();
             break;
 
         case 1:  // middle
             this->iTextAddX = -(this->fTextWidth - this->vSize.x) / 2.0f;
-            this->iTextAddX = this->iTextAddX > 0 ? this->iTextAddX : cv_ui_textbox_text_offset_x.getInt();
+            this->iTextAddX = this->iTextAddX > 0 ? this->iTextAddX : cv::ui_textbox_text_offset_x.getInt();
             break;
 
         case 2:  // right
-            this->iTextAddX = (this->vSize.x - this->fTextWidth) - cv_ui_textbox_text_offset_x.getInt();
-            this->iTextAddX = this->iTextAddX > 0 ? this->iTextAddX : cv_ui_textbox_text_offset_x.getInt();
+            this->iTextAddX = (this->vSize.x - this->fTextWidth) - cv::ui_textbox_text_offset_x.getInt();
+            this->iTextAddX = this->iTextAddX > 0 ? this->iTextAddX : cv::ui_textbox_text_offset_x.getInt();
             break;
     }
 
     // handle over-text
     if(this->fTextWidth > this->vSize.x) {
-        this->iTextAddX -= this->fTextWidth - this->vSize.x + cv_ui_textbox_text_offset_x.getInt() * 2;
+        this->iTextAddX -= this->fTextWidth - this->vSize.x + cv::ui_textbox_text_offset_x.getInt() * 2;
         this->handleCaretKeyboardMove();
     } else
         this->fTextScrollAddX = 0;
@@ -619,11 +619,11 @@ void CBaseUITextbox::insertTextFromClipboard() {
 
 void CBaseUITextbox::updateTextPos() {
     if(this->iTextJustification == 0) {
-        if((this->iTextAddX + this->fTextScrollAddX) > cv_ui_textbox_text_offset_x.getInt()) {
+        if((this->iTextAddX + this->fTextScrollAddX) > cv::ui_textbox_text_offset_x.getInt()) {
             if(this->hasSelectedText() && this->iCaretPosition == 0) {
-                this->fTextScrollAddX = cv_ui_textbox_text_offset_x.getInt() - this->iTextAddX;
+                this->fTextScrollAddX = cv::ui_textbox_text_offset_x.getInt() - this->iTextAddX;
             } else
-                this->fTextScrollAddX = cv_ui_textbox_text_offset_x.getInt() - this->iTextAddX;
+                this->fTextScrollAddX = cv::ui_textbox_text_offset_x.getInt() - this->iTextAddX;
         }
     }
 }

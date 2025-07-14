@@ -195,12 +195,12 @@ static UString get_osu_folder_from_registry() {
 }
 
 void import_settings_from_osu_stable() {
-    UString osu_folder{cv_osu_folder.getString()};
+    UString osu_folder{cv::osu_folder.getString()};
     if(osu_folder.isWhitespaceOnly()) {
         osu_folder = get_osu_folder_from_registry();
         if(!osu_folder.isWhitespaceOnly()) {
             debugLog("Found osu! folder from registry: %s\n", osu_folder.toUtf8());
-            cv_osu_folder.setValue(osu_folder);
+            cv::osu_folder.setValue(osu_folder);
         }
     }
 
@@ -228,184 +228,184 @@ void import_settings_from_osu_stable() {
         if(sscanf(curLine.c_str(), " BeatmapDirectory = %1023[^\n]", str) == 1) {
             UString BeatmapDirectory{UString(str).trim()};
             if(BeatmapDirectory.length() > 2) {
-                cv_songs_folder.setValue(BeatmapDirectory);
+                cv::songs_folder.setValue(BeatmapDirectory);
             }
         } else if(sscanf(curLine.c_str(), " VolumeUniversal = %i[^\n]", &num) == 1) {
-            cv_volume_master.setValue((f32)num / 100.f);
+            cv::volume_master.setValue((f32)num / 100.f);
         } else if(sscanf(curLine.c_str(), " VolumeEffect = %i[^\n]", &num) == 1) {
-            cv_volume_effects.setValue((f32)num / 100.f);
+            cv::volume_effects.setValue((f32)num / 100.f);
         } else if(sscanf(curLine.c_str(), " VolumeMusic = %i[^\n]", &num) == 1) {
-            cv_volume_music.setValue((f32)num / 100.f);
+            cv::volume_music.setValue((f32)num / 100.f);
         } else if(sscanf(curLine.c_str(), " AllowPublicInvites = %i[^\n]", &num) == 1) {
-            cv_allow_mp_invites.setValue(num == 1);
+            cv::allow_mp_invites.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " AutoChatHide = %i[^\n]", &num) == 1) {
-            cv_chat_auto_hide.setValue(num == 1);
+            cv::chat_auto_hide.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " BlockNonFriendPM = %i[^\n]", &num) == 1) {
-            cv_allow_stranger_dms.setValue(num == 1);
+            cv::allow_stranger_dms.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " ChatAudibleHighlight = %i[^\n]", &num) == 1) {
-            cv_chat_ping_on_mention.setValue(num == 1);
+            cv::chat_ping_on_mention.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " ChatHighlightName = %i[^\n]", &num) == 1) {
-            cv_chat_notify_on_mention.setValue(num == 1);
+            cv::chat_notify_on_mention.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " CursorSize = %f[^\n]", &flt) == 1) {
-            cv_cursor_scale.setValue(flt);
+            cv::cursor_scale.setValue(flt);
         } else if(sscanf(curLine.c_str(), " AutomaticCursorSizing = %i[^\n]", &num) == 1) {
-            cv_automatic_cursor_size.setValue(num == 1);
+            cv::automatic_cursor_size.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " DimLevel = %i[^\n]", &num) == 1) {
-            cv_background_dim.setValue((f32)num / 100.f);
+            cv::background_dim.setValue((f32)num / 100.f);
         } else if(sscanf(curLine.c_str(), " IHateHavingFun = %i[^\n]", &num) == 1) {
-            cv_background_dont_fade_during_breaks.setValue(num == 1);
+            cv::background_dont_fade_during_breaks.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " DiscordRichPresence = %i[^\n]", &num) == 1) {
-            cv_rich_presence.setValue(num == 1);
+            cv::rich_presence.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " FpsCounter = %i[^\n]", &num) == 1) {
-            cv_draw_fps.setValue(num == 1);
+            cv::draw_fps.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " CursorRipple = %i[^\n]", &num) == 1) {
-            cv_draw_cursor_ripples.setValue(num == 1);
+            cv::draw_cursor_ripples.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " HighlightWords = %1023[^\n]", str) == 1) {
             UString HighlightWords{UString(str).trim()};
-            cv_chat_highlight_words.setValue(HighlightWords);
+            cv::chat_highlight_words.setValue(HighlightWords);
         } else if(sscanf(curLine.c_str(), " HighResolution = %i[^\n]", &num) == 1) {
             if(num == 1) {
-                cv_skin_hd.setValue(true);
+                cv::skin_hd.setValue(true);
             }
         } else if(sscanf(curLine.c_str(), " IgnoreBeatmapSamples = %i[^\n]", &num) == 1) {
-            cv_ignore_beatmap_samples.setValue(num == 1);
+            cv::ignore_beatmap_samples.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " IgnoreBeatmapSkins = %i[^\n]", &num) == 1) {
-            cv_ignore_beatmap_skins.setValue(num == 1);
+            cv::ignore_beatmap_skins.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " IgnoreList = %1023[^\n]", str) == 1) {
             UString IgnoreList{UString(str).trim()};
-            cv_chat_ignore_list.setValue(IgnoreList);
+            cv::chat_ignore_list.setValue(IgnoreList);
         } else if(sscanf(curLine.c_str(), " KeyOverlay = %i[^\n]", &num) == 1) {
-            cv_draw_inputoverlay.setValue(num == 1);
+            cv::draw_inputoverlay.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " Language = %1023[^\n]", str) == 1) {
-            cv_language.setValue(str);
+            cv::language.setValue(str);
         } else if(sscanf(curLine.c_str(), " ShowInterface = %i[^\n]", &num) == 1) {
-            cv_draw_hud.setValue(num == 0);
+            cv::draw_hud.setValue(num == 0);
         } else if(sscanf(curLine.c_str(), " LowResolution = %i[^\n]", &num) == 1) {
             if(num == 1) {
-                cv_skin_hd.setValue(false);
+                cv::skin_hd.setValue(false);
             }
         } else if(sscanf(curLine.c_str(), " MouseDisableButtons = %i[^\n]", &num) == 1) {
-            cv_disable_mousebuttons.setValue(num == 1);
+            cv::disable_mousebuttons.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " MouseDisableWheel = %i[^\n]", &num) == 1) {
-            cv_disable_mousewheel.setValue(num == 1);
+            cv::disable_mousewheel.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " MouseSpeed = %f[^\n]", &flt) == 1) {
-            cv_mouse_sensitivity.setValue(flt);
+            cv::mouse_sensitivity.setValue(flt);
         } else if(sscanf(curLine.c_str(), " Offset = %i[^\n]", &num) == 1) {
-            cv_universal_offset.setValue((f32)num);
+            cv::universal_offset.setValue((f32)num);
         } else if(sscanf(curLine.c_str(), " ScoreMeterScale = %f[^\n]", &flt) == 1) {
-            cv_hud_hiterrorbar_scale.setValue(flt);
+            cv::hud_hiterrorbar_scale.setValue(flt);
         } else if(sscanf(curLine.c_str(), " NotifyFriends = %i[^\n]", &num) == 1) {
-            cv_notify_friends.setValue(num == 1);
+            cv::notify_friends.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " PopupDuringGameplay = %i[^\n]", &num) == 1) {
-            cv_notify_during_gameplay.setValue(num == 1);
+            cv::notify_during_gameplay.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " ScoreboardVisible = %i[^\n]", &num) == 1) {
-            cv_draw_scoreboard.setValue(num == 1);
-            cv_draw_scoreboard_mp.setValue(num == 1);
+            cv::draw_scoreboard.setValue(num == 1);
+            cv::draw_scoreboard_mp.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " SongSelectThumbnails = %i[^\n]", &num) == 1) {
-            cv_draw_songbrowser_thumbnails.setValue(num == 1);
+            cv::draw_songbrowser_thumbnails.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " ShowSpectators = %i[^\n]", &num) == 1) {
-            cv_draw_spectator_list.setValue(num == 1);
+            cv::draw_spectator_list.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " ShowStoryboard = %i[^\n]", &num) == 1) {
-            cv_draw_storyboard.setValue(num == 1);
+            cv::draw_storyboard.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " Skin = %1023[^\n]", str) == 1) {
             UString Skin{UString(str).trim()};
-            cv_skin.setValue(Skin);
+            cv::skin.setValue(Skin);
         } else if(sscanf(curLine.c_str(), " SkinSamples = %i[^\n]", &num) == 1) {
-            cv_skin_use_skin_hitsounds.setValue(num == 1);
+            cv::skin_use_skin_hitsounds.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " SnakingSliders = %i[^\n]", &num) == 1) {
-            cv_snaking_sliders.setValue(num == 1);
+            cv::snaking_sliders.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " Video = %i[^\n]", &num) == 1) {
-            cv_draw_video.setValue(num == 1);
+            cv::draw_video.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " RawInput = %i[^\n]", &num) == 1) {
-            cv_mouse_raw_input.setValue(num == 1);
+            cv::mouse_raw_input.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " AbsoluteToOsuWindow = %i[^\n]", &num) == 1) {
-            cv_mouse_raw_input_absolute_to_window.setValue(num == 1);
+            cv::mouse_raw_input_absolute_to_window.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " ConfineMouse = %1023[^\n]", str) == 1) {
             if(!strcmp(str, "Never")) {
-                cv_confine_cursor_fullscreen.setValue(false);
-                cv_confine_cursor_windowed.setValue(false);
+                cv::confine_cursor_fullscreen.setValue(false);
+                cv::confine_cursor_windowed.setValue(false);
             } else if(!strcmp(str, "Fullscreen")) {
-                cv_confine_cursor_fullscreen.setValue(true);
-                cv_confine_cursor_windowed.setValue(false);
+                cv::confine_cursor_fullscreen.setValue(true);
+                cv::confine_cursor_windowed.setValue(false);
             } else if(!strcmp(str, "Always")) {
-                cv_confine_cursor_fullscreen.setValue(true);
-                cv_confine_cursor_windowed.setValue(true);
+                cv::confine_cursor_fullscreen.setValue(true);
+                cv::confine_cursor_windowed.setValue(true);
             }
         } else if(sscanf(curLine.c_str(), " HiddenShowFirstApproach = %i[^\n]", &num) == 1) {
-            cv_show_approach_circle_on_first_hidden_object.setValue(num == 1);
+            cv::show_approach_circle_on_first_hidden_object.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " ComboColourSliderBall = %i[^\n]", &num) == 1) {
-            cv_slider_ball_tint_combo_color.setValue(num == 1);
+            cv::slider_ball_tint_combo_color.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " Username = %1023[^\n]", str) == 1) {
             UString Username{UString(str).trim()};
-            cv_name.setValue(Username);
+            cv::name.setValue(Username);
         } else if(sscanf(curLine.c_str(), " Letterboxing = %i[^\n]", &num) == 1) {
-            cv_letterboxing.setValue(num == 1);
+            cv::letterboxing.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " LetterboxPositionX = %i[^\n]", &num) == 1) {
-            cv_letterboxing_offset_x.setValue((f32)num / 100.f);
+            cv::letterboxing_offset_x.setValue((f32)num / 100.f);
         } else if(sscanf(curLine.c_str(), " LetterboxPositionY = %i[^\n]", &num) == 1) {
-            cv_letterboxing_offset_y.setValue((f32)num / 100.f);
+            cv::letterboxing_offset_y.setValue((f32)num / 100.f);
         } else if(sscanf(curLine.c_str(), " ShowUnicode = %i[^\n]", &num) == 1) {
-            cv_prefer_cjk.setValue(num == 1);
+            cv::prefer_cjk.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " Ticker = %i[^\n]", &num) == 1) {
-            cv_chat_ticker.setValue(num == 1);
+            cv::chat_ticker.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " keyOsuLeft = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_LEFT_CLICK);
+            try_set_key(str, &cv::LEFT_CLICK);
         } else if(sscanf(curLine.c_str(), " keyOsuRight = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_RIGHT_CLICK);
+            try_set_key(str, &cv::RIGHT_CLICK);
         } else if(sscanf(curLine.c_str(), " keyOsuSmoke = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_SMOKE);
+            try_set_key(str, &cv::SMOKE);
         } else if(sscanf(curLine.c_str(), " keyPause = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_GAME_PAUSE);
+            try_set_key(str, &cv::GAME_PAUSE);
         } else if(sscanf(curLine.c_str(), " keySkip = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_SKIP_CUTSCENE);
+            try_set_key(str, &cv::SKIP_CUTSCENE);
         } else if(sscanf(curLine.c_str(), " keyToggleScoreboard = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_TOGGLE_SCOREBOARD);
+            try_set_key(str, &cv::TOGGLE_SCOREBOARD);
         } else if(sscanf(curLine.c_str(), " keyToggleChat = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_TOGGLE_CHAT);
+            try_set_key(str, &cv::TOGGLE_CHAT);
         } else if(sscanf(curLine.c_str(), " keyToggleExtendedChat = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_TOGGLE_EXTENDED_CHAT);
+            try_set_key(str, &cv::TOGGLE_EXTENDED_CHAT);
         } else if(sscanf(curLine.c_str(), " keyScreenshot = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_SAVE_SCREENSHOT);
+            try_set_key(str, &cv::SAVE_SCREENSHOT);
         } else if(sscanf(curLine.c_str(), " keyIncreaseAudioOffset = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_INCREASE_LOCAL_OFFSET);
+            try_set_key(str, &cv::INCREASE_LOCAL_OFFSET);
         } else if(sscanf(curLine.c_str(), " keyDecreaseAudioOffset = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_DECREASE_LOCAL_OFFSET);
+            try_set_key(str, &cv::DECREASE_LOCAL_OFFSET);
         } else if(sscanf(curLine.c_str(), " keyQuickRetry = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_QUICK_RETRY);
+            try_set_key(str, &cv::QUICK_RETRY);
         } else if(sscanf(curLine.c_str(), " keyVolumeIncrease = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_INCREASE_VOLUME);
+            try_set_key(str, &cv::INCREASE_VOLUME);
         } else if(sscanf(curLine.c_str(), " keyVolumeDecrease = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_DECREASE_VOLUME);
+            try_set_key(str, &cv::DECREASE_VOLUME);
         } else if(sscanf(curLine.c_str(), " keyDisableMouseButtons = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_DISABLE_MOUSE_BUTTONS);
+            try_set_key(str, &cv::DISABLE_MOUSE_BUTTONS);
         } else if(sscanf(curLine.c_str(), " keyBossKey = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_BOSS_KEY);
+            try_set_key(str, &cv::BOSS_KEY);
         } else if(sscanf(curLine.c_str(), " keyEasy = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_MOD_EASY);
+            try_set_key(str, &cv::MOD_EASY);
         } else if(sscanf(curLine.c_str(), " keyNoFail = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_MOD_NOFAIL);
+            try_set_key(str, &cv::MOD_NOFAIL);
         } else if(sscanf(curLine.c_str(), " keyHalfTime = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_MOD_HALFTIME);
+            try_set_key(str, &cv::MOD_HALFTIME);
         } else if(sscanf(curLine.c_str(), " keyHardRock = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_MOD_HARDROCK);
+            try_set_key(str, &cv::MOD_HARDROCK);
         } else if(sscanf(curLine.c_str(), " keySuddenDeath = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_MOD_SUDDENDEATH);
+            try_set_key(str, &cv::MOD_SUDDENDEATH);
         } else if(sscanf(curLine.c_str(), " keyDoubleTime = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_MOD_DOUBLETIME);
+            try_set_key(str, &cv::MOD_DOUBLETIME);
         } else if(sscanf(curLine.c_str(), " keyHidden = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_MOD_HIDDEN);
+            try_set_key(str, &cv::MOD_HIDDEN);
         } else if(sscanf(curLine.c_str(), " keyFlashlight = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_MOD_FLASHLIGHT);
+            try_set_key(str, &cv::MOD_FLASHLIGHT);
         } else if(sscanf(curLine.c_str(), " keyRelax = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_MOD_RELAX);
+            try_set_key(str, &cv::MOD_RELAX);
         } else if(sscanf(curLine.c_str(), " keyAutopilot = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_MOD_AUTOPILOT);
+            try_set_key(str, &cv::MOD_AUTOPILOT);
         } else if(sscanf(curLine.c_str(), " keySpunOut = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_MOD_SPUNOUT);
+            try_set_key(str, &cv::MOD_SPUNOUT);
         } else if(sscanf(curLine.c_str(), " keyAuto = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_MOD_AUTO);
+            try_set_key(str, &cv::MOD_AUTO);
         } else if(sscanf(curLine.c_str(), " keyScoreV2 = %1023[^\n]", str) == 1) {
-            try_set_key(str, &cv_MOD_SCOREV2);
+            try_set_key(str, &cv::MOD_SCOREV2);
         }
     }
 }

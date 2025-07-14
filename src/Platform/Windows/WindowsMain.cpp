@@ -77,7 +77,7 @@ void WindowsMain::handle_osk(const char *osk_path) {
     auto folder_name = env->getFileNameFromFilePath(osk_path);
     folder_name.erase(folder_name.size() - 4);  // remove .osk extension
 
-    cv_skin.setValue(env->getFileNameFromFilePath(folder_name).c_str());
+    cv::skin.setValue(env->getFileNameFromFilePath(folder_name).c_str());
     osu->optionsMenu->updateSkinNameLabel();
 }
 
@@ -441,8 +441,8 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> & /*
             float displayFrequency = static_cast<float>(lpDevMode.dmDisplayFrequency);
             /// printf("Display Refresh Rate is %.2f Hz, setting fps_max to %i.\n\n", displayFrequency,
             /// (int)displayFrequency);
-            cv_fps_max.setValue((int)displayFrequency);
-            cv_fps_max.setDefaultFloat((int)displayFrequency);
+            cv::fps_max.setValue((int)displayFrequency);
+            cv::fps_max.setDefaultFloat((int)displayFrequency);
         }
     }
 
@@ -509,7 +509,7 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> & /*
         {
             VPROF_BUDGET("Windows", VPROF_BUDGETGROUP_WNDPROC);
 
-            if(cv_win_mouse_raw_input_buffer.getBool() && mouse != NULL) {
+            if(cv::win_mouse_raw_input_buffer.getBool() && mouse != NULL) {
                 UINT minRawInputBufferNumBytes = 0;
                 UINT hr = GetRawInputBuffer(NULL, &minRawInputBufferNumBytes, sizeof(RAWINPUTHEADER));
                 if(hr != (UINT)-1 && minRawInputBufferNumBytes > 0) {
@@ -587,7 +587,7 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> & /*
 
         // draw
         {
-            const unsigned long interleaved = cv_fps_max_background_interleaved.getInt();
+            const unsigned long interleaved = cv::fps_max_background_interleaved.getInt();
             if(this->bDraw && (!inBackground || interleaved < 2 || tickCounter % interleaved == 0)) {
                 engine->onPaint();
             }
@@ -601,8 +601,8 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> & /*
 
             // delay the next frame
             const int target_fps =
-                inBackground ? cv_fps_max_background.getInt()
-                             : (cv_fps_unlimited.getBool() || cv_fps_max.getInt() <= 0 ? 0 : cv_fps_max.getInt());
+                inBackground ? cv::fps_max_background.getInt()
+                             : (cv::fps_unlimited.getBool() || cv::fps_max.getInt() <= 0 ? 0 : cv::fps_max.getInt());
             FPSLimiter::limit_frames(target_fps);
         }
     }

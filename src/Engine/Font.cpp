@@ -134,7 +134,7 @@ bool McFont::loadGlyphDynamic(wchar_t ch) {
     FT_Face targetFace = getFontFaceForGlyph(ch, fontIndex);
 
     if(!targetFace) {
-        if(cv_r_debug_font_unicode.getBool()) {
+        if(cv::r_debug_font_unicode.getBool()) {
             // character not supported by any available font
             const char *charRange = FontTypeMap::getCharacterRangeName(ch);
             if(charRange)
@@ -146,7 +146,7 @@ bool McFont::loadGlyphDynamic(wchar_t ch) {
         return false;
     }
 
-    if(cv_r_debug_font_unicode.getBool() && fontIndex > 0)
+    if(cv::r_debug_font_unicode.getBool() && fontIndex > 0)
         debugLogF("Font Info: Using fallback font #{:d} for character U+{:04X}\n", fontIndex, (unsigned int)ch);
 
     // load glyph from the selected font face
@@ -156,7 +156,7 @@ bool McFont::loadGlyphDynamic(wchar_t ch) {
 
     // check if we need atlas space for non-empty glyphs
     if(metrics.sizePixelsX > 0 && metrics.sizePixelsY > 0) {
-        const int padding = cv_r_debug_font_atlas_padding.getInt();
+        const int padding = cv::r_debug_font_atlas_padding.getInt();
         const int requiredWidth = metrics.sizePixelsX + padding;
         const int requiredHeight = metrics.sizePixelsY + padding;
 
@@ -271,13 +271,13 @@ bool McFont::initializeSharedFallbackFonts() {
 
     for(const auto &fontName : bundledFallbacks) {
         if(loadFallbackFont(UString{fontName}, false)) {
-            if(cv_r_debug_font_unicode.getBool())
+            if(cv::r_debug_font_unicode.getBool())
                 debugLogF("Font Info: Loaded bundled fallback font: {:s}\n", fontName);
         }
     }
 
     // then find likely system fonts
-    if(!Env::cfg(OS::WASM) && cv_font_load_system.getBool()) discoverSystemFallbacks();
+    if(!Env::cfg(OS::WASM) && cv::font_load_system.getBool()) discoverSystemFallbacks();
 
     s_sharedFallbacksInitialized = true;
     return true;
@@ -319,12 +319,12 @@ void McFont::discoverSystemFallbacks() {
 bool McFont::loadFallbackFont(const UString &fontPath, bool isSystemFont) {
     FT_Face face{};
     if(FT_New_Face(s_sharedFtLibrary, fontPath.toUtf8(), 0, &face)) {
-        if(cv_r_debug_font_unicode.getBool()) debugLogF("Font Warning: Failed to load fallback font: {:s}\n", fontPath);
+        if(cv::r_debug_font_unicode.getBool()) debugLogF("Font Warning: Failed to load fallback font: {:s}\n", fontPath);
         return false;
     }
 
     if(FT_Select_Charmap(face, ft_encoding_unicode)) {
-        if(cv_r_debug_font_unicode.getBool())
+        if(cv::r_debug_font_unicode.getBool())
             debugLogF("Font Warning: Failed to select unicode charmap for fallback font: {:s}\n", fontPath);
         FT_Done_Face(face);
         return false;
@@ -491,7 +491,7 @@ bool McFont::createAndPackAtlas(const std::vector<wchar_t> &glyphs) {
     if(packRects.empty()) return true;
 
     // calculate optimal atlas size and create texture atlas
-    const int padding = cv_r_debug_font_atlas_padding.getInt();
+    const int padding = cv::r_debug_font_atlas_padding.getInt();
     const size_t atlasSize =
         TextureAtlas::calculateOptimalSize(packRects, ATLAS_OCCUPANCY_TARGET, padding, MIN_ATLAS_SIZE, MAX_ATLAS_SIZE);
 
@@ -586,7 +586,7 @@ void McFont::buildGlyphGeometry(const GLYPH_METRICS &gm, const Vector3 &basePos,
 }
 
 void McFont::buildStringGeometry(const UString &text, size_t &vertexCount) {
-    if(!this->bReady || text.length() == 0 || text.length() > cv_r_drawstring_max_string_length.getInt()) return;
+    if(!this->bReady || text.length() == 0 || text.length() > cv::r_drawstring_max_string_length.getInt()) return;
 
     // check if atlas needs rebuilding before geometry generation
     if(this->bAtlasNeedsRebuild) rebuildAtlas();
@@ -604,7 +604,7 @@ void McFont::buildStringGeometry(const UString &text, size_t &vertexCount) {
 void McFont::drawString(const UString &text) {
     if(!this->bReady) return;
 
-    const int maxNumGlyphs = cv_r_drawstring_max_string_length.getInt();
+    const int maxNumGlyphs = cv::r_drawstring_max_string_length.getInt();
     if(text.length() == 0 || text.length() > maxNumGlyphs) return;
 
     this->vao.empty();
@@ -624,7 +624,7 @@ void McFont::drawString(const UString &text) {
     this->textureAtlas->getAtlasImage()->bind();
     g->drawVAO(&this->vao);
 
-    if(cv_r_debug_drawstring_unbind.getBool()) this->textureAtlas->getAtlasImage()->unbind();
+    if(cv::r_debug_drawstring_unbind.getBool()) this->textureAtlas->getAtlasImage()->unbind();
 }
 
 void McFont::beginBatch() {
@@ -679,7 +679,7 @@ void McFont::flushBatch() {
 
     g->drawVAO(&this->vao);
 
-    if(cv_r_debug_drawstring_unbind.getBool()) this->textureAtlas->getAtlasImage()->unbind();
+    if(cv::r_debug_drawstring_unbind.getBool()) this->textureAtlas->getAtlasImage()->unbind();
 
     this->batchActive = false;
 }

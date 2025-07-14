@@ -34,7 +34,7 @@ class VSTitleBarButton : public CBaseUIButton {
 
         // blue seekbar overlay
         {
-            const float seekBarPercent = cv_vs_percent.getFloat();
+            const float seekBarPercent = cv::vs_percent.getFloat();
             if(seekBarPercent > 0.0f) {
                 const Color middle = argb(255, 0, 50, 119);
                 const Color third = argb(255, 0, 113 - 50, 207 - 50);
@@ -140,10 +140,10 @@ void VSTitleBar::draw() {
 
 void VSTitleBar::drawTitle1() {
     this->title->draw();
-    if(cv_vs_percent.getFloat() > 0) {
+    if(cv::vs_percent.getFloat() > 0) {
         this->title->setTextColor(0xffffffff);
         g->pushClipRect(
-            McRect(this->vPos.x, this->vPos.y, cv_vs_percent.getFloat() * this->vSize.x, this->title2->getSize().y));
+            McRect(this->vPos.x, this->vPos.y, cv::vs_percent.getFloat() * this->vSize.x, this->title2->getSize().y));
         { this->title->draw(); }
         g->popClipRect();
         this->title->setTextColor(argb(255, 55, 55, 55));
@@ -152,10 +152,10 @@ void VSTitleBar::drawTitle1() {
 
 void VSTitleBar::drawTitle2() {
     this->title2->draw();
-    if(cv_vs_percent.getFloat() > 0) {
+    if(cv::vs_percent.getFloat() > 0) {
         this->title2->setTextColor(0xffffffff);
         g->pushClipRect(
-            McRect(this->vPos.x, this->vPos.y, cv_vs_percent.getFloat() * this->vSize.x, this->title2->getSize().y));
+            McRect(this->vPos.x, this->vPos.y, cv::vs_percent.getFloat() * this->vSize.x, this->title2->getSize().y));
         { this->title2->draw(); }
         g->popClipRect();
         this->title2->setTextColor(argb(255, 55, 55, 55));
@@ -187,7 +187,7 @@ void VSTitleBar::mouse_update(bool *propagate_clicks) {
         this->bIsSeeking = true;
         const float percent =
             std::clamp<float>((mouse->getPos().x + 1 - this->vPos.x) / this->title->getSize().x, 0.0f, 1.0f);
-        cv_vs_percent.setValue(percent);
+        cv::vs_percent.setValue(percent);
     } else {
         // fire seek callback once scrubbing stops
         if(this->bIsSeeking) {

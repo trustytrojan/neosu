@@ -25,7 +25,7 @@ void Circle::drawApproachCircle(Beatmap *beatmap, Vector2 rawPos, int number, in
     rainbowColorCounter = colorCounter;
 
     Color comboColor = Colors::scale(beatmap->getSkin()->getComboColorForCounter(colorCounter, colorOffset),
-                                     colorRGBMultiplier * cv_circle_color_saturation.getFloat());
+                                     colorRGBMultiplier * cv::circle_color_saturation.getFloat());
 
     drawApproachCircle(beatmap->getSkin(), beatmap->osuCoords2Pixels(rawPos), comboColor, beatmap->fHitcircleDiameter,
                        approachScale, alpha, osu->getModHD(), overrideHDApproachCircle);
@@ -42,13 +42,13 @@ void Circle::drawCircle(Beatmap *beatmap, Vector2 rawPos, int number, int colorC
 void Circle::drawCircle(Skin *skin, Vector2 pos, float hitcircleDiameter, float numberScale, float overlapScale,
                         int number, int colorCounter, int colorOffset, float colorRGBMultiplier, float approachScale,
                         float alpha, float numberAlpha, bool drawNumber, bool overrideHDApproachCircle) {
-    if(alpha <= 0.0f || !cv_draw_circles.getBool()) return;
+    if(alpha <= 0.0f || !cv::draw_circles.getBool()) return;
 
     rainbowNumber = number;
     rainbowColorCounter = colorCounter;
 
     Color comboColor = Colors::scale(skin->getComboColorForCounter(colorCounter, colorOffset),
-                                     colorRGBMultiplier * cv_circle_color_saturation.getFloat());
+                                     colorRGBMultiplier * cv::circle_color_saturation.getFloat());
 
     // approach circle
     /// drawApproachCircle(skin, pos, comboColor, hitcircleDiameter, approachScale, alpha, modHD,
@@ -96,7 +96,7 @@ void Circle::drawSliderStartCircle(Skin *skin, Vector2 pos, float hitcircleDiame
                                    float hitcircleOverlapScale, int number, int colorCounter, int colorOffset,
                                    float colorRGBMultiplier, float approachScale, float alpha, float numberAlpha,
                                    bool drawNumber, bool overrideHDApproachCircle) {
-    if(alpha <= 0.0f || !cv_draw_circles.getBool()) return;
+    if(alpha <= 0.0f || !cv::draw_circles.getBool()) return;
 
     // if no sliderstartcircle image is preset, fallback to default circle
     if(skin->getSliderStartCircle() == skin->getMissingTexture()) {
@@ -110,7 +110,7 @@ void Circle::drawSliderStartCircle(Skin *skin, Vector2 pos, float hitcircleDiame
     rainbowColorCounter = colorCounter;
 
     Color comboColor = Colors::scale(skin->getComboColorForCounter(colorCounter, colorOffset),
-                                     colorRGBMultiplier * cv_circle_color_saturation.getFloat());
+                                     colorRGBMultiplier * cv::circle_color_saturation.getFloat());
 
     // circle
     const float circleImageScale = hitcircleDiameter / (128.0f * (skin->isSliderStartCircle2x() ? 2.0f : 1.0f));
@@ -149,7 +149,7 @@ void Circle::drawSliderEndCircle(Skin *skin, Vector2 pos, float hitcircleDiamete
                                  float overlapScale, int number, int colorCounter, int colorOffset,
                                  float colorRGBMultiplier, float approachScale, float alpha, float numberAlpha,
                                  bool drawNumber, bool overrideHDApproachCircle) {
-    if(alpha <= 0.0f || !cv_slider_draw_endcircle.getBool() || !cv_draw_circles.getBool()) return;
+    if(alpha <= 0.0f || !cv::slider_draw_endcircle.getBool() || !cv::draw_circles.getBool()) return;
 
     // if no sliderendcircle image is preset, fallback to default circle
     if(skin->getSliderEndCircle() == skin->getMissingTexture()) {
@@ -162,7 +162,7 @@ void Circle::drawSliderEndCircle(Skin *skin, Vector2 pos, float hitcircleDiamete
     rainbowColorCounter = colorCounter;
 
     Color comboColor = Colors::scale(skin->getComboColorForCounter(colorCounter, colorOffset),
-                                     colorRGBMultiplier * cv_circle_color_saturation.getFloat());
+                                     colorRGBMultiplier * cv::circle_color_saturation.getFloat());
 
     // circle
     const float circleImageScale = hitcircleDiameter / (128.0f * (skin->isSliderEndCircle2x() ? 2.0f : 1.0f));
@@ -179,14 +179,14 @@ void Circle::drawSliderEndCircle(Skin *skin, Vector2 pos, float hitcircleDiamete
 
 void Circle::drawApproachCircle(Skin *skin, Vector2 pos, Color comboColor, float hitcircleDiameter, float approachScale,
                                 float alpha, bool modHD, bool overrideHDApproachCircle) {
-    if((!modHD || overrideHDApproachCircle) && cv_draw_approach_circles.getBool() && !cv_mod_mafham.getBool()) {
+    if((!modHD || overrideHDApproachCircle) && cv::draw_approach_circles.getBool() && !cv::mod_mafham.getBool()) {
         if(approachScale > 1.0f) {
             const float approachCircleImageScale =
                 hitcircleDiameter / (128.0f * (skin->isApproachCircle2x() ? 2.0f : 1.0f));
 
             g->setColor(comboColor);
 
-            if(cv_circle_rainbow.getBool()) {
+            if(cv::circle_rainbow.getBool()) {
                 float frequency = 0.3f;
                 float time = engine->getTime() * 20;
 
@@ -197,7 +197,7 @@ void Circle::drawApproachCircle(Skin *skin, Vector2 pos, Color comboColor, float
                 g->setColor(argb(255, red1, green1, blue1));
             }
 
-            g->setAlpha(alpha * cv_approach_circle_alpha_multiplier.getFloat());
+            g->setAlpha(alpha * cv::approach_circle_alpha_multiplier.getFloat());
 
             g->pushTransform();
             {
@@ -220,7 +220,7 @@ void Circle::drawHitCircleOverlay(SkinImage *hitCircleOverlayImage, Vector2 pos,
 void Circle::drawHitCircle(Image *hitCircleImage, Vector2 pos, Color comboColor, float circleImageScale, float alpha) {
     g->setColor(comboColor);
 
-    if(cv_circle_rainbow.getBool()) {
+    if(cv::circle_rainbow.getBool()) {
         float frequency = 0.3f;
         float time = engine->getTime() * 20;
 
@@ -244,7 +244,7 @@ void Circle::drawHitCircle(Image *hitCircleImage, Vector2 pos, Color comboColor,
 
 void Circle::drawHitCircleNumber(Skin *skin, float numberScale, float overlapScale, Vector2 pos, int number,
                                  float numberAlpha, float colorRGBMultiplier) {
-    if(!cv_draw_numbers.getBool()) return;
+    if(!cv::draw_numbers.getBool()) return;
 
     class DigitWidth {
        public:
@@ -288,7 +288,7 @@ void Circle::drawHitCircleNumber(Skin *skin, float numberScale, float overlapSca
     // g->setColor(argb(1.0f, colorRGBMultiplier, colorRGBMultiplier, colorRGBMultiplier)); // see
     // https://github.com/ppy/osu/issues/24506
     g->setColor(0xffffffff);
-    if(cv_circle_number_rainbow.getBool()) {
+    if(cv::circle_number_rainbow.getBool()) {
         float frequency = 0.3f;
         float time = engine->getTime() * 20;
 
@@ -390,7 +390,7 @@ void Circle::draw() {
     Skin *skin = osu->getSkin();
 
     // draw hit animation
-    bool is_instafade = cv_instafade.getBool();
+    bool is_instafade = cv::instafade.getBool();
     if(!is_instafade && this->fHitAnimation > 0.0f && this->fHitAnimation != 1.0f && !osu->getModHD()) {
         float alpha = 1.0f - this->fHitAnimation;
 
@@ -398,7 +398,7 @@ void Circle::draw() {
         scale = -scale * (scale - 2.0f);  // quad out scale
 
         const bool drawNumber = skin->getVersion() > 1.0f ? false : true;
-        const float foscale = cv_circle_fade_out_scale.getFloat();
+        const float foscale = cv::circle_fade_out_scale.getFloat();
 
         g->pushTransform();
         {
@@ -423,7 +423,7 @@ void Circle::draw() {
     if(engine->getTime() < this->fShakeAnimation && !this->bm->isInMafhamRenderChunk())  // handle note blocking shaking
     {
         float smooth = 1.0f - ((this->fShakeAnimation - engine->getTime()) /
-                               cv_circle_shake_duration.getFloat());  // goes from 0 to 1
+                               cv::circle_shake_duration.getFloat());  // goes from 0 to 1
         if(smooth < 0.5f)
             smooth = smooth / 0.5f;
         else
@@ -431,7 +431,7 @@ void Circle::draw() {
         // (now smooth goes from 0 to 1 to 0 linearly)
         smooth = -smooth * (smooth - 2);  // quad out
         smooth = -smooth * (smooth - 2);  // quad out twice
-        shakeCorrectedPos.x += std::sin(engine->getTime() * 120) * smooth * cv_circle_shake_strength.getFloat();
+        shakeCorrectedPos.x += std::sin(engine->getTime() * 120) * smooth * cv::circle_shake_strength.getFloat();
     }
     skin->getHitCircleOverlay2()->setAnimationTimeOffset(
         skin->getAnimationSpeed(), !this->bm->isInMafhamRenderChunk() ? this->click_time - this->iApproachTime
@@ -453,7 +453,7 @@ void Circle::draw2() {
 
     // HACKHACK: don't fucking change this piece of code here, it fixes a heisenbug
     // (https://github.com/McKay42/McOsu/issues/165)
-    if(cv_bug_flicker_log.getBool()) {
+    if(cv::bug_flicker_log.getBool()) {
         const float approachCircleImageScale =
             this->bm->fHitcircleDiameter / (128.0f * (this->bm->getSkin()->isApproachCircle2x() ? 2.0f : 1.0f));
         debugLog("click_time = %ld, aScale = %f, iScale = %f\n", click_time, this->fApproachScale,
@@ -480,7 +480,7 @@ void Circle::update(long curPos, f64 frame_time) {
     }
 
     if(mods.flags & Replay::ModFlags::Relax) {
-        if(curPos >= this->click_time + (long)cv_relax_offset.getInt() && !this->bi->isPaused() &&
+        if(curPos >= this->click_time + (long)cv::relax_offset.getInt() && !this->bi->isPaused() &&
            !this->bi->isContinueScheduled()) {
             const Vector2 pos = this->bi->osuCoords2Pixels(this->vRawPos);
             const float cursorDelta = (this->bi->getCursorPos() - pos).length();
@@ -536,7 +536,7 @@ void Circle::onClickEvent(std::vector<Click> &clicks) {
     if(cursorDelta < this->bi->fHitcircleDiameter / 2.0f) {
         // note blocking & shake
         if(this->bBlocked) {
-            this->fShakeAnimation = engine->getTime() + cv_circle_shake_duration.getFloat();
+            this->fShakeAnimation = engine->getTime() + cv::circle_shake_duration.getFloat();
             return;  // ignore click event completely
         }
 
@@ -556,7 +556,7 @@ void Circle::onClickEvent(std::vector<Click> &clicks) {
 void Circle::onHit(LiveScore::HIT result, long delta, float targetDelta, float targetAngle) {
     // sound and hit animation
     if(this->bm != NULL && result != LiveScore::HIT::HIT_MISS) {
-        if(cv_timingpoints_force.getBool()) this->bm->updateTimingPoints(this->click_time);
+        if(cv::timingpoints_force.getBool()) this->bm->updateTimingPoints(this->click_time);
 
         const Vector2 osuCoords = this->bm->pixels2OsuCoords(this->bm->osuCoords2Pixels(this->vRawPos));
 

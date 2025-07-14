@@ -117,7 +117,7 @@ void set_discord_presence(struct DiscordActivity *activity) {
     if(!initialized) return;
 
 #ifdef _WIN32
-    if(!cv_rich_presence.getBool()) return;
+    if(!cv::rich_presence.getBool()) return;
 
     // activity->type: int
     //     DiscordActivityType_Playing,
@@ -153,7 +153,7 @@ void set_discord_presence(struct DiscordActivity *activity) {
                                    diff2->getID());
         strncpy(&activity->assets.large_image[0], url.toUtf8(), 127);
 
-        if(bancho->server_icon_url.length() > 0 && cv_main_menu_use_server_logo.getBool()) {
+        if(bancho->server_icon_url.length() > 0 && cv::main_menu_use_server_logo.getBool()) {
             strncpy(&activity->assets.small_image[0], bancho->server_icon_url.toUtf8(), 127);
             strncpy(&activity->assets.small_text[0], bancho->endpoint.toUtf8(), 127);
         } else {

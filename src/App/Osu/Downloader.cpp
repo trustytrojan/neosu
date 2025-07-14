@@ -356,10 +356,10 @@ void download_beatmapset(u32 set_id, float* progress) {
 
     std::vector<u8> data;
 
-    auto scheme = cv_use_https.getBool() ? "https://" : "http://";
+    auto scheme = cv::use_https.getBool() ? "https://" : "http://";
     auto download_url = fmt::format("{:s}osu.{:s}/d/", scheme, bancho->endpoint.toUtf8());
-    if(cv_beatmap_mirror_override.getString().length() > 0) {
-        download_url = cv_beatmap_mirror_override.getString();
+    if(cv::beatmap_mirror_override.getString().length() > 0) {
+        download_url = cv::beatmap_mirror_override.getString();
     }
     download_url.append(fmt::format("{:d}", set_id));
 

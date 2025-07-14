@@ -218,13 +218,13 @@ void RankingScreen::draw() {
     if(!this->bVisible) return;
 
     // draw background image
-    if(cv_draw_rankingscreen_background_image.getBool()) {
+    if(cv::draw_rankingscreen_background_image.getBool()) {
         SongBrowser::drawSelectedBeatmapBackgroundImage();
 
         // draw top black bar
         g->setColor(0xff000000);
         g->fillRect(0, 0, osu->getScreenWidth(),
-                    this->rankingTitle->getSize().y * cv_rankingscreen_topbar_height_percent.getFloat());
+                    this->rankingTitle->getSize().y * cv::rankingscreen_topbar_height_percent.getFloat());
     }
 
     ScreenBackable::draw();
@@ -299,7 +299,7 @@ void RankingScreen::draw() {
     }
 
     // draw pp
-    if(cv_rankingscreen_pp.getBool()) {
+    if(cv::rankingscreen_pp.getBool()) {
         const UString ppString = this->getPPString();
         const Vector2 ppPos = this->getPPPosRaw();
 
@@ -438,7 +438,7 @@ void RankingScreen::onWatchClicked() {
 }
 
 void RankingScreen::setScore(FinishedScore score) {
-    bool is_same_player = !score.playerName.compare(cv_name.getString());
+    bool is_same_player = !score.playerName.compare(cv::name.getString());
 
     this->score = score;
 
@@ -487,43 +487,43 @@ void RankingScreen::setScore(FinishedScore score) {
 
     this->enabledExperimentalMods.clear();
     if(score.mods.flags & Replay::ModFlags::FPoSu_Strafing)
-        this->enabledExperimentalMods.push_back(&cv_fposu_mod_strafing);
-    if(score.mods.flags & Replay::ModFlags::Wobble1) this->enabledExperimentalMods.push_back(&cv_mod_wobble);
-    if(score.mods.flags & Replay::ModFlags::Wobble2) this->enabledExperimentalMods.push_back(&cv_mod_wobble2);
-    if(score.mods.flags & Replay::ModFlags::ARWobble) this->enabledExperimentalMods.push_back(&cv_mod_arwobble);
-    if(score.mods.flags & Replay::ModFlags::Timewarp) this->enabledExperimentalMods.push_back(&cv_mod_timewarp);
-    if(score.mods.flags & Replay::ModFlags::ARTimewarp) this->enabledExperimentalMods.push_back(&cv_mod_artimewarp);
-    if(score.mods.flags & Replay::ModFlags::Minimize) this->enabledExperimentalMods.push_back(&cv_mod_minimize);
-    if(score.mods.flags & Replay::ModFlags::FadingCursor) this->enabledExperimentalMods.push_back(&cv_mod_fadingcursor);
-    if(score.mods.flags & Replay::ModFlags::FPS) this->enabledExperimentalMods.push_back(&cv_mod_fps);
-    if(score.mods.flags & Replay::ModFlags::Jigsaw1) this->enabledExperimentalMods.push_back(&cv_mod_jigsaw1);
-    if(score.mods.flags & Replay::ModFlags::Jigsaw2) this->enabledExperimentalMods.push_back(&cv_mod_jigsaw2);
+        this->enabledExperimentalMods.push_back(&cv::fposu_mod_strafing);
+    if(score.mods.flags & Replay::ModFlags::Wobble1) this->enabledExperimentalMods.push_back(&cv::mod_wobble);
+    if(score.mods.flags & Replay::ModFlags::Wobble2) this->enabledExperimentalMods.push_back(&cv::mod_wobble2);
+    if(score.mods.flags & Replay::ModFlags::ARWobble) this->enabledExperimentalMods.push_back(&cv::mod_arwobble);
+    if(score.mods.flags & Replay::ModFlags::Timewarp) this->enabledExperimentalMods.push_back(&cv::mod_timewarp);
+    if(score.mods.flags & Replay::ModFlags::ARTimewarp) this->enabledExperimentalMods.push_back(&cv::mod_artimewarp);
+    if(score.mods.flags & Replay::ModFlags::Minimize) this->enabledExperimentalMods.push_back(&cv::mod_minimize);
+    if(score.mods.flags & Replay::ModFlags::FadingCursor) this->enabledExperimentalMods.push_back(&cv::mod_fadingcursor);
+    if(score.mods.flags & Replay::ModFlags::FPS) this->enabledExperimentalMods.push_back(&cv::mod_fps);
+    if(score.mods.flags & Replay::ModFlags::Jigsaw1) this->enabledExperimentalMods.push_back(&cv::mod_jigsaw1);
+    if(score.mods.flags & Replay::ModFlags::Jigsaw2) this->enabledExperimentalMods.push_back(&cv::mod_jigsaw2);
     if(score.mods.flags & Replay::ModFlags::FullAlternate)
-        this->enabledExperimentalMods.push_back(&cv_mod_fullalternate);
+        this->enabledExperimentalMods.push_back(&cv::mod_fullalternate);
     if(score.mods.flags & Replay::ModFlags::ReverseSliders)
-        this->enabledExperimentalMods.push_back(&cv_mod_reverse_sliders);
-    if(score.mods.flags & Replay::ModFlags::No50s) this->enabledExperimentalMods.push_back(&cv_mod_no50s);
-    if(score.mods.flags & Replay::ModFlags::No100s) this->enabledExperimentalMods.push_back(&cv_mod_no100s);
-    if(score.mods.flags & Replay::ModFlags::Ming3012) this->enabledExperimentalMods.push_back(&cv_mod_ming3012);
-    if(score.mods.flags & Replay::ModFlags::HalfWindow) this->enabledExperimentalMods.push_back(&cv_mod_halfwindow);
-    if(score.mods.flags & Replay::ModFlags::Millhioref) this->enabledExperimentalMods.push_back(&cv_mod_millhioref);
-    if(score.mods.flags & Replay::ModFlags::Mafham) this->enabledExperimentalMods.push_back(&cv_mod_mafham);
+        this->enabledExperimentalMods.push_back(&cv::mod_reverse_sliders);
+    if(score.mods.flags & Replay::ModFlags::No50s) this->enabledExperimentalMods.push_back(&cv::mod_no50s);
+    if(score.mods.flags & Replay::ModFlags::No100s) this->enabledExperimentalMods.push_back(&cv::mod_no100s);
+    if(score.mods.flags & Replay::ModFlags::Ming3012) this->enabledExperimentalMods.push_back(&cv::mod_ming3012);
+    if(score.mods.flags & Replay::ModFlags::HalfWindow) this->enabledExperimentalMods.push_back(&cv::mod_halfwindow);
+    if(score.mods.flags & Replay::ModFlags::Millhioref) this->enabledExperimentalMods.push_back(&cv::mod_millhioref);
+    if(score.mods.flags & Replay::ModFlags::Mafham) this->enabledExperimentalMods.push_back(&cv::mod_mafham);
     if(score.mods.flags & Replay::ModFlags::StrictTracking)
-        this->enabledExperimentalMods.push_back(&cv_mod_strict_tracking);
+        this->enabledExperimentalMods.push_back(&cv::mod_strict_tracking);
     if(score.mods.flags & Replay::ModFlags::MirrorHorizontal)
-        this->enabledExperimentalMods.push_back(&cv_playfield_mirror_horizontal);
+        this->enabledExperimentalMods.push_back(&cv::playfield_mirror_horizontal);
     if(score.mods.flags & Replay::ModFlags::MirrorVertical)
-        this->enabledExperimentalMods.push_back(&cv_playfield_mirror_vertical);
-    if(score.mods.flags & Replay::ModFlags::Shirone) this->enabledExperimentalMods.push_back(&cv_mod_shirone);
+        this->enabledExperimentalMods.push_back(&cv::playfield_mirror_vertical);
+    if(score.mods.flags & Replay::ModFlags::Shirone) this->enabledExperimentalMods.push_back(&cv::mod_shirone);
     if(score.mods.flags & Replay::ModFlags::ApproachDifferent)
-        this->enabledExperimentalMods.push_back(&cv_mod_approach_different);
+        this->enabledExperimentalMods.push_back(&cv::mod_approach_different);
 }
 
 void RankingScreen::setBeatmapInfo(Beatmap *beatmap, DatabaseBeatmap *diff2) {
     this->score.diff2 = diff2;
     this->songInfo->setFromBeatmap(beatmap, diff2);
 
-    UString local_name{cv_name.getString()};
+    UString local_name{cv::name.getString()};
     this->songInfo->setPlayer(this->bIsUnranked ? "neosu" : local_name.toUtf8());
 
     // @PPV3: update m_score.ppv3_score, this->score.ppv3_aim_stars, this->score.ppv3_speed_stars,
@@ -533,7 +533,7 @@ void RankingScreen::setBeatmapInfo(Beatmap *beatmap, DatabaseBeatmap *diff2) {
 void RankingScreen::updateLayout() {
     ScreenBackable::updateLayout();
 
-    const float uiScale = cv_ui_scale.getFloat();
+    const float uiScale = cv::ui_scale.getFloat();
 
     this->setSize(osu->getScreenSize());
 
@@ -546,7 +546,7 @@ void RankingScreen::updateLayout() {
 
     this->songInfo->setSize(osu->getScreenWidth(),
                             std::max(this->songInfo->getMinimumHeight(),
-                                this->rankingTitle->getSize().y * cv_rankingscreen_topbar_height_percent.getFloat()));
+                                this->rankingTitle->getSize().y * cv::rankingscreen_topbar_height_percent.getFloat()));
 
     this->rankings->setSize(osu->getScreenSize().x + 2, osu->getScreenSize().y - this->songInfo->getSize().y + 3);
     this->rankings->setRelPosY(this->songInfo->getSize().y - 1);
@@ -628,7 +628,7 @@ void RankingScreen::setGrade(FinishedScore::Grade grade) {
             break;
     }
 
-    const float uiScale = /*cv_ui_scale.getFloat()*/ 1.0f;  // NOTE: no uiScale for rankingPanel and rankingGrade,
+    const float uiScale = /*cv::ui_scale.getFloat()*/ 1.0f;  // NOTE: no uiScale for rankingPanel and rankingGrade,
                                                             // doesn't really work due to legacy layout expectations
 
     const float rankingGradeImageScale = Osu::getImageScale(hardcodedOsuRankingGradeImageSize, 230.0f) * uiScale;
@@ -643,7 +643,7 @@ void RankingScreen::setGrade(FinishedScore::Grade grade) {
 }
 
 void RankingScreen::setIndex(int index) {
-    if(!cv_scores_enabled.getBool()) index = -1;
+    if(!cv::scores_enabled.getBool()) index = -1;
 
     if(index > -1) {
         this->rankingIndex->setText(UString::format("You achieved the #%i score on local rankings!", (index + 1)));
@@ -667,7 +667,7 @@ UString RankingScreen::getPPString() {
 Vector2 RankingScreen::getPPPosRaw() {
     const UString ppString = this->getPPString();
     float ppStringWidth = osu->getTitleFont()->getStringWidth(ppString);
-    return Vector2(this->rankingGrade->getPos().x, cv_ui_scale.getFloat() * 10.f) +
-           Vector2(this->rankingGrade->getSize().x / 2 - (ppStringWidth / 2 + cv_ui_scale.getFloat() * 100.f),
+    return Vector2(this->rankingGrade->getPos().x, cv::ui_scale.getFloat() * 10.f) +
+           Vector2(this->rankingGrade->getSize().x / 2 - (ppStringWidth / 2 + cv::ui_scale.getFloat() * 100.f),
                    this->rankings->getRelPosY() + osu->getUIScale(400) + osu->getTitleFont()->getHeight() / 2);
 }

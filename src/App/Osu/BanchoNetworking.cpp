@@ -76,7 +76,7 @@ void disconnect() {
         struct curl_slist *chunk = NULL;
         chunk = curl_slist_append(chunk, auth_header.c_str());
         chunk = curl_slist_append(chunk, version_header.toUtf8());
-        auto scheme = cv_use_https.getBool() ? "https://" : "http://";
+        auto scheme = cv::use_https.getBool() ? "https://" : "http://";
         auto query_url = UString::format("%sc.%s/", scheme, bancho->endpoint.toUtf8());
         curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, packet.memory);
@@ -144,10 +144,10 @@ void reconnect() {
 
     // Disable autologin, in case there's an error while logging in
     // Will be reenabled after the login succeeds
-    cv_mp_autologin.setValue(false);
+    cv::mp_autologin.setValue(false);
 
-    bancho->username = cv_name.getString().c_str();
-    bancho->endpoint = cv_mp_server.getString().c_str();
+    bancho->username = cv::name.getString().c_str();
+    bancho->endpoint = cv::mp_server.getString().c_str();
 
     // Admins told me they don't want any clients to connect
     const char *server_blacklist[] = {
@@ -161,7 +161,7 @@ void reconnect() {
         }
     }
 
-    UString password{cv_mp_password.getString()};
+    UString password{cv::mp_password.getString()};
     if(password.length() == 0) {
         // No password: don't try to log in
         return;
@@ -220,7 +220,7 @@ static void send_api_request(CURL *curl, const APIRequest &api_out) {
     response.memory = (u8 *)malloc(2048);
 
     struct curl_slist *chunk = NULL;
-    auto scheme = cv_use_https.getBool() ? "https://" : "http://";
+    auto scheme = cv::use_https.getBool() ? "https://" : "http://";
     auto query_url = UString::format("%sosu.%s%s", scheme, bancho->endpoint.toUtf8(), api_out.path.toUtf8());
     curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
     if(api_out.type == SUBMIT_SCORE) {
@@ -265,7 +265,7 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
     }
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
 
-    auto scheme = cv_use_https.getBool() ? "https://" : "http://";
+    auto scheme = cv::use_https.getBool() ? "https://" : "http://";
     auto query_url = UString::format("%sc.%s/", scheme, bancho->endpoint.toUtf8());
     curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, outgoing.memory);

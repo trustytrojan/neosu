@@ -298,7 +298,7 @@ void Engine::onUpdate() {
     if(this->bResolutionChange) {
         this->bResolutionChange = false;
 
-        if(cv_debug_engine.getBool())
+        if(cv::debug_engine.getBool())
             debugLog("Engine: executing pending queued resolution change to (%i, %i)\n", (int)this->vNewScreenSize.x,
                      (int)this->vNewScreenSize.y);
 
@@ -359,7 +359,7 @@ void Engine::onUpdate() {
 void Engine::onFocusGained() {
     this->bHasFocus = true;
 
-    if(cv_debug_engine.getBool()) debugLog("Engine: got focus\n");
+    if(cv::debug_engine.getBool()) debugLog("Engine: got focus\n");
 
     if(app != NULL) app->onFocusGained();
 }
@@ -367,7 +367,7 @@ void Engine::onFocusGained() {
 void Engine::onFocusLost() {
     this->bHasFocus = false;
 
-    if(cv_debug_engine.getBool()) debugLog("Engine: lost focus\n");
+    if(cv::debug_engine.getBool()) debugLog("Engine: lost focus\n");
 
     for(size_t i = 0; i < this->keyboards.size(); i++) {
         this->keyboards[i]->reset();
@@ -377,9 +377,9 @@ void Engine::onFocusLost() {
 
     // auto minimize on certain conditions
     if(env->isFullscreen() || env->isFullscreenWindowedBorderless()) {
-        if((!env->isFullscreenWindowedBorderless() && cv_minimize_on_focus_lost_if_fullscreen.getBool()) ||
+        if((!env->isFullscreenWindowedBorderless() && cv::minimize_on_focus_lost_if_fullscreen.getBool()) ||
            (env->isFullscreenWindowedBorderless() &&
-            cv_minimize_on_focus_lost_if_borderless_windowed_fullscreen.getBool())) {
+            cv::minimize_on_focus_lost_if_borderless_windowed_fullscreen.getBool())) {
             env->minimize();
         }
     }
@@ -389,7 +389,7 @@ void Engine::onMinimized() {
     this->bIsMinimized = true;
     this->bHasFocus = false;
 
-    if(cv_debug_engine.getBool()) debugLog("Engine: window minimized\n");
+    if(cv::debug_engine.getBool()) debugLog("Engine: window minimized\n");
 
     if(app != NULL) app->onMinimized();
 }
@@ -397,13 +397,13 @@ void Engine::onMinimized() {
 void Engine::onMaximized() {
     this->bIsMinimized = false;
 
-    if(cv_debug_engine.getBool()) debugLog("Engine: window maximized\n");
+    if(cv::debug_engine.getBool()) debugLog("Engine: window maximized\n");
 }
 
 void Engine::onRestored() {
     this->bIsMinimized = false;
 
-    if(cv_debug_engine.getBool()) debugLog("Engine: window restored\n");
+    if(cv::debug_engine.getBool()) debugLog("Engine: window restored\n");
 
     if(app != NULL) app->onRestored();
 }
@@ -462,13 +462,13 @@ void Engine::onKeyboardKeyDown(KEYCODE keyCode) {
 
         // handle CTRL+F11 profiler toggle
         if(keyboard->isControlDown() && keyCode == KEY_F11) {
-            cv_vprof.setValue(cv_vprof.getBool() ? 0.0f : 1.0f);
+            cv::vprof.setValue(cv::vprof.getBool() ? 0.0f : 1.0f);
             return;
         }
 
         // handle profiler display mode change
         if(keyboard->isControlDown() && keyCode == KEY_TAB) {
-            if(cv_vprof.getBool()) {
+            if(cv::vprof.getBool()) {
                 if(keyboard->isShiftDown())
                     this->visualProfiler->decrementInfoBladeDisplayMode();
                 else
@@ -576,11 +576,11 @@ void _printsize(void) {
 void _fullscreen(void) { engine->toggleFullscreen(); }
 
 void _borderless(void) {
-    if(cv_fullscreen_windowed_borderless.getBool()) {
-        cv_fullscreen_windowed_borderless.setValue(0.0f);
+    if(cv::fullscreen_windowed_borderless.getBool()) {
+        cv::fullscreen_windowed_borderless.setValue(0.0f);
         if(env->isFullscreen()) env->disableFullscreen();
     } else {
-        cv_fullscreen_windowed_borderless.setValue(1.0f);
+        cv::fullscreen_windowed_borderless.setValue(1.0f);
         if(!env->isFullscreen()) env->enableFullscreen();
     }
 }

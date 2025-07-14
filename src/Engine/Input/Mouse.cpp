@@ -27,7 +27,7 @@ Mouse::Mouse() : InputDevice() {
 }
 
 void Mouse::draw() {
-    if(!cv_debug_mouse.getBool()) return;
+    if(!cv::debug_mouse.getBool()) return;
 
     this->drawDebug();
 
@@ -111,8 +111,8 @@ void Mouse::update() {
     // (sensitivity, setCursorPos(), etc.) same goes for a sensitivity of 1 without raw input, it is not necessary to
     // call env->setPos() in that case
 
-    const float sens = cv_mouse_sensitivity.getFloat();
-    const bool isRaw = cv_mouse_raw_input.getBool();
+    const float sens = cv::mouse_sensitivity.getFloat();
+    const bool isRaw = cv::mouse_raw_input.getBool();
 
     const McRect windowRect{0, 0, static_cast<float>(engine->getScreenWidth()),
                             static_cast<float>(engine->getScreenHeight())};
@@ -126,7 +126,7 @@ void Mouse::update() {
     if(osCursorVisible || (!sensitivityAdjustmentNeeded && !isRaw) || this->bAbsolute) {
         // this block handles visible/active OS cursor movement without sensitivity adjustments, and absolute input
         // device movement
-        if(!Env::cfg(OS::LINUX) && this->bAbsolute && !cv_tablet_sensitivity_ignore.getBool()) {
+        if(!Env::cfg(OS::LINUX) && this->bAbsolute && !cv::tablet_sensitivity_ignore.getBool()) {
             // absolute input (with sensitivity)
             // NOTE: these range values work on windows only!
             // TODO: standardize the input values before they even reach the engine, this should not be in here
@@ -135,13 +135,13 @@ void Mouse::update() {
             double rawRangeY = 65536;
 
             // if enabled, uses the screen resolution as the coord range, instead of 65536
-            if(cv_win_ink_workaround.getBool()) {
+            if(cv::win_ink_workaround.getBool()) {
                 rawRangeX = env->getNativeScreenSize().x;
                 rawRangeY = env->getNativeScreenSize().y;
             }
 
             // NOTE: mouse_raw_input_absolute_to_window only applies if raw input is enabled in general
-            if(isRaw && cv_mouse_raw_input_absolute_to_window.getBool()) {
+            if(isRaw && cv::mouse_raw_input_absolute_to_window.getBool()) {
                 const Vector2d scaledOffset = this->vOffset;
                 const Vector2d scaledEngineScreenSize = engine->getScreenSize() + 2 * scaledOffset;
 
@@ -281,9 +281,9 @@ void Mouse::onPosChange(Vector2d pos) {
 }
 
 void Mouse::setPosXY(double x, double y) {
-    if(cv_mouse_fakelag.getFloat() > 0.0f) {
+    if(cv::mouse_fakelag.getFloat() > 0.0f) {
         FAKELAG_PACKET p;
-        p.time = engine->getTime() + cv_mouse_fakelag.getFloat();
+        p.time = engine->getTime() + cv::mouse_fakelag.getFloat();
         p.pos = Vector2d(x, y);
         this->fakelagBuffer.push_back(p);
 
@@ -310,7 +310,7 @@ void Mouse::onRawMove(double xDelta, double yDelta, bool absolute, bool virtualD
     if(xDelta != 0 || yDelta != 0)  // sanity check, else some people get mouse drift like above, I don't even
     {
         if(!this->bAbsolute)  // mouse
-            this->vRawDeltaActual += Vector2d(xDelta, yDelta) * cv_mouse_sensitivity.getFloat();
+            this->vRawDeltaActual += Vector2d(xDelta, yDelta) * cv::mouse_sensitivity.getFloat();
         else  // tablet
             this->vRawDeltaAbsoluteActual = Vector2d(xDelta, yDelta);
     }

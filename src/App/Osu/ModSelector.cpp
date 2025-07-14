@@ -163,15 +163,15 @@ ModSelector::ModSelector() : OsuScreen() {
     }
 
     // build override sliders
-    OVERRIDE_SLIDER overrideCS = this->addOverrideSlider("CS Override", "CS:", &cv_cs_override, 0.0f, 12.5f,
+    OVERRIDE_SLIDER overrideCS = this->addOverrideSlider("CS Override", "CS:", &cv::cs_override, 0.0f, 12.5f,
                                                          "Circle Size (higher number = smaller circles).");
     OVERRIDE_SLIDER overrideAR =
-        this->addOverrideSlider("AR Override", "AR:", &cv_ar_override, 0.0f, 12.5f,
-                                "Approach Rate (higher number = faster circles).", &cv_ar_override_lock);
+        this->addOverrideSlider("AR Override", "AR:", &cv::ar_override, 0.0f, 12.5f,
+                                "Approach Rate (higher number = faster circles).", &cv::ar_override_lock);
     OVERRIDE_SLIDER overrideOD =
-        this->addOverrideSlider("OD Override", "OD:", &cv_od_override, 0.0f, 12.5f,
-                                "Overall Difficulty (higher number = harder accuracy).", &cv_od_override_lock);
-    OVERRIDE_SLIDER overrideHP = this->addOverrideSlider("HP Override", "HP:", &cv_hp_override, 0.0f, 12.5f,
+        this->addOverrideSlider("OD Override", "OD:", &cv::od_override, 0.0f, 12.5f,
+                                "Overall Difficulty (higher number = harder accuracy).", &cv::od_override_lock);
+    OVERRIDE_SLIDER overrideHP = this->addOverrideSlider("HP Override", "HP:", &cv::hp_override, 0.0f, 12.5f,
                                                          "Hit/Health Points (higher number = harder survival).");
 
     overrideCS.slider->setAnimated(false);  // quick fix for otherwise possible inconsistencies due to slider vertex
@@ -192,7 +192,7 @@ ModSelector::ModSelector() : OsuScreen() {
     this->ODLock = overrideOD.lock;
 
     OVERRIDE_SLIDER overrideSpeed =
-        this->addOverrideSlider("Speed/BPM Multiplier", "x", &cv_speed_override, 0.9f, 2.5f);
+        this->addOverrideSlider("Speed/BPM Multiplier", "x", &cv::speed_override, 0.9f, 2.5f);
 
     overrideSpeed.slider->setChangeCallback(fastdelegate::MakeDelegate(this, &ModSelector::onOverrideSliderChange));
     // overrideSpeed.slider->setValue(-1.0f, false);
@@ -205,48 +205,48 @@ ModSelector::ModSelector() : OsuScreen() {
     this->addExperimentalLabel(" Experimental Mods (!)");
     this->addExperimentalCheckbox(
         "FPoSu: Strafing", "Playfield moves in 3D space (see fposu_mod_strafing_...).\nOnly works in FPoSu mode!",
-        &cv_fposu_mod_strafing);
-    this->addExperimentalCheckbox("Wobble", "Playfield rotates and moves.", &cv_mod_wobble);
-    this->addExperimentalCheckbox("AR Wobble", "Approach rate oscillates between -1 and +1.", &cv_mod_arwobble);
+        &cv::fposu_mod_strafing);
+    this->addExperimentalCheckbox("Wobble", "Playfield rotates and moves.", &cv::mod_wobble);
+    this->addExperimentalCheckbox("AR Wobble", "Approach rate oscillates between -1 and +1.", &cv::mod_arwobble);
     this->addExperimentalCheckbox(
         "Approach Different",
         "Customize the approach circle animation.\nSee osu_mod_approach_different_style.\nSee "
         "osu_mod_approach_different_initial_size.",
-        &cv_mod_approach_different);
+        &cv::mod_approach_different);
     this->addExperimentalCheckbox("Timewarp", "Speed increases from 100% to 150% over the course of the beatmap.",
-                                  &cv_mod_timewarp);
+                                  &cv::mod_timewarp);
     this->addExperimentalCheckbox(
-        "AR Timewarp", "Approach rate decreases from 100% to 50% over the course of the beatmap.", &cv_mod_artimewarp);
+        "AR Timewarp", "Approach rate decreases from 100% to 50% over the course of the beatmap.", &cv::mod_artimewarp);
     this->addExperimentalCheckbox("Minimize", "Circle size decreases from 100% to 50% over the course of the beatmap.",
-                                  &cv_mod_minimize);
+                                  &cv::mod_minimize);
     this->addExperimentalCheckbox("Fading Cursor", "The cursor fades the higher the combo, becoming invisible at 50.",
-                                  &cv_mod_fadingcursor);
-    this->addExperimentalCheckbox("First Person", "Centered cursor.", &cv_mod_fps);
+                                  &cv::mod_fadingcursor);
+    this->addExperimentalCheckbox("First Person", "Centered cursor.", &cv::mod_fps);
     this->addExperimentalCheckbox("Full Alternate", "You can never use the same key twice in a row.",
-                                  &cv_mod_fullalternate);
-    this->addExperimentalCheckbox("Jigsaw 1", "Unnecessary clicks count as misses.", &cv_mod_jigsaw1);
-    this->addExperimentalCheckbox("Jigsaw 2", "Massively reduced slider follow circle radius.", &cv_mod_jigsaw2);
+                                  &cv::mod_fullalternate);
+    this->addExperimentalCheckbox("Jigsaw 1", "Unnecessary clicks count as misses.", &cv::mod_jigsaw1);
+    this->addExperimentalCheckbox("Jigsaw 2", "Massively reduced slider follow circle radius.", &cv::mod_jigsaw2);
     this->addExperimentalCheckbox("Reverse Sliders",
                                   "Reverses the direction of all sliders. (Reload beatmap to apply!)",
-                                  &cv_mod_reverse_sliders);
-    this->addExperimentalCheckbox("No 50s", "Only 300s or 100s. Try harder.", &cv_mod_no50s);
-    this->addExperimentalCheckbox("No 100s no 50s", "300 or miss. PF \"lite\"", &cv_mod_no100s);
-    this->addExperimentalCheckbox("MinG3012", "No 100s. Only 300s or 50s. Git gud.", &cv_mod_ming3012);
+                                  &cv::mod_reverse_sliders);
+    this->addExperimentalCheckbox("No 50s", "Only 300s or 100s. Try harder.", &cv::mod_no50s);
+    this->addExperimentalCheckbox("No 100s no 50s", "300 or miss. PF \"lite\"", &cv::mod_no100s);
+    this->addExperimentalCheckbox("MinG3012", "No 100s. Only 300s or 50s. Git gud.", &cv::mod_ming3012);
     this->addExperimentalCheckbox(
-        "Half Timing Window", "The hit timing window is cut in half. Hit early or perfect (300).", &cv_mod_halfwindow);
-    this->addExperimentalCheckbox("MillhioreF", "Go below AR 0. Doubled approach time.", &cv_mod_millhioref);
+        "Half Timing Window", "The hit timing window is cut in half. Hit early or perfect (300).", &cv::mod_halfwindow);
+    this->addExperimentalCheckbox("MillhioreF", "Go below AR 0. Doubled approach time.", &cv::mod_millhioref);
     this->addExperimentalCheckbox(
         "Mafham",
         "Approach rate is set to negative infinity. See the entire beatmap at once.\nUses very "
         "aggressive optimizations to keep the framerate high, you have been warned!",
-        &cv_mod_mafham);
+        &cv::mod_mafham);
     this->addExperimentalCheckbox(
         "Strict Tracking", "Leaving sliders in any way counts as a miss and combo break. (Reload beatmap to apply!)",
-        &cv_mod_strict_tracking);
+        &cv::mod_strict_tracking);
     this->addExperimentalCheckbox("Flip Up/Down", "Playfield is flipped upside down (mirrored at horizontal axis).",
-                                  &cv_playfield_mirror_horizontal);
+                                  &cv::playfield_mirror_horizontal);
     this->addExperimentalCheckbox("Flip Left/Right", "Playfield is flipped left/right (mirrored at vertical axis).",
-                                  &cv_playfield_mirror_vertical);
+                                  &cv::playfield_mirror_vertical);
 
     this->nonVanillaWarning = new CBaseUILabel();
     this->nonVanillaWarning->setDrawFrame(false);
@@ -278,83 +278,83 @@ ModSelector::ModSelector() : OsuScreen() {
 
 void ModSelector::updateButtons(bool initial) {
     this->modButtonEasy = this->setModButtonOnGrid(
-        0, 0, 0, initial && osu->getModEZ(), &cv_mod_easy, "ez",
+        0, 0, 0, initial && osu->getModEZ(), &cv::mod_easy, "ez",
         "Reduces overall difficulty - larger circles, more forgiving HP drain, less accuracy required.",
         []() -> SkinImage * { return osu->getSkin()->getSelectionModEasy(); });
     this->modButtonNofail = this->setModButtonOnGrid(
-        1, 0, 0, initial && osu->getModNF(), &cv_mod_nofail, "nf",
+        1, 0, 0, initial && osu->getModNF(), &cv::mod_nofail, "nf",
         "You can't fail. No matter what.\nNOTE: To disable drain completely:\nOptions > Gameplay > "
         "Mechanics > \"Select HP Drain\" > \"None\".",
         []() -> SkinImage * { return osu->getSkin()->getSelectionModNoFail(); });
-    this->setModButtonOnGrid(4, 0, 0, initial && osu->getModNightmare(), &cv_mod_nightmare, "nightmare",
+    this->setModButtonOnGrid(4, 0, 0, initial && osu->getModNightmare(), &cv::mod_nightmare, "nightmare",
                              "Unnecessary clicks count as misses.\nMassively reduced slider follow circle radius.",
                              []() -> SkinImage * { return osu->getSkin()->getSelectionModNightmare(); });
 
     this->modButtonHardrock = this->setModButtonOnGrid(
-        0, 1, 0, initial && osu->getModHR(), &cv_mod_hardrock, "hr", "Everything just got a bit harder...",
+        0, 1, 0, initial && osu->getModHR(), &cv::mod_hardrock, "hr", "Everything just got a bit harder...",
         []() -> SkinImage * { return osu->getSkin()->getSelectionModHardRock(); });
     this->modButtonSuddendeath = this->setModButtonOnGrid(
-        1, 1, 0, initial && osu->getModSD(), &cv_mod_suddendeath, "sd", "Miss a note and fail.",
+        1, 1, 0, initial && osu->getModSD(), &cv::mod_suddendeath, "sd", "Miss a note and fail.",
         []() -> SkinImage * { return osu->getSkin()->getSelectionModSuddenDeath(); });
-    this->setModButtonOnGrid(1, 1, 1, initial && osu->getModSS(), &cv_mod_perfect, "ss", "SS or quit.",
+    this->setModButtonOnGrid(1, 1, 1, initial && osu->getModSS(), &cv::mod_perfect, "ss", "SS or quit.",
                              []() -> SkinImage * { return osu->getSkin()->getSelectionModPerfect(); });
 
-    if(cv_nightcore_enjoyer.getBool()) {
+    if(cv::nightcore_enjoyer.getBool()) {
         this->modButtonHalftime = this->setModButtonOnGrid(
-            2, 0, 0, initial && cv_mod_halftime_dummy.getBool(), &cv_mod_halftime_dummy, "dc", "A E S T H E T I C",
+            2, 0, 0, initial && cv::mod_halftime_dummy.getBool(), &cv::mod_halftime_dummy, "dc", "A E S T H E T I C",
             []() -> SkinImage * { return osu->getSkin()->getSelectionModDayCore(); });
         this->modButtonDoubletime = this->setModButtonOnGrid(
-            2, 1, 0, initial && cv_mod_doubletime_dummy.getBool(), &cv_mod_doubletime_dummy, "nc", "uguuuuuuuu",
+            2, 1, 0, initial && cv::mod_doubletime_dummy.getBool(), &cv::mod_doubletime_dummy, "nc", "uguuuuuuuu",
             []() -> SkinImage * { return osu->getSkin()->getSelectionModNightCore(); });
     } else {
         this->modButtonHalftime = this->setModButtonOnGrid(
-            2, 0, 0, initial && cv_mod_halftime_dummy.getBool(), &cv_mod_halftime_dummy, "ht", "Less zoom.",
+            2, 0, 0, initial && cv::mod_halftime_dummy.getBool(), &cv::mod_halftime_dummy, "ht", "Less zoom.",
             []() -> SkinImage * { return osu->getSkin()->getSelectionModHalfTime(); });
         this->modButtonDoubletime = this->setModButtonOnGrid(
-            2, 1, 0, initial && cv_mod_doubletime_dummy.getBool(), &cv_mod_doubletime_dummy, "dt", "Zoooooooooom.",
+            2, 1, 0, initial && cv::mod_doubletime_dummy.getBool(), &cv::mod_doubletime_dummy, "dt", "Zoooooooooom.",
             []() -> SkinImage * { return osu->getSkin()->getSelectionModDoubleTime(); });
     }
 
     this->modButtonHidden =
-        this->setModButtonOnGrid(3, 1, 0, initial && osu->getModHD(), &cv_mod_hidden, "hd",
+        this->setModButtonOnGrid(3, 1, 0, initial && osu->getModHD(), &cv::mod_hidden, "hd",
                                  "Play with no approach circles and fading notes for a slight score advantage.",
                                  []() -> SkinImage * { return osu->getSkin()->getSelectionModHidden(); });
 
     this->modButtonFlashlight = this->setModButtonOnGrid(
-        4, 1, 0, initial && osu->getModFlashlight(), &cv_mod_flashlight, "fl", "Restricted view area.",
+        4, 1, 0, initial && osu->getModFlashlight(), &cv::mod_flashlight, "fl", "Restricted view area.",
         []() -> SkinImage * { return osu->getSkin()->getSelectionModFlashlight(); });
-    this->setModButtonOnGrid(4, 1, 1, initial && cv_mod_actual_flashlight.getBool(), &cv_mod_actual_flashlight, "afl",
+    this->setModButtonOnGrid(4, 1, 1, initial && cv::mod_actual_flashlight.getBool(), &cv::mod_actual_flashlight, "afl",
                              "Actual flashlight.",
                              []() -> SkinImage * { return osu->getSkin()->getSelectionModFlashlight(); });
 
-    this->modButtonTD = this->setModButtonOnGrid(5, 1, 0, initial && osu->getModTD(), &cv_mod_touchdevice, "nerftd",
+    this->modButtonTD = this->setModButtonOnGrid(5, 1, 0, initial && osu->getModTD(), &cv::mod_touchdevice, "nerftd",
                                                  "Simulate pp nerf for touch devices.\nOnly affects pp calculation.",
                                                  []() -> SkinImage * { return osu->getSkin()->getSelectionModTD(); });
-    this->getModButtonOnGrid(5, 1)->setAvailable(!cv_mod_touchdevice_always.getBool());
+    this->getModButtonOnGrid(5, 1)->setAvailable(!cv::mod_touchdevice_always.getBool());
 
     this->modButtonRelax = this->setModButtonOnGrid(
-        0, 2, 0, initial && osu->getModRelax(), &cv_mod_relax, "relax",
+        0, 2, 0, initial && osu->getModRelax(), &cv::mod_relax, "relax",
         "You don't need to click.\nGive your clicking/tapping fingers a break from the heat of things.\n** UNRANKED **",
         []() -> SkinImage * { return osu->getSkin()->getSelectionModRelax(); });
     this->modButtonAutopilot =
-        this->setModButtonOnGrid(1, 2, 0, initial && osu->getModAutopilot(), &cv_mod_autopilot, "autopilot",
+        this->setModButtonOnGrid(1, 2, 0, initial && osu->getModAutopilot(), &cv::mod_autopilot, "autopilot",
                                  "Automatic cursor movement - just follow the rhythm.\n** UNRANKED **",
                                  []() -> SkinImage * { return osu->getSkin()->getSelectionModAutopilot(); });
     this->modButtonSpunout =
-        this->setModButtonOnGrid(2, 2, 0, initial && osu->getModSpunout(), &cv_mod_spunout, "spunout",
+        this->setModButtonOnGrid(2, 2, 0, initial && osu->getModSpunout(), &cv::mod_spunout, "spunout",
                                  "Spinners will be automatically completed.",
                                  []() -> SkinImage * { return osu->getSkin()->getSelectionModSpunOut(); });
     this->modButtonAuto =
-        this->setModButtonOnGrid(3, 2, 0, initial && osu->getModAuto(), &cv_mod_autoplay, "auto",
+        this->setModButtonOnGrid(3, 2, 0, initial && osu->getModAuto(), &cv::mod_autoplay, "auto",
                                  "Watch a perfect automated play through the song.",
                                  []() -> SkinImage * { return osu->getSkin()->getSelectionModAutoplay(); });
     this->setModButtonOnGrid(
-        4, 2, 0, initial && osu->getModTarget(), &cv_mod_target, "practicetarget",
+        4, 2, 0, initial && osu->getModTarget(), &cv::mod_target, "practicetarget",
         "Accuracy is based on the distance to the center of all hitobjects.\n300s still require at "
         "least being in the hit window of a 100 in addition to the rule above.",
         []() -> SkinImage * { return osu->getSkin()->getSelectionModTarget(); });
     this->modButtonScoreV2 =
-        this->setModButtonOnGrid(5, 2, 0, initial && osu->getModScorev2(), &cv_mod_scorev2, "v2",
+        this->setModButtonOnGrid(5, 2, 0, initial && osu->getModScorev2(), &cv::mod_scorev2, "v2",
                                  "Try the future scoring system.\n** UNRANKED **",
                                  []() -> SkinImage * { return osu->getSkin()->getSelectionModScorev2(); });
 
@@ -677,24 +677,24 @@ void ModSelector::onKeyDown(KeyboardEvent &key) {
 
     if(key == KEY_1) this->resetModsUserInitiated();
 
-    if(((key == KEY_F1 || key == (KEYCODE)cv_TOGGLE_MODSELECT.getInt()) && !this->bWaitForF1KeyUp) || key == KEY_2 ||
-       key == (KEYCODE)cv_GAME_PAUSE.getInt() || key == KEY_ESCAPE || key == KEY_ENTER || key == KEY_NUMPAD_ENTER)
+    if(((key == KEY_F1 || key == (KEYCODE)cv::TOGGLE_MODSELECT.getInt()) && !this->bWaitForF1KeyUp) || key == KEY_2 ||
+       key == (KEYCODE)cv::GAME_PAUSE.getInt() || key == KEY_ESCAPE || key == KEY_ENTER || key == KEY_NUMPAD_ENTER)
         this->close();
 
     // mod hotkeys
-    if(key == (KEYCODE)cv_MOD_EASY.getInt()) this->modButtonEasy->click();
-    if(key == (KEYCODE)cv_MOD_NOFAIL.getInt()) this->modButtonNofail->click();
-    if(key == (KEYCODE)cv_MOD_HARDROCK.getInt()) this->modButtonHardrock->click();
-    if(key == (KEYCODE)cv_MOD_SUDDENDEATH.getInt()) this->modButtonSuddendeath->click();
-    if(key == (KEYCODE)cv_MOD_HIDDEN.getInt()) this->modButtonHidden->click();
-    if(key == (KEYCODE)cv_MOD_FLASHLIGHT.getInt()) this->modButtonFlashlight->click();
-    if(key == (KEYCODE)cv_MOD_RELAX.getInt()) this->modButtonRelax->click();
-    if(key == (KEYCODE)cv_MOD_AUTOPILOT.getInt()) this->modButtonAutopilot->click();
-    if(key == (KEYCODE)cv_MOD_SPUNOUT.getInt()) this->modButtonSpunout->click();
-    if(key == (KEYCODE)cv_MOD_AUTO.getInt()) this->modButtonAuto->click();
-    if(key == (KEYCODE)cv_MOD_SCOREV2.getInt()) this->modButtonScoreV2->click();
-    if(key == (KEYCODE)cv_MOD_HALFTIME.getInt()) this->modButtonHalftime->click();
-    if(key == (KEYCODE)cv_MOD_DOUBLETIME.getInt()) this->modButtonDoubletime->click();
+    if(key == (KEYCODE)cv::MOD_EASY.getInt()) this->modButtonEasy->click();
+    if(key == (KEYCODE)cv::MOD_NOFAIL.getInt()) this->modButtonNofail->click();
+    if(key == (KEYCODE)cv::MOD_HARDROCK.getInt()) this->modButtonHardrock->click();
+    if(key == (KEYCODE)cv::MOD_SUDDENDEATH.getInt()) this->modButtonSuddendeath->click();
+    if(key == (KEYCODE)cv::MOD_HIDDEN.getInt()) this->modButtonHidden->click();
+    if(key == (KEYCODE)cv::MOD_FLASHLIGHT.getInt()) this->modButtonFlashlight->click();
+    if(key == (KEYCODE)cv::MOD_RELAX.getInt()) this->modButtonRelax->click();
+    if(key == (KEYCODE)cv::MOD_AUTOPILOT.getInt()) this->modButtonAutopilot->click();
+    if(key == (KEYCODE)cv::MOD_SPUNOUT.getInt()) this->modButtonSpunout->click();
+    if(key == (KEYCODE)cv::MOD_AUTO.getInt()) this->modButtonAuto->click();
+    if(key == (KEYCODE)cv::MOD_SCOREV2.getInt()) this->modButtonScoreV2->click();
+    if(key == (KEYCODE)cv::MOD_HALFTIME.getInt()) this->modButtonHalftime->click();
+    if(key == (KEYCODE)cv::MOD_DOUBLETIME.getInt()) this->modButtonDoubletime->click();
 
     key.consume();
 }
@@ -702,7 +702,7 @@ void ModSelector::onKeyDown(KeyboardEvent &key) {
 void ModSelector::onKeyUp(KeyboardEvent &key) {
     if(!this->bVisible) return;
 
-    if(key == KEY_F1 || key == (KEYCODE)cv_TOGGLE_MODSELECT.getInt()) this->bWaitForF1KeyUp = false;
+    if(key == KEY_F1 || key == (KEYCODE)cv::TOGGLE_MODSELECT.getInt()) this->bWaitForF1KeyUp = false;
 }
 
 CBaseUIContainer *ModSelector::setVisible(bool visible) {
@@ -787,7 +787,7 @@ void ModSelector::updateLayout() {
     if(this->modButtons.size() < 1 || this->overrideSliders.size() < 1) return;
 
     const float dpiScale = Osu::getUIScale();
-    const float uiScale = cv_ui_scale.getFloat();
+    const float uiScale = cv::ui_scale.getFloat();
 
     if(!this->isInCompactMode())  // normal layout
     {
@@ -1152,7 +1152,7 @@ void ModSelector::resetModsUserInitiated() {
 }
 
 void ModSelector::resetMods() {
-    cv_mod_fposu.setValue(false);
+    cv::mod_fposu.setValue(false);
 
     for(int i = 0; i < this->overrideSliders.size(); i++) {
         if(this->overrideSliders[i].lock != NULL) this->overrideSliders[i].lock->setChecked(false);
@@ -1186,15 +1186,15 @@ u32 ModSelector::getModFlags() { return osu->getScore()->getModsLegacy(); }
 
 void ModSelector::enableModsFromFlags(u32 flags) {
     if(flags & (LegacyFlags::DoubleTime | LegacyFlags::Nightcore)) {
-        cv_speed_override.setValue(1.5f);
+        cv::speed_override.setValue(1.5f);
     } else if(flags & LegacyFlags::HalfTime) {
-        cv_speed_override.setValue(0.75f);
+        cv::speed_override.setValue(0.75f);
     } else {
-        cv_speed_override.setValue(-1.f);
+        cv::speed_override.setValue(-1.f);
     }
 
-    cv_mod_suddendeath.setValue(false);
-    cv_mod_perfect.setValue(false);
+    cv::mod_suddendeath.setValue(false);
+    cv::mod_perfect.setValue(false);
     if(flags & LegacyFlags::Perfect) {
         this->modButtonSuddendeath->setState(1);
         this->modButtonSuddendeath->setOn(true, true);
@@ -1307,7 +1307,7 @@ void ModSelector::onOverrideSliderLockChange(CBaseUICheckbox *checkbox) {
             const bool locked = this->overrideSliders[i].lock->isChecked();
             const bool wasLocked = this->overrideSliders[i].lockCvar->getBool();
 
-            // update convar with final value (e.g. osu_ar_override_lock, cv_od_override_lock)
+            // update convar with final value (e.g. osu_ar_override_lock, cv::od_override_lock)
             this->overrideSliders[i].lockCvar->setValue(locked ? 1.0f : 0.0f);
 
             // usability: if we just got locked, and the override slider value is < 0.0f (disabled), then set override

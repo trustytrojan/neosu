@@ -93,13 +93,13 @@ void VinylScratcher::mouse_update(bool *propagate_clicks) {
     }
 
     // update seekbar
-    if(this->stream->isPlaying() && !this->titleBar->isSeeking()) cv_vs_percent.setValue(this->stream->getPosition());
+    if(this->stream->isPlaying() && !this->titleBar->isSeeking()) cv::vs_percent.setValue(this->stream->getPosition());
 
     // update info text
     {
         unsigned long lengthMS = this->stream->getLengthMS();
         unsigned long positionMS = this->stream->getPositionMS();
-        if(this->titleBar->isSeeking()) positionMS = (unsigned long)((float)lengthMS * cv_vs_percent.getFloat());
+        if(this->titleBar->isSeeking()) positionMS = (unsigned long)((float)lengthMS * cv::vs_percent.getFloat());
 
         this->controlBar->getInfoButton()->setText(UString::format("  %i:%02i / %i:%02i", (positionMS / 1000) / 60,
                                                                    (positionMS / 1000) % 60, (lengthMS / 1000) / 60,
@@ -119,7 +119,7 @@ void VinylScratcher::onKeyDown(KeyboardEvent &e) {
 }
 
 void VinylScratcher::onFinished() {
-    if(cv_vs_repeat.getBool())
+    if(cv::vs_repeat.getBool())
         soundEngine->play(this->stream);
     else {
         // reset and stop (since we can't know yet if there even is a next song)
@@ -132,7 +132,7 @@ void VinylScratcher::onFinished() {
     }
 
     // update seekbar
-    cv_vs_percent.setValue(0.0f);
+    cv::vs_percent.setValue(0.0f);
 }
 
 void VinylScratcher::onFileClicked(const std::string& filepath, bool reverse) {
@@ -161,7 +161,7 @@ void VinylScratcher::onFileClicked(const std::string& filepath, bool reverse) {
 
 void VinylScratcher::onVolumeChanged(CBaseUISlider *slider) { this->stream->setVolume(slider->getFloat()); }
 
-void VinylScratcher::onSeek() { this->stream->setPosition(cv_vs_percent.getFloat()); }
+void VinylScratcher::onSeek() { this->stream->setPosition(cv::vs_percent.getFloat()); }
 
 void VinylScratcher::onPlayClicked() {
     if(this->stream->isPlaying()) {

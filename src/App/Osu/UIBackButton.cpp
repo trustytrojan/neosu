@@ -68,7 +68,7 @@ void UIBackButton::onMouseOutside() {
 }
 
 void UIBackButton::updateLayout() {
-    const float uiScale = cv_ui_scale.getFloat();
+    const float uiScale = cv::ui_scale.getFloat();
     Vector2 newSize = osu->getSkin()->getMenuBack2()->getSize() * uiScale;
     this->fImageScale = (newSize.y / osu->getSkin()->getMenuBack2()->getSize().y);
     this->setSize(newSize);

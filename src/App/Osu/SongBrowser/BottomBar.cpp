@@ -205,7 +205,7 @@ void draw_bottombar() {
         g->popTransform();
         calcy += font->getHeight() + 10;
     }
-    if(cv_normalize_loudness.getBool() && VolNormalization::get_total() > 0 && VolNormalization::get_computed() < VolNormalization::get_total()) {
+    if(cv::normalize_loudness.getBool() && VolNormalization::get_total() > 0 && VolNormalization::get_computed() < VolNormalization::get_total()) {
         UString msg = UString::format("Computing loudness (%i/%i) ...", VolNormalization::get_computed(), VolNormalization::get_total());
         g->setColor(0xff333333);
         g->pushTransform();

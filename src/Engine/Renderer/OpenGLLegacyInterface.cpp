@@ -83,7 +83,7 @@ void OpenGLLegacyInterface::beginScene() {
     // push main transforms
     this->pushTransform();
     this->setProjectionMatrix(defaultProjectionMatrix);
-    this->translate(cv_r_globaloffset_x.getFloat(), cv_r_globaloffset_y.getFloat());
+    this->translate(cv::r_globaloffset_x.getFloat(), cv::r_globaloffset_y.getFloat());
 
     // and apply them
     this->updateTransform();
@@ -392,9 +392,9 @@ void OpenGLLegacyInterface::drawImage(Image *image, AnchorPoint anchor) {
         }
         glEnd();
     }
-    if(cv_r_image_unbind_after_drawimage.getBool()) image->unbind();
+    if(cv::r_image_unbind_after_drawimage.getBool()) image->unbind();
 
-    if(cv_r_debug_drawimage.getBool()) {
+    if(cv::r_debug_drawimage.getBool()) {
         this->setColor(0xbbff00ff);
         this->drawRect(x, y, width - 1, height - 1);
     }
@@ -405,7 +405,7 @@ void OpenGLLegacyInterface::drawString(McFont *font, UString text) {
 
     this->updateTransform();
 
-    if(cv_r_debug_flush_drawstring.getBool()) {
+    if(cv::r_debug_flush_drawstring.getBool()) {
         glFinish();
         glFlush();
         glFinish();
@@ -452,7 +452,7 @@ void OpenGLLegacyInterface::drawVAO(VertexArrayObject *vao) {
 }
 
 void OpenGLLegacyInterface::setClipRect(McRect clipRect) {
-    if(cv_r_debug_disable_cliprect.getBool()) return;
+    if(cv::r_debug_disable_cliprect.getBool()) return;
     // if (this->bIs3DScene) return; // HACKHACK:TODO:
 
     // HACKHACK: compensate for viewport changes caused by RenderTargets!

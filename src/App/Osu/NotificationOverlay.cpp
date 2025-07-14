@@ -195,7 +195,7 @@ void NotificationOverlay::onChar(KeyboardEvent &e) {
 }
 
 void NotificationOverlay::addNotification(UString text, Color textColor, bool waitForKey, float duration) {
-    const float notificationDuration = (duration < 0.0f ? cv_notification_duration.getFloat() : duration);
+    const float notificationDuration = (duration < 0.0f ? cv::notification_duration.getFloat() : duration);
 
     // swap effect
     if(this->isVisible()) {

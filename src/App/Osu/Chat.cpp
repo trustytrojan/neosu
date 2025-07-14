@@ -1112,7 +1112,7 @@ bool Chat::isVisibilityForced() {
 void Chat::updateVisibility() {
     auto selected_beatmap = osu->getSelectedBeatmap();
     bool can_skip = (selected_beatmap != NULL) && (selected_beatmap->isInSkippableSection());
-    bool is_spectating = cv_mod_autoplay.getBool() || (cv_mod_autopilot.getBool() && cv_mod_relax.getBool()) ||
+    bool is_spectating = cv::mod_autoplay.getBool() || (cv::mod_autopilot.getBool() && cv::mod_relax.getBool()) ||
                          (selected_beatmap != NULL && selected_beatmap->is_watching) || bancho->spectating;
     bool is_clicking_circles = osu->isInPlayMode() && !can_skip && !is_spectating && !osu->pauseMenu->isVisible();
     if(bancho->is_playing_a_multi_map() && !bancho->room.all_players_loaded) {
