@@ -142,11 +142,9 @@ class Engine {
         template <typename... Args>
         static void log(const std::source_location &loc, const char *func, fmt::format_string<Args...> fmt,
                         Args &&...args) {
-            // auto contextPrefix =
-            //     fmt::format("[{}:{}:{}] [{}]: ", Environment::getFileNameFromFilePath(loc.file_name()), loc.line(),
-            //     loc.column(), func);
-
-            auto contextPrefix = fmt::format("[{}:{}:{}] [{}]: ", loc.file_name(), loc.line(), loc.column(), func);
+            auto contextPrefix =
+                fmt::format("[{}:{}:{}] [{}]: ", Environment::getFileNameFromFilePath(loc.file_name()), loc.line(),
+                loc.column(), func);
 
             auto message = fmt::format(fmt, std::forward<Args>(args)...);
             Engine::logImpl(contextPrefix + message);
@@ -155,11 +153,9 @@ class Engine {
         template <typename... Args>
         static void log(const std::source_location &loc, const char *func, Color color, fmt::format_string<Args...> fmt,
                         Args &&...args) {
-            // auto contextPrefix =
-            //     fmt::format("[{}:{}:{}] [{}]: ", Environment::getFileNameFromFilePath(loc.file_name()), loc.line(),
-            //     loc.column(), func);
-
-            auto contextPrefix = fmt::format("[{}:{}:{}] [{}]: ", loc.file_name(), loc.line(), loc.column(), func);
+            auto contextPrefix =
+                fmt::format("[{}:{}:{}] [{}]: ", Environment::getFileNameFromFilePath(loc.file_name()), loc.line(),
+                loc.column(), func);
 
             auto message = fmt::format(fmt, std::forward<Args>(args)...);
             Engine::logImpl(contextPrefix + message, color);
@@ -185,11 +181,9 @@ class Engine {
         //[[deprecated("use compile-time format string checked debugLogF instead")]]
         static void logPrintf(const std::source_location &loc, const char *func, const std::string_view &fmt,
                               Args &&...args) {
-            // auto contextPrefix =
-            //     fmt::format("[{}:{}:{}] [{}]: ", Environment::getFileNameFromFilePath(loc.file_name()), loc.line(),
-            //     loc.column(), func);
-
-            auto contextPrefix = fmt::format("[{}:{}:{}] [{}]: ", loc.file_name(), loc.line(), loc.column(), func);
+            auto contextPrefix =
+                fmt::format("[{}:{}:{}] [{}]: ", Environment::getFileNameFromFilePath(loc.file_name()), loc.line(),
+                loc.column(), func);
 
             std::string message = fmt::sprintf(fmt, std::forward<Args>(args)...);
             Engine::logImpl(contextPrefix + message);
@@ -199,11 +193,9 @@ class Engine {
         //[[deprecated("use compile-time format string checked debugLogF instead")]]
         static void logPrintf(const std::source_location &loc, const char *func, Color color,
                               const std::string_view &fmt, Args &&...args) {
-            // auto contextPrefix =
-            //     fmt::format("[{}:{}:{}] [{}]: ", Environment::getFileNameFromFilePath(loc.file_name()), loc.line(),
-            //     loc.column(), func);
-
-            auto contextPrefix = fmt::format("[{}:{}:{}] [{}]: ", loc.file_name(), loc.line(), loc.column(), func);
+            auto contextPrefix =
+                fmt::format("[{}:{}:{}] [{}]: ", Environment::getFileNameFromFilePath(loc.file_name()), loc.line(),
+                loc.column(), func);
 
             std::string message = fmt::sprintf(fmt, std::forward<Args>(args)...);
             Engine::logImpl(contextPrefix + message, color);
