@@ -686,7 +686,7 @@ AS_IF([test "$renderer" != "dx11"], [
 ])
 
 SDL3_MIN_VERSION=3.4.0 # needs SDL_SetRelativeMouseTransform, not in any current (3.2.x) releases
-SDL3_BUILD_VERSION=e9535fa0265901cda2cd3da47df18c45507b4066 # git
+SDL3_BUILD_VERSION=277f91c3176c88193648760a651f8dd6407035dc # git
 FREETYPE2_MIN_VERSION=2.10.0
 FREETYPE2_BUILD_VERSION=2.13.3
 LIBJPEG_MIN_VERSION=3.0.0
@@ -709,7 +709,7 @@ MPG123_MIN_VERSION=1.30.0
 MPG123_BUILD_VERSION=b9edc89540cb43f1d8c9881d9f67dde996cfb8ef # git mirror, latest as of June 16th, 2025 (next version after 1.33.0)
 
 # always build these from source if we want to use them
-AC_SUBST([SOLOUD_VERSION], [1.1.0]) # my fork
+AC_SUBST([SOLOUD_VERSION], [1.1.1]) # my fork
 #AC_SUBST([SOLOUD_VERSION], [0de5febb972da4144e606ce7bdee72d0ecf1d791])
 AC_SUBST([SOLOUD_PREFIX],[$DEPS_PREFIX])
 AC_SUBST([SOUNDTOUCH_VERSION], [2.4.0])
