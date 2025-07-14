@@ -5,8 +5,8 @@
 
 // version information
 1 VERSIONINFO
-FILEVERSION 38,0,0,0
-PRODUCTVERSION 38,0,0,0
+FILEVERSION 39,0,0,0
+PRODUCTVERSION 39,0,0,0
 FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
 #ifdef _DEBUG
 FILEFLAGS VS_FF_DEBUG
@@ -23,12 +23,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "neosu"
             VALUE "FileDescription", "cookie clicker with extra features"
-            VALUE "FileVersion", "38.00.0.0"
+            VALUE "FileVersion", "39.00.0.0"
             VALUE "InternalName", "neosu"
             VALUE "LegalCopyright", "Copyright (C) 2025"
             VALUE "OriginalFilename", "neosu.exe"
             VALUE "ProductName", "neosu"
-            VALUE "ProductVersion", "38.00"
+            VALUE "ProductVersion", "39.00"
         END
     END
     BLOCK "VarFileInfo"
