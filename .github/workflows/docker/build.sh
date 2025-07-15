@@ -4,6 +4,10 @@ echo "Building for target: $HOST"
 set -e
 
 export MAKEFLAGS="-j$(nproc)"
+export CCACHE_DIR="${CCACHE_DIR:-"/src/.ccache"}"
+
+# this is required for ccache to survive compiler reinstalls
+export CCACHE_COMPILERCHECK="none"
 
 # Building..
 ./autogen.sh
