@@ -33,7 +33,7 @@ class Environment {
 
     virtual void shutdown() = 0;
     virtual void restart() = 0;
-    static const std::string &getExecutablePath();
+    static const std::string &getExeFolder();
     virtual void openURLInDefaultBrowser(UString url) = 0;
     virtual void openDirectory(std::string path) = 0;
 

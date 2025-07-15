@@ -66,7 +66,7 @@ const std::string &Environment::getPathToSelf(const char *argv0) {
     return pathStr;
 }
 
-const std::string &Environment::getExecutablePath() {
+const std::string &Environment::getExeFolder() {
     static std::string pathStr{};
     if(!pathStr.empty()) return pathStr;
     // sdl caches this internally, but we'll cache a std::string representation of it

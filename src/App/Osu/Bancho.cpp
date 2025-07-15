@@ -623,7 +623,7 @@ Packet Bancho::build_login_packet() {
     proto::write<u8>(&packet, '0');
     proto::write<u8>(&packet, '|');
 
-    const char *osu_path = Environment::getExecutablePath().c_str();
+    const char *osu_path = Environment::getPathToSelf().c_str();
 
     MD5Hash osu_path_md5 = Bancho::md5((u8 *)osu_path, strlen(osu_path));
 
