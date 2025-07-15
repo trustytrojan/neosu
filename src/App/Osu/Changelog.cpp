@@ -30,6 +30,7 @@ Changelog::Changelog() : ScreenBackable() {
     v39_00.title = PACKAGE_VERSION " " __DATE__;
     v39_00.changes = {
         R"(- Crop screenshots to the internal/letterboxed osu! resolution, instead of keeping the black borders)",
+        R"(- Added "Sort Skins Alphabetically" option, for sorting skins in a different order (ignoring prefixes))",
     };
     changelogs.push_back(v39_00);
 

@@ -779,6 +779,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
         ((UIButton *)skinReload.elements[1])->setColor(0xff00566b);
     }
     this->addSpacer();
+    this->addCheckbox("Sort Skins Alphabetically", "Less like stable, but useful if you don't\nlike obnoxious skin names floating to the top.", &cv::sort_skins_cleaned);
     CBaseUISlider *numberScaleSlider =
         this->addSlider("Number Scale:", 0.01f, 3.0f, &cv::number_scale_multiplier, 135.0f);
     numberScaleSlider->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangePercent));
