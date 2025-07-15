@@ -11,8 +11,6 @@
 
 std::unique_ptr<Bancho> bancho = nullptr;
 
-std::once_flag NetworkHandler::curl_init_flag;
-
 // internal request structure
 struct NetworkRequest {
     UString url;
@@ -32,7 +30,7 @@ struct NetworkRequest {
 
 NetworkHandler::NetworkHandler() : multi_handle(nullptr) {
     // this needs to be called once to initialize curl on startup
-    std::call_once(curl_init_flag, []() { curl_global_init(CURL_GLOBAL_DEFAULT); });
+    curl_global_init(CURL_GLOBAL_DEFAULT);
 
     this->multi_handle = curl_multi_init();
     if(!this->multi_handle) {
@@ -69,11 +67,13 @@ NetworkHandler::~NetworkHandler() {
         this->active_requests.clear();
     }
 
+    bancho.reset();
+
     if(this->multi_handle) {
         curl_multi_cleanup(this->multi_handle);
     }
 
-    bancho.reset();
+    curl_global_cleanup();
 }
 
 void NetworkHandler::networkThreadFunc(std::stop_token stopToken) {

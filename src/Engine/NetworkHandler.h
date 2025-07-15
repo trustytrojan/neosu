@@ -60,8 +60,6 @@ class NetworkHandler {
     Response performSyncRequest(const UString& url, const RequestOptions& options);
 
    private:
-    static std::once_flag curl_init_flag;
-
     // curl_multi implementation
     CURLM* multi_handle;
     std::unique_ptr<McThread> network_thread;
