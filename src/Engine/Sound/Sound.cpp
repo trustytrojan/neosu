@@ -68,7 +68,8 @@ void Sound::initAsync() {
             auto fileExtensionLowerCase = UString(env->getFileExtensionFromFilePath(this->sFilePath).c_str());
             fileExtensionLowerCase.lowerCase();
             if(fileExtensionLowerCase == UString("wav")) {
-                File wavFile(this->sFilePath);
+                // avoid races
+                File wavFile(const_cast<const std::string&>(this->sFilePath));
                 if(wavFile.getFileSize() < (size_t)minWavFileSize) {
                     printf("Sound: Ignoring malformed/corrupt WAV file (%i) %s\n", (int)wavFile.getFileSize(),
                            this->sFilePath.c_str());

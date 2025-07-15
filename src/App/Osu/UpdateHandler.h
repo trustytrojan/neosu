@@ -1,7 +1,5 @@
 #pragma once
 
-#include <thread>
-
 #include "cbase.h"
 
 class UpdateHandler {
@@ -15,13 +13,8 @@ class UpdateHandler {
         STATUS_ERROR
     };
 
-    static void *run(void *data);
-
     UpdateHandler();
-    virtual ~UpdateHandler();
-
-    void stop();  // tells the update thread to stop at the next cancellation point
-    void wait();  // blocks until the update thread is finished
+    ~UpdateHandler() = default;
 
     void checkForUpdates();
 
@@ -29,15 +22,14 @@ class UpdateHandler {
     UString update_url;
 
    private:
-    static const char *TEMP_UPDATE_DOWNLOAD_FILEPATH;
+    static constexpr const char* TEMP_UPDATE_DOWNLOAD_FILEPATH = "update.zip";
 
-    // async
-    void _requestUpdate();
-    bool _downloadUpdate();
-    void _installUpdate(const std::string& zipFilePath);
-
-    std::thread* updateThread = NULL;
-    bool _m_bKYS;
+    // async operation chain
+    void requestUpdate();
+    void onVersionCheckComplete(const std::string& response, bool success);
+    void downloadUpdate();
+    void onDownloadComplete(const std::string& data, bool success);
+    void installUpdate(const std::string& zipFilePath);
 
     // status
     std::atomic<STATUS> status;

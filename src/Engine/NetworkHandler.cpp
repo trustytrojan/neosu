@@ -1,98 +1,329 @@
 #include "NetworkHandler.h"
 #include "curl_blob.h"
-
-#include <curl/curl.h>
-
-#include <sstream>
-
-// #include "ConVar.h"
 #include "Engine.h"
 #include "Bancho.h"
+
+#include <curl/curl.h>
+#include <chrono>
+#include <utility>
+#include <utility>
 
 std::unique_ptr<Bancho> bancho = nullptr;
 
 std::once_flag NetworkHandler::curl_init_flag;
 
-NetworkHandler::NetworkHandler() {
-    std::call_once(curl_init_flag, []() {
-        // XXX: run curl_global_cleanup() after waiting for network threads to terminate
-        curl_global_init(CURL_GLOBAL_DEFAULT);
-    });
+// internal request structure
+struct NetworkRequest {
+    UString url;
+    NetworkHandler::AsyncCallback callback;
+    NetworkHandler::RequestOptions options;
+    NetworkHandler::Response response;
+    CURL* easy_handle{nullptr};
+    struct curl_slist* headers_list{nullptr};
+
+    // for sync requests
+    bool is_sync{false};
+    void* sync_id{nullptr};
+
+    NetworkRequest(UString u, NetworkHandler::AsyncCallback cb, NetworkHandler::RequestOptions opts)
+        : url(std::move(u)), callback(std::move(cb)), options(std::move(opts)) {}
+};
+
+NetworkHandler::NetworkHandler() : multi_handle(nullptr), should_stop(false) {
+    // this needs to be called once to initialize curl on startup
+    std::call_once(curl_init_flag, []() { curl_global_init(CURL_GLOBAL_DEFAULT); });
+
+    this->multi_handle = curl_multi_init();
+    if(!this->multi_handle) {
+        debugLogF("ERROR: Failed to initialize curl multi handle!\n");
+        return;
+    }
+
     bancho = std::make_unique<Bancho>();
     runtime_assert(bancho.get(), "Bancho failed to initialize!");
+
+    // start network thread
+    this->network_thread = std::thread(&NetworkHandler::networkThreadFunc, this);
 }
 
 NetworkHandler::~NetworkHandler() {
+    // signal thread to stop
+    this->should_stop = true;
+    this->request_queue_cv.notify_all();
+
+    if(this->network_thread.joinable()) {
+        this->network_thread.join();
+    }
+
+    // cleanup any remaining requests
+    {
+        std::scoped_lock<std::mutex> lock{this->active_requests_mutex};
+        for(auto& [handle, request] : this->active_requests) {
+            curl_multi_remove_handle(this->multi_handle, handle);
+            curl_easy_cleanup(handle);
+            if(request->headers_list) {
+                curl_slist_free_all(request->headers_list);
+            }
+        }
+        this->active_requests.clear();
+    }
+
+    if(this->multi_handle) {
+        curl_multi_cleanup(this->multi_handle);
+    }
+
     bancho.reset();
-    // XXX: run after waiting for network threads to terminate
-    // curl_global_cleanup();
 }
 
-UString NetworkHandler::httpGet(const UString &url, long timeout, long connectTimeout) {
-    CURL *curl = curl_easy_init();
+void NetworkHandler::networkThreadFunc() {
+    while(!this->should_stop.load()) {
+        processNewRequests();
 
-    if(curl != NULL) {
-        curl_easy_setopt(curl, CURLOPT_URL, url.toUtf8());
-        curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, connectTimeout);
-        curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout);
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlStringWriteCallback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &this->curlReadBuffer);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
-        curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+        if(!this->active_requests.empty()) {
+            int running_handles;
+            CURLMcode mres = curl_multi_perform(this->multi_handle, &running_handles);
 
-        curl_easy_setopt_CAINFO_BLOB_embedded(curl);
+            if(mres != CURLM_OK) {
+                debugLogF("curl_multi_perform error: {}\n", curl_multi_strerror(mres));
+            }
 
-        CURLcode res = curl_easy_perform(curl);
-        if(res != CURLE_OK) {
-            debugLogF("Error while fetching {:s}: {:s}\n", url.toUtf8(), curl_easy_strerror(res));
+            processCompletedRequests();
         }
 
-        curl_easy_cleanup(curl);
-
-        return UString{this->curlReadBuffer};
-    } else {
-        debugLogF("ERROR: curl == NULL!\n");
-        return {""};
+        if(this->active_requests.empty()) {
+            // wait for new requests
+            std::unique_lock<std::mutex> lock{this->request_queue_mutex};
+            this->request_queue_cv.wait_for(lock, std::chrono::milliseconds(100), [this] {
+                return !this->pending_requests.empty() || this->should_stop.load();
+            });
+        } else {
+            // brief sleep to avoid busy waiting
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
     }
 }
 
-std::string NetworkHandler::httpDownload(const UString &url, long timeout, long connectTimeout) {
-    CURL *curl = curl_easy_init();
+void NetworkHandler::processNewRequests() {
+    std::scoped_lock<std::mutex> lock{this->request_queue_mutex};
 
-    if(curl != NULL) {
-        std::stringstream curlWriteBuffer(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
-        curl_easy_setopt(curl, CURLOPT_URL, url.toUtf8());
-        curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, connectTimeout);
-        curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout);
-        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-        curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlStringStreamWriteCallback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &curlWriteBuffer);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
+    while(!this->pending_requests.empty()) {
+        auto request = std::move(this->pending_requests.front());
+        this->pending_requests.pop();
 
-        curl_easy_setopt_CAINFO_BLOB_embedded(curl);
-
-        CURLcode res = curl_easy_perform(curl);
-        if(res != CURLE_OK) {
-            curlWriteBuffer = std::stringstream();
-            debugLogF("ERROR ({}): {:s}\n", static_cast<unsigned int>(res), curl_easy_strerror(res));
+        request->easy_handle = curl_easy_init();
+        if(!request->easy_handle) {
+            request->response.success = false;
+            request->callback(request->response);
+            continue;
         }
 
-        curl_easy_cleanup(curl);
+        setupCurlHandle(request->easy_handle, request.get());
 
-        return std::string{curlWriteBuffer.str()};
-    } else {
-        debugLogF("ERROR: curl == NULL!\n");
-        return {""};
+        CURLMcode mres = curl_multi_add_handle(this->multi_handle, request->easy_handle);
+        if(mres != CURLM_OK) {
+            curl_easy_cleanup(request->easy_handle);
+            request->response.success = false;
+            request->callback(request->response);
+            continue;
+        }
+
+        std::scoped_lock<std::mutex> active_lock{this->active_requests_mutex};
+        this->active_requests[request->easy_handle] = std::move(request);
     }
 }
 
-size_t NetworkHandler::curlStringWriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
-    ((std::string *)userp)->append((char *)contents, size * nmemb);
-    return size * nmemb;
+void NetworkHandler::processCompletedRequests() {
+    CURLMsg* msg;
+    int msgs_left;
+
+    while((msg = curl_multi_info_read(this->multi_handle, &msgs_left))) {
+        if(msg->msg == CURLMSG_DONE) {
+            CURL* easy_handle = msg->easy_handle;
+
+            std::scoped_lock<std::mutex> lock{this->active_requests_mutex};
+            auto it = this->active_requests.find(easy_handle);
+            if(it != this->active_requests.end()) {
+                auto request = std::move(it->second);
+                this->active_requests.erase(it);
+
+                curl_multi_remove_handle(this->multi_handle, easy_handle);
+
+                // get response code
+                curl_easy_getinfo(easy_handle, CURLINFO_RESPONSE_CODE, &request->response.responseCode);
+                request->response.success = (msg->data.result == CURLE_OK);
+
+                if(request->headers_list) {
+                    curl_slist_free_all(request->headers_list);
+                }
+                curl_easy_cleanup(easy_handle);
+
+                if(request->is_sync) {
+                    // handle sync request
+                    std::scoped_lock<std::mutex> sync_lock{this->sync_requests_mutex};
+                    this->sync_responses[request->sync_id] = request->response;
+                    auto cv_it = this->sync_request_cvs.find(request->sync_id);
+                    if(cv_it != this->sync_request_cvs.end()) {
+                        cv_it->second->notify_one();
+                    }
+                } else {
+                    // handle async request
+                    request->callback(request->response);
+                }
+            }
+        }
+    }
 }
 
-size_t NetworkHandler::curlStringStreamWriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
-    ((std::stringstream *)userp)->write((const char *)contents, (size_t)size * nmemb);
-    return size * nmemb;
+void NetworkHandler::setupCurlHandle(CURL* handle, NetworkRequest* request) {
+    curl_easy_setopt(handle, CURLOPT_URL, request->url.toUtf8());
+    curl_easy_setopt(handle, CURLOPT_CONNECTTIMEOUT, request->options.connectTimeout);
+    curl_easy_setopt(handle, CURLOPT_TIMEOUT, request->options.timeout);
+    curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, writeCallback);
+    curl_easy_setopt(handle, CURLOPT_WRITEDATA, request);
+    curl_easy_setopt(handle, CURLOPT_HEADERFUNCTION, headerCallback);
+    curl_easy_setopt(handle, CURLOPT_HEADERDATA, request);
+    curl_easy_setopt(handle, CURLOPT_SSL_VERIFYPEER, true);
+    curl_easy_setopt(handle, CURLOPT_NOSIGNAL, 1L);
+
+    if(!request->options.userAgent.empty()) {
+        curl_easy_setopt(handle, CURLOPT_USERAGENT, request->options.userAgent.c_str());
+    }
+
+    if(request->options.followRedirects) {
+        curl_easy_setopt(handle, CURLOPT_FOLLOWLOCATION, 1L);
+    }
+
+    curl_easy_setopt_CAINFO_BLOB_embedded(handle);
+
+    // setup headers
+    if(!request->options.headers.empty()) {
+        for(const auto& [key, value] : request->options.headers) {
+            std::string header = fmt::format("{}: {}", key, value);
+            request->headers_list = curl_slist_append(request->headers_list, header.c_str());
+        }
+        curl_easy_setopt(handle, CURLOPT_HTTPHEADER, request->headers_list);
+    }
+
+    // setup POST data
+    if(!request->options.postData.empty()) {
+        curl_easy_setopt(handle, CURLOPT_POSTFIELDS, request->options.postData.c_str());
+        curl_easy_setopt(handle, CURLOPT_POSTFIELDSIZE, request->options.postData.length());
+    }
+
+    // setup MIME data
+    if(request->options.mimeData) {
+        curl_easy_setopt(handle, CURLOPT_MIMEPOST, request->options.mimeData);
+    }
+}
+
+size_t NetworkHandler::writeCallback(void* contents, size_t size, size_t nmemb, void* userp) {
+    auto* request = static_cast<NetworkRequest*>(userp);
+    size_t real_size = size * nmemb;
+    request->response.body.append(static_cast<char*>(contents), real_size);
+    return real_size;
+}
+
+size_t NetworkHandler::headerCallback(char* buffer, size_t size, size_t nitems, void* userdata) {
+    auto* request = static_cast<NetworkRequest*>(userdata);
+    size_t real_size = size * nitems;
+
+    std::string header(buffer, real_size);
+    size_t colon_pos = header.find(':');
+    if(colon_pos != std::string::npos) {
+        std::string key = header.substr(0, colon_pos);
+        std::string value = header.substr(colon_pos + 1);
+
+        // trim whitespace
+        key.erase(0, key.find_first_not_of(" \t"));
+        key.erase(key.find_last_not_of(" \t\r\n") + 1);
+        value.erase(0, value.find_first_not_of(" \t"));
+        value.erase(value.find_last_not_of(" \t\r\n") + 1);
+
+        request->response.headers[key] = value;
+    }
+
+    return real_size;
+}
+
+void NetworkHandler::httpRequestAsync(const UString& url, AsyncCallback callback, const RequestOptions& options) {
+    auto request = std::make_unique<NetworkRequest>(url, std::move(callback), options);
+
+    std::scoped_lock<std::mutex> lock{this->request_queue_mutex};
+    this->pending_requests.push(std::move(request));
+    this->request_queue_cv.notify_one();
+}
+
+// synchronous API (blocking)
+NetworkHandler::Response NetworkHandler::performSyncRequest(const UString& url, const RequestOptions& options) {
+    Response result;
+    std::condition_variable cv;
+    std::mutex cv_mutex;
+
+    void* sync_id = &cv;
+
+    // register sync request
+    {
+        std::scoped_lock<std::mutex> lock{this->sync_requests_mutex};
+        this->sync_request_cvs[sync_id] = &cv;
+    }
+
+    // create sync request
+    auto request = std::make_unique<NetworkRequest>(url, [](Response) {}, options);
+    request->is_sync = true;
+    request->sync_id = sync_id;
+
+    // submit request
+    {
+        std::scoped_lock<std::mutex> lock{this->request_queue_mutex};
+        this->pending_requests.push(std::move(request));
+        this->request_queue_cv.notify_one();
+    }
+
+    // wait for completion
+    std::unique_lock<std::mutex> lock{cv_mutex};
+    cv.wait(lock, [&] {
+        std::scoped_lock<std::mutex> sync_lock{this->sync_requests_mutex};
+        return this->sync_responses.find(sync_id) != this->sync_responses.end();
+    });
+
+    // get result and cleanup
+    {
+        std::scoped_lock<std::mutex> sync_lock{this->sync_requests_mutex};
+        result = this->sync_responses[sync_id];
+        this->sync_responses.erase(sync_id);
+        this->sync_request_cvs.erase(sync_id);
+    }
+
+    return result;
+}
+
+UString NetworkHandler::httpGet(const UString& url, long timeout, long connectTimeout) {
+    RequestOptions options;
+    options.timeout = timeout;
+    options.connectTimeout = connectTimeout;
+
+    Response response = performSyncRequest(url, options);
+
+    if(!response.success) {
+        debugLogF("Error while fetching {}: HTTP {}\n", url.toUtf8(), response.responseCode);
+        return {""};
+    }
+
+    return UString{response.body};
+}
+
+std::string NetworkHandler::httpDownload(const UString& url, long timeout, long connectTimeout) {
+    RequestOptions options;
+    options.timeout = timeout;
+    options.connectTimeout = connectTimeout;
+    options.followRedirects = true;
+
+    Response response = performSyncRequest(url, options);
+
+    if(!response.success) {
+        debugLogF("ERROR ({}): HTTP request failed\n", response.responseCode);
+        return {""};
+    }
+
+    return response.body;
 }

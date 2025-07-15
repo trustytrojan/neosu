@@ -13,88 +13,47 @@
 #include "ResourceManager.h"
 #include "UpdateHandler.h"
 
-const char *UpdateHandler::TEMP_UPDATE_DOWNLOAD_FILEPATH = "update.zip";
-
-void *UpdateHandler::run(void *data) {
-    // not using semaphores/mutexes here because it's not critical
-
-    if(data == NULL) return NULL;
-
-    UpdateHandler *handler = (UpdateHandler *)data;
-
-    if(handler->_m_bKYS) return NULL;  // cancellation point
-
-    // check for updates
-    handler->_requestUpdate();
-
-    if(handler->_m_bKYS) return NULL;  // cancellation point
-
-    // continue if we have one. reset the thread in both cases after we're done
-    if(handler->status != STATUS::STATUS_UP_TO_DATE) {
-        // try to download and install the update
-        if(handler->_downloadUpdate()) {
-            if(handler->_m_bKYS) return NULL;  // cancellation point
-
-            handler->_installUpdate(TEMP_UPDATE_DOWNLOAD_FILEPATH);
-        }
-
-        handler->updateThread = NULL;  // reset
-
-        if(handler->_m_bKYS) return NULL;  // cancellation point
-
-        // retry up to 3 times if something went wrong
-        if(handler->getStatus() != STATUS::STATUS_SUCCESS_INSTALLATION) {
-            handler->iNumRetries++;
-            if(handler->iNumRetries < 4) handler->checkForUpdates();
-        }
-    } else {
-        handler->updateThread = NULL;  // reset
-    }
-
-    return NULL;
-}
-
 UpdateHandler::UpdateHandler() {
     this->update_url = "";
-
     this->status = cv::auto_update.getBool() ? STATUS::STATUS_CHECKING_FOR_UPDATE : STATUS::STATUS_UP_TO_DATE;
     this->iNumRetries = 0;
-    this->_m_bKYS = false;
-}
-
-UpdateHandler::~UpdateHandler() {}
-
-void UpdateHandler::stop() {
-    this->_m_bKYS = true;
-    this->updateThread = NULL;
-}
-
-void UpdateHandler::wait() {
-    if(this->updateThread != NULL) {
-        this->updateThread->join();
-    }
 }
 
 void UpdateHandler::checkForUpdates() {
-    if(!cv::auto_update.getBool() || cv::debug.getBool() ||
-       (this->updateThread != NULL && this->updateThread->joinable()))
-        return;
-
-    this->updateThread = new std::thread(UpdateHandler::run, (void *)this);
-    this->updateThread->detach();
+    if(!cv::auto_update.getBool() || cv::debug.getBool()) return;
 
     if(this->iNumRetries > 0) debugLog("UpdateHandler::checkForUpdates() retry %i ...\n", this->iNumRetries);
+
+    requestUpdate();
 }
 
-void UpdateHandler::_requestUpdate() {
+void UpdateHandler::requestUpdate() {
     debugLog("UpdateHandler::requestUpdate()\n");
     this->status = STATUS::STATUS_CHECKING_FOR_UPDATE;
 
-    UString latestVersion = networkHandler->httpGet("https://" NEOSU_DOMAIN "/update/" OS_NAME "/latest-version.txt");
-    float fLatestVersion = strtof(latestVersion.toUtf8(), NULL);
-    if(fLatestVersion == 0.f) {
+    UString versionUrl = "https://" NEOSU_DOMAIN "/update/" OS_NAME "/latest-version.txt";
+
+    NetworkHandler::RequestOptions options;
+    options.timeout = 10;
+    options.connectTimeout = 5;
+
+    networkHandler->httpRequestAsync(
+        versionUrl,
+        [this](const NetworkHandler::Response& response) { this->onVersionCheckComplete(response.body, response.success); },
+        options);
+}
+
+void UpdateHandler::onVersionCheckComplete(const std::string &response, bool success) {
+    if(!success || response.empty()) {
         this->status = STATUS::STATUS_UP_TO_DATE;
         debugLog("Failed to check for updates :/\n");
+        return;
+    }
+
+    float fLatestVersion = strtof(response.c_str(), NULL);
+    if(fLatestVersion == 0.f) {
+        this->status = STATUS::STATUS_UP_TO_DATE;
+        debugLog("Failed to parse version number\n");
         return;
     }
 
@@ -108,41 +67,62 @@ void UpdateHandler::_requestUpdate() {
 
     debugLog("Downloading latest update... (current v%.2f, latest v%.2f)\n", current_version, fLatestVersion);
     this->update_url = UString::format("https://" NEOSU_DOMAIN "/update/" OS_NAME "/v%.2f.zip", fLatestVersion);
+
+    downloadUpdate();
 }
 
-bool UpdateHandler::_downloadUpdate() {
+void UpdateHandler::downloadUpdate() {
     UString url = this->update_url;
 
     debugLog("UpdateHandler::downloadUpdate( %s )\n", url.toUtf8());
     this->status = STATUS::STATUS_DOWNLOADING_UPDATE;
 
-    // setting the status in every error check return is retarded
+    NetworkHandler::RequestOptions options;
+    options.timeout = 300;  // 5 minutes for large downloads
+    options.connectTimeout = 10;
+    options.followRedirects = true;
 
-    // download
-    std::string data = networkHandler->httpDownload(url);
-    if(data.length() < 2) {
-        debugLog("UpdateHandler::downloadUpdate() error, downloaded file is too small (%i)!\n", data.length());
+    networkHandler->httpRequestAsync(
+        url, [this](const NetworkHandler::Response& response) { this->onDownloadComplete(response.body, response.success); },
+        options);
+}
+
+void UpdateHandler::onDownloadComplete(const std::string &data, bool success) {
+    if(!success || data.length() < 2) {
+        debugLog("UpdateHandler::downloadUpdate() error, downloaded file is too small or failed (%zu bytes)!\n",
+                 data.length());
         this->status = STATUS::STATUS_ERROR;
-        return false;
+
+        // retry logic
+        this->iNumRetries++;
+        if(this->iNumRetries < 4) {
+            checkForUpdates();
+        }
+        return;
     }
 
     // write to disk
-    debugLog("UpdateHandler: Downloaded file has %i length, writing ...\n", data.length());
+    debugLog("UpdateHandler: Downloaded file has %zu bytes, writing ...\n", data.length());
     std::ofstream file(TEMP_UPDATE_DOWNLOAD_FILEPATH, std::ios::out | std::ios::binary);
     if(file.good()) {
-        file.write(data.data(), data.length());
+        file.write(data.data(), static_cast<std::streamsize>(data.length()));
         file.close();
+
+        debugLog("UpdateHandler::downloadUpdate() finished successfully.\n");
+        installUpdate(TEMP_UPDATE_DOWNLOAD_FILEPATH);
     } else {
         debugLog("UpdateHandler::downloadUpdate() error, can't write file!\n");
         this->status = STATUS::STATUS_ERROR;
-        return false;
-    }
 
-    debugLog("UpdateHandler::downloadUpdate() finished successfully.\n");
-    return true;
+        // retry logic
+        this->iNumRetries++;
+        if(this->iNumRetries < 4) {
+            checkForUpdates();
+        }
+    }
 }
 
-void UpdateHandler::_installUpdate(const std::string &zipFilePath) {
+void UpdateHandler::installUpdate(const std::string &zipFilePath) {
     debugLog("UpdateHandler::installUpdate( %s )\n", zipFilePath.c_str());
     this->status = STATUS::STATUS_INSTALLING_UPDATE;
 
@@ -190,11 +170,11 @@ void UpdateHandler::_installUpdate(const std::string &zipFilePath) {
     }
 
     // repair/create missing/new dirs
-    std::string cfgDir = MCENGINE_DATA_DIR "cfg/";
+    std::string cfgDir = MCENGINE_DATA_DIR "cfg" PREF_PATHSEP "";
     bool cfgDirExists = env->directoryExists(cfgDir);
     for(const auto &dir : dirs) {
         std::string dirName = dir.getFilename();
-        int mainDirectoryOffset = dirName.find(mainDirectory);
+        size_t mainDirectoryOffset = dirName.find(mainDirectory);
         if(mainDirectoryOffset == 0 && dirName.length() - mainDirectoryOffset > 0 &&
            mainDirectoryOffset + mainDirectory.length() < dirName.length()) {
             std::string newDir = dirName.substr(mainDirectoryOffset + mainDirectory.length());
@@ -216,7 +196,7 @@ void UpdateHandler::_installUpdate(const std::string &zipFilePath) {
             continue;
         }
 
-        int mainDirectoryOffset = fileName.find(mainDirectory);
+        size_t mainDirectoryOffset = fileName.find(mainDirectory);
         if(mainDirectoryOffset == 0 && fileName.length() - mainDirectoryOffset > 0 &&
            mainDirectoryOffset + mainDirectory.length() < fileName.length()) {
             std::string outFilePath = fileName.substr(mainDirectoryOffset + mainDirectory.length());

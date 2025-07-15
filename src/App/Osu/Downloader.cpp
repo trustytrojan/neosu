@@ -43,6 +43,25 @@ class DownloadManager {
     std::unordered_map<std::string, std::shared_ptr<DownloadRequest>> active_downloads;
     std::mutex active_mutex;
 
+    static size_t curl_writefunc(void *contents, size_t size, size_t nmemb, void *userp) {
+        size_t realsize = size * nmemb;
+        Packet *mem = (Packet *)userp;
+
+        u8 *ptr = (u8 *)realloc(mem->memory, mem->size + realsize + 1);
+        if(!ptr) {
+            /* out of memory! */
+            debugLog("not enough memory (realloc returned NULL)\n");
+            return 0;
+        }
+
+        mem->memory = ptr;
+        memcpy(&(mem->memory[mem->size]), contents, realsize);
+        mem->size += realsize;
+        mem->memory[mem->size] = 0;
+
+        return realsize;
+    }
+
     static int progress_callback(void* clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t, curl_off_t) {
         auto* request = static_cast<DownloadRequest*>(clientp);
         if(dltotal > 0) {
@@ -92,7 +111,7 @@ class DownloadManager {
             curl_easy_reset(curl);
             curl_easy_setopt(curl, CURLOPT_URL, request->url.c_str());
             curl_easy_setopt(curl, CURLOPT_USERAGENT, bancho->user_agent.toUtf8());
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, BANCHO::Net::curl_writefunc);
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_writefunc);
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
             curl_easy_setopt(curl, CURLOPT_XFERINFODATA, request.get());
             curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, progress_callback);

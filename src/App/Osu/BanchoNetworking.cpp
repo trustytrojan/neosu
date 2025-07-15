@@ -24,6 +24,7 @@
 #include "Engine.h"
 #include "File.h"
 #include "Lobby.h"
+#include "NetworkHandler.h"
 #include "OptionsMenu.h"
 #include "ResourceManager.h"
 #include "RoomScreen.h"
@@ -44,7 +45,7 @@ Packet outgoing;
 std::mutex incoming_mutex;
 std::vector<Packet> incoming_queue;
 time_t last_packet_tms = {0};
-double seconds_between_pings = 1.0;
+std::atomic<double> seconds_between_pings{1.0};
 
 std::atomic<bool> dead = true;
 
@@ -56,152 +57,156 @@ std::mutex api_responses_mutex;
 std::vector<APIRequest> api_request_queue;
 std::vector<Packet> api_response_queue;
 
-// dummy method to prevent curl from printing to stdout
-size_t curldummy(void *buffer, size_t size, size_t nmemb, void *userp) {
-    (void)buffer;
-    (void)userp;
-    return size * nmemb;
-}
+void send_api_request_async(const APIRequest &api_out) {
+    NetworkHandler::RequestOptions options;
+    options.timeout = 60;
+    options.connectTimeout = 5;
+    options.userAgent = "osu!";
 
-void send_api_request(CURL *curl, const APIRequest &api_out) {
-    // XXX: Use download()
-
-    Packet response;
-    response.id = api_out.type;
-    response.extra = api_out.extra;
-    response.extra_int = api_out.extra_int;
-    response.memory = (u8 *)malloc(2048);
-
-    struct curl_slist *chunk = NULL;
     auto scheme = cv::use_https.getBool() ? "https://" : "http://";
     auto query_url = UString::format("%sosu.%s%s", scheme, bancho->endpoint.toUtf8(), api_out.path.toUtf8());
-    curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
+
     if(api_out.type == SUBMIT_SCORE) {
         auto token_header = UString::format("token: %s", cho_token.toUtf8());
-        chunk = curl_slist_append(chunk, token_header.toUtf8());
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
+        options.headers["token"] = cho_token.toUtf8();
     }
+
     if(api_out.mime != NULL) {
-        curl_easy_setopt(curl, CURLOPT_MIMEPOST, api_out.mime);
-    }
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_writefunc);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
-    curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
-
-    curl_easy_setopt_CAINFO_BLOB_embedded(curl);
-
-    CURLcode res = curl_easy_perform(curl);
-    if(res == CURLE_OK) {
-        api_responses_mutex.lock();
-        api_response_queue.push_back(response);
-        api_responses_mutex.unlock();
+        options.mimeData = api_out.mime;
     }
 
-    if(api_out.mime) {
-        curl_mime_free(api_out.mime);
-    }
-    curl_easy_reset(curl);
-    curl_slist_free_all(chunk);
+    networkHandler->httpRequestAsync(
+        query_url,
+        [api_out](NetworkHandler::Response response) {
+            Packet api_response;
+            api_response.id = api_out.type;
+            api_response.extra = api_out.extra;
+            api_response.extra_int = api_out.extra_int;
+
+            if(response.success) {
+                api_response.size = response.body.length();
+                api_response.memory = (u8 *)malloc(api_response.size);
+                memcpy(api_response.memory, response.body.data(), api_response.size);
+
+                api_responses_mutex.lock();
+                api_response_queue.push_back(api_response);
+                api_responses_mutex.unlock();
+            }
+
+            // cleanup mime data if it was provided
+            if(api_out.mime) {
+                curl_mime_free(api_out.mime);
+            }
+        },
+        options);
 }
 
-void send_bancho_packet(CURL *curl, Packet outgoing) {
-    Packet response;
-    response.memory = (u8 *)malloc(2048);
+void send_bancho_packet_async(Packet outgoing) {
+    NetworkHandler::RequestOptions options;
+    options.timeout = 30;
+    options.connectTimeout = 5;
+    options.userAgent = "osu!";
 
-    struct curl_slist *chunk = NULL;
     auto version_header = UString::format("x-mcosu-ver: %s", bancho->neosu_version.toUtf8());
-    chunk = curl_slist_append(chunk, version_header.toUtf8());
+    options.headers["x-mcosu-ver"] = bancho->neosu_version.toUtf8();
+
     if(!auth_header.empty()) {
-        chunk = curl_slist_append(chunk, auth_header.c_str());
+        // extract token from "osu-token: TOKEN" format
+        size_t colon_pos = auth_header.find(':');
+        if(colon_pos != std::string::npos) {
+            std::string token = auth_header.substr(colon_pos + 1);
+            // trim whitespace
+            token.erase(0, token.find_first_not_of(" \t"));
+            token.erase(token.find_last_not_of(" \t\r\n") + 1);
+            options.headers["osu-token"] = token;
+        }
     }
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
+
+    // copy outgoing packet data for POST
+    options.postData = std::string(reinterpret_cast<char *>(outgoing.memory), outgoing.pos);
 
     auto scheme = cv::use_https.getBool() ? "https://" : "http://";
     auto query_url = UString::format("%sc.%s/", scheme, bancho->endpoint.toUtf8());
-    curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, outgoing.memory);
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, outgoing.pos);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_writefunc);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
-    curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
-
-    curl_easy_setopt_CAINFO_BLOB_embedded(curl);
 
     last_packet_tms = time(NULL);
-    CURLcode res = curl_easy_perform(curl);
-    CURLHcode hres;
-    if(res != CURLE_OK) {
-        debugLog("Failed to send packet, cURL error %u: %s\n", static_cast<unsigned int>(res), curl_easy_strerror(res));
-        if(auth_header.empty()) {
-            // XXX: Not thread safe, playing with fire here
-            auto errmsg = UString::format("Failed to log in: %s", curl_easy_strerror(res));
-            osu->getNotificationOverlay()->addToast(errmsg);
-        }
-        goto end;
-    }
 
-    // Update auth token if applicable
-    struct curl_header *header;
-    hres = curl_easy_header(curl, "cho-token", 0, CURLH_HEADER, -1, &header);
-    if(hres == CURLHE_OK) {
-        auth_header = "osu-token: " + std::string(header->value);
-        cho_token = UString(header->value);
-    }
+    networkHandler->httpRequestAsync(
+        query_url,
+        [](NetworkHandler::Response response) {
+            if(!response.success) {
+                Engine::logRaw("[httpRequestAsync] Failed to send packet, HTTP error %ld\n", response.responseCode);
+                if(auth_header.empty()) {
+                    auto errmsg = UString::format("Failed to log in: HTTP %ld", response.responseCode);
+                    osu->getNotificationOverlay()->addToast(errmsg);
+                }
+                return;
+            }
 
-    hres = curl_easy_header(curl, "x-mcosu-features", 0, CURLH_HEADER, -1, &header);
-    if(hres == CURLHE_OK) {
-        if(strstr(header->value, "submit=0") != NULL) {
-            bancho->score_submission_policy = ServerPolicy::NO;
-            debugLog("Server doesn't want score submission. :(\n");
-        } else if(strstr(header->value, "submit=1") != NULL) {
-            bancho->score_submission_policy = ServerPolicy::YES;
-            debugLog("Server wants score submission! :D\n");
-        }
-    }
+            // Update auth token if applicable
+            auto cho_token_it = response.headers.find("cho-token");
+            if(cho_token_it != response.headers.end()) {
+                auth_header = "osu-token: " + cho_token_it->second;
+                cho_token = UString(cho_token_it->second);
+            }
 
-    while(response.pos < response.size) {
-        u16 packet_id = proto::read<u16>(&response);
-        response.pos++;
-        u32 packet_len = proto::read<u32>(&response);
-        if(packet_len > 10485760) {
-            debugLog("Received a packet over 10Mb! Dropping response.\n");
-            goto end;
-        }
+            auto features_it = response.headers.find("x-mcosu-features");
+            if(features_it != response.headers.end()) {
+                if(strstr(features_it->second.c_str(), "submit=0") != NULL) {
+                    bancho->score_submission_policy = ServerPolicy::NO;
+                    Engine::logRaw("[httpRequestAsync] Server doesn't want score submission. :(\n");
+                } else if(strstr(features_it->second.c_str(), "submit=1") != NULL) {
+                    bancho->score_submission_policy = ServerPolicy::YES;
+                    Engine::logRaw("[httpRequestAsync] Server wants score submission! :D\n");
+                }
+            }
 
-        Packet incoming = {
-            .id = packet_id,
-            .memory = (u8 *)malloc(packet_len),
-            .size = packet_len,
-            .pos = 0,
-        };
-        memcpy(incoming.memory, response.memory + response.pos, packet_len);
+            // parse response packets using existing protocol functions
+            Packet response_packet = {
+                .memory = (u8 *)malloc(response.body.length()),
+                .size = response.body.length(),
+                .pos = 0,
+            };
+            memcpy(response_packet.memory, response.body.data(), response.body.length());
 
-        incoming_mutex.lock();
-        incoming_queue.push_back(incoming);
-        incoming_mutex.unlock();
+            while(response_packet.pos < response_packet.size) {
+                if(response_packet.pos + 7 > response_packet.size) break;  // need at least packet header
 
-        seconds_between_pings = 1.0;
-        response.pos += packet_len;
-    }
+                u16 packet_id = proto::read<u16>(&response_packet);
+                response_packet.pos++;  // skip compression flag
+                u32 packet_len = proto::read<u32>(&response_packet);
 
-end:
-    curl_easy_reset(curl);
-    free(response.memory);
-    curl_slist_free_all(chunk);
+                if(packet_len > 10485760) {
+                    Engine::logRaw("[httpRequestAsync] Received a packet over 10Mb! Dropping response.\n");
+                    break;
+                }
+
+                if(response_packet.pos + packet_len > response_packet.size) break;
+
+                Packet incoming = {
+                    .id = packet_id,
+                    .memory = (u8 *)malloc(packet_len),
+                    .size = packet_len,
+                    .pos = 0,
+                };
+                memcpy(incoming.memory, response_packet.memory + response_packet.pos, packet_len);
+
+                incoming_mutex.lock();
+                incoming_queue.push_back(incoming);
+                incoming_mutex.unlock();
+
+                seconds_between_pings = 1.0;
+                response_packet.pos += packet_len;
+            }
+
+            free(response_packet.memory);
+        },
+        options);
+
+    free(outgoing.memory);
 }
 
 void *do_networking() {
     last_packet_tms = time(NULL);
-
-    CURL *curl = curl_easy_init();
-    if(!curl) {
-        debugLog("Failed to initialize cURL, online functionality disabled.\n");
-        return NULL;
-    }
 
     while(!dead.load()) {
         api_requests_mutex.lock();
@@ -212,13 +217,13 @@ void *do_networking() {
             api_request_queue.erase(api_request_queue.begin());
             api_requests_mutex.unlock();
 
-            send_api_request(curl, api_out);
+            send_api_request_async(api_out);
         }
 
         if(osu && osu->lobby->isVisible()) seconds_between_pings = 1;
         if(bancho->spectating) seconds_between_pings = 1;
         if(bancho->is_in_a_multi_room() && seconds_between_pings > 3) seconds_between_pings = 3;
-        bool should_ping = difftime(time(NULL), last_packet_tms) > seconds_between_pings;
+        bool should_ping = difftime(time(NULL), last_packet_tms) > seconds_between_pings.load();
         if(bancho->user_id <= 0) should_ping = false;
 
         outgoing_mutex.lock();
@@ -227,8 +232,7 @@ void *do_networking() {
             login_packet = Packet();
             try_logging_in = false;
             outgoing_mutex.unlock();
-            send_bancho_packet(curl, login);
-            free(login.memory);
+            send_bancho_packet_async(login);
             outgoing_mutex.lock();
         } else if(should_ping && outgoing.pos == 0) {
             proto::write<u16>(&outgoing, PING);
@@ -236,7 +240,7 @@ void *do_networking() {
             proto::write<u32>(&outgoing, 0);
 
             // Polling gets slower over time, but resets when we receive new data
-            if(seconds_between_pings < 30.0) {
+            if(seconds_between_pings.load() < 30.0) {
                 seconds_between_pings += 1.0;
             }
         }
@@ -252,16 +256,13 @@ void *do_networking() {
             proto::write<u8>(&out, 0);
             proto::write<u32>(&out, 0);
 
-            send_bancho_packet(curl, out);
-            free(out.memory);
+            send_bancho_packet_async(out);
         } else {
             outgoing_mutex.unlock();
         }
 
         Timing::sleepMS(1);
     }
-
-    curl_easy_cleanup(curl);
 
     return NULL;
 }
@@ -326,6 +327,7 @@ void handle_api_response(Packet packet) {
 
 }  // namespace
 
+// this is a global var
 UString cho_token = "";
 
 void disconnect() {
@@ -340,27 +342,31 @@ void disconnect() {
         proto::write<u32>(&packet, 4);
         proto::write<u32>(&packet, 0);
 
-        CURL *curl = curl_easy_init();
+        NetworkHandler::RequestOptions options;
+        options.timeout = 5;
+        options.connectTimeout = 5;
+        options.userAgent = "osu!";
+        options.postData = std::string(reinterpret_cast<char *>(packet.memory), packet.pos);
+
         auto version_header = UString::format("x-mcosu-ver: %s", bancho->neosu_version.toUtf8());
-        struct curl_slist *chunk = NULL;
-        chunk = curl_slist_append(chunk, auth_header.c_str());
-        chunk = curl_slist_append(chunk, version_header.toUtf8());
+        options.headers["x-mcosu-ver"] = bancho->neosu_version.toUtf8();
+
+        if(!auth_header.empty()) {
+            size_t colon_pos = auth_header.find(':');
+            if(colon_pos != std::string::npos) {
+                std::string token = auth_header.substr(colon_pos + 1);
+                token.erase(0, token.find_first_not_of(" \t"));
+                token.erase(token.find_last_not_of(" \t\r\n") + 1);
+                options.headers["osu-token"] = token;
+            }
+        }
+
         auto scheme = cv::use_https.getBool() ? "https://" : "http://";
         auto query_url = UString::format("%sc.%s/", scheme, bancho->endpoint.toUtf8());
-        curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, packet.memory);
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, packet.pos);
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
-        curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curldummy);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
-        curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
 
-        curl_easy_setopt_CAINFO_BLOB_embedded(curl);
+        // use sync request for logout to ensure it completes
+        NetworkHandler::Response response = networkHandler->performSyncRequest(query_url, options);
 
-        curl_easy_perform(curl);
-        curl_slist_free_all(chunk);
-        curl_easy_cleanup(curl);
         free(packet.memory);
     }
 
@@ -457,25 +463,6 @@ void reconnect() {
     login_packet = new_login_packet;
     try_logging_in = true;
     outgoing_mutex.unlock();
-}
-
-size_t curl_writefunc(void *contents, size_t size, size_t nmemb, void *userp) {
-    size_t realsize = size * nmemb;
-    Packet *mem = (Packet *)userp;
-
-    u8 *ptr = (u8 *)realloc(mem->memory, mem->size + realsize + 1);
-    if(!ptr) {
-        /* out of memory! */
-        debugLog("not enough memory (realloc returned NULL)\n");
-        return 0;
-    }
-
-    mem->memory = ptr;
-    memcpy(&(mem->memory[mem->size]), contents, realsize);
-    mem->size += realsize;
-    mem->memory[mem->size] = 0;
-
-    return realsize;
 }
 
 void receive_api_responses() {

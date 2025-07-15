@@ -211,7 +211,7 @@ void import_settings_from_osu_stable() {
     }
 
     std::string cfg_path = osu_folder.toUtf8();
-    cfg_path.append("/osu!.");
+    cfg_path.append(PREF_PATHSEP "osu!.");
     cfg_path.append(username.toUtf8());
     cfg_path.append(".cfg");
     File file(cfg_path);

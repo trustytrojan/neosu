@@ -2458,7 +2458,7 @@ void OptionsMenu::onResolutionSelect() {
 
     // get custom resolutions
     std::vector<Vector2> customResolutions;
-    std::ifstream customres(MCENGINE_DATA_DIR "cfg/customres.cfg");
+    std::ifstream customres(MCENGINE_DATA_DIR "cfg" PREF_PATHSEP "customres.cfg");
     std::string curLine;
     while(std::getline(customres, curLine)) {
         const char *curLineChar = curLine.c_str();
@@ -3536,7 +3536,7 @@ void OptionsMenu::save() {
 
     debugLog("Osu: Saving user config file ...\n");
 
-    UString userConfigFile = MCENGINE_DATA_DIR "cfg/osu.cfg";
+    UString userConfigFile = MCENGINE_DATA_DIR "cfg" PREF_PATHSEP "osu.cfg";
 
     std::vector<UString> user_lines;
     {

@@ -62,8 +62,6 @@ void init_networking_thread();
 // Stop networking thread. Should be called once when exiting neosu.
 void kill_networking_thread();
 
-size_t curl_writefunc(void *contents, size_t size, size_t nmemb, void *userp);
-
 extern UString cho_token;
 
 }

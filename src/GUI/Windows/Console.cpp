@@ -166,7 +166,7 @@ void Console::processCommand(std::string command) {
 
 void Console::execConfigFile(std::string filename) {
     // handle extension
-    filename.insert(0, MCENGINE_DATA_DIR "cfg/");
+    filename.insert(0, MCENGINE_DATA_DIR "cfg" PREF_PATHSEP "");
     if(filename.find(".cfg", (filename.length() - 4), filename.length()) == std::string::npos) filename.append(".cfg");
 
     File configFile(filename, File::TYPE::READ);

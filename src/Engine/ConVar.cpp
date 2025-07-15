@@ -115,11 +115,14 @@ void ConVar::execFloat(float args) {
 
 // Reset default values to the actual defaults (before neosu.json overrides)
 void ConVar::resetDefaults() {
-    this->fDefaultValue = this->fDefaultDefaultValue;
-    this->sDefaultValue = this->sDefaultDefaultValue;
-
     std::scoped_lock<std::mutex> lock{this->flagLock};
-    this->iFlags = this->iDefaultFlags;
+
+    if (this->fDefaultValue != this->fDefaultDefaultValue)
+        this->fDefaultValue = this->fDefaultDefaultValue;
+    if (this->sDefaultValue != this->sDefaultDefaultValue)
+        this->sDefaultValue = this->sDefaultDefaultValue;
+    if (this->iFlags != this->iDefaultFlags)
+        this->iFlags = this->iDefaultFlags;
 }
 
 void ConVar::setFlags(uint8_t new_flags) {

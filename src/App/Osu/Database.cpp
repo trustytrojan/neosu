@@ -588,7 +588,7 @@ void Database::loadDB() {
     this->peppy_overrides_mtx.lock();
 
     std::string osuDbFilePath = cv::osu_folder.getString();
-    osuDbFilePath.append("/osu!.db");
+    osuDbFilePath.append(PREF_PATHSEP "osu!.db");
     BanchoFile::Reader db(osuDbFilePath.c_str());
     BanchoFile::Reader neosu_maps("neosu_maps.db");
 

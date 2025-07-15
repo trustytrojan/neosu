@@ -21,6 +21,7 @@
 #include "DatabaseBeatmap.h"
 #include "Downloader.h"
 #include "Engine.h"
+#include "File.h"
 #include "Environment.h"
 #include "GameRules.h"
 #include "HUD.h"
@@ -218,7 +219,7 @@ Osu::Osu() {
     // (loading the rest of the app can take a bit of time)
     engine->onPaint();
 
-    std::ifstream osuCfgFile(MCENGINE_DATA_DIR "cfg/osu.cfg");
+    std::ifstream osuCfgFile(MCENGINE_DATA_DIR "cfg" PREF_PATHSEP "osu.cfg");
     if(!osuCfgFile.good()) {
         import_settings_from_osu_stable();
     }
@@ -230,9 +231,12 @@ Osu::Osu() {
     cv::snd_output_device.setValue(soundEngine->getOutputDeviceName());
     cv::snd_freq.setCallback(fastdelegate::MakeDelegate(soundEngine.get(), &SoundEngine::onFreqChanged));
     cv::snd_restart.setCallback(fastdelegate::MakeDelegate(soundEngine.get(), &SoundEngine::restart));
-    cv::win_snd_wasapi_exclusive.setCallback(fastdelegate::MakeDelegate(soundEngine.get(), &SoundEngine::onParamChanged));
-    cv::win_snd_wasapi_buffer_size.setCallback(fastdelegate::MakeDelegate(soundEngine.get(), &SoundEngine::onParamChanged));
-    cv::win_snd_wasapi_period_size.setCallback(fastdelegate::MakeDelegate(soundEngine.get(), &SoundEngine::onParamChanged));
+    cv::win_snd_wasapi_exclusive.setCallback(
+        fastdelegate::MakeDelegate(soundEngine.get(), &SoundEngine::onParamChanged));
+    cv::win_snd_wasapi_buffer_size.setCallback(
+        fastdelegate::MakeDelegate(soundEngine.get(), &SoundEngine::onParamChanged));
+    cv::win_snd_wasapi_period_size.setCallback(
+        fastdelegate::MakeDelegate(soundEngine.get(), &SoundEngine::onParamChanged));
     cv::asio_buffer_size.setCallback(fastdelegate::MakeDelegate(soundEngine.get(), &SoundEngine::onParamChanged));
 
     // Initialize skin after sound engine has started, or else sounds won't load properly
@@ -406,13 +410,6 @@ Osu::~Osu() {
     VolNormalization::shutdown();
     MapCalcThread::shutdown();
     BANCHO::Net::kill_networking_thread();
-
-    // "leak" UpdateHandler object, but not relevant since shutdown:
-    // this is the only way of handling instant user shutdown requests properly, there is no solution for active working
-    // threads besides letting the OS kill them when the main threads exits. we must not delete the update handler
-    // object, because the thread is potentially still accessing members during shutdown
-    this->updateHandler->stop();  // tell it to stop at the next cancellation point, depending on the OS/runtime and
-                                  // engine shutdown time it may get killed before that
 
     SAFE_DELETE(this->windowManager);
 
