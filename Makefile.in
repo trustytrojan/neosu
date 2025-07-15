@@ -155,6 +155,7 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	libraries/glad_glx/neosu-glad_glx.$(OBJEXT) \
 	libraries/glad_wgl/neosu-glad_wgl.$(OBJEXT) \
 	libraries/neosu-lodepng.$(OBJEXT) \
+	libraries/neosu-sha256.$(OBJEXT) \
 	src/App/Osu/neosu-BackgroundImageHandler.$(OBJEXT) \
 	src/App/Osu/neosu-Bancho.$(OBJEXT) \
 	src/App/Osu/neosu-BanchoAes.$(OBJEXT) \
@@ -304,7 +305,8 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/Platform/neosu-main.$(OBJEXT) \
 	src/Util/neosu-MD5Hash.$(OBJEXT) \
 	src/Util/neosu-Quaternion.$(OBJEXT) \
-	src/Util/neosu-Rect.$(OBJEXT) src/Util/neosu-UString.$(OBJEXT)
+	src/Util/neosu-Rect.$(OBJEXT) src/Util/neosu-UString.$(OBJEXT) \
+	src/Util/neosu-random.$(OBJEXT)
 neosu_OBJECTS = $(am_neosu_OBJECTS)
 @WIN_PLATFORM_TRUE@neosu_DEPENDENCIES = neosu_resource.o
 neosu_LINK = $(CXXLD) $(neosu_CXXFLAGS) $(CXXFLAGS) $(neosu_LDFLAGS) \
@@ -329,6 +331,7 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	libraries/$(DEPDIR)/neosu-cJSON.Po \
 	libraries/$(DEPDIR)/neosu-curl_blob.Po \
 	libraries/$(DEPDIR)/neosu-lodepng.Po \
+	libraries/$(DEPDIR)/neosu-sha256.Po \
 	libraries/glad/$(DEPDIR)/neosu-glad.Po \
 	libraries/glad_glx/$(DEPDIR)/neosu-glad_glx.Po \
 	libraries/glad_wgl/$(DEPDIR)/neosu-glad_wgl.Po \
@@ -482,7 +485,8 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/Util/$(DEPDIR)/neosu-MD5Hash.Po \
 	src/Util/$(DEPDIR)/neosu-Quaternion.Po \
 	src/Util/$(DEPDIR)/neosu-Rect.Po \
-	src/Util/$(DEPDIR)/neosu-UString.Po
+	src/Util/$(DEPDIR)/neosu-UString.Po \
+	src/Util/$(DEPDIR)/neosu-random.Po
 am__mv = mv -f
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -818,6 +822,7 @@ neosu_SOURCES = \
 	libraries/glad_glx/glad_glx.cpp \
 	libraries/glad_wgl/glad_wgl.cpp \
 	libraries/lodepng.cpp \
+	libraries/sha256.cpp \
 	src/App/Osu/BackgroundImageHandler.cpp \
 	src/App/Osu/Bancho.cpp \
 	src/App/Osu/BanchoAes.cpp \
@@ -969,6 +974,7 @@ neosu_SOURCES = \
 	src/Util/Quaternion.cpp \
 	src/Util/Rect.cpp \
 	src/Util/UString.cpp \
+	src/Util/random.cpp \
 $(NULL)
 
 
@@ -1261,6 +1267,8 @@ libraries/glad_wgl/neosu-glad_wgl.$(OBJEXT):  \
 	libraries/glad_wgl/$(am__dirstamp) \
 	libraries/glad_wgl/$(DEPDIR)/$(am__dirstamp)
 libraries/neosu-lodepng.$(OBJEXT): libraries/$(am__dirstamp) \
+	libraries/$(DEPDIR)/$(am__dirstamp)
+libraries/neosu-sha256.$(OBJEXT): libraries/$(am__dirstamp) \
 	libraries/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/$(am__dirstamp):
 	@$(MKDIR_P) src/App/Osu
@@ -1728,6 +1736,8 @@ src/Util/neosu-Rect.$(OBJEXT): src/Util/$(am__dirstamp) \
 	src/Util/$(DEPDIR)/$(am__dirstamp)
 src/Util/neosu-UString.$(OBJEXT): src/Util/$(am__dirstamp) \
 	src/Util/$(DEPDIR)/$(am__dirstamp)
+src/Util/neosu-random.$(OBJEXT): src/Util/$(am__dirstamp) \
+	src/Util/$(DEPDIR)/$(am__dirstamp)
 
 neosu$(EXEEXT): $(neosu_OBJECTS) $(neosu_DEPENDENCIES) $(EXTRA_neosu_DEPENDENCIES) 
 	@rm -f neosu$(EXEEXT)
@@ -1763,6 +1773,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@libraries/$(DEPDIR)/neosu-cJSON.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@libraries/$(DEPDIR)/neosu-curl_blob.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@libraries/$(DEPDIR)/neosu-lodepng.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@libraries/$(DEPDIR)/neosu-sha256.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@libraries/glad/$(DEPDIR)/neosu-glad.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@libraries/glad_glx/$(DEPDIR)/neosu-glad_glx.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@libraries/glad_wgl/$(DEPDIR)/neosu-glad_wgl.Po@am__quote@ # am--include-marker
@@ -1917,6 +1928,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/Util/$(DEPDIR)/neosu-Quaternion.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Util/$(DEPDIR)/neosu-Rect.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Util/$(DEPDIR)/neosu-UString.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/Util/$(DEPDIR)/neosu-random.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -2051,6 +2063,20 @@ libraries/neosu-lodepng.obj: libraries/lodepng.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='libraries/lodepng.cpp' object='libraries/neosu-lodepng.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o libraries/neosu-lodepng.obj `if test -f 'libraries/lodepng.cpp'; then $(CYGPATH_W) 'libraries/lodepng.cpp'; else $(CYGPATH_W) '$(srcdir)/libraries/lodepng.cpp'; fi`
+
+libraries/neosu-sha256.o: libraries/sha256.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT libraries/neosu-sha256.o -MD -MP -MF libraries/$(DEPDIR)/neosu-sha256.Tpo -c -o libraries/neosu-sha256.o `test -f 'libraries/sha256.cpp' || echo '$(srcdir)/'`libraries/sha256.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) libraries/$(DEPDIR)/neosu-sha256.Tpo libraries/$(DEPDIR)/neosu-sha256.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='libraries/sha256.cpp' object='libraries/neosu-sha256.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o libraries/neosu-sha256.o `test -f 'libraries/sha256.cpp' || echo '$(srcdir)/'`libraries/sha256.cpp
+
+libraries/neosu-sha256.obj: libraries/sha256.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT libraries/neosu-sha256.obj -MD -MP -MF libraries/$(DEPDIR)/neosu-sha256.Tpo -c -o libraries/neosu-sha256.obj `if test -f 'libraries/sha256.cpp'; then $(CYGPATH_W) 'libraries/sha256.cpp'; else $(CYGPATH_W) '$(srcdir)/libraries/sha256.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) libraries/$(DEPDIR)/neosu-sha256.Tpo libraries/$(DEPDIR)/neosu-sha256.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='libraries/sha256.cpp' object='libraries/neosu-sha256.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o libraries/neosu-sha256.obj `if test -f 'libraries/sha256.cpp'; then $(CYGPATH_W) 'libraries/sha256.cpp'; else $(CYGPATH_W) '$(srcdir)/libraries/sha256.cpp'; fi`
 
 src/App/Osu/neosu-BackgroundImageHandler.o: src/App/Osu/BackgroundImageHandler.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-BackgroundImageHandler.o -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-BackgroundImageHandler.Tpo -c -o src/App/Osu/neosu-BackgroundImageHandler.o `test -f 'src/App/Osu/BackgroundImageHandler.cpp' || echo '$(srcdir)/'`src/App/Osu/BackgroundImageHandler.cpp
@@ -4166,6 +4192,20 @@ src/Util/neosu-UString.obj: src/Util/UString.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Util/neosu-UString.obj `if test -f 'src/Util/UString.cpp'; then $(CYGPATH_W) 'src/Util/UString.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Util/UString.cpp'; fi`
 
+src/Util/neosu-random.o: src/Util/random.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Util/neosu-random.o -MD -MP -MF src/Util/$(DEPDIR)/neosu-random.Tpo -c -o src/Util/neosu-random.o `test -f 'src/Util/random.cpp' || echo '$(srcdir)/'`src/Util/random.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Util/$(DEPDIR)/neosu-random.Tpo src/Util/$(DEPDIR)/neosu-random.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Util/random.cpp' object='src/Util/neosu-random.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Util/neosu-random.o `test -f 'src/Util/random.cpp' || echo '$(srcdir)/'`src/Util/random.cpp
+
+src/Util/neosu-random.obj: src/Util/random.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Util/neosu-random.obj -MD -MP -MF src/Util/$(DEPDIR)/neosu-random.Tpo -c -o src/Util/neosu-random.obj `if test -f 'src/Util/random.cpp'; then $(CYGPATH_W) 'src/Util/random.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Util/random.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Util/$(DEPDIR)/neosu-random.Tpo src/Util/$(DEPDIR)/neosu-random.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Util/random.cpp' object='src/Util/neosu-random.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Util/neosu-random.obj `if test -f 'src/Util/random.cpp'; then $(CYGPATH_W) 'src/Util/random.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Util/random.cpp'; fi`
+
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
 tags: tags-am
@@ -4497,6 +4537,7 @@ distclean: distclean-am
 	-rm -f libraries/$(DEPDIR)/neosu-cJSON.Po
 	-rm -f libraries/$(DEPDIR)/neosu-curl_blob.Po
 	-rm -f libraries/$(DEPDIR)/neosu-lodepng.Po
+	-rm -f libraries/$(DEPDIR)/neosu-sha256.Po
 	-rm -f libraries/glad/$(DEPDIR)/neosu-glad.Po
 	-rm -f libraries/glad_glx/$(DEPDIR)/neosu-glad_glx.Po
 	-rm -f libraries/glad_wgl/$(DEPDIR)/neosu-glad_wgl.Po
@@ -4651,6 +4692,7 @@ distclean: distclean-am
 	-rm -f src/Util/$(DEPDIR)/neosu-Quaternion.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-Rect.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-UString.Po
+	-rm -f src/Util/$(DEPDIR)/neosu-random.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-local distclean-tags
@@ -4704,6 +4746,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f libraries/$(DEPDIR)/neosu-cJSON.Po
 	-rm -f libraries/$(DEPDIR)/neosu-curl_blob.Po
 	-rm -f libraries/$(DEPDIR)/neosu-lodepng.Po
+	-rm -f libraries/$(DEPDIR)/neosu-sha256.Po
 	-rm -f libraries/glad/$(DEPDIR)/neosu-glad.Po
 	-rm -f libraries/glad_glx/$(DEPDIR)/neosu-glad_glx.Po
 	-rm -f libraries/glad_wgl/$(DEPDIR)/neosu-glad_wgl.Po
@@ -4858,6 +4901,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/Util/$(DEPDIR)/neosu-Quaternion.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-Rect.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-UString.Po
+	-rm -f src/Util/$(DEPDIR)/neosu-random.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic \
 	maintainer-clean-local

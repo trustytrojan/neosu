@@ -8,6 +8,7 @@ neosu_SOURCES = \
 	libraries/glad_glx/glad_glx.cpp \
 	libraries/glad_wgl/glad_wgl.cpp \
 	libraries/lodepng.cpp \
+	libraries/sha256.cpp \
 	src/App/Osu/BackgroundImageHandler.cpp \
 	src/App/Osu/Bancho.cpp \
 	src/App/Osu/BanchoAes.cpp \
@@ -159,4 +160,5 @@ neosu_SOURCES = \
 	src/Util/Quaternion.cpp \
 	src/Util/Rect.cpp \
 	src/Util/UString.cpp \
+	src/Util/random.cpp \
 $(NULL)

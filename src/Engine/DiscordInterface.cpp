@@ -30,6 +30,7 @@ struct IDiscordActivityEvents activities_events{};
 struct IDiscordRelationshipEvents relationships_events{};
 struct IDiscordUserEvents users_events{};
 
+#ifdef _WIN64
 void on_discord_log(void * /*cdata*/, enum EDiscordLogLevel level, const char *message) {
     //(void)cdata;
     if(level == DiscordLogLevel_Error) {
@@ -38,6 +39,8 @@ void on_discord_log(void * /*cdata*/, enum EDiscordLogLevel level, const char *m
         debugLog("[Discord] %s\n", message);
     }
 }
+#endif
+
 }  // namespace
 #endif
 

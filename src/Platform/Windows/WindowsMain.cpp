@@ -10,6 +10,7 @@
 #include <objbase.h>
 // clang-format on
 
+#include "UIButton.h"
 #include "Mouse.h"
 
 #include "Database.h"

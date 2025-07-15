@@ -50,7 +50,7 @@
 #include "UISlider.h"
 
 // Addresses for which we should use OAuth login instead of username:password login
-const char *oauth_servers[] = {
+static constexpr std::initializer_list<const char *> oauth_servers{
     "neosu.local",
     "neosu.net",
 };
