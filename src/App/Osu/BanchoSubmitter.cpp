@@ -11,14 +11,12 @@
 #include "BanchoSubmitter.h"
 #include "DatabaseBeatmap.h"
 #include "Engine.h"
-#include "base64.h"
-#include "random.h"
+#include "crypto.h"
 
-#include <chrono>
 namespace BANCHO::Net {
 void submit_score(FinishedScore score) {
     debugLog("Submitting score...\n");
-    const char *GRADES[] = {"XH", "SH", "X", "S", "A", "B", "C", "D", "F", "N"};
+    constexpr auto GRADES = std::array{"XH", "SH", "X", "S", "A", "B", "C", "D", "F", "N"};
 
     u8 *compressed_data = NULL;
 
@@ -27,7 +25,7 @@ void submit_score(FinishedScore score) {
     strftime(score_time, sizeof(score_time), "%y%m%d%H%M%S", timeinfo);
 
     u8 iv[32];
-    get_random_bytes(iv, 32);
+    crypto::rng::get_bytes(&iv[0], 32);
 
     APIRequest request;
     request.type = SUBMIT_SCORE;
@@ -71,7 +69,7 @@ void submit_score(FinishedScore score) {
     {
         part = curl_mime_addpart(request.mime);
         curl_mime_name(part, "bmk");
-        curl_mime_data(part, score.beatmap_hash.hash, CURL_ZERO_TERMINATED);
+        curl_mime_data(part, score.beatmap_hash.hash.data(), CURL_ZERO_TERMINATED);
     }
     {
         auto unique_ids = UString::format("%s|%s", bancho->install_id.toUtf8(), bancho->disk_uuid.toUtf8());
@@ -82,7 +80,7 @@ void submit_score(FinishedScore score) {
     {
         part = curl_mime_addpart(request.mime);
         curl_mime_name(part, "pass");
-        curl_mime_data(part, bancho->pw_md5.hash, 32);
+        curl_mime_data(part, bancho->pw_md5.hash.data(), 32);
     }
     {
         auto osu_version = UString::format("%d", OSU_VERSION_DATEONLY);
@@ -91,32 +89,29 @@ void submit_score(FinishedScore score) {
         curl_mime_data(part, osu_version.toUtf8(), osu_version.lengthUtf8());
     }
     {
-        const char *iv_b64 = (const char *)base64_encode(iv, sizeof(iv), NULL);
+        auto iv_b64 = crypto::baseconv::encode64(iv, sizeof(iv));
         part = curl_mime_addpart(request.mime);
         curl_mime_name(part, "iv");
-        curl_mime_data(part, iv_b64, CURL_ZERO_TERMINATED);
-        delete[] iv_b64;
+        curl_mime_data(part, (const char*)iv_b64.data(), CURL_ZERO_TERMINATED);
     }
     {
         size_t s_client_hashes_encrypted = 0;
         u8 *client_hashes_encrypted = BANCHO::AES::encrypt(
             iv, (u8 *)bancho->client_hashes.toUtf8(), bancho->client_hashes.lengthUtf8(), &s_client_hashes_encrypted);
-        const char *client_hashes_b64 =
-            (const char *)base64_encode(client_hashes_encrypted, s_client_hashes_encrypted, NULL);
+        auto client_hashes_b64 = crypto::baseconv::encode64(client_hashes_encrypted, s_client_hashes_encrypted);
         part = curl_mime_addpart(request.mime);
         curl_mime_name(part, "s");
-        curl_mime_data(part, client_hashes_b64, CURL_ZERO_TERMINATED);
-        delete[] client_hashes_b64;
+        curl_mime_data(part, (const char*)client_hashes_b64.data(), CURL_ZERO_TERMINATED);
     }
     {
         UString score_data;
-        score_data.append(score.diff2->getMD5Hash().hash);
+        score_data.append(score.diff2->getMD5Hash().hash.data());
         score_data.append(UString::format(":%s", bancho->username.toUtf8()));
         {
             auto idiot_check = UString::format("chickenmcnuggets%d", score.num300s + score.num100s);
             idiot_check.append(UString::format("o15%d%d", score.num50s, score.numGekis));
             idiot_check.append(UString::format("smustard%d%d", score.numKatus, score.numMisses));
-            idiot_check.append(UString::format("uu%s", score.diff2->getMD5Hash().toUtf8()));
+            idiot_check.append(UString::format("uu%s", score.diff2->getMD5Hash().hash.data()));
             idiot_check.append(UString::format("%d%s", score.comboMax, score.perfect ? "True" : "False"));
             idiot_check.append(
                 UString::format("%s%d%s", bancho->username.toUtf8(), score.score, GRADES[(int)score.grade]));
@@ -126,7 +121,7 @@ void submit_score(FinishedScore score) {
 
             auto idiot_hash = Bancho::md5((u8 *)idiot_check.toUtf8(), idiot_check.lengthUtf8());
             score_data.append(":");
-            score_data.append(idiot_hash.hash);
+            score_data.append(idiot_hash.hash.data());
         }
         score_data.append(UString::format(":%d", score.num300s));
         score_data.append(UString::format(":%d", score.num100s));
@@ -147,12 +142,11 @@ void submit_score(FinishedScore score) {
         size_t s_score_data_encrypted = 0;
         u8 *score_data_encrypted =
             BANCHO::AES::encrypt(iv, (u8 *)score_data.toUtf8(), score_data.lengthUtf8(), &s_score_data_encrypted);
-        const char *score_data_b64 = (const char *)base64_encode(score_data_encrypted, s_score_data_encrypted, NULL);
+        auto score_data_b64 = crypto::baseconv::encode64(score_data_encrypted, s_score_data_encrypted);
 
         part = curl_mime_addpart(request.mime);
         curl_mime_name(part, "score");
-        curl_mime_data(part, score_data_b64, CURL_ZERO_TERMINATED);
-        delete[] score_data_b64;
+        curl_mime_data(part, (const char*)score_data_b64.data(), CURL_ZERO_TERMINATED);
     }
     {
         size_t s_compressed_data = 0;

@@ -1,5 +1,6 @@
 #pragma once
 #include "OsuScreen.h"
+#include "MD5Hash.h"
 
 class UIAvatar;
 class Beatmap;

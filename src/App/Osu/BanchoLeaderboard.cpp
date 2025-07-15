@@ -73,7 +73,7 @@ FinishedScore parse_score(char *score_line) {
 namespace BANCHO::Leaderboard {
 void fetch_online_scores(DatabaseBeatmap *beatmap) {
     UString path = "/web/osu-osz2-getscores.php?s=0&vv=4&v=1";
-    path.append(UString::format("&c=%s", beatmap->getMD5Hash().hash));
+    path.append(UString::fmt("&c={:s}", beatmap->getMD5Hash().hash.data()));
 
     std::string osu_file_path = beatmap->getFilePath();
     auto path_end = osu_file_path.find_last_of('/');
@@ -96,14 +96,14 @@ void fetch_online_scores(DatabaseBeatmap *beatmap) {
     curl_free(encoded_filename);
     curl_easy_cleanup(curl);
     path.append(UString::format("&m=0&i=%d&mods=%d&h=&a=0&us=%s&ha=%s", beatmap->getSetID(),
-                                osu->modSelector->getModFlags(), bancho->username.toUtf8(), bancho->pw_md5.toUtf8())
+                                osu->modSelector->getModFlags(), bancho->username.toUtf8(), bancho->pw_md5.hash.data())
                     .toUtf8());
 
     APIRequest request;
     request.type = GET_MAP_LEADERBOARD;
     request.path = path;
     request.mime = NULL;
-    request.extra = (u8 *)strdup(beatmap->getMD5Hash().hash);
+    request.extra = (u8 *)strdup(beatmap->getMD5Hash().hash.data());
 
     BANCHO::Net::send_api_request(request);
 }

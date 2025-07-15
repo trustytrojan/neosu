@@ -1,6 +1,6 @@
 #pragma once
 #include "Replay.h"
-#include "cbase.h"
+#include "MD5Hash.h"
 
 class ConVar;
 class DatabaseBeatmap;

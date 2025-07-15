@@ -1,5 +1,5 @@
 #pragma once
-#include "UString.h"
+#include "MD5Hash.h"
 
 #define COLLECTIONS_DB_VERSION 20240429
 

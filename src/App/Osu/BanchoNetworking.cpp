@@ -368,7 +368,7 @@ void reconnect() {
     bancho->endpoint = cv::mp_server.getString().c_str();
 
     // Admins told me they don't want any clients to connect
-    static constexpr std::initializer_list<const char *> server_blacklist{
+    constexpr auto server_blacklist = std::array{
         "ppy.sh",  // haven't asked, but the answer is obvious
         "gatari.pw",
     };
@@ -388,7 +388,7 @@ void reconnect() {
     bancho->pw_md5 = Bancho::md5((u8 *)pw, strlen(pw));
 
     // Admins told me they don't want score submission enabled
-    static constexpr std::initializer_list<const char *> submit_blacklist{
+    constexpr auto submit_blacklist = std::array{
         "akatsuki.gg",
         "ripple.moe",
     };

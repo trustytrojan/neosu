@@ -727,7 +727,7 @@ void Chat::mark_as_read(ChatChannel *chan) {
     APIRequest request;
     request.type = MARK_AS_READ;
     request.path = UString::format("/web/osu-markasread.php?u=%s&h=%s&channel=%s", bancho->username.toUtf8(),
-                                   bancho->pw_md5.toUtf8(), channel_urlencoded);
+                                   bancho->pw_md5.hash.data(), channel_urlencoded);
     request.mime = NULL;
 
     BANCHO::Net::send_api_request(request);

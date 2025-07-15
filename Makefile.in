@@ -303,10 +303,9 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/Platform/Windows/neosu-WinGLLegacyInterface.$(OBJEXT) \
 	src/Platform/Windows/neosu-WindowsMain.$(OBJEXT) \
 	src/Platform/neosu-main.$(OBJEXT) \
-	src/Util/neosu-MD5Hash.$(OBJEXT) \
 	src/Util/neosu-Quaternion.$(OBJEXT) \
 	src/Util/neosu-Rect.$(OBJEXT) src/Util/neosu-UString.$(OBJEXT) \
-	src/Util/neosu-random.$(OBJEXT)
+	src/Util/neosu-crypto.$(OBJEXT)
 neosu_OBJECTS = $(am_neosu_OBJECTS)
 @WIN_PLATFORM_TRUE@neosu_DEPENDENCIES = neosu_resource.o
 neosu_LINK = $(CXXLD) $(neosu_CXXFLAGS) $(CXXFLAGS) $(neosu_LDFLAGS) \
@@ -482,11 +481,10 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/Platform/Windows/$(DEPDIR)/neosu-WinEnvironment.Po \
 	src/Platform/Windows/$(DEPDIR)/neosu-WinGLLegacyInterface.Po \
 	src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain.Po \
-	src/Util/$(DEPDIR)/neosu-MD5Hash.Po \
 	src/Util/$(DEPDIR)/neosu-Quaternion.Po \
 	src/Util/$(DEPDIR)/neosu-Rect.Po \
 	src/Util/$(DEPDIR)/neosu-UString.Po \
-	src/Util/$(DEPDIR)/neosu-random.Po
+	src/Util/$(DEPDIR)/neosu-crypto.Po
 am__mv = mv -f
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -970,11 +968,10 @@ neosu_SOURCES = \
 	src/Platform/Windows/WinGLLegacyInterface.cpp \
 	src/Platform/Windows/WindowsMain.cpp \
 	src/Platform/main.cpp \
-	src/Util/MD5Hash.cpp \
 	src/Util/Quaternion.cpp \
 	src/Util/Rect.cpp \
 	src/Util/UString.cpp \
-	src/Util/random.cpp \
+	src/Util/crypto.cpp \
 $(NULL)
 
 
@@ -1728,15 +1725,13 @@ src/Util/$(am__dirstamp):
 src/Util/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) src/Util/$(DEPDIR)
 	@: >>src/Util/$(DEPDIR)/$(am__dirstamp)
-src/Util/neosu-MD5Hash.$(OBJEXT): src/Util/$(am__dirstamp) \
-	src/Util/$(DEPDIR)/$(am__dirstamp)
 src/Util/neosu-Quaternion.$(OBJEXT): src/Util/$(am__dirstamp) \
 	src/Util/$(DEPDIR)/$(am__dirstamp)
 src/Util/neosu-Rect.$(OBJEXT): src/Util/$(am__dirstamp) \
 	src/Util/$(DEPDIR)/$(am__dirstamp)
 src/Util/neosu-UString.$(OBJEXT): src/Util/$(am__dirstamp) \
 	src/Util/$(DEPDIR)/$(am__dirstamp)
-src/Util/neosu-random.$(OBJEXT): src/Util/$(am__dirstamp) \
+src/Util/neosu-crypto.$(OBJEXT): src/Util/$(am__dirstamp) \
 	src/Util/$(DEPDIR)/$(am__dirstamp)
 
 neosu$(EXEEXT): $(neosu_OBJECTS) $(neosu_DEPENDENCIES) $(EXTRA_neosu_DEPENDENCIES) 
@@ -1924,11 +1919,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/Platform/Windows/$(DEPDIR)/neosu-WinEnvironment.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Platform/Windows/$(DEPDIR)/neosu-WinGLLegacyInterface.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Util/$(DEPDIR)/neosu-MD5Hash.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Util/$(DEPDIR)/neosu-Quaternion.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Util/$(DEPDIR)/neosu-Rect.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Util/$(DEPDIR)/neosu-UString.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Util/$(DEPDIR)/neosu-random.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/Util/$(DEPDIR)/neosu-crypto.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -4136,20 +4130,6 @@ src/Platform/neosu-main.obj: src/Platform/main.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Platform/neosu-main.obj `if test -f 'src/Platform/main.cpp'; then $(CYGPATH_W) 'src/Platform/main.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Platform/main.cpp'; fi`
 
-src/Util/neosu-MD5Hash.o: src/Util/MD5Hash.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Util/neosu-MD5Hash.o -MD -MP -MF src/Util/$(DEPDIR)/neosu-MD5Hash.Tpo -c -o src/Util/neosu-MD5Hash.o `test -f 'src/Util/MD5Hash.cpp' || echo '$(srcdir)/'`src/Util/MD5Hash.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Util/$(DEPDIR)/neosu-MD5Hash.Tpo src/Util/$(DEPDIR)/neosu-MD5Hash.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Util/MD5Hash.cpp' object='src/Util/neosu-MD5Hash.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Util/neosu-MD5Hash.o `test -f 'src/Util/MD5Hash.cpp' || echo '$(srcdir)/'`src/Util/MD5Hash.cpp
-
-src/Util/neosu-MD5Hash.obj: src/Util/MD5Hash.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Util/neosu-MD5Hash.obj -MD -MP -MF src/Util/$(DEPDIR)/neosu-MD5Hash.Tpo -c -o src/Util/neosu-MD5Hash.obj `if test -f 'src/Util/MD5Hash.cpp'; then $(CYGPATH_W) 'src/Util/MD5Hash.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Util/MD5Hash.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Util/$(DEPDIR)/neosu-MD5Hash.Tpo src/Util/$(DEPDIR)/neosu-MD5Hash.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Util/MD5Hash.cpp' object='src/Util/neosu-MD5Hash.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Util/neosu-MD5Hash.obj `if test -f 'src/Util/MD5Hash.cpp'; then $(CYGPATH_W) 'src/Util/MD5Hash.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Util/MD5Hash.cpp'; fi`
-
 src/Util/neosu-Quaternion.o: src/Util/Quaternion.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Util/neosu-Quaternion.o -MD -MP -MF src/Util/$(DEPDIR)/neosu-Quaternion.Tpo -c -o src/Util/neosu-Quaternion.o `test -f 'src/Util/Quaternion.cpp' || echo '$(srcdir)/'`src/Util/Quaternion.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Util/$(DEPDIR)/neosu-Quaternion.Tpo src/Util/$(DEPDIR)/neosu-Quaternion.Po
@@ -4192,19 +4172,19 @@ src/Util/neosu-UString.obj: src/Util/UString.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Util/neosu-UString.obj `if test -f 'src/Util/UString.cpp'; then $(CYGPATH_W) 'src/Util/UString.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Util/UString.cpp'; fi`
 
-src/Util/neosu-random.o: src/Util/random.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Util/neosu-random.o -MD -MP -MF src/Util/$(DEPDIR)/neosu-random.Tpo -c -o src/Util/neosu-random.o `test -f 'src/Util/random.cpp' || echo '$(srcdir)/'`src/Util/random.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Util/$(DEPDIR)/neosu-random.Tpo src/Util/$(DEPDIR)/neosu-random.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Util/random.cpp' object='src/Util/neosu-random.o' libtool=no @AMDEPBACKSLASH@
+src/Util/neosu-crypto.o: src/Util/crypto.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Util/neosu-crypto.o -MD -MP -MF src/Util/$(DEPDIR)/neosu-crypto.Tpo -c -o src/Util/neosu-crypto.o `test -f 'src/Util/crypto.cpp' || echo '$(srcdir)/'`src/Util/crypto.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Util/$(DEPDIR)/neosu-crypto.Tpo src/Util/$(DEPDIR)/neosu-crypto.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Util/crypto.cpp' object='src/Util/neosu-crypto.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Util/neosu-random.o `test -f 'src/Util/random.cpp' || echo '$(srcdir)/'`src/Util/random.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Util/neosu-crypto.o `test -f 'src/Util/crypto.cpp' || echo '$(srcdir)/'`src/Util/crypto.cpp
 
-src/Util/neosu-random.obj: src/Util/random.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Util/neosu-random.obj -MD -MP -MF src/Util/$(DEPDIR)/neosu-random.Tpo -c -o src/Util/neosu-random.obj `if test -f 'src/Util/random.cpp'; then $(CYGPATH_W) 'src/Util/random.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Util/random.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Util/$(DEPDIR)/neosu-random.Tpo src/Util/$(DEPDIR)/neosu-random.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Util/random.cpp' object='src/Util/neosu-random.obj' libtool=no @AMDEPBACKSLASH@
+src/Util/neosu-crypto.obj: src/Util/crypto.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Util/neosu-crypto.obj -MD -MP -MF src/Util/$(DEPDIR)/neosu-crypto.Tpo -c -o src/Util/neosu-crypto.obj `if test -f 'src/Util/crypto.cpp'; then $(CYGPATH_W) 'src/Util/crypto.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Util/crypto.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Util/$(DEPDIR)/neosu-crypto.Tpo src/Util/$(DEPDIR)/neosu-crypto.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Util/crypto.cpp' object='src/Util/neosu-crypto.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Util/neosu-random.obj `if test -f 'src/Util/random.cpp'; then $(CYGPATH_W) 'src/Util/random.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Util/random.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Util/neosu-crypto.obj `if test -f 'src/Util/crypto.cpp'; then $(CYGPATH_W) 'src/Util/crypto.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Util/crypto.cpp'; fi`
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
@@ -4688,11 +4668,10 @@ distclean: distclean-am
 	-rm -f src/Platform/Windows/$(DEPDIR)/neosu-WinEnvironment.Po
 	-rm -f src/Platform/Windows/$(DEPDIR)/neosu-WinGLLegacyInterface.Po
 	-rm -f src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain.Po
-	-rm -f src/Util/$(DEPDIR)/neosu-MD5Hash.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-Quaternion.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-Rect.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-UString.Po
-	-rm -f src/Util/$(DEPDIR)/neosu-random.Po
+	-rm -f src/Util/$(DEPDIR)/neosu-crypto.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-local distclean-tags
@@ -4897,11 +4876,10 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/Platform/Windows/$(DEPDIR)/neosu-WinEnvironment.Po
 	-rm -f src/Platform/Windows/$(DEPDIR)/neosu-WinGLLegacyInterface.Po
 	-rm -f src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain.Po
-	-rm -f src/Util/$(DEPDIR)/neosu-MD5Hash.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-Quaternion.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-Rect.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-UString.Po
-	-rm -f src/Util/$(DEPDIR)/neosu-random.Po
+	-rm -f src/Util/$(DEPDIR)/neosu-crypto.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic \
 	maintainer-clean-local

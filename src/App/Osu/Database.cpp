@@ -1,13 +1,10 @@
 #include "Database.h"
 
-#include <string.h>
-
-#include <fstream>
+#include <cstring>
 #include <utility>
 
-#include "Bancho.h"  // md5
+#include "MD5Hash.h"
 #include "BanchoFile.h"
-#include "BanchoNetworking.h"
 #include "Collections.h"
 #include "ConVar.h"
 #include "Database.h"
@@ -773,7 +770,8 @@ void Database::loadDB() {
         for(int i = 0; i < this->iNumBeatmapsToLoad; i++) {
             if(this->bInterruptLoad.load()) break;  // cancellation point
 
-            if(cv::debug.getBool()) debugLog("Database: Reading beatmap %i/%i ...\n", (i + 1), this->iNumBeatmapsToLoad);
+            if(cv::debug.getBool())
+                debugLog("Database: Reading beatmap %i/%i ...\n", (i + 1), this->iNumBeatmapsToLoad);
 
             // update progress (another thread checks if progress >= 1.f to know when we're done)
             u32 db_pos_sum = db.total_pos + neosu_maps.total_pos;
@@ -1495,7 +1493,7 @@ u32 Database::importPeppyScores() {
 
         MD5Hash md5hash;
 
-        memcpy(md5hash.hash, md5hash_str.c_str(), 32);
+        memcpy(md5hash.hash.data(), md5hash_str.c_str(), 32);
         md5hash.hash[32] = '\0';
         u32 nb_scores = db.read<u32>();
 

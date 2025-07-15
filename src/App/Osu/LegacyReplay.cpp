@@ -203,7 +203,7 @@ LegacyReplay::Info LegacyReplay::from_bytes(u8* data, int s_data) {
 bool LegacyReplay::load_from_disk(FinishedScore* score, bool update_db) {
     if(score->peppy_replay_tms > 0) {
         auto osu_folder = cv::osu_folder.getString();
-        auto path = UString::format("%s/Data/r/%s-%llu.osr", osu_folder, score->beatmap_hash.hash,
+        auto path = UString::format("%s/Data/r/%s-%llu.osr", osu_folder, score->beatmap_hash.hash.data(),
                                     score->peppy_replay_tms);
 
         FILE* replay_file = fopen(path.toUtf8(), "rb");
@@ -272,7 +272,7 @@ void LegacyReplay::load_and_watch(FinishedScore score) {
             APIRequest request;
             request.type = GET_REPLAY;
             request.path = UString::format("/web/osu-getreplay.php?u=%s&h=%s&m=0&c=%d", bancho->username.toUtf8(),
-                                           bancho->pw_md5.toUtf8(), score.bancho_score_id);
+                                           bancho->pw_md5.hash.data(), score.bancho_score_id);
             request.mime = NULL;
             request.extra = (u8*)score_cpy;
             BANCHO::Net::send_api_request(request);

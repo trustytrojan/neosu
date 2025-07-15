@@ -71,7 +71,7 @@ MD5Hash read_hash(Packet *packet) {
         len = 32;
     }
 
-    read_bytes(packet, (u8 *)hash.hash, len);
+    read_bytes(packet, (u8 *)hash.hash.data(), len);
     hash.hash[len] = '\0';
     return hash;
 }
@@ -132,7 +132,7 @@ void write_string(Packet *packet, const char *str) {
 void write_hash(Packet *packet, MD5Hash hash) {
     write<u8>(packet, 0x0B);
     write<u8>(packet, 0x20);
-    write_bytes(packet, (u8 *)hash.hash, 32);
+    write_bytes(packet, (u8 *)hash.hash.data(), 32);
 }
 }  // namespace BANCHO::Proto
 
@@ -203,7 +203,7 @@ void Room::pack(Packet *packet) {
     write_string(packet, this->password.toUtf8());
     write_string(packet, this->map_name.toUtf8());
     write<u32>(packet, this->map_id);
-    write_string(packet, this->map_md5.toUtf8());
+    write_string(packet, this->map_md5.hash.data());
     for(int i = 0; i < 16; i++) {
         write<u8>(packet, this->slots[i].status);
     }

@@ -1,5 +1,5 @@
 #pragma once
-#include "UString.h"
+#include "MD5Hash.h"
 #include "types.h"
 
 enum Action : uint8_t {

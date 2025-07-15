@@ -595,7 +595,7 @@ Packet Bancho::build_login_packet() {
     proto::write_bytes(&packet, (u8 *)bancho->username.toUtf8(), bancho->username.lengthUtf8());
     proto::write<u8>(&packet, '\n');
 
-    proto::write_bytes(&packet, (u8 *)bancho->pw_md5.hash, 32);
+    proto::write_bytes(&packet, (u8 *)bancho->pw_md5.hash.data(), 32);
     proto::write<u8>(&packet, '\n');
 
     proto::write_bytes(&packet, (u8 *)OSU_VERSION, strlen(OSU_VERSION));
@@ -633,10 +633,9 @@ Packet Bancho::build_login_packet() {
     // XXX: Not implemented, I'm lazy so just reusing disk signature
     bancho->install_id = bancho->disk_uuid;
     MD5Hash install_md5 = Bancho::md5((u8 *)bancho->install_id.toUtf8(), bancho->install_id.lengthUtf8());
-    ;
 
-    bancho->client_hashes = UString::format("%s:%s:%s:%s:%s:", osu_path_md5.hash, adapters, adapters_md5.hash,
-                                            install_md5.hash, disk_md5.hash);
+    bancho->client_hashes = UString::fmt("{:s}:{:s}:{:s}:{:s}:{:s}:", osu_path_md5.hash.data(), adapters, adapters_md5.hash.data(),
+                                            install_md5.hash.data(), disk_md5.hash.data());
     proto::write_bytes(&packet, (u8 *)bancho->client_hashes.toUtf8(), bancho->client_hashes.lengthUtf8());
 
     // Allow PMs from strangers

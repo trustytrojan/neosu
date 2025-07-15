@@ -156,9 +156,8 @@ neosu_SOURCES = \
 	src/Platform/Windows/WinGLLegacyInterface.cpp \
 	src/Platform/Windows/WindowsMain.cpp \
 	src/Platform/main.cpp \
-	src/Util/MD5Hash.cpp \
 	src/Util/Quaternion.cpp \
 	src/Util/Rect.cpp \
 	src/Util/UString.cpp \
-	src/Util/random.cpp \
+	src/Util/crypto.cpp \
 $(NULL)

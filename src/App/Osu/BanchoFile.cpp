@@ -74,7 +74,7 @@ MD5Hash BanchoFile::Reader::read_hash() {
         len = 32;
     }
 
-    if(this->read_bytes((u8 *)hash.hash, len) != len) {
+    if(this->read_bytes((u8 *)hash.hash.data(), len) != len) {
         // just continue, don't set error flag
         debugLog("WARNING: failed to read %d bytes to obtain hash.\n", len);
         extra = len;
@@ -187,7 +187,7 @@ void BanchoFile::Writer::write_hash(MD5Hash hash) {
 
     this->write<u8>(0x0B);
     this->write<u8>(0x20);
-    this->write_bytes((u8 *)hash.hash, 32);
+    this->write_bytes((u8 *)hash.hash.data(), 32);
 }
 
 void BanchoFile::Writer::write_string(std::string str) {

@@ -5,9 +5,7 @@
 #include <iostream>
 #include <utility>
 
-#include "base64.h"
-#include "random.h"
-#include "sha256.h"
+#include "crypto.h"
 #include "AnimationHandler.h"
 #include "Bancho.h"
 #include "BanchoNetworking.h"
@@ -50,7 +48,7 @@
 #include "UISlider.h"
 
 // Addresses for which we should use OAuth login instead of username:password login
-static constexpr std::initializer_list<const char *> oauth_servers{
+static constexpr auto oauth_servers = std::array{
     "neosu.local",
     "neosu.net",
 };
@@ -2618,13 +2616,12 @@ void OptionsMenu::onLogInClicked() {
         if(this->should_use_oauth_login()) {
             bancho->endpoint = cv::mp_server.getString().c_str();
 
-            get_random_bytes(bancho->oauth_challenge, 32);
-            sha256_easy_hash(bancho->oauth_verifier, 32, bancho->oauth_challenge);
+            crypto::rng::get_bytes(&bancho->oauth_challenge[0], 32);
+            crypto::hash::sha256(&bancho->oauth_challenge[0], 32, &bancho->oauth_verifier[0]);
 
-            const char *challenge_b64 = (const char *)base64_encode(bancho->oauth_challenge, 32, NULL);
+            auto challenge_b64 = crypto::baseconv::encode64(&bancho->oauth_challenge[0], 32);
             auto scheme = cv::use_https.getBool() ? "https://" : "http://";
-            auto url = UString::format("%s%s/connect?challenge=%s", scheme, bancho->endpoint.toUtf8(), challenge_b64);
-            delete[] challenge_b64;
+            auto url = UString::format("%s%s/connect?challenge=%s", scheme, bancho->endpoint.toUtf8(), (const char*)challenge_b64.data());
 
             env->openURLInDefaultBrowser(url);
         } else {

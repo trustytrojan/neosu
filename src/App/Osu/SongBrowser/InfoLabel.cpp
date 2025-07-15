@@ -254,7 +254,7 @@ void InfoLabel::mouse_update(bool *propagate_clicks) {
                                                                       beatmap->getSelectedDifficulty2()->getID(),
                                                                       beatmap->getSelectedDifficulty2()->getSetID()));
                     osu->getTooltipOverlay()->addLine(
-                        UString::format("MD5: %s", beatmap->getSelectedDifficulty2()->getMD5Hash().toUtf8()));
+                        UString::format("MD5: %s", beatmap->getSelectedDifficulty2()->getMD5Hash().hash.data()));
                 }
             }
             osu->getTooltipOverlay()->end();
