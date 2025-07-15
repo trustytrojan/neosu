@@ -101,7 +101,7 @@ struct alignas(1) TIMINGPOINT {
     inline const std::vector<SCORE_SORTING_METHOD> &getScoreSortingMethods() const { return this->scoreSortingMethods; }
 
     std::unordered_map<MD5Hash, std::vector<FinishedScore>> online_scores;
-    std::string getOsuSongsFolder();
+    static const std::string &getOsuSongsFolder();
 
     BeatmapSet *loadRawBeatmap(const std::string& beatmapPath);  // only used for raw loading without db
 

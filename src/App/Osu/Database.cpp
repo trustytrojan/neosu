@@ -566,20 +566,28 @@ DatabaseBeatmap *Database::getBeatmapSet(i32 set_id) {
     return NULL;
 }
 
-std::string Database::getOsuSongsFolder() {
-    std::string songs_folder;
+const std::string &Database::getOsuSongsFolder() {
+    static std::string songs_folder;
 
     if(cv::songs_folder.getString().find(':') == std::string::npos) {
         // Relative path (yes, the check is Windows-only)
         songs_folder = cv::osu_folder.getString();
-        songs_folder.append("/");
+        while(!songs_folder.empty() && (songs_folder.ends_with('\\') || songs_folder.ends_with('/'))) {
+            songs_folder.pop_back();
+        }
+        songs_folder.append(PREF_PATHSEP);
         songs_folder.append(cv::songs_folder.getString());
     } else {
         // Absolute path
         songs_folder = cv::songs_folder.getString();
     }
 
-    songs_folder.append("/");
+    // remove duplicate slashes
+    while(!songs_folder.empty() && (songs_folder.ends_with('\\') || songs_folder.ends_with('/'))) {
+        songs_folder.pop_back();
+    }
+    songs_folder.append(PREF_PATHSEP);
+
     return songs_folder;
 }
 
@@ -594,7 +602,7 @@ void Database::loadDB() {
 
     u32 db_size_sum = neosu_maps.total_size + db.total_size;
 
-    std::string songFolder = this->getOsuSongsFolder();
+    const std::string &songFolder = this->getOsuSongsFolder();
     debugLog("Database: songFolder = %s\n", songFolder.c_str());
 
     this->importTimer->start();

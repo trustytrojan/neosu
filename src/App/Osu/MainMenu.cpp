@@ -1004,7 +1004,7 @@ void MainMenu::selectRandomBeatmap() {
         RichPresence::onMainMenu();
     } else {
         // Database is not loaded yet, load a random map and select it
-        auto songs_folder = db->getOsuSongsFolder();
+        auto songs_folder{db->getOsuSongsFolder()};
         auto mapset_folders = env->directoryExists(songs_folder) ? env->getFoldersInFolder(songs_folder) : std::vector<std::string>{};
         auto mapset_folders2 = env->getFoldersInFolder(MCENGINE_DATA_DIR "maps/");
         auto nb_mapsets = mapset_folders.size();

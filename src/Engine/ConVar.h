@@ -2,6 +2,7 @@
 #define CONVAR_H
 
 #include <atomic>
+#include <mutex>
 #include <string>
 #include <variant>
 #include <type_traits>

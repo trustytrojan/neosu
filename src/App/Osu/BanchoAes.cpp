@@ -196,7 +196,7 @@ void aes_free_key(u32 **key) {
     for(int i = 0; i < 15; i++) {
         delete key[i];
     }
-    delete key;
+    delete[] key;
 }
 
 void aes_encrypt_block(u8 *in, u8 *out, u32 **k_e) {
