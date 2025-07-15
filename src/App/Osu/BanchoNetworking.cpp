@@ -88,7 +88,7 @@ void send_api_request(CURL *curl, const APIRequest &api_out) {
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
-    curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
+    curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
 
     curl_easy_setopt_CAINFO_BLOB_embedded(curl);
 
@@ -127,7 +127,7 @@ void send_bancho_packet(CURL *curl, Packet outgoing) {
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
-    curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
+    curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
 
     curl_easy_setopt_CAINFO_BLOB_embedded(curl);
 
@@ -354,7 +354,7 @@ void disconnect() {
         curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curldummy);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
-        curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
+        curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
 
         curl_easy_setopt_CAINFO_BLOB_embedded(curl);
 
@@ -380,8 +380,7 @@ void disconnect() {
         bancho->server_icon = NULL;
     }
 
-    std::vector<ConVar *> convars = convar->getConVarArray();
-    for(auto var : convars) {
+    for(auto &var : convar->getConVarArray()) {
         var->resetDefaults();
     }
 

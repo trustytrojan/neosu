@@ -115,9 +115,16 @@ void ConVar::execFloat(float args) {
 
 // Reset default values to the actual defaults (before neosu.json overrides)
 void ConVar::resetDefaults() {
-    this->iFlags = this->iDefaultFlags;
     this->fDefaultValue = this->fDefaultDefaultValue;
     this->sDefaultValue = this->sDefaultDefaultValue;
+
+    std::scoped_lock<std::mutex> lock{this->flagLock};
+    this->iFlags = this->iDefaultFlags;
+}
+
+void ConVar::setFlags(uint8_t new_flags) {
+    std::scoped_lock<std::mutex> lock{this->flagLock};
+    this->iFlags = new_flags;
 }
 
 void ConVar::setDefaultString(const UString &defaultValue) {
@@ -469,8 +476,8 @@ void _echo(const UString &args) {
     }
 }
 
-void _volume(const UString &/*oldValue*/, const UString &newValue) {
-    if (!soundEngine) return;
+void _volume(const UString & /*oldValue*/, const UString &newValue) {
+    if(!soundEngine) return;
     soundEngine->setVolume(newValue.toFloat());
 }
 

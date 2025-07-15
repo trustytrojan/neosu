@@ -25,7 +25,7 @@ class UpdateHandler {
 
     void checkForUpdates();
 
-    [[nodiscard]] inline STATUS getStatus() const { return this->status; }
+    [[nodiscard]] inline STATUS getStatus() const { return this->status.load(); }
     UString update_url;
 
    private:
@@ -40,6 +40,6 @@ class UpdateHandler {
     bool _m_bKYS;
 
     // status
-    STATUS status;
+    std::atomic<STATUS> status;
     int iNumRetries;
 };

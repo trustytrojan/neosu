@@ -99,7 +99,7 @@ class DownloadManager {
             curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
             curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
             curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
-            curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
+            curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
             curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30L);
 
             curl_easy_setopt_CAINFO_BLOB_embedded(curl);

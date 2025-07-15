@@ -241,7 +241,7 @@ class ConVar {
     [[nodiscard]] inline const ConVarString &getName() const { return this->sName; }
     [[nodiscard]] inline CONVAR_TYPE getType() const { return this->type; }
     [[nodiscard]] inline uint8_t getFlags() const { return this->iFlags; }
-    inline void setFlags(uint8_t new_flags) { this->iFlags = new_flags; }
+    void setFlags(uint8_t new_flags);
 
     [[nodiscard]] inline bool hasValue() const { return this->bHasValue; }
 
@@ -403,6 +403,8 @@ class ConVar {
     // callback storage (allow having 1 "change" callback and 1 single value (or void) callback)
     ExecutionCallback callback{std::monostate()};
     ChangeCallback changeCallback{std::monostate()};
+
+    mutable std::mutex flagLock;
 };
 
 //*******************//

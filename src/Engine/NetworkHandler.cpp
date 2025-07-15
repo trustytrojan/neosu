@@ -38,7 +38,7 @@ UString NetworkHandler::httpGet(const UString &url, long timeout, long connectTi
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlStringWriteCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &this->curlReadBuffer);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
-        curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
+        curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
 
         curl_easy_setopt_CAINFO_BLOB_embedded(curl);
 
@@ -65,7 +65,7 @@ std::string NetworkHandler::httpDownload(const UString &url, long timeout, long 
         curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, connectTimeout);
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout);
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-        curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
+        curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlStringStreamWriteCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &curlWriteBuffer);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
