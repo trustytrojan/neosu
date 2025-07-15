@@ -1283,7 +1283,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
 
     // HACKHACK: force current value update
     if(this->sliderQualitySlider != NULL)
-        this->onHighQualitySlidersConVarChange("", cv::options_high_quality_sliders.getString().c_str());
+        this->onHighQualitySlidersConVarChange(cv::options_high_quality_sliders.getString().c_str());
 }
 
 OptionsMenu::~OptionsMenu() {
@@ -2964,9 +2964,11 @@ void OptionsMenu::onASIOBufferChange([[maybe_unused]] CBaseUISlider *slider) {
         for(int e = 0; e < this->elements[i].elements.size(); e++) {
             if(this->elements[i].elements[e] == slider) {
                 if(this->elements[i].elements.size() == 3) {
-                    CBaseUILabel *labelPointer = dynamic_cast<CBaseUILabel *>(this->elements[i].elements[2]);
-                    UString text = UString::format("%.1f ms", latency);
-                    labelPointer->setText(text);
+                    auto *labelPointer = dynamic_cast<CBaseUILabel *>(this->elements[i].elements[2]);
+                    if (labelPointer) {
+                        UString text = UString::format("%.1f ms", latency);
+                        labelPointer->setText(text);
+                    }
                 }
 
                 this->asioBufferSizeResetButton = this->elements[i].resetButton;  // HACKHACK: disgusting
@@ -2985,10 +2987,12 @@ void OptionsMenu::onWASAPIBufferChange(CBaseUISlider *slider) {
         for(int e = 0; e < this->elements[i].elements.size(); e++) {
             if(this->elements[i].elements[e] == slider) {
                 if(this->elements[i].elements.size() == 3) {
-                    CBaseUILabel *labelPointer = dynamic_cast<CBaseUILabel *>(this->elements[i].elements[2]);
-                    UString text = UString::format("%i", (int)std::round(slider->getFloat() * 1000.0f));
-                    text.append(" ms");
-                    labelPointer->setText(text);
+                    auto *labelPointer = dynamic_cast<CBaseUILabel *>(this->elements[i].elements[2]);
+                    if (labelPointer) {
+                        UString text = UString::format("%i", (int)std::round(slider->getFloat() * 1000.0f));
+                        text.append(" ms");
+                        labelPointer->setText(text);
+                    }
                 }
 
                 this->wasapiBufferSizeResetButton = this->elements[i].resetButton;  // HACKHACK: disgusting
@@ -3006,10 +3010,13 @@ void OptionsMenu::onWASAPIPeriodChange(CBaseUISlider *slider) {
         for(int e = 0; e < this->elements[i].elements.size(); e++) {
             if(this->elements[i].elements[e] == slider) {
                 if(this->elements[i].elements.size() == 3) {
-                    CBaseUILabel *labelPointer = dynamic_cast<CBaseUILabel *>(this->elements[i].elements[2]);
-                    UString text = UString::format("%i", (int)std::round(slider->getFloat() * 1000.0f));
-                    text.append(" ms");
-                    labelPointer->setText(text);
+                    auto *labelPointer = dynamic_cast<CBaseUILabel *>(this->elements[i].elements[2]);
+                    if (labelPointer)
+                    {
+                        UString text = UString::format("%i", (int)std::round(slider->getFloat() * 1000.0f));
+                        text.append(" ms");
+                        labelPointer->setText(text);
+                    }
                 }
 
                 this->wasapiPeriodSizeResetButton = this->elements[i].resetButton;  // HACKHACK: disgusting
@@ -3041,7 +3048,7 @@ void OptionsMenu::onNightcoreToggle(CBaseUICheckbox *checkbox) {
     osu->updateMods();
 }
 
-void OptionsMenu::onUseSkinsSoundSamplesChange(const UString & /*oldValue*/, const UString & /*newValue*/) { osu->reloadSkin(); }
+void OptionsMenu::onUseSkinsSoundSamplesChange() { osu->reloadSkin(); }
 
 void OptionsMenu::onHighQualitySlidersCheckboxChange(CBaseUICheckbox *checkbox) {
     this->onCheckboxChange(checkbox);
@@ -3050,7 +3057,7 @@ void OptionsMenu::onHighQualitySlidersCheckboxChange(CBaseUICheckbox *checkbox) 
     if(checkbox->isChecked()) this->sliderQualitySlider->setValue(1.0f, false);
 }
 
-void OptionsMenu::onHighQualitySlidersConVarChange(const UString & /*oldValue*/, const UString &newValue) {
+void OptionsMenu::onHighQualitySlidersConVarChange(const UString &newValue) {
     const bool enabled = newValue.toFloat() > 0;
     for(int i = 0; i < this->elements.size(); i++) {
         bool contains = false;

@@ -1302,7 +1302,7 @@ bool Skin::parseSkinINI(std::string filepath) {
     return true;
 }
 
-void Skin::onIgnoreBeatmapSampleVolumeChange(const UString & /*oldValue*/, const UString & /*newValue*/) { this->resetSampleVolume(); }
+void Skin::onIgnoreBeatmapSampleVolumeChange() { this->resetSampleVolume(); }
 
 void Skin::setSampleSet(int sampleSet) {
     if(this->iSampleSet == sampleSet) return;

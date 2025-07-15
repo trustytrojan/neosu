@@ -152,9 +152,9 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     void onLoudnessNormalizationToggle(CBaseUICheckbox *checkbox);
     void onNightcoreToggle(CBaseUICheckbox *checkbox);
 
-    void onUseSkinsSoundSamplesChange(const UString &oldValue, const UString &newValue);
+    void onUseSkinsSoundSamplesChange();
     void onHighQualitySlidersCheckboxChange(CBaseUICheckbox *checkbox);
-    void onHighQualitySlidersConVarChange(const UString &oldValue, const UString &newValue);
+    void onHighQualitySlidersConVarChange(const UString &newValue);
 
     // categories
     void onCategoryClicked(CBaseUIButton *button);

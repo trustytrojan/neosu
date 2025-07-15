@@ -183,16 +183,16 @@ class Osu : public App, public MouseListener {
     void onRawInputChange(const UString &oldValue, const UString &newValue);
 
     void onSkinReload();
-    void onSkinChange(const UString &oldValue, const UString &newValue);
-    void onAnimationSpeedChange(const UString &oldValue, const UString &newValue);
+    void onSkinChange(const UString &newValue);
+    void onAnimationSpeedChange();
     void updateAnimationSpeed();
 
-    void onSpeedChange(const UString &oldValue, const UString &newValue);
-    void onDTPresetChange(const UString &oldValue, const UString &newValue);
-    void onHTPresetChange(const UString &oldValue, const UString &newValue);
-    void onThumbnailsToggle(const UString &oldValue, const UString &newValue);
+    void onSpeedChange(const UString &newValue);
+    void onDTPresetChange();
+    void onHTPresetChange();
+    void onThumbnailsToggle();
 
-    void onPlayfieldChange(const UString &oldValue, const UString &newValue);
+    void onPlayfieldChange();
 
     void onUIScaleChange(const UString &oldValue, const UString &newValue);
     void onUIScaleToDPIChange(const UString &oldValue, const UString &newValue);
@@ -201,13 +201,13 @@ class Osu : public App, public MouseListener {
     void onKey1Change(bool pressed, bool mouse);
     void onKey2Change(bool pressed, bool mouse);
 
-    void onModMafhamChange(const UString &oldValue, const UString &newValue);
-    void onModFPoSuChange(const UString &oldValue, const UString &newValue);
-    void onModFPoSu3DChange(const UString &oldValue, const UString &newValue);
-    void onModFPoSu3DSpheresChange(const UString &oldValue, const UString &newValue);
-    void onModFPoSu3DSpheresAAChange(const UString &oldValue, const UString &newValue);
+    void onModMafhamChange();
+    void onModFPoSuChange();
+    void onModFPoSu3DChange();
+    void onModFPoSu3DSpheresChange();
+    void onModFPoSu3DSpheresAAChange();
 
-    void onLetterboxingOffsetChange(const UString &oldValue, const UString &newValue);
+    void onLetterboxingOffsetChange();
 
     void onUserCardChange(const UString& new_username);
 

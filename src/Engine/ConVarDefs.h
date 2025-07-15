@@ -11,10 +11,15 @@
     (defined(_CLANGD) || defined(Q_CREATOR_RUN) || defined(__INTELLISENSE__) || defined(__CDT_PARSER__))
 #define DEFINE_CONVARS
 #include "ConVar.h"
-#include "KeyboardKeys.h"
 
-struct dummyEngine{inline void shutdown() {;}};
+struct dummyEngine{inline void shutdown() {;} inline void toggleFullscreen() {;}};
 dummyEngine *engine{};
+
+struct dummyGraphics{inline void setVSync(bool/**/) {;}};
+dummyGraphics *g{};
+
+struct dummyEnv{inline void setFullscreenWindowedBorderless(bool/**/) {;}};
+dummyEnv *env{};
 
 extern void _borderless();
 extern void _center();
@@ -25,8 +30,6 @@ extern void _errortest();
 extern void _exec();
 extern void _find();
 extern void _focus();
-extern void _fullscreen();
-extern void _fullscreen_windowed_borderless(const UString&, const UString&);
 extern void _help();
 extern void _listcommands();
 extern void _maximize();
@@ -41,13 +44,12 @@ extern void _save();
 
 extern void spectate_by_username();
 extern void loudness_cb(const UString&, const UString&);
-extern void _osuOptionsSliderQualityWrapper(const UString&, const UString&);
+extern void _osuOptionsSliderQualityWrapper(float);
 namespace RichPresence {
 extern void onRichPresenceChange(const UString&, const UString&);
 }
 extern void _osu_songbrowser_search_hardcoded_filter(const UString&, const UString&);
-extern void _vsync(const UString&, const UString&);
-extern void _vprof(const UString&, const UString&);
+extern void _vprof(float);
 extern void _volume(const UString&, const UString&);
 #endif
 
@@ -61,6 +63,7 @@ extern void _volume(const UString&, const UString&);
 #if defined(DEFINE_CONVARS)
 #undef CONVAR
 #define CONVAR(name, ...) ConVar _CV(name)(__VA_ARGS__)
+#include "KeyboardKeys.h"
 #else
 #define CONVAR(name, ...) extern ConVar _CV(name)
 #endif
@@ -82,7 +85,7 @@ CONVAR(exec, "exec", FCVAR_BANCHO_COMPATIBLE, _exec);
 CONVAR(exit, "exit", FCVAR_BANCHO_COMPATIBLE, []() -> void {engine ? engine->shutdown() : (void)0;});
 CONVAR(find, "find", FCVAR_BANCHO_COMPATIBLE, _find);
 CONVAR(focus, "focus", FCVAR_BANCHO_COMPATIBLE, _focus);
-CONVAR(fullscreen, "fullscreen", FCVAR_BANCHO_COMPATIBLE, _fullscreen);
+CONVAR(fullscreen, "fullscreen", FCVAR_BANCHO_COMPATIBLE, []() -> void {engine ? engine->toggleFullscreen() : (void)0;});
 CONVAR(help, "help", FCVAR_BANCHO_COMPATIBLE, _help);
 CONVAR(listcommands, "listcommands", FCVAR_BANCHO_COMPATIBLE, _listcommands);
 CONVAR(maximize, "maximize", FCVAR_BANCHO_COMPATIBLE, _maximize);
@@ -487,7 +490,7 @@ CONVAR(fps_unlimited_yield,
     "fps_unlimited_yield", false, FCVAR_BANCHO_COMPATIBLE,
     "always release rest of timeslice once per frame (call scheduler via sleep(0)), even if unlimited fps are enabled");
 CONVAR(fullscreen_windowed_borderless, "fullscreen_windowed_borderless", false, FCVAR_BANCHO_COMPATIBLE,
-                                         _fullscreen_windowed_borderless);
+                                         [](float newValue) -> void {env ? env->setFullscreenWindowedBorderless(!!static_cast<int>(newValue)) : (void)0;});
 CONVAR(hiterrorbar_misaims, "osu_hiterrorbar_misaims", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(hiterrorbar_misses, "osu_hiterrorbar_misses", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(hitobject_fade_in_time, "osu_hitobject_fade_in_time", 400, FCVAR_LOCKED | FCVAR_GAMEPLAY,
@@ -1227,7 +1230,7 @@ CONVAR(vs_percent, "vs_percent", 0.0f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(vs_repeat, "vs_repeat", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(vs_shuffle, "vs_shuffle", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(vs_volume, "vs_volume", 1.0f, FCVAR_BANCHO_COMPATIBLE);
-CONVAR(vsync, "vsync", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE, _vsync);
+CONVAR(vsync, "vsync", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE, [](float on) -> void { g ? g->setVSync(!!static_cast<int>(on)) : (void)0; });
 CONVAR(win_disable_windows_key, 
     "win_disable_windows_key", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
     "if compiled on Windows, set to 0/1 to disable/enable all windows keys via low level keyboard hook");

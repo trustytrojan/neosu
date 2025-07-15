@@ -238,7 +238,7 @@ Osu::Osu() {
     // Initialize skin after sound engine has started, or else sounds won't load properly
     cv::skin.setCallback(fastdelegate::MakeDelegate(this, &Osu::onSkinChange));
     cv::skin_reload.setCallback(fastdelegate::MakeDelegate(this, &Osu::onSkinReload));
-    this->onSkinChange("", cv::skin.getString().c_str());
+    this->onSkinChange(cv::skin.getString().c_str());
 
     // Convar callbacks that should be set after loading the config
     cv::mod_mafham.setCallback(fastdelegate::MakeDelegate(this, &Osu::onModMafhamChange));
@@ -293,7 +293,7 @@ Osu::Osu() {
         skinFolder.append(cv::skin.getString());
         skinFolder.append("/");
         if(this->skin == NULL)  // the skin may already be loaded by Console::execConfigFile() above
-            this->onSkinChange("", cv::skin.getString().c_str());
+            this->onSkinChange(cv::skin.getString().c_str());
 
         // enable async skin loading for user-action skin changes (but not during startup)
         cv::skin_async.setValue(1.0f);
@@ -1792,10 +1792,10 @@ bool Osu::onShutdown() {
 
 void Osu::onSkinReload() {
     this->bSkinLoadWasReload = true;
-    this->onSkinChange("", cv::skin.getString().c_str());
+    this->onSkinChange(cv::skin.getString().c_str());
 }
 
-void Osu::onSkinChange(const UString & /*oldValue*/, const UString &newValue) {
+void Osu::onSkinChange(const UString &newValue) {
     if(this->skin != NULL) {
         if(this->bSkinLoadScheduled || this->skinScheduledToLoad != NULL) return;
         if(newValue.length() < 1) return;
@@ -1838,9 +1838,9 @@ void Osu::updateAnimationSpeed() {
     }
 }
 
-void Osu::onAnimationSpeedChange(const UString & /*oldValue*/, const UString & /*newValue*/) { this->updateAnimationSpeed(); }
+void Osu::onAnimationSpeedChange() { this->updateAnimationSpeed(); }
 
-void Osu::onSpeedChange(const UString & /*oldValue*/, const UString &newValue) {
+void Osu::onSpeedChange(const UString &newValue) {
     float speed = newValue.toFloat();
     this->getSelectedBeatmap()->setSpeed(speed >= 0.0f ? speed : this->getSelectedBeatmap()->getSpeedMultiplier());
     this->updateAnimationSpeed();
@@ -1855,21 +1855,21 @@ void Osu::onSpeedChange(const UString & /*oldValue*/, const UString &newValue) {
     osu->getModSelector()->updateOverrideSliderLabels();
 }
 
-void Osu::onDTPresetChange(const UString & /*oldValue*/, const UString & /*newValue*/) {
+void Osu::onDTPresetChange() {
     cv::speed_override.setValue(cv::mod_doubletime_dummy.getBool() ? 1.5f : -1.f);
     osu->getModSelector()->speedSlider->setValue(cv::speed_override.getFloat() == -1 ? cv::speed_override.getFloat() : cv::speed_override.getFloat() + 1.0f, false, false);
 }
 
-void Osu::onHTPresetChange(const UString & /*oldValue*/, const UString & /*newValue*/) {
+void Osu::onHTPresetChange() {
     cv::speed_override.setValue(cv::mod_halftime_dummy.getBool() ? 0.75f : -1.f);
     osu->getModSelector()->speedSlider->setValue(cv::speed_override.getFloat() == -1 ? cv::speed_override.getFloat() : cv::speed_override.getFloat() + 1.0f, false, false);
 }
 
-void Osu::onThumbnailsToggle(const UString & /*oldValue*/, const UString & /*newValue*/) {
+void Osu::onThumbnailsToggle() {
     osu->getSongBrowser()->thumbnailYRatio = cv::draw_songbrowser_thumbnails.getBool() ? 1.333333f : 0.f;
 }
 
-void Osu::onPlayfieldChange(const UString & /*oldValue*/, const UString & /*newValue*/) { this->getSelectedBeatmap()->onModUpdate(); }
+void Osu::onPlayfieldChange() { this->getSelectedBeatmap()->onModUpdate(); }
 
 void Osu::onUIScaleChange(const UString &oldValue, const UString &newValue) {
     const float oldVal = oldValue.toFloat();
@@ -2046,17 +2046,17 @@ void Osu::onKey2Change(bool pressed, bool isMouse) {
     }
 }
 
-void Osu::onModMafhamChange(const UString & /*oldValue*/, const UString & /*newValue*/) { this->rebuildRenderTargets(); }
+void Osu::onModMafhamChange() { this->rebuildRenderTargets(); }
 
-void Osu::onModFPoSuChange(const UString & /*oldValue*/, const UString & /*newValue*/) { this->rebuildRenderTargets(); }
+void Osu::onModFPoSuChange() { this->rebuildRenderTargets(); }
 
-void Osu::onModFPoSu3DChange(const UString & /*oldValue*/, const UString & /*newValue*/) { this->rebuildRenderTargets(); }
+void Osu::onModFPoSu3DChange() { this->rebuildRenderTargets(); }
 
-void Osu::onModFPoSu3DSpheresChange(const UString & /*oldValue*/, const UString & /*newValue*/) { this->rebuildRenderTargets(); }
+void Osu::onModFPoSu3DSpheresChange() { this->rebuildRenderTargets(); }
 
-void Osu::onModFPoSu3DSpheresAAChange(const UString & /*oldValue*/, const UString & /*newValue*/) { this->rebuildRenderTargets(); }
+void Osu::onModFPoSu3DSpheresAAChange() { this->rebuildRenderTargets(); }
 
-void Osu::onLetterboxingOffsetChange(const UString & /*oldValue*/, const UString & /*newValue*/) { this->updateMouseSettings(); }
+void Osu::onLetterboxingOffsetChange() { this->updateMouseSettings(); }
 
 void Osu::onUserCardChange(const UString& new_username) {
     // NOTE: force update options textbox to avoid shutdown inconsistency

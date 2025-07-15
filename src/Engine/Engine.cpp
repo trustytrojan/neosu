@@ -573,8 +573,6 @@ void _printsize(void) {
     debugLog("Engine: screenSize = (%f, %f)\n", s.x, s.y);
 }
 
-void _fullscreen(void) { engine->toggleFullscreen(); }
-
 void _borderless(void) {
     if(cv::fullscreen_windowed_borderless.getBool()) {
         cv::fullscreen_windowed_borderless.setValue(0.0f);

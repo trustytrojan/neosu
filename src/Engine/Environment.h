@@ -38,6 +38,10 @@ class Environment {
     static const std::string &getUserDataPath();
 
     // file IO
+    virtual std::vector<UString> getLogicalDrives() = 0;
+
+    static inline bool isaTTY() { return isatty(fileno(stdout)) != 0; }
+
     // modifies the input filename! (checks case insensitively past the last slash)
     static bool fileExists(std::string &filename);
     // modifies the input directoryName! (checks case insensitively past the last slash)
@@ -50,16 +54,14 @@ class Environment {
     static bool createDirectory(const std::string &directoryName);
     static bool renameFile(const std::string &oldFileName, const std::string &newFileName);
     static bool deleteFile(const std::string &filePath);
-    // i can't make these as fast as the win32 api version in a generic way
-    virtual std::vector<std::string> getFilesInFolder(const std::string &folder) noexcept;
-    virtual std::vector<std::string> getFoldersInFolder(const std::string &folder) noexcept;
+
     static std::string getFolderFromFilePath(const std::string &filepath) noexcept;
     static std::string getFileExtensionFromFilePath(const std::string &filepath, bool includeDot = false) noexcept;
     static std::string getFileNameFromFilePath(const std::string &filePath) noexcept;
 
-    virtual std::vector<UString> getLogicalDrives() = 0;
-
-    static inline bool isaTTY() { return isatty(fileno(stdout)) != 0; }
+    // i can't make these as fast as the win32 api version in a generic way
+    virtual std::vector<std::string> getFilesInFolder(const std::string &folder) noexcept;
+    virtual std::vector<std::string> getFoldersInFolder(const std::string &folder) noexcept;
 
     // clipboard
     virtual UString getClipBoardText() = 0;

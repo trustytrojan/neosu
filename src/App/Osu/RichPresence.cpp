@@ -254,8 +254,8 @@ void RichPresence::onMultiplayerLobby() {
     set_discord_presence(&activity);
 }
 
-void RichPresence::onRichPresenceChange(const UString & /*oldValue*/, const UString & /*newValue*/) {
-    if(!cv::rich_presence.getBool()) {
+void RichPresence::onRichPresenceChange(float oldValue, float newValue) {
+    if(oldValue != newValue && !static_cast<int>(newValue)) {
         clear_discord_presence();
     }
 }

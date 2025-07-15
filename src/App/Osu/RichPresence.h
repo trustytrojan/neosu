@@ -12,7 +12,7 @@ class RichPresence {
     static void onPlayEnd(bool quit);
     static void onMultiplayerLobby();
 
-    static void onRichPresenceChange(const UString &oldValue, const UString &newValue);
+    static void onRichPresenceChange(float oldValue, float newValue);
     static void setBanchoStatus(const char *info_text, Action action);
     static void updateBanchoMods();
 

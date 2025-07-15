@@ -337,7 +337,7 @@ class Skin {
                         bool fallback_to_default = true, float hardcodedVolumeMultiplier = -1.0f);
 
     void onEffectVolumeChange(const UString &oldValue, const UString &newValue);
-    void onIgnoreBeatmapSampleVolumeChange(const UString &oldValue, const UString &newValue);
+    void onIgnoreBeatmapSampleVolumeChange();
 
     bool bReady;
     bool bIsDefaultSkin;
