@@ -512,9 +512,12 @@ SongBrowser::~SongBrowser() {
     }
 
     this->scoreBrowser->getContainer()->empty();
-    for(size_t i = 0; i < this->scoreButtonCache.size(); i++) {
-        delete this->scoreButtonCache[i];
+    for(ScoreButton* button : this->scoreButtonCache) {
+        SAFE_DELETE(button);
     }
+    this->scoreButtonCache.clear();
+
+    SAFE_DELETE(this->localBestButton);
     SAFE_DELETE(this->scoreBrowserScoresStillLoadingElement);
     SAFE_DELETE(this->scoreBrowserNoRecordsYetElement);
 

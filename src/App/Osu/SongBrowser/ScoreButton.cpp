@@ -52,7 +52,10 @@ ScoreButton::ScoreButton(UIContextMenu *contextMenu, float xPos, float yPos, flo
     this->scoreGrade = FinishedScore::Grade::D;
 }
 
-ScoreButton::~ScoreButton() { anim->deleteExistingAnimation(&this->fIndexNumberAnim); }
+ScoreButton::~ScoreButton() {
+    anim->deleteExistingAnimation(&this->fIndexNumberAnim);
+    SAFE_DELETE(this->avatar);
+}
 
 void ScoreButton::draw() {
     if(!this->bVisible) return;
