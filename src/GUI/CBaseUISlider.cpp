@@ -35,7 +35,7 @@ CBaseUISlider::CBaseUISlider(float xPos, float yPos, float xSize, float ySize, U
 
     this->vBlockSize = Vector2(xSize < ySize ? xSize : ySize, xSize < ySize ? xSize : ySize);
 
-    this->sliderChangeCallback = NULL;
+    this->sliderChangeCallback = {};
 
     this->setOrientation(xSize > ySize);
 }

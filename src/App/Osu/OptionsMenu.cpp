@@ -424,9 +424,9 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
 
     // convar callbacks
     cv::skin_use_skin_hitsounds.setCallback(
-        fastdelegate::MakeDelegate(this, &OptionsMenu::onUseSkinsSoundSamplesChange));
+        SA::MakeDelegate<&OptionsMenu::onUseSkinsSoundSamplesChange>(this));
     cv::options_high_quality_sliders.setCallback(
-        fastdelegate::MakeDelegate(this, &OptionsMenu::onHighQualitySlidersConVarChange));
+        SA::MakeDelegate<&OptionsMenu::onHighQualitySlidersConVarChange>(this));
 
     osu->getNotificationOverlay()->addKeyListener(this);
 
@@ -563,21 +563,21 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addCheckbox("Unlimited FPS", &cv::fps_unlimited);
 
     CBaseUISlider *fpsSlider = this->addSlider("FPS Limiter:", 60.0f, 1000.0f, &cv::fps_max, -1.0f, true);
-    fpsSlider->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangeInt));
+    fpsSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangeInt>(this));
     fpsSlider->setKeyDelta(1);
 
     this->addSubSection("Layout");
     OPTIONS_ELEMENT resolutionSelect =
         this->addButton("Select Resolution", UString::format("%ix%i", osu->getScreenWidth(), osu->getScreenHeight()));
     this->resolutionSelectButton = (CBaseUIButton *)resolutionSelect.elements[0];
-    this->resolutionSelectButton->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onResolutionSelect));
+    this->resolutionSelectButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onResolutionSelect>(this));
     this->resolutionLabel = (CBaseUILabel *)resolutionSelect.elements[1];
     this->fullscreenCheckbox = this->addCheckbox("Fullscreen");
-    this->fullscreenCheckbox->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onFullscreenChange));
+    this->fullscreenCheckbox->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onFullscreenChange>(this));
     this->addCheckbox("Borderless",
                       "May cause extra input lag if enabled.\nDepends on your operating system version/updates.",
                       &cv::fullscreen_windowed_borderless)
-        ->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onBorderlessWindowedChange));
+        ->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onBorderlessWindowedChange>(this));
     this->addCheckbox("Keep Aspect Ratio",
                       "Black borders instead of a stretched image.\nOnly relevant if fullscreen is enabled, and "
                       "letterboxing is disabled.\nUse the two position sliders below to move the viewport around.",
@@ -589,12 +589,12 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
         &cv::letterboxing);
     this->letterboxingOffsetXSlider =
         this->addSlider("Horizontal position", -1.0f, 1.0f, &cv::letterboxing_offset_x, 170)
-            ->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangeLetterboxingOffset))
+            ->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangeLetterboxingOffset>(this))
             ->setKeyDelta(0.01f)
             ->setAnimated(false);
     this->letterboxingOffsetYSlider =
         this->addSlider("Vertical position", -1.0f, 1.0f, &cv::letterboxing_offset_y, 170)
-            ->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangeLetterboxingOffset))
+            ->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangeLetterboxingOffset>(this))
             ->setKeyDelta(0.01f)
             ->setAnimated(false);
 
@@ -604,9 +604,9 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
             UString::format("Automatically scale to the DPI of your display: %i DPI.\nScale factor = %i / 96 = %.2gx",
                             env->getDPI(), env->getDPI(), env->getDPIScale()),
             &cv::ui_scale_to_dpi)
-        ->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onDPIScalingChange));
+        ->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onDPIScalingChange>(this));
     this->uiScaleSlider = this->addSlider("UI Scale:", 1.0f, 1.5f, &cv::ui_scale);
-    this->uiScaleSlider->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangeUIScale));
+    this->uiScaleSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangeUIScale>(this));
     this->uiScaleSlider->setKeyDelta(0.01f);
     this->uiScaleSlider->setAnimated(false);
 
@@ -639,10 +639,10 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
                       &cv::force_legacy_slider_renderer);
     this->addCheckbox("Higher Quality Sliders (!)", "Disable this if your fps drop too low while sliders are visible.",
                       &cv::options_high_quality_sliders)
-        ->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onHighQualitySlidersCheckboxChange));
+        ->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onHighQualitySlidersCheckboxChange>(this));
     this->sliderQualitySlider = this->addSlider("Slider Quality", 0.0f, 1.0f, &cv::options_slider_quality);
     this->sliderQualitySlider->setChangeCallback(
-        fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangeSliderQuality));
+        SA::MakeDelegate<&OptionsMenu::onSliderChangeSliderQuality>(this));
 
     //**************************************************************************************************************************//
 
@@ -653,10 +653,10 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
         OPTIONS_ELEMENT outputDeviceSelect = this->addButton("Select Output Device", "Default", true);
         this->outputDeviceResetButton = outputDeviceSelect.resetButton;
         this->outputDeviceResetButton->setClickCallback(
-            fastdelegate::MakeDelegate(this, &OptionsMenu::onOutputDeviceResetClicked));
+            SA::MakeDelegate<&OptionsMenu::onOutputDeviceResetClicked>(this));
         this->outputDeviceSelectButton = (CBaseUIButton *)outputDeviceSelect.elements[0];
         this->outputDeviceSelectButton->setClickCallback(
-            fastdelegate::MakeDelegate(this, &OptionsMenu::onOutputDeviceSelect));
+            SA::MakeDelegate<&OptionsMenu::onOutputDeviceSelect>(this));
 
         this->outputDeviceLabel = (CBaseUILabel *)outputDeviceSelect.elements[1];
 
@@ -667,7 +667,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
             this->wasapiBufferSizeSlider =
                 this->addSlider("Buffer Size:", 0.000f, 0.050f, &cv::win_snd_wasapi_buffer_size);
             this->wasapiBufferSizeSlider->setChangeCallback(
-                fastdelegate::MakeDelegate(this, &OptionsMenu::onWASAPIBufferChange));
+                SA::MakeDelegate<&OptionsMenu::onWASAPIBufferChange>(this));
             this->wasapiBufferSizeSlider->setKeyDelta(0.001f);
             this->wasapiBufferSizeSlider->setAnimated(false);
             this->addLabel("Windows 7: Start at 11 ms,")->setTextColor(0xff666666);
@@ -684,11 +684,11 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
             this->wasapiPeriodSizeSlider =
                 this->addSlider("Period Size:", 0.0f, 0.050f, &cv::win_snd_wasapi_period_size);
             this->wasapiPeriodSizeSlider->setChangeCallback(
-                fastdelegate::MakeDelegate(this, &OptionsMenu::onWASAPIPeriodChange));
+                SA::MakeDelegate<&OptionsMenu::onWASAPIPeriodChange>(this));
             this->wasapiPeriodSizeSlider->setKeyDelta(0.001f);
             this->wasapiPeriodSizeSlider->setAnimated(false);
             UIButton *restartSoundEngine = this->addButton("Restart SoundEngine");
-            restartSoundEngine->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onOutputDeviceRestart));
+            restartSoundEngine->setClickCallback(SA::MakeDelegate<&OptionsMenu::onOutputDeviceRestart>(this));
             restartSoundEngine->setColor(0xff00566b);
             this->addLabel("");
         }
@@ -706,13 +706,13 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
             this->asioBufferSizeSlider->setAnimated(false);
             this->asioBufferSizeSlider->setLiveUpdate(false);
             this->asioBufferSizeSlider->setChangeCallback(
-                fastdelegate::MakeDelegate(this, &OptionsMenu::onASIOBufferChange));
+                SA::MakeDelegate<&OptionsMenu::onASIOBufferChange>(this));
             this->addLabel("");
             UIButton *asio_settings_btn = this->addButton("Open ASIO settings");
-            asio_settings_btn->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::OpenASIOSettings));
+            asio_settings_btn->setClickCallback(SA::MakeDelegate<&OptionsMenu::OpenASIOSettings>(this));
             asio_settings_btn->setColor(0xff00566b);
             UIButton *restartSoundEngine = this->addButton("Restart SoundEngine");
-            restartSoundEngine->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onOutputDeviceRestart));
+            restartSoundEngine->setClickCallback(SA::MakeDelegate<&OptionsMenu::onOutputDeviceRestart>(this));
             restartSoundEngine->setColor(0xff00566b);
         }
         auto asio_end_idx = this->elements.size();
@@ -725,25 +725,25 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
 
     if constexpr(Env::cfg(AUD::BASS)) {
         this->addCheckbox("Normalize loudness across songs", &cv::normalize_loudness)
-            ->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onLoudnessNormalizationToggle));
+            ->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onLoudnessNormalizationToggle>(this));
     }
 
     CBaseUISlider *masterVolumeSlider = this->addSlider("Master:", 0.0f, 1.0f, &cv::volume_master, 70.0f);
-    masterVolumeSlider->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangePercent));
+    masterVolumeSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     masterVolumeSlider->setKeyDelta(0.01f);
     CBaseUISlider *inactiveVolumeSlider = this->addSlider("Inactive:", 0.0f, 1.0f, &cv::volume_master_inactive, 70.0f);
-    inactiveVolumeSlider->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangePercent));
+    inactiveVolumeSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     inactiveVolumeSlider->setKeyDelta(0.01f);
     CBaseUISlider *musicVolumeSlider = this->addSlider("Music:", 0.0f, 1.0f, &cv::volume_music, 70.0f);
-    musicVolumeSlider->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangePercent));
+    musicVolumeSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     musicVolumeSlider->setKeyDelta(0.01f);
     CBaseUISlider *effectsVolumeSlider = this->addSlider("Effects:", 0.0f, 1.0f, &cv::volume_effects, 70.0f);
-    effectsVolumeSlider->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangePercent));
+    effectsVolumeSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     effectsVolumeSlider->setKeyDelta(0.01f);
 
     this->addSubSection("Offset Adjustment");
     CBaseUISlider *offsetSlider = this->addSlider("Universal Offset:", -300.0f, 300.0f, &cv::universal_offset);
-    offsetSlider->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangeIntMS));
+    offsetSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangeIntMS>(this));
     offsetSlider->setKeyDelta(1);
 
     this->addSubSection("Songbrowser");
@@ -754,7 +754,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addSubSection("Gameplay");
     this->addCheckbox("Change hitsound pitch based on accuracy", &cv::snd_pitch_hitsounds);
     this->addCheckbox("Prefer Nightcore over Double Time", &cv::nightcore_enjoyer)
-        ->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onNightcoreToggle));
+        ->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onNightcoreToggle>(this));
 
     //**************************************************************************************************************************//
 
@@ -770,17 +770,17 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
             this->skinLabel = (CBaseUILabel *)skinSelect.elements[1];
         }
         ((CBaseUIButton *)this->skinSelectLocalButton)
-            ->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSkinSelect));
+            ->setClickCallback(SA::MakeDelegate<&OptionsMenu::onSkinSelect>(this));
 
         this->addButton("Open current Skin folder")
-            ->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::openCurrentSkinFolder));
+            ->setClickCallback(SA::MakeDelegate<&OptionsMenu::openCurrentSkinFolder>(this));
 
         OPTIONS_ELEMENT skinReload = this->addButtonButton("Reload Skin", "Random Skin");
         ((UIButton *)skinReload.elements[0])
-            ->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSkinReload));
+            ->setClickCallback(SA::MakeDelegate<&OptionsMenu::onSkinReload>(this));
         ((UIButton *)skinReload.elements[0])->setTooltipText("(CTRL + ALT + S)");
         ((UIButton *)skinReload.elements[1])
-            ->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSkinRandom));
+            ->setClickCallback(SA::MakeDelegate<&OptionsMenu::onSkinRandom>(this));
         ((UIButton *)skinReload.elements[1])
             ->setTooltipText(
                 "Temporary, does not change your configured skin (reload to reset).\nUse \"osu_skin_random 1\" to "
@@ -794,11 +794,11 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
                       &cv::sort_skins_cleaned);
     CBaseUISlider *numberScaleSlider =
         this->addSlider("Number Scale:", 0.01f, 3.0f, &cv::number_scale_multiplier, 135.0f);
-    numberScaleSlider->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangePercent));
+    numberScaleSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     numberScaleSlider->setKeyDelta(0.01f);
     CBaseUISlider *hitResultScaleSlider =
         this->addSlider("HitResult Scale:", 0.01f, 3.0f, &cv::hitresult_scale, 135.0f);
-    hitResultScaleSlider->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangePercent));
+    hitResultScaleSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     hitResultScaleSlider->setKeyDelta(0.01f);
     this->addCheckbox("Draw Numbers", &cv::draw_numbers);
     this->addCheckbox("Draw Approach Circles", &cv::draw_approach_circles);
@@ -874,7 +874,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
                               "\"Tablet/Absolute Mode\").",
                               &cv::win_mouse_raw_input_buffer);
             this->addCheckbox("Map Absolute Raw Input to Window", &cv::mouse_raw_input_absolute_to_window)
-                ->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onRawInputToAbsoluteWindowChange));
+                ->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onRawInputToAbsoluteWindowChange>(this));
         }
     }
     // if constexpr(Env::cfg(OS::LINUX)) {
@@ -915,7 +915,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     UIButton *resetAllKeyBindingsButton = this->addButton("Reset all key bindings");
     resetAllKeyBindingsButton->setColor(0xffff0000);
     resetAllKeyBindingsButton->setClickCallback(
-        fastdelegate::MakeDelegate(this, &OptionsMenu::onKeyBindingsResetAllPressed));
+        SA::MakeDelegate<&OptionsMenu::onKeyBindingsResetAllPressed>(this));
     this->addSubSection("Keys - osu! Standard Mode", keyboardSectionTags);
     this->addKeyBindButton("Left Click", &cv::LEFT_CLICK);
     this->addKeyBindButton("Right Click", &cv::RIGHT_CLICK);
@@ -973,11 +973,11 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
 
     this->addSubSection("General");
     this->backgroundDimSlider = this->addSlider("Background Dim:", 0.0f, 1.0f, &cv::background_dim, 220.0f);
-    this->backgroundDimSlider->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangePercent));
+    this->backgroundDimSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     this->backgroundBrightnessSlider =
         this->addSlider("Background Brightness:", 0.0f, 1.0f, &cv::background_brightness, 220.0f);
     this->backgroundBrightnessSlider->setChangeCallback(
-        fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangePercent));
+        SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     this->addSpacer();
     this->addCheckbox("Don't change dim level during breaks",
                       "Makes the background basically impossible to see during breaks.\nNot recommended.",
@@ -1001,12 +1001,12 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
 
     OPTIONS_ELEMENT notelockSelect = this->addButton("Select [Notelock]", "None", true);
     ((CBaseUIButton *)notelockSelect.elements[0])
-        ->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onNotelockSelect));
+        ->setClickCallback(SA::MakeDelegate<&OptionsMenu::onNotelockSelect>(this));
     this->notelockSelectButton = notelockSelect.elements[0];
     this->notelockSelectLabel = (CBaseUILabel *)notelockSelect.elements[1];
     this->notelockSelectResetButton = notelockSelect.resetButton;
     this->notelockSelectResetButton->setClickCallback(
-        fastdelegate::MakeDelegate(this, &OptionsMenu::onNotelockSelectResetClicked));
+        SA::MakeDelegate<&OptionsMenu::onNotelockSelectResetClicked>(this));
     this->addLabel("");
     this->addLabel("Info about different notelock algorithms:")->setTextColor(0xff666666);
     this->addLabel("");
@@ -1088,63 +1088,63 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
         &cv::draw_statistics_hitdelta);
     this->addSpacer();
     this->hudSizeSlider = this->addSlider("HUD Scale:", 0.01f, 3.0f, &cv::hud_scale, 165.0f);
-    this->hudSizeSlider->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangePercent));
+    this->hudSizeSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     this->hudSizeSlider->setKeyDelta(0.01f);
     this->addSpacer();
     this->hudScoreScaleSlider = this->addSlider("Score Scale:", 0.01f, 3.0f, &cv::hud_score_scale, 165.0f);
-    this->hudScoreScaleSlider->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangePercent));
+    this->hudScoreScaleSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     this->hudScoreScaleSlider->setKeyDelta(0.01f);
     this->hudComboScaleSlider = this->addSlider("Combo Scale:", 0.01f, 3.0f, &cv::hud_combo_scale, 165.0f);
-    this->hudComboScaleSlider->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangePercent));
+    this->hudComboScaleSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     this->hudComboScaleSlider->setKeyDelta(0.01f);
     this->hudAccuracyScaleSlider = this->addSlider("Accuracy Scale:", 0.01f, 3.0f, &cv::hud_accuracy_scale, 165.0f);
     this->hudAccuracyScaleSlider->setChangeCallback(
-        fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangePercent));
+        SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     this->hudAccuracyScaleSlider->setKeyDelta(0.01f);
     this->hudHiterrorbarScaleSlider =
         this->addSlider("HitErrorBar Scale:", 0.01f, 3.0f, &cv::hud_hiterrorbar_scale, 165.0f);
     this->hudHiterrorbarScaleSlider->setChangeCallback(
-        fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangePercent));
+        SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     this->hudHiterrorbarScaleSlider->setKeyDelta(0.01f);
     this->hudHiterrorbarURScaleSlider =
         this->addSlider("HitErrorBar UR Scale:", 0.01f, 3.0f, &cv::hud_hiterrorbar_ur_scale, 165.0f);
     this->hudHiterrorbarURScaleSlider->setChangeCallback(
-        fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangePercent));
+        SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     this->hudHiterrorbarURScaleSlider->setKeyDelta(0.01f);
     this->hudProgressbarScaleSlider =
         this->addSlider("ProgressBar Scale:", 0.01f, 3.0f, &cv::hud_progressbar_scale, 165.0f);
     this->hudProgressbarScaleSlider->setChangeCallback(
-        fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangePercent));
+        SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     this->hudProgressbarScaleSlider->setKeyDelta(0.01f);
     this->hudScoreBarScaleSlider = this->addSlider("ScoreBar Scale:", 0.01f, 3.0f, &cv::hud_scorebar_scale, 165.0f);
     this->hudScoreBarScaleSlider->setChangeCallback(
-        fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangePercent));
+        SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     this->hudScoreBarScaleSlider->setKeyDelta(0.01f);
     this->hudScoreBoardScaleSlider =
         this->addSlider("ScoreBoard Scale:", 0.01f, 3.0f, &cv::hud_scoreboard_scale, 165.0f);
     this->hudScoreBoardScaleSlider->setChangeCallback(
-        fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangePercent));
+        SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     this->hudScoreBoardScaleSlider->setKeyDelta(0.01f);
     this->hudInputoverlayScaleSlider =
         this->addSlider("Key Overlay Scale:", 0.01f, 3.0f, &cv::hud_inputoverlay_scale, 165.0f);
     this->hudInputoverlayScaleSlider->setChangeCallback(
-        fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangePercent));
+        SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     this->hudInputoverlayScaleSlider->setKeyDelta(0.01f);
     this->statisticsOverlayScaleSlider =
         this->addSlider("Statistics Scale:", 0.01f, 3.0f, &cv::hud_statistics_scale, 165.0f);
     this->statisticsOverlayScaleSlider->setChangeCallback(
-        fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangePercent));
+        SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     this->statisticsOverlayScaleSlider->setKeyDelta(0.01f);
     this->addSpacer();
     this->statisticsOverlayXOffsetSlider =
         this->addSlider("Statistics X Offset:", 0.0f, 2000.0f, &cv::hud_statistics_offset_x, 165.0f, true);
     this->statisticsOverlayXOffsetSlider->setChangeCallback(
-        fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangeInt));
+        SA::MakeDelegate<&OptionsMenu::onSliderChangeInt>(this));
     this->statisticsOverlayXOffsetSlider->setKeyDelta(1.0f);
     this->statisticsOverlayYOffsetSlider =
         this->addSlider("Statistics Y Offset:", 0.0f, 1000.0f, &cv::hud_statistics_offset_y, 165.0f, true);
     this->statisticsOverlayYOffsetSlider->setChangeCallback(
-        fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangeInt));
+        SA::MakeDelegate<&OptionsMenu::onSliderChangeInt>(this));
     this->statisticsOverlayYOffsetSlider->setKeyDelta(1.0f);
 
     this->addSubSection("Playfield");
@@ -1155,7 +1155,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->playfieldBorderSizeSlider =
         this->addSlider("Playfield Border Size:", 0.0f, 500.0f, &cv::hud_playfield_border_size);
     this->playfieldBorderSizeSlider->setChangeCallback(
-        fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangeInt));
+        SA::MakeDelegate<&OptionsMenu::onSliderChangeInt>(this));
     this->playfieldBorderSizeSlider->setKeyDelta(1.0f);
 
     this->addSubSection("Hitobjects");
@@ -1188,11 +1188,11 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addCheckbox("Vertical FOV", "If enabled: Vertical FOV.\nIf disabled: Horizontal FOV (default).",
                       &cv::fposu_vertical_fov);
     CBaseUISlider *fovSlider = this->addSlider("FOV:", 10.0f, 160.0f, &cv::fposu_fov, -1.0f, true, true);
-    fovSlider->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangeTwoDecimalPlaces));
+    fovSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangeTwoDecimalPlaces>(this));
     fovSlider->setKeyDelta(0.01f);
     CBaseUISlider *zoomedFovSlider =
         this->addSlider("FOV (Zoom):", 10.0f, 160.0f, &cv::fposu_zoom_fov, -1.0f, true, true);
-    zoomedFovSlider->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangeTwoDecimalPlaces));
+    zoomedFovSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangeTwoDecimalPlaces>(this));
     zoomedFovSlider->setKeyDelta(0.01f);
     this->addCheckbox("Zoom Key Toggle", "Enabled: Zoom key toggles zoom.\nDisabled: Zoom while zoom key is held.",
                       &cv::fposu_zoom_toggle);
@@ -1205,7 +1205,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
         this->addSubSection("FPoSu - Mouse");
         UIButton *cm360CalculatorLinkButton = this->addButton("https://www.mouse-sensitivity.com/");
         cm360CalculatorLinkButton->setClickCallback(
-            fastdelegate::MakeDelegate(this, &OptionsMenu::onCM360CalculatorLinkClicked));
+            SA::MakeDelegate<&OptionsMenu::onCM360CalculatorLinkClicked>(this));
         cm360CalculatorLinkButton->setColor(0xff10667b);
         this->addLabel("");
         this->dpiTextbox = this->addTextbox(cv::fposu_mouse_dpi.getString().c_str(), "DPI:", &cv::fposu_mouse_dpi);
@@ -1243,7 +1243,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->passwordTextbox->is_password = true;
     this->elements.back().render_condition = RenderCondition::PASSWORD_AUTH;
     this->logInButton = this->addButton("Log in");
-    this->logInButton->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onLogInClicked));
+    this->logInButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onLogInClicked>(this));
     this->logInButton->setColor(0xff00ff00);
     this->logInButton->setTextColor(0xffffffff);
 
@@ -1268,10 +1268,10 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addSection("Maintenance");
     this->addSubSection("Restore");
     UIButton *resetAllSettingsButton = this->addButton("Reset all settings");
-    resetAllSettingsButton->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onResetEverythingClicked));
+    resetAllSettingsButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onResetEverythingClicked>(this));
     resetAllSettingsButton->setColor(0xffff0000);
     UIButton *importSettingsButton = this->addButton("Import settings from osu!stable");
-    importSettingsButton->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onImportSettingsFromStable));
+    importSettingsButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onImportSettingsFromStable>(this));
     importSettingsButton->setColor(0xffff0000);
     this->addSpacer();
     this->addSpacer();
@@ -2423,7 +2423,7 @@ void OptionsMenu::onSkinSelect() {
             if(skinFolders[i].compare(cv::skin.getString()) == 0) button->setTextBrightColor(0xff00ff00);
         }
         this->contextMenu->end(false, !this->bVisible);
-        this->contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSkinSelect2));
+        this->contextMenu->setClickCallback(SA::MakeDelegate<&OptionsMenu::onSkinSelect2>(this));
 
         if(!this->bVisible) {
             // Center context menu
@@ -2535,7 +2535,7 @@ void OptionsMenu::onResolutionSelect() {
             UString::format("%ix%i", (int)std::round(customResolutions[i].x), (int)std::round(customResolutions[i].y)));
     }
     this->contextMenu->end(false, false);
-    this->contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onResolutionSelect2));
+    this->contextMenu->setClickCallback(SA::MakeDelegate<&OptionsMenu::onResolutionSelect2>(this));
 
     // reposition context monu
     f32 menu_width = this->contextMenu->getSize().x;
@@ -2572,7 +2572,7 @@ void OptionsMenu::onOutputDeviceSelect() {
         if(device.name == soundEngine->getOutputDeviceName()) button->setTextBrightColor(0xff00ff00);
     }
     this->contextMenu->end(false, true);
-    this->contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onOutputDeviceSelect2));
+    this->contextMenu->setClickCallback(SA::MakeDelegate<&OptionsMenu::onOutputDeviceSelect2>(this));
     this->options->setScrollSizeToContent();
 }
 
@@ -2647,7 +2647,7 @@ void OptionsMenu::onNotelockSelect() {
         }
     }
     this->contextMenu->end(false, false);
-    this->contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onNotelockSelect2));
+    this->contextMenu->setClickCallback(SA::MakeDelegate<&OptionsMenu::onNotelockSelect2>(this));
     this->options->setScrollSizeToContent();
 }
 
@@ -3394,7 +3394,7 @@ OptionsMenuKeyBindButton *OptionsMenu::addKeyBindButton(const UString &text, Con
     unbindButton->setTooltipText("Unbind");
     unbindButton->setColor(0x77ff0000);
     unbindButton->setUseDefaultSkin();
-    unbindButton->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onKeyUnbindButtonPressed));
+    unbindButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onKeyUnbindButtonPressed>(this));
     /// unbindButton->setFont(osu->getFontIcons());
     this->options->getContainer()->addBaseUIElement(unbindButton);
 
@@ -3402,7 +3402,7 @@ OptionsMenuKeyBindButton *OptionsMenu::addKeyBindButton(const UString &text, Con
         new OptionsMenuKeyBindButton(0, 0, this->options->getSize().x, 50, text, text);
     bindButton->setColor(0xff0e94b5);
     bindButton->setUseDefaultSkin();
-    bindButton->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onKeyBindingButtonPressed));
+    bindButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onKeyBindingButtonPressed>(this));
     this->options->getContainer()->addBaseUIElement(bindButton);
 
     OptionsMenuKeyBindLabel *label =
@@ -3435,7 +3435,7 @@ CBaseUICheckbox *OptionsMenu::addCheckbox(const UString &text, const UString &to
 
     if(cvar != NULL) {
         checkbox->setChecked(cvar->getBool());
-        checkbox->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onCheckboxChange));
+        checkbox->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onCheckboxChange>(this));
     }
 
     this->options->getContainer()->addBaseUIElement(checkbox);
@@ -3443,7 +3443,7 @@ CBaseUICheckbox *OptionsMenu::addCheckbox(const UString &text, const UString &to
     OPTIONS_ELEMENT e;
     if(cvar != NULL) {
         e.resetButton = new OptionsMenuResetButton(0, 0, 35, 50, "", "");
-        e.resetButton->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onResetClicked));
+        e.resetButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onResetClicked>(this));
     }
     e.elements.push_back(checkbox);
     e.type = 6;
@@ -3461,7 +3461,7 @@ UISlider *OptionsMenu::addSlider(const UString &text, float min, float max, ConV
     slider->setLiveUpdate(true);
     if(cvar != NULL) {
         slider->setValue(cvar->getFloat(), false);
-        slider->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChange));
+        slider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChange>(this));
     }
     this->options->getContainer()->addBaseUIElement(slider);
 
@@ -3483,7 +3483,7 @@ UISlider *OptionsMenu::addSlider(const UString &text, float min, float max, ConV
     OPTIONS_ELEMENT e;
     if(cvar != NULL) {
         e.resetButton = new OptionsMenuResetButton(0, 0, 35, 50, "", "");
-        e.resetButton->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onResetClicked));
+        e.resetButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onResetClicked>(this));
     }
     e.elements.push_back(label1);
     e.elements.push_back(slider);
@@ -3567,7 +3567,7 @@ OptionsMenuCategoryButton *OptionsMenu::addCategory(CBaseUIElement *section, wch
     button->setFont(osu->getFontIcons());
     button->setDrawBackground(false);
     button->setDrawFrame(false);
-    button->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onCategoryClicked));
+    button->setClickCallback(SA::MakeDelegate<&OptionsMenu::onCategoryClicked>(this));
     this->categories->getContainer()->addBaseUIElement(button);
     this->categoryButtons.push_back(button);
 

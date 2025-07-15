@@ -20,7 +20,7 @@ std::mutex g_consoleLogMutex;
 
 Console::Console() : CBaseUIWindow(350, 100, 620, 550, "Console") {
     // convar bindings
-    cv::cmd::clear.setCallback(fastdelegate::MakeDelegate(this, &Console::clear));
+    cv::cmd::clear.setCallback(SA::MakeDelegate<&Console::clear>(this));
 
     // resources
     this->logFont = resourceManager->getFont("FONT_CONSOLE");

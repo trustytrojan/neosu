@@ -24,7 +24,7 @@ class UIContextMenu : public CBaseUIScrollView {
     void onKeyDown(KeyboardEvent &e) override;
     void onChar(KeyboardEvent &e) override;
 
-    typedef fastdelegate::FastDelegate2<const UString &, int> ButtonClickCallback;
+    using ButtonClickCallback = SA::delegate<void(const UString &, int)>;
     void setClickCallback(const ButtonClickCallback& clickCallback) { this->clickCallback = clickCallback; }
 
     void begin(int minWidth = 0, bool bigStyle = false);
@@ -51,7 +51,7 @@ class UIContextMenu : public CBaseUIScrollView {
 
     CBaseUIScrollView *parent = NULL;
     UIContextMenuTextbox *containedTextbox = NULL;
-    ButtonClickCallback clickCallback = NULL;
+    ButtonClickCallback clickCallback = {};
 
     i32 iYCounter = 0;
     i32 iWidthCounter = 0;

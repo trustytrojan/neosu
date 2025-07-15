@@ -354,12 +354,12 @@ SongBrowser::SongBrowser() : ScreenBackable() {
 
     this->scoreSortButton = new CBaseUIButton(0, 0, 0, 0, "", "Sort by score");
     this->scoreSortButton->setDrawBackground(false);
-    this->scoreSortButton->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onSortScoresClicked));
+    this->scoreSortButton->setClickCallback(SA::MakeDelegate<&SongBrowser::onSortScoresClicked>(this));
     this->topbarLeft->addBaseUIElement(this->scoreSortButton);
 
     this->webButton = new CBaseUIButton(0, 0, 0, 0, "", "Web");
     this->webButton->setDrawBackground(false);
-    this->webButton->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onWebClicked));
+    this->webButton->setClickCallback(SA::MakeDelegate<&SongBrowser::onWebClicked>(this));
     this->topbarLeft->addBaseUIElement(this->webButton);
 
     // build topbar right
@@ -374,7 +374,7 @@ SongBrowser::SongBrowser() : ScreenBackable() {
 
         this->groupButton = new CBaseUIButton(0, 0, 0, 0, "", "No Grouping");
         this->groupButton->setDrawBackground(false);
-        this->groupButton->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onGroupClicked));
+        this->groupButton->setClickCallback(SA::MakeDelegate<&SongBrowser::onGroupClicked>(this));
         this->groupButton->grabs_clicks = true;
         this->topbarRight->addBaseUIElement(this->groupButton);
 
@@ -387,7 +387,7 @@ SongBrowser::SongBrowser() : ScreenBackable() {
 
         this->sortButton = new CBaseUIButton(0, 0, 0, 0, "", "By Date Added");
         this->sortButton->setDrawBackground(false);
-        this->sortButton->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onSortClicked));
+        this->sortButton->setClickCallback(SA::MakeDelegate<&SongBrowser::onSortClicked>(this));
         this->sortButton->grabs_clicks = true;
         this->topbarRight->addBaseUIElement(this->sortButton);
 
@@ -395,23 +395,23 @@ SongBrowser::SongBrowser() : ScreenBackable() {
         this->groupByCollectionBtn = new CBaseUIButton(0, 0, 0, 0, "", "Collections");
         this->groupByCollectionBtn->setDrawBackground(false);
         this->groupByCollectionBtn->setClickCallback(
-            fastdelegate::MakeDelegate(this, &SongBrowser::onQuickGroupClicked));
+            SA::MakeDelegate<&SongBrowser::onQuickGroupClicked>(this));
         this->groupByCollectionBtn->grabs_clicks = true;
         this->topbarRight->addBaseUIElement(this->groupByCollectionBtn);
         this->groupByArtistBtn = new CBaseUIButton(0, 0, 0, 0, "", "By Artist");
         this->groupByArtistBtn->setDrawBackground(false);
-        this->groupByArtistBtn->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onQuickGroupClicked));
+        this->groupByArtistBtn->setClickCallback(SA::MakeDelegate<&SongBrowser::onQuickGroupClicked>(this));
         this->groupByArtistBtn->grabs_clicks = true;
         this->topbarRight->addBaseUIElement(this->groupByArtistBtn);
         this->groupByDifficultyBtn = new CBaseUIButton(0, 0, 0, 0, "", "By Difficulty");
         this->groupByDifficultyBtn->setDrawBackground(false);
         this->groupByDifficultyBtn->setClickCallback(
-            fastdelegate::MakeDelegate(this, &SongBrowser::onQuickGroupClicked));
+            SA::MakeDelegate<&SongBrowser::onQuickGroupClicked>(this));
         this->groupByDifficultyBtn->grabs_clicks = true;
         this->topbarRight->addBaseUIElement(this->groupByDifficultyBtn);
         this->groupByNothingBtn = new CBaseUIButton(0, 0, 0, 0, "", "No Grouping");
         this->groupByNothingBtn->setDrawBackground(false);
-        this->groupByNothingBtn->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onQuickGroupClicked));
+        this->groupByNothingBtn->setClickCallback(SA::MakeDelegate<&SongBrowser::onQuickGroupClicked>(this));
         this->groupByNothingBtn->grabs_clicks = true;
         this->topbarRight->addBaseUIElement(this->groupByNothingBtn);
     }
@@ -2516,7 +2516,7 @@ void SongBrowser::rebuildScoreButtons() {
                     SAFE_DELETE(this->localBestButton);
                     this->localBestButton = new ScoreButton(this->contextMenu, 0, 0, 0, 0);
                     this->localBestButton->setClickCallback(
-                        fastdelegate::MakeDelegate(this, &SongBrowser::onScoreClicked));
+                        SA::MakeDelegate<&SongBrowser::onScoreClicked>(this));
                     this->localBestButton->map_hash = diff2->getMD5Hash();
                     this->localBestButton->setScore(*local_best, diff2);
                     this->localBestButton->resetHighlight();
@@ -2539,7 +2539,7 @@ void SongBrowser::rebuildScoreButtons() {
                     SAFE_DELETE(this->localBestButton);
                     this->localBestButton = new ScoreButton(this->contextMenu, 0, 0, 0, 0);
                     this->localBestButton->setClickCallback(
-                        fastdelegate::MakeDelegate(this, &SongBrowser::onScoreClicked));
+                        SA::MakeDelegate<&SongBrowser::onScoreClicked>(this));
                     this->localBestButton->map_hash = diff2->getMD5Hash();
                     this->localBestButton->setScore(*local_best, diff2);
                     this->localBestButton->resetHighlight();
@@ -2561,7 +2561,7 @@ void SongBrowser::rebuildScoreButtons() {
         const int numNewButtons = numScores - this->scoreButtonCache.size();
         for(size_t i = 0; i < numNewButtons; i++) {
             ScoreButton *scoreButton = new ScoreButton(this->contextMenu, 0, 0, 0, 0);
-            scoreButton->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onScoreClicked));
+            scoreButton->setClickCallback(SA::MakeDelegate<&SongBrowser::onScoreClicked>(this));
             this->scoreButtonCache.push_back(scoreButton);
         }
     }
@@ -2992,7 +2992,7 @@ void SongBrowser::onSortScoresClicked(CBaseUIButton *button) {
         }
     }
     this->contextMenu->end(false, false);
-    this->contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onSortScoresChange));
+    this->contextMenu->setClickCallback(SA::MakeDelegate<&SongBrowser::onSortScoresChange>(this));
 }
 
 void SongBrowser::onSortScoresChange(const UString& text, int  /*id*/) {
@@ -3045,7 +3045,7 @@ void SongBrowser::onGroupClicked(CBaseUIButton *button) {
         }
     }
     this->contextMenu->end(false, false);
-    this->contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onGroupChange));
+    this->contextMenu->setClickCallback(SA::MakeDelegate<&SongBrowser::onGroupChange>(this));
 }
 
 void SongBrowser::onGroupChange(const UString& text, int id) {
@@ -3109,7 +3109,7 @@ void SongBrowser::onSortClicked(CBaseUIButton *button) {
         }
     }
     this->contextMenu->end(false, false);
-    this->contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onSortChange));
+    this->contextMenu->setClickCallback(SA::MakeDelegate<&SongBrowser::onSortChange>(this));
 }
 
 void SongBrowser::onSortChange(const UString& text, int  /*id*/) { this->onSortChangeInt(text, true); }

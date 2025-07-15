@@ -109,7 +109,7 @@ SpectatorScreen::SpectatorScreen() {
     this->lfont = osu->getSubTitleFont();
 
     this->pauseButton = new MainMenuPauseButton(0, 0, 0, 0, "pause_btn", "");
-    this->pauseButton->setClickCallback(fastdelegate::MakeDelegate(osu->mainMenu, &MainMenu::onPausePressed));
+    this->pauseButton->setClickCallback(SA::MakeDelegate<&MainMenu::onPausePressed>(osu->mainMenu));
     this->addBaseUIElement(this->pauseButton);
 
     this->background = new CBaseUIScrollView(0, 0, 0, 0, "spectator_bg");
@@ -133,7 +133,7 @@ SpectatorScreen::SpectatorScreen() {
     this->stop_btn->grabs_clicks = true;
     this->stop_btn->setColor(0xff00ff00);
     this->stop_btn->setUseDefaultSkin();
-    this->stop_btn->setClickCallback(fastdelegate::MakeDelegate(this, &SpectatorScreen::onStopSpectatingClicked));
+    this->stop_btn->setClickCallback(SA::MakeDelegate<&SpectatorScreen::onStopSpectatingClicked>(this));
     this->addBaseUIElement(this->stop_btn);
 
     // isVisible() is overridden

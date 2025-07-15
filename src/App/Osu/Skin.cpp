@@ -330,7 +330,7 @@ Skin::Skin(const UString& name, std::string filepath, bool isDefaultSkin) {
 
     // convar callbacks
     cv::ignore_beatmap_sample_volume.setCallback(
-        fastdelegate::MakeDelegate(this, &Skin::onIgnoreBeatmapSampleVolumeChange));
+        SA::MakeDelegate<&Skin::onIgnoreBeatmapSampleVolumeChange>(this));
 }
 
 Skin::~Skin() {

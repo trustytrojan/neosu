@@ -19,13 +19,13 @@ PromptScreen::PromptScreen() : OsuScreen() {
     this->ok_btn = new UIButton(0, 0, 110, 35, "ok_btn", "OK");
     this->ok_btn->setColor(0xff00ff00);
     this->ok_btn->setUseDefaultSkin();
-    this->ok_btn->setClickCallback(fastdelegate::MakeDelegate(this, &PromptScreen::on_ok));
+    this->ok_btn->setClickCallback(SA::MakeDelegate<&PromptScreen::on_ok>(this));
     this->addBaseUIElement(this->ok_btn);
 
     this->cancel_btn = new UIButton(0, 0, 110, 35, "cancel_btn", "Cancel");
     this->cancel_btn->setColor(0xff0e94b5);
     this->cancel_btn->setUseDefaultSkin();
-    this->cancel_btn->setClickCallback(fastdelegate::MakeDelegate(this, &PromptScreen::on_cancel));
+    this->cancel_btn->setClickCallback(SA::MakeDelegate<&PromptScreen::on_cancel>(this));
     this->addBaseUIElement(this->cancel_btn);
 }
 

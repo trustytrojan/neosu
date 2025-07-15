@@ -205,26 +205,26 @@ MainMenu::MainMenu() : OsuScreen() {
     this->setSize(osu->getScreenWidth(), osu->getScreenHeight());
 
     this->cube = new MainMenuCubeButton(0, 0, 1, 1, "", "");
-    this->cube->setClickCallback(fastdelegate::MakeDelegate(this, &MainMenu::onCubePressed));
+    this->cube->setClickCallback(SA::MakeDelegate<&MainMenu::onCubePressed>(this));
     this->addBaseUIElement(this->cube);
 
     this->addMainMenuButton("Singleplayer")
-        ->setClickCallback(fastdelegate::MakeDelegate(this, &MainMenu::onPlayButtonPressed));
+        ->setClickCallback(SA::MakeDelegate<&MainMenu::onPlayButtonPressed>(this));
     this->addMainMenuButton("Multiplayer")
-        ->setClickCallback(fastdelegate::MakeDelegate(this, &MainMenu::onMultiplayerButtonPressed));
+        ->setClickCallback(SA::MakeDelegate<&MainMenu::onMultiplayerButtonPressed>(this));
     this->addMainMenuButton("Options (CTRL + O)")
-        ->setClickCallback(fastdelegate::MakeDelegate(this, &MainMenu::onOptionsButtonPressed));
-    this->addMainMenuButton("Exit")->setClickCallback(fastdelegate::MakeDelegate(this, &MainMenu::onExitButtonPressed));
+        ->setClickCallback(SA::MakeDelegate<&MainMenu::onOptionsButtonPressed>(this));
+    this->addMainMenuButton("Exit")->setClickCallback(SA::MakeDelegate<&MainMenu::onExitButtonPressed>(this));
 
     this->pauseButton = new MainMenuPauseButton(0, 0, 0, 0, "", "");
-    this->pauseButton->setClickCallback(fastdelegate::MakeDelegate(this, &MainMenu::onPausePressed));
+    this->pauseButton->setClickCallback(SA::MakeDelegate<&MainMenu::onPausePressed>(this));
     this->addBaseUIElement(this->pauseButton);
 
     // TODO @spec: shouldn't this be portable-ish already?
     if constexpr(Env::cfg(OS::WINDOWS)) {
         this->updateAvailableButton = new UIButton(0, 0, 0, 0, "", "Checking for updates ...");
         this->updateAvailableButton->setUseDefaultSkin();
-        this->updateAvailableButton->setClickCallback(fastdelegate::MakeDelegate(this, &MainMenu::onUpdatePressed));
+        this->updateAvailableButton->setClickCallback(SA::MakeDelegate<&MainMenu::onUpdatePressed>(this));
         this->updateAvailableButton->setColor(0x2200ff00);
         this->updateAvailableButton->setTextColor(0x22ffffff);
     }
@@ -234,7 +234,7 @@ MainMenu::MainMenu() : OsuScreen() {
     this->versionButton->setText(versionString);
     this->versionButton->setDrawBackground(false);
     this->versionButton->setDrawFrame(false);
-    this->versionButton->setClickCallback(fastdelegate::MakeDelegate(this, &MainMenu::onVersionPressed));
+    this->versionButton->setClickCallback(SA::MakeDelegate<&MainMenu::onVersionPressed>(this));
     this->addBaseUIElement(this->versionButton);
 }
 

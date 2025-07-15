@@ -455,7 +455,7 @@ Changelog::Changelog() : ScreenBackable() {
             };
 
             CBaseUIButton *change = new CustomCBaseUILabel(changelogs[i].changes[c]);
-            change->setClickCallback(fastdelegate::MakeDelegate(this, &Changelog::onChangeClicked));
+            change->setClickCallback(SA::MakeDelegate<&Changelog::onChangeClicked>(this));
 
             if(i > 0) change->setTextColor(0xff888888);
 

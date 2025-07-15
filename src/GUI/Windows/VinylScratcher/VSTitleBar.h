@@ -17,7 +17,7 @@ class CBaseUIButton;
 
 class VSTitleBar : public CBaseUIElement {
    public:
-    typedef fastdelegate::FastDelegate0<> SeekCallback;
+    using SeekCallback = SA::delegate<void()>;
 
    public:
     VSTitleBar(int x, int y, int xSize, McFont *font);

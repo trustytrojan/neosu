@@ -53,9 +53,9 @@ WinEnvironment::WinEnvironment(HWND hwnd, HINSTANCE hinstance) : Environment() {
     }
 
     // convar callbacks
-    cv::win_processpriority.setCallback(fastdelegate::MakeDelegate(this, &WinEnvironment::onProcessPriorityChange));
+    cv::win_processpriority.setCallback(SA::MakeDelegate<&WinEnvironment::onProcessPriorityChange>(this));
     cv::win_disable_windows_key.setCallback(
-        fastdelegate::MakeDelegate(this, &WinEnvironment::onDisableWindowsKeyChange));
+        SA::MakeDelegate<&WinEnvironment::onDisableWindowsKeyChange>(this));
 
     setProcessPriority(cv::win_processpriority.getInt());
 }

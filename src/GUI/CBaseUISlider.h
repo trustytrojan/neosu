@@ -31,7 +31,7 @@ class CBaseUISlider : public CBaseUIElement {
     void setBlockSize(float xSize, float ySize);
 
     // callbacks, either void or with ourself as the argument
-    typedef fastdelegate::FastDelegate1<CBaseUISlider *> SliderChangeCallback;
+    using SliderChangeCallback = SA::delegate<void(CBaseUISlider *)>;
     CBaseUISlider *setChangeCallback(const SliderChangeCallback& changeCallback) {
         this->sliderChangeCallback = changeCallback;
         return this;

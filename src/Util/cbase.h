@@ -29,7 +29,8 @@
 // ENGINE INCLUDES
 
 #include "Environment.h"
-#include "FastDelegate.h"
+#include "MultiCastDelegate.h"
+#include "MakeDelegateWrapper.h"
 #include "Color.h"
 #include "Graphics.h"
 #include "KeyboardEvent.h"

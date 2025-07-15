@@ -130,20 +130,20 @@ Osu::Osu() {
 
     // convar callbacks
     cv::resolution.setValue(UString::format("%ix%i", engine->getScreenWidth(), engine->getScreenHeight()));
-    cv::resolution.setCallback(fastdelegate::MakeDelegate(this, &Osu::onInternalResolutionChanged));
-    cv::windowed_resolution.setCallback(fastdelegate::MakeDelegate(this, &Osu::onWindowedResolutionChanged));
-    cv::animation_speed_override.setCallback(fastdelegate::MakeDelegate(this, &Osu::onAnimationSpeedChange));
-    cv::ui_scale.setCallback(fastdelegate::MakeDelegate(this, &Osu::onUIScaleChange));
-    cv::ui_scale_to_dpi.setCallback(fastdelegate::MakeDelegate(this, &Osu::onUIScaleToDPIChange));
-    cv::letterboxing.setCallback(fastdelegate::MakeDelegate(this, &Osu::onLetterboxingChange));
-    cv::letterboxing_offset_x.setCallback(fastdelegate::MakeDelegate(this, &Osu::onLetterboxingOffsetChange));
-    cv::letterboxing_offset_y.setCallback(fastdelegate::MakeDelegate(this, &Osu::onLetterboxingOffsetChange));
-    cv::confine_cursor_windowed.setCallback(fastdelegate::MakeDelegate(this, &Osu::updateConfineCursor));
-    cv::confine_cursor_fullscreen.setCallback(fastdelegate::MakeDelegate(this, &Osu::updateConfineCursor));
-    cv::confine_cursor_never.setCallback(fastdelegate::MakeDelegate(this, &Osu::updateConfineCursor));
+    cv::resolution.setCallback(SA::MakeDelegate<&Osu::onInternalResolutionChanged>(this));
+    cv::windowed_resolution.setCallback(SA::MakeDelegate<&Osu::onWindowedResolutionChanged>(this));
+    cv::animation_speed_override.setCallback(SA::MakeDelegate<&Osu::onAnimationSpeedChange>(this));
+    cv::ui_scale.setCallback(SA::MakeDelegate<&Osu::onUIScaleChange>(this));
+    cv::ui_scale_to_dpi.setCallback(SA::MakeDelegate<&Osu::onUIScaleToDPIChange>(this));
+    cv::letterboxing.setCallback(SA::MakeDelegate<&Osu::onLetterboxingChange>(this));
+    cv::letterboxing_offset_x.setCallback(SA::MakeDelegate<&Osu::onLetterboxingOffsetChange>(this));
+    cv::letterboxing_offset_y.setCallback(SA::MakeDelegate<&Osu::onLetterboxingOffsetChange>(this));
+    cv::confine_cursor_windowed.setCallback(SA::MakeDelegate<&Osu::updateConfineCursor>(this));
+    cv::confine_cursor_fullscreen.setCallback(SA::MakeDelegate<&Osu::updateConfineCursor>(this));
+    cv::confine_cursor_never.setCallback(SA::MakeDelegate<&Osu::updateConfineCursor>(this));
     if constexpr(Env::cfg(OS::LINUX)) {
-        cv::mouse_raw_input.setCallback(fastdelegate::MakeDelegate(this, &Osu::onRawInputChange));
-        cv::mouse_sensitivity.setCallback(fastdelegate::MakeDelegate(this, &Osu::onSensitivityChange));
+        cv::mouse_raw_input.setCallback(SA::MakeDelegate<&Osu::onRawInputChange>(this));
+        cv::mouse_sensitivity.setCallback(SA::MakeDelegate<&Osu::onSensitivityChange>(this));
     }
 
     // vars
@@ -229,31 +229,31 @@ Osu::Osu() {
     soundEngine->updateOutputDevices(true);
     soundEngine->initializeOutputDevice(soundEngine->getWantedDevice());
     cv::snd_output_device.setValue(soundEngine->getOutputDeviceName());
-    cv::snd_freq.setCallback(fastdelegate::MakeDelegate(soundEngine.get(), &SoundEngine::onFreqChanged));
-    cv::snd_restart.setCallback(fastdelegate::MakeDelegate(soundEngine.get(), &SoundEngine::restart));
+    cv::snd_freq.setCallback(SA::MakeDelegate<&SoundEngine::onFreqChanged>(soundEngine.get()));
+    cv::snd_restart.setCallback(SA::MakeDelegate<&SoundEngine::restart>(soundEngine.get()));
     cv::win_snd_wasapi_exclusive.setCallback(
-        fastdelegate::MakeDelegate(soundEngine.get(), &SoundEngine::onParamChanged));
+        SA::MakeDelegate<&SoundEngine::onParamChanged>(soundEngine.get()));
     cv::win_snd_wasapi_buffer_size.setCallback(
-        fastdelegate::MakeDelegate(soundEngine.get(), &SoundEngine::onParamChanged));
+        SA::MakeDelegate<&SoundEngine::onParamChanged>(soundEngine.get()));
     cv::win_snd_wasapi_period_size.setCallback(
-        fastdelegate::MakeDelegate(soundEngine.get(), &SoundEngine::onParamChanged));
-    cv::asio_buffer_size.setCallback(fastdelegate::MakeDelegate(soundEngine.get(), &SoundEngine::onParamChanged));
+        SA::MakeDelegate<&SoundEngine::onParamChanged>(soundEngine.get()));
+    cv::asio_buffer_size.setCallback(SA::MakeDelegate<&SoundEngine::onParamChanged>(soundEngine.get()));
 
     // Initialize skin after sound engine has started, or else sounds won't load properly
-    cv::skin.setCallback(fastdelegate::MakeDelegate(this, &Osu::onSkinChange));
-    cv::skin_reload.setCallback(fastdelegate::MakeDelegate(this, &Osu::onSkinReload));
+    cv::skin.setCallback(SA::MakeDelegate<&Osu::onSkinChange>(this));
+    cv::skin_reload.setCallback(SA::MakeDelegate<&Osu::onSkinReload>(this));
     this->onSkinChange(cv::skin.getString().c_str());
 
     // Convar callbacks that should be set after loading the config
-    cv::mod_mafham.setCallback(fastdelegate::MakeDelegate(this, &Osu::onModMafhamChange));
-    cv::mod_fposu.setCallback(fastdelegate::MakeDelegate(this, &Osu::onModFPoSuChange));
-    cv::playfield_mirror_horizontal.setCallback(fastdelegate::MakeDelegate(this, &Osu::updateModsForConVarTemplate));
-    cv::playfield_mirror_vertical.setCallback(fastdelegate::MakeDelegate(this, &Osu::updateModsForConVarTemplate));
-    cv::playfield_rotation.setCallback(fastdelegate::MakeDelegate(this, &Osu::onPlayfieldChange));
-    cv::speed_override.setCallback(fastdelegate::MakeDelegate(this, &Osu::onSpeedChange));
-    cv::mod_doubletime_dummy.setCallback(fastdelegate::MakeDelegate(this, &Osu::onDTPresetChange));
-    cv::mod_halftime_dummy.setCallback(fastdelegate::MakeDelegate(this, &Osu::onHTPresetChange));
-    cv::draw_songbrowser_thumbnails.setCallback(fastdelegate::MakeDelegate(this, &Osu::onThumbnailsToggle));
+    cv::mod_mafham.setCallback(SA::MakeDelegate<&Osu::onModMafhamChange>(this));
+    cv::mod_fposu.setCallback(SA::MakeDelegate<&Osu::onModFPoSuChange>(this));
+    cv::playfield_mirror_horizontal.setCallback(SA::MakeDelegate<&Osu::updateModsForConVarTemplate>(this));
+    cv::playfield_mirror_vertical.setCallback(SA::MakeDelegate<&Osu::updateModsForConVarTemplate>(this));
+    cv::playfield_rotation.setCallback(SA::MakeDelegate<&Osu::onPlayfieldChange>(this));
+    cv::speed_override.setCallback(SA::MakeDelegate<&Osu::onSpeedChange>(this));
+    cv::mod_doubletime_dummy.setCallback(SA::MakeDelegate<&Osu::onDTPresetChange>(this));
+    cv::mod_halftime_dummy.setCallback(SA::MakeDelegate<&Osu::onHTPresetChange>(this));
+    cv::draw_songbrowser_thumbnails.setCallback(SA::MakeDelegate<&Osu::onThumbnailsToggle>(this));
 
     // load global resources
     const int baseDPI = 96;

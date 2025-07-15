@@ -289,7 +289,7 @@ void SongButton::triggerContextMenu(Vector2 pos) {
             }
         }
         this->contextMenu->end(false, false);
-        this->contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &SongButton::onContextMenu));
+        this->contextMenu->setClickCallback(SA::MakeDelegate<&SongButton::onContextMenu>(this));
         UIContextMenu::clampToRightScreenEdge(this->contextMenu);
         UIContextMenu::clampToBottomScreenEdge(this->contextMenu);
     }
@@ -341,7 +341,7 @@ void SongButton::onContextMenu(const UString& text, int id) {
             }
         }
         this->contextMenu->end(false, true);
-        this->contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &SongButton::onAddToCollectionConfirmed));
+        this->contextMenu->setClickCallback(SA::MakeDelegate<&SongButton::onAddToCollectionConfirmed>(this));
         UIContextMenu::clampToRightScreenEdge(this->contextMenu);
         UIContextMenu::clampToBottomScreenEdge(this->contextMenu);
     } else if(id == 3 || id == 4) {
@@ -380,7 +380,7 @@ void SongButton::onAddToCollectionConfirmed(const UString& text, int id) {
         }
         this->contextMenu->end(false, false);
         this->contextMenu->setClickCallback(
-            fastdelegate::MakeDelegate(this, &SongButton::onCreateNewCollectionConfirmed));
+            SA::MakeDelegate<&SongButton::onCreateNewCollectionConfirmed>(this));
         UIContextMenu::clampToRightScreenEdge(this->contextMenu);
         UIContextMenu::clampToBottomScreenEdge(this->contextMenu);
     } else {

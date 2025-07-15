@@ -17,7 +17,7 @@ class PromptScreen : public OsuScreen {
     void onKeyUp(KeyboardEvent &e) override;
     void onChar(KeyboardEvent &e) override;
 
-    typedef fastdelegate::FastDelegate1<const UString &> PromptResponseCallback;
+    using PromptResponseCallback = SA::delegate<void(const UString &)>;
     void prompt(const UString &msg, const PromptResponseCallback &callback);
 
    private:

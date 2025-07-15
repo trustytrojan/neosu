@@ -48,9 +48,9 @@ ModFPoSu::ModFPoSu() {
     this->hitcircleShader = NULL;
 
     // convar callbacks
-    cv::fposu_curved.setCallback(fastdelegate::MakeDelegate(this, &ModFPoSu::onCurvedChange));
-    cv::fposu_distance.setCallback(fastdelegate::MakeDelegate(this, &ModFPoSu::onDistanceChange));
-    cv::fposu_noclip.setCallback(fastdelegate::MakeDelegate(this, &ModFPoSu::onNoclipChange));
+    cv::fposu_curved.setCallback(SA::MakeDelegate<&ModFPoSu::onCurvedChange>(this));
+    cv::fposu_distance.setCallback(SA::MakeDelegate<&ModFPoSu::onDistanceChange>(this));
+    cv::fposu_noclip.setCallback(SA::MakeDelegate<&ModFPoSu::onNoclipChange>(this));
 
     // init
     this->makePlayfield();

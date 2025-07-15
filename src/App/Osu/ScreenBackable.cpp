@@ -11,7 +11,7 @@
 
 ScreenBackable::ScreenBackable() : OsuScreen() {
     this->backButton = new UIBackButton(-1, 0, 0, 0, "");
-    this->backButton->setClickCallback(fastdelegate::MakeDelegate(this, &ScreenBackable::onBack));
+    this->backButton->setClickCallback(SA::MakeDelegate<&ScreenBackable::onBack>(this));
 
     this->updateLayout();
 }

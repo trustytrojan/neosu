@@ -99,7 +99,7 @@ void CollectionButton::triggerContextMenu(Vector2 pos) {
             this->contextMenu->addButton("[-]         Delete Collection", 2);
         }
         this->contextMenu->end(false, false);
-        this->contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &CollectionButton::onContextMenu));
+        this->contextMenu->setClickCallback(SA::MakeDelegate<&CollectionButton::onContextMenu>(this));
         UIContextMenu::clampToRightScreenEdge(this->contextMenu);
         UIContextMenu::clampToBottomScreenEdge(this->contextMenu);
     }
@@ -134,7 +134,7 @@ void CollectionButton::onContextMenu(const UString& text, int id) {
         }
         this->contextMenu->end(false, false);
         this->contextMenu->setClickCallback(
-            fastdelegate::MakeDelegate(this, &CollectionButton::onRenameCollectionConfirmed));
+            SA::MakeDelegate<&CollectionButton::onRenameCollectionConfirmed>(this));
         UIContextMenu::clampToRightScreenEdge(this->contextMenu);
         UIContextMenu::clampToBottomScreenEdge(this->contextMenu);
     } else if(id == 2) {
@@ -154,7 +154,7 @@ void CollectionButton::onContextMenu(const UString& text, int id) {
             }
             this->contextMenu->end(false, false);
             this->contextMenu->setClickCallback(
-                fastdelegate::MakeDelegate(this, &CollectionButton::onDeleteCollectionConfirmed));
+                SA::MakeDelegate<&CollectionButton::onDeleteCollectionConfirmed>(this));
             UIContextMenu::clampToRightScreenEdge(this->contextMenu);
             UIContextMenu::clampToBottomScreenEdge(this->contextMenu);
         }

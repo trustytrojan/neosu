@@ -69,40 +69,43 @@ extern void _volume(const UString &, const UString &);
 // defined and included at the end of ConVar.cpp
 #if defined(DEFINE_CONVARS)
 #undef CONVAR
+#undef CFUNC
 #define CONVAR(name, ...) ConVar _CV(name)(__VA_ARGS__)
+#define CFUNC(func) SA::delegate<decltype(func)>::template create<func>()
 #include "KeyboardKeys.h"
 #else
 #define CONVAR(name, ...) extern ConVar _CV(name)
+#define CFUNC(func)
 #endif
 
 class ConVar;
 namespace cv {
 namespace cmd {
 
-CONVAR(borderless, "borderless", FCVAR_BANCHO_COMPATIBLE, _borderless);
-CONVAR(center, "center", FCVAR_BANCHO_COMPATIBLE, _center);
+CONVAR(borderless, "borderless", FCVAR_BANCHO_COMPATIBLE, CFUNC(_borderless));
+CONVAR(center, "center", FCVAR_BANCHO_COMPATIBLE, CFUNC(_center));
 CONVAR(clear, "clear");
-CONVAR(dpiinfo, "dpiinfo", FCVAR_BANCHO_COMPATIBLE, _dpiinfo);
-CONVAR(dumpcommands, "dumpcommands", FCVAR_HIDDEN, _dumpcommands);
-CONVAR(echo, "echo", FCVAR_BANCHO_COMPATIBLE, _echo);
-CONVAR(errortest, "errortest", FCVAR_BANCHO_COMPATIBLE, _errortest);
-CONVAR(exec, "exec", FCVAR_BANCHO_COMPATIBLE, _exec);
+CONVAR(dpiinfo, "dpiinfo", FCVAR_BANCHO_COMPATIBLE, CFUNC(_dpiinfo));
+CONVAR(dumpcommands, "dumpcommands", FCVAR_HIDDEN, CFUNC(_dumpcommands));
+CONVAR(echo, "echo", FCVAR_BANCHO_COMPATIBLE, CFUNC(_echo));
+CONVAR(errortest, "errortest", FCVAR_BANCHO_COMPATIBLE, CFUNC(_errortest));
+CONVAR(exec, "exec", FCVAR_BANCHO_COMPATIBLE, CFUNC(_exec));
 CONVAR(exit, "exit", FCVAR_BANCHO_COMPATIBLE, []() -> void { engine ? engine->shutdown() : (void)0; });
-CONVAR(find, "find", FCVAR_BANCHO_COMPATIBLE, _find);
-CONVAR(focus, "focus", FCVAR_BANCHO_COMPATIBLE, _focus);
+CONVAR(find, "find", FCVAR_BANCHO_COMPATIBLE, CFUNC(_find));
+CONVAR(focus, "focus", FCVAR_BANCHO_COMPATIBLE, CFUNC(_focus));
 CONVAR(fullscreen, "fullscreen", FCVAR_BANCHO_COMPATIBLE,
        []() -> void { engine ? engine->toggleFullscreen() : (void)0; });
-CONVAR(help, "help", FCVAR_BANCHO_COMPATIBLE, _help);
-CONVAR(listcommands, "listcommands", FCVAR_BANCHO_COMPATIBLE, _listcommands);
-CONVAR(maximize, "maximize", FCVAR_BANCHO_COMPATIBLE, _maximize);
-CONVAR(minimize, "minimize", FCVAR_BANCHO_COMPATIBLE, _minimize);
-CONVAR(printsize, "printsize", FCVAR_BANCHO_COMPATIBLE, _printsize);
-CONVAR(resizable_toggle, "resizable_toggle", FCVAR_BANCHO_COMPATIBLE, _toggleresizable);
-CONVAR(restart, "restart", FCVAR_BANCHO_COMPATIBLE, _restart);
-CONVAR(save, "save", FCVAR_BANCHO_COMPATIBLE, _save);
+CONVAR(help, "help", FCVAR_BANCHO_COMPATIBLE, CFUNC(_help));
+CONVAR(listcommands, "listcommands", FCVAR_BANCHO_COMPATIBLE, CFUNC(_listcommands));
+CONVAR(maximize, "maximize", FCVAR_BANCHO_COMPATIBLE, CFUNC(_maximize));
+CONVAR(minimize, "minimize", FCVAR_BANCHO_COMPATIBLE, CFUNC(_minimize));
+CONVAR(printsize, "printsize", FCVAR_BANCHO_COMPATIBLE, CFUNC(_printsize));
+CONVAR(resizable_toggle, "resizable_toggle", FCVAR_BANCHO_COMPATIBLE, CFUNC(_toggleresizable));
+CONVAR(restart, "restart", FCVAR_BANCHO_COMPATIBLE, CFUNC(_restart));
+CONVAR(save, "save", FCVAR_BANCHO_COMPATIBLE, CFUNC(_save));
 CONVAR(showconsolebox, "showconsolebox");
 CONVAR(shutdown, "shutdown", FCVAR_BANCHO_COMPATIBLE, []() -> void { engine ? engine->shutdown() : (void)0; });
-CONVAR(spectate, "spectate", FCVAR_HIDDEN, spectate_by_username);
+CONVAR(spectate, "spectate", FCVAR_HIDDEN, CFUNC(spectate_by_username));
 
 }  // namespace cmd
 
@@ -687,7 +690,7 @@ CONVAR(letterboxing_offset_x, "osu_letterboxing_offset_x", 0.0f, FCVAR_BANCHO_CO
 CONVAR(letterboxing_offset_y, "osu_letterboxing_offset_y", 0.0f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(load_beatmap_background_images, "osu_load_beatmap_background_images", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(loudness_calc_threads, "loudness_calc_threads", 0.f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
-       "0 = autodetect. do not use too many threads or your PC will explode", loudness_cb);
+       "0 = autodetect. do not use too many threads or your PC will explode", CFUNC(loudness_cb));
 CONVAR(loudness_fallback, "loudness_fallback", -12.f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
 CONVAR(loudness_target, "loudness_target", -14.f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
 CONVAR(main_menu_alpha, "osu_main_menu_alpha", 0.8f, FCVAR_BANCHO_COMPATIBLE);
@@ -808,7 +811,7 @@ CONVAR(mod_wobble_frequency, "osu_mod_wobble_frequency", 1.0f, FCVAR_BANCHO_COMP
 CONVAR(mod_wobble_rotation_speed, "osu_mod_wobble_rotation_speed", 1.0f, FCVAR_BANCHO_COMPATIBLE | FCVAR_GAMEPLAY);
 CONVAR(mod_wobble_strength, "osu_mod_wobble_strength", 25.0f, FCVAR_BANCHO_COMPATIBLE | FCVAR_GAMEPLAY);
 CONVAR(monitor, "monitor", 0, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
-       "monitor/display device to switch to, 0 = primary monitor", _monitor);
+       "monitor/display device to switch to, 0 = primary monitor", CFUNC(_monitor));
 CONVAR(mouse_fakelag, "mouse_fakelag", 0.000f, FCVAR_BANCHO_COMPATIBLE,
        "delay all mouse movement by this many seconds (e.g. 0.1 = 100 ms delay)");
 CONVAR(mouse_raw_input, "mouse_raw_input", Env::cfg(OS::WINDOWS) ? false : true, FCVAR_BANCHO_COMPATIBLE);
@@ -842,7 +845,7 @@ CONVAR(options_slider_preview_use_legacy_renderer, "osu_options_slider_preview_u
        "apparently newer AMD drivers with old gpus are crashing here with the legacy renderer? was just me being lazy "
        "anyway, so now there is a vao render path as it should be");
 CONVAR(options_slider_quality, "osu_options_slider_quality", 0.0f, FCVAR_BANCHO_COMPATIBLE,
-       _osuOptionsSliderQualityWrapper);
+       CFUNC(_osuOptionsSliderQualityWrapper));
 CONVAR(pause_anim_duration, "osu_pause_anim_duration", 0.15f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(pause_dim_alpha, "osu_pause_dim_alpha", 0.58f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(pause_dim_background, "osu_pause_dim_background", true, FCVAR_BANCHO_COMPATIBLE);
@@ -893,7 +896,7 @@ CONVAR(resolution_enabled, "osu_resolution_enabled", false, FCVAR_BANCHO_COMPATI
 CONVAR(resolution_keep_aspect_ratio, "osu_resolution_keep_aspect_ratio", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(restart_sound_engine_before_playing, "restart_sound_engine_before_playing", false, FCVAR_BANCHO_COMPATIBLE,
        "jank fix for users who experience sound issues after playing for a while");
-CONVAR(rich_presence, "osu_rich_presence", true, FCVAR_BANCHO_COMPATIBLE, RichPresence::onRichPresenceChange);
+CONVAR(rich_presence, "osu_rich_presence", true, FCVAR_BANCHO_COMPATIBLE, CFUNC(RichPresence::onRichPresenceChange));
 CONVAR(rm_debug_async_delay, "rm_debug_async_delay", 0.0f, FCVAR_LOCKED);
 CONVAR(rm_interrupt_on_destroy, "rm_interrupt_on_destroy", true, FCVAR_LOCKED);
 CONVAR(
@@ -1085,7 +1088,7 @@ CONVAR(songbrowser_search_delay, "osu_songbrowser_search_delay", 0.2f, FCVAR_BAN
        "delay until search update when entering text");
 CONVAR(songbrowser_search_hardcoded_filter, "osu_songbrowser_search_hardcoded_filter", "", FCVAR_BANCHO_COMPATIBLE,
        "allows forcing the specified search filter to be active all the time",
-       _osu_songbrowser_search_hardcoded_filter);
+       CFUNC(_osu_songbrowser_search_hardcoded_filter));
 CONVAR(songbrowser_sortingtype, "osu_songbrowser_sortingtype", "By Date Added", FCVAR_BANCHO_COMPATIBLE);
 CONVAR(songbrowser_thumbnail_delay, "osu_songbrowser_thumbnail_delay", 0.1f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(songbrowser_thumbnail_fade_in_duration, "osu_songbrowser_thumbnail_fade_in_duration", 0.1f,
@@ -1158,13 +1161,13 @@ CONVAR(user_draw_pp, "osu_user_draw_pp", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(user_include_relax_and_autopilot_for_stats, "osu_user_include_relax_and_autopilot_for_stats", false,
        FCVAR_BANCHO_COMPATIBLE);
 CONVAR(version, "osu_version", PACKAGE_VERSION, FCVAR_BANCHO_COMPATIBLE | FCVAR_HIDDEN);
-CONVAR(volume, "volume", 1.0f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE, _volume);
+CONVAR(volume, "volume", 1.0f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE, CFUNC(_volume));
 CONVAR(volume_change_interval, "osu_volume_change_interval", 0.05f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(volume_effects, "osu_volume_effects", 1.0f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(volume_master, "osu_volume_master", 1.0f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(volume_master_inactive, "osu_volume_master_inactive", 0.25f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(volume_music, "osu_volume_music", 0.4f, FCVAR_BANCHO_COMPATIBLE);
-CONVAR(vprof, "vprof", false, FCVAR_BANCHO_COMPATIBLE, "enables/disables the visual profiler", _vprof);
+CONVAR(vprof, "vprof", false, FCVAR_BANCHO_COMPATIBLE, "enables/disables the visual profiler", CFUNC(_vprof));
 CONVAR(vprof_display_mode, "vprof_display_mode", 0, FCVAR_BANCHO_COMPATIBLE,
        "which info blade to show on the top right (gpu/engine/app/etc. info), use CTRL + TAB to "
        "cycle through, 0 = disabled");

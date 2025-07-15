@@ -16,12 +16,12 @@ class CBaseUIButton : public CBaseUIElement {
     void click() { this->onClicked(); }
 
     // callbacks, either void or with ourself as the argument
-    typedef fastdelegate::FastDelegate0<> ButtonClickVoidCallback;
+    using ButtonClickVoidCallback = SA::delegate<void()>;
     CBaseUIButton *setClickCallback(const ButtonClickVoidCallback& clickCallback) {
         this->clickVoidCallback = clickCallback;
         return this;
     }
-    typedef fastdelegate::FastDelegate1<CBaseUIButton *> ButtonClickCallback;
+    using ButtonClickCallback = SA::delegate<void(CBaseUIButton *)>;
     CBaseUIButton *setClickCallback(const ButtonClickCallback& clickCallback) {
         this->clickCallback = clickCallback;
         return this;

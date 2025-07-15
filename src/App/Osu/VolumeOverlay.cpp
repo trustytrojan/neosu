@@ -23,10 +23,10 @@
 #include "UIVolumeSlider.h"
 
 VolumeOverlay::VolumeOverlay() : OsuScreen() {
-    cv::volume_master.setCallback(fastdelegate::MakeDelegate(this, &VolumeOverlay::onMasterVolumeChange));
-    cv::volume_effects.setCallback(fastdelegate::MakeDelegate(this, &VolumeOverlay::onEffectVolumeChange));
-    cv::volume_music.setCallback(fastdelegate::MakeDelegate(this, &VolumeOverlay::onMusicVolumeChange));
-    cv::hud_volume_size_multiplier.setCallback(fastdelegate::MakeDelegate(this, &VolumeOverlay::updateLayout));
+    cv::volume_master.setCallback(SA::MakeDelegate<&VolumeOverlay::onMasterVolumeChange>(this));
+    cv::volume_effects.setCallback(SA::MakeDelegate<&VolumeOverlay::onEffectVolumeChange>(this));
+    cv::volume_music.setCallback(SA::MakeDelegate<&VolumeOverlay::onMusicVolumeChange>(this));
+    cv::hud_volume_size_multiplier.setCallback(SA::MakeDelegate<&VolumeOverlay::updateLayout>(this));
 
     this->fVolumeChangeTime = 0.0f;
     this->fVolumeChangeFade = 1.0f;

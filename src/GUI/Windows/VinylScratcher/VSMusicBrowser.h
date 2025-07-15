@@ -19,7 +19,7 @@ class VSMusicBrowserButton;
 
 class VSMusicBrowser : public CBaseUIElement {
    public:
-    typedef fastdelegate::FastDelegate2<const std::string&, bool> FileClickedCallback;
+    using FileClickedCallback = SA::delegate<void(const std::string&, bool)>;
 
    public:
     VSMusicBrowser(int x, int y, int xSize, int ySize, McFont *font);

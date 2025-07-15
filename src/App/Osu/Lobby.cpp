@@ -48,7 +48,7 @@ RoomUIElement::RoomUIElement(Lobby* multi, Room* room, float x, float y, float w
     this->join_btn = new UIButton(10, 65, 120, 30, "", "Join room");
     this->join_btn->setUseDefaultSkin();
     this->join_btn->setColor(0xff00ff00);
-    this->join_btn->setClickCallback(fastdelegate::MakeDelegate(this, &RoomUIElement::onRoomJoinButtonClick));
+    this->join_btn->setClickCallback(SA::MakeDelegate<&RoomUIElement::onRoomJoinButtonClick>(this));
     this->getContainer()->addBaseUIElement(this->join_btn);
 
     if(room->has_password) {
@@ -63,7 +63,7 @@ void RoomUIElement::onRoomJoinButtonClick(CBaseUIButton*  /*btn*/) {
     if(this->has_password) {
         this->multi->room_to_join = this->room_id;
         osu->prompt->prompt("Room password:",
-                              fastdelegate::MakeDelegate(this->multi, &Lobby::on_room_join_with_password));
+                              SA::MakeDelegate<&Lobby::on_room_join_with_password>(this->multi));
     } else {
         this->multi->joinRoom(this->room_id, "");
     }
@@ -82,7 +82,7 @@ Lobby::Lobby() : OsuScreen() {
     this->create_room_btn = new UIButton(0, 0, 200, 50, "", "Create new room");
     this->create_room_btn->setUseDefaultSkin();
     this->create_room_btn->setColor(0xff00ff00);
-    this->create_room_btn->setClickCallback(fastdelegate::MakeDelegate(this, &Lobby::on_create_room_clicked));
+    this->create_room_btn->setClickCallback(SA::MakeDelegate<&Lobby::on_create_room_clicked>(this));
     this->addBaseUIElement(this->create_room_btn);
 
     this->list = new CBaseUIScrollView(0, 0, 0, 0, "");

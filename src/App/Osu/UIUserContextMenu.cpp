@@ -79,7 +79,7 @@ void UIUserContextMenuScreen::open(u32 user_id) {
 
     this->menu->end(false, false);
     this->menu->setPos(mouse->getPos());
-    this->menu->setClickCallback(fastdelegate::MakeDelegate(this, &UIUserContextMenuScreen::on_action));
+    this->menu->setClickCallback(SA::MakeDelegate<&UIUserContextMenuScreen::on_action>(this));
     this->menu->setVisible(true);
 }
 

@@ -176,13 +176,13 @@ ModSelector::ModSelector() : OsuScreen() {
 
     overrideCS.slider->setAnimated(false);  // quick fix for otherwise possible inconsistencies due to slider vertex
                                             // buffers and animated CS changes
-    overrideCS.slider->setChangeCallback(fastdelegate::MakeDelegate(this, &ModSelector::onOverrideSliderChange));
-    overrideAR.slider->setChangeCallback(fastdelegate::MakeDelegate(this, &ModSelector::onOverrideSliderChange));
-    overrideOD.slider->setChangeCallback(fastdelegate::MakeDelegate(this, &ModSelector::onOverrideSliderChange));
-    overrideHP.slider->setChangeCallback(fastdelegate::MakeDelegate(this, &ModSelector::onOverrideSliderChange));
+    overrideCS.slider->setChangeCallback(SA::MakeDelegate<&ModSelector::onOverrideSliderChange>(this));
+    overrideAR.slider->setChangeCallback(SA::MakeDelegate<&ModSelector::onOverrideSliderChange>(this));
+    overrideOD.slider->setChangeCallback(SA::MakeDelegate<&ModSelector::onOverrideSliderChange>(this));
+    overrideHP.slider->setChangeCallback(SA::MakeDelegate<&ModSelector::onOverrideSliderChange>(this));
 
-    overrideAR.desc->setClickCallback(fastdelegate::MakeDelegate(this, &ModSelector::onOverrideARSliderDescClicked));
-    overrideOD.desc->setClickCallback(fastdelegate::MakeDelegate(this, &ModSelector::onOverrideODSliderDescClicked));
+    overrideAR.desc->setClickCallback(SA::MakeDelegate<&ModSelector::onOverrideARSliderDescClicked>(this));
+    overrideOD.desc->setClickCallback(SA::MakeDelegate<&ModSelector::onOverrideODSliderDescClicked>(this));
 
     this->CSSlider = overrideCS.slider;
     this->ARSlider = overrideAR.slider;
@@ -194,7 +194,7 @@ ModSelector::ModSelector() : OsuScreen() {
     OVERRIDE_SLIDER overrideSpeed =
         this->addOverrideSlider("Speed/BPM Multiplier", "x", &cv::speed_override, 0.9f, 2.5f);
 
-    overrideSpeed.slider->setChangeCallback(fastdelegate::MakeDelegate(this, &ModSelector::onOverrideSliderChange));
+    overrideSpeed.slider->setChangeCallback(SA::MakeDelegate<&ModSelector::onOverrideSliderChange>(this));
     // overrideSpeed.slider->setValue(-1.0f, false);
     overrideSpeed.slider->setAnimated(false);  // same quick fix as above
     overrideSpeed.slider->setLiveUpdate(false);
@@ -266,10 +266,10 @@ ModSelector::ModSelector() : OsuScreen() {
 
     // build action buttons
     this->resetModsButton = this->addActionButton("1. Reset All Mods");
-    this->resetModsButton->setClickCallback(fastdelegate::MakeDelegate(this, &ModSelector::resetModsUserInitiated));
+    this->resetModsButton->setClickCallback(SA::MakeDelegate<&ModSelector::resetModsUserInitiated>(this));
     this->resetModsButton->setColor(0xffff3800);
     this->closeButton = this->addActionButton("2. Close");
-    this->closeButton->setClickCallback(fastdelegate::MakeDelegate(this, &ModSelector::close));
+    this->closeButton->setClickCallback(SA::MakeDelegate<&ModSelector::close>(this));
     this->closeButton->setColor(0xff8f8f8f);
 
     this->updateButtons(true);
@@ -1036,7 +1036,7 @@ ModSelector::OVERRIDE_SLIDER ModSelector::addOverrideSlider(UString text, const 
     OVERRIDE_SLIDER os;
     if(lockCvar != NULL) {
         os.lock = new ModSelectorOverrideSliderLockButton(0, 0, height, height, "", "");
-        os.lock->setChangeCallback(fastdelegate::MakeDelegate(this, &ModSelector::onOverrideSliderLockChange));
+        os.lock->setChangeCallback(SA::MakeDelegate<&ModSelector::onOverrideSliderLockChange>(this));
     }
     os.desc = new ModSelectorOverrideSliderDescButton(0, 0, 100, height, "", std::move(text));
     os.desc->setTooltipText(std::move(tooltipText));
@@ -1106,7 +1106,7 @@ UICheckbox *ModSelector::addExperimentalCheckbox(const UString& text, const UStr
     checkbox->setWidthToContent(0);
     if(cvar != NULL) {
         checkbox->setChecked(cvar->getBool());
-        checkbox->setChangeCallback(fastdelegate::MakeDelegate(this, &ModSelector::onCheckboxChange));
+        checkbox->setChangeCallback(SA::MakeDelegate<&ModSelector::onCheckboxChange>(this));
     }
     this->experimentalContainer->getContainer()->addBaseUIElement(checkbox);
 

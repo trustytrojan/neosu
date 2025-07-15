@@ -107,7 +107,7 @@ RoomScreen::RoomScreen() : OsuScreen() {
     this->lfont = osu->getSubTitleFont();
 
     this->pauseButton = new MainMenuPauseButton(0, 0, 0, 0, "pause_btn", "");
-    this->pauseButton->setClickCallback(fastdelegate::MakeDelegate(osu->mainMenu, &MainMenu::onPausePressed));
+    this->pauseButton->setClickCallback(SA::MakeDelegate<&MainMenu::onPausePressed>(osu->mainMenu));
     this->addBaseUIElement(this->pauseButton);
 
     this->settings = new CBaseUIScrollView(0, 0, 0, 0, "room_settings");
@@ -127,20 +127,20 @@ RoomScreen::RoomScreen() : OsuScreen() {
     this->change_password_btn = new UIButton(0, 0, 190, 40, "change_password_btn", "Change password");
     this->change_password_btn->setColor(0xff0e94b5);
     this->change_password_btn->setUseDefaultSkin();
-    this->change_password_btn->setClickCallback(fastdelegate::MakeDelegate(this, &RoomScreen::onChangePasswordClicked));
+    this->change_password_btn->setClickCallback(SA::MakeDelegate<&RoomScreen::onChangePasswordClicked>(this));
 
     INIT_LABEL(this->win_condition, "Win condition: Score", false);
     this->change_win_condition_btn = new UIButton(0, 0, 240, 40, "change_win_condition_btn", "Win condition: Score");
     this->change_win_condition_btn->setColor(0xff00ff00);
     this->change_win_condition_btn->setUseDefaultSkin();
     this->change_win_condition_btn->setClickCallback(
-        fastdelegate::MakeDelegate(this, &RoomScreen::onChangeWinConditionClicked));
+        SA::MakeDelegate<&RoomScreen::onChangeWinConditionClicked>(this));
 
     INIT_LABEL(map_label, "Beatmap", true);
     this->select_map_btn = new UIButton(0, 0, 130, 40, "select_map_btn", "Select map");
     this->select_map_btn->setColor(0xff0e94b5);
     this->select_map_btn->setUseDefaultSkin();
-    this->select_map_btn->setClickCallback(fastdelegate::MakeDelegate(this, &RoomScreen::onSelectMapClicked));
+    this->select_map_btn->setClickCallback(SA::MakeDelegate<&RoomScreen::onSelectMapClicked>(this));
 
     INIT_LABEL(this->map_title, "(no map selected)", false);
     INIT_LABEL(this->map_stars, "", false);
@@ -151,18 +151,18 @@ RoomScreen::RoomScreen() : OsuScreen() {
     this->select_mods_btn = new UIButton(0, 0, 180, 40, "select_mods_btn", "Select mods [F1]");
     this->select_mods_btn->setColor(0xff0e94b5);
     this->select_mods_btn->setUseDefaultSkin();
-    this->select_mods_btn->setClickCallback(fastdelegate::MakeDelegate(this, &RoomScreen::onSelectModsClicked));
+    this->select_mods_btn->setClickCallback(SA::MakeDelegate<&RoomScreen::onSelectModsClicked>(this));
     this->freemod = new UICheckbox(0, 0, 200, 50, "allow_freemod", "Freemod");
     this->freemod->setDrawFrame(false);
     this->freemod->setDrawBackground(false);
-    this->freemod->setChangeCallback(fastdelegate::MakeDelegate(this, &RoomScreen::onFreemodCheckboxChanged));
+    this->freemod->setChangeCallback(SA::MakeDelegate<&RoomScreen::onFreemodCheckboxChanged>(this));
     this->mods = new UIModList(&bancho->room.mods);
     INIT_LABEL(this->no_mods_selected, "No mods selected.", false);
 
     this->ready_btn = new UIButton(0, 0, 300, 50, "start_game_btn", "Start game");
     this->ready_btn->setColor(0xff00ff00);
     this->ready_btn->setUseDefaultSkin();
-    this->ready_btn->setClickCallback(fastdelegate::MakeDelegate(this, &RoomScreen::onReadyButtonClick));
+    this->ready_btn->setClickCallback(SA::MakeDelegate<&RoomScreen::onReadyButtonClick>(this));
     this->ready_btn->is_loading = true;
 
     auto player_list_label = new CBaseUILabel(50, 50, 0, 0, "label", "Player list");
@@ -833,7 +833,7 @@ void RoomScreen::onSelectMapClicked() {
 }
 
 void RoomScreen::onChangePasswordClicked() {
-    osu->prompt->prompt("New password:", fastdelegate::MakeDelegate(this, &RoomScreen::set_new_password));
+    osu->prompt->prompt("New password:", SA::MakeDelegate<&RoomScreen::set_new_password>(this));
 }
 
 void RoomScreen::onChangeWinConditionClicked() {
@@ -845,7 +845,7 @@ void RoomScreen::onChangeWinConditionClicked() {
     this->contextMenu->addButton("Combo", COMBO);
     this->contextMenu->end(false, false);
     this->contextMenu->setPos(mouse->getPos());
-    this->contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &RoomScreen::onWinConditionSelected));
+    this->contextMenu->setClickCallback(SA::MakeDelegate<&RoomScreen::onWinConditionSelected>(this));
     this->contextMenu->setVisible(true);
 }
 

@@ -52,7 +52,7 @@ ChatChannel::ChatChannel(Chat *chat, UString name_arg) {
     this->btn = new UIButton(0, 0, 0, 0, "button", this->name);
     this->btn->grabs_clicks = true;
     this->btn->setUseDefaultSkin();
-    this->btn->setClickCallback(fastdelegate::MakeDelegate(this, &ChatChannel::onChannelButtonClick));
+    this->btn->setClickCallback(SA::MakeDelegate<&ChatChannel::onChannelButtonClick>(this));
     this->chat->button_container->addBaseUIElement(this->btn);
 }
 
@@ -271,7 +271,7 @@ Chat::Chat() : OsuScreen() {
     this->join_channel_btn->setUseDefaultSkin();
     this->join_channel_btn->setColor(0xffffff55);
     this->join_channel_btn->setSize(this->button_height + 2, this->button_height + 2);
-    this->join_channel_btn->setClickCallback(fastdelegate::MakeDelegate(this, &Chat::askWhatChannelToJoin));
+    this->join_channel_btn->setClickCallback(SA::MakeDelegate<&Chat::askWhatChannelToJoin>(this));
     this->button_container->addBaseUIElement(this->join_channel_btn);
 
     this->input_box = new CBaseUITextbox(0, 0, 0, 0, "");
@@ -1172,5 +1172,5 @@ bool Chat::isMouseInChat() {
 void Chat::askWhatChannelToJoin(CBaseUIButton * /*btn*/) {
     // XXX: Could display nicer UI with full channel list (chat_channels in Bancho.cpp)
     osu->prompt->prompt("Type in the channel you want to join (e.g. '#osu'):",
-                        fastdelegate::MakeDelegate(this, &Chat::join));
+                        SA::MakeDelegate<&Chat::join>(this));
 }

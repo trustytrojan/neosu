@@ -7,7 +7,7 @@
 #include <variant>
 #include <type_traits>
 
-#include "FastDelegate.h"
+#include "Delegate.h"
 #include "UString.h"
 
 #ifndef DEFINE_CONVARS
@@ -45,12 +45,12 @@ class ConVar {
    public:
     enum class CONVAR_TYPE : uint8_t { CONVAR_TYPE_BOOL, CONVAR_TYPE_INT, CONVAR_TYPE_FLOAT, CONVAR_TYPE_STRING };
 
-    // callback typedefs
-    using NativeConVarCallback = fastdelegate::FastDelegate0<>;
-    using NativeConVarCallbackArgs = fastdelegate::FastDelegate1<const UString &>;
-    using NativeConVarChangeCallback = fastdelegate::FastDelegate2<const UString &, const UString &>;
-    using NativeConVarCallbackFloat = fastdelegate::FastDelegate1<float>;
-    using NativeConVarChangeCallbackFloat = fastdelegate::FastDelegate2<float, float>;
+    // callback typedefs using Kryukov delegates
+    using NativeConVarCallback = SA::delegate<void()>;
+    using NativeConVarCallbackArgs = SA::delegate<void(const UString &)>;
+    using NativeConVarChangeCallback = SA::delegate<void(const UString &, const UString &)>;
+    using NativeConVarCallbackFloat = SA::delegate<void(float)>;
+    using NativeConVarChangeCallbackFloat = SA::delegate<void(float, float)>;
 
     // polymorphic callback storage
     using ExecutionCallback = std::variant<std::monostate,            // empty
@@ -288,8 +288,7 @@ class ConVar {
         this->type = getTypeFor<T>();
 
         // set default value
-        if constexpr(std::is_same_v<std::decay_t<T>, std::string_view> ||
-                     std::is_same_v<std::decay_t<T>, const char *>)
+        if constexpr(std::is_same_v<std::decay_t<T>, std::string_view> || std::is_same_v<std::decay_t<T>, const char *>)
             setDefaultStringInt(defaultValue);
         else
             setDefaultFloatInt(static_cast<float>(defaultValue));
@@ -299,8 +298,7 @@ class ConVar {
         this->sDefaultDefaultValue = this->sDefaultValue;
 
         // set initial value (without triggering callbacks)
-        if constexpr(std::is_same_v<std::decay_t<T>, std::string_view> ||
-                     std::is_same_v<std::decay_t<T>, const char *>)
+        if constexpr(std::is_same_v<std::decay_t<T>, std::string_view> || std::is_same_v<std::decay_t<T>, const char *>)
             setValueInt(defaultValue);
         else
             setValueInt(static_cast<float>(defaultValue));

@@ -528,7 +528,7 @@ void ScoreButton::onRightMouseUpInside() {
             }
         }
         this->contextMenu->end(false, false);
-        this->contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &ScoreButton::onContextMenu));
+        this->contextMenu->setClickCallback(SA::MakeDelegate<&ScoreButton::onContextMenu>(this));
         UIContextMenu::clampToRightScreenEdge(this->contextMenu);
         UIContextMenu::clampToBottomScreenEdge(this->contextMenu);
     }
@@ -574,7 +574,7 @@ void ScoreButton::onDeleteScoreClicked() {
             this->contextMenu->addButton("No")->setTextLeft(false);
         }
         this->contextMenu->end(false, false);
-        this->contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &ScoreButton::onDeleteScoreConfirmed));
+        this->contextMenu->setClickCallback(SA::MakeDelegate<&ScoreButton::onDeleteScoreConfirmed>(this));
         UIContextMenu::clampToRightScreenEdge(this->contextMenu);
         UIContextMenu::clampToBottomScreenEdge(this->contextMenu);
     }

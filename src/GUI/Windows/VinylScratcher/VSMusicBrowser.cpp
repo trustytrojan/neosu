@@ -445,7 +445,7 @@ void VSMusicBrowser::updateFolder(const std::string& baseFolder, size_t fromDept
             VSMusicBrowserButton *folderButton =
                 new VSMusicBrowserButton(border, border + elementCounter * height, 50 * dpiScale, height,
                                          UString(completeName.c_str()), UString(folder.c_str()));
-            folderButton->setClickCallback(fastdelegate::MakeDelegate(this, &VSMusicBrowser::onButtonClicked));
+            folderButton->setClickCallback(SA::MakeDelegate<&VSMusicBrowser::onButtonClicked>(this));
             folderButton->setTextColor(this->defaultTextColor);
             folderButton->setFrameColor(frameColor);
             folderButton->setSizeToContent(12 * dpiScale, 5 * dpiScale);
@@ -470,7 +470,7 @@ void VSMusicBrowser::updateFolder(const std::string& baseFolder, size_t fromDept
             VSMusicBrowserButton *fileButton =
                 new VSMusicBrowserButton(border, border + elementCounter * height, 50 * dpiScale, height,
                                          UString(completeName.c_str()), UString(file.c_str()));
-            fileButton->setClickCallback(fastdelegate::MakeDelegate(this, &VSMusicBrowser::onButtonClicked));
+            fileButton->setClickCallback(SA::MakeDelegate<&VSMusicBrowser::onButtonClicked>(this));
             fileButton->setDrawBackground(false);
             fileButton->setTextColor(this->defaultTextColor);
             fileButton->setFrameColor(frameColor);
@@ -545,7 +545,7 @@ void VSMusicBrowser::updateDrives() {
         VSMusicBrowserButton *driveButton =
             new VSMusicBrowserButton(border, border + i * height, 50, height, drive, drive.substr(0, 1));
         driveButton->setTextColor(this->defaultTextColor);
-        driveButton->setClickCallback(fastdelegate::MakeDelegate(this, &VSMusicBrowser::onButtonClicked));
+        driveButton->setClickCallback(SA::MakeDelegate<&VSMusicBrowser::onButtonClicked>(this));
         driveButton->setDirectory(true);
         driveButton->setDrawBackground(false);
         driveButton->setFrameColor(frameColor);

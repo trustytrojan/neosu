@@ -183,10 +183,10 @@ RankingScreen::RankingScreen() : ScreenBackable() {
     this->rankings->getContainer()->addBaseUIElement(this->rankingIndex);
 
     this->retry_btn = new UIButton(0, 0, 0, 0, "", "Retry");
-    this->retry_btn->setClickCallback(fastdelegate::MakeDelegate(this, &RankingScreen::onRetryClicked));
+    this->retry_btn->setClickCallback(SA::MakeDelegate<&RankingScreen::onRetryClicked>(this));
     this->rankings->getContainer()->addBaseUIElement(this->retry_btn);
     this->watch_btn = new UIButton(0, 0, 0, 0, "", "Watch replay");
-    this->watch_btn->setClickCallback(fastdelegate::MakeDelegate(this, &RankingScreen::onWatchClicked));
+    this->watch_btn->setClickCallback(SA::MakeDelegate<&RankingScreen::onWatchClicked>(this));
     this->rankings->getContainer()->addBaseUIElement(this->watch_btn);
 
     this->setGrade(FinishedScore::Grade::D);

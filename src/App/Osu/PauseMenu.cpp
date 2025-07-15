@@ -48,9 +48,9 @@ PauseMenu::PauseMenu() : OsuScreen() {
         this->addButton([]() -> Image * { return osu->getSkin()->getPauseRetry(); }, "Retry");
     UIPauseMenuButton *backButton = this->addButton([]() -> Image * { return osu->getSkin()->getPauseBack(); }, "Quit");
 
-    continueButton->setClickCallback(fastdelegate::MakeDelegate(this, &PauseMenu::onContinueClicked));
-    retryButton->setClickCallback(fastdelegate::MakeDelegate(this, &PauseMenu::onRetryClicked));
-    backButton->setClickCallback(fastdelegate::MakeDelegate(this, &PauseMenu::onBackClicked));
+    continueButton->setClickCallback(SA::MakeDelegate<&PauseMenu::onContinueClicked>(this));
+    retryButton->setClickCallback(SA::MakeDelegate<&PauseMenu::onRetryClicked>(this));
+    backButton->setClickCallback(SA::MakeDelegate<&PauseMenu::onBackClicked>(this));
 
     this->updateLayout();
 }

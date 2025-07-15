@@ -161,7 +161,7 @@ void UIContextMenu::begin(int minWidth, bool bigStyle) {
     this->bBigStyle = bigStyle;
 
     this->iYCounter = 0;
-    this->clickCallback = NULL;
+    this->clickCallback = {};
 
     this->setSizeX(this->iWidthCounter);
 
@@ -191,7 +191,7 @@ UIContextMenuButton *UIContextMenu::addButton(const UString& text, int id) {
     {
         if(this->bBigStyle) button->setFont(osu->getSubTitleFont());
 
-        button->setClickCallback(fastdelegate::MakeDelegate(this, &UIContextMenu::onClick));
+        button->setClickCallback(SA::MakeDelegate<&UIContextMenu::onClick>(this));
         button->setWidthToContent(3 * Osu::getUIScale());
         button->setTextLeft(true);
         button->setDrawFrame(false);

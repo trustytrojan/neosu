@@ -22,7 +22,7 @@ UserCard2::UserCard2(u32 user_id) : CBaseUIButton() {
     this->info = BANCHO::User::get_user_info(user_id, true);
     this->avatar = new UIAvatar(user_id, 0.f, 0.f, 0.f, 0.f);
     this->avatar->on_screen = true;
-    this->setClickCallback(fastdelegate::MakeDelegate(this, &UserCard2::onClick));
+    this->setClickCallback(SA::MakeDelegate<&UserCard2::onClick>(this));
 }
 
 UserCard2::~UserCard2() { SAFE_DELETE(this->avatar); }

@@ -36,7 +36,7 @@ CBaseUIWindow::CBaseUIWindow(float xPos, float yPos, float xSize, float ySize, c
     this->closeButton = new CBaseUIButton(
         this->vSize.x - titleBarButtonSize - (this->iTitleBarHeight - titleBarButtonSize) / 2.0f,
         this->iTitleBarHeight / 2.0f - titleBarButtonSize / 2.0f, titleBarButtonSize, titleBarButtonSize, "", "");
-    this->closeButton->setClickCallback(fastdelegate::MakeDelegate(this, &CBaseUIWindow::close));
+    this->closeButton->setClickCallback(SA::MakeDelegate<&CBaseUIWindow::close>(this));
     this->closeButton->setDrawFrame(false);
 
     this->minimizeButton = new CBaseUIButton(
@@ -45,7 +45,7 @@ CBaseUIWindow::CBaseUIWindow(float xPos, float yPos, float xSize, float ySize, c
         this->iTitleBarHeight / 2.0f - titleBarButtonSize / 2.0f, titleBarButtonSize, titleBarButtonSize, "", "");
     this->minimizeButton->setVisible(false);
     this->minimizeButton->setDrawFrame(false);
-    this->minimizeButton->setClickCallback(fastdelegate::MakeDelegate(this, &CBaseUIWindow::minimize));
+    this->minimizeButton->setClickCallback(SA::MakeDelegate<&CBaseUIWindow::minimize>(this));
 
     this->titleBarContainer->addBaseUIElement(this->minimizeButton);
     this->titleBarContainer->addBaseUIElement(this->closeButton);
