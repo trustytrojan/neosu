@@ -8,6 +8,12 @@
 #include <SDL3/SDL_messagebox.h>
 #include <SDL3/SDL_dialog.h>
 
+#ifdef MCENGINE_PLATFORM_WINDOWS
+#include "WinDebloatDefs.h"
+#include <stringapiset.h>
+#include <libloaderapi.h>
+#endif
+
 Environment::Environment() { this->bFullscreenWindowedBorderless = false; }
 
 void Environment::setFullscreenWindowedBorderless(bool fullscreenWindowedBorderless) {
@@ -17,6 +23,47 @@ void Environment::setFullscreenWindowedBorderless(bool fullscreenWindowedBorderl
         env->disableFullscreen();
         env->enableFullscreen();
     }
+}
+
+const std::string &Environment::getPathToSelf(const char *argv0) {
+    static std::string pathStr{};
+    if(!pathStr.empty()) return pathStr;
+    namespace fs = std::filesystem;
+
+    std::error_code ec;
+    fs::path exe_path{};
+
+    if constexpr(Env::cfg(OS::LINUX))
+        exe_path = fs::canonical("/proc/self/exe", ec);
+    else
+        exe_path = fs::canonical(fs::path(argv0), ec);
+
+    if(!ec && !exe_path.empty())  // canonical path found
+    {
+        pathStr = exe_path.string();
+    } else {
+#if defined(MCENGINE_PLATFORM_WINDOWS)  // fallback to GetModuleFileNameW
+        std::array<wchar_t, MAX_PATH> buf;
+        GetModuleFileNameW(nullptr, buf.data(), MAX_PATH);
+
+        auto size = WideCharToMultiByte(CP_UTF8, 0, buf.data(), buf.size(), NULL, 0, NULL, NULL);
+        std::string utf8path(size, 0);
+        WideCharToMultiByte(CP_UTF8, 0, buf.data(), size, (LPSTR)utf8path.c_str(), size, NULL, NULL);
+        pathStr = utf8path;
+#else
+#ifndef MCENGINE_PLATFORM_LINUX
+        printf("WARNING: unsupported platform for " __FUNCTION__ "\n");
+#endif
+        std::string sp;
+        std::ifstream("/proc/self/comm") >> sp;
+        if(!sp.empty()) {  // fallback to data dir + self
+            pathStr = MCENGINE_DATA_DIR + sp;
+        } else {  // fallback to data dir + package name
+            pathStr = std::string{MCENGINE_DATA_DIR} + PACKAGE_NAME;
+        }
+#endif
+    }
+    return pathStr;
 }
 
 const std::string &Environment::getExecutablePath() {
@@ -36,6 +83,8 @@ const std::string &Environment::getExecutablePath() {
 const std::string &Environment::getUserDataPath() {
     static std::string userdataStr{};
     if(!userdataStr.empty()) return userdataStr;
+
+    userdataStr = "."; // set it to non-empty to avoid endlessly failing if SDL_GetPrefPath fails once
 
     char *path = SDL_GetPrefPath("", "");
     if(path != nullptr) {
@@ -133,78 +182,72 @@ void Environment::showMessageErrorFatal(const UString &title, const UString &mes
     showMessageError(title, message);
 }
 
-void Environment::openFileWindow(FileDialogCallback callback, const char *filetypefilters, const UString & /*title*/, const UString &initialpath)
-{
-	// convert filetypefilters (Windows-style)
-	std::vector<std::string> filterNames;
-	std::vector<std::string> filterPatterns;
-	std::vector<SDL_DialogFileFilter> sdlFilters;
+void Environment::openFileWindow(FileDialogCallback callback, const char *filetypefilters, const UString & /*title*/,
+                                 const UString &initialpath) {
+    // convert filetypefilters (Windows-style)
+    std::vector<std::string> filterNames;
+    std::vector<std::string> filterPatterns;
+    std::vector<SDL_DialogFileFilter> sdlFilters;
 
-	if (filetypefilters && *filetypefilters)
-	{
-		const char *curr = filetypefilters;
-		// add the filetype filters to the SDL dialog filter
-		while (*curr)
-		{
-			const char *name = curr;
-			curr += strlen(name) + 1;
+    if(filetypefilters && *filetypefilters) {
+        const char *curr = filetypefilters;
+        // add the filetype filters to the SDL dialog filter
+        while(*curr) {
+            const char *name = curr;
+            curr += strlen(name) + 1;
 
-			if (!*curr)
-				break;
+            if(!*curr) break;
 
-			const char *pattern = curr;
-			curr += strlen(pattern) + 1;
+            const char *pattern = curr;
+            curr += strlen(pattern) + 1;
 
-			filterNames.emplace_back(name);
-			filterPatterns.emplace_back(pattern);
+            filterNames.emplace_back(name);
+            filterPatterns.emplace_back(pattern);
 
-			SDL_DialogFileFilter filter = {filterNames.back().c_str(), filterPatterns.back().c_str()};
-			sdlFilters.push_back(filter);
-		}
-	}
+            SDL_DialogFileFilter filter = {filterNames.back().c_str(), filterPatterns.back().c_str()};
+            sdlFilters.push_back(filter);
+        }
+    }
 
-	// callback data to be passed to SDL
-	auto *callbackData = new FileDialogCallbackData{std::move(callback)};
+    // callback data to be passed to SDL
+    auto *callbackData = new FileDialogCallbackData{std::move(callback)};
 
-	// show it
-	SDL_ShowOpenFileDialog(sdlFileDialogCallback, callbackData, nullptr, sdlFilters.empty() ? nullptr : sdlFilters.data(), static_cast<int>(sdlFilters.size()),
-	                       initialpath.length() > 0 ? initialpath.toUtf8() : nullptr, false);
+    // show it
+    SDL_ShowOpenFileDialog(sdlFileDialogCallback, callbackData, nullptr,
+                           sdlFilters.empty() ? nullptr : sdlFilters.data(), static_cast<int>(sdlFilters.size()),
+                           initialpath.length() > 0 ? initialpath.toUtf8() : nullptr, false);
 }
 
-void Environment::openFolderWindow(FileDialogCallback callback, const UString &initialpath)
-{
-	// callback data to be passed to SDL
-	auto *callbackData = new FileDialogCallbackData{std::move(callback)};
+void Environment::openFolderWindow(FileDialogCallback callback, const UString &initialpath) {
+    // callback data to be passed to SDL
+    auto *callbackData = new FileDialogCallbackData{std::move(callback)};
 
-	// show it
-	SDL_ShowOpenFolderDialog(sdlFileDialogCallback, callbackData, nullptr, initialpath.length() > 0 ? initialpath.toUtf8() : nullptr, false);
+    // show it
+    SDL_ShowOpenFolderDialog(sdlFileDialogCallback, callbackData, nullptr,
+                             initialpath.length() > 0 ? initialpath.toUtf8() : nullptr, false);
 }
 
 // internal
 
 // TODO: filter?
 // for open{File,Folder}Window
-void Environment::sdlFileDialogCallback(void *userdata, const char *const *filelist, int  /*filter*/)
-{
-	auto *callbackData = static_cast<FileDialogCallbackData *>(userdata);
-	if (!callbackData)
-		return;
+void Environment::sdlFileDialogCallback(void *userdata, const char *const *filelist, int /*filter*/) {
+    auto *callbackData = static_cast<FileDialogCallbackData *>(userdata);
+    if(!callbackData) return;
 
-	std::vector<UString> results;
+    std::vector<UString> results;
 
-	if (filelist)
-	{
-		for (const char *const *curr = filelist; *curr; curr++)
-		{
-			results.emplace_back(*curr);
-		}
-	}
+    if(filelist) {
+        for(const char *const *curr = filelist; *curr; curr++) {
+            results.emplace_back(*curr);
+        }
+    }
 
-	// call the callback
-	callbackData->callback(results);
+    // call the callback
+    callbackData->callback(results);
 
-	// data is no longer needed
-	delete callbackData;
+    // data is no longer needed
+    delete callbackData;
 }
 
 // for getting files in folder/ folders in folder

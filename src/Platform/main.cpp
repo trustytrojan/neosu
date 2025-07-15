@@ -17,33 +17,37 @@ int Main::ret = 1;
 EnvironmentImpl *baseEnv = nullptr;
 
 namespace {
-void setcwdexe(const char *argv0) noexcept {
+void setcwdexe(const std::string &exePathStr) noexcept {
+    if constexpr(Env::cfg(OS::WASM)) return;
     // Fix path in case user is running it from the wrong folder.
     // We only do this if MCENGINE_DATA_DIR is set to its default value, since if it's changed,
     // the packager clearly wants the executable in a different location.
-    UString dataDir{MCENGINE_DATA_DIR};
+    std::string dataDir{MCENGINE_DATA_DIR};
     if(dataDir != "./" && dataDir != ".\\") {
         return;
     }
     namespace fs = std::filesystem;
 
+    bool failed = true;
     std::error_code ec;
-    fs::path exe_path{};
-    if constexpr(Env::cfg(OS::LINUX))
-        exe_path = fs::canonical("/proc/self/exe", ec);
-    else if constexpr(Env::cfg(OS::WINDOWS))
-        exe_path = fs::canonical(fs::path(argv0), ec);
+    fs::path exe_path{exePathStr};
 
-    if(ec || !exe_path.has_parent_path()) return;
+    if(!exe_path.empty() && exe_path.has_parent_path()) {
+        fs::current_path(exe_path.parent_path(), ec);
+        failed = !!ec;
+    }
 
-    fs::current_path(exe_path.parent_path(), ec);
+    if(failed) {
+        printf("WARNING: failed to set working directory to parent of %s\n", exePathStr.c_str());
+    }
 }
 }  // namespace
 
 int main(int argc, char *argv[]) {
-    if constexpr(!Env::cfg(OS::WASM))
-        setcwdexe(argv[0]);  // set the current working directory to the executable directory, so that relative paths
-                             // work as expected
+    // set the current working directory to the executable directory, so that relative paths
+    // work as expected
+    // this also sets and caches the path in getPathToSelf, so this must be called here
+    setcwdexe(Environment::getPathToSelf(argv[0]));
 
     std::string lowerPackageName = PACKAGE_NAME;
     std::ranges::transform(lowerPackageName, lowerPackageName.begin(), [](char c) { return std::tolower(c); });

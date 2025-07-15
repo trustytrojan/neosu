@@ -27,11 +27,16 @@ class Environment {
     virtual Graphics *createRenderer() = 0;
 
     // system
+    // resolved and cached at early startup with argv[0]
+    // contains the full canonical path to the current exe
+    static const std::string &getPathToSelf(const char *argv0 = nullptr);
+
     virtual void shutdown() = 0;
     virtual void restart() = 0;
     static const std::string &getExecutablePath();
     virtual void openURLInDefaultBrowser(UString url) = 0;
     virtual void openDirectory(std::string path) = 0;
+
 
     // user
     virtual UString getUsername() = 0;

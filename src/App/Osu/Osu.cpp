@@ -230,10 +230,10 @@ Osu::Osu() {
     cv::snd_output_device.setValue(soundEngine->getOutputDeviceName());
     cv::snd_freq.setCallback(fastdelegate::MakeDelegate(soundEngine.get(), &SoundEngine::onFreqChanged));
     cv::snd_restart.setCallback(fastdelegate::MakeDelegate(soundEngine.get(), &SoundEngine::restart));
-    cv::win_snd_wasapi_exclusive.setCallback(_RESTART_SOUND_ENGINE_ON_CHANGE);
-    cv::win_snd_wasapi_buffer_size.setCallback(_RESTART_SOUND_ENGINE_ON_CHANGE);
-    cv::win_snd_wasapi_period_size.setCallback(_RESTART_SOUND_ENGINE_ON_CHANGE);
-    cv::asio_buffer_size.setCallback(_RESTART_SOUND_ENGINE_ON_CHANGE);
+    cv::win_snd_wasapi_exclusive.setCallback(fastdelegate::MakeDelegate(soundEngine.get(), &SoundEngine::onParamChanged));
+    cv::win_snd_wasapi_buffer_size.setCallback(fastdelegate::MakeDelegate(soundEngine.get(), &SoundEngine::onParamChanged));
+    cv::win_snd_wasapi_period_size.setCallback(fastdelegate::MakeDelegate(soundEngine.get(), &SoundEngine::onParamChanged));
+    cv::asio_buffer_size.setCallback(fastdelegate::MakeDelegate(soundEngine.get(), &SoundEngine::onParamChanged));
 
     // Initialize skin after sound engine has started, or else sounds won't load properly
     cv::skin.setCallback(fastdelegate::MakeDelegate(this, &Osu::onSkinChange));

@@ -660,11 +660,16 @@ void SoundEngine::setVolume(float volume) {
     }
 }
 
-void SoundEngine::onFreqChanged(const UString &oldValue, const UString &newValue) {
-    (void)oldValue;
-    (void)newValue;
-    if(!this->isReady()) return;
+void SoundEngine::onFreqChanged(float oldFreq, float newFreq) {
+    if(!this->isReady() || oldFreq == newFreq) return;
     this->restart();
+}
+
+void SoundEngine::onParamChanged(float oldValue, float newValue) {
+    const int oldValueMS = static_cast<int>(std::round(oldValue * 1000.0f));
+    const int newValueMS = static_cast<int>(std::round(newValue * 1000.0f));
+
+    if(oldValueMS != newValueMS) this->restart();
 }
 
 std::vector<OUTPUT_DEVICE> SoundEngine::getOutputDevices() {

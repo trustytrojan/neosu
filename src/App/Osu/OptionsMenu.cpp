@@ -2528,13 +2528,11 @@ void OptionsMenu::onOutputDeviceSelect() {
         return;
     }
 
-    std::vector<OUTPUT_DEVICE> outputDevices = soundEngine->getOutputDevices();
-
     // build context menu
     this->contextMenu->setPos(this->outputDeviceSelectButton->getPos());
     this->contextMenu->setRelPos(this->outputDeviceSelectButton->getRelPos());
     this->contextMenu->begin();
-    for(auto device : outputDevices) {
+    for(const auto& device : soundEngine->getOutputDevices()) {
         CBaseUIButton *button = this->contextMenu->addButton(device.name);
         if(device.name == soundEngine->getOutputDeviceName()) button->setTextBrightColor(0xff00ff00);
     }
@@ -2549,7 +2547,7 @@ void OptionsMenu::onOutputDeviceSelect2(const UString &outputDeviceName, int  /*
         return;
     }
 
-    for(auto device : soundEngine->getOutputDevices()) {
+    for(const auto& device : soundEngine->getOutputDevices()) {
         if(device.name != outputDeviceName) continue;
 
         soundEngine->setOutputDevice(device);
@@ -2942,13 +2940,13 @@ void OptionsMenu::onSliderChangeUIScale(CBaseUISlider *slider) {
 }
 
 void OptionsMenu::OpenASIOSettings() {
-#ifdef _WIN32
+#if defined(MCENGINE_PLATFORM_WINDOWS) && defined(MCENGINE_FEATURE_BASS)
     BASS_ASIO_ControlPanel();
 #endif
 }
 
 void OptionsMenu::onASIOBufferChange([[maybe_unused]] CBaseUISlider *slider) {
-#ifdef _WIN32
+#if defined(MCENGINE_PLATFORM_WINDOWS) && defined(MCENGINE_FEATURE_BASS)
     if(!this->updating_layout) this->bASIOBufferChangeScheduled = true;
 
     BASS_ASIO_INFO info{};

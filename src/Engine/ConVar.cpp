@@ -474,14 +474,6 @@ void _volume(const UString &/*oldValue*/, const UString &newValue) {
     soundEngine->setVolume(newValue.toFloat());
 }
 
-void _RESTART_SOUND_ENGINE_ON_CHANGE(const UString &oldValue, const UString &newValue) {
-    if (!soundEngine) return;
-    const int oldValueMS = std::round(oldValue.toFloat() * 1000.0f);
-    const int newValueMS = std::round(newValue.toFloat() * 1000.0f);
-
-    if(oldValueMS != newValueMS) soundEngine->restart();
-}
-
 void _vprof(float newValue) {
     const bool enable = !!static_cast<int>(newValue);
 
