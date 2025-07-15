@@ -31,6 +31,8 @@ typedef uint64_t QWORD;
 
 #include <iostream>
 
+#include <SDL3/SDL_events.h>  // for SDL_PumpEvents, needed for SDL_ShowOpenFileDialog/SDL_ShowOpenFolderDialog
+
 #include "ConVar.h"
 #include "Engine.h"
 #include "Mouse.h"
@@ -505,9 +507,13 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> & /*
     while(this->bRunning) {
         VPROF_MAIN();
 
-        // handle windows message queue
+        // handle window message queue
         {
-            VPROF_BUDGET("Windows", VPROF_BUDGETGROUP_WNDPROC);
+            VPROF_BUDGET("Events", VPROF_BUDGETGROUP_WNDPROC);
+            /* From SDL_dialog.h: Apps that do not use SDL to handle events
+             * should add a call to SDL_PumpEvents in their main loop.
+             */
+            SDL_PumpEvents();
 
             if(cv::win_mouse_raw_input_buffer.getBool() && mouse != NULL) {
                 UINT minRawInputBufferNumBytes = 0;

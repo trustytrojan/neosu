@@ -5,6 +5,8 @@
 #include "File.h"
 
 #include <SDL3/SDL_filesystem.h>
+#include <SDL3/SDL_messagebox.h>
+#include <SDL3/SDL_dialog.h>
 
 Environment::Environment() { this->bFullscreenWindowedBorderless = false; }
 
@@ -115,7 +117,95 @@ std::string Environment::getFileExtensionFromFilePath(const std::string &filepat
         return {""};
 }
 
+void Environment::showMessageInfo(const UString &title, const UString &message) {
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, title.toUtf8(), message.toUtf8(), nullptr);
+}
+
+void Environment::showMessageWarning(const UString &title, const UString &message) {
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, title.toUtf8(), message.toUtf8(), nullptr);
+}
+
+void Environment::showMessageError(const UString &title, const UString &message) {
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title.toUtf8(), message.toUtf8(), nullptr);
+}
+
+void Environment::showMessageErrorFatal(const UString &title, const UString &message) {
+    showMessageError(title, message);
+}
+
+void Environment::openFileWindow(FileDialogCallback callback, const char *filetypefilters, const UString & /*title*/, const UString &initialpath)
+{
+	// convert filetypefilters (Windows-style)
+	std::vector<std::string> filterNames;
+	std::vector<std::string> filterPatterns;
+	std::vector<SDL_DialogFileFilter> sdlFilters;
+
+	if (filetypefilters && *filetypefilters)
+	{
+		const char *curr = filetypefilters;
+		// add the filetype filters to the SDL dialog filter
+		while (*curr)
+		{
+			const char *name = curr;
+			curr += strlen(name) + 1;
+
+			if (!*curr)
+				break;
+
+			const char *pattern = curr;
+			curr += strlen(pattern) + 1;
+
+			filterNames.emplace_back(name);
+			filterPatterns.emplace_back(pattern);
+
+			SDL_DialogFileFilter filter = {filterNames.back().c_str(), filterPatterns.back().c_str()};
+			sdlFilters.push_back(filter);
+		}
+	}
+
+	// callback data to be passed to SDL
+	auto *callbackData = new FileDialogCallbackData{std::move(callback)};
+
+	// show it
+	SDL_ShowOpenFileDialog(sdlFileDialogCallback, callbackData, nullptr, sdlFilters.empty() ? nullptr : sdlFilters.data(), static_cast<int>(sdlFilters.size()),
+	                       initialpath.length() > 0 ? initialpath.toUtf8() : nullptr, false);
+}
+
+void Environment::openFolderWindow(FileDialogCallback callback, const UString &initialpath)
+{
+	// callback data to be passed to SDL
+	auto *callbackData = new FileDialogCallbackData{std::move(callback)};
+
+	// show it
+	SDL_ShowOpenFolderDialog(sdlFileDialogCallback, callbackData, nullptr, initialpath.length() > 0 ? initialpath.toUtf8() : nullptr, false);
+}
+
 // internal
+
+// TODO: filter?
+// for open{File,Folder}Window
+void Environment::sdlFileDialogCallback(void *userdata, const char *const *filelist, int  /*filter*/)
+{
+	auto *callbackData = static_cast<FileDialogCallbackData *>(userdata);
+	if (!callbackData)
+		return;
+
+	std::vector<UString> results;
+
+	if (filelist)
+	{
+		for (const char *const *curr = filelist; *curr; curr++)
+		{
+			results.emplace_back(*curr);
+		}
+	}
+
+	// call the callback
+	callbackData->callback(results);
+
+	// data is no longer needed
+	delete callbackData;
+}
 
 // for getting files in folder/ folders in folder
 std::vector<std::string> Environment::enumerateDirectory(const std::string &pathToEnum,

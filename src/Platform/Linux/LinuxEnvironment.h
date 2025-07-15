@@ -34,14 +34,6 @@ class LinuxEnvironment : public Environment {
     UString getClipBoardText() override;
     void setClipBoardText(UString text) override;
 
-    // dialogs & message boxes
-    void showMessageInfo(UString title, UString message) override;
-    void showMessageWarning(UString title, UString message) override;
-    void showMessageError(UString title, UString message) override;
-    void showMessageErrorFatal(UString title, UString message) override;
-    UString openFileWindow(const char *filetypefilters, UString title, UString initialpath) override;
-    UString openFolderWindow(UString title, UString initialpath) override;
-
     // window
     void focus() override;
     void center() override;

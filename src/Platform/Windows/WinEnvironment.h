@@ -37,12 +37,10 @@ class WinEnvironment : public Environment {
     void setClipBoardText(UString text);
 
     // dialogs & message boxes
-    void showMessageInfo(UString title, UString message);
-    void showMessageWarning(UString title, UString message);
-    void showMessageError(UString title, UString message);
-    void showMessageErrorFatal(UString title, UString message);
-    UString openFileWindow(const char *filetypefilters, UString title, UString initialpath);
-    UString openFolderWindow(UString title, UString initialpath);
+    void showMessageInfo(const UString &title, const UString &message);
+    void showMessageWarning(const UString &title, const UString &message);
+    void showMessageError(const UString &title, const UString &message);
+    void showMessageErrorFatal(const UString &title, const UString &message);
 
     // window
     void focus();

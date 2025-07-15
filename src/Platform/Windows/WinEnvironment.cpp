@@ -137,95 +137,6 @@ void WinEnvironment::openDirectory(std::string path) {
     ShellExecuteW(this->hwnd, L"open", wpath.wc_str(), NULL, NULL, SW_SHOW);
 }
 
-UString WinEnvironment::openFileWindow(const char *filetypefilters, UString title, UString initialpath) {
-    disableFullscreen();
-
-    OPENFILENAME fn;
-    ZeroMemory(&fn, sizeof(fn));
-
-    auto temp = UString(filetypefilters);
-#ifdef _UNICODE
-    wchar_t fileNameBuffer[255]{};
-    const wchar_t *winFiletypeFilters = temp.wc_str();
-#else
-    char fileNameBuffer[255]{};
-    const char *winFiletypeFilters = temp.c_str();
-#endif
-
-    // fill it
-    fn.lStructSize = sizeof(fn);
-    fn.hwndOwner = NULL;
-    fn.lpstrFile = fileNameBuffer;
-    fn.lpstrFile[0] = '\0';
-    fn.nMaxFile = sizeof(fileNameBuffer);
-    fn.lpstrFilter = winFiletypeFilters;
-    fn.nFilterIndex = 1;
-    fn.lpstrFileTitle = NULL;
-    fn.nMaxFileTitle = 0;
-
-#ifdef _UNICODE
-    fn.lpstrTitle = title.length() > 1 ? title.wc_str() : NULL;
-    fn.lpstrInitialDir = initialpath.length() > 1 ? initialpath.wc_str() : NULL;
-#else
-    fn.lpstrTitle = title.lengthUtf8() > 1 ? title.toUtf8() : NULL;
-    fn.lpstrInitialDir = initialpath.lengthUtf8() > 1 ? initialpath.toUtf8() : NULL;
-#endif
-
-    fn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR | OFN_ENABLESIZING;
-
-    // open the dialog
-    GetOpenFileName(&fn);
-
-    return fn.lpstrFile;
-}
-
-UString WinEnvironment::openFolderWindow(UString title, UString initialpath) {
-    disableFullscreen();
-
-    OPENFILENAME fn;
-    ZeroMemory(&fn, sizeof(fn));
-
-#ifdef _UNICODE
-    wchar_t fileNameBuffer[255]{};
-#else
-    char fileNameBuffer[255]{};
-#endif
-
-    fileNameBuffer[0] = 's';
-    fileNameBuffer[1] = 'k';
-    fileNameBuffer[2] = 'i';
-    fileNameBuffer[3] = 'n';
-    fileNameBuffer[4] = '.';
-    fileNameBuffer[5] = 'i';
-    fileNameBuffer[6] = 'n';
-    fileNameBuffer[7] = 'i';
-    fileNameBuffer[8] = '\0';
-
-    // fill it
-    fn.lStructSize = sizeof(fn);
-    fn.hwndOwner = NULL;
-    fn.lpstrFile = fileNameBuffer;
-    /// fn.lpstrFile[0] = '\0';
-    fn.nMaxFile = sizeof(fileNameBuffer);
-    fn.nFilterIndex = 1;
-    fn.lpstrFileTitle = NULL;
-
-#ifdef _UNICODE
-    fn.lpstrTitle = title.length() > 1 ? title.wc_str() : NULL;
-    fn.lpstrInitialDir = initialpath.length() > 1 ? initialpath.wc_str() : NULL;
-#else
-    fn.lpstrTitle = title.lengthUtf8() > 1 ? title.toUtf8() : NULL;
-    fn.lpstrInitialDir = initialpath.lengthUtf8() > 1 ? initialpath.toUtf8() : NULL;
-#endif
-
-    fn.Flags = OFN_PATHMUSTEXIST | OFN_ENABLESIZING;
-
-    // open the dialog
-    GetOpenFileName(&fn);
-
-    return fn.lpstrFile;
-}
-
 std::vector<std::string> WinEnvironment::getFilesInFolder(const std::string &folderOrig) noexcept {
     // Since we want to avoid wide strings in the codebase as much as possible,
     // we convert wide paths to UTF-8 (as they fucking should be).
@@ -349,7 +260,7 @@ std::vector<UString> WinEnvironment::getLogicalDrives() {
     return drives;
 }
 
-void WinEnvironment::showMessageInfo(UString title, UString message) {
+void WinEnvironment::showMessageInfo(const UString &title, const UString &message) {
     bool wasFullscreen = this->bFullScreen;
     handleShowMessageFullscreen();
     MessageBoxW(this->hwnd, message.wc_str(), title.wc_str(), MB_ICONINFORMATION | MB_OK);
@@ -359,7 +270,7 @@ void WinEnvironment::showMessageInfo(UString title, UString message) {
     }
 }
 
-void WinEnvironment::showMessageWarning(UString title, UString message) {
+void WinEnvironment::showMessageWarning(const UString &title, const UString &message) {
     bool wasFullscreen = this->bFullScreen;
     handleShowMessageFullscreen();
     MessageBoxW(this->hwnd, message.wc_str(), title.wc_str(), MB_ICONWARNING | MB_OK);
@@ -369,7 +280,7 @@ void WinEnvironment::showMessageWarning(UString title, UString message) {
     }
 }
 
-void WinEnvironment::showMessageError(UString title, UString message) {
+void WinEnvironment::showMessageError(const UString &title, const UString &message) {
     bool wasFullscreen = this->bFullScreen;
     handleShowMessageFullscreen();
     MessageBoxW(this->hwnd, message.wc_str(), title.wc_str(), MB_ICONERROR | MB_OK);
@@ -379,7 +290,7 @@ void WinEnvironment::showMessageError(UString title, UString message) {
     }
 }
 
-void WinEnvironment::showMessageErrorFatal(UString title, UString message) {
+void WinEnvironment::showMessageErrorFatal(const UString &title, const UString &message) {
     bool wasFullscreen = this->bFullScreen;
     handleShowMessageFullscreen();
 #ifdef _UNICODE

@@ -24,6 +24,8 @@
 
 #include "OpenGLHeaders.h"
 
+#include <SDL3/SDL_events.h>  // for SDL_PumpEvents, needed for SDL_ShowOpenFileDialog/SDL_ShowOpenFolderDialog
+
 #define WINDOW_TITLE "neosu"
 
 // TODO: this is incorrect, the size here doesn't take the decorations into account
@@ -173,13 +175,23 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> & /*argC
         VPROF_MAIN();
 
         // handle window message queue
-        while(XPending(this->dpy)) {
-            XNextEvent(this->dpy, &this->xev);
+        {
+            VPROF_BUDGET("Events", VPROF_BUDGETGROUP_WNDPROC);
+            /* From SDL_dialog.h:
+             * On Linux, dialogs may require XDG Portals, which requires DBus, which
+             * requires an event-handling loop. Apps that do not use SDL to handle events
+             * should add a call to SDL_PumpEvents in their main loop.
+             */
+            SDL_PumpEvents();
 
-            if(XFilterEvent(&this->xev, this->clientWindow))  // for keyboard chars
-                continue;
+            while(XPending(this->dpy)) {
+                XNextEvent(this->dpy, &this->xev);
 
-            WndProc();
+                if(XFilterEvent(&this->xev, this->clientWindow))  // for keyboard chars
+                    continue;
+
+                WndProc();
+            }
         }
 
         // update
@@ -201,8 +213,9 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> & /*argC
 
             // delay the next frame
             const int target_fps =
-                !this->bHasFocus ? cv::fps_max_background.getInt()
-                                 : (cv::fps_unlimited.getBool() || cv::fps_max.getInt() <= 0 ? 0 : cv::fps_max.getInt());
+                !this->bHasFocus
+                    ? cv::fps_max_background.getInt()
+                    : (cv::fps_unlimited.getBool() || cv::fps_max.getInt() <= 0 ? 0 : cv::fps_max.getInt());
             FPSLimiter::limit_frames(target_fps);
         }
     }

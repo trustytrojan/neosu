@@ -66,12 +66,15 @@ class Environment {
     virtual void setClipBoardText(UString text) = 0;
 
     // dialogs & message boxes
-    virtual void showMessageInfo(UString title, UString message) = 0;
-    virtual void showMessageWarning(UString title, UString message) = 0;
-    virtual void showMessageError(UString title, UString message) = 0;
-    virtual void showMessageErrorFatal(UString title, UString message) = 0;
-    virtual UString openFileWindow(const char *filetypefilters, UString title, UString initialpath) = 0;
-    virtual UString openFolderWindow(UString title, UString initialpath) = 0;
+    virtual void showMessageInfo(const UString &title, const UString &message);
+    virtual void showMessageWarning(const UString &title, const UString &message);
+    virtual void showMessageError(const UString &title, const UString &message);
+    virtual void showMessageErrorFatal(const UString &title, const UString &message);
+
+    using FileDialogCallback = std::function<void(const std::vector<UString> &paths)>;
+    static void openFileWindow(FileDialogCallback callback, const char *filetypefilters, const UString &title,
+                               const UString &initialpath = "");
+    static void openFolderWindow(FileDialogCallback callback, const UString &initialpath = "");
 
     // window
     virtual void focus() = 0;
@@ -121,9 +124,16 @@ class Environment {
     bool bFullscreenWindowedBorderless;
 
    private:
+    // static callbacks/helpers
+    struct FileDialogCallbackData {
+        FileDialogCallback callback;
+    };
+    static void sdlFileDialogCallback(void *userdata, const char *const *filelist, int filter);
+
     // for getting files in folder/ folders in folder
     static std::vector<std::string> enumerateDirectory(const std::string &pathToEnum,
                                                        /* enum SDL_PathType */ unsigned int type) noexcept;
     static std::string getThingFromPathHelper(
-        const std::string &path, bool folder) noexcept;  // code sharing for getFolderFromFilePath/getFileNameFromFilePath
+        const std::string &path,
+        bool folder) noexcept;  // code sharing for getFolderFromFilePath/getFileNameFromFilePath
 };

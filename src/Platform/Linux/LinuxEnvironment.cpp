@@ -159,32 +159,6 @@ UString LinuxEnvironment::getClipBoardText() { return this->getClipboardTextInt(
 
 void LinuxEnvironment::setClipBoardText(UString text) { this->setClipBoardTextInt(text); }
 
-void LinuxEnvironment::showMessageInfo(UString title, UString message) {
-    // TODO:
-}
-
-void LinuxEnvironment::showMessageWarning(UString title, UString message) {
-    // TODO:
-}
-
-void LinuxEnvironment::showMessageError(UString title, UString message) {
-    // TODO:
-}
-
-void LinuxEnvironment::showMessageErrorFatal(UString title, UString message) {
-    // TODO:
-}
-
-UString LinuxEnvironment::openFileWindow(const char * /*filetypefilters*/, UString  /*title*/, UString  /*initialpath*/) {
-    // TODO:
-    return UString("");
-}
-
-UString LinuxEnvironment::openFolderWindow(UString  /*title*/, UString  /*initialpath*/) {
-    // TODO:
-    return UString("");
-}
-
 void LinuxEnvironment::focus() {
     XRaiseWindow(this->display, this->window);
     XMapRaised(this->display, this->window);
