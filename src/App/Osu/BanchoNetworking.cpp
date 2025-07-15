@@ -292,13 +292,16 @@ void disconnect() {
         auto version_header = UString::format("x-mcosu-ver: %s", bancho->neosu_version.toUtf8());
         options.headers["x-mcosu-ver"] = bancho->neosu_version.toUtf8();
 
-        if(!auth_header.empty()) {
-            size_t colon_pos = auth_header.find(':');
-            if(colon_pos != std::string::npos) {
-                std::string token = auth_header.substr(colon_pos + 1);
-                token.erase(0, token.find_first_not_of(" \t"));
-                token.erase(token.find_last_not_of(" \t\r\n") + 1);
-                options.headers["osu-token"] = token;
+        {
+            std::scoped_lock<std::mutex> lock{auth_mutex};
+            if(!auth_header.empty()) {
+                size_t colon_pos = auth_header.find(':');
+                if(colon_pos != std::string::npos) {
+                    std::string token = auth_header.substr(colon_pos + 1);
+                    token.erase(0, token.find_first_not_of(" \t"));
+                    token.erase(token.find_last_not_of(" \t\r\n") + 1);
+                    options.headers["osu-token"] = token;
+                }
             }
         }
 

@@ -1,8 +1,9 @@
 #include "NetworkHandler.h"
-#include "curl_blob.h"
 #include "Engine.h"
 #include "Bancho.h"
+#include "Thread.h"
 
+#include "curl_blob.h"
 #include <curl/curl.h>
 #include <chrono>
 #include <utility>
@@ -29,7 +30,7 @@ struct NetworkRequest {
         : url(std::move(u)), callback(std::move(cb)), options(std::move(opts)) {}
 };
 
-NetworkHandler::NetworkHandler() : multi_handle(nullptr), should_stop(false) {
+NetworkHandler::NetworkHandler() : multi_handle(nullptr) {
     // this needs to be called once to initialize curl on startup
     std::call_once(curl_init_flag, []() { curl_global_init(CURL_GLOBAL_DEFAULT); });
 
@@ -43,17 +44,17 @@ NetworkHandler::NetworkHandler() : multi_handle(nullptr), should_stop(false) {
     runtime_assert(bancho.get(), "Bancho failed to initialize!");
 
     // start network thread
-    this->network_thread = std::thread(&NetworkHandler::networkThreadFunc, this);
+    this->network_thread = std::make_unique<McThread>(
+        [this](std::stop_token stopToken) { this->networkThreadFunc(std::move(stopToken)); });
+
+    if(!this->network_thread->isReady()) {
+        debugLogF("ERROR: Failed to create network thread!\n");
+    }
 }
 
 NetworkHandler::~NetworkHandler() {
-    // signal thread to stop
-    this->should_stop = true;
-    this->request_queue_cv.notify_all();
-
-    if(this->network_thread.joinable()) {
-        this->network_thread.join();
-    }
+    // McThread destructor automatically requests stop and joins the thread
+    this->network_thread.reset();
 
     // cleanup any remaining requests
     {
@@ -75,8 +76,8 @@ NetworkHandler::~NetworkHandler() {
     bancho.reset();
 }
 
-void NetworkHandler::networkThreadFunc() {
-    while(!this->should_stop.load()) {
+void NetworkHandler::networkThreadFunc(std::stop_token stopToken) {
+    while(!stopToken.stop_requested()) {
         processNewRequests();
 
         if(!this->active_requests.empty()) {
@@ -93,8 +94,11 @@ void NetworkHandler::networkThreadFunc() {
         if(this->active_requests.empty()) {
             // wait for new requests
             std::unique_lock<std::mutex> lock{this->request_queue_mutex};
-            this->request_queue_cv.wait_for(lock, std::chrono::milliseconds(100), [this] {
-                return !this->pending_requests.empty() || this->should_stop.load();
+
+            std::stop_callback stopCallback(stopToken, [&]() { this->request_queue_cv.notify_all(); });
+
+            this->request_queue_cv.wait_for(lock, std::chrono::milliseconds(100), [this, &stopToken] {
+                return !this->pending_requests.empty() || stopToken.stop_requested();
             });
         } else {
             // brief sleep to avoid busy waiting
