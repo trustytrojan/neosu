@@ -10,12 +10,15 @@
 
 #if !defined(_MSC_VER) && __has_include(<openssl/rand.h>)
 #include <openssl/rand.h>
+#define USE_OPENSSL
 #endif
 
 void get_random_bytes(u8 *out, std::size_t s_out) {
+#ifdef USE_OPENSSL
     if(RAND_bytes(out, static_cast<i32>(s_out)) == 1) {
         return;
     }
+#endif
 
 #ifdef _WIN32
     HCRYPTPROV hCryptProv;
