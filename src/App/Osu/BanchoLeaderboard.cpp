@@ -15,6 +15,22 @@
 #include "ModSelector.h"
 #include "SongBrowser/SongBrowser.h"
 
+// Since strtok_r SUCKS I'll just make my own
+// Returns the token start, and edits str to after the token end (unless '\0').
+// @spec: why is this here
+char *strtok_x(char d, char **str) {
+    char *old = *str;
+    while(**str != '\0' && **str != d) {
+        (*str)++;
+    }
+    if(**str != '\0') {
+        **str = '\0';
+        (*str)++;
+    }
+    return old;
+}
+
+namespace {  // static namespace
 FinishedScore parse_score(char *score_line) {
     FinishedScore score;
     score.client = "peppy-unknown";
@@ -42,7 +58,7 @@ FinishedScore parse_score(char *score_line) {
     // might also be missing some important fields here, double check
 
     // Set username for given user id, since we now know both
-    auto user = get_user_info(score.player_id);
+    auto user = BANCHO::User::get_user_info(score.player_id);
     user->name = UString(score.playerName.c_str());
 
     // Mark as a player. Setting this also makes the has_user_info check pass,
@@ -52,6 +68,9 @@ FinishedScore parse_score(char *score_line) {
     return score;
 }
 
+}  // namespace
+
+namespace BANCHO::Leaderboard {
 void fetch_online_scores(DatabaseBeatmap *beatmap) {
     UString path = "/web/osu-osz2-getscores.php?s=0&vv=4&v=1";
     path.append(UString::format("&c=%s", beatmap->getMD5Hash().hash));
@@ -86,21 +105,7 @@ void fetch_online_scores(DatabaseBeatmap *beatmap) {
     request.mime = NULL;
     request.extra = (u8 *)strdup(beatmap->getMD5Hash().hash);
 
-    send_api_request(request);
-}
-
-// Since strtok_r SUCKS I'll just make my own
-// Returns the token start, and edits str to after the token end (unless '\0').
-char *strtok_x(char d, char **str) {
-    char *old = *str;
-    while(**str != '\0' && **str != d) {
-        (*str)++;
-    }
-    if(**str != '\0') {
-        **str = '\0';
-        (*str)++;
-    }
-    return old;
+    BANCHO::Net::send_api_request(request);
 }
 
 void process_leaderboard_response(Packet response) {
@@ -165,3 +170,4 @@ void process_leaderboard_response(Packet response) {
     db->online_scores[beatmap_hash] = std::move(scores);
     osu->getSongBrowser()->rebuildScoreButtons();
 }
+}  // namespace BANCHO::Leaderboard

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <atomic>
+#include <memory>
 #include <mutex>
 #include <unordered_map>
 
@@ -72,16 +73,16 @@ struct Bancho {
         u32 nb_members;
     };
 
+    // static helpers
+    static MD5Hash md5(u8 *msg, size_t msg_len);
+    static void handle_packet(Packet *packet);
+    static Packet build_login_packet();
+    static std::unordered_map<std::string, Bancho::Channel *> chat_channels;
+
    private:
     mutable std::mutex bancho_get_lock;
 };
 
-MD5Hash md5(u8 *msg, size_t msg_len);
-
-void handle_packet(Packet *packet);
-
-Packet build_login_packet();
-
 // initialized by NetworkHandler
-extern Bancho *bancho;
-extern std::unordered_map<std::string, Bancho::Channel *> chat_channels;
+// declared here for convenience
+extern std::unique_ptr<Bancho> bancho;

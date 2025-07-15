@@ -144,8 +144,8 @@ void UIModSelectorModButton::onClicked() {
             debugLog("Sending mod change to server.\n");
             Packet packet;
             packet.id = MATCH_CHANGE_MODS;
-            write<u32>(&packet, bancho->room.slots[i].mods);
-            send_packet(packet);
+            BANCHO::Proto::write<u32>(&packet, bancho->room.slots[i].mods);
+            BANCHO::Net::send_packet(packet);
 
             osu->room->on_room_updated(bancho->room);
             break;

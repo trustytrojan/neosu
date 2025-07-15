@@ -53,7 +53,7 @@ void UIUserContextMenuScreen::open(u32 user_id) {
             this->menu->addButton("Kick", KICK);
         }
 
-        auto user_info = get_user_info(user_id, true);
+        auto user_info = BANCHO::User::get_user_info(user_id, true);
         if(user_info->has_presence) {
             // Without user info, we don't have the username
             this->menu->addButton("Start Chat", START_CHAT);
@@ -86,7 +86,7 @@ void UIUserContextMenuScreen::open(u32 user_id) {
 void UIUserContextMenuScreen::close() { this->menu->setVisible(false); }
 
 void UIUserContextMenuScreen::on_action(const UString&  /*text*/, int user_action) {
-    auto user_info = get_user_info(this->user_id);
+    auto user_info = BANCHO::User::get_user_info(this->user_id);
     int slot_number = -1;
     if(bancho->is_in_a_multi_room()) {
         for(int i = 0; i < 16; i++) {
@@ -100,14 +100,14 @@ void UIUserContextMenuScreen::on_action(const UString&  /*text*/, int user_actio
     if(user_action == UA_TRANSFER_HOST) {
         Packet packet;
         packet.id = TRANSFER_HOST;
-        write<u32>(&packet, slot_number);
-        send_packet(packet);
+        BANCHO::Proto::write<u32>(&packet, slot_number);
+        BANCHO::Net::send_packet(packet);
     } else if(user_action == KICK) {
         Packet packet;
         packet.id = MATCH_LOCK;
-        write<u32>(&packet, slot_number);
-        send_packet(packet);  // kick by locking the slot
-        send_packet(packet);  // unlock the slot
+        BANCHO::Proto::write<u32>(&packet, slot_number);
+        BANCHO::Net::send_packet(packet);  // kick by locking the slot
+        BANCHO::Net::send_packet(packet);  // unlock the slot
     } else if(user_action == START_CHAT) {
         osu->chat->addChannel(user_info->name, true);
     } else if(user_action == VIEW_PROFILE) {
@@ -117,18 +117,18 @@ void UIUserContextMenuScreen::on_action(const UString&  /*text*/, int user_actio
     } else if(user_action == UA_ADD_FRIEND) {
         Packet packet;
         packet.id = FRIEND_ADD;
-        write<u32>(&packet, this->user_id);
-        send_packet(packet);
-        friends.push_back(this->user_id);
+        BANCHO::Proto::write<u32>(&packet, this->user_id);
+        BANCHO::Net::send_packet(packet);
+        BANCHO::User::friends.push_back(this->user_id);
     } else if(user_action == UA_REMOVE_FRIEND) {
         Packet packet;
         packet.id = FRIEND_REMOVE;
-        write<u32>(&packet, this->user_id);
-        send_packet(packet);
+        BANCHO::Proto::write<u32>(&packet, this->user_id);
+        BANCHO::Net::send_packet(packet);
 
-        auto it = std::find(friends.begin(), friends.end(), this->user_id);
-        if(it != friends.end()) {
-            friends.erase(it);
+        auto it = std::find(BANCHO::User::friends.begin(), BANCHO::User::friends.end(), this->user_id);
+        if(it != BANCHO::User::friends.end()) {
+            BANCHO::User::friends.erase(it);
         }
     } else if(user_action == TOGGLE_SPECTATE) {
         if(bancho->spectated_player_id == this->user_id) {

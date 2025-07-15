@@ -1235,7 +1235,7 @@ std::vector<SCORE_ENTRY> HUD::getCurrentScores() {
                 slot->current_hp = beatmap->getHealth() * 200;
             }
 
-            auto user_info = get_user_info(slot->player_id, true);
+            auto user_info = BANCHO::User::get_user_info(slot->player_id, true);
 
             SCORE_ENTRY scoreEntry;
             scoreEntry.entry_id = slot->player_id;

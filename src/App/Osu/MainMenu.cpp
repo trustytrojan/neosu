@@ -274,7 +274,7 @@ void MainMenu::draw() {
         float progress = -1.f;
         std::vector<u8> data;
         int response_code;
-        download(bancho->server_icon_url.toUtf8(), &progress, data, &response_code);
+        Downloader::download(bancho->server_icon_url.toUtf8(), &progress, data, &response_code);
         if(progress == -1.f) bancho->server_icon_url = "";
         if(!data.empty()) {
             FILE *file = fopen(icon_path.toUtf8(), "wb");
@@ -1105,12 +1105,12 @@ CBaseUIContainer *MainMenu::setVisible(bool visible) {
         if(!bancho->spectators.empty()) {
             Packet packet;
             packet.id = OUT_SPECTATE_FRAMES;
-            write<i32>(&packet, 0);
-            write<u16>(&packet, 0);
-            write<u8>(&packet, LiveReplayBundle::Action::NONE);
-            write<ScoreFrame>(&packet, ScoreFrame::get());
-            write<u16>(&packet, osu->getSelectedBeatmap()->spectator_sequence++);
-            send_packet(packet);
+            BANCHO::Proto::write<i32>(&packet, 0);
+            BANCHO::Proto::write<u16>(&packet, 0);
+            BANCHO::Proto::write<u8>(&packet, LiveReplayBundle::Action::NONE);
+            BANCHO::Proto::write<ScoreFrame>(&packet, ScoreFrame::get());
+            BANCHO::Proto::write<u16>(&packet, osu->getSelectedBeatmap()->spectator_sequence++);
+            BANCHO::Net::send_packet(packet);
         }
 
         this->updateLayout();

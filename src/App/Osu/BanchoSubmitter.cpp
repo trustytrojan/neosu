@@ -15,7 +15,7 @@
 #include "base64.h"
 
 #include <chrono>
-
+namespace BANCHO::Net {
 void submit_score(FinishedScore score) {
     debugLog("Submitting score...\n");
     const char *GRADES[] = {"XH", "SH", "X", "S", "A", "B", "C", "D", "F", "N"};
@@ -105,8 +105,8 @@ void submit_score(FinishedScore score) {
     }
     {
         size_t s_client_hashes_encrypted = 0;
-        u8 *client_hashes_encrypted = encrypt(iv, (u8 *)bancho->client_hashes.toUtf8(),
-                                              bancho->client_hashes.lengthUtf8(), &s_client_hashes_encrypted);
+        u8 *client_hashes_encrypted = BANCHO::AES::encrypt(
+            iv, (u8 *)bancho->client_hashes.toUtf8(), bancho->client_hashes.lengthUtf8(), &s_client_hashes_encrypted);
         const char *client_hashes_b64 =
             (const char *)base64_encode(client_hashes_encrypted, s_client_hashes_encrypted, NULL);
         part = curl_mime_addpart(request.mime);
@@ -130,7 +130,7 @@ void submit_score(FinishedScore score) {
             idiot_check.append(UString::format("0%d%s", OSU_VERSION_DATEONLY, score_time));
             idiot_check.append(bancho->client_hashes);
 
-            auto idiot_hash = md5((u8 *)idiot_check.toUtf8(), idiot_check.lengthUtf8());
+            auto idiot_hash = Bancho::md5((u8 *)idiot_check.toUtf8(), idiot_check.lengthUtf8());
             score_data.append(":");
             score_data.append(idiot_hash.hash);
         }
@@ -152,7 +152,7 @@ void submit_score(FinishedScore score) {
 
         size_t s_score_data_encrypted = 0;
         u8 *score_data_encrypted =
-            encrypt(iv, (u8 *)score_data.toUtf8(), score_data.lengthUtf8(), &s_score_data_encrypted);
+            BANCHO::AES::encrypt(iv, (u8 *)score_data.toUtf8(), score_data.lengthUtf8(), &s_score_data_encrypted);
         const char *score_data_b64 = (const char *)base64_encode(score_data_encrypted, s_score_data_encrypted, NULL);
 
         part = curl_mime_addpart(request.mime);
@@ -175,7 +175,7 @@ void submit_score(FinishedScore score) {
         free(compressed_data);
     }
 
-    send_api_request(request);
+    BANCHO::Net::send_api_request(request);
     curl_easy_cleanup(curl);
     return;
 
@@ -184,3 +184,4 @@ err:
     curl_mime_free(request.mime);
     curl_easy_cleanup(curl);
 }
+}  // namespace BANCHO::Submission

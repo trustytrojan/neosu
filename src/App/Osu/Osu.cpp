@@ -345,9 +345,9 @@ Osu::Osu() {
     this->updateMods();
 
     // Init online functionality (multiplayer/leaderboards/etc)
-    init_networking_thread();
+    BANCHO::Net::init_networking_thread();
     if(cv::mp_autologin.getBool()) {
-        reconnect();
+        BANCHO::Net::reconnect();
     }
 
     this->updateHandler->checkForUpdates();
@@ -405,7 +405,7 @@ Osu::~Osu() {
     lct_set_map(NULL);
     VolNormalization::shutdown();
     MapCalcThread::shutdown();
-    kill_networking_thread();
+    BANCHO::Net::kill_networking_thread();
 
     // "leak" UpdateHandler object, but not relevant since shutdown:
     // this is the only way of handling instant user shutdown requests properly, there is no solution for active working
@@ -677,7 +677,7 @@ void Osu::update() {
                         if(bancho->is_playing_a_multi_map()) {
                             Packet packet;
                             packet.id = MATCH_SKIP_REQUEST;
-                            send_packet(packet);
+                            BANCHO::Net::send_packet(packet);
                         }
                     }
                 }
@@ -797,7 +797,7 @@ void Osu::update() {
                 Packet packet;
                 packet.id = MATCH_CHANGE_SETTINGS;
                 bancho->room.pack(&packet);
-                send_packet(packet);
+                BANCHO::Net::send_packet(packet);
 
                 this->room->on_map_change();
             }
@@ -836,8 +836,8 @@ void Osu::update() {
     }
 
     // multiplayer update
-    receive_api_responses();
-    receive_bancho_packets();
+    BANCHO::Net::receive_api_responses();
+    BANCHO::Net::receive_bancho_packets();
 
     // skin async loading
     if(this->bSkinLoadScheduled) {
@@ -1834,7 +1834,7 @@ bool Osu::onShutdown() {
     this->optionsMenu->save();
     db->save();
 
-    disconnect();
+    BANCHO::Net::disconnect();
 
     // the only time where a shutdown could be problematic is while an update is being installed, so we block it here
     return this->updateHandler == NULL ||

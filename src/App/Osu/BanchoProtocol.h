@@ -312,6 +312,8 @@ struct LiveReplayBundle {
     u16 sequence;
 };
 
+namespace BANCHO::Proto {
+
 void read_bytes(Packet *packet, u8 *bytes, size_t n);
 u32 read_uleb128(Packet *packet);
 UString read_string(Packet *packet);
@@ -340,4 +342,5 @@ void write_hash(Packet *packet, MD5Hash hash);
 template <typename T>
 void write(Packet *packet, T t) {
     write_bytes(packet, (u8 *)&t, sizeof(T));
+}
 }

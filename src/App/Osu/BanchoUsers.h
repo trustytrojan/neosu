@@ -38,6 +38,9 @@ struct UserInfo {
     bool is_friend();
 };
 
+namespace BANCHO::User
+{
+
 extern std::unordered_map<u32, UserInfo*> online_users;
 extern std::vector<u32> friends;
 extern std::vector<u32> stats_requests;
@@ -49,3 +52,4 @@ UserInfo* try_get_user_info(u32 user_id, bool wants_presence = false);
 UserInfo* get_user_info(u32 user_id, bool wants_presence = false);
 
 void request_presence_batch();
+}

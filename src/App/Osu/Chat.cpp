@@ -1,5 +1,6 @@
 #include "Chat.h"
 
+#include <algorithm>
 #include <regex>
 #include <utility>
 
@@ -33,6 +34,8 @@
 #include "UIButton.h"
 #include "UIUserContextMenu.h"
 #include "UserCard2.h"
+
+namespace proto = BANCHO::Proto;
 
 ChatChannel::ChatChannel(Chat *chat, UString name_arg) {
     this->chat = chat;
@@ -340,8 +343,9 @@ void Chat::mouse_update(bool *propagate_clicks) {
         bool is_above_bottom = card->getPos().y <= this->user_list->getPos().y + this->user_list->getSize().y;
         bool is_below_top = card->getPos().y + card->getSize().y >= this->user_list->getPos().y;
         if(is_outdated && is_above_bottom && is_below_top) {
-            if(std::find(stats_requests.begin(), stats_requests.end(), card->info->user_id) == stats_requests.end()) {
-                stats_requests.push_back(card->info->user_id);
+            if(std::find(BANCHO::User::stats_requests.begin(), BANCHO::User::stats_requests.end(),
+                         card->info->user_id) == BANCHO::User::stats_requests.end()) {
+                BANCHO::User::stats_requests.push_back(card->info->user_id);
             }
         }
     }
@@ -414,7 +418,7 @@ void Chat::handle_command(const UString &msg) {
 
     if(msg.startsWith("/addfriend ")) {
         auto friend_name = msg.substr(11);
-        auto user = find_user(friend_name);
+        auto user = BANCHO::User::find_user(friend_name);
         if(!user) {
             this->addSystemMessage(UString::format("User '%s' not found. Are they online?", friend_name.toUtf8()));
             return;
@@ -425,10 +429,10 @@ void Chat::handle_command(const UString &msg) {
         } else {
             Packet packet;
             packet.id = FRIEND_ADD;
-            write<u32>(&packet, user->user_id);
-            send_packet(packet);
+            proto::write<u32>(&packet, user->user_id);
+            BANCHO::Net::send_packet(packet);
 
-            friends.push_back(user->user_id);
+            BANCHO::User::friends.push_back(user->user_id);
 
             this->addSystemMessage(UString::format("You are now friends with %s.", friend_name.toUtf8()));
         }
@@ -455,7 +459,7 @@ void Chat::handle_command(const UString &msg) {
 
     if(msg.startsWith("/delfriend ")) {
         auto friend_name = msg.substr(11);
-        auto user = find_user(friend_name);
+        auto user = BANCHO::User::find_user(friend_name);
         if(!user) {
             this->addSystemMessage(UString::format("User '%s' not found. Are they online?", friend_name.toUtf8()));
             return;
@@ -464,12 +468,12 @@ void Chat::handle_command(const UString &msg) {
         if(user->is_friend()) {
             Packet packet;
             packet.id = FRIEND_REMOVE;
-            write<u32>(&packet, user->user_id);
-            send_packet(packet);
+            proto::write<u32>(&packet, user->user_id);
+            BANCHO::Net::send_packet(packet);
 
-            auto it = std::find(friends.begin(), friends.end(), user->user_id);
-            if(it != friends.end()) {
-                friends.erase(it);
+            auto it = std::ranges::find(BANCHO::User::friends, user->user_id);
+            if(it != BANCHO::User::friends.end()) {
+                BANCHO::User::friends.erase(it);
             }
 
             this->addSystemMessage(UString::format("You are no longer friends with %s.", friend_name.toUtf8()));
@@ -506,11 +510,11 @@ void Chat::handle_command(const UString &msg) {
 
         Packet packet;
         packet.id = SEND_PRIVATE_MESSAGE;
-        write_string(&packet, (char *)bancho->username.toUtf8());
-        write_string(&packet, (char *)invite_msg.toUtf8());
-        write_string(&packet, (char *)username.toUtf8());
-        write<u32>(&packet, bancho->user_id);
-        send_packet(packet);
+        proto::write_string(&packet, (char *)bancho->username.toUtf8());
+        proto::write_string(&packet, (char *)invite_msg.toUtf8());
+        proto::write_string(&packet, (char *)username.toUtf8());
+        proto::write<u32>(&packet, bancho->user_id);
+        BANCHO::Net::send_packet(packet);
 
         this->addSystemMessage(UString::format("%s has been invited to the game.", username.toUtf8()));
         return;
@@ -657,7 +661,7 @@ void Chat::onKeyDown(KeyboardEvent &key) {
             username_len = username_end_idx - username_start_idx;
         }
 
-        auto user = find_user_starting_with(this->tab_completion_prefix, this->tab_completion_match);
+        auto user = BANCHO::User::find_user_starting_with(this->tab_completion_prefix, this->tab_completion_match);
         if(user) {
             this->tab_completion_match = user->name;
 
@@ -726,7 +730,7 @@ void Chat::mark_as_read(ChatChannel *chan) {
                                    bancho->pw_md5.toUtf8(), channel_urlencoded);
     request.mime = NULL;
 
-    send_api_request(request);
+    BANCHO::Net::send_api_request(request);
 
     curl_free(channel_urlencoded);
     curl_easy_cleanup(curl);
@@ -802,11 +806,11 @@ void Chat::addMessage(UString channel_name, const ChatMessage &msg, bool mark_un
     if(is_pm && this->away_msg.length() > 0) {
         Packet packet;
         packet.id = SEND_PRIVATE_MESSAGE;
-        write_string(&packet, (char *)bancho->username.toUtf8());
-        write_string(&packet, (char *)this->away_msg.toUtf8());
-        write_string(&packet, (char *)msg.author_name.toUtf8());
-        write<u32>(&packet, bancho->user_id);
-        send_packet(packet);
+        proto::write_string(&packet, (char *)bancho->username.toUtf8());
+        proto::write_string(&packet, (char *)this->away_msg.toUtf8());
+        proto::write_string(&packet, (char *)msg.author_name.toUtf8());
+        proto::write<u32>(&packet, bancho->user_id);
+        BANCHO::Net::send_packet(packet);
 
         // Server doesn't echo the message back
         this->addMessage(channel_name, ChatMessage{
@@ -970,7 +974,7 @@ void Chat::updateUserList() {
     // XXX: Optimize so fps doesn't halve when F9 is open
 
     std::vector<UserInfo *> sorted_users;
-    for(auto pair : online_users) {
+    for(auto pair : BANCHO::User::online_users) {
         if(pair.second->user_id > 0) {
             sorted_users.push_back(pair.second);
         }
@@ -1033,8 +1037,8 @@ void Chat::join(const UString &channel_name) {
     //      Would allow to keep open the tabs of the channels we got kicked out of.
     Packet packet;
     packet.id = CHANNEL_JOIN;
-    write_string(&packet, channel_name.toUtf8());
-    send_packet(packet);
+    proto::write_string(&packet, channel_name.toUtf8());
+    BANCHO::Net::send_packet(packet);
 }
 
 void Chat::leave(const UString &channel_name) {
@@ -1045,8 +1049,8 @@ void Chat::leave(const UString &channel_name) {
     if(send_leave_packet) {
         Packet packet;
         packet.id = CHANNEL_PART;
-        write_string(&packet, channel_name.toUtf8());
-        send_packet(packet);
+        proto::write_string(&packet, channel_name.toUtf8());
+        BANCHO::Net::send_packet(packet);
     }
 
     this->removeChannel(channel_name);
@@ -1057,11 +1061,11 @@ void Chat::leave(const UString &channel_name) {
 void Chat::send_message(const UString &msg) {
     Packet packet;
     packet.id = this->selected_channel->name[0] == '#' ? SEND_PUBLIC_MESSAGE : SEND_PRIVATE_MESSAGE;
-    write_string(&packet, (char *)bancho->username.toUtf8());
-    write_string(&packet, (char *)msg.toUtf8());
-    write_string(&packet, (char *)this->selected_channel->name.toUtf8());
-    write<u32>(&packet, bancho->user_id);
-    send_packet(packet);
+    proto::write_string(&packet, (char *)bancho->username.toUtf8());
+    proto::write_string(&packet, (char *)msg.toUtf8());
+    proto::write_string(&packet, (char *)this->selected_channel->name.toUtf8());
+    proto::write<u32>(&packet, bancho->user_id);
+    BANCHO::Net::send_packet(packet);
 
     // Server doesn't echo the message back
     this->addMessage(this->selected_channel->name, ChatMessage{
@@ -1078,10 +1082,10 @@ void Chat::onDisconnect() {
     }
     this->channels.clear();
 
-    for(auto chan : chat_channels) {
+    for(auto chan : Bancho::chat_channels) {
         delete chan.second;
     }
-    chat_channels.clear();
+    Bancho::chat_channels.clear();
 
     this->selected_channel = NULL;
     this->updateLayout(osu->getScreenSize());

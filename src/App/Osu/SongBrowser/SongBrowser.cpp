@@ -947,7 +947,7 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
     // auto-download
     if(this->map_autodl) {
         float progress = -1.f;
-        auto beatmap = download_beatmap(this->map_autodl, this->set_autodl, &progress);
+        auto beatmap = Downloader::download_beatmap(this->map_autodl, this->set_autodl, &progress);
         if(progress == -1.f) {
             auto error_str = UString::format("Failed to download Beatmap #%d :(", this->map_autodl);
             osu->getNotificationOverlay()->addToast(error_str);
@@ -969,7 +969,7 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
             this->set_autodl = 0;
         } else {
             float progress = -1.f;
-            download_beatmapset(this->set_autodl, &progress);
+            Downloader::download_beatmapset(this->set_autodl, &progress);
             if(progress == -1.f) {
                 auto error_str = UString::format("Failed to download Beatmapset #%d :(", this->set_autodl);
                 osu->getNotificationOverlay()->addToast(error_str);
@@ -1546,7 +1546,7 @@ void SongBrowser::onDifficultySelected(DatabaseBeatmap *diff2, bool play) {
             Packet packet;
             packet.id = MATCH_CHANGE_SETTINGS;
             bancho->room.pack(&packet);
-            send_packet(packet);
+            BANCHO::Net::send_packet(packet);
 
             osu->room->on_map_change();
 
@@ -2529,7 +2529,7 @@ void SongBrowser::rebuildScoreButtons() {
                 is_online = false;
             } else {
                 // We haven't fetched the scores yet, do so now
-                fetch_online_scores(diff2);
+                BANCHO::Leaderboard::fetch_online_scores(diff2);
 
                 // Display local best while scores are loading
                 if(local_best != local_scores.end()) {

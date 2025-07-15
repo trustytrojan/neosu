@@ -58,10 +58,10 @@ void start_spectating(i32 user_id) {
 
     Packet packet;
     packet.id = START_SPECTATING;
-    write<i32>(&packet, user_id);
-    send_packet(packet);
+    BANCHO::Proto::write<i32>(&packet, user_id);
+    BANCHO::Net::send_packet(packet);
 
-    auto user_info = get_user_info(user_id, true);
+    auto user_info = BANCHO::User::get_user_info(user_id, true);
     auto notif = UString::format("Started spectating %s", user_info->name.toUtf8());
     osu->getNotificationOverlay()->addToast(notif, 0xffffdd00);
 
@@ -88,7 +88,7 @@ void stop_spectating() {
         osu->songBrowser2->bHasSelectedAndIsPlaying = false;
     }
 
-    auto user_info = get_user_info(bancho->spectated_player_id, true);
+    auto user_info = BANCHO::User::get_user_info(bancho->spectated_player_id, true);
     auto notif = UString::format("Stopped spectating %s", user_info->name.toUtf8());
     osu->getNotificationOverlay()->addToast(notif, 0xffffdd00);
 
@@ -98,7 +98,7 @@ void stop_spectating() {
 
     Packet packet;
     packet.id = STOP_SPECTATING;
-    send_packet(packet);
+    BANCHO::Net::send_packet(packet);
 
     osu->mainMenu->setVisible(true);
     soundEngine->play(osu->getSkin()->menuBack);
@@ -147,14 +147,14 @@ void SpectatorScreen::mouse_update(bool *propagate_clicks) {
     // Control client state
     // XXX: should use map_md5 instead of map_id
     f32 download_progress = -1.f;
-    auto user_info = get_user_info(bancho->spectated_player_id, true);
+    auto user_info = BANCHO::User::get_user_info(bancho->spectated_player_id, true);
     if(user_info->map_id == -1 || user_info->map_id == 0) {
         if(osu->isInPlayMode()) {
             osu->getSelectedBeatmap()->stop(true);
             osu->songBrowser2->bHasSelectedAndIsPlaying = false;
         }
     } else if(user_info->mode == STANDARD && user_info->map_id != current_map_id) {
-        auto beatmap = download_beatmap(user_info->map_id, user_info->map_md5, &download_progress);
+        auto beatmap = Downloader::download_beatmap(user_info->map_id, user_info->map_md5, &download_progress);
         if(beatmap != NULL) {
             current_map_id = user_info->map_id;
             osu->rankingScreen->setVisible(false);
@@ -192,7 +192,7 @@ void SpectatorScreen::mouse_update(bool *propagate_clicks) {
                 if(user_info->map_id != last_failed_map) {
                     Packet packet;
                     packet.id = CANT_SPECTATE;
-                    send_packet(packet);
+                    BANCHO::Net::send_packet(packet);
 
                     last_failed_map = user_info->map_id;
                 }

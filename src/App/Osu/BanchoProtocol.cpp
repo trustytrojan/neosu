@@ -7,100 +7,7 @@
 #include "Beatmap.h"
 #include "Osu.h"
 
-Room::Room() {
-    // 0-initialized room means we're not in multiplayer at the moment
-}
-
-Room::Room(Packet *packet) {
-    this->id = read<u16>(packet);
-    this->in_progress = read<u8>(packet);
-    this->match_type = read<u8>(packet);
-    this->mods = read<u32>(packet);
-    this->name = read_string(packet);
-
-    this->has_password = read<u8>(packet) > 0;
-    if(this->has_password) {
-        // Discard password. It should be an empty string, but just in case, read it properly.
-        packet->pos--;
-        read_string(packet);
-    }
-
-    this->map_name = read_string(packet);
-    this->map_id = read<u32>(packet);
-
-    auto hash_str = read_string(packet);
-    this->map_md5 = hash_str.toUtf8();
-
-    this->nb_players = 0;
-    for(int i = 0; i < 16; i++) {
-        this->slots[i].status = read<u8>(packet);
-    }
-    for(int i = 0; i < 16; i++) {
-        this->slots[i].team = read<u8>(packet);
-    }
-    for(int s = 0; s < 16; s++) {
-        if(!this->slots[s].is_locked()) {
-            this->nb_open_slots++;
-        }
-
-        if(this->slots[s].has_player()) {
-            this->slots[s].player_id = read<u32>(packet);
-            this->nb_players++;
-        }
-    }
-
-    this->host_id = read<u32>(packet);
-    this->mode = read<u8>(packet);
-    this->win_condition = read<u8>(packet);
-    this->team_type = read<u8>(packet);
-    this->freemods = read<u8>(packet);
-    if(this->freemods) {
-        for(int i = 0; i < 16; i++) {
-            this->slots[i].mods = read<u32>(packet);
-        }
-    }
-
-    this->seed = read<u32>(packet);
-}
-
-void Room::pack(Packet *packet) {
-    write<u16>(packet, this->id);
-    write<u8>(packet, this->in_progress);
-    write<u8>(packet, this->match_type);
-    write<u32>(packet, this->mods);
-    write_string(packet, this->name.toUtf8());
-    write_string(packet, this->password.toUtf8());
-    write_string(packet, this->map_name.toUtf8());
-    write<u32>(packet, this->map_id);
-    write_string(packet, this->map_md5.toUtf8());
-    for(int i = 0; i < 16; i++) {
-        write<u8>(packet, this->slots[i].status);
-    }
-    for(int i = 0; i < 16; i++) {
-        write<u8>(packet, this->slots[i].team);
-    }
-    for(int s = 0; s < 16; s++) {
-        if(this->slots[s].has_player()) {
-            write<u32>(packet, this->slots[s].player_id);
-        }
-    }
-
-    write<u32>(packet, this->host_id);
-    write<u8>(packet, this->mode);
-    write<u8>(packet, this->win_condition);
-    write<u8>(packet, this->team_type);
-    write<u8>(packet, this->freemods);
-    if(this->freemods) {
-        for(int i = 0; i < 16; i++) {
-            write<u32>(packet, this->slots[i].mods);
-        }
-    }
-
-    write<u32>(packet, this->seed);
-}
-
-bool Room::is_host() { return this->host_id == bancho->user_id; }
-
+namespace BANCHO::Proto {
 void read_bytes(Packet *packet, u8 *bytes, size_t n) {
     if(packet->pos + n > packet->size) {
         packet->pos = packet->size + 1;
@@ -227,6 +134,103 @@ void write_hash(Packet *packet, MD5Hash hash) {
     write<u8>(packet, 0x20);
     write_bytes(packet, (u8 *)hash.hash, 32);
 }
+}  // namespace BANCHO::Proto
+
+using namespace BANCHO::Proto;
+
+Room::Room() {
+    // 0-initialized room means we're not in multiplayer at the moment
+}
+
+Room::Room(Packet *packet) {
+    this->id = read<u16>(packet);
+    this->in_progress = read<u8>(packet);
+    this->match_type = read<u8>(packet);
+    this->mods = read<u32>(packet);
+    this->name = read_string(packet);
+
+    this->has_password = read<u8>(packet) > 0;
+    if(this->has_password) {
+        // Discard password. It should be an empty string, but just in case, read it properly.
+        packet->pos--;
+        read_string(packet);
+    }
+
+    this->map_name = read_string(packet);
+    this->map_id = read<u32>(packet);
+
+    auto hash_str = read_string(packet);
+    this->map_md5 = hash_str.toUtf8();
+
+    this->nb_players = 0;
+    for(int i = 0; i < 16; i++) {
+        this->slots[i].status = read<u8>(packet);
+    }
+    for(int i = 0; i < 16; i++) {
+        this->slots[i].team = read<u8>(packet);
+    }
+    for(int s = 0; s < 16; s++) {
+        if(!this->slots[s].is_locked()) {
+            this->nb_open_slots++;
+        }
+
+        if(this->slots[s].has_player()) {
+            this->slots[s].player_id = read<u32>(packet);
+            this->nb_players++;
+        }
+    }
+
+    this->host_id = read<u32>(packet);
+    this->mode = read<u8>(packet);
+    this->win_condition = read<u8>(packet);
+    this->team_type = read<u8>(packet);
+    this->freemods = read<u8>(packet);
+    if(this->freemods) {
+        for(int i = 0; i < 16; i++) {
+            this->slots[i].mods = read<u32>(packet);
+        }
+    }
+
+    this->seed = read<u32>(packet);
+}
+
+void Room::pack(Packet *packet) {
+    write<u16>(packet, this->id);
+    write<u8>(packet, this->in_progress);
+    write<u8>(packet, this->match_type);
+    write<u32>(packet, this->mods);
+    write_string(packet, this->name.toUtf8());
+    write_string(packet, this->password.toUtf8());
+    write_string(packet, this->map_name.toUtf8());
+    write<u32>(packet, this->map_id);
+    write_string(packet, this->map_md5.toUtf8());
+    for(int i = 0; i < 16; i++) {
+        write<u8>(packet, this->slots[i].status);
+    }
+    for(int i = 0; i < 16; i++) {
+        write<u8>(packet, this->slots[i].team);
+    }
+    for(int s = 0; s < 16; s++) {
+        if(this->slots[s].has_player()) {
+            write<u32>(packet, this->slots[s].player_id);
+        }
+    }
+
+    write<u32>(packet, this->host_id);
+    write<u8>(packet, this->mode);
+    write<u8>(packet, this->win_condition);
+    write<u8>(packet, this->team_type);
+    write<u8>(packet, this->freemods);
+    if(this->freemods) {
+        for(int i = 0; i < 16; i++) {
+            write<u32>(packet, this->slots[i].mods);
+        }
+    }
+
+    write<u32>(packet, this->seed);
+}
+
+bool Room::is_host() { return this->host_id == bancho->user_id; }
 
 ScoreFrame ScoreFrame::get() {
     u8 slot_id = 0;

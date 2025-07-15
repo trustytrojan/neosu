@@ -1,5 +1,7 @@
 #include "BanchoUsers.h"
 
+#include <algorithm>
+
 #include "Bancho.h"
 #include "BanchoNetworking.h"
 #include "Chat.h"
@@ -7,11 +9,9 @@
 #include "Osu.h"
 #include "SpectatorScreen.h"
 
-std::unordered_map<u32, UserInfo*> online_users;
-std::vector<u32> friends;
-
+namespace BANCHO::User {
+namespace {  // static namespace
 std::vector<UserInfo*> presence_requests;
-std::vector<u32> stats_requests;
 
 void request_presence(UserInfo* info) {
     if(info->has_presence) return;
@@ -22,6 +22,12 @@ void request_presence(UserInfo* info) {
 
     presence_requests.push_back(info);
 }
+}
+
+std::unordered_map<u32, UserInfo*> online_users;
+std::vector<u32> friends;
+std::vector<u32> stats_requests;
+
 
 void request_presence_batch() {
     std::vector<u32> actual_requests;
@@ -36,11 +42,11 @@ void request_presence_batch() {
 
     Packet packet;
     packet.id = USER_PRESENCE_REQUEST;
-    write<u16>(&packet, actual_requests.size());
+    BANCHO::Proto::write<u16>(&packet, actual_requests.size());
     for(auto user_id : actual_requests) {
-        write<u32>(&packet, user_id);
+        BANCHO::Proto::write<u32>(&packet, user_id);
     }
-    send_packet(packet);
+    BANCHO::Net::send_packet(packet);
 }
 
 void logout_user(u32 user_id) {
@@ -126,7 +132,11 @@ UserInfo* get_user_info(u32 user_id, bool wants_presence) {
     return info;
 }
 
+}  // namespace BANCHO::User
+
+using namespace BANCHO::User;
+
 bool UserInfo::is_friend() {
-    auto it = std::find(friends.begin(), friends.end(), this->user_id);
+    auto it = std::ranges::find(friends, this->user_id);
     return it != friends.end();
 }

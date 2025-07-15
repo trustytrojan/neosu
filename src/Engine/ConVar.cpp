@@ -491,7 +491,7 @@ void _osuOptionsSliderQualityWrapper(float newValue) {
 };
 
 void spectate_by_username(const UString &username) {
-    auto user = find_user(username);
+    auto user = BANCHO::User::find_user(username);
     if(user == NULL) {
         debugLog("Couldn't find user \"%s\"!", username.toUtf8());
         return;

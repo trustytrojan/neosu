@@ -933,7 +933,7 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
 
     // compute MD5 hash (very slow)
     if(compute_md5) {
-        auto hash = md5((u8 *)beatmapFile, beatmapFileSize);
+        auto hash = Bancho::md5((u8 *)beatmapFile, beatmapFileSize);
         this->sMD5Hash = MD5Hash(hash.toUtf8());
     }
 

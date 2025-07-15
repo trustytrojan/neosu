@@ -81,13 +81,13 @@ void RichPresence::setBanchoStatus(const char* info_text, Action action) {
 
     Packet packet;
     packet.id = CHANGE_ACTION;
-    write<u8>(&packet, action);
-    write_string(&packet, fancy_text);
-    write_string(&packet, map_md5.hash);
-    write<u32>(&packet, osu->modSelector->getModFlags());
-    write<u8>(&packet, 0);  // osu!std
-    write<u32>(&packet, map_id);
-    send_packet(packet);
+    BANCHO::Proto::write<u8>(&packet, action);
+    BANCHO::Proto::write_string(&packet, fancy_text);
+    BANCHO::Proto::write_string(&packet, map_md5.hash);
+    BANCHO::Proto::write<u32>(&packet, osu->modSelector->getModFlags());
+    BANCHO::Proto::write<u8>(&packet, 0);  // osu!std
+    BANCHO::Proto::write<u32>(&packet, map_id);
+    BANCHO::Net::send_packet(packet);
 }
 
 void RichPresence::updateBanchoMods() {
@@ -105,13 +105,13 @@ void RichPresence::updateBanchoMods() {
 
     Packet packet;
     packet.id = CHANGE_ACTION;
-    write<u8>(&packet, last_action);
-    write_string(&packet, last_status.toUtf8());
-    write_string(&packet, map_md5.hash);
-    write<u32>(&packet, osu->modSelector->getModFlags());
-    write<u8>(&packet, 0);  // osu!std
-    write<u32>(&packet, map_id);
-    send_packet(packet);
+    BANCHO::Proto::write<u8>(&packet, last_action);
+    BANCHO::Proto::write_string(&packet, last_status.toUtf8());
+    BANCHO::Proto::write_string(&packet, map_md5.hash);
+    BANCHO::Proto::write<u32>(&packet, osu->modSelector->getModFlags());
+    BANCHO::Proto::write<u8>(&packet, 0);  // osu!std
+    BANCHO::Proto::write<u32>(&packet, map_id);
+    BANCHO::Net::send_packet(packet);
 
     // Servers like akatsuki send different leaderboards based on what mods
     // you have selected. Reset leaderboard when switching mods.
@@ -193,7 +193,7 @@ void RichPresence::onPlayStart() {
         activity.party.size.current_size = 0;
         activity.party.size.max_size = 0;
 
-        auto user = get_user_info(bancho->spectated_player_id, true);
+        auto user = BANCHO::User::get_user_info(bancho->spectated_player_id, true);
         if(user->has_presence) {
             snprintf(activity.state, 128, "Spectating %s", user->name.toUtf8());
         } else {

@@ -4,6 +4,8 @@
 
 class DatabaseBeatmap;
 
+namespace Downloader {
+
 void abort_downloads();
 
 // Downloads `url` and stores downloaded file data into `out`
@@ -21,5 +23,7 @@ DatabaseBeatmap *download_beatmap(i32 beatmap_id, MD5Hash beatmap_md5, float *pr
 DatabaseBeatmap *download_beatmap(i32 beatmap_id, i32 beatmapset_id, float *progress);
 void process_beatmapset_info_response(Packet packet);
 
-i32 extract_beatmapset_id(const u8* data, size_t data_s);
-bool extract_beatmapset(const u8* data, size_t data_s, const std::string& map_dir);
+i32 extract_beatmapset_id(const u8 *data, size_t data_s);
+bool extract_beatmapset(const u8 *data, size_t data_s, const std::string &map_dir);
+
+}  // namespace Downloader

@@ -42,27 +42,19 @@
 #include "UIButton.h"
 #include "UserCard.h"
 
-std::unordered_map<std::string, Bancho::Channel *> chat_channels;
-bool print_new_channels = true;
+namespace proto = BANCHO::Proto;
 
-bool Bancho::submit_scores() {
-    if(this->score_submission_policy == ServerPolicy::NO_PREFERENCE) {
-        return cv::submit_scores.getBool();
-    } else if(this->score_submission_policy == ServerPolicy::YES) {
-        return true;
-    } else {
-        return false;
-    }
-}
+namespace {  // static
+bool print_new_channels = true;
 
 void update_channel(const UString &name, const UString &topic, i32 nb_members) {
     Bancho::Channel *chan;
     auto name_str = std::string(name.toUtf8());
-    auto it = chat_channels.find(name_str);
-    if(it == chat_channels.end()) {
+    auto it = Bancho::chat_channels.find(name_str);
+    if(it == Bancho::chat_channels.end()) {
         chan = new Bancho::Channel();
         chan->name = name;
-        chat_channels[name_str] = chan;
+        Bancho::chat_channels[name_str] = chan;
 
         if(print_new_channels) {
             auto msg = ChatMessage{
@@ -79,21 +71,6 @@ void update_channel(const UString &name, const UString &topic, i32 nb_members) {
 
     chan->topic = topic;
     chan->nb_members = nb_members;
-}
-
-MD5Hash md5(u8 *msg, size_t msg_len) {
-    MD5 hasher;
-    hasher.update(msg, msg_len);
-    hasher.finalize();
-
-    u8 *digest = hasher.getDigest();
-    MD5Hash out;
-    for(int i = 0; i < 16; i++) {
-        out.hash[i * 2] = "0123456789abcdef"[digest[i] >> 4];
-        out.hash[i * 2 + 1] = "0123456789abcdef"[digest[i] & 0xf];
-    }
-    out.hash[32] = 0;
-    return out;
 }
 
 UString get_disk_uuid() {
@@ -193,11 +170,29 @@ UString get_disk_uuid() {
     return UString("error getting disk uuid");
 #endif
 }
+}
 
-void handle_packet(Packet *packet) {
+std::unordered_map<std::string, Bancho::Channel *> Bancho::chat_channels;
+
+MD5Hash Bancho::md5(u8 *msg, size_t msg_len) {
+    MD5 hasher;
+    hasher.update(msg, msg_len);
+    hasher.finalize();
+
+    u8 *digest = hasher.getDigest();
+    MD5Hash out;
+    for(int i = 0; i < 16; i++) {
+        out.hash[i * 2] = "0123456789abcdef"[digest[i] >> 4];
+        out.hash[i * 2 + 1] = "0123456789abcdef"[digest[i] & 0xf];
+    }
+    out.hash[32] = 0;
+    return out;
+}
+
+void Bancho::handle_packet(Packet *packet) {
     // XXX: This is a bit of a mess, should at least group packets by type for readability
     if(packet->id == USER_ID) {
-        bancho->user_id.store(read<i32>(packet));
+        bancho->user_id.store(proto::read<i32>(packet));
         if(bancho->user_id > 0) {
             debugLog("Logged in as user #%d.\n", bancho->user_id.load());
             osu->optionsMenu->logInButton->setText("Disconnect");
@@ -226,6 +221,7 @@ void handle_packet(Packet *packet) {
             // If server sent a score submission policy, update options menu to hide the checkbox
             osu->optionsMenu->scheduleLayoutUpdate();
         } else {
+            using namespace BANCHO::Net;
             cv::mp_autologin.setValue(false);
             osu->optionsMenu->logInButton->setText("Log in");
             osu->optionsMenu->logInButton->setColor(0xff00ff00);
@@ -260,10 +256,10 @@ void handle_packet(Packet *packet) {
             osu->getNotificationOverlay()->addToast(errmsg);
         }
     } else if(packet->id == RECV_MESSAGE) {
-        UString sender = read_string(packet);
-        UString text = read_string(packet);
-        UString recipient = read_string(packet);
-        i32 sender_id = read<u32>(packet);
+        UString sender = proto::read_string(packet);
+        UString text = proto::read_string(packet);
+        UString recipient = proto::read_string(packet);
+        i32 sender_id = proto::read<u32>(packet);
 
         auto msg = ChatMessage{
             .tms = time(NULL),
@@ -275,25 +271,25 @@ void handle_packet(Packet *packet) {
     } else if(packet->id == PONG) {
         // (nothing to do)
     } else if(packet->id == USER_STATS) {
-        i32 raw_id = read<i32>(packet);
+        i32 raw_id = proto::read<i32>(packet);
         u32 stats_user_id = abs(raw_id);  // IRC clients are sent with negative IDs, hence the abs()
-        u8 action = read<u8>(packet);
+        u8 action = proto::read<u8>(packet);
 
-        UserInfo *user = get_user_info(stats_user_id);
+        UserInfo *user = BANCHO::User::get_user_info(stats_user_id);
         user->irc_user = raw_id < 0;
         user->stats_tms = Timing::getTicksMS();
         user->action = (Action)action;
-        user->info_text = read_string(packet);
-        user->map_md5 = read_hash(packet);
-        user->mods = read<u32>(packet);
-        user->mode = (GameMode)read<u8>(packet);
-        user->map_id = read<u32>(packet);
-        user->ranked_score = read<u64>(packet);
-        user->accuracy = read<f32>(packet);
-        user->plays = read<u32>(packet);
-        user->total_score = read<u64>(packet);
-        user->global_rank = read<u32>(packet);
-        user->pp = read<u16>(packet);
+        user->info_text = proto::read_string(packet);
+        user->map_md5 = proto::read_hash(packet);
+        user->mods = proto::read<u32>(packet);
+        user->mode = (GameMode)proto::read<u8>(packet);
+        user->map_id = proto::read<u32>(packet);
+        user->ranked_score = proto::read<u64>(packet);
+        user->accuracy = proto::read<f32>(packet);
+        user->plays = proto::read<u32>(packet);
+        user->total_score = proto::read<u64>(packet);
+        user->global_rank = proto::read<u32>(packet);
+        user->pp = proto::read<u16>(packet);
 
         if(stats_user_id == bancho->user_id) {
             osu->userButton->updateUserStats();
@@ -304,25 +300,25 @@ void handle_packet(Packet *packet) {
 
         osu->chat->updateUserList();
     } else if(packet->id == USER_LOGOUT) {
-        i32 logged_out_id = read<u32>(packet);
-        read<u8>(packet);
+        i32 logged_out_id = proto::read<u32>(packet);
+        proto::read<u8>(packet);
         if(logged_out_id == bancho->user_id) {
             debugLog("Logged out.\n");
-            disconnect();
+            BANCHO::Net::disconnect();
         } else {
-            logout_user(logged_out_id);
+            BANCHO::User::logout_user(logged_out_id);
         }
     } else if(packet->id == IN_SPECTATE_FRAMES) {
-        i32 extra = read<i32>(packet);
+        i32 extra = proto::read<i32>(packet);
         (void)extra;  // this is mania seed or something we can't use
 
         if(bancho->spectating) {
-            UserInfo *info = get_user_info(bancho->spectated_player_id, true);
+            UserInfo *info = BANCHO::User::get_user_info(bancho->spectated_player_id, true);
             auto beatmap = osu->getSelectedBeatmap();
 
-            u16 nb_frames = read<u16>(packet);
+            u16 nb_frames = proto::read<u16>(packet);
             for(u16 i = 0; i < nb_frames; i++) {
-                auto frame = read<LiveReplayFrame>(packet);
+                auto frame = proto::read<LiveReplayFrame>(packet);
 
                 if(frame.mouse_x < 0 || frame.mouse_x > 512 || frame.mouse_y < 0 || frame.mouse_y > 384) {
                     debugLog("WEIRD FRAME: time %d, x %f, y %f\n", frame.time, frame.mouse_x, frame.mouse_y);
@@ -346,7 +342,7 @@ void handle_packet(Packet *packet) {
                 beatmap->last_frame_ms = frame.cur_music_pos;
             }
 
-            LiveReplayBundle::Action action = (LiveReplayBundle::Action)read<u8>(packet);
+            LiveReplayBundle::Action action = (LiveReplayBundle::Action)proto::read<u8>(packet);
             info->spec_action = action;
 
             if(osu->isInPlayMode()) {
@@ -375,37 +371,37 @@ void handle_packet(Packet *packet) {
                 }
             }
 
-            auto score_frame = read<ScoreFrame>(packet);
+            auto score_frame = proto::read<ScoreFrame>(packet);
             beatmap->score_frames.push_back(score_frame);
 
-            auto sequence = read<u16>(packet);
+            auto sequence = proto::read<u16>(packet);
             (void)sequence;  // don't know how to use this
         }
     } else if(packet->id == SPECTATOR_JOINED) {
-        i32 spectator_id = read<u32>(packet);
+        i32 spectator_id = proto::read<u32>(packet);
         if(std::find(bancho->spectators.begin(), bancho->spectators.end(), spectator_id) == bancho->spectators.end()) {
             debugLog("Spectator joined: user id %d\n", spectator_id);
             bancho->spectators.push_back(spectator_id);
         }
     } else if(packet->id == SPECTATOR_LEFT) {
-        i32 spectator_id = read<u32>(packet);
+        i32 spectator_id = proto::read<u32>(packet);
         auto it = std::find(bancho->spectators.begin(), bancho->spectators.end(), spectator_id);
         if(it != bancho->spectators.end()) {
             debugLog("Spectator left: user id %d\n", spectator_id);
             bancho->spectators.erase(it);
         }
     } else if(packet->id == SPECTATOR_CANT_SPECTATE) {
-        i32 spectator_id = read<u32>(packet);
+        i32 spectator_id = proto::read<u32>(packet);
         debugLog("Spectator can't spectate: user id %d\n", spectator_id);
     } else if(packet->id == FELLOW_SPECTATOR_JOINED) {
-        i32 spectator_id = read<u32>(packet);
+        i32 spectator_id = proto::read<u32>(packet);
         if(std::find(bancho->fellow_spectators.begin(), bancho->fellow_spectators.end(), spectator_id) ==
            bancho->fellow_spectators.end()) {
             debugLog("Fellow spectator joined: user id %d\n", spectator_id);
             bancho->fellow_spectators.push_back(spectator_id);
         }
     } else if(packet->id == FELLOW_SPECTATOR_LEFT) {
-        i32 spectator_id = read<u32>(packet);
+        i32 spectator_id = proto::read<u32>(packet);
         auto it = std::find(bancho->fellow_spectators.begin(), bancho->fellow_spectators.end(), spectator_id);
         if(it != bancho->fellow_spectators.end()) {
             debugLog("Fellow spectator left: user id %d\n", spectator_id);
@@ -414,7 +410,7 @@ void handle_packet(Packet *packet) {
     } else if(packet->id == GET_ATTENTION) {
         // (nothing to do)
     } else if(packet->id == NOTIFICATION) {
-        UString notification = read_string(packet);
+        UString notification = proto::read_string(packet);
         osu->getNotificationOverlay()->addToast(notification, 0xffffdd00);
     } else if(packet->id == ROOM_UPDATED) {
         auto room = Room(packet);
@@ -427,7 +423,7 @@ void handle_packet(Packet *packet) {
         auto room = new Room(packet);
         osu->lobby->addRoom(room);
     } else if(packet->id == ROOM_CLOSED) {
-        i32 room_id = read<u32>(packet);
+        i32 room_id = proto::read<u32>(packet);
         osu->lobby->removeRoom(room_id);
     } else if(packet->id == ROOM_JOIN_SUCCESS) {
         // Sanity, in case some trolley admins do funny business
@@ -454,14 +450,14 @@ void handle_packet(Packet *packet) {
     } else if(packet->id == MATCH_ALL_PLAYERS_LOADED) {
         osu->room->on_all_players_loaded();
     } else if(packet->id == MATCH_PLAYER_FAILED) {
-        i32 slot_id = read<u32>(packet);
+        i32 slot_id = proto::read<u32>(packet);
         osu->room->on_player_failed(slot_id);
     } else if(packet->id == MATCH_FINISHED) {
         osu->room->on_match_finished();
     } else if(packet->id == MATCH_SKIP) {
         osu->room->on_all_players_skipped();
     } else if(packet->id == CHANNEL_JOIN_SUCCESS) {
-        UString name = read_string(packet);
+        UString name = proto::read_string(packet);
         auto msg = ChatMessage{
             .tms = time(NULL),
             .author_id = 0,
@@ -471,83 +467,83 @@ void handle_packet(Packet *packet) {
         osu->chat->addChannel(name);
         osu->chat->addMessage(name, msg, false);
     } else if(packet->id == CHANNEL_INFO) {
-        UString channel_name = read_string(packet);
-        UString channel_topic = read_string(packet);
-        i32 nb_members = read<u32>(packet);
+        UString channel_name = proto::read_string(packet);
+        UString channel_topic = proto::read_string(packet);
+        i32 nb_members = proto::read<u32>(packet);
         update_channel(channel_name, channel_topic, nb_members);
     } else if(packet->id == LEFT_CHANNEL) {
-        UString name = read_string(packet);
+        UString name = proto::read_string(packet);
         osu->chat->removeChannel(name);
     } else if(packet->id == CHANNEL_AUTO_JOIN) {
-        UString channel_name = read_string(packet);
-        UString channel_topic = read_string(packet);
-        i32 nb_members = read<u32>(packet);
+        UString channel_name = proto::read_string(packet);
+        UString channel_topic = proto::read_string(packet);
+        i32 nb_members = proto::read<u32>(packet);
         update_channel(channel_name, channel_topic, nb_members);
     } else if(packet->id == PRIVILEGES) {
-        read<u32>(packet);
+        proto::read<u32>(packet);
         // (nothing to do)
     } else if(packet->id == FRIENDS_LIST) {
-        friends.clear();
+        BANCHO::User::friends.clear();
 
-        u16 nb_friends = read<u16>(packet);
+        u16 nb_friends = proto::read<u16>(packet);
         for(int i = 0; i < nb_friends; i++) {
-            u32 friend_id = read<u32>(packet);
-            friends.push_back(friend_id);
+            u32 friend_id = proto::read<u32>(packet);
+            BANCHO::User::friends.push_back(friend_id);
         }
     } else if(packet->id == PROTOCOL_VERSION) {
-        int protocol_version = read<u32>(packet);
+        int protocol_version = proto::read<u32>(packet);
         if(protocol_version != 19) {
             osu->getNotificationOverlay()->addToast("This server may use an unsupported protocol version.");
         }
     } else if(packet->id == MAIN_MENU_ICON) {
-        UString icon = read_string(packet);
+        UString icon = proto::read_string(packet);
         auto urls = icon.split("|");
         if(urls.size() == 2 && ((urls[0].find("http://") == 0) || urls[0].find("https://") == 0)) {
             bancho->server_icon_url = urls[0];
         }
     } else if(packet->id == MATCH_PLAYER_SKIPPED) {
-        i32 user_id = read<u32>(packet);
+        i32 user_id = proto::read<u32>(packet);
         osu->room->on_player_skip(user_id);
     } else if(packet->id == USER_PRESENCE) {
-        i32 raw_id = read<i32>(packet);
+        i32 raw_id = proto::read<i32>(packet);
         u32 presence_user_id = abs(raw_id);  // IRC clients are sent with negative IDs, hence the abs()
-        UString presence_username = read_string(packet);
+        UString presence_username = proto::read_string(packet);
 
-        UserInfo *user = get_user_info(presence_user_id);
+        UserInfo *user = BANCHO::User::get_user_info(presence_user_id);
         user->irc_user = raw_id < 0;
         user->has_presence = true;
         user->name = presence_username;
-        user->utc_offset = read<u8>(packet);
-        user->country = read<u8>(packet);
-        user->privileges = read<u8>(packet);
-        user->longitude = read<f32>(packet);
-        user->latitude = read<f32>(packet);
-        user->global_rank = read<u32>(packet);
+        user->utc_offset = proto::read<u8>(packet);
+        user->country = proto::read<u8>(packet);
+        user->privileges = proto::read<u8>(packet);
+        user->longitude = proto::read<f32>(packet);
+        user->latitude = proto::read<f32>(packet);
+        user->global_rank = proto::read<u32>(packet);
 
         osu->chat->updateUserList();
     } else if(packet->id == USER_PRESENCE_SINGLE) {
-        get_user_info(read<u32>(packet));  // add to online_users list
+        BANCHO::User::get_user_info(proto::read<u32>(packet));  // add to online_users list
     } else if(packet->id == USER_PRESENCE_BUNDLE) {
-        u16 nb_users = read<u16>(packet);
+        u16 nb_users = proto::read<u16>(packet);
         for(u16 i = 0; i < nb_users; i++) {
-            get_user_info(read<u32>(packet));  // add to online_users list
+            BANCHO::User::get_user_info(proto::read<u32>(packet));  // add to online_users list
         }
     } else if(packet->id == RESTART) {
         // XXX: wait 'ms' milliseconds before reconnecting
-        i32 ms = read<u32>(packet);
+        i32 ms = proto::read<u32>(packet);
         (void)ms;
 
         // Some servers send "restart" packets when password is incorrect
         // So, don't retry unless actually logged in
         if(bancho->is_online()) {
-            reconnect();
+            BANCHO::Net::reconnect();
         }
     } else if(packet->id == MATCH_INVITE) {
-        UString sender = read_string(packet);
-        UString text = read_string(packet);
-        UString recipient = read_string(packet);
+        UString sender = proto::read_string(packet);
+        UString text = proto::read_string(packet);
+        UString recipient = proto::read_string(packet);
         (void)recipient;
-        i32 sender_id = read<u32>(packet);
+        i32 sender_id = proto::read<u32>(packet);
         auto msg = ChatMessage{
             .tms = time(NULL),
             .author_id = sender_id,
@@ -560,36 +556,36 @@ void handle_packet(Packet *packet) {
         osu->chat->join("#announce");
         osu->chat->join("#osu");
     } else if(packet->id == ROOM_PASSWORD_CHANGED) {
-        UString new_password = read_string(packet);
+        UString new_password = proto::read_string(packet);
         debugLog("Room changed password to %s\n", new_password.toUtf8());
         bancho->room.password = new_password;
     } else if(packet->id == SILENCE_END) {
-        i32 delta = read<u32>(packet);
+        i32 delta = proto::read<u32>(packet);
         debugLog("Silence ends in %d seconds.\n", delta);
         // XXX: Prevent user from sending messages while silenced
     } else if(packet->id == USER_SILENCED) {
-        i32 user_id = read<u32>(packet);
+        i32 user_id = proto::read<u32>(packet);
         debugLog("User #%d silenced.\n", user_id);
     } else if(packet->id == USER_DM_BLOCKED) {
-        read_string(packet);
-        read_string(packet);
-        UString blocked = read_string(packet);
-        read<u32>(packet);
+        proto::read_string(packet);
+        proto::read_string(packet);
+        UString blocked = proto::read_string(packet);
+        proto::read<u32>(packet);
         debugLog("Blocked %s.\n", blocked.toUtf8());
     } else if(packet->id == TARGET_IS_SILENCED) {
-        read_string(packet);
-        read_string(packet);
-        UString blocked = read_string(packet);
-        read<u32>(packet);
+        proto::read_string(packet);
+        proto::read_string(packet);
+        UString blocked = proto::read_string(packet);
+        proto::read<u32>(packet);
         debugLog("Silenced %s.\n", blocked.toUtf8());
     } else if(packet->id == VERSION_UPDATE) {
         // (nothing to do)
     } else if(packet->id == VERSION_UPDATE_FORCED) {
-        disconnect();
+        BANCHO::Net::disconnect();
         osu->getNotificationOverlay()->addToast("This server requires a newer client version.");
     } else if(packet->id == ACCOUNT_RESTRICTED) {
         osu->getNotificationOverlay()->addToast("Account restricted.");
-        disconnect();
+        BANCHO::Net::disconnect();
     } else if(packet->id == MATCH_ABORT) {
         osu->room->on_match_aborted();
     } else {
@@ -597,19 +593,19 @@ void handle_packet(Packet *packet) {
     }
 }
 
-Packet build_login_packet() {
+Packet Bancho::build_login_packet() {
     // Request format:
     // username\npasswd_md5\nosu_version|utc_offset|display_city|client_hashes|pm_private\n
     Packet packet;
 
-    write_bytes(&packet, (u8 *)bancho->username.toUtf8(), bancho->username.lengthUtf8());
-    write<u8>(&packet, '\n');
+    proto::write_bytes(&packet, (u8 *)bancho->username.toUtf8(), bancho->username.lengthUtf8());
+    proto::write<u8>(&packet, '\n');
 
-    write_bytes(&packet, (u8 *)bancho->pw_md5.hash, 32);
-    write<u8>(&packet, '\n');
+    proto::write_bytes(&packet, (u8 *)bancho->pw_md5.hash, 32);
+    proto::write<u8>(&packet, '\n');
 
-    write_bytes(&packet, (u8 *)OSU_VERSION, strlen(OSU_VERSION));
-    write<u8>(&packet, '|');
+    proto::write_bytes(&packet, (u8 *)OSU_VERSION, strlen(OSU_VERSION));
+    proto::write<u8>(&packet, '|');
 
     // UTC offset
     time_t now = time(NULL);
@@ -617,43 +613,53 @@ Packet build_login_packet() {
     auto local_time = localtime(&now);
     int utc_offset = difftime(mktime(local_time), mktime(gmt)) / 3600;
     if(utc_offset < 0) {
-        write<u8>(&packet, '-');
+        proto::write<u8>(&packet, '-');
         utc_offset *= -1;
     }
-    write<u8>(&packet, '0' + utc_offset);
-    write<u8>(&packet, '|');
+    proto::write<u8>(&packet, '0' + utc_offset);
+    proto::write<u8>(&packet, '|');
 
     // Don't dox the user's city
-    write<u8>(&packet, '0');
-    write<u8>(&packet, '|');
+    proto::write<u8>(&packet, '0');
+    proto::write<u8>(&packet, '|');
 
     const char *osu_path = Environment::getExecutablePath().c_str();
 
-    MD5Hash osu_path_md5 = md5((u8 *)osu_path, strlen(osu_path));
+    MD5Hash osu_path_md5 = Bancho::md5((u8 *)osu_path, strlen(osu_path));
 
     // XXX: Should get MAC addresses from network adapters
     // NOTE: Not sure how the MD5 is computed - does it include final "." ?
     const char *adapters = "runningunderwine";
-    MD5Hash adapters_md5 = md5((u8 *)adapters, strlen(adapters));
+    MD5Hash adapters_md5 = Bancho::md5((u8 *)adapters, strlen(adapters));
 
     // XXX: Should remove '|' from the disk UUID just to be safe
     bancho->disk_uuid = get_disk_uuid();
-    MD5Hash disk_md5 = md5((u8 *)bancho->disk_uuid.toUtf8(), bancho->disk_uuid.lengthUtf8());
+    MD5Hash disk_md5 = Bancho::md5((u8 *)bancho->disk_uuid.toUtf8(), bancho->disk_uuid.lengthUtf8());
 
     // XXX: Not implemented, I'm lazy so just reusing disk signature
     bancho->install_id = bancho->disk_uuid;
-    MD5Hash install_md5 = md5((u8 *)bancho->install_id.toUtf8(), bancho->install_id.lengthUtf8());
+    MD5Hash install_md5 = Bancho::md5((u8 *)bancho->install_id.toUtf8(), bancho->install_id.lengthUtf8());
     ;
 
     bancho->client_hashes = UString::format("%s:%s:%s:%s:%s:", osu_path_md5.hash, adapters, adapters_md5.hash,
                                             install_md5.hash, disk_md5.hash);
-    write_bytes(&packet, (u8 *)bancho->client_hashes.toUtf8(), bancho->client_hashes.lengthUtf8());
+    proto::write_bytes(&packet, (u8 *)bancho->client_hashes.toUtf8(), bancho->client_hashes.lengthUtf8());
 
     // Allow PMs from strangers
-    write<u8>(&packet, '|');
-    write<u8>(&packet, '0');
+    proto::write<u8>(&packet, '|');
+    proto::write<u8>(&packet, '0');
 
-    write<u8>(&packet, '\n');
+    proto::write<u8>(&packet, '\n');
 
     return packet;
+}
+
+bool Bancho::submit_scores() {
+    if(this->score_submission_policy == ServerPolicy::NO_PREFERENCE) {
+        return cv::submit_scores.getBool();
+    } else if(this->score_submission_policy == ServerPolicy::YES) {
+        return true;
+    } else {
+        return false;
+    }
 }

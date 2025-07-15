@@ -20,6 +20,8 @@
 #include "SongBrowser/SongBrowser.h"
 #include "score.h"
 
+namespace proto = BANCHO::Proto;
+
 LegacyReplay::BEATMAP_VALUES LegacyReplay::getBeatmapValuesForModsLegacy(int modsLegacy, float legacyAR, float legacyCS,
                                                                          float legacyOD, float legacyHP) {
     LegacyReplay::BEATMAP_VALUES v;
@@ -73,9 +75,9 @@ std::vector<LegacyReplay::Frame> LegacyReplay::get_frames(u8* replay_data, i32 r
             goto end;
         }
 
-        write_bytes(&output, outbuf, sizeof(outbuf) - strm.avail_out);
+        proto::write_bytes(&output, outbuf, sizeof(outbuf) - strm.avail_out);
     } while(strm.avail_out == 0);
-    write<u8>(&output, '\0');
+    proto::write<u8>(&output, '\0');
 
     {
         char* line = (char*)output.memory;
@@ -165,33 +167,33 @@ LegacyReplay::Info LegacyReplay::from_bytes(u8* data, int s_data) {
     replay.memory = data;
     replay.size = s_data;
 
-    info.gamemode = read<u8>(&replay);
+    info.gamemode = proto::read<u8>(&replay);
     if(info.gamemode != 0) {
         debugLog("Replay has unexpected gamemode %d!", info.gamemode);
         return info;
     }
 
-    info.osu_version = read<u32>(&replay);
-    info.diff2_md5 = read_string(&replay);
-    info.username = read_string(&replay);
-    info.replay_md5 = read_string(&replay);
-    info.num300s = read<u16>(&replay);
-    info.num100s = read<u16>(&replay);
-    info.num50s = read<u16>(&replay);
-    info.numGekis = read<u16>(&replay);
-    info.numKatus = read<u16>(&replay);
-    info.numMisses = read<u16>(&replay);
-    info.score = read<u32>(&replay);
-    info.comboMax = read<u16>(&replay);
-    info.perfect = read<u8>(&replay);
-    info.mod_flags = read<u32>(&replay);
-    info.life_bar_graph = read_string(&replay);
-    info.timestamp = read<u64>(&replay) / 10;
+    info.osu_version = proto::read<u32>(&replay);
+    info.diff2_md5 = proto::read_string(&replay);
+    info.username = proto::read_string(&replay);
+    info.replay_md5 = proto::read_string(&replay);
+    info.num300s = proto::read<u16>(&replay);
+    info.num100s = proto::read<u16>(&replay);
+    info.num50s = proto::read<u16>(&replay);
+    info.numGekis = proto::read<u16>(&replay);
+    info.numKatus = proto::read<u16>(&replay);
+    info.numMisses = proto::read<u16>(&replay);
+    info.score = proto::read<u32>(&replay);
+    info.comboMax = proto::read<u16>(&replay);
+    info.perfect = proto::read<u8>(&replay);
+    info.mod_flags = proto::read<u32>(&replay);
+    info.life_bar_graph = proto::read_string(&replay);
+    info.timestamp = proto::read<u64>(&replay) / 10;
 
-    i32 replay_size = read<u32>(&replay);
+    i32 replay_size = proto::read<u32>(&replay);
     if(replay_size <= 0) return info;
     auto replay_data = new u8[replay_size];
-    read_bytes(&replay, replay_data, replay_size);
+    proto::read_bytes(&replay, replay_data, replay_size);
     info.frames = LegacyReplay::get_frames(replay_data, replay_size);
     delete[] replay_data;
 
@@ -273,7 +275,7 @@ void LegacyReplay::load_and_watch(FinishedScore score) {
                                            bancho->pw_md5.toUtf8(), score.bancho_score_id);
             request.mime = NULL;
             request.extra = (u8*)score_cpy;
-            send_api_request(request);
+            BANCHO::Net::send_api_request(request);
 
             osu->notificationOverlay->addNotification("Downloading replay...");
             return;

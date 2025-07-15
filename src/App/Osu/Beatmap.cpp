@@ -53,7 +53,7 @@
 #include "Spinner.h"
 #include "UIModSelectorModButton.h"
 
-
+namespace proto = BANCHO::Proto;
 
 Beatmap::Beatmap() {
     // vars
@@ -317,12 +317,12 @@ void Beatmap::skipEmptySection() {
 
         Packet packet;
         packet.id = OUT_SPECTATE_FRAMES;
-        write<i32>(&packet, 0);
-        write<u16>(&packet, 0);
-        write<u8>(&packet, LiveReplayBundle::Action::SKIP);
-        write<ScoreFrame>(&packet, ScoreFrame::get());
-        write<u16>(&packet, this->spectator_sequence++);
-        send_packet(packet);
+        proto::write<i32>(&packet, 0);
+        proto::write<u16>(&packet, 0);
+        proto::write<u8>(&packet, LiveReplayBundle::Action::SKIP);
+        proto::write<ScoreFrame>(&packet, ScoreFrame::get());
+        proto::write<u16>(&packet, this->spectator_sequence++);
+        BANCHO::Net::send_packet(packet);
     }
 }
 
@@ -461,12 +461,12 @@ bool Beatmap::play() {
         if(!bancho->spectators.empty()) {
             Packet packet;
             packet.id = OUT_SPECTATE_FRAMES;
-            write<i32>(&packet, 0);
-            write<u16>(&packet, 0);  // 0 frames, we're just signaling map start
-            write<u8>(&packet, LiveReplayBundle::Action::NEW_SONG);
-            write<ScoreFrame>(&packet, ScoreFrame::get());
-            write<u16>(&packet, this->spectator_sequence++);
-            send_packet(packet);
+            proto::write<i32>(&packet, 0);
+            proto::write<u16>(&packet, 0);  // 0 frames, we're just signaling map start
+            proto::write<u8>(&packet, LiveReplayBundle::Action::NEW_SONG);
+            proto::write<ScoreFrame>(&packet, ScoreFrame::get());
+            proto::write<u16>(&packet, this->spectator_sequence++);
+            BANCHO::Net::send_packet(packet);
         }
 
         return true;
@@ -522,7 +522,7 @@ bool Beatmap::spectate() {
     this->bContinueScheduled = false;
     this->unloadObjects();
 
-    auto user_info = get_user_info(bancho->spectated_player_id, true);
+    auto user_info = BANCHO::User::get_user_info(bancho->spectated_player_id, true);
     osu->watched_user_id = bancho->spectated_player_id;
     osu->watched_user_name = user_info->name;
 
@@ -927,7 +927,7 @@ void Beatmap::stop(bool quit) {
             osu->room->onClientScoreChange(true);
             Packet packet;
             packet.id = FINISH_MATCH;
-            send_packet(packet);
+            BANCHO::Net::send_packet(packet);
         }
     } else {
         osu->onPlayEnd(score, quit);
@@ -1749,7 +1749,7 @@ void Beatmap::draw() {
 
     // draw spectator pause message
     if(this->spectate_pause) {
-        auto info = get_user_info(bancho->spectated_player_id);
+        auto info = BANCHO::User::get_user_info(bancho->spectated_player_id);
         auto pause_msg = UString::format("%s has paused", info->name.toUtf8());
         osu->getHUD()->drawLoadingSmall(pause_msg);
     }
@@ -2136,7 +2136,7 @@ void Beatmap::update() {
 
                 Packet packet;
                 packet.id = MATCH_LOAD_COMPLETE;
-                send_packet(packet);
+                BANCHO::Net::send_packet(packet);
             }
         }
     }
@@ -3083,15 +3083,15 @@ void Beatmap::broadcast_spectator_frames() {
 
     Packet packet;
     packet.id = OUT_SPECTATE_FRAMES;
-    write<i32>(&packet, 0);
-    write<u16>(&packet, this->frame_batch.size());
+    proto::write<i32>(&packet, 0);
+    proto::write<u16>(&packet, this->frame_batch.size());
     for(auto batch : this->frame_batch) {
-        write<LiveReplayFrame>(&packet, batch);
+        proto::write<LiveReplayFrame>(&packet, batch);
     }
-    write<u8>(&packet, LiveReplayBundle::Action::NONE);
-    write<ScoreFrame>(&packet, ScoreFrame::get());
-    write<u16>(&packet, this->spectator_sequence++);
-    send_packet(packet);
+    proto::write<u8>(&packet, LiveReplayBundle::Action::NONE);
+    proto::write<ScoreFrame>(&packet, ScoreFrame::get());
+    proto::write<u16>(&packet, this->spectator_sequence++);
+    BANCHO::Net::send_packet(packet);
 
     this->frame_batch.clear();
     this->last_spectator_broadcast = engine->getTime();
@@ -3552,7 +3552,7 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
 
         if(bancho->submit_scores() && !isZero && this->vanilla) {
             score.server = bancho->endpoint.toUtf8();
-            submit_score(score);
+            BANCHO::Net::submit_score(score);
             // XXX: Save bancho_score_id after getting submission result
         }
 
@@ -3569,12 +3569,12 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
 
         Packet packet;
         packet.id = OUT_SPECTATE_FRAMES;
-        write<i32>(&packet, 0);
-        write<u16>(&packet, 0);
-        write<u8>(&packet, isComplete ? LiveReplayBundle::Action::COMPLETION : LiveReplayBundle::Action::FAIL);
-        write<ScoreFrame>(&packet, ScoreFrame::get());
-        write<u16>(&packet, this->spectator_sequence++);
-        send_packet(packet);
+        proto::write<i32>(&packet, 0);
+        proto::write<u16>(&packet, 0);
+        proto::write<u8>(&packet, isComplete ? LiveReplayBundle::Action::COMPLETION : LiveReplayBundle::Action::FAIL);
+        proto::write<ScoreFrame>(&packet, ScoreFrame::get());
+        proto::write<u16>(&packet, this->spectator_sequence++);
+        BANCHO::Net::send_packet(packet);
     }
 
     // special case: incomplete scores should NEVER show pp, even if auto

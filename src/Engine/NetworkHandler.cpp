@@ -9,8 +9,7 @@
 #include "Engine.h"
 #include "Bancho.h"
 
-std::unique_ptr<Bancho> NetworkHandler::s_banchoInstance = nullptr;
-Bancho *bancho = nullptr;
+std::unique_ptr<Bancho> bancho = nullptr;
 
 std::once_flag NetworkHandler::curl_init_flag;
 
@@ -19,14 +18,12 @@ NetworkHandler::NetworkHandler() {
         // XXX: run curl_global_cleanup() after waiting for network threads to terminate
         curl_global_init(CURL_GLOBAL_DEFAULT);
     });
-    s_banchoInstance = std::make_unique<Bancho>();
-    bancho = s_banchoInstance.get();
-    runtime_assert(bancho, "Bancho handler failed to initialize!");
+    bancho = std::make_unique<Bancho>();
+    runtime_assert(bancho.get(), "Bancho failed to initialize!");
 }
 
 NetworkHandler::~NetworkHandler() {
-    s_banchoInstance.reset();
-    bancho = nullptr;
+    bancho.reset();
     // XXX: run after waiting for network threads to terminate
     // curl_global_cleanup();
 }

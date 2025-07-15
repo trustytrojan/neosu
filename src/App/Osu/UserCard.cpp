@@ -210,7 +210,7 @@ void UserCard::mouse_update(bool *propagate_clicks) {
     if(!this->bVisible) return;
 
     if(this->user_id > 0) {
-        UserInfo *my = get_user_info(this->user_id, true);
+        UserInfo *my = BANCHO::User::get_user_info(this->user_id, true);
         this->sText = my->name;
 
         static i64 total_score = 0;
@@ -234,7 +234,7 @@ void UserCard::updateUserStats() {
     if(this->user_id == 0) {
         stats = db->calculatePlayerStats(this->sText);
     } else {
-        UserInfo *my = get_user_info(this->user_id, true);
+        UserInfo *my = BANCHO::User::get_user_info(this->user_id, true);
 
         int level = Database::getLevelForScore(my->total_score);
         float percentToNextLevel = 1.f;
@@ -282,7 +282,7 @@ void UserCard::setID(u32 new_id) {
 
     this->user_id = new_id;
     if(this->user_id > 0) {
-        UserInfo *my = get_user_info(this->user_id, true);
+        UserInfo *my = BANCHO::User::get_user_info(this->user_id, true);
         this->avatar = new UIAvatar(this->user_id, 0.f, 0.f, 0.f, 0.f);
         this->avatar->on_screen = true;
         this->sText = my->name;

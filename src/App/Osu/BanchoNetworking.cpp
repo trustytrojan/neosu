@@ -32,6 +32,11 @@
 #include "UIButton.h"
 
 // Bancho protocol
+namespace proto = BANCHO::Proto;
+
+namespace BANCHO::Net {
+namespace {  // static namespace
+
 std::mutex outgoing_mutex;
 bool try_logging_in = false;
 Packet login_packet;
@@ -44,7 +49,6 @@ double seconds_between_pings = 1.0;
 std::atomic<bool> dead = true;
 
 std::string auth_header = "";
-UString cho_token = "";
 
 // osu! private API
 std::mutex api_requests_mutex;
@@ -59,6 +63,271 @@ size_t curldummy(void *buffer, size_t size, size_t nmemb, void *userp) {
     return size * nmemb;
 }
 
+void send_api_request(CURL *curl, const APIRequest &api_out) {
+    // XXX: Use download()
+
+    Packet response;
+    response.id = api_out.type;
+    response.extra = api_out.extra;
+    response.extra_int = api_out.extra_int;
+    response.memory = (u8 *)malloc(2048);
+
+    struct curl_slist *chunk = NULL;
+    auto scheme = cv::use_https.getBool() ? "https://" : "http://";
+    auto query_url = UString::format("%sosu.%s%s", scheme, bancho->endpoint.toUtf8(), api_out.path.toUtf8());
+    curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
+    if(api_out.type == SUBMIT_SCORE) {
+        auto token_header = UString::format("token: %s", cho_token.toUtf8());
+        chunk = curl_slist_append(chunk, token_header.toUtf8());
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
+    }
+    if(api_out.mime != NULL) {
+        curl_easy_setopt(curl, CURLOPT_MIMEPOST, api_out.mime);
+    }
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_writefunc);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
+    curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
+
+    curl_easy_setopt_CAINFO_BLOB_embedded(curl);
+
+    CURLcode res = curl_easy_perform(curl);
+    if(res == CURLE_OK) {
+        api_responses_mutex.lock();
+        api_response_queue.push_back(response);
+        api_responses_mutex.unlock();
+    }
+
+    if(api_out.mime) {
+        curl_mime_free(api_out.mime);
+    }
+    curl_easy_reset(curl);
+    curl_slist_free_all(chunk);
+}
+
+void send_bancho_packet(CURL *curl, Packet outgoing) {
+    Packet response;
+    response.memory = (u8 *)malloc(2048);
+
+    struct curl_slist *chunk = NULL;
+    auto version_header = UString::format("x-mcosu-ver: %s", bancho->neosu_version.toUtf8());
+    chunk = curl_slist_append(chunk, version_header.toUtf8());
+    if(!auth_header.empty()) {
+        chunk = curl_slist_append(chunk, auth_header.c_str());
+    }
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
+
+    auto scheme = cv::use_https.getBool() ? "https://" : "http://";
+    auto query_url = UString::format("%sc.%s/", scheme, bancho->endpoint.toUtf8());
+    curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, outgoing.memory);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, outgoing.pos);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_writefunc);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
+    curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
+
+    curl_easy_setopt_CAINFO_BLOB_embedded(curl);
+
+    last_packet_tms = time(NULL);
+    CURLcode res = curl_easy_perform(curl);
+    CURLHcode hres;
+    if(res != CURLE_OK) {
+        debugLog("Failed to send packet, cURL error %u: %s\n", static_cast<unsigned int>(res), curl_easy_strerror(res));
+        if(auth_header.empty()) {
+            // XXX: Not thread safe, playing with fire here
+            auto errmsg = UString::format("Failed to log in: %s", curl_easy_strerror(res));
+            osu->getNotificationOverlay()->addToast(errmsg);
+        }
+        goto end;
+    }
+
+    // Update auth token if applicable
+    struct curl_header *header;
+    hres = curl_easy_header(curl, "cho-token", 0, CURLH_HEADER, -1, &header);
+    if(hres == CURLHE_OK) {
+        auth_header = "osu-token: " + std::string(header->value);
+        cho_token = UString(header->value);
+    }
+
+    hres = curl_easy_header(curl, "x-mcosu-features", 0, CURLH_HEADER, -1, &header);
+    if(hres == CURLHE_OK) {
+        if(strstr(header->value, "submit=0") != NULL) {
+            bancho->score_submission_policy = ServerPolicy::NO;
+            debugLog("Server doesn't want score submission. :(\n");
+        } else if(strstr(header->value, "submit=1") != NULL) {
+            bancho->score_submission_policy = ServerPolicy::YES;
+            debugLog("Server wants score submission! :D\n");
+        }
+    }
+
+    while(response.pos < response.size) {
+        u16 packet_id = proto::read<u16>(&response);
+        response.pos++;
+        u32 packet_len = proto::read<u32>(&response);
+        if(packet_len > 10485760) {
+            debugLog("Received a packet over 10Mb! Dropping response.\n");
+            goto end;
+        }
+
+        Packet incoming = {
+            .id = packet_id,
+            .memory = (u8 *)malloc(packet_len),
+            .size = packet_len,
+            .pos = 0,
+        };
+        memcpy(incoming.memory, response.memory + response.pos, packet_len);
+
+        incoming_mutex.lock();
+        incoming_queue.push_back(incoming);
+        incoming_mutex.unlock();
+
+        seconds_between_pings = 1.0;
+        response.pos += packet_len;
+    }
+
+end:
+    curl_easy_reset(curl);
+    free(response.memory);
+    curl_slist_free_all(chunk);
+}
+
+void *do_networking() {
+    last_packet_tms = time(NULL);
+
+    CURL *curl = curl_easy_init();
+    if(!curl) {
+        debugLog("Failed to initialize cURL, online functionality disabled.\n");
+        return NULL;
+    }
+
+    while(!dead.load()) {
+        api_requests_mutex.lock();
+        if(api_request_queue.empty()) {
+            api_requests_mutex.unlock();
+        } else {
+            APIRequest api_out = api_request_queue.front();
+            api_request_queue.erase(api_request_queue.begin());
+            api_requests_mutex.unlock();
+
+            send_api_request(curl, api_out);
+        }
+
+        if(osu && osu->lobby->isVisible()) seconds_between_pings = 1;
+        if(bancho->spectating) seconds_between_pings = 1;
+        if(bancho->is_in_a_multi_room() && seconds_between_pings > 3) seconds_between_pings = 3;
+        bool should_ping = difftime(time(NULL), last_packet_tms) > seconds_between_pings;
+        if(bancho->user_id <= 0) should_ping = false;
+
+        outgoing_mutex.lock();
+        if(try_logging_in) {
+            Packet login = login_packet;
+            login_packet = Packet();
+            try_logging_in = false;
+            outgoing_mutex.unlock();
+            send_bancho_packet(curl, login);
+            free(login.memory);
+            outgoing_mutex.lock();
+        } else if(should_ping && outgoing.pos == 0) {
+            proto::write<u16>(&outgoing, PING);
+            proto::write<u8>(&outgoing, 0);
+            proto::write<u32>(&outgoing, 0);
+
+            // Polling gets slower over time, but resets when we receive new data
+            if(seconds_between_pings < 30.0) {
+                seconds_between_pings += 1.0;
+            }
+        }
+
+        if(outgoing.pos > 0) {
+            Packet out = outgoing;
+            outgoing = Packet();
+            outgoing_mutex.unlock();
+
+            // DEBUG: If we're not sending the right amount of bytes, bancho.py just
+            // chugs along! To try to detect it faster, we'll send two packets per request.
+            proto::write<u16>(&out, PING);
+            proto::write<u8>(&out, 0);
+            proto::write<u32>(&out, 0);
+
+            send_bancho_packet(curl, out);
+            free(out.memory);
+        } else {
+            outgoing_mutex.unlock();
+        }
+
+        Timing::sleepMS(1);
+    }
+
+    curl_easy_cleanup(curl);
+
+    return NULL;
+}
+
+void handle_api_response(Packet packet) {
+    switch(packet.id) {
+        case GET_BEATMAPSET_INFO: {
+            Downloader::process_beatmapset_info_response(packet);
+            break;
+        }
+
+        case GET_MAP_LEADERBOARD: {
+            BANCHO::Leaderboard::process_leaderboard_response(packet);
+            break;
+        }
+
+        case GET_REPLAY: {
+            if(packet.size == 0) {
+                // Most likely, 404
+                osu->notificationOverlay->addToast("Failed to download replay");
+                break;
+            }
+
+            FinishedScore *score = (FinishedScore *)packet.extra;
+            auto replay_path = UString::format(MCENGINE_DATA_DIR "replays/%s/%d.replay.lzma", score->server.c_str(),
+                                               score->unixTimestamp);
+
+            // XXX: this is blocking main thread
+            FILE *replay_file = fopen(replay_path.toUtf8(), "wb");
+            if(replay_file == NULL) {
+                osu->notificationOverlay->addToast("Failed to save replay");
+                break;
+            }
+
+            fwrite(packet.memory, packet.size, 1, replay_file);
+            fclose(replay_file);
+            LegacyReplay::load_and_watch(*score);
+            break;
+        }
+
+        case MARK_AS_READ: {
+            // (nothing to do)
+            break;
+        }
+
+        case SUBMIT_SCORE: {
+            // TODO @kiwec: handle response
+            debugLog("Score submit result: %s\n", reinterpret_cast<const char *>(packet.memory));
+
+            // Reset leaderboards so new score will appear
+            db->online_scores.clear();
+            osu->getSongBrowser()->rebuildScoreButtons();
+            break;
+        }
+
+        default: {
+            // NOTE: API Response type is same as API Request type
+            debugLog("No handler for API response type %d!\n", packet.id);
+        }
+    }
+}
+
+}  // namespace
+
+UString cho_token = "";
+
 void disconnect() {
     std::scoped_lock lock(outgoing_mutex);
 
@@ -66,10 +335,10 @@ void disconnect() {
     // This is a blocking call, but we *do* want this to block when quitting the game.
     if(bancho->is_online()) {
         Packet packet;
-        write<u16>(&packet, LOGOUT);
-        write<u8>(&packet, 0);
-        write<u32>(&packet, 4);
-        write<u32>(&packet, 0);
+        proto::write<u16>(&packet, LOGOUT);
+        proto::write<u8>(&packet, 0);
+        proto::write<u32>(&packet, 4);
+        proto::write<u32>(&packet, 0);
 
         CURL *curl = curl_easy_init();
         auto version_header = UString::format("x-mcosu-ver: %s", bancho->neosu_version.toUtf8());
@@ -123,11 +392,11 @@ void disconnect() {
     osu->optionsMenu->logInButton->setColor(0xff00ff00);
     osu->optionsMenu->logInButton->is_loading = false;
 
-    for(auto &pair : online_users) {
+    for(auto &pair : BANCHO::User::online_users) {
         delete pair.second;
     }
-    online_users.clear();
-    friends.clear();
+    BANCHO::User::online_users.clear();
+    BANCHO::User::friends.clear();
 
     osu->chat->onDisconnect();
 
@@ -136,7 +405,7 @@ void disconnect() {
     //      While offline ones would be "By score", "By pp", etc
     osu->songBrowser2->onSortScoresChange(UString("Sort by pp"), 0);
 
-    abort_downloads();
+    Downloader::abort_downloads();
 }
 
 void reconnect() {
@@ -167,7 +436,7 @@ void reconnect() {
         return;
     }
     const char *pw = password.toUtf8();  // password needs to stay in scope!
-    bancho->pw_md5 = md5((u8 *)pw, strlen(pw));
+    bancho->pw_md5 = Bancho::md5((u8 *)pw, strlen(pw));
 
     // Admins told me they don't want score submission enabled
     const char *submit_blacklist[] = {
@@ -182,7 +451,7 @@ void reconnect() {
     }
 
     osu->optionsMenu->logInButton->is_loading = true;
-    Packet new_login_packet = build_login_packet();
+    Packet new_login_packet = Bancho::build_login_packet();
 
     outgoing_mutex.lock();
     free(login_packet.memory);
@@ -191,7 +460,7 @@ void reconnect() {
     outgoing_mutex.unlock();
 }
 
-size_t curl_write(void *contents, size_t size, size_t nmemb, void *userp) {
+size_t curl_writefunc(void *contents, size_t size, size_t nmemb, void *userp) {
     size_t realsize = size * nmemb;
     Packet *mem = (Packet *)userp;
 
@@ -210,267 +479,6 @@ size_t curl_write(void *contents, size_t size, size_t nmemb, void *userp) {
     return realsize;
 }
 
-static void send_api_request(CURL *curl, const APIRequest &api_out) {
-    // XXX: Use download()
-
-    Packet response;
-    response.id = api_out.type;
-    response.extra = api_out.extra;
-    response.extra_int = api_out.extra_int;
-    response.memory = (u8 *)malloc(2048);
-
-    struct curl_slist *chunk = NULL;
-    auto scheme = cv::use_https.getBool() ? "https://" : "http://";
-    auto query_url = UString::format("%sosu.%s%s", scheme, bancho->endpoint.toUtf8(), api_out.path.toUtf8());
-    curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
-    if(api_out.type == SUBMIT_SCORE) {
-        auto token_header = UString::format("token: %s", cho_token.toUtf8());
-        chunk = curl_slist_append(chunk, token_header.toUtf8());
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
-    }
-    if(api_out.mime != NULL) {
-        curl_easy_setopt(curl, CURLOPT_MIMEPOST, api_out.mime);
-    }
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
-    curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
-
-    curl_easy_setopt_CAINFO_BLOB_embedded(curl);
-
-    CURLcode res = curl_easy_perform(curl);
-    if(res == CURLE_OK) {
-        api_responses_mutex.lock();
-        api_response_queue.push_back(response);
-        api_responses_mutex.unlock();
-    }
-
-    if(api_out.mime) {
-        curl_mime_free(api_out.mime);
-    }
-    curl_easy_reset(curl);
-    curl_slist_free_all(chunk);
-}
-
-static void send_bancho_packet(CURL *curl, Packet outgoing) {
-    Packet response;
-    response.memory = (u8 *)malloc(2048);
-
-    struct curl_slist *chunk = NULL;
-    auto version_header = UString::format("x-mcosu-ver: %s", bancho->neosu_version.toUtf8());
-    chunk = curl_slist_append(chunk, version_header.toUtf8());
-    if(!auth_header.empty()) {
-        chunk = curl_slist_append(chunk, auth_header.c_str());
-    }
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
-
-    auto scheme = cv::use_https.getBool() ? "https://" : "http://";
-    auto query_url = UString::format("%sc.%s/", scheme, bancho->endpoint.toUtf8());
-    curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, outgoing.memory);
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, outgoing.pos);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
-    curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
-
-    curl_easy_setopt_CAINFO_BLOB_embedded(curl);
-
-    last_packet_tms = time(NULL);
-    CURLcode res = curl_easy_perform(curl);
-    CURLHcode hres;
-    if(res != CURLE_OK) {
-        debugLog("Failed to send packet, cURL error %u: %s\n", static_cast<unsigned int>(res), curl_easy_strerror(res));
-        if(auth_header.empty()) {
-            // XXX: Not thread safe, playing with fire here
-            auto errmsg = UString::format("Failed to log in: %s", curl_easy_strerror(res));
-            osu->getNotificationOverlay()->addToast(errmsg);
-        }
-        goto end;
-    }
-
-    // Update auth token if applicable
-    struct curl_header *header;
-    hres = curl_easy_header(curl, "cho-token", 0, CURLH_HEADER, -1, &header);
-    if(hres == CURLHE_OK) {
-        auth_header = "osu-token: " + std::string(header->value);
-        cho_token = UString(header->value);
-    }
-
-    hres = curl_easy_header(curl, "x-mcosu-features", 0, CURLH_HEADER, -1, &header);
-    if(hres == CURLHE_OK) {
-        if(strstr(header->value, "submit=0") != NULL) {
-            bancho->score_submission_policy = ServerPolicy::NO;
-            debugLog("Server doesn't want score submission. :(\n");
-        } else if(strstr(header->value, "submit=1") != NULL) {
-            bancho->score_submission_policy = ServerPolicy::YES;
-            debugLog("Server wants score submission! :D\n");
-        }
-    }
-
-    while(response.pos < response.size) {
-        u16 packet_id = read<u16>(&response);
-        response.pos++;
-        u32 packet_len = read<u32>(&response);
-        if(packet_len > 10485760) {
-            debugLog("Received a packet over 10Mb! Dropping response.\n");
-            goto end;
-        }
-
-        Packet incoming = {
-            .id = packet_id,
-            .memory = (u8 *)malloc(packet_len),
-            .size = packet_len,
-            .pos = 0,
-        };
-        memcpy(incoming.memory, response.memory + response.pos, packet_len);
-
-        incoming_mutex.lock();
-        incoming_queue.push_back(incoming);
-        incoming_mutex.unlock();
-
-        seconds_between_pings = 1.0;
-        response.pos += packet_len;
-    }
-
-end:
-    curl_easy_reset(curl);
-    free(response.memory);
-    curl_slist_free_all(chunk);
-}
-
-static void *do_networking() {
-    last_packet_tms = time(NULL);
-
-    CURL *curl = curl_easy_init();
-    if(!curl) {
-        debugLog("Failed to initialize cURL, online functionality disabled.\n");
-        return NULL;
-    }
-
-    while(!dead.load()) {
-        api_requests_mutex.lock();
-        if(api_request_queue.empty()) {
-            api_requests_mutex.unlock();
-        } else {
-            APIRequest api_out = api_request_queue.front();
-            api_request_queue.erase(api_request_queue.begin());
-            api_requests_mutex.unlock();
-
-            send_api_request(curl, api_out);
-        }
-
-        if(osu && osu->lobby->isVisible()) seconds_between_pings = 1;
-        if(bancho->spectating) seconds_between_pings = 1;
-        if(bancho->is_in_a_multi_room() && seconds_between_pings > 3) seconds_between_pings = 3;
-        bool should_ping = difftime(time(NULL), last_packet_tms) > seconds_between_pings;
-        if(bancho->user_id <= 0) should_ping = false;
-
-        outgoing_mutex.lock();
-        if(try_logging_in) {
-            Packet login = login_packet;
-            login_packet = Packet();
-            try_logging_in = false;
-            outgoing_mutex.unlock();
-            send_bancho_packet(curl, login);
-            free(login.memory);
-            outgoing_mutex.lock();
-        } else if(should_ping && outgoing.pos == 0) {
-            write<u16>(&outgoing, PING);
-            write<u8>(&outgoing, 0);
-            write<u32>(&outgoing, 0);
-
-            // Polling gets slower over time, but resets when we receive new data
-            if(seconds_between_pings < 30.0) {
-                seconds_between_pings += 1.0;
-            }
-        }
-
-        if(outgoing.pos > 0) {
-            Packet out = outgoing;
-            outgoing = Packet();
-            outgoing_mutex.unlock();
-
-            // DEBUG: If we're not sending the right amount of bytes, bancho.py just
-            // chugs along! To try to detect it faster, we'll send two packets per request.
-            write<u16>(&out, PING);
-            write<u8>(&out, 0);
-            write<u32>(&out, 0);
-
-            send_bancho_packet(curl, out);
-            free(out.memory);
-        } else {
-            outgoing_mutex.unlock();
-        }
-
-        Timing::sleepMS(1);
-    }
-
-    curl_easy_cleanup(curl);
-
-    return NULL;
-}
-
-static void handle_api_response(Packet packet) {
-    switch(packet.id) {
-        case GET_BEATMAPSET_INFO: {
-            process_beatmapset_info_response(packet);
-            break;
-        }
-
-        case GET_MAP_LEADERBOARD: {
-            process_leaderboard_response(packet);
-            break;
-        }
-
-        case GET_REPLAY: {
-            if(packet.size == 0) {
-                // Most likely, 404
-                osu->notificationOverlay->addToast("Failed to download replay");
-                break;
-            }
-
-            FinishedScore *score = (FinishedScore *)packet.extra;
-            auto replay_path = UString::format(MCENGINE_DATA_DIR "replays/%s/%d.replay.lzma", score->server.c_str(),
-                                               score->unixTimestamp);
-
-            // XXX: this is blocking main thread
-            FILE *replay_file = fopen(replay_path.toUtf8(), "wb");
-            if(replay_file == NULL) {
-                osu->notificationOverlay->addToast("Failed to save replay");
-                break;
-            }
-
-            fwrite(packet.memory, packet.size, 1, replay_file);
-            fclose(replay_file);
-            LegacyReplay::load_and_watch(*score);
-            break;
-        }
-
-        case MARK_AS_READ: {
-            // (nothing to do)
-            break;
-        }
-
-        case SUBMIT_SCORE: {
-            // TODO @kiwec: handle response
-            debugLog("Score submit result: %s\n", reinterpret_cast<const char *>(packet.memory));
-
-            // Reset leaderboards so new score will appear
-            db->online_scores.clear();
-            osu->getSongBrowser()->rebuildScoreButtons();
-            break;
-        }
-
-        default: {
-            // NOTE: API Response type is same as API Request type
-            debugLog("No handler for API response type %d!\n", packet.id);
-        }
-    }
-}
-
 void receive_api_responses() {
     std::scoped_lock lock(api_responses_mutex);
     while(!api_response_queue.empty()) {
@@ -487,7 +495,7 @@ void receive_bancho_packets() {
     while(!incoming_queue.empty()) {
         Packet incoming = incoming_queue.front();
         incoming_queue.erase(incoming_queue.begin());
-        handle_packet(&incoming);
+        Bancho::handle_packet(&incoming);
         free(incoming.memory);
     }
 
@@ -498,18 +506,18 @@ void receive_bancho_packets() {
     if(engine->getTime() > last_presence_request + 1.f) {
         last_presence_request = engine->getTime();
 
-        request_presence_batch();
+        BANCHO::User::request_presence_batch();
 
-        if(!stats_requests.empty()) {
+        if(!BANCHO::User::stats_requests.empty()) {
             Packet packet;
             packet.id = USER_STATS_REQUEST;
-            write<u16>(&packet, stats_requests.size());
-            for(auto user_id : stats_requests) {
-                write<u32>(&packet, user_id);
+            proto::write<u16>(&packet, BANCHO::User::stats_requests.size());
+            for(auto user_id : BANCHO::User::stats_requests) {
+                proto::write<u32>(&packet, user_id);
             }
             send_packet(packet);
 
-            stats_requests.clear();
+            BANCHO::User::stats_requests.clear();
         }
     }
 }
@@ -550,10 +558,10 @@ void send_packet(Packet &packet) {
 
     // We're not sending it immediately, instead we just add it to the pile of
     // packets to send
-    write<u16>(&outgoing, packet.id);
-    write<u8>(&outgoing, 0);
-    write<u32>(&outgoing, packet.pos);
-    write_bytes(&outgoing, packet.memory, packet.pos);
+    proto::write<u16>(&outgoing, packet.id);
+    proto::write<u8>(&outgoing, 0);
+    proto::write<u32>(&outgoing, packet.pos);
+    proto::write_bytes(&outgoing, packet.memory, packet.pos);
 
     outgoing_mutex.unlock();
 
@@ -569,3 +577,5 @@ void init_networking_thread() {
 }
 
 void kill_networking_thread() { dead = true; }
+
+}  // namespace BANCHO::Net

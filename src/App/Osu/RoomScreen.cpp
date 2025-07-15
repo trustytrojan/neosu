@@ -217,7 +217,7 @@ void RoomScreen::draw() {
         this->ready_btn->is_loading = true;
     } else if(bancho->room.map_id != current_map_id) {
         float progress = -1.f;
-        auto beatmap = download_beatmap(bancho->room.map_id, bancho->room.map_md5, &progress);
+        auto beatmap = Downloader::download_beatmap(bancho->room.map_id, bancho->room.map_md5, &progress);
         if(progress == -1.f) {
             auto error_str = UString::format("Failed to download Beatmap #%d :(", bancho->room.map_id);
             this->map_title->setText(error_str);
@@ -261,7 +261,7 @@ void RoomScreen::mouse_update(bool *propagate_clicks) {
         Packet packet;
         packet.id = MATCH_CHANGE_SETTINGS;
         bancho->room.pack(&packet);
-        send_packet(packet);
+        BANCHO::Net::send_packet(packet);
 
         // Update room name in rich presence info
         RichPresence::onMultiplayerLobby();
@@ -341,7 +341,7 @@ void RoomScreen::updateSettingsLayout(Vector2 newResolution) {
     if(!is_host) {
         UString host_str = "Host: None";
         if(bancho->room.host_id > 0) {
-            auto host = get_user_info(bancho->room.host_id, true);
+            auto host = BANCHO::User::get_user_info(bancho->room.host_id, true);
             host_str = UString::format("Host: %s", host->name.toUtf8());
         }
         this->host->setText(host_str);
@@ -445,7 +445,7 @@ void RoomScreen::updateLayout(Vector2 newResolution) {
     int y_total = 10;
     for(int i = 0; i < 16; i++) {
         if(bancho->room.slots[i].has_player()) {
-            auto user_info = get_user_info(bancho->room.slots[i].player_id, true);
+            auto user_info = BANCHO::User::get_user_info(bancho->room.slots[i].player_id, true);
             auto username = user_info->name;
             if(bancho->room.slots[i].is_player_playing()) {
                 username = UString::format("[playing] %s", user_info->name.toUtf8());
@@ -488,7 +488,7 @@ void RoomScreen::ragequit(bool play_sound) {
 
     Packet packet;
     packet.id = EXIT_ROOM;
-    send_packet(packet);
+    BANCHO::Net::send_packet(packet);
 
     osu->modSelector->resetMods();
     osu->modSelector->updateButtons();
@@ -544,11 +544,11 @@ void RoomScreen::on_map_change() {
 
             Packet packet;
             packet.id = MATCH_HAS_BEATMAP;
-            send_packet(packet);
+            BANCHO::Net::send_packet(packet);
         } else {
             Packet packet;
             packet.id = MATCH_NO_BEATMAP;
-            send_packet(packet);
+            BANCHO::Net::send_packet(packet);
         }
     }
 
@@ -560,7 +560,7 @@ void RoomScreen::on_room_joined(Room room) {
     debugLog("Joined room #%d\nPlayers:\n", room.id);
     for(int i = 0; i < 16; i++) {
         if(room.slots[i].has_player()) {
-            auto user_info = get_user_info(room.slots[i].player_id, true);
+            auto user_info = BANCHO::User::get_user_info(room.slots[i].player_id, true);
             debugLog("- %s\n", user_info->name.toUtf8());
         }
     }
@@ -668,7 +668,7 @@ void RoomScreen::on_match_started(Room room) {
 }
 
 void RoomScreen::on_match_score_updated(Packet *packet) {
-    auto frame = read<ScoreFrame>(packet);
+    auto frame = BANCHO::Proto::read<ScoreFrame>(packet);
     if(frame.slot_id > 15) return;
 
     auto slot = &bancho->room.slots[frame.slot_id];
@@ -686,10 +686,10 @@ void RoomScreen::on_match_score_updated(Packet *packet) {
     slot->current_hp = frame.current_hp;
     slot->tag = frame.tag;
 
-    bool is_scorev2 = read<u8>(packet);
+    bool is_scorev2 = BANCHO::Proto::read<u8>(packet);
     if(is_scorev2) {
-        slot->sv2_combo = read<f64>(packet);
-        slot->sv2_bonus = read<f64>(packet);
+        slot->sv2_combo = BANCHO::Proto::read<f64>(packet);
+        slot->sv2_bonus = BANCHO::Proto::read<f64>(packet);
     }
 
     osu->hud->updateScoreboard(true);
@@ -779,8 +779,8 @@ void RoomScreen::onClientScoreChange(bool force) {
 
     Packet packet;
     packet.id = UPDATE_MATCH_SCORE;
-    write<ScoreFrame>(&packet, ScoreFrame::get());
-    send_packet(packet);
+    BANCHO::Proto::write<ScoreFrame>(&packet, ScoreFrame::get());
+    BANCHO::Net::send_packet(packet);
 
     this->last_packet_tms = time(NULL);
 }
@@ -802,11 +802,11 @@ void RoomScreen::onReadyButtonClick() {
     if(bancho->room.is_host() && is_ready && nb_ready > 1) {
         Packet packet;
         packet.id = START_MATCH;
-        send_packet(packet);
+        BANCHO::Net::send_packet(packet);
     } else {
         Packet packet;
         packet.id = is_ready ? MATCH_NOT_READY : MATCH_READY;
-        send_packet(packet);
+        BANCHO::Net::send_packet(packet);
     }
 }
 
@@ -827,7 +827,7 @@ void RoomScreen::onSelectMapClicked() {
     bancho->room.map_name = "";
     bancho->room.map_md5 = "";
     bancho->room.pack(&packet);
-    send_packet(packet);
+    BANCHO::Net::send_packet(packet);
 
     osu->songBrowser2->setVisible(true);
 }
@@ -855,7 +855,7 @@ void RoomScreen::onWinConditionSelected(const UString & /*win_condition_str*/, i
     Packet packet;
     packet.id = MATCH_CHANGE_SETTINGS;
     bancho->room.pack(&packet);
-    send_packet(packet);
+    BANCHO::Net::send_packet(packet);
 
     this->updateLayout(osu->getScreenSize());
 }
@@ -867,7 +867,7 @@ void RoomScreen::set_new_password(const UString &new_password) {
     Packet packet;
     packet.id = CHANGE_ROOM_PASSWORD;
     bancho->room.pack(&packet);
-    send_packet(packet);
+    BANCHO::Net::send_packet(packet);
 }
 
 void RoomScreen::onFreemodCheckboxChanged(CBaseUICheckbox *checkbox) {
@@ -878,7 +878,7 @@ void RoomScreen::onFreemodCheckboxChanged(CBaseUICheckbox *checkbox) {
     Packet packet;
     packet.id = MATCH_CHANGE_SETTINGS;
     bancho->room.pack(&packet);
-    send_packet(packet);
+    BANCHO::Net::send_packet(packet);
 
     this->on_room_updated(bancho->room);
 }

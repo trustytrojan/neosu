@@ -344,12 +344,12 @@ CBaseUIContainer *PauseMenu::setVisible(bool visible) {
             if(!bancho->spectators.empty()) {
                 Packet packet;
                 packet.id = OUT_SPECTATE_FRAMES;
-                write<i32>(&packet, 0);
-                write<u16>(&packet, 0);
-                write<u8>(&packet, LiveReplayBundle::Action::PAUSE);
-                write<ScoreFrame>(&packet, ScoreFrame::get());
-                write<u16>(&packet, osu->getSelectedBeatmap()->spectator_sequence++);
-                send_packet(packet);
+                BANCHO::Proto::write<i32>(&packet, 0);
+                BANCHO::Proto::write<u16>(&packet, 0);
+                BANCHO::Proto::write<u8>(&packet, LiveReplayBundle::Action::PAUSE);
+                BANCHO::Proto::write<ScoreFrame>(&packet, ScoreFrame::get());
+                BANCHO::Proto::write<u16>(&packet, osu->getSelectedBeatmap()->spectator_sequence++);
+                BANCHO::Net::send_packet(packet);
             }
         } else {
             RichPresence::setBanchoStatus("Failed", SUBMITTING);
@@ -362,12 +362,12 @@ CBaseUIContainer *PauseMenu::setVisible(bool visible) {
         if(!bancho->spectators.empty()) {
             Packet packet;
             packet.id = OUT_SPECTATE_FRAMES;
-            write<i32>(&packet, 0);
-            write<u16>(&packet, 0);
-            write<u8>(&packet, LiveReplayBundle::Action::UNPAUSE);
-            write<ScoreFrame>(&packet, ScoreFrame::get());
-            write<u16>(&packet, osu->getSelectedBeatmap()->spectator_sequence++);
-            send_packet(packet);
+            BANCHO::Proto::write<i32>(&packet, 0);
+            BANCHO::Proto::write<u16>(&packet, 0);
+            BANCHO::Proto::write<u8>(&packet, LiveReplayBundle::Action::UNPAUSE);
+            BANCHO::Proto::write<ScoreFrame>(&packet, ScoreFrame::get());
+            BANCHO::Proto::write<u16>(&packet, osu->getSelectedBeatmap()->spectator_sequence++);
+            BANCHO::Net::send_packet(packet);
         }
     }
 

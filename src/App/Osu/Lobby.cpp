@@ -130,12 +130,12 @@ CBaseUIContainer* Lobby::setVisible(bool visible) {
     if(visible) {
         Packet packet;
         packet.id = JOIN_ROOM_LIST;
-        send_packet(packet);
+        BANCHO::Net::send_packet(packet);
 
         packet = Packet();
         packet.id = CHANNEL_JOIN;
-        write_string(&packet, "#lobby");
-        send_packet(packet);
+        BANCHO::Proto::write_string(&packet, "#lobby");
+        BANCHO::Net::send_packet(packet);
 
         // LOBBY presence is broken so we send MULTIPLAYER
         RichPresence::setBanchoStatus("Looking to play", MULTIPLAYER);
@@ -146,12 +146,12 @@ CBaseUIContainer* Lobby::setVisible(bool visible) {
     } else {
         Packet packet;
         packet.id = EXIT_ROOM_LIST;
-        send_packet(packet);
+        BANCHO::Net::send_packet(packet);
 
         packet = Packet();
         packet.id = CHANNEL_PART;
-        write_string(&packet, "#lobby");
-        send_packet(packet);
+        BANCHO::Proto::write_string(&packet, "#lobby");
+        BANCHO::Net::send_packet(packet);
 
         for(auto room : this->rooms) {
             delete room;
@@ -204,9 +204,9 @@ void Lobby::addRoom(Room* room) {
 void Lobby::joinRoom(u32 id, const UString& password) {
     Packet packet;
     packet.id = JOIN_ROOM;
-    write<u32>(&packet, id);
-    write_string(&packet, password.toUtf8());
-    send_packet(packet);
+    BANCHO::Proto::write<u32>(&packet, id);
+    BANCHO::Proto::write_string(&packet, password.toUtf8());
+    BANCHO::Net::send_packet(packet);
 
     for(CBaseUIElement* elm : this->list->getContainer()->getElements()) {
         RoomUIElement* room = dynamic_cast<RoomUIElement*>(elm);
@@ -262,7 +262,7 @@ void Lobby::on_create_room_clicked() {
     Packet packet = {0};
     packet.id = CREATE_ROOM;
     bancho->room.pack(&packet);
-    send_packet(packet);
+    BANCHO::Net::send_packet(packet);
 
     osu->getNotificationOverlay()->addNotification("Creating room...");
 }

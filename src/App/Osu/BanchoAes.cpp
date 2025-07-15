@@ -1,11 +1,12 @@
 // AES with 32-byte key size and 32-byte block size.
 // Full of magic values (as usual in crypto), but this will never get edited again.
-#include <stdint.h>
-#include <string.h>
+#include <cstring>
 
 #include "BanchoNetworking.h"
+#include "BanchoAes.h"
 #include "UString.h"
 
+namespace {  // static
 u8 r_con[] = {1,  2,  4,   8,  16,  32,  64, 128, 27,  54,  108, 216, 171, 77,  154,
               47, 94, 188, 99, 198, 151, 53, 106, 212, 179, 125, 250, 239, 197, 145};
 u8 S[] = {99,  124, 119, 123, 242, 107, 111, 197, 48,  1,   103, 43,  254, 215, 171, 118, 202, 130, 201, 125, 250, 89,
@@ -224,7 +225,9 @@ void aes_encrypt_block(u8 *in, u8 *out, u32 **k_e) {
         out[i * 4 + 3] = (S[(b[(i + 4) % 8]) & 0xFF] ^ (tt)) & 0xFF;
     }
 }
+}  // namespace
 
+namespace BANCHO::AES {
 u8 *encrypt(const u8 *iv, u8 *msg, size_t s_msg, size_t *s_out) {
     auto key_str = UString::format("osu!-scoreburgr---------%d", OSU_VERSION_DATEONLY);
     u32 **key = aes_init_key((u8 *)key_str.toUtf8());
@@ -262,3 +265,4 @@ u8 *encrypt(const u8 *iv, u8 *msg, size_t s_msg, size_t *s_out) {
     aes_free_key(key);
     return out;
 }
+}  // namespace BANCHO::AES

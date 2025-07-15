@@ -10,17 +10,33 @@ BanchoFile::Reader::Reader(const char *path) {
         return;
     }
 
-    fseek(this->file, 0, SEEK_END);
+    if(fseek(this->file, 0, SEEK_END)) {
+        goto seek_error;
+    }
+
     this->total_size = ftell(this->file);
-    rewind(this->file);
+
+    if(fseek(this->file, 0, SEEK_SET)) {
+        goto seek_error;
+    }
 
     this->buffer = (u8 *)malloc(READ_BUFFER_SIZE);
+
     if(this->buffer == NULL) {
         this->set_error("Failed to allocate read buffer");
         fclose(this->file);
         this->file = NULL;
         return;
     }
+
+    return; // success
+
+seek_error:
+    this->set_error("Failed to initialize file reader: " + std::string(strerror(errno)));
+    debugLog("Failed to initialize file reader '%s': %s\n", path, strerror(errno));
+    fclose(this->file);
+    this->file = NULL;
+    return;
 }
 
 BanchoFile::Reader::~Reader() {
@@ -60,7 +76,7 @@ MD5Hash BanchoFile::Reader::read_hash() {
 
     if(this->read_bytes((u8 *)hash.hash, len) != len) {
         // just continue, don't set error flag
-        debugLogF("WARNING: failed to read %d bytes to obtain hash.\n", len);
+        debugLog("WARNING: failed to read %d bytes to obtain hash.\n", len);
         extra = len;
     }
     this->skip_bytes(extra);

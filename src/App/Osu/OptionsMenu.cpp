@@ -1513,11 +1513,11 @@ void OptionsMenu::mouse_update(bool *propagate_clicks) {
     }
     if(this->passwordTextbox->hitEnter()) {
         this->passwordTextbox->stealFocus();
-        reconnect();
+        BANCHO::Net::reconnect();
     }
     if(this->serverTextbox->hitEnter()) {
         this->serverTextbox->stealFocus();
-        reconnect();
+        BANCHO::Net::reconnect();
     }
 
     if(this->dpiTextbox != NULL && this->dpiTextbox->hitEnter()) this->updateFposuDPI();
@@ -2573,9 +2573,9 @@ void OptionsMenu::onLogInClicked() {
     soundEngine->play(osu->getSkin()->getMenuHit());
 
     if(bancho->user_id > 0) {
-        disconnect();
+        BANCHO::Net::disconnect();
     } else {
-        reconnect();
+        BANCHO::Net::reconnect();
     }
 }
 

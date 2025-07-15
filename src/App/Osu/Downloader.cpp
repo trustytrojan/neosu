@@ -23,6 +23,7 @@
 #include "SongBrowser/SongBrowser.h"
 #include "curl_blob.h"
 
+namespace {  // static
 class DownloadManager {
    private:
     struct DownloadRequest {
@@ -91,7 +92,7 @@ class DownloadManager {
             curl_easy_reset(curl);
             curl_easy_setopt(curl, CURLOPT_URL, request->url.c_str());
             curl_easy_setopt(curl, CURLOPT_USERAGENT, bancho->user_agent.toUtf8());
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, BANCHO::Net::curl_writefunc);
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
             curl_easy_setopt(curl, CURLOPT_XFERINFODATA, request.get());
             curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, progress_callback);
@@ -207,35 +208,10 @@ class DownloadManager {
     }
 };
 
-// global instance
-static std::unique_ptr<DownloadManager> g_download_manager;
+// shared global instance
+std::unique_ptr<DownloadManager> s_download_manager;
 
-void abort_downloads() {
-    if(g_download_manager) {
-        g_download_manager->shutdown();  // this will block until the worker thread finishes
-        g_download_manager.reset();
-    }
-}
-
-void download(const char* url, float* progress, std::vector<u8>& out, int* response_code) {
-    if(!g_download_manager) {
-        g_download_manager = std::make_unique<DownloadManager>();
-    }
-
-    auto request = g_download_manager->start_download(std::string(url));
-
-    *progress = request->progress.load();
-    *response_code = request->response_code.load();
-
-    if(request->completed) {
-        std::scoped_lock lock(request->data_mutex);
-        if(*response_code == 200) {
-            out = request->data;
-        }
-    }
-}
-
-namespace {
+// helper
 std::unordered_map<i32, i32> beatmap_to_beatmapset;
 
 i32 get_beatmapset_id_from_osu_file(const u8* osu_data, size_t s_osu_data) {
@@ -260,8 +236,34 @@ i32 get_beatmapset_id_from_osu_file(const u8* osu_data, size_t s_osu_data) {
 
     return -1;
 }
-
 }  // namespace
+
+namespace Downloader {
+
+void abort_downloads() {
+    if(s_download_manager) {
+        s_download_manager->shutdown();  // this will block until the worker thread finishes
+        s_download_manager.reset();
+    }
+}
+
+void download(const char* url, float* progress, std::vector<u8>& out, int* response_code) {
+    if(!s_download_manager) {
+        s_download_manager = std::make_unique<DownloadManager>();
+    }
+
+    auto request = s_download_manager->start_download(std::string(url));
+
+    *progress = request->progress.load();
+    *response_code = request->response_code.load();
+
+    if(request->completed) {
+        std::scoped_lock lock(request->data_mutex);
+        if(*response_code == 200) {
+            out = request->data;
+        }
+    }
+}
 
 i32 extract_beatmapset_id(const u8* data, size_t data_s) {
     debugLog("Reading beatmapset (%d bytes)\n", data_s);
@@ -397,7 +399,7 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, MD5Hash beatmap_md5, float* pr
         request.path = UString::format("/web/osu-search-set.php?b=%d&u=%s&h=%s", beatmap_id, bancho->username.toUtf8(),
                                        bancho->pw_md5.toUtf8());
         request.extra_int = beatmap_id;
-        send_api_request(request);
+        BANCHO::Net::send_api_request(request);
 
         queried_map_id = beatmap_id;
 
@@ -472,7 +474,7 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, i32 beatmapset_id, float* prog
         request.path = UString::format("/web/osu-search-set.php?b=%d&u=%s&h=%s", beatmap_id, bancho->username.toUtf8(),
                                        bancho->pw_md5.toUtf8());
         request.extra_int = beatmap_id;
-        send_api_request(request);
+        BANCHO::Net::send_api_request(request);
 
         queried_map_id = beatmap_id;
 
@@ -525,3 +527,4 @@ void process_beatmapset_info_response(Packet packet) {
 
     beatmap_to_beatmapset[map_id] = strtoul(tokens[7].toUtf8(), NULL, 10);
 }
+}  // namespace Downloader
