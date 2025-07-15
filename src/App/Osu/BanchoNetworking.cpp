@@ -2,10 +2,9 @@
 
 #include <time.h>
 
+#include <algorithm>
 #include <mutex>
 #include <thread>
-
-#include "curl_blob.h"
 
 #ifndef _MSC_VER
 #include <unistd.h>
@@ -47,8 +46,7 @@ std::vector<Packet> incoming_queue;
 time_t last_packet_tms = {0};
 std::atomic<double> seconds_between_pings{1.0};
 
-std::atomic<bool> dead = true;
-
+std::mutex auth_mutex;
 std::string auth_header = "";
 
 // osu! private API
@@ -110,15 +108,18 @@ void send_bancho_packet_async(Packet outgoing) {
     auto version_header = UString::format("x-mcosu-ver: %s", bancho->neosu_version.toUtf8());
     options.headers["x-mcosu-ver"] = bancho->neosu_version.toUtf8();
 
-    if(!auth_header.empty()) {
-        // extract token from "osu-token: TOKEN" format
-        size_t colon_pos = auth_header.find(':');
-        if(colon_pos != std::string::npos) {
-            std::string token = auth_header.substr(colon_pos + 1);
-            // trim whitespace
-            token.erase(0, token.find_first_not_of(" \t"));
-            token.erase(token.find_last_not_of(" \t\r\n") + 1);
-            options.headers["osu-token"] = token;
+    {
+        std::scoped_lock<std::mutex> lock{auth_mutex};
+        if(!auth_header.empty()) {
+            // extract token from "osu-token: TOKEN" format
+            size_t colon_pos = auth_header.find(':');
+            if(colon_pos != std::string::npos) {
+                std::string token = auth_header.substr(colon_pos + 1);
+                // trim whitespace
+                token.erase(0, token.find_first_not_of(" \t"));
+                token.erase(token.find_last_not_of(" \t\r\n") + 1);
+                options.headers["osu-token"] = token;
+            }
         }
     }
 
@@ -135,6 +136,7 @@ void send_bancho_packet_async(Packet outgoing) {
         [](NetworkHandler::Response response) {
             if(!response.success) {
                 Engine::logRaw("[httpRequestAsync] Failed to send packet, HTTP error %ld\n", response.responseCode);
+                std::scoped_lock<std::mutex> lock{auth_mutex};
                 if(auth_header.empty()) {
                     auto errmsg = UString::format("Failed to log in: HTTP %ld", response.responseCode);
                     osu->getNotificationOverlay()->addToast(errmsg);
@@ -142,9 +144,10 @@ void send_bancho_packet_async(Packet outgoing) {
                 return;
             }
 
-            // Update auth token if applicable
+            // Update auth token
             auto cho_token_it = response.headers.find("cho-token");
             if(cho_token_it != response.headers.end()) {
+                std::scoped_lock<std::mutex> lock{auth_mutex};
                 auth_header = "osu-token: " + cho_token_it->second;
                 cho_token = UString(cho_token_it->second);
             }
@@ -160,7 +163,7 @@ void send_bancho_packet_async(Packet outgoing) {
                 }
             }
 
-            // parse response packets using existing protocol functions
+            // parse response packets
             Packet response_packet = {
                 .memory = (u8 *)malloc(response.body.length()),
                 .size = response.body.length(),
@@ -203,68 +206,6 @@ void send_bancho_packet_async(Packet outgoing) {
         options);
 
     free(outgoing.memory);
-}
-
-void *do_networking() {
-    last_packet_tms = time(NULL);
-
-    while(!dead.load()) {
-        api_requests_mutex.lock();
-        if(api_request_queue.empty()) {
-            api_requests_mutex.unlock();
-        } else {
-            APIRequest api_out = api_request_queue.front();
-            api_request_queue.erase(api_request_queue.begin());
-            api_requests_mutex.unlock();
-
-            send_api_request_async(api_out);
-        }
-
-        if(osu && osu->lobby->isVisible()) seconds_between_pings = 1;
-        if(bancho->spectating) seconds_between_pings = 1;
-        if(bancho->is_in_a_multi_room() && seconds_between_pings > 3) seconds_between_pings = 3;
-        bool should_ping = difftime(time(NULL), last_packet_tms) > seconds_between_pings.load();
-        if(bancho->user_id <= 0) should_ping = false;
-
-        outgoing_mutex.lock();
-        if(try_logging_in) {
-            Packet login = login_packet;
-            login_packet = Packet();
-            try_logging_in = false;
-            outgoing_mutex.unlock();
-            send_bancho_packet_async(login);
-            outgoing_mutex.lock();
-        } else if(should_ping && outgoing.pos == 0) {
-            proto::write<u16>(&outgoing, PING);
-            proto::write<u8>(&outgoing, 0);
-            proto::write<u32>(&outgoing, 0);
-
-            // Polling gets slower over time, but resets when we receive new data
-            if(seconds_between_pings.load() < 30.0) {
-                seconds_between_pings += 1.0;
-            }
-        }
-
-        if(outgoing.pos > 0) {
-            Packet out = outgoing;
-            outgoing = Packet();
-            outgoing_mutex.unlock();
-
-            // DEBUG: If we're not sending the right amount of bytes, bancho.py just
-            // chugs along! To try to detect it faster, we'll send two packets per request.
-            proto::write<u16>(&out, PING);
-            proto::write<u8>(&out, 0);
-            proto::write<u32>(&out, 0);
-
-            send_bancho_packet_async(out);
-        } else {
-            outgoing_mutex.unlock();
-        }
-
-        Timing::sleepMS(1);
-    }
-
-    return NULL;
 }
 
 void handle_api_response(Packet packet) {
@@ -371,7 +312,10 @@ void disconnect() {
     }
 
     try_logging_in = false;
-    auth_header = "";
+    {
+        std::scoped_lock<std::mutex> lock{auth_mutex};
+        auth_header = "";
+    }
     free(outgoing.memory);
     outgoing = Packet();
 
@@ -424,7 +368,7 @@ void reconnect() {
     bancho->endpoint = cv::mp_server.getString().c_str();
 
     // Admins told me they don't want any clients to connect
-    const char *server_blacklist[] = {
+    static constexpr std::initializer_list<const char *> server_blacklist{
         "ppy.sh",  // haven't asked, but the answer is obvious
         "gatari.pw",
     };
@@ -444,7 +388,7 @@ void reconnect() {
     bancho->pw_md5 = Bancho::md5((u8 *)pw, strlen(pw));
 
     // Admins told me they don't want score submission enabled
-    const char *submit_blacklist[] = {
+    static constexpr std::initializer_list<const char *> submit_blacklist{
         "akatsuki.gg",
         "ripple.moe",
     };
@@ -463,6 +407,76 @@ void reconnect() {
     login_packet = new_login_packet;
     try_logging_in = true;
     outgoing_mutex.unlock();
+}
+
+void update_networking() {
+    // Rate limit to every 1ms at most
+    static double last_update = 0;
+    double current_time = engine->getTime();
+    if(current_time - last_update < 0.001) return;
+    last_update = current_time;
+
+    // Initialize last_packet_tms on first call
+    static bool initialized = false;
+    if(!initialized) {
+        last_packet_tms = time(NULL);
+        initialized = true;
+    }
+
+    // Process API requests
+    api_requests_mutex.lock();
+    if(api_request_queue.empty()) {
+        api_requests_mutex.unlock();
+    } else {
+        APIRequest api_out = api_request_queue.front();
+        api_request_queue.erase(api_request_queue.begin());
+        api_requests_mutex.unlock();
+
+        send_api_request_async(api_out);
+    }
+
+    // Set ping timeout
+    if(osu && osu->lobby->isVisible()) seconds_between_pings = 1;
+    if(bancho->spectating) seconds_between_pings = 1;
+    if(bancho->is_in_a_multi_room() && seconds_between_pings > 3) seconds_between_pings = 3;
+    bool should_ping = difftime(time(NULL), last_packet_tms) > seconds_between_pings;
+    if(bancho->user_id <= 0) should_ping = false;
+
+    // Handle login and outgoing packet processing
+    outgoing_mutex.lock();
+    if(try_logging_in) {
+        Packet login = login_packet;
+        login_packet = Packet();
+        try_logging_in = false;
+        outgoing_mutex.unlock();
+        send_bancho_packet_async(login);
+        outgoing_mutex.lock();
+    } else if(should_ping && outgoing.pos == 0) {
+        proto::write<u16>(&outgoing, PING);
+        proto::write<u8>(&outgoing, 0);
+        proto::write<u32>(&outgoing, 0);
+
+        // Polling gets slower over time, but resets when we receive new data
+        if(seconds_between_pings < 30.0) {
+            seconds_between_pings += 1.0;
+        }
+    }
+
+    if(outgoing.pos > 0) {
+        Packet out = outgoing;
+        outgoing = Packet();
+        outgoing_mutex.unlock();
+
+        // DEBUG: If we're not sending the right amount of bytes, bancho.py just
+        // chugs along! To try to detect it faster, we'll send two packets per request.
+        proto::write<u16>(&out, PING);
+        proto::write<u8>(&out, 0);
+        proto::write<u32>(&out, 0);
+
+        send_bancho_packet_async(out);
+    } else {
+        outgoing_mutex.unlock();
+    }
 }
 
 void receive_api_responses() {
@@ -518,9 +532,7 @@ void send_api_request(const APIRequest &request) {
     std::scoped_lock lock(api_requests_mutex);
 
     // Jank way to do things... remove outdated requests now
-    api_request_queue.erase(std::remove_if(api_request_queue.begin(), api_request_queue.end(),
-                                           [request](APIRequest r) { return r.type = request.type; }),
-                            api_request_queue.end());
+    std::erase_if(api_request_queue, [request](APIRequest r) { return r.type = request.type; });
 
     api_request_queue.push_back(request);
 }
@@ -556,12 +568,12 @@ void send_packet(Packet &packet) {
     packet.size = 0;
 }
 
-void init_networking_thread() {
-    dead = false;
-    auto net_thread = std::thread(do_networking);
-    net_thread.detach();
+void cleanup_networking() {
+    // no thread to kill, just cleanup any remaining state
+    try_logging_in = false;
+    auth_header = "";
+    free(outgoing.memory);
+    outgoing = Packet();
 }
-
-void kill_networking_thread() { dead = true; }
 
 }  // namespace BANCHO::Net

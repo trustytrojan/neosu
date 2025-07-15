@@ -40,8 +40,7 @@ struct ReplayExtraInfo {
     i32 player_id;
 };
 
-namespace BANCHO::Net
-{
+namespace BANCHO::Net {
 
 void disconnect();
 void reconnect();
@@ -56,12 +55,12 @@ void send_packet(Packet &packet);
 void receive_api_responses();
 void receive_bancho_packets();
 
-// Initialize networking thread. Should be called once when starting neosu.
-void init_networking_thread();
+// Process networking logic. Should be called regularly from main thread.
+void update_networking();
 
-// Stop networking thread. Should be called once when exiting neosu.
-void kill_networking_thread();
+// Clean up networking. Should be called once when exiting neosu.
+void cleanup_networking();
 
 extern UString cho_token;
 
-}
+}  // namespace BANCHO::Net

@@ -349,7 +349,6 @@ Osu::Osu() {
     this->updateMods();
 
     // Init online functionality (multiplayer/leaderboards/etc)
-    BANCHO::Net::init_networking_thread();
     if(cv::mp_autologin.getBool()) {
         BANCHO::Net::reconnect();
     }
@@ -409,7 +408,7 @@ Osu::~Osu() {
     lct_set_map(NULL);
     VolNormalization::shutdown();
     MapCalcThread::shutdown();
-    BANCHO::Net::kill_networking_thread();
+    BANCHO::Net::cleanup_networking();
 
     SAFE_DELETE(this->windowManager);
 
@@ -832,7 +831,8 @@ void Osu::update() {
         this->songBrowser2->playNextRandomBeatmap();
     }
 
-    // multiplayer update
+    // multiplayer/networking update
+    BANCHO::Net::update_networking();
     BANCHO::Net::receive_api_responses();
     BANCHO::Net::receive_bancho_packets();
 

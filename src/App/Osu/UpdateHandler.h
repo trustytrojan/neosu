@@ -16,6 +16,11 @@ class UpdateHandler {
     UpdateHandler();
     ~UpdateHandler() = default;
 
+    UpdateHandler(const UpdateHandler&) = delete;
+    UpdateHandler& operator=(const UpdateHandler&) = delete;
+    UpdateHandler(UpdateHandler&&) = delete;
+    UpdateHandler& operator=(UpdateHandler&&) = delete;
+
     void checkForUpdates();
 
     [[nodiscard]] inline STATUS getStatus() const { return this->status.load(); }
