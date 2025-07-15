@@ -29,7 +29,7 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG v39_00;
     v39_00.title = PACKAGE_VERSION " " __DATE__;
     v39_00.changes = {
-        R"(- <placeholder>)",
+        R"(- Crop screenshots to the internal/letterboxed osu! resolution, instead of keeping the black borders)",
     };
     changelogs.push_back(v39_00);
 

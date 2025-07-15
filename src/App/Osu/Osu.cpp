@@ -84,7 +84,7 @@ Osu::Osu() {
 
     bancho->neosu_version = UString::format("%.2f-" NEOSU_STREAM, cv::version.getFloat());
     bancho->user_agent = UString::format("Mozilla/5.0 (compatible; neosu/%s; +https://" NEOSU_DOMAIN "/)",
-                                        bancho->neosu_version.toUtf8());
+                                         bancho->neosu_version.toUtf8());
 
     // experimental mods list
     this->experimentalMods.push_back(&cv::fposu_mod_strafing);
@@ -542,7 +542,8 @@ void Osu::draw() {
 
         // draw FPoSu cursor trail
         fadingCursorAlpha =
-            1.0f - std::clamp<float>((float)this->score->getCombo() / cv::mod_fadingcursor_combo.getFloat(), 0.0f, 1.0f);
+            1.0f -
+            std::clamp<float>((float)this->score->getCombo() / cv::mod_fadingcursor_combo.getFloat(), 0.0f, 1.0f);
         if(this->pauseMenu->isVisible() || this->getSelectedBeatmap()->isContinueScheduled() ||
            !cv::mod_fadingcursor.getBool())
             fadingCursorAlpha = 1.0f;
@@ -789,7 +790,7 @@ void Osu::update() {
             auto diff2 = this->songBrowser2->lastSelectedBeatmap;
             if(diff2 != NULL) {
                 bancho->room.map_name = UString::format("%s - %s [%s]", diff2->getArtist().c_str(),
-                                                       diff2->getTitle().c_str(), diff2->getDifficultyName().c_str());
+                                                        diff2->getTitle().c_str(), diff2->getDifficultyName().c_str());
                 bancho->room.map_md5 = diff2->getMD5Hash();
                 bancho->room.map_id = diff2->getID();
 
@@ -1080,7 +1081,7 @@ void Osu::onKeyDown(KeyboardEvent &key) {
                         score.playerName = bancho->username.toUtf8();
                     } else {
                         score.player_id = 0;
-                        score.playerName = cv::name.getString(); // local name
+                        score.playerName = cv::name.getString();  // local name
                     }
 
                     double percentFinished = beatmap->getPercentFinished();
@@ -1162,8 +1163,8 @@ void Osu::onKeyDown(KeyboardEvent &key) {
                     } else {
                         cv::draw_scoreboard.setValue(!cv::draw_scoreboard.getBool());
                         this->notificationOverlay->addNotification(
-                            cv::draw_scoreboard.getBool() ? "Scoreboard is shown." : "Scoreboard is hidden.", 0xffffffff,
-                            false, 0.1f);
+                            cv::draw_scoreboard.getBool() ? "Scoreboard is shown." : "Scoreboard is hidden.",
+                            0xffffffff, false, 0.1f);
                     }
 
                     key.consume();
@@ -1412,19 +1413,69 @@ void Osu::toggleChangelog() { this->bToggleChangelogScheduled = true; }
 void Osu::toggleEditor() { this->bToggleEditorScheduled = true; }
 
 void Osu::saveScreenshot() {
-    soundEngine->play(this->skin->getShutter());
-    int screenshotNumber = 0;
-    UString screenshot_path;
-    do {
-        screenshot_path = UString::format("screenshots/screenshot%d.png", screenshotNumber);
-        screenshotNumber++;
-    } while(env->fileExists(screenshot_path.toUtf8()));
+    static i32 screenshotNumber = 0;
 
-    std::vector<unsigned char> pixels = g->getScreenshot();
-    Image::saveToImage(&pixels[0], g->getResolution().x, g->getResolution().y, screenshot_path.toUtf8());
+    if(!env->directoryExists("screenshots") && !env->createDirectory("screenshots")) {
+        this->notificationOverlay->addNotification("Error: Couldn't create screenshots folder.", 0xffff0000, false,
+                                                   3.0f);
+        return;
+    }
+
+    while(env->fileExists(fmt::format("screenshots/screenshot{}.png", screenshotNumber))) screenshotNumber++;
+
+    const auto screenshotFilename{fmt::format("screenshots/screenshot{}.png", screenshotNumber)};
+
+    std::vector<u8> pixels = g->getScreenshot();
+
+    if(pixels.empty()) {
+        static uint8_t once = 0;
+        if(!once++)
+            this->notificationOverlay->addNotification("Error: Couldn't grab a screenshot :(", 0xffff0000, false, 3.0f);
+        debugLog("failed to get pixel data for screenshot\n");
+        return;
+    }
+
+    const f32 outerWidth = g->getResolution().x;
+    const f32 outerHeight = g->getResolution().y;
+    const f32 innerWidth = g_vInternalResolution.x;
+    const f32 innerHeight = g_vInternalResolution.y;
+
+    soundEngine->play(this->skin->getShutter());
+
+    // don't need cropping
+    if(static_cast<i32>(innerWidth) == static_cast<i32>(outerWidth) &&
+       static_cast<i32>(innerHeight) == static_cast<i32>(outerHeight)) {
+        Image::saveToImage(pixels.data(), static_cast<u32>(innerWidth), static_cast<u32>(innerHeight),
+                           screenshotFilename);
+        return;
+    }
+
+    // need cropping
+    f32 offsetXpct = 0, offsetYpct = 0;
+    if(cv::resolution_enabled.getBool() && cv::letterboxing.getBool()) {
+        offsetXpct = cv::letterboxing_offset_x.getFloat();
+        offsetYpct = cv::letterboxing_offset_y.getFloat();
+    }
+
+    const i32 startX = std::clamp<i32>(static_cast<i32>((outerWidth - innerWidth) * (1 + offsetXpct) / 2), 0,
+                                       static_cast<i32>(outerWidth - innerWidth));
+    const i32 startY = std::clamp<i32>(static_cast<i32>((outerHeight - innerHeight) * (1 + offsetYpct) / 2), 0,
+                                       static_cast<i32>(outerHeight - innerHeight));
+
+    std::vector<u8> croppedPixels(static_cast<size_t>(innerWidth * innerHeight * 3));
+
+    for(ssize_t y = 0; y < static_cast<ssize_t>(innerHeight); ++y) {
+        auto srcRowStart = pixels.begin() + ((startY + y) * static_cast<ssize_t>(outerWidth) + startX) * 3;
+        auto destRowStart = croppedPixels.begin() + (y * static_cast<ssize_t>(innerWidth)) * 3;
+        // copy the entire row
+        std::ranges::copy_n(srcRowStart, static_cast<ssize_t>(innerWidth) * 3, destRowStart);
+    }
+
+    Image::saveToImage(croppedPixels.data(), static_cast<u32>(innerWidth), static_cast<u32>(innerHeight),
+                       screenshotFilename);
 }
 
-void Osu::onPlayEnd(FinishedScore score, bool quit, bool  /*aborted*/) {
+void Osu::onPlayEnd(FinishedScore score, bool quit, bool /*aborted*/) {
     cv::snd_change_check_interval.setValue(cv::snd_change_check_interval.getDefaultFloat());
 
     if(!quit) {
@@ -1671,7 +1722,7 @@ void Osu::updateWindowsKeyDisable() {
 
 void Osu::fireResolutionChanged() { this->onResolutionChanged(g_vInternalResolution); }
 
-void Osu::onWindowedResolutionChanged(const UString&  /*oldValue*/, const UString& args) {
+void Osu::onWindowedResolutionChanged(const UString & /*oldValue*/, const UString &args) {
     if(env->isFullscreen()) return;
     if(args.length() < 7) return;
 
@@ -1693,7 +1744,7 @@ void Osu::onWindowedResolutionChanged(const UString&  /*oldValue*/, const UStrin
     env->center();
 }
 
-void Osu::onInternalResolutionChanged(const UString&  /*oldValue*/, const UString& args) {
+void Osu::onInternalResolutionChanged(const UString & /*oldValue*/, const UString &args) {
     if(!env->isFullscreen()) return;
     if(args.length() < 7) return;
 
@@ -1857,12 +1908,16 @@ void Osu::onSpeedChange(const UString &newValue) {
 
 void Osu::onDTPresetChange() {
     cv::speed_override.setValue(cv::mod_doubletime_dummy.getBool() ? 1.5f : -1.f);
-    osu->getModSelector()->speedSlider->setValue(cv::speed_override.getFloat() == -1 ? cv::speed_override.getFloat() : cv::speed_override.getFloat() + 1.0f, false, false);
+    osu->getModSelector()->speedSlider->setValue(
+        cv::speed_override.getFloat() == -1 ? cv::speed_override.getFloat() : cv::speed_override.getFloat() + 1.0f,
+        false, false);
 }
 
 void Osu::onHTPresetChange() {
     cv::speed_override.setValue(cv::mod_halftime_dummy.getBool() ? 0.75f : -1.f);
-    osu->getModSelector()->speedSlider->setValue(cv::speed_override.getFloat() == -1 ? cv::speed_override.getFloat() : cv::speed_override.getFloat() + 1.0f, false, false);
+    osu->getModSelector()->speedSlider->setValue(
+        cv::speed_override.getFloat() == -1 ? cv::speed_override.getFloat() : cv::speed_override.getFloat() + 1.0f,
+        false, false);
 }
 
 void Osu::onThumbnailsToggle() {
@@ -1930,7 +1985,7 @@ void Osu::updateCursorVisibility() {
     }
 }
 
-void Osu::onRawInputChange(const UString& /*old*/, const UString& newValue) {
+void Osu::onRawInputChange(const UString & /*old*/, const UString &newValue) {
     bool newBool = newValue.toBool();
     float sens = cv::mouse_sensitivity.getFloat();
     if(!newBool && (sens < 0.999 || sens > 1.001)) {
@@ -1939,7 +1994,7 @@ void Osu::onRawInputChange(const UString& /*old*/, const UString& newValue) {
     }
 }
 
-void Osu::onSensitivityChange(const UString& /*old*/, const UString& newValue) {
+void Osu::onSensitivityChange(const UString & /*old*/, const UString &newValue) {
     float newFloat = newValue.toFloat();
     if(!cv::mouse_raw_input.getBool() && (newFloat < 0.999 || newFloat > 1.001)) {
         cv::mouse_raw_input.setValue(true, false);
@@ -2058,7 +2113,7 @@ void Osu::onModFPoSu3DSpheresAAChange() { this->rebuildRenderTargets(); }
 
 void Osu::onLetterboxingOffsetChange() { this->updateMouseSettings(); }
 
-void Osu::onUserCardChange(const UString& new_username) {
+void Osu::onUserCardChange(const UString &new_username) {
     // NOTE: force update options textbox to avoid shutdown inconsistency
     this->getOptionsMenu()->setUsername(new_username);
     this->userButton->setID(bancho->user_id);
