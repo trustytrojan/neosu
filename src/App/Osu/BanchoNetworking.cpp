@@ -82,9 +82,10 @@ void send_api_request_async(const APIRequest &api_out) {
             api_response.extra_int = api_out.extra_int;
 
             if(response.success) {
-                api_response.size = response.body.length();
+                api_response.size = response.body.length() + 1;  // +1 for null terminator
                 api_response.memory = (u8 *)malloc(api_response.size);
-                memcpy(api_response.memory, response.body.data(), api_response.size);
+                memcpy(api_response.memory, response.body.data(), response.body.length());
+                api_response.memory[response.body.length()] = '\0';  // null terminate
 
                 api_responses_mutex.lock();
                 api_response_queue.push_back(api_response);

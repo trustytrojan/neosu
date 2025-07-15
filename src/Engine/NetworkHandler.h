@@ -28,6 +28,7 @@ class NetworkHandler {
         long timeout{5};
         long connectTimeout{5};
         bool followRedirects{false};
+        std::function<void(float)> progressCallback;  // progress callback for downloads
     };
 
     // async response data
@@ -87,6 +88,7 @@ class NetworkHandler {
     void setupCurlHandle(CURL* handle, NetworkRequest* request);
     static size_t headerCallback(char* buffer, size_t size, size_t nitems, void* userdata);
     static size_t writeCallback(void* contents, size_t size, size_t nmemb, void* userp);
+    static int progressCallback(void* clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t, curl_off_t);
 };
 
 // allocate the global Bancho here, early in engine startup

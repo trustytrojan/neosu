@@ -1,15 +1,12 @@
 #include "Downloader.h"
 
-#include <curl/curl.h>
-
 #include <atomic>
-#include <condition_variable>
 #include <memory>
 #include <mutex>
 #include <queue>
-#include <sstream>
-#include <thread>
 #include <unordered_map>
+#include <chrono>
+#include <utility>
 
 #include "Archival.h"
 #include "Bancho.h"
@@ -19,9 +16,9 @@
 #include "Database.h"
 #include "DatabaseBeatmap.h"
 #include "Engine.h"
+#include "NetworkHandler.h"
 #include "Osu.h"
 #include "SongBrowser/SongBrowser.h"
-#include "curl_blob.h"
 
 namespace {  // static
 class DownloadManager {
@@ -33,148 +30,99 @@ class DownloadManager {
         std::vector<u8> data;
         std::mutex data_mutex;
         bool completed{false};
+        std::chrono::steady_clock::time_point retry_after{};
     };
 
     std::atomic<bool> shutting_down{false};
-    std::thread worker_thread;
-    std::mutex queue_mutex;
-    std::condition_variable queue_cv;
-    std::queue<std::shared_ptr<DownloadRequest>> download_queue;
     std::unordered_map<std::string, std::shared_ptr<DownloadRequest>> active_downloads;
     std::mutex active_mutex;
 
-    static size_t curl_writefunc(void *contents, size_t size, size_t nmemb, void *userp) {
-        size_t realsize = size * nmemb;
-        Packet *mem = (Packet *)userp;
+    // rate limiting and queuing
+    std::queue<std::shared_ptr<DownloadRequest>> download_queue;
+    std::mutex queue_mutex;
+    std::atomic<bool> currently_downloading{false};
+    std::chrono::steady_clock::time_point last_download_start{};
 
-        u8 *ptr = (u8 *)realloc(mem->memory, mem->size + realsize + 1);
-        if(!ptr) {
-            /* out of memory! */
-            debugLog("not enough memory (realloc returned NULL)\n");
-            return 0;
-        }
+    void checkAndStartNextDownload() {
+        if(this->shutting_down.load() || this->currently_downloading.load()) return;
 
-        mem->memory = ptr;
-        memcpy(&(mem->memory[mem->size]), contents, realsize);
-        mem->size += realsize;
-        mem->memory[mem->size] = 0;
+        std::scoped_lock lock(this->queue_mutex);
+        if(this->download_queue.empty()) return;
 
-        return realsize;
+        auto now = std::chrono::steady_clock::now();
+
+        // check if we need to wait for rate limiting (100ms between downloads)
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - this->last_download_start);
+        if(elapsed < std::chrono::milliseconds(100)) return;
+
+        // check for retry delays
+        auto& request = this->download_queue.front();
+        if(request->retry_after > now) return;
+
+        // ready to start next download
+        this->download_queue.pop();
+        this->startDownloadNow(request);
     }
 
-    static int progress_callback(void* clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t, curl_off_t) {
-        auto* request = static_cast<DownloadRequest*>(clientp);
-        if(dltotal > 0) {
-            request->progress.store(static_cast<float>(dlnow) / static_cast<float>(dltotal));
-        }
-        return 0;
+    void startDownloadNow(const std::shared_ptr<DownloadRequest>& request) {
+        this->currently_downloading.store(true);
+        this->last_download_start = std::chrono::steady_clock::now();
+
+        debugLog("Downloading %s\n", request->url.c_str());
+
+        NetworkHandler::RequestOptions options;
+        options.timeout = 30;
+        options.connectTimeout = 5;
+        options.userAgent = bancho->user_agent.toUtf8();
+        options.followRedirects = true;
+        options.progressCallback = [request](float progress) { request->progress.store(progress); };
+
+        networkHandler->httpRequestAsync(
+            UString(request->url),
+            [this, request](NetworkHandler::Response response) {
+                this->onDownloadComplete(request, std::move(response));
+            },
+            options);
     }
 
-    void worker_loop() {
-        CURL* curl = curl_easy_init();
-        if(!curl) {
-            debugLog("Failed to initialize cURL for download worker!\n");
-            return;
-        }
+    void onDownloadComplete(const std::shared_ptr<DownloadRequest>& request, NetworkHandler::Response response) {
+        this->currently_downloading.store(false);
 
-        while(!this->shutting_down.load()) {
-            Timing::sleepMS(100);  // wait 100ms between every download
-            std::shared_ptr<DownloadRequest> request;
+        // update request with results
+        {
+            std::scoped_lock lock(request->data_mutex);
+            request->response_code.store(static_cast<int>(response.responseCode));
 
-            // wait for work or shutdown
-            {
-                std::unique_lock<std::mutex> lock(this->queue_mutex);
-                this->queue_cv.wait(lock,
-                                    [this] { return !this->download_queue.empty() || this->shutting_down.load(); });
-
-                if(this->shutting_down.load() && this->download_queue.empty()) {
-                    break;
+            if(response.success && response.responseCode == 200) {
+                request->data = std::vector<u8>(response.body.begin(), response.body.end());
+                request->progress.store(1.0f);
+                request->completed = true;
+            } else {
+                if(!response.success) {
+                    debugLog("Failed to download %s: network error\n", request->url.c_str());
                 }
+                if(response.responseCode == 429) {
+                    // rate limited, retry after 5 seconds
+                    request->progress.store(0.0f);
+                    request->retry_after = std::chrono::steady_clock::now() + std::chrono::seconds(5);
 
-                if(!this->download_queue.empty()) {
-                    request = this->download_queue.front();
-                    this->download_queue.pop();
-                }
-            }
-
-            if(!request) {
-                continue;
-            }
-
-            if(this->shutting_down.load()) {
-                break;
-            }
-
-            // perform download
-            Packet response{};
-
-            curl_easy_reset(curl);
-            curl_easy_setopt(curl, CURLOPT_URL, request->url.c_str());
-            curl_easy_setopt(curl, CURLOPT_USERAGENT, bancho->user_agent.toUtf8());
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_writefunc);
-            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
-            curl_easy_setopt(curl, CURLOPT_XFERINFODATA, request.get());
-            curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, progress_callback);
-            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-            curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, true);
-            curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
-            curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30L);
-
-            curl_easy_setopt_CAINFO_BLOB_embedded(curl);
-
-            debugLog("Downloading %s\n", request->url.c_str());
-            CURLcode res = curl_easy_perform(curl);
-
-            long response_code = 0;
-            curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
-
-            // update request with results
-            {
-                std::scoped_lock lock(request->data_mutex);
-                request->response_code.store(static_cast<int>(response_code));
-
-                if(res == CURLE_OK && response_code == 200) {
-                    request->data = std::vector<u8>(response.memory, response.memory + response.size);
-                    request->progress.store(1.0f);
-                    request->completed = true;
+                    // re-queue for retry
+                    std::scoped_lock lock(this->queue_mutex);
+                    this->download_queue.push(request);
+                    return;
                 } else {
-                    if(res != CURLE_OK) {
-                        debugLog("Failed to download %s: %s\n", request->url.c_str(), curl_easy_strerror(res));
-                    }
-                    if(response_code == 429) {
-                        // rate limited, retry later (keep in active_downloads)
-                        request->progress.store(0.0f);
-
-                        // wait before retrying
-                        std::this_thread::sleep_for(std::chrono::seconds(5));
-
-                        // re-queue for retry
-                        {
-                            std::scoped_lock lock(this->queue_mutex);
-                            this->download_queue.push(request);
-                        }
-                        this->queue_cv.notify_one();
-
-                        free(response.memory);
-                        continue;
-                    } else {
-                        request->progress.store(-1.0f);
-                        request->completed = true;
-                    }
+                    request->progress.store(-1.0f);
+                    request->completed = true;
                 }
             }
-
-            free(response.memory);
-            // don't remove from active_downloads, keep completed requests cached (so future download requests can just
-            // grab the already-downloaded data)
         }
 
-        curl_easy_cleanup(curl);
+        // check if we can start next download
+        this->checkAndStartNextDownload();
     }
 
    public:
-    DownloadManager() { this->worker_thread = std::thread(&DownloadManager::worker_loop, this); }
+    DownloadManager() { this->last_download_start = std::chrono::steady_clock::now() - std::chrono::milliseconds(100); }
 
     ~DownloadManager() { this->shutdown(); }
 
@@ -185,26 +133,20 @@ class DownloadManager {
 
     void shutdown() {
         if(!this->shutting_down.exchange(true)) {
-            // signal shutdown and wake up worker
-            {
-                std::scoped_lock lock(this->queue_mutex);
-                // clear queue to prevent new work
-                while(!this->download_queue.empty()) {
-                    this->download_queue.pop();
-                }
-            }
-            this->queue_cv.notify_all();
-
-            if(this->worker_thread.joinable()) {
-                this->worker_thread.join();
+            // clear download queue to prevent new work
+            std::scoped_lock lock(this->queue_mutex);
+            while(!this->download_queue.empty()) {
+                this->download_queue.pop();
             }
         }
     }
 
     std::shared_ptr<DownloadRequest> start_download(const std::string& url) {
+        if(this->shutting_down.load()) return nullptr;
+
         std::scoped_lock lock(this->active_mutex);
 
-        // check if already downloading
+        // check if already downloading or cached
         auto it = this->active_downloads.find(url);
         if(it != this->active_downloads.end()) {
             return it->second;
@@ -221,7 +163,9 @@ class DownloadManager {
             std::scoped_lock queue_lock(this->queue_mutex);
             this->download_queue.push(request);
         }
-        this->queue_cv.notify_one();
+
+        // try to start immediately if possible
+        this->checkAndStartNextDownload();
 
         return request;
     }
@@ -261,7 +205,7 @@ namespace Downloader {
 
 void abort_downloads() {
     if(s_download_manager) {
-        s_download_manager->shutdown();  // this will block until the worker thread finishes
+        s_download_manager->shutdown();
         s_download_manager.reset();
     }
 }
@@ -272,6 +216,11 @@ void download(const char* url, float* progress, std::vector<u8>& out, int* respo
     }
 
     auto request = s_download_manager->start_download(std::string(url));
+    if(!request) {
+        *progress = -1.0f;
+        *response_code = 0;
+        return;
+    }
 
     *progress = request->progress.load();
     *response_code = request->response_code.load();

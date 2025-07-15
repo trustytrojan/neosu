@@ -178,6 +178,16 @@ void NetworkHandler::processCompletedRequests() {
     }
 }
 
+int NetworkHandler::progressCallback(void* clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t /*unused*/,
+                                     curl_off_t /*unused*/) {
+    auto* request = static_cast<NetworkRequest*>(clientp);
+    if(request->options.progressCallback && dltotal > 0) {
+        float progress = static_cast<float>(dlnow) / static_cast<float>(dltotal);
+        request->options.progressCallback(progress);
+    }
+    return 0;
+}
+
 void NetworkHandler::setupCurlHandle(CURL* handle, NetworkRequest* request) {
     curl_easy_setopt(handle, CURLOPT_URL, request->url.toUtf8());
     curl_easy_setopt(handle, CURLOPT_CONNECTTIMEOUT, request->options.connectTimeout);
@@ -217,6 +227,13 @@ void NetworkHandler::setupCurlHandle(CURL* handle, NetworkRequest* request) {
     // setup MIME data
     if(request->options.mimeData) {
         curl_easy_setopt(handle, CURLOPT_MIMEPOST, request->options.mimeData);
+    }
+
+    // setup progress callback if provided
+    if(request->options.progressCallback) {
+        curl_easy_setopt(handle, CURLOPT_NOPROGRESS, 0L);
+        curl_easy_setopt(handle, CURLOPT_XFERINFOFUNCTION, progressCallback);
+        curl_easy_setopt(handle, CURLOPT_XFERINFODATA, request);
     }
 }
 
