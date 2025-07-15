@@ -16,9 +16,9 @@
 #include <unistd.h>
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include "Bancho.h"
 #include "BanchoNetworking.h"
@@ -29,7 +29,7 @@
 #include "ConVar.h"
 #include "Engine.h"
 #include "Lobby.h"
-#include "MD5.h"
+#include "crypto.h"
 #include "NotificationOverlay.h"
 #include "OptionsMenu.h"
 #include "Osu.h"
@@ -175,11 +175,9 @@ UString get_disk_uuid() {
 std::unordered_map<std::string, Bancho::Channel *> Bancho::chat_channels;
 
 MD5Hash Bancho::md5(u8 *msg, size_t msg_len) {
-    MD5 hasher;
-    hasher.update(msg, msg_len);
-    hasher.finalize();
+    u8 digest[16];
+    crypto::hash::md5(msg, msg_len, &digest[0]);
 
-    u8 *digest = hasher.getDigest();
     MD5Hash out;
     for(int i = 0; i < 16; i++) {
         out.hash[i * 2] = "0123456789abcdef"[digest[i] >> 4];
@@ -598,7 +596,7 @@ Packet Bancho::build_login_packet() {
     proto::write_bytes(&packet, (u8 *)bancho->pw_md5.hash.data(), 32);
     proto::write<u8>(&packet, '\n');
 
-    proto::write_bytes(&packet, (u8 *)OSU_VERSION, strlen(OSU_VERSION));
+    proto::write_bytes(&packet, (u8 *)OSU_VERSION, sizeof(OSU_VERSION) - 1);
     proto::write<u8>(&packet, '|');
 
     // UTC offset
@@ -634,8 +632,8 @@ Packet Bancho::build_login_packet() {
     bancho->install_id = bancho->disk_uuid;
     MD5Hash install_md5 = Bancho::md5((u8 *)bancho->install_id.toUtf8(), bancho->install_id.lengthUtf8());
 
-    bancho->client_hashes = UString::fmt("{:s}:{:s}:{:s}:{:s}:{:s}:", osu_path_md5.hash.data(), adapters, adapters_md5.hash.data(),
-                                            install_md5.hash.data(), disk_md5.hash.data());
+    bancho->client_hashes = UString::fmt("{:s}:{:s}:{:s}:{:s}:{:s}:", osu_path_md5.hash.data(), adapters,
+                                         adapters_md5.hash.data(), install_md5.hash.data(), disk_md5.hash.data());
     proto::write_bytes(&packet, (u8 *)bancho->client_hashes.toUtf8(), bancho->client_hashes.lengthUtf8());
 
     // Allow PMs from strangers

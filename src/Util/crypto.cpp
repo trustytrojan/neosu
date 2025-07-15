@@ -1,7 +1,9 @@
 #include "crypto.h"
 #include "sha256.h"  // vendored library
 #include "base64.h"  // vendored library
+#include "MD5.h"     // vendored library
 #include <vector>
+#include <cstring>
 
 #if !defined(_MSC_VER) && __has_include(<openssl/crypto.h>)
 #include <openssl/rand.h>
@@ -51,6 +53,21 @@ void sha256(const void* data, size_t size, u8* hash) {
 
     // fallback to vendored library
     sha256_easy_hash(data, size, hash);
+}
+
+void md5(const void* data, size_t size, u8* hash) {
+#ifdef USE_OPENSSL
+    unsigned int hash_len;
+    if(EVP_Digest(data, size, hash, &hash_len, EVP_md5(), nullptr) == 1) {
+        return;
+    }
+#endif
+
+    // fallback to vendored library
+    MD5 hasher;
+    hasher.update(static_cast<const unsigned char*>(data), size);
+    hasher.finalize();
+    std::memcpy(hash, hasher.getDigest(), 16);
 }
 }  // namespace hash
 
