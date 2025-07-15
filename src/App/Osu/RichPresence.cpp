@@ -39,7 +39,7 @@ void crop_to(const UString& str, char* output, int max_len) {
 }
 
 // output is assumed to be a char[128] string
-void diff2str(DatabaseBeatmap* diff2, char* output, bool include_difficulty) {
+void diff2str(DatabaseBeatmap* diff2, char* output, bool  /*include_difficulty*/) {
     if(diff2 == NULL) {
         strcpy(output, "No map selected");
         return;
@@ -254,7 +254,7 @@ void RichPresence::onMultiplayerLobby() {
     set_discord_presence(&activity);
 }
 
-void RichPresence::onRichPresenceChange(const UString &oldValue, const UString &newValue) {
+void RichPresence::onRichPresenceChange(const UString & /*oldValue*/, const UString & /*newValue*/) {
     if(!cv::rich_presence.getBool()) {
         clear_discord_presence();
     }

@@ -229,7 +229,7 @@ void HUD::draw() {
     }
 }
 
-void HUD::mouse_update(bool *propagate_clicks) {
+void HUD::mouse_update(bool * /*propagate_clicks*/) {
     Beatmap *beatmap = osu->getSelectedBeatmap();
 
     if(beatmap != NULL) {
@@ -350,7 +350,7 @@ void HUD::drawCursorInt(Shader *trailShader, std::vector<CURSORTRAIL> &trail, Ma
     this->drawCursorRaw(pos, alphaMultiplier);
 }
 
-void HUD::drawCursorTrailInt(Shader *trailShader, std::vector<CURSORTRAIL> &trail, Matrix4 &mvp, Vector2 pos,
+void HUD::drawCursorTrailInt(Shader *trailShader, std::vector<CURSORTRAIL> &trail, Matrix4 & /*mvp*/, Vector2 pos,
                              float alphaMultiplier, bool emptyTrailFrame) {
     Image *trailImage = osu->getSkin()->getCursorTrail();
 
@@ -1190,7 +1190,7 @@ void HUD::drawWarningArrow(Vector2 pos, bool flipVertically, bool originLeft) {
     g->popTransform();
 }
 
-void HUD::drawWarningArrows(float hitcircleDiameter) {
+void HUD::drawWarningArrows(float  /*hitcircleDiameter*/) {
     const float divider = 18.0f;
     const float part = GameRules::getPlayfieldSize().y * (1.0f / divider);
 

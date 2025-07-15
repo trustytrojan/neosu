@@ -361,7 +361,7 @@ void SliderRenderer::draw(VertexArrayObject *vao, const std::vector<Vector2> &al
 }
 
 void SliderRenderer::drawFillSliderBodyPeppy(const std::vector<Vector2> &points, VertexArrayObject *circleMesh,
-                                             float radius, int drawFromIndex, int drawUpToIndex, Shader *shader) {
+                                             float radius, int drawFromIndex, int drawUpToIndex, Shader * /*shader*/) {
     if(drawFromIndex < 0) drawFromIndex = 0;
     if(drawUpToIndex < 0) drawUpToIndex = points.size();
 
@@ -395,8 +395,8 @@ void SliderRenderer::drawFillSliderBodyPeppy(const std::vector<Vector2> &points,
     g->popTransform();
 }
 
-void SliderRenderer::drawFillSliderBodyMM(const std::vector<Vector2> &points, float radius, int drawFromIndex,
-                                          int drawUpToIndex) {
+void SliderRenderer::drawFillSliderBodyMM(const std::vector<Vector2> &points, float radius, int  /*drawFromIndex*/,
+                                          int  /*drawUpToIndex*/) {
     // modified version of
     // https://github.com/ppy/osu-framework/blob/master/osu.Framework/Graphics/Lines/Path_DrawNode.cs
 

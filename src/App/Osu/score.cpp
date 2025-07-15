@@ -103,7 +103,7 @@ float LiveScore::getScoreMultiplier() {
     return multiplier;
 }
 
-void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject *hitObject, HIT hit, long delta,
+void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject * /*hitObject*/, HIT hit, long delta,
                              bool ignoreOnHitErrorBar, bool hitErrorBarOnly, bool ignoreCombo, bool ignoreScore) {
     // current combo, excluding the current hitobject which caused the addHitResult() call
     const int scoreComboMultiplier = std::max(this->iCombo - 1, 0);

@@ -483,7 +483,7 @@ void _RESTART_SOUND_ENGINE_ON_CHANGE(const UString &oldValue, const UString &new
     if(oldValueMS != newValueMS) soundEngine->restart();
 }
 
-void _vprof(const UString &oldValue, const UString &newValue) {
+void _vprof(const UString & /*oldValue*/, const UString &newValue) {
     const bool enable = (newValue.toFloat() > 0.0f);
 
     if(enable != g_profCurrentProfile.isEnabled()) {
@@ -494,7 +494,7 @@ void _vprof(const UString &oldValue, const UString &newValue) {
     }
 }
 
-void _osuOptionsSliderQualityWrapper(const UString &oldValue, const UString &newValue) {
+void _osuOptionsSliderQualityWrapper(const UString & /*oldValue*/, const UString &newValue) {
     float value = std::lerp(1.0f, 2.5f, 1.0f - newValue.toFloat());
     cv::slider_curve_points_separation.setValue(value);
 };
@@ -510,7 +510,7 @@ void spectate_by_username(const UString &username) {
     start_spectating(user->user_id);
 }
 
-void _vsync(const UString &oldValue, const UString &newValue) {
+void _vsync(const UString & /*oldValue*/, const UString &newValue) {
     if(newValue.length() < 1)
         debugLog("Usage: 'vsync 1' to turn vsync on, 'vsync 0' to turn vsync off\n");
     else {
@@ -519,17 +519,17 @@ void _vsync(const UString &oldValue, const UString &newValue) {
     }
 }
 
-void _fullscreen_windowed_borderless(const UString &oldValue, const UString &newValue) {
+void _fullscreen_windowed_borderless(const UString & /*oldValue*/, const UString &newValue) {
     env->setFullscreenWindowedBorderless(newValue.toFloat() > 0.0f);
 }
 
-void _monitor(const UString &oldValue, const UString &newValue) { env->setMonitor(newValue.toInt()); }
+void _monitor(const UString & /*oldValue*/, const UString &newValue) { env->setMonitor(newValue.toInt()); }
 
-void _osu_songbrowser_search_hardcoded_filter(const UString &oldValue, const UString &newValue) {
+void _osu_songbrowser_search_hardcoded_filter(const UString & /*oldValue*/, const UString &newValue) {
     if(newValue.length() == 1 && newValue.isWhitespaceOnly()) cv::songbrowser_search_hardcoded_filter.setValue("");
 }
 
-void loudness_cb(const UString &oldValue, const UString &newValue) {
+void loudness_cb(const UString & /*oldValue*/, const UString & /*newValue*/) {
     // Restart loudness calc.
     VolNormalization::abort();
     if(db && cv::normalize_loudness.getBool()) {

@@ -858,11 +858,11 @@ void WinEnvironment::enumerateMonitors() {
     EnumDisplayMonitors(NULL, NULL, WinEnvironment::monitorEnumProc, 0);
 }
 
-void WinEnvironment::onProcessPriorityChange(const UString &oldValue, const UString &newValue) {
+void WinEnvironment::onProcessPriorityChange(const UString & /*oldValue*/, const UString &newValue) {
     setProcessPriority(newValue.toInt());
 }
 
-void WinEnvironment::onDisableWindowsKeyChange(const UString &oldValue, const UString &newValue) {
+void WinEnvironment::onDisableWindowsKeyChange(const UString & /*oldValue*/, const UString &newValue) {
     if(newValue.toInt())
         disableWindowsKey();
     else
@@ -877,7 +877,7 @@ long WinEnvironment::getWindowStyleWindowed() {
     return style;
 }
 
-BOOL CALLBACK WinEnvironment::monitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) {
+BOOL CALLBACK WinEnvironment::monitorEnumProc(HMONITOR hMonitor, HDC /*hdcMonitor*/, LPRECT lprcMonitor, LPARAM /*dwData*/) {
     MONITORINFO monitorInfo;
     monitorInfo.cbSize = sizeof(MONITORINFO);
     GetMonitorInfo(hMonitor, &monitorInfo);

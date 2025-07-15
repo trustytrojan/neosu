@@ -175,12 +175,12 @@ void LinuxEnvironment::showMessageErrorFatal(UString title, UString message) {
     // TODO:
 }
 
-UString LinuxEnvironment::openFileWindow(const char *filetypefilters, UString title, UString initialpath) {
+UString LinuxEnvironment::openFileWindow(const char * /*filetypefilters*/, UString  /*title*/, UString  /*initialpath*/) {
     // TODO:
     return UString("");
 }
 
-UString LinuxEnvironment::openFolderWindow(UString title, UString initialpath) {
+UString LinuxEnvironment::openFolderWindow(UString  /*title*/, UString  /*initialpath*/) {
     // TODO:
     return UString("");
 }
@@ -378,7 +378,7 @@ void LinuxEnvironment::setWindowResizableInt(bool resizable, Vector2 windowSize)
     XFlush(this->display);
 }
 
-void LinuxEnvironment::setMonitor(int monitor) {
+void LinuxEnvironment::setMonitor(int  /*monitor*/) {
     // TODO:
     this->center();
 }
@@ -588,7 +588,7 @@ void LinuxEnvironment::setCursorInt(Cursor cursor) {
     XDefineCursor(this->display, this->window, cursor);
 }
 
-UString LinuxEnvironment::readWindowProperty(Window window, Atom prop, Atom fmt /* XA_STRING or UTF8_STRING */,
+UString LinuxEnvironment::readWindowProperty(Window window, Atom prop, Atom  /*fmt*/ /* XA_STRING or UTF8_STRING */,
                                              bool deleteAfterReading) {
     UString returnData = UString("");
     unsigned char *clipData;

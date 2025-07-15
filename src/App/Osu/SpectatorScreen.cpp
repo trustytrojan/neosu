@@ -258,7 +258,7 @@ void SpectatorScreen::draw() {
 
 bool SpectatorScreen::isVisible() { return bancho->spectating && !osu->isInPlayMode(); }
 
-CBaseUIElement *SpectatorScreen::setVisible(bool visible) {
+CBaseUIElement *SpectatorScreen::setVisible(bool  /*visible*/) {
     engine->showMessageError("Programmer Error", "Idiot tried to control spectator screen visibility");
     abort();
     return this;

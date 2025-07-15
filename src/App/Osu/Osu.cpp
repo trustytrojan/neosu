@@ -1424,7 +1424,7 @@ void Osu::saveScreenshot() {
     Image::saveToImage(&pixels[0], g->getResolution().x, g->getResolution().y, screenshot_path.toUtf8());
 }
 
-void Osu::onPlayEnd(FinishedScore score, bool quit, bool aborted) {
+void Osu::onPlayEnd(FinishedScore score, bool quit, bool  /*aborted*/) {
     cv::snd_change_check_interval.setValue(cv::snd_change_check_interval.getDefaultFloat());
 
     if(!quit) {
@@ -1671,7 +1671,7 @@ void Osu::updateWindowsKeyDisable() {
 
 void Osu::fireResolutionChanged() { this->onResolutionChanged(g_vInternalResolution); }
 
-void Osu::onWindowedResolutionChanged(const UString& oldValue, const UString& args) {
+void Osu::onWindowedResolutionChanged(const UString&  /*oldValue*/, const UString& args) {
     if(env->isFullscreen()) return;
     if(args.length() < 7) return;
 
@@ -1693,7 +1693,7 @@ void Osu::onWindowedResolutionChanged(const UString& oldValue, const UString& ar
     env->center();
 }
 
-void Osu::onInternalResolutionChanged(const UString& oldValue, const UString& args) {
+void Osu::onInternalResolutionChanged(const UString&  /*oldValue*/, const UString& args) {
     if(!env->isFullscreen()) return;
     if(args.length() < 7) return;
 
@@ -1795,7 +1795,7 @@ void Osu::onSkinReload() {
     this->onSkinChange("", cv::skin.getString().c_str());
 }
 
-void Osu::onSkinChange(const UString &oldValue, const UString &newValue) {
+void Osu::onSkinChange(const UString & /*oldValue*/, const UString &newValue) {
     if(this->skin != NULL) {
         if(this->bSkinLoadScheduled || this->skinScheduledToLoad != NULL) return;
         if(newValue.length() < 1) return;
@@ -1838,9 +1838,9 @@ void Osu::updateAnimationSpeed() {
     }
 }
 
-void Osu::onAnimationSpeedChange(const UString &oldValue, const UString &newValue) { this->updateAnimationSpeed(); }
+void Osu::onAnimationSpeedChange(const UString & /*oldValue*/, const UString & /*newValue*/) { this->updateAnimationSpeed(); }
 
-void Osu::onSpeedChange(const UString &oldValue, const UString &newValue) {
+void Osu::onSpeedChange(const UString & /*oldValue*/, const UString &newValue) {
     float speed = newValue.toFloat();
     this->getSelectedBeatmap()->setSpeed(speed >= 0.0f ? speed : this->getSelectedBeatmap()->getSpeedMultiplier());
     this->updateAnimationSpeed();
@@ -1855,21 +1855,21 @@ void Osu::onSpeedChange(const UString &oldValue, const UString &newValue) {
     osu->getModSelector()->updateOverrideSliderLabels();
 }
 
-void Osu::onDTPresetChange(const UString &oldValue, const UString &newValue) {
+void Osu::onDTPresetChange(const UString & /*oldValue*/, const UString & /*newValue*/) {
     cv::speed_override.setValue(cv::mod_doubletime_dummy.getBool() ? 1.5f : -1.f);
     osu->getModSelector()->speedSlider->setValue(cv::speed_override.getFloat() == -1 ? cv::speed_override.getFloat() : cv::speed_override.getFloat() + 1.0f, false, false);
 }
 
-void Osu::onHTPresetChange(const UString &oldValue, const UString &newValue) {
+void Osu::onHTPresetChange(const UString & /*oldValue*/, const UString & /*newValue*/) {
     cv::speed_override.setValue(cv::mod_halftime_dummy.getBool() ? 0.75f : -1.f);
     osu->getModSelector()->speedSlider->setValue(cv::speed_override.getFloat() == -1 ? cv::speed_override.getFloat() : cv::speed_override.getFloat() + 1.0f, false, false);
 }
 
-void Osu::onThumbnailsToggle(const UString &oldValue, const UString &newValue) {
+void Osu::onThumbnailsToggle(const UString & /*oldValue*/, const UString & /*newValue*/) {
     osu->getSongBrowser()->thumbnailYRatio = cv::draw_songbrowser_thumbnails.getBool() ? 1.333333f : 0.f;
 }
 
-void Osu::onPlayfieldChange(const UString &oldValue, const UString &newValue) { this->getSelectedBeatmap()->onModUpdate(); }
+void Osu::onPlayfieldChange(const UString & /*oldValue*/, const UString & /*newValue*/) { this->getSelectedBeatmap()->onModUpdate(); }
 
 void Osu::onUIScaleChange(const UString &oldValue, const UString &newValue) {
     const float oldVal = oldValue.toFloat();
@@ -2046,17 +2046,17 @@ void Osu::onKey2Change(bool pressed, bool isMouse) {
     }
 }
 
-void Osu::onModMafhamChange(const UString &oldValue, const UString &newValue) { this->rebuildRenderTargets(); }
+void Osu::onModMafhamChange(const UString & /*oldValue*/, const UString & /*newValue*/) { this->rebuildRenderTargets(); }
 
-void Osu::onModFPoSuChange(const UString &oldValue, const UString &newValue) { this->rebuildRenderTargets(); }
+void Osu::onModFPoSuChange(const UString & /*oldValue*/, const UString & /*newValue*/) { this->rebuildRenderTargets(); }
 
-void Osu::onModFPoSu3DChange(const UString &oldValue, const UString &newValue) { this->rebuildRenderTargets(); }
+void Osu::onModFPoSu3DChange(const UString & /*oldValue*/, const UString & /*newValue*/) { this->rebuildRenderTargets(); }
 
-void Osu::onModFPoSu3DSpheresChange(const UString &oldValue, const UString &newValue) { this->rebuildRenderTargets(); }
+void Osu::onModFPoSu3DSpheresChange(const UString & /*oldValue*/, const UString & /*newValue*/) { this->rebuildRenderTargets(); }
 
-void Osu::onModFPoSu3DSpheresAAChange(const UString &oldValue, const UString &newValue) { this->rebuildRenderTargets(); }
+void Osu::onModFPoSu3DSpheresAAChange(const UString & /*oldValue*/, const UString & /*newValue*/) { this->rebuildRenderTargets(); }
 
-void Osu::onLetterboxingOffsetChange(const UString &oldValue, const UString &newValue) { this->updateMouseSettings(); }
+void Osu::onLetterboxingOffsetChange(const UString & /*oldValue*/, const UString & /*newValue*/) { this->updateMouseSettings(); }
 
 void Osu::onUserCardChange(const UString& new_username) {
     // NOTE: force update options textbox to avoid shutdown inconsistency

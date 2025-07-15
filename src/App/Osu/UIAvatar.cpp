@@ -118,7 +118,7 @@ void UIAvatar::draw_avatar(float alpha) {
     // }
 }
 
-void UIAvatar::onAvatarClicked(CBaseUIButton *btn) {
+void UIAvatar::onAvatarClicked(CBaseUIButton * /*btn*/) {
     if(osu->isInPlayMode()) {
         // Don't want context menu to pop up while playing a map
         return;

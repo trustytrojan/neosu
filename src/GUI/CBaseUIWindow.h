@@ -166,6 +166,6 @@ class CBaseUIWindow : public CBaseUIElement {
     Vector2 vLastSize;
 
     // test features
-    RenderTarget *rt;
-    CBaseUIBoxShadow *shadow;
+    // RenderTarget *rt;
+    // CBaseUIBoxShadow *shadow;
 };

@@ -849,7 +849,7 @@ void RoomScreen::onChangeWinConditionClicked() {
     this->contextMenu->setVisible(true);
 }
 
-void RoomScreen::onWinConditionSelected(const UString &win_condition_str, int win_condition) {
+void RoomScreen::onWinConditionSelected(const UString & /*win_condition_str*/, int win_condition) {
     bancho->room.win_condition = win_condition;
 
     Packet packet;

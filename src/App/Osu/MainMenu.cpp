@@ -1091,7 +1091,7 @@ void MainMenu::onMiddleChange(bool down) {
     }
 }
 
-void MainMenu::onResolutionChange(Vector2 newResolution) {
+void MainMenu::onResolutionChange(Vector2  /*newResolution*/) {
     this->updateLayout();
     this->setMenuElementsVisible(this->bMenuElementsVisible);
 }

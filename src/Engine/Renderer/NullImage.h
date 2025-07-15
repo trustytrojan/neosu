@@ -18,7 +18,7 @@ class NullImage : public Image {
     NullImage(int width, int height, bool mipmapped = false, bool keepInSystemMemory = false) : Image(width, height, mipmapped, keepInSystemMemory) { ; }
     ~NullImage() override { this->destroy(); }
 
-    void bind(unsigned int textureUnit = 0) override { ; }
+    void bind(unsigned int  /*textureUnit*/ = 0) override { ; }
     void unbind() override { ; }
 
     void setFilterMode(Graphics::FILTER_MODE filterMode) override;

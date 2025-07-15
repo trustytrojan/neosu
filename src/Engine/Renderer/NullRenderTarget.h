@@ -21,7 +21,7 @@ class NullRenderTarget : public RenderTarget {
     void enable() override { ; }
     void disable() override { ; }
 
-    void bind(unsigned int textureUnit = 0) override { ; }
+    void bind(unsigned int  /*textureUnit*/ = 0) override { ; }
     void unbind() override { ; }
 
    private:

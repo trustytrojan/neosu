@@ -148,7 +148,11 @@ void UserCard2::draw() {
         const f32 height = this->vSize.y * 0.5f;
         const f32 paddingTopPercent = (1.0f - usernameScale) * 0.1f;
         const f32 paddingTop = height * paddingTopPercent;
-        const f32 paddingLeftPercent = (1.0f - usernameScale) * 0.3f;
+
+        /* TODO: use?
+        * const f32 paddingLeftPercent = (1.0f - usernameScale) * 0.3f;
+        */
+
         const f32 scale = height / usernameFont->getHeight() * usernameScale;
 
         xCounter += this->avatar->getSize().x + height * 0.2f;

@@ -113,7 +113,7 @@ void clear_discord_presence() {
 #endif
 }
 
-void set_discord_presence(struct DiscordActivity *activity) {
+void set_discord_presence([[maybe_unused]] struct DiscordActivity *activity) {
     if(!initialized) return;
 
 #ifdef _WIN32

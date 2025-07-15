@@ -1088,7 +1088,7 @@ void Skin::load() {
         osu->getNotificationOverlay()->addNotification("Error: Couldn't load DEFAULT skin.ini!!!", 0xffff0000);
 }
 
-void Skin::loadBeatmapOverride(const std::string& filepath) {
+void Skin::loadBeatmapOverride(const std::string& /*filepath*/) {
     // debugLog("Skin::loadBeatmapOverride( %s )\n", filepath.c_str());
     //  TODO: beatmap skin support
 }
@@ -1302,7 +1302,7 @@ bool Skin::parseSkinINI(std::string filepath) {
     return true;
 }
 
-void Skin::onIgnoreBeatmapSampleVolumeChange(const UString &oldValue, const UString &newValue) { this->resetSampleVolume(); }
+void Skin::onIgnoreBeatmapSampleVolumeChange(const UString & /*oldValue*/, const UString & /*newValue*/) { this->resetSampleVolume(); }
 
 void Skin::setSampleSet(int sampleSet) {
     if(this->iSampleSet == sampleSet) return;

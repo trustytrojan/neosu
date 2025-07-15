@@ -16,7 +16,7 @@ class GameRules {
     //************************//
 
     // this scales the fadeout duration with the current speed multiplier
-    static float getFadeOutTime(Beatmap *beatmap) {
+    static float getFadeOutTime(Beatmap * /*beatmap*/) {
         const float fade_out_time = cv::hitobject_fade_out_time.getFloat();
         const float multiplier_min = cv::hitobject_fade_out_time_speed_multiplier_min.getFloat();
         return fade_out_time * (1.0f / std::max(osu->getAnimationSpeedMultiplier(), multiplier_min));

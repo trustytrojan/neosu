@@ -298,7 +298,7 @@ void HitObject::drawHitResultAnim(const HITRESULTANIM &hitresultanim) {
     }
 }
 
-void HitObject::update(long curPos, f64 frame_time) {
+void HitObject::update(long curPos, f64  /*frame_time*/) {
     this->fAlphaForApproachCircle = 0.0f;
     this->fHittableDimRGBColorMultiplierPercent = 1.0f;
 
@@ -473,7 +473,7 @@ void HitObject::addHitResult(LiveScore::HIT result, long delta, bool isEndOfComb
         this->hitresultanim2 = hitresultanim;
 }
 
-void HitObject::onReset(long curPos) {
+void HitObject::onReset(long  /*curPos*/) {
     this->bMisAim = false;
     this->iAutopilotDelta = 0;
 

@@ -577,7 +577,7 @@ void ScoreButton::onDeleteScoreClicked() {
     }
 }
 
-void ScoreButton::onDeleteScoreConfirmed(const UString &text, int id) {
+void ScoreButton::onDeleteScoreConfirmed(const UString & /*text*/, int id) {
     if(id != 1) return;
 
     debugLog("Deleting score\n");
@@ -586,8 +586,8 @@ void ScoreButton::onDeleteScoreConfirmed(const UString &text, int id) {
     osu->getSongBrowser()->onScoreContextMenu(this, 2);
 }
 
-void ScoreButton::setScore(const FinishedScore &score, DatabaseBeatmap *diff2, int index, const UString &titleString,
-                           float weight) {
+void ScoreButton::setScore(const FinishedScore &score, DatabaseBeatmap *diff2, int index, const UString & /*titleString*/,
+                           float  /*weight*/) {
     this->score = score;
     this->score.beatmap_hash = diff2->getMD5Hash();
     this->score.diff2 = diff2;

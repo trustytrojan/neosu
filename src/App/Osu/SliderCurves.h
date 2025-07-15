@@ -90,7 +90,7 @@ class SliderCurveTypeBezier2 final : public SliderCurveType {
     SliderCurveTypeBezier2(const std::vector<Vector2> &points);
     ~SliderCurveTypeBezier2() override { ; }
 
-    Vector2 pointAt(float t) override { return Vector2(); }  // unused
+    Vector2 pointAt(float  /*t*/) override { return Vector2(); }  // unused
 };
 
 class SliderCurveTypeCentripetalCatmullRom final : public SliderCurveType {

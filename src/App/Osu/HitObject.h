@@ -69,7 +69,7 @@ class HitObject {
     [[nodiscard]] inline bool isBlocked() const { return this->bBlocked; }
     [[nodiscard]] inline bool hasMisAimed() const { return this->bMisAim; }
 
-    virtual void onClickEvent(std::vector<Click> &clicks) { ; }
+    virtual void onClickEvent(std::vector<Click> & /*clicks*/) { ; }
     virtual void onReset(long curPos);
 
    protected:

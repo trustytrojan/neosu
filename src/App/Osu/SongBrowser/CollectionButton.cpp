@@ -161,7 +161,7 @@ void CollectionButton::onContextMenu(const UString& text, int id) {
     }
 }
 
-void CollectionButton::onRenameCollectionConfirmed(const UString& text, int id) {
+void CollectionButton::onRenameCollectionConfirmed(const UString& text, int  /*id*/) {
     if(text.length() > 0) {
         std::string new_name = text.toUtf8();
         auto collection = get_or_create_collection(this->sCollectionName);
@@ -173,7 +173,7 @@ void CollectionButton::onRenameCollectionConfirmed(const UString& text, int id) 
     }
 }
 
-void CollectionButton::onDeleteCollectionConfirmed(const UString& text, int id) {
+void CollectionButton::onDeleteCollectionConfirmed(const UString&  /*text*/, int id) {
     if(id != 2) return;
 
     // just forward it

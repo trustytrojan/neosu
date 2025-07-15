@@ -182,7 +182,7 @@ void VolumeOverlay::updateLayout() {
                                 this->volumeMaster->getSize().y / 1.5f);
 }
 
-void VolumeOverlay::onResolutionChange(Vector2 newResolution) { this->updateLayout(); }
+void VolumeOverlay::onResolutionChange(Vector2  /*newResolution*/) { this->updateLayout(); }
 
 void VolumeOverlay::onKeyDown(KeyboardEvent &key) {
     if(!this->canChangeVolume()) return;
@@ -285,7 +285,7 @@ void VolumeOverlay::onVolumeChange(int multiplier) {
     this->animate();
 }
 
-void VolumeOverlay::onMasterVolumeChange(const UString &oldValue, const UString &newValue) {
+void VolumeOverlay::onMasterVolumeChange(const UString & /*oldValue*/, const UString &newValue) {
     if(this->bVolumeInactiveToActiveScheduled) return;  // not very clean, but w/e
 
     float newVolume = newValue.toFloat();
@@ -303,7 +303,7 @@ void VolumeOverlay::onEffectVolumeChange() {
     skin->resetSampleVolume();
 }
 
-void VolumeOverlay::onMusicVolumeChange(const UString &oldValue, const UString &newValue) {
+void VolumeOverlay::onMusicVolumeChange(const UString & /*oldValue*/, const UString & /*newValue*/) {
     auto music = osu->getSelectedBeatmap()->getMusic();
     if(music != NULL) {
         music->setVolume(osu->getSelectedBeatmap()->getIdealVolume());

@@ -2403,7 +2403,7 @@ void OptionsMenu::onSkinSelect() {
     }
 }
 
-void OptionsMenu::onSkinSelect2(const UString &skinName, int id) {
+void OptionsMenu::onSkinSelect2(const UString &skinName, int  /*id*/) {
     cv::skin.setValue(skinName);
     this->updateSkinNameLabel();
 }
@@ -2512,7 +2512,7 @@ void OptionsMenu::onResolutionSelect() {
     this->options->setScrollSizeToContent();
 }
 
-void OptionsMenu::onResolutionSelect2(const UString &resolution, int id) {
+void OptionsMenu::onResolutionSelect2(const UString &resolution, int  /*id*/) {
     if(env->isFullscreen()) {
         cv::resolution.setValue(resolution);
     } else {
@@ -2542,7 +2542,7 @@ void OptionsMenu::onOutputDeviceSelect() {
     this->options->setScrollSizeToContent();
 }
 
-void OptionsMenu::onOutputDeviceSelect2(const UString &outputDeviceName, int id) {
+void OptionsMenu::onOutputDeviceSelect2(const UString &outputDeviceName, int  /*id*/) {
     if(outputDeviceName == soundEngine->getOutputDeviceName()) {
         debugLog("SoundEngine::setOutputDevice() \"%s\" already is the current device.\n", outputDeviceName.toUtf8());
         return;
@@ -2601,7 +2601,7 @@ void OptionsMenu::onNotelockSelect() {
     this->options->setScrollSizeToContent();
 }
 
-void OptionsMenu::onNotelockSelect2(const UString &notelockType, int id) {
+void OptionsMenu::onNotelockSelect2(const UString & /*notelockType*/, int id) {
     cv::notelock_type.setValue(id);
     this->updateNotelockSelectLabel();
 
@@ -2841,7 +2841,7 @@ void OptionsMenu::onKeyUnbindButtonPressed(CBaseUIButton *button) {
     }
 }
 
-void OptionsMenu::onKeyBindingsResetAllPressed(CBaseUIButton *button) {
+void OptionsMenu::onKeyBindingsResetAllPressed(CBaseUIButton * /*button*/) {
     this->iNumResetAllKeyBindingsPressed++;
 
     const int numRequiredPressesUntilReset = 4;
@@ -2946,7 +2946,7 @@ void OptionsMenu::OpenASIOSettings() {
 #endif
 }
 
-void OptionsMenu::onASIOBufferChange(CBaseUISlider *slider) {
+void OptionsMenu::onASIOBufferChange([[maybe_unused]] CBaseUISlider *slider) {
 #ifdef _WIN32
     if(!this->updating_layout) this->bASIOBufferChangeScheduled = true;
 
@@ -3041,7 +3041,7 @@ void OptionsMenu::onNightcoreToggle(CBaseUICheckbox *checkbox) {
     osu->updateMods();
 }
 
-void OptionsMenu::onUseSkinsSoundSamplesChange(const UString &oldValue, const UString &newValue) { osu->reloadSkin(); }
+void OptionsMenu::onUseSkinsSoundSamplesChange(const UString & /*oldValue*/, const UString & /*newValue*/) { osu->reloadSkin(); }
 
 void OptionsMenu::onHighQualitySlidersCheckboxChange(CBaseUICheckbox *checkbox) {
     this->onCheckboxChange(checkbox);
@@ -3050,7 +3050,7 @@ void OptionsMenu::onHighQualitySlidersCheckboxChange(CBaseUICheckbox *checkbox) 
     if(checkbox->isChecked()) this->sliderQualitySlider->setValue(1.0f, false);
 }
 
-void OptionsMenu::onHighQualitySlidersConVarChange(const UString &oldValue, const UString &newValue) {
+void OptionsMenu::onHighQualitySlidersConVarChange(const UString & /*oldValue*/, const UString &newValue) {
     const bool enabled = newValue.toFloat() > 0;
     for(int i = 0; i < this->elements.size(); i++) {
         bool contains = false;
@@ -3151,7 +3151,7 @@ void OptionsMenu::onResetClicked(CBaseUIButton *button) {
     this->onResetUpdate(button);
 }
 
-void OptionsMenu::onResetEverythingClicked(CBaseUIButton *button) {
+void OptionsMenu::onResetEverythingClicked(CBaseUIButton * /*button*/) {
     this->iNumResetEverythingPressed++;
 
     const int numRequiredPressesUntilReset = 4;
@@ -3182,7 +3182,7 @@ void OptionsMenu::onResetEverythingClicked(CBaseUIButton *button) {
     }
 }
 
-void OptionsMenu::onImportSettingsFromStable(CBaseUIButton *button) { import_settings_from_osu_stable(); }
+void OptionsMenu::onImportSettingsFromStable(CBaseUIButton * /*button*/) { import_settings_from_osu_stable(); }
 
 void OptionsMenu::addSpacer() {
     OPTIONS_ELEMENT e;

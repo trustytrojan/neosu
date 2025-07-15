@@ -111,7 +111,7 @@ OUTPUT_DEVICE SoundEngine::getDefaultDevice() {
     };
 }
 
-void SoundEngine::updateOutputDevices(bool printInfo) {
+void SoundEngine::updateOutputDevices(bool /*printInfo*/) {
     this->outputDevices.clear();
 
     BASS_DEVICEINFO deviceInfo;
@@ -233,7 +233,7 @@ void SoundEngine::updateOutputDevices(bool printInfo) {
 
 // The BASS mixer is used for every sound driver, but it's useful to be able to
 // initialize it later on some drivers where we know the best available frequency.
-bool SoundEngine::init_bass_mixer(const OUTPUT_DEVICE& device) {
+bool SoundEngine::init_bass_mixer(const OUTPUT_DEVICE &device) {
     auto bass_flags = BASS_DEVICE_STEREO | BASS_DEVICE_FREQ | BASS_DEVICE_NOSPEAKER;
     auto freq = cv::snd_freq.getInt();
 
@@ -278,7 +278,7 @@ bool SoundEngine::init_bass_mixer(const OUTPUT_DEVICE& device) {
     return true;
 }
 
-bool SoundEngine::initializeOutputDevice(const OUTPUT_DEVICE& device) {
+bool SoundEngine::initializeOutputDevice(const OUTPUT_DEVICE &device) {
     debugLog("SoundEngine: initializeOutputDevice( %s ) ...\n", device.name.toUtf8());
 
     this->shutdown();
@@ -414,10 +414,15 @@ bool SoundEngine::initializeOutputDevice(const OUTPUT_DEVICE& device) {
             // mode
             flags |= BASS_WASAPI_EXCLUSIVE | BASS_WASAPI_AUTOFORMAT;
         }
-
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
+#endif
         if(!BASS_WASAPI_Init(device.id, 0, 0, flags, bufferSize, updatePeriod, WASAPIPROC_BASS,
                              (void *)g_bassOutputMixer)) {
-            const int errorCode = BASS_ErrorGetCode();
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
             ready_since = -1.0;
             debugLog("BASS_WASAPI_Init() failed.\n");
             osu->getNotificationOverlay()->addToast(BassManager::getErrorUString());
@@ -580,7 +585,7 @@ bool SoundEngine::hasExclusiveOutput() {
     return this->isASIO() || (this->isWASAPI() && cv::win_snd_wasapi_exclusive.getBool());
 }
 
-void SoundEngine::setOutputDevice(const OUTPUT_DEVICE& device) {
+void SoundEngine::setOutputDevice(const OUTPUT_DEVICE &device) {
     bool was_playing = false;
     unsigned long prevMusicPositionMS = 0;
     if(osu->getSelectedBeatmap()->getMusic() != NULL) {

@@ -65,8 +65,6 @@ class VolNormalization {
     struct LoudnessCalcThread;
     std::vector<LoudnessCalcThread*> threads;
 
-    const std::vector<DatabaseBeatmap*>* maps_to_calc{nullptr};
-
     static std::unique_ptr<VolNormalization> instance;
     static std::once_flag instance_flag;
     static std::once_flag shutdown_flag;

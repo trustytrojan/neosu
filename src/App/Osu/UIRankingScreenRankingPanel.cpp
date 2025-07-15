@@ -142,7 +142,7 @@ void UIRankingScreenRankingPanel::draw() {
     }
 }
 
-void UIRankingScreenRankingPanel::drawHitImage(SkinImage *img, float scale, Vector2 pos) {
+void UIRankingScreenRankingPanel::drawHitImage(SkinImage *img, float  /*scale*/, Vector2 pos) {
     const float uiScale = /*cv::ui_scale.getFloat()*/ 1.0f;  // NOTE: commented for now, doesn't really work due to
                                                             // legacy layout expectations
 

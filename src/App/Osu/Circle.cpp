@@ -40,8 +40,8 @@ void Circle::drawCircle(Beatmap *beatmap, Vector2 rawPos, int number, int colorC
 }
 
 void Circle::drawCircle(Skin *skin, Vector2 pos, float hitcircleDiameter, float numberScale, float overlapScale,
-                        int number, int colorCounter, int colorOffset, float colorRGBMultiplier, float approachScale,
-                        float alpha, float numberAlpha, bool drawNumber, bool overrideHDApproachCircle) {
+                        int number, int colorCounter, int colorOffset, float colorRGBMultiplier, float  /*approachScale*/,
+                        float alpha, float numberAlpha, bool drawNumber, bool  /*overrideHDApproachCircle*/) {
     if(alpha <= 0.0f || !cv::draw_circles.getBool()) return;
 
     rainbowNumber = number;
@@ -243,7 +243,7 @@ void Circle::drawHitCircle(Image *hitCircleImage, Vector2 pos, Color comboColor,
 }
 
 void Circle::drawHitCircleNumber(Skin *skin, float numberScale, float overlapScale, Vector2 pos, int number,
-                                 float numberAlpha, float colorRGBMultiplier) {
+                                 float numberAlpha, float  /*colorRGBMultiplier*/) {
     if(!cv::draw_numbers.getBool()) return;
 
     class DigitWidth {
@@ -590,4 +590,4 @@ void Circle::onReset(long curPos) {
     }
 }
 
-Vector2 Circle::getAutoCursorPos(long curPos) { return this->bi->osuCoords2Pixels(this->vRawPos); }
+Vector2 Circle::getAutoCursorPos(long  /*curPos*/) { return this->bi->osuCoords2Pixels(this->vRawPos); }

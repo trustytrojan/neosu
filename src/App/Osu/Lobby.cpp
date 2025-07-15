@@ -59,7 +59,7 @@ RoomUIElement::RoomUIElement(Lobby* multi, Room* room, float x, float y, float w
     }
 }
 
-void RoomUIElement::onRoomJoinButtonClick(CBaseUIButton* btn) {
+void RoomUIElement::onRoomJoinButtonClick(CBaseUIButton*  /*btn*/) {
     if(this->has_password) {
         this->multi->room_to_join = this->room_id;
         osu->prompt->prompt("Room password:",
@@ -109,13 +109,13 @@ void Lobby::onKeyDown(KeyboardEvent& key) {
     // XXX: search bar
 }
 
-void Lobby::onKeyUp(KeyboardEvent& key) {
+void Lobby::onKeyUp(KeyboardEvent&  /*key*/) {
     if(!this->bVisible) return;
 
     // XXX: search bar
 }
 
-void Lobby::onChar(KeyboardEvent& key) {
+void Lobby::onChar(KeyboardEvent&  /*key*/) {
     if(!this->bVisible) return;
 
     // XXX: search bar

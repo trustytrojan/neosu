@@ -58,8 +58,8 @@ class Circle : public HitObject {
     void updateStackPosition(float stackOffset) override;
     void miss(long curPos) override;
 
-    Vector2 getRawPosAt(long pos) override { return this->vRawPos; }
-    Vector2 getOriginalRawPosAt(long pos) override { return this->vOriginalRawPos; }
+    Vector2 getRawPosAt(long  /*pos*/) override { return this->vRawPos; }
+    Vector2 getOriginalRawPosAt(long  /*pos*/) override { return this->vOriginalRawPos; }
     Vector2 getAutoCursorPos(long curPos) override;
 
     void onClickEvent(std::vector<Click> &clicks) override;

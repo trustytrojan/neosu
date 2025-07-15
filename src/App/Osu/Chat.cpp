@@ -58,7 +58,7 @@ ChatChannel::~ChatChannel() {
     this->chat->button_container->deleteBaseUIElement(this->btn);
 }
 
-void ChatChannel::onChannelButtonClick(CBaseUIButton *btn) {
+void ChatChannel::onChannelButtonClick(CBaseUIButton * /*btn*/) {
     soundEngine->play(osu->getSkin()->clickButton);
     this->chat->switchToChannel(this);
 }
@@ -1165,7 +1165,7 @@ bool Chat::isMouseInChat() {
     return this->input_box->isMouseInside() || this->selected_channel->ui->isMouseInside();
 }
 
-void Chat::askWhatChannelToJoin(CBaseUIButton *btn) {
+void Chat::askWhatChannelToJoin(CBaseUIButton * /*btn*/) {
     // XXX: Could display nicer UI with full channel list (chat_channels in Bancho.cpp)
     osu->prompt->prompt("Type in the channel you want to join (e.g. '#osu'):",
                         fastdelegate::MakeDelegate(this, &Chat::join));

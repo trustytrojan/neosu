@@ -48,4 +48,4 @@ void ScreenBackable::updateLayout() {
     this->backButton->setPosY(osu->getScreenHeight() - this->backButton->getSize().y);
 }
 
-void ScreenBackable::onResolutionChange(Vector2 newResolution) { this->updateLayout(); }
+void ScreenBackable::onResolutionChange(Vector2  /*newResolution*/) { this->updateLayout(); }

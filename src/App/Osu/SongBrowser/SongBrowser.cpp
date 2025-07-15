@@ -2314,7 +2314,10 @@ void SongBrowser::updateLayout() {
     bool is_widescreen = ((i32)(std::max(0, (i32)((screen.x - (screen.y * 4.f / 3.f)) / 2.f))) > 0);
     f32 global_scale = screen.x / (is_widescreen ? 1366.f : 1024.f);
 
-    const float uiScale = cv::ui_scale.getFloat();
+    /* TODO: use?
+     * const float uiScale = cv::ui_scale.getFloat();
+     */
+
     const float dpiScale = Osu::getUIScale();
 
     const int margin = 5 * dpiScale;
@@ -2418,7 +2421,9 @@ void SongBrowser::updateScoreBrowserLayout() {
 
     const int scoreButtonWidthMax = this->topbarLeft->getSize().x;
 
-    f32 back_btn_height = osu->getSkin()->getMenuBack2()->getSize().y;
+    /* TODO: use?
+     * f32 back_btn_height = osu->getSkin()->getMenuBack2()->getSize().y;
+     */
     f32 browserHeight = osu->getScreenHeight() -
                         (get_bottombar_height() + (this->topbarLeft->getPos().y + this->topbarLeft->getSize().y)) +
                         2 * dpiScale;
@@ -2987,7 +2992,7 @@ void SongBrowser::onSortScoresClicked(CBaseUIButton *button) {
     this->contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onSortScoresChange));
 }
 
-void SongBrowser::onSortScoresChange(const UString& text, int id) {
+void SongBrowser::onSortScoresChange(const UString& text, int  /*id*/) {
     cv::songbrowser_scores_sortingtype.setValue(text);  // NOTE: remember
     this->scoreSortButton->setText(text);
     this->rebuildScoreButtons();
@@ -3010,7 +3015,7 @@ void SongBrowser::onSortScoresChange(const UString& text, int id) {
     }
 }
 
-void SongBrowser::onWebClicked(CBaseUIButton *button) {
+void SongBrowser::onWebClicked(CBaseUIButton * /*button*/) {
     if(this->songInfo->getBeatmapID() > 0) {
         env->openURLInDefaultBrowser(UString::format("https://osu.ppy.sh/b/%ld", this->songInfo->getBeatmapID()));
         osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
@@ -3104,9 +3109,9 @@ void SongBrowser::onSortClicked(CBaseUIButton *button) {
     this->contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onSortChange));
 }
 
-void SongBrowser::onSortChange(const UString& text, int id) { this->onSortChangeInt(text, true); }
+void SongBrowser::onSortChange(const UString& text, int  /*id*/) { this->onSortChangeInt(text, true); }
 
-void SongBrowser::onSortChangeInt(const UString& text, bool autoScroll) {
+void SongBrowser::onSortChangeInt(const UString& text, bool  /*autoScroll*/) {
     SORTING_METHOD *sortingMethod = &this->sortingMethods[3];
     for(size_t i = 0; i < this->sortingMethods.size(); i++) {
         if(this->sortingMethods[i].name == text) {
@@ -3201,7 +3206,7 @@ void SongBrowser::onGroupNoGrouping() {
     this->onAfterSortingOrGroupChange();
 }
 
-void SongBrowser::onGroupCollections(bool autoScroll) {
+void SongBrowser::onGroupCollections(bool  /*autoScroll*/) {
     this->group = GROUP::GROUP_COLLECTIONS;
     this->groupByCollectionBtn->setTextBrightColor(highlightColor);
 
@@ -3505,7 +3510,7 @@ void SongBrowser::onSongButtonContextMenu(SongButton *songButton, const UString&
     }
 }
 
-void SongBrowser::onCollectionButtonContextMenu(CollectionButton *collectionButton, const UString& text, int id) {
+void SongBrowser::onCollectionButtonContextMenu(CollectionButton * /*collectionButton*/, const UString& text, int id) {
     std::string collection_name = text.toUtf8();
 
     if(id == 2) {  // delete collection
@@ -3544,7 +3549,7 @@ void SongBrowser::highlightScore(u64 unixTimestamp) {
     }
 }
 
-void SongBrowser::recalculateStarsForSelectedBeatmap(bool force) {
+void SongBrowser::recalculateStarsForSelectedBeatmap(bool  /*force*/) {
     if(this->beatmap->getSelectedDifficulty2() == NULL) return;
 
     this->beatmap->getSelectedDifficulty2()->pp.pp = -1.0;

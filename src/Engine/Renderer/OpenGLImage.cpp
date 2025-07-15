@@ -18,12 +18,12 @@
 #include "OpenGLHeaders.h"
 #include "ResourceManager.h"
 
-OpenGLImage::OpenGLImage(std::string filepath, bool mipmapped, bool keepInSystemMemory) : Image(std::move(filepath), mipmapped) {
+OpenGLImage::OpenGLImage(std::string filepath, bool mipmapped, bool  /*keepInSystemMemory*/) : Image(std::move(filepath), mipmapped) {
     this->GLTexture = 0;
     this->iTextureUnitBackup = 0;
 }
 
-OpenGLImage::OpenGLImage(int width, int height, bool mipmapped, bool keepInSystemMemory) : Image(width, height, mipmapped) {
+OpenGLImage::OpenGLImage(int width, int height, bool mipmapped, bool  /*keepInSystemMemory*/) : Image(width, height, mipmapped) {
     this->GLTexture = 0;
     this->iTextureUnitBackup = 0;
 }

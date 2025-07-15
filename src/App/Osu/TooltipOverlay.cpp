@@ -72,7 +72,7 @@ void TooltipOverlay::draw() {
     }
 }
 
-void TooltipOverlay::mouse_update(bool *propagate_clicks) {
+void TooltipOverlay::mouse_update(bool * /*propagate_clicks*/) {
     if(this->bDelayFadeout)
         this->bDelayFadeout = false;
     else if(this->fAnim > 0.0f)

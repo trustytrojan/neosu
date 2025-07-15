@@ -12,7 +12,7 @@
 
 class NullShader : public Shader {
    public:
-    NullShader(const std::string& vertexShader, const std::string& fragmentShader, bool source) : Shader() { ; }
+    NullShader(const std::string&  /*vertexShader*/, const std::string&  /*fragmentShader*/, bool  /*source*/) : Shader() { ; }
     ~NullShader() override { this->destroy(); }
 
     void enable() override { ; }

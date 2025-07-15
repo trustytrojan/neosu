@@ -33,7 +33,7 @@ class Slider : public HitObject {
 
     Vector2 getRawPosAt(long pos) override;
     Vector2 getOriginalRawPosAt(long pos) override;
-    inline Vector2 getAutoCursorPos(long curPos) override { return this->vCurPoint; }
+    inline Vector2 getAutoCursorPos(long  /*curPos*/) override { return this->vCurPoint; }
 
     void onClickEvent(std::vector<Click> &clicks) override;
     void onReset(long curPos) override;

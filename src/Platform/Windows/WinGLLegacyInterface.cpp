@@ -74,7 +74,7 @@ bool wglIsExtensionSupported(const char *extension) {
 //	handle enabling of multisampling  //
 //************************************//
 
-bool initWinGLMultisample(HDC hDC, HINSTANCE hInstance, HWND hWnd, int factor) {
+bool initWinGLMultisample(HDC hDC, HINSTANCE /*hInstance*/, HWND /*hWnd*/, int factor) {
     // check if the multisampling extension is available
     if(!wglIsExtensionSupported("WGL_ARB_multisample")) return false;
 

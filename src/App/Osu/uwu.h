@@ -11,7 +11,7 @@ namespace uwu {
 // Promise for queuing work, but only the latest function will be run.
 template <typename Func, typename Ret>
 struct lazy_promise {
-    lazy_promise(Ret default_ret) : ret(default_ret), keep_running(true), thread_started(false) {
+    lazy_promise(Ret default_ret) : keep_running(true), thread_started(false), ret(default_ret) {
         // don't start thread during construction to avoid races
         // thread will be started lazily on first enqueue
     }

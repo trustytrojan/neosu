@@ -480,7 +480,7 @@ void Slider::draw2(bool drawApproachCircle, bool drawOnlyApproachCircle) {
     }
 }
 
-void Slider::drawStartCircle(float alpha) {
+void Slider::drawStartCircle(float  /*alpha*/) {
     Skin *skin = this->bm->getSkin();
 
     if(this->bStartFinished) {
@@ -509,7 +509,7 @@ void Slider::drawStartCircle(float alpha) {
     }
 }
 
-void Slider::drawEndCircle(float alpha, float sliderSnake) {
+void Slider::drawEndCircle(float  /*alpha*/, float sliderSnake) {
     Skin *skin = this->bm->getSkin();
 
     skin->getHitCircleOverlay2()->setAnimationTimeOffset(

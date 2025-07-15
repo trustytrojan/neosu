@@ -1335,9 +1335,9 @@ void ModSelector::onOverrideSliderLockChange(CBaseUICheckbox *checkbox) {
     osu->updateMods();
 }
 
-void ModSelector::onOverrideARSliderDescClicked(CBaseUIButton *button) { this->ARLock->click(); }
+void ModSelector::onOverrideARSliderDescClicked(CBaseUIButton * /*button*/) { this->ARLock->click(); }
 
-void ModSelector::onOverrideODSliderDescClicked(CBaseUIButton *button) { this->ODLock->click(); }
+void ModSelector::onOverrideODSliderDescClicked(CBaseUIButton * /*button*/) { this->ODLock->click(); }
 
 void ModSelector::updateOverrideSliderLabels() {
     const Color inactiveColor = 0xff777777;

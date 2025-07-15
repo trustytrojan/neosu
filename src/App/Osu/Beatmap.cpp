@@ -396,7 +396,7 @@ void Beatmap::keyPressed2(bool mouse) {
     }
 }
 
-void Beatmap::keyReleased1(bool mouse) {
+void Beatmap::keyReleased1(bool  /*mouse*/) {
     if(this->is_watching || bancho->spectating) return;
 
     // key overlay
@@ -408,7 +408,7 @@ void Beatmap::keyReleased1(bool mouse) {
     this->current_keys = this->current_keys & ~(LegacyReplay::M1 | LegacyReplay::K1);
 }
 
-void Beatmap::keyReleased2(bool mouse) {
+void Beatmap::keyReleased2(bool  /*mouse*/) {
     if(this->is_watching || bancho->spectating) return;
 
     // key overlay
