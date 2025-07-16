@@ -23,7 +23,8 @@ class Console;
 
 #ifdef _DEBUG
 #define debugLogF(...) Engine::ContextLogger::log(std::source_location::current(), __FUNCTION__, __VA_ARGS__)
-#define debugLog(...) Engine::ContextLogger::logPrintf(std::source_location::current(), __FUNCTION__, __VA_ARGS__)  // deprecated
+#define debugLog(...) \
+    Engine::ContextLogger::logPrintf(std::source_location::current(), __FUNCTION__, __VA_ARGS__)  // deprecated
 #else
 #define debugLogF(...) Engine::ContextLogger::log(__FUNCTION__, __VA_ARGS__)
 #define debugLog(...) Engine::ContextLogger::logPrintf(__FUNCTION__, __VA_ARGS__)  // deprecated
@@ -64,17 +65,16 @@ class Engine {
     void toggleFullscreen();
     void disableFullscreen();
 
-    void showMessageInfo(const UString& title, const UString& message);
-    void showMessageWarning(const UString& title, const UString& message);
-    void showMessageError(const UString& title, const UString& message);
-    void showMessageErrorFatal(const UString& title, const UString& message);
+    void showMessageInfo(const UString &title, const UString &message);
+    void showMessageWarning(const UString &title, const UString &message);
+    void showMessageError(const UString &title, const UString &message);
+    void showMessageErrorFatal(const UString &title, const UString &message);
 
     // engine specifics
     void blackout() { this->bBlackout = true; }
 
     // interfaces
    public:
-
     [[nodiscard]] inline const std::vector<Mouse *> &getMice() const { return this->mice; }
     [[nodiscard]] inline const std::vector<Keyboard *> &getKeyboards() const { return this->keyboards; }
 
@@ -137,14 +137,23 @@ class Engine {
 
    public:
     class ContextLogger {
+       private:
+        static forceinline void trim_to_last_scope([[maybe_unused]] std::string &str) {
+#ifdef _MSC_VER  // msvc always adds the full scope to __FUNCTION__, which we don't want for non-debug builds
+            auto pos = str.rfind("::");
+            if(pos != std::string::npos) {
+                str.erase(1, pos + 1);
+            }
+#endif
+        }
+
        public:
         // debug build shows full source location
         template <typename... Args>
         static void log(const std::source_location &loc, const char *func, fmt::format_string<Args...> fmt,
                         Args &&...args) {
-            auto contextPrefix =
-                fmt::format("[{}:{}:{}] [{}]: ", Environment::getFileNameFromFilePath(loc.file_name()), loc.line(),
-                loc.column(), func);
+            auto contextPrefix = fmt::format("[{}:{}:{}] [{}]: ", Environment::getFileNameFromFilePath(loc.file_name()),
+                                             loc.line(), loc.column(), func);
 
             auto message = fmt::format(fmt, std::forward<Args>(args)...);
             Engine::logImpl(contextPrefix + message);
@@ -153,9 +162,8 @@ class Engine {
         template <typename... Args>
         static void log(const std::source_location &loc, const char *func, Color color, fmt::format_string<Args...> fmt,
                         Args &&...args) {
-            auto contextPrefix =
-                fmt::format("[{}:{}:{}] [{}]: ", Environment::getFileNameFromFilePath(loc.file_name()), loc.line(),
-                loc.column(), func);
+            auto contextPrefix = fmt::format("[{}:{}:{}] [{}]: ", Environment::getFileNameFromFilePath(loc.file_name()),
+                                             loc.line(), loc.column(), func);
 
             auto message = fmt::format(fmt, std::forward<Args>(args)...);
             Engine::logImpl(contextPrefix + message, color);
@@ -165,6 +173,9 @@ class Engine {
         template <typename... Args>
         static void log(const char *func, fmt::format_string<Args...> fmt, Args &&...args) {
             auto contextPrefix = fmt::format("[{}] ", func);
+            trim_to_last_scope(contextPrefix);
+            contextPrefix.erase(0, contextPrefix.find_last_of("::"));
+
             auto message = fmt::format(fmt, std::forward<Args>(args)...);
             Engine::logImpl(contextPrefix + message);
         }
@@ -172,6 +183,7 @@ class Engine {
         template <typename... Args>
         static void log(const char *func, Color color, fmt::format_string<Args...> fmt, Args &&...args) {
             auto contextPrefix = fmt::format("[{}] ", func);
+            trim_to_last_scope(contextPrefix);
             auto message = fmt::format(fmt, std::forward<Args>(args)...);
             Engine::logImpl(contextPrefix + message, color);
         }
@@ -181,9 +193,8 @@ class Engine {
         //[[deprecated("use compile-time format string checked debugLogF instead")]]
         static void logPrintf(const std::source_location &loc, const char *func, const std::string_view &fmt,
                               Args &&...args) {
-            auto contextPrefix =
-                fmt::format("[{}:{}:{}] [{}]: ", Environment::getFileNameFromFilePath(loc.file_name()), loc.line(),
-                loc.column(), func);
+            auto contextPrefix = fmt::format("[{}:{}:{}] [{}]: ", Environment::getFileNameFromFilePath(loc.file_name()),
+                                             loc.line(), loc.column(), func);
 
             std::string message = fmt::sprintf(fmt, std::forward<Args>(args)...);
             Engine::logImpl(contextPrefix + message);
@@ -193,9 +204,8 @@ class Engine {
         //[[deprecated("use compile-time format string checked debugLogF instead")]]
         static void logPrintf(const std::source_location &loc, const char *func, Color color,
                               const std::string_view &fmt, Args &&...args) {
-            auto contextPrefix =
-                fmt::format("[{}:{}:{}] [{}]: ", Environment::getFileNameFromFilePath(loc.file_name()), loc.line(),
-                loc.column(), func);
+            auto contextPrefix = fmt::format("[{}:{}:{}] [{}]: ", Environment::getFileNameFromFilePath(loc.file_name()),
+                                             loc.line(), loc.column(), func);
 
             std::string message = fmt::sprintf(fmt, std::forward<Args>(args)...);
             Engine::logImpl(contextPrefix + message, color);
@@ -206,6 +216,7 @@ class Engine {
         //[[deprecated("use compile-time format string checked debugLogF instead")]]
         static void logPrintf(const char *func, const std::string_view &fmt, Args &&...args) {
             auto contextPrefix = fmt::format("[{}] ", func);
+            trim_to_last_scope(contextPrefix);
             std::string message = fmt::sprintf(fmt, std::forward<Args>(args)...);
             Engine::logImpl(contextPrefix + message);
         }
@@ -214,6 +225,7 @@ class Engine {
         //[[deprecated("use compile-time format string checked debugLogF instead")]]
         static void logPrintf(const char *func, Color color, const std::string_view &fmt, Args &&...args) {
             auto contextPrefix = fmt::format("[{}] ", func);
+            trim_to_last_scope(contextPrefix);
             std::string message = fmt::sprintf(fmt, std::forward<Args>(args)...);
             Engine::logImpl(contextPrefix + message, color);
         }
