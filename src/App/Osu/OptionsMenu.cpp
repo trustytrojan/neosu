@@ -397,9 +397,7 @@ class OptionsMenuResetButton : public CBaseUIButton {
 
         if(this->isMouseInside()) {
             osu->getTooltipOverlay()->begin();
-            {
-                osu->getTooltipOverlay()->addLine("Reset");
-            }
+            { osu->getTooltipOverlay()->addLine("Reset"); }
             osu->getTooltipOverlay()->end();
         }
     }
@@ -423,8 +421,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->fAnimation = 0.0f;
 
     // convar callbacks
-    cv::skin_use_skin_hitsounds.setCallback(
-        SA::MakeDelegate<&OptionsMenu::onUseSkinsSoundSamplesChange>(this));
+    cv::skin_use_skin_hitsounds.setCallback(SA::MakeDelegate<&OptionsMenu::onUseSkinsSoundSamplesChange>(this));
     cv::options_high_quality_sliders.setCallback(
         SA::MakeDelegate<&OptionsMenu::onHighQualitySlidersConVarChange>(this));
 
@@ -641,8 +638,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
                       &cv::options_high_quality_sliders)
         ->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onHighQualitySlidersCheckboxChange>(this));
     this->sliderQualitySlider = this->addSlider("Slider Quality", 0.0f, 1.0f, &cv::options_slider_quality);
-    this->sliderQualitySlider->setChangeCallback(
-        SA::MakeDelegate<&OptionsMenu::onSliderChangeSliderQuality>(this));
+    this->sliderQualitySlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangeSliderQuality>(this));
 
     //**************************************************************************************************************************//
 
@@ -655,8 +651,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
         this->outputDeviceResetButton->setClickCallback(
             SA::MakeDelegate<&OptionsMenu::onOutputDeviceResetClicked>(this));
         this->outputDeviceSelectButton = (CBaseUIButton *)outputDeviceSelect.elements[0];
-        this->outputDeviceSelectButton->setClickCallback(
-            SA::MakeDelegate<&OptionsMenu::onOutputDeviceSelect>(this));
+        this->outputDeviceSelectButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onOutputDeviceSelect>(this));
 
         this->outputDeviceLabel = (CBaseUILabel *)outputDeviceSelect.elements[1];
 
@@ -666,8 +661,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
             this->addSubSection("WASAPI");
             this->wasapiBufferSizeSlider =
                 this->addSlider("Buffer Size:", 0.000f, 0.050f, &cv::win_snd_wasapi_buffer_size);
-            this->wasapiBufferSizeSlider->setChangeCallback(
-                SA::MakeDelegate<&OptionsMenu::onWASAPIBufferChange>(this));
+            this->wasapiBufferSizeSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onWASAPIBufferChange>(this));
             this->wasapiBufferSizeSlider->setKeyDelta(0.001f);
             this->wasapiBufferSizeSlider->setAnimated(false);
             this->addLabel("Windows 7: Start at 11 ms,")->setTextColor(0xff666666);
@@ -683,8 +677,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
             this->addLabel("WARNING: Only if you know what you are doing")->setTextColor(0xffff0000);
             this->wasapiPeriodSizeSlider =
                 this->addSlider("Period Size:", 0.0f, 0.050f, &cv::win_snd_wasapi_period_size);
-            this->wasapiPeriodSizeSlider->setChangeCallback(
-                SA::MakeDelegate<&OptionsMenu::onWASAPIPeriodChange>(this));
+            this->wasapiPeriodSizeSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onWASAPIPeriodChange>(this));
             this->wasapiPeriodSizeSlider->setKeyDelta(0.001f);
             this->wasapiPeriodSizeSlider->setAnimated(false);
             UIButton *restartSoundEngine = this->addButton("Restart SoundEngine");
@@ -705,8 +698,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
             this->asioBufferSizeSlider->setKeyDelta(512);
             this->asioBufferSizeSlider->setAnimated(false);
             this->asioBufferSizeSlider->setLiveUpdate(false);
-            this->asioBufferSizeSlider->setChangeCallback(
-                SA::MakeDelegate<&OptionsMenu::onASIOBufferChange>(this));
+            this->asioBufferSizeSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onASIOBufferChange>(this));
             this->addLabel("");
             UIButton *asio_settings_btn = this->addButton("Open ASIO settings");
             asio_settings_btn->setClickCallback(SA::MakeDelegate<&OptionsMenu::OpenASIOSettings>(this));
@@ -776,11 +768,9 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
             ->setClickCallback(SA::MakeDelegate<&OptionsMenu::openCurrentSkinFolder>(this));
 
         OPTIONS_ELEMENT skinReload = this->addButtonButton("Reload Skin", "Random Skin");
-        ((UIButton *)skinReload.elements[0])
-            ->setClickCallback(SA::MakeDelegate<&OptionsMenu::onSkinReload>(this));
+        ((UIButton *)skinReload.elements[0])->setClickCallback(SA::MakeDelegate<&OptionsMenu::onSkinReload>(this));
         ((UIButton *)skinReload.elements[0])->setTooltipText("(CTRL + ALT + S)");
-        ((UIButton *)skinReload.elements[1])
-            ->setClickCallback(SA::MakeDelegate<&OptionsMenu::onSkinRandom>(this));
+        ((UIButton *)skinReload.elements[1])->setClickCallback(SA::MakeDelegate<&OptionsMenu::onSkinRandom>(this));
         ((UIButton *)skinReload.elements[1])
             ->setTooltipText(
                 "Temporary, does not change your configured skin (reload to reset).\nUse \"osu_skin_random 1\" to "
@@ -914,8 +904,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     CBaseUIElement *subSectionKeyboard = this->addSubSection("Keyboard", keyboardSectionTags);
     UIButton *resetAllKeyBindingsButton = this->addButton("Reset all key bindings");
     resetAllKeyBindingsButton->setColor(0xffff0000);
-    resetAllKeyBindingsButton->setClickCallback(
-        SA::MakeDelegate<&OptionsMenu::onKeyBindingsResetAllPressed>(this));
+    resetAllKeyBindingsButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onKeyBindingsResetAllPressed>(this));
     this->addSubSection("Keys - osu! Standard Mode", keyboardSectionTags);
     this->addKeyBindButton("Left Click", &cv::LEFT_CLICK);
     this->addKeyBindButton("Right Click", &cv::RIGHT_CLICK);
@@ -976,8 +965,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->backgroundDimSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     this->backgroundBrightnessSlider =
         this->addSlider("Background Brightness:", 0.0f, 1.0f, &cv::background_brightness, 220.0f);
-    this->backgroundBrightnessSlider->setChangeCallback(
-        SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
+    this->backgroundBrightnessSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     this->addSpacer();
     this->addCheckbox("Don't change dim level during breaks",
                       "Makes the background basically impossible to see during breaks.\nNot recommended.",
@@ -1098,53 +1086,43 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->hudComboScaleSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     this->hudComboScaleSlider->setKeyDelta(0.01f);
     this->hudAccuracyScaleSlider = this->addSlider("Accuracy Scale:", 0.01f, 3.0f, &cv::hud_accuracy_scale, 165.0f);
-    this->hudAccuracyScaleSlider->setChangeCallback(
-        SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
+    this->hudAccuracyScaleSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     this->hudAccuracyScaleSlider->setKeyDelta(0.01f);
     this->hudHiterrorbarScaleSlider =
         this->addSlider("HitErrorBar Scale:", 0.01f, 3.0f, &cv::hud_hiterrorbar_scale, 165.0f);
-    this->hudHiterrorbarScaleSlider->setChangeCallback(
-        SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
+    this->hudHiterrorbarScaleSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     this->hudHiterrorbarScaleSlider->setKeyDelta(0.01f);
     this->hudHiterrorbarURScaleSlider =
         this->addSlider("HitErrorBar UR Scale:", 0.01f, 3.0f, &cv::hud_hiterrorbar_ur_scale, 165.0f);
-    this->hudHiterrorbarURScaleSlider->setChangeCallback(
-        SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
+    this->hudHiterrorbarURScaleSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     this->hudHiterrorbarURScaleSlider->setKeyDelta(0.01f);
     this->hudProgressbarScaleSlider =
         this->addSlider("ProgressBar Scale:", 0.01f, 3.0f, &cv::hud_progressbar_scale, 165.0f);
-    this->hudProgressbarScaleSlider->setChangeCallback(
-        SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
+    this->hudProgressbarScaleSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     this->hudProgressbarScaleSlider->setKeyDelta(0.01f);
     this->hudScoreBarScaleSlider = this->addSlider("ScoreBar Scale:", 0.01f, 3.0f, &cv::hud_scorebar_scale, 165.0f);
-    this->hudScoreBarScaleSlider->setChangeCallback(
-        SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
+    this->hudScoreBarScaleSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     this->hudScoreBarScaleSlider->setKeyDelta(0.01f);
     this->hudScoreBoardScaleSlider =
         this->addSlider("ScoreBoard Scale:", 0.01f, 3.0f, &cv::hud_scoreboard_scale, 165.0f);
-    this->hudScoreBoardScaleSlider->setChangeCallback(
-        SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
+    this->hudScoreBoardScaleSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     this->hudScoreBoardScaleSlider->setKeyDelta(0.01f);
     this->hudInputoverlayScaleSlider =
         this->addSlider("Key Overlay Scale:", 0.01f, 3.0f, &cv::hud_inputoverlay_scale, 165.0f);
-    this->hudInputoverlayScaleSlider->setChangeCallback(
-        SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
+    this->hudInputoverlayScaleSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     this->hudInputoverlayScaleSlider->setKeyDelta(0.01f);
     this->statisticsOverlayScaleSlider =
         this->addSlider("Statistics Scale:", 0.01f, 3.0f, &cv::hud_statistics_scale, 165.0f);
-    this->statisticsOverlayScaleSlider->setChangeCallback(
-        SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
+    this->statisticsOverlayScaleSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
     this->statisticsOverlayScaleSlider->setKeyDelta(0.01f);
     this->addSpacer();
     this->statisticsOverlayXOffsetSlider =
         this->addSlider("Statistics X Offset:", 0.0f, 2000.0f, &cv::hud_statistics_offset_x, 165.0f, true);
-    this->statisticsOverlayXOffsetSlider->setChangeCallback(
-        SA::MakeDelegate<&OptionsMenu::onSliderChangeInt>(this));
+    this->statisticsOverlayXOffsetSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangeInt>(this));
     this->statisticsOverlayXOffsetSlider->setKeyDelta(1.0f);
     this->statisticsOverlayYOffsetSlider =
         this->addSlider("Statistics Y Offset:", 0.0f, 1000.0f, &cv::hud_statistics_offset_y, 165.0f, true);
-    this->statisticsOverlayYOffsetSlider->setChangeCallback(
-        SA::MakeDelegate<&OptionsMenu::onSliderChangeInt>(this));
+    this->statisticsOverlayYOffsetSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangeInt>(this));
     this->statisticsOverlayYOffsetSlider->setKeyDelta(1.0f);
 
     this->addSubSection("Playfield");
@@ -1154,8 +1132,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addSpacer();
     this->playfieldBorderSizeSlider =
         this->addSlider("Playfield Border Size:", 0.0f, 500.0f, &cv::hud_playfield_border_size);
-    this->playfieldBorderSizeSlider->setChangeCallback(
-        SA::MakeDelegate<&OptionsMenu::onSliderChangeInt>(this));
+    this->playfieldBorderSizeSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangeInt>(this));
     this->playfieldBorderSizeSlider->setKeyDelta(1.0f);
 
     this->addSubSection("Hitobjects");
@@ -1204,8 +1181,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     if constexpr(Env::cfg(OS::WINDOWS)) {
         this->addSubSection("FPoSu - Mouse");
         UIButton *cm360CalculatorLinkButton = this->addButton("https://www.mouse-sensitivity.com/");
-        cm360CalculatorLinkButton->setClickCallback(
-            SA::MakeDelegate<&OptionsMenu::onCM360CalculatorLinkClicked>(this));
+        cm360CalculatorLinkButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onCM360CalculatorLinkClicked>(this));
         cm360CalculatorLinkButton->setColor(0xff10667b);
         this->addLabel("");
         this->dpiTextbox = this->addTextbox(cv::fposu_mouse_dpi.getString().c_str(), "DPI:", &cv::fposu_mouse_dpi);
@@ -1403,6 +1379,19 @@ void OptionsMenu::draw() {
     }
 }
 
+void OptionsMenu::update_login_button() {
+    if(bancho->is_online()) {
+        this->logInButton->setText("Disconnect");
+        this->logInButton->setColor(0xffff0000);
+        this->logInButton->is_loading = false;
+    } else {
+        bool oauth = this->should_use_oauth_login();
+        this->logInButton->setText(oauth ? "Log in with osu!" : "Log in");
+        this->logInButton->setColor(oauth ? 0xffff66ff : 0xff00ff00);
+        this->logInButton->is_loading = false;
+    }
+}
+
 void OptionsMenu::mouse_update(bool *propagate_clicks) {
     if(this->bSearchLayoutUpdateScheduled) this->updateLayout();
 
@@ -1522,22 +1511,9 @@ void OptionsMenu::mouse_update(bool *propagate_clicks) {
     // apply textbox changes on enter key
     if(this->osuFolderTextbox->hitEnter()) this->updateOsuFolder();
 
-    // Update login/disconnect button
-    {
-        if(bancho->is_online()) {
-            logInButton->setText("Disconnect");
-            logInButton->setColor(0xffff0000);
-            logInButton->is_loading = false;
-        } else {
-            bool oauth = this->should_use_oauth_login();
-            logInButton->setText(oauth ? "Log in with osu!" : "Log in");
-            logInButton->setColor(oauth ? 0xffff66ff : 0xff00ff00);
-            logInButton->is_loading = false;
-        }
-    }
-
     cv::name.setValue(this->nameTextbox->getText());
     cv::mp_password.setValue(this->passwordTextbox->getText());
+    cv::mp_server.setValue(this->serverTextbox->getText());
     if(this->nameTextbox->hitEnter()) {
         cv::name.setValue(this->nameTextbox->getText());
         this->nameTextbox->stealFocus();
@@ -1545,11 +1521,11 @@ void OptionsMenu::mouse_update(bool *propagate_clicks) {
     }
     if(this->passwordTextbox->hitEnter()) {
         this->passwordTextbox->stealFocus();
-        BANCHO::Net::reconnect();
+        this->logInButton->click();
     }
     if(this->serverTextbox->hitEnter()) {
         this->serverTextbox->stealFocus();
-        logInButton->click();
+        this->logInButton->click();
     }
 
     if(this->dpiTextbox != NULL && this->dpiTextbox->hitEnter()) this->updateFposuDPI();
@@ -2621,7 +2597,8 @@ void OptionsMenu::onLogInClicked() {
 
             auto challenge_b64 = crypto::baseconv::encode64(&bancho->oauth_challenge[0], 32);
             auto scheme = cv::use_https.getBool() ? "https://" : "http://";
-            auto url = UString::format("%s%s/connect?challenge=%s", scheme, bancho->endpoint.toUtf8(), (const char*)challenge_b64.data());
+            auto url = UString::format("%s%s/connect?challenge=%s", scheme, bancho->endpoint.toUtf8(),
+                                       (const char *)challenge_b64.data());
 
             env->openURLInDefaultBrowser(url);
         } else {

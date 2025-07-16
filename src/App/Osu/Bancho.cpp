@@ -192,6 +192,8 @@ void Bancho::handle_packet(Packet *packet) {
     if(packet->id == USER_ID) {
         i32 new_user_id = proto::read<i32>(packet);
         bancho->user_id.store(new_user_id);
+        osu->optionsMenu->update_login_button();
+
         if(new_user_id > 0) {
             debugLog("Logged in as user #%d.\n", new_user_id);
             cv::mp_autologin.setValue(true);

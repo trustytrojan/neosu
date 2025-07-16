@@ -104,6 +104,7 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     void updateFposuCMper360();
     void updateSkinNameLabel();
     void updateNotelockSelectLabel();
+    void update_login_button();
 
     // options
     void onFullscreenChange(CBaseUICheckbox *checkbox);

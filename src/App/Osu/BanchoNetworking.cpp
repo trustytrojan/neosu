@@ -37,9 +37,7 @@ namespace proto = BANCHO::Proto;
 namespace BANCHO::Net {
 namespace {  // static namespace
 
-std::mutex outgoing_mutex;
 bool try_logging_in = false;
-Packet login_packet;
 Packet outgoing;
 std::mutex incoming_mutex;
 std::vector<Packet> incoming_queue;
@@ -273,8 +271,6 @@ void handle_api_response(Packet packet) {
 UString cho_token = "";
 
 void disconnect() {
-    std::scoped_lock lock(outgoing_mutex);
-
     // Logout
     // This is a blocking call, but we *do* want this to block when quitting the game.
     if(bancho->is_online()) {
@@ -339,9 +335,10 @@ void disconnect() {
     }
 
     bancho->score_submission_policy = ServerPolicy::NO_PREFERENCE;
+    osu->optionsMenu->update_login_button();
     osu->optionsMenu->scheduleLayoutUpdate();
 
-    for(auto pair : BANCHO::User::online_users) {
+    for(auto &pair : BANCHO::User::online_users) {
         delete pair.second;
     }
     BANCHO::User::online_users.clear();
@@ -400,13 +397,7 @@ void reconnect() {
     }
 
     osu->optionsMenu->logInButton->is_loading = true;
-    Packet new_login_packet = Bancho::build_login_packet();
-
-    outgoing_mutex.lock();
-    free(login_packet.memory);
-    login_packet = new_login_packet;
     try_logging_in = true;
-    outgoing_mutex.unlock();
 }
 
 void update_networking() {
@@ -440,17 +431,15 @@ void update_networking() {
     if(bancho->spectating) seconds_between_pings = 1;
     if(bancho->is_in_a_multi_room() && seconds_between_pings > 3) seconds_between_pings = 3;
     bool should_ping = difftime(time(NULL), last_packet_tms) > seconds_between_pings;
-    if(bancho->user_id <= 0) should_ping = false;
+    if(bancho->user_id.load() <= 0) should_ping = false;
 
     // Handle login and outgoing packet processing
-    outgoing_mutex.lock();
     if(try_logging_in) {
-        Packet login = login_packet;
-        login_packet = Packet();
         try_logging_in = false;
-        outgoing_mutex.unlock();
-        send_bancho_packet_async(login);
-        outgoing_mutex.lock();
+        if(bancho->user_id.load() <= 0) {
+            Packet login = Bancho::build_login_packet();
+            send_bancho_packet_async(login);
+        }
     } else if(should_ping && outgoing.pos == 0) {
         proto::write<u16>(&outgoing, PING);
         proto::write<u8>(&outgoing, 0);
@@ -465,7 +454,6 @@ void update_networking() {
     if(outgoing.pos > 0) {
         Packet out = outgoing;
         outgoing = Packet();
-        outgoing_mutex.unlock();
 
         // DEBUG: If we're not sending the right amount of bytes, bancho.py just
         // chugs along! To try to detect it faster, we'll send two packets per request.
@@ -474,8 +462,6 @@ void update_networking() {
         proto::write<u32>(&out, 0);
 
         send_bancho_packet_async(out);
-    } else {
-        outgoing_mutex.unlock();
     }
 }
 
@@ -552,16 +538,12 @@ void send_packet(Packet &packet) {
     // }
     // Engine::logRaw("\n");
 
-    outgoing_mutex.lock();
-
     // We're not sending it immediately, instead we just add it to the pile of
     // packets to send
     proto::write<u16>(&outgoing, packet.id);
     proto::write<u8>(&outgoing, 0);
     proto::write<u32>(&outgoing, packet.pos);
     proto::write_bytes(&outgoing, packet.memory, packet.pos);
-
-    outgoing_mutex.unlock();
 
     free(packet.memory);
     packet.memory = NULL;
