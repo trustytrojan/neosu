@@ -26,6 +26,9 @@ export PKG_CONFIG="pkgconf --msvc-syntax"
 
 export CC=cl CXX=cl
 
+WINE="${WINE:-wine}"
+WINESERVER="${WINESERVER:-wineserver}"
+
 export WINEPREFIX=$PWD/.winepfx
 
 doit() {

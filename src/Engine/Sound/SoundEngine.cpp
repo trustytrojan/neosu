@@ -1,29 +1,21 @@
 #include "SoundEngine.h"
 
-#include "Bancho.h"
 #include "Beatmap.h"
 #include "CBaseUILabel.h"
-#include "CBaseUISlider.h"
 #include "ConVar.h"
 #include "Database.h"
 #include "Engine.h"
-#include "Environment.h"
 #include "OptionsMenu.h"
 #include "Osu.h"
-#include "PauseMenu.h"
 #include "ResourceManager.h"
 #include "Skin.h"
 #include "SongBrowser/LoudnessCalcThread.h"
 #include "SongBrowser/SongBrowser.h"
 #include "Sound.h"
-#include "WinEnvironment.h"
-
-// removed from latest headers. not sure if it's handled at all
-#ifndef BASS_CONFIG_MP3_OLDGAPS
-#define BASS_CONFIG_MP3_OLDGAPS 68
-#endif
 
 #ifdef MCENGINE_PLATFORM_WINDOWS
+#include "CBaseUISlider.h"
+
 DWORD ASIO_clamp(BASS_ASIO_INFO info, DWORD buflen) {
     if(buflen == -1) return info.bufpref;
     if(buflen < info.bufmin) return info.bufmin;
@@ -81,6 +73,8 @@ SoundEngine::SoundEngine() {
         .driver = OutputDriver::NONE,
     };
 }
+
+SoundEngine::~SoundEngine() { BassManager::cleanup(); }
 
 OUTPUT_DEVICE SoundEngine::getWantedDevice() {
     auto wanted_name = cv::snd_output_device.getString();

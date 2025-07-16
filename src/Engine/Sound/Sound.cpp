@@ -1,15 +1,12 @@
 #include "Sound.h"
 
-#include <sstream>
 #include <utility>
 
-#include "Bancho.h"
 #include "ConVar.h"
 #include "Engine.h"
 #include "File.h"
 #include "Osu.h"
 #include "ResourceManager.h"
-#include "SoundEngine.h"
 
 Sound::Sound(std::string filepath, bool stream, bool overlayable, bool loop) : Resource(std::move(filepath)) {
     this->sample = 0;

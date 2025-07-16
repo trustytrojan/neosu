@@ -1,8 +1,7 @@
 #pragma once
 
-#include "cbase.h"
-// ^ needs to be before Sound.h on windows
-#include "Sound.h"
+#include "UString.h"
+#include "BassManager.h"
 
 enum class OutputDriver : uint8_t {
     NONE,
@@ -19,10 +18,14 @@ struct OUTPUT_DEVICE {
     OutputDriver driver;
 };
 
+class Sound;
+
 class SoundEngine {
+    using SOUNDHANDLE = unsigned long;
+
    public:
     SoundEngine();
-    ~SoundEngine() { BassManager::cleanup(); }
+    ~SoundEngine();
     void restart();
     void shutdown();
 
@@ -37,7 +40,7 @@ class SoundEngine {
     bool isWASAPI() { return this->currentOutputDevice.driver == OutputDriver::BASS_WASAPI; }
     bool hasExclusiveOutput();
 
-    void setOutputDevice(const OUTPUT_DEVICE& device);
+    void setOutputDevice(const OUTPUT_DEVICE &device);
     void setVolume(float volume);
 
     OUTPUT_DEVICE getDefaultDevice();
@@ -48,10 +51,10 @@ class SoundEngine {
     [[nodiscard]] inline float getVolume() const { return this->fVolume; }
 
     void updateOutputDevices(bool printInfo);
-    bool initializeOutputDevice(const OUTPUT_DEVICE& device);
-    bool init_bass_mixer(const OUTPUT_DEVICE& device);
+    bool initializeOutputDevice(const OUTPUT_DEVICE &device);
+    bool init_bass_mixer(const OUTPUT_DEVICE &device);
 
-    Sound::SOUNDHANDLE g_bassOutputMixer = 0;
+    SOUNDHANDLE g_bassOutputMixer = 0;
     void onFreqChanged(float oldValue, float newValue);
     void onParamChanged(float oldValue, float newValue);
 
@@ -67,4 +70,3 @@ class SoundEngine {
 #ifdef MCENGINE_PLATFORM_WINDOWS
 DWORD ASIO_clamp(BASS_ASIO_INFO info, DWORD buflen);
 #endif
-

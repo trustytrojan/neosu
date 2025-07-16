@@ -548,9 +548,9 @@ void send_packet(Packet &packet) {
 
     // debugLog("Sending packet of type %hu: ", packet.id);
     // for (int i = 0; i < packet.pos; i++) {
-    //     debugLog("%02x ", packet.memory[i]);
+    //     Engine::logRaw("{:02x} ", packet.memory[i]);
     // }
-    // debugLog("\n");
+    // Engine::logRaw("\n");
 
     outgoing_mutex.lock();
 

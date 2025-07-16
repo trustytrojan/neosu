@@ -2,7 +2,6 @@
 
 #include "BassManager.h"
 #include "Resource.h"
-#include "cbase.h"
 #include "PlaybackInterpolator.h"
 
 class SoundEngine;
@@ -11,7 +10,7 @@ class Sound : public Resource {
     friend class SoundEngine;
 
    public:
-    typedef unsigned long SOUNDHANDLE;
+    using SOUNDHANDLE = unsigned long;
 
    public:
     Sound(std::string filepath, bool stream, bool overlayable, bool loop);
