@@ -140,41 +140,51 @@ void NetworkHandler::processCompletedRequests() {
     CURLMsg* msg;
     int msgs_left;
 
+    // collect completed requests without holding locks during callback execution
+    std::vector<std::unique_ptr<NetworkRequest>> completed_requests;
+
     while((msg = curl_multi_info_read(this->multi_handle, &msgs_left))) {
         if(msg->msg == CURLMSG_DONE) {
             CURL* easy_handle = msg->easy_handle;
 
-            std::scoped_lock<std::mutex> lock{this->active_requests_mutex};
-            auto it = this->active_requests.find(easy_handle);
-            if(it != this->active_requests.end()) {
-                auto request = std::move(it->second);
-                this->active_requests.erase(it);
+            {
+                std::scoped_lock<std::mutex> lock{this->active_requests_mutex};
+                auto it = this->active_requests.find(easy_handle);
+                if(it != this->active_requests.end()) {
+                    auto request = std::move(it->second);
+                    this->active_requests.erase(it);
 
-                curl_multi_remove_handle(this->multi_handle, easy_handle);
+                    curl_multi_remove_handle(this->multi_handle, easy_handle);
 
-                // get response code
-                curl_easy_getinfo(easy_handle, CURLINFO_RESPONSE_CODE, &request->response.responseCode);
-                request->response.success = (msg->data.result == CURLE_OK);
+                    // get response code
+                    curl_easy_getinfo(easy_handle, CURLINFO_RESPONSE_CODE, &request->response.responseCode);
+                    request->response.success = (msg->data.result == CURLE_OK);
 
-                if(request->headers_list) {
-                    curl_slist_free_all(request->headers_list);
-                }
-                curl_easy_cleanup(easy_handle);
-
-                if(request->is_sync) {
-                    // handle sync request
-                    std::scoped_lock<std::mutex> sync_lock{this->sync_requests_mutex};
-                    this->sync_responses[request->sync_id] = request->response;
-                    auto cv_it = this->sync_request_cvs.find(request->sync_id);
-                    if(cv_it != this->sync_request_cvs.end()) {
-                        cv_it->second->notify_one();
+                    if(request->headers_list) {
+                        curl_slist_free_all(request->headers_list);
                     }
-                } else {
-                    // handle async request
-                    request->callback(request->response);
+                    curl_easy_cleanup(easy_handle);
+
+                    if(request->is_sync) {
+                        // handle sync request immediately
+                        std::scoped_lock<std::mutex> sync_lock{this->sync_requests_mutex};
+                        this->sync_responses[request->sync_id] = request->response;
+                        auto cv_it = this->sync_request_cvs.find(request->sync_id);
+                        if(cv_it != this->sync_request_cvs.end()) {
+                            cv_it->second->notify_one();
+                        }
+                    } else {
+                        // defer async callback execution
+                        completed_requests.push_back(std::move(request));
+                    }
                 }
-            }
+            }  // release active_requests_mutex here
         }
+    }
+
+    // execute callbacks without holding any locks
+    for(auto& request : completed_requests) {
+        request->callback(request->response);
     }
 }
 
