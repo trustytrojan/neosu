@@ -142,6 +142,12 @@ void send_bancho_packet_async(Packet outgoing) {
                 }
                 return;
             }
+            // // debug
+            // Engine::logRaw("DEBUG headers:\n");
+            // for (const auto &headerstr : response.headers)
+            // {
+            //     Engine::logRaw("{:s} {:s}\n", headerstr.first.c_str(), headerstr.second.c_str());
+            // }
 
             // Update auth token
             auto cho_token_it = response.headers.find("cho-token");
