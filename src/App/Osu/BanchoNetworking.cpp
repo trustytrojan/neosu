@@ -136,7 +136,7 @@ void send_bancho_packet_async(Packet outgoing) {
         query_url,
         [](NetworkHandler::Response response) {
             if(!response.success) {
-                Engine::logRaw("[httpRequestAsync] Failed to send packet, HTTP error %ld\n", response.responseCode);
+                Engine::logRaw("[httpRequestAsync] Failed to send packet, HTTP error {}\n", response.responseCode);
                 std::scoped_lock<std::mutex> lock{auth_mutex};
                 if(auth_header.empty()) {
                     auto errmsg = UString::format("Failed to log in: HTTP %ld", response.responseCode);
