@@ -80,6 +80,8 @@ class SongBrowserBackgroundSearchMatcher : public Resource {
             this->sSearchString.append(" ");
         }
         this->sSearchString.append(searchString);
+        // do case-insensitive searches
+        SString::to_lower(this->sSearchString);
         this->sHardcodedSearchString = hardcodedSearchString;
     }
 
@@ -2045,6 +2047,7 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
         SPINNERS,
         LENGTH,
         STARS,
+        CREATOR
     };
     static const std::vector<std::pair<std::string, keywordId>> keywords = {
         std::pair<std::string, keywordId>("ar", AR),
@@ -2066,7 +2069,8 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
         std::pair<std::string, keywordId>("length", LENGTH),
         std::pair<std::string, keywordId>("len", LENGTH),
         std::pair<std::string, keywordId>("stars", STARS),
-        std::pair<std::string, keywordId>("star", STARS)};
+        std::pair<std::string, keywordId>("star", STARS),
+        std::pair<std::string, keywordId>("creator", CREATOR)};
 
     // split search string into tokens
     // parse over all difficulties
@@ -2088,12 +2092,13 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
                     std::vector<std::string> values{SString::split(searchStringToken, o.first)};
                     if(values.size() == 2 && values[0].length() > 0 && values[1].length() > 0) {
                         const std::string &lvalue = values[0];
-                        const auto rvaluePercentIndex = values[1].find('%');
+                        const std::string &rstring = values[1];
+                        const auto rvaluePercentIndex = rstring.find('%');
                         const bool rvalueIsPercent = (rvaluePercentIndex != std::string::npos);
                         const float rvalue =
                             (rvaluePercentIndex == std::string::npos
-                                 ? std::strtof(values[1].c_str(), nullptr)
-                                 : std::strtof(values[1].substr(0, rvaluePercentIndex).c_str(),
+                                 ? std::strtof(rstring.c_str(), nullptr)
+                                 : std::strtof(rstring.substr(0, rvaluePercentIndex).c_str(),
                                                nullptr));  // this must always be a number (at least, assume it is)
 
                         // find lvalue keyword in array (only continue if keyword exists)
@@ -2105,6 +2110,7 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
 
                                 // solve keyword
                                 float compareValue = 5.0f;
+                                std::string compareString{};
                                 switch(keyword.second) {
                                     case AR:
                                         compareValue = diff->getAR();
@@ -2173,6 +2179,9 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
                                         compareValue = std::round(diff->getStarsNomod() * 100.0f) /
                                                        100.0f;  // round to 2 decimal places
                                         break;
+                                    case CREATOR:
+                                        compareString = SString::lower(diff->getCreator());
+                                        break;
                                 }
 
                                 // solve operator
@@ -2194,7 +2203,7 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
                                         if(compareValue != rvalue) matches = true;
                                         break;
                                     case EQ:
-                                        if(compareValue == rvalue) matches = true;
+                                        if(compareValue == rvalue || compareString == rstring) matches = true;
                                         break;
                                 }
 
