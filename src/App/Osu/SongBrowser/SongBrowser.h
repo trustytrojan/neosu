@@ -166,19 +166,9 @@ class SongBrowser : public ScreenBackable {
 
     void onSortClicked(CBaseUIButton *button);
     void onSortChange(const UString& text, int id = -1);
-    void onSortChangeInt(const UString& text, bool autoScroll);
+    void onSortChangeInt(const UString& text);
 
-    void onGroupNoGrouping();
-    void onGroupCollections(bool autoScroll = true);
-    void onGroupArtist();
-    void onGroupDifficulty();
-    void onGroupBPM();
-    void onGroupCreator();
-    void onGroupDateadded();
-    void onGroupLength();
-    void onGroupTitle();
-
-    void onAfterSortingOrGroupChange();
+    void rebuildAfterGroupOrSortChange(GROUP group, SORTING_COMPARATOR sortComp = nullptr);
 
     void onSelectionMode();
     void onSelectionMods();
@@ -297,4 +287,6 @@ class SongBrowser : public ScreenBackable {
     bool bInSearch;
     GROUP searchPrevGroup;
     SongBrowserBackgroundSearchMatcher *backgroundSearchMatcher;
+private:
+    std::vector<CollectionButton *> *getCollectionButtonsForGroup(GROUP group);
 };

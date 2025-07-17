@@ -227,7 +227,7 @@ BeatmapSet *Database::addBeatmapSet(const std::string &beatmapFolderPath, i32 se
     osu->songBrowser2->addBeatmapSet(beatmap);
 
     // XXX: Very slow
-    osu->songBrowser2->onSortChangeInt(cv::songbrowser_sortingtype.getString().c_str(), false);
+    osu->songBrowser2->onSortChangeInt(cv::songbrowser_sortingtype.getString().c_str());
 
     return beatmap;
 }
