@@ -30,9 +30,9 @@ bool download_avatar(u32 user_id) {
         }
     }
 
-    auto server_dir = UString::format(MCENGINE_DATA_DIR "avatars/%s", bancho->endpoint.toUtf8());
-    if(!env->directoryExists(server_dir.toUtf8())) {
-        env->createDirectory(server_dir.toUtf8());
+    std::string server_dir = fmt::format(MCENGINE_DATA_DIR "avatars/{:s}", bancho->endpoint.toUtf8());
+    if(!env->directoryExists(server_dir)) {
+        env->createDirectory(server_dir);
     }
 
     float progress = -1.f;
@@ -44,8 +44,8 @@ bool download_avatar(u32 user_id) {
     if(progress == -1.f) blacklist.push_back(user_id);
     if(data.empty()) return false;
 
-    auto img_path = UString::format("%s/%d", server_dir.toUtf8(), user_id);
-    FILE *file = fopen(img_path.toUtf8(), "wb");
+    const auto img_path = fmt::format("{:s}/{:d}", server_dir, user_id);
+    FILE *file = fopen(img_path.c_str(), "wb");
     if(file != NULL) {
         fwrite(data.data(), data.size(), 1, file);
         fflush(file);

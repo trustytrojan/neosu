@@ -199,14 +199,14 @@ void Bancho::handle_packet(Packet *packet) {
             cv::mp_autologin.setValue(true);
             print_new_channels = true;
 
-            auto avatar_dir = UString::format(MCENGINE_DATA_DIR "avatars/%s", bancho->endpoint.toUtf8());
-            if(!env->directoryExists(avatar_dir.toUtf8())) {
-                env->createDirectory(avatar_dir.toUtf8());
+            std::string avatar_dir = fmt::format(MCENGINE_DATA_DIR "avatars/{:s}", bancho->endpoint.toUtf8());
+            if(!env->directoryExists(avatar_dir)) {
+                env->createDirectory(avatar_dir);
             }
 
-            auto replays_dir = UString::format(MCENGINE_DATA_DIR "replays/%s", bancho->endpoint.toUtf8());
-            if(!env->directoryExists(replays_dir.toUtf8())) {
-                env->createDirectory(replays_dir.toUtf8());
+            std::string replays_dir = fmt::format(MCENGINE_DATA_DIR "replays/{:s}", bancho->endpoint.toUtf8());
+            if(!env->directoryExists(replays_dir)) {
+                env->createDirectory(replays_dir);
             }
 
             osu->onUserCardChange(bancho->username);

@@ -24,6 +24,6 @@ DatabaseBeatmap *download_beatmap(i32 beatmap_id, i32 beatmapset_id, float *prog
 void process_beatmapset_info_response(Packet packet);
 
 i32 extract_beatmapset_id(const u8 *data, size_t data_s);
-bool extract_beatmapset(const u8 *data, size_t data_s, const std::string &map_dir);
+bool extract_beatmapset(const u8 *data, size_t data_s, std::string &map_dir);
 
 }  // namespace Downloader

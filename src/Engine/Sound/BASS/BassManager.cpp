@@ -97,7 +97,7 @@ BASS_LIBRARIES(GENERATE_LIBRARY_LOADER)
 
 };  // namespace BassFuncs
 
-namespace { // static
+namespace {  // static
 HPLUGIN plBassFlac = 0;
 bool loaded = false;
 
@@ -110,20 +110,23 @@ void unloadPlugins() {
 }
 
 HPLUGIN loadPlugin(const std::string &pluginname) {
-#define LNAMESTR(lib) UString::fmt(LPREFIX "{:s}" LSUFFIX, (lib))
+#define LNAMESTR(lib) fmt::format(LPREFIX "{:s}" LSUFFIX, (lib))
     HPLUGIN ret = 0;
     // handle bassflac plugin separately
-    UString tryPath{LNAMESTR(pluginname)};
-    if(!env->fileExists(tryPath.toUtf8())) tryPath = UString::fmt("lib" PREF_PATHSEP "{}", LNAMESTR(pluginname));
+    std::string tryPath{LNAMESTR(pluginname)};
+
+    if(!env->fileExists(tryPath)) tryPath = fmt::format("lib" PREF_PATHSEP "{}", LNAMESTR(pluginname));
 
     // make it a fully qualified path
-    if(env->fileExists(tryPath.toUtf8()))
-        tryPath = UString::fmt("{}{}", env->getFolderFromFilePath(tryPath.toUtf8()), LNAMESTR(pluginname));
+    if(env->fileExists(tryPath))
+        tryPath = fmt::format("{}{}", env->getFolderFromFilePath(tryPath), LNAMESTR(pluginname));
     else
-        tryPath = LNAMESTR(pluginname);  // maybe bass will find it?
+        tryPath = LNAMESTR(pluginname);
+
+    const UString pathUString{tryPath};
 
     ret = BASS_PluginLoad(
-        (const char *)tryPath.plat_str(),
+        (const char *)pathUString.plat_str(),
         Env::cfg(OS::WINDOWS) ? BASS_UNICODE : 0);  // ??? this wchar_t->char* cast is required for some reason?
 
     if(ret) {
@@ -349,11 +352,7 @@ std::string printBassError(const std::string &context, int code) {
     return fmt::format("{:s} error: {:s}", context, errstr);  // also return it
 }
 
-UString getErrorUString() {
-    auto code = BASS_ErrorGetCode();
-
-    return UString{"BASS error: "} + UString{getBassErrorStringFromCode(code)};
-}
+UString getErrorUString() { return UString::fmt("BASS error: {:s}", getBassErrorStringFromCode(BASS_ErrorGetCode())); }
 
 }  // namespace BassManager
 

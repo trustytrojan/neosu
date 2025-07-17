@@ -264,7 +264,7 @@ i32 extract_beatmapset_id(const u8* data, size_t data_s) {
     return -1;
 }
 
-bool extract_beatmapset(const u8* data, size_t data_s, const std::string& map_dir) {
+bool extract_beatmapset(const u8* data, size_t data_s, std::string &map_dir) {
     debugLog("Extracting beatmapset (%d bytes)\n", data_s);
 
     Archive archive(data, data_s);
@@ -318,7 +318,7 @@ bool extract_beatmapset(const u8* data, size_t data_s, const std::string& map_di
 
 void download_beatmapset(u32 set_id, float* progress) {
     // Check if we already have downloaded it
-    auto map_dir = fmt::format(MCENGINE_DATA_DIR "maps/{}/", set_id);
+    std::string map_dir = fmt::format(MCENGINE_DATA_DIR "maps/{}/", set_id);
     if(env->directoryExists(map_dir)) {
         *progress = 1.f;
         return;

@@ -265,9 +265,9 @@ void MainMenu::draw() {
 
     // load server icon
     if(bancho->is_online() && bancho->server_icon_url.length() > 0 && bancho->server_icon == NULL) {
-        auto icon_path = UString::format(MCENGINE_DATA_DIR "avatars/%s", bancho->endpoint.toUtf8());
-        if(!env->directoryExists(icon_path.toUtf8())) {
-            env->createDirectory(icon_path.toUtf8());
+        std::string icon_path = fmt::format(MCENGINE_DATA_DIR "avatars/{:s}", bancho->endpoint.toUtf8());
+        if(!env->directoryExists(icon_path)) {
+            env->createDirectory(icon_path);
         }
         icon_path.append("/server_icon");
 
@@ -277,14 +277,14 @@ void MainMenu::draw() {
         Downloader::download(bancho->server_icon_url.toUtf8(), &progress, data, &response_code);
         if(progress == -1.f) bancho->server_icon_url = "";
         if(!data.empty()) {
-            FILE *file = fopen(icon_path.toUtf8(), "wb");
+            FILE *file = fopen(icon_path.c_str(), "wb");
             if(file != NULL) {
                 fwrite(data.data(), data.size(), 1, file);
                 fflush(file);
                 fclose(file);
             }
 
-            bancho->server_icon = resourceManager->loadImageAbs(icon_path.toUtf8(), icon_path.toUtf8());
+            bancho->server_icon = resourceManager->loadImageAbs(icon_path, icon_path);
         }
     }
 
