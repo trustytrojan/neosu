@@ -2308,16 +2308,16 @@ void OptionsMenu::onRawInputToAbsoluteWindowChange(CBaseUICheckbox *checkbox) {
 void OptionsMenu::openCurrentSkinFolder() {
     auto current_skin = cv::skin.getString();
     if(strcasecmp(current_skin.c_str(), "default") == 0) {
-        env->openDirectory(MCENGINE_DATA_DIR "materials" PREF_PATHSEP "default");
+        env->openFileBrowser(MCENGINE_DATA_DIR "materials" PREF_PATHSEP "default");
     } else {
         std::string neosuSkinFolder = MCENGINE_DATA_DIR "skins/";
         neosuSkinFolder.append(current_skin);
         if(env->directoryExists(neosuSkinFolder)) {
-            env->openDirectory(neosuSkinFolder);
+            env->openFileBrowser(neosuSkinFolder);
         } else {
             std::string currentSkinFolder =
                 fmt::format("{}/{}{}", cv::osu_folder.getString(), cv::osu_folder_sub_skins.getString(), current_skin);
-            env->openDirectory(currentSkinFolder);
+            env->openFileBrowser(currentSkinFolder);
         }
     }
 }
@@ -2597,7 +2597,7 @@ void OptionsMenu::onLogInClicked() {
 
             auto challenge_b64 = crypto::baseconv::encode64(&bancho->oauth_challenge[0], 32);
             auto scheme = cv::use_https.getBool() ? "https://" : "http://";
-            auto url = UString::format("%s%s/connect?challenge=%s", scheme, bancho->endpoint.toUtf8(),
+            auto url = fmt::format("{:s}{:s}/connect?challenge={:s}", scheme, bancho->endpoint.toUtf8(),
                                        (const char *)challenge_b64.data());
 
             env->openURLInDefaultBrowser(url);

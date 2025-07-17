@@ -1364,11 +1364,11 @@ void Database::loadScores() {
 // may contain replays)
 u32 Database::importOldMcNeosuScores() {
     bool is_neosu = true;
-    constexpr auto latest_mcosu_custom_scores_ver = 20210110;
     u32 db_version = 0;
     int nb_imported = 0;
 
     // mcosu logic
+    constexpr auto latest_mcosu_custom_scores_ver = 20210110;
     int makeBackupType = 0;
     const int backupLessThanVersion = 20210103;
     const int backupMoreThanVersion = 20210105;

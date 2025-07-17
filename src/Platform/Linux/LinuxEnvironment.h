@@ -21,8 +21,6 @@ class LinuxEnvironment : public Environment {
     // system
     void shutdown() override;
     void restart() override;
-    void openURLInDefaultBrowser(UString url) override;
-    void openDirectory(std::string path) override;
 
     // user
     UString getUsername() override;

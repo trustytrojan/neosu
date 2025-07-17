@@ -1,5 +1,5 @@
 #pragma once
-#include "UString.h"
+#include "types.h"
 
 struct MapOverrides {
     i16 local_offset = 0;

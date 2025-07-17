@@ -45,7 +45,7 @@ void ChatLink::open_beatmap_link(i32 map_id, i32 set_id) {
         osu->getSongBrowser()->map_autodl = map_id;
         osu->getSongBrowser()->set_autodl = set_id;
     } else {
-        env->openURLInDefaultBrowser(this->link);
+        env->openURLInDefaultBrowser(this->link.toUtf8());
     }
 }
 
@@ -103,9 +103,9 @@ void ChatLink::onMouseUpInside() {
 
     // Detect beatmapset links
     // https:\/\/((osu\.)?akatsuki\.gg|osu\.ppy\.sh)\/beatmapsets\/(\d+)(#osu\/(\d+))?
-    UString set_pattern = "https://((osu\\.)?";
+    UString set_pattern = R"(https://((osu\.)?)";
     set_pattern.append(escaped_endpoint);
-    set_pattern.append("|osu\\.ppy\\.sh)/beatmapsets/(\\d+)(#osu/(\\d+))?");
+    set_pattern.append(R"(|osu\.ppy\.sh)/beatmapsets/(\d+)(#osu/(\d+))?)");
     if(std::regex_search(link_str, match, std::regex(set_pattern.toUtf8()))) {
         i32 set_id = std::stoi(match.str(3));
         i32 map_id = 0;
@@ -117,5 +117,5 @@ void ChatLink::onMouseUpInside() {
         return;
     }
 
-    env->openURLInDefaultBrowser(this->link);
+    env->openURLInDefaultBrowser(this->link.toUtf8());
 }

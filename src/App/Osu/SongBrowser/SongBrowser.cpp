@@ -2024,7 +2024,7 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
     // findSubstringInDiff() the rest is interpreted NOTE: this code is quite shitty. the order of the operators
     // array does matter, because find() is used to detect their presence (and '=' would then break '<=' etc.)
     enum operatorId : uint8_t { EQ, LT, GT, LE, GE, NE };
-    static const std::vector<std::pair<std::string, operatorId>> operators = {
+    static constexpr auto operators = std::array{
         std::pair<std::string, operatorId>("<=", LE), std::pair<std::string, operatorId>(">=", GE),
         std::pair<std::string, operatorId>("<", LT),  std::pair<std::string, operatorId>(">", GT),
         std::pair<std::string, operatorId>("!=", NE), std::pair<std::string, operatorId>("==", EQ),
@@ -2048,7 +2048,7 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
         STARS,
         CREATOR
     };
-    static const std::vector<std::pair<std::string, keywordId>> keywords = {
+    static constexpr auto keywords = std::array{
         std::pair<std::string, keywordId>("ar", AR),
         std::pair<std::string, keywordId>("cs", CS),
         std::pair<std::string, keywordId>("od", OD),
@@ -2202,7 +2202,9 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
                                         if(compareValue != rvalue) matches = true;
                                         break;
                                     case EQ:
-                                        if(compareValue == rvalue || compareString == rstring) matches = true;
+                                        if(compareValue == rvalue ||
+                                           (!compareString.empty() && compareString == rstring))
+                                            matches = true;
                                         break;
                                 }
 
@@ -2974,7 +2976,7 @@ void SongBrowser::onSortScoresChange(const UString &text, int /*id*/) {
 
 void SongBrowser::onWebClicked(CBaseUIButton * /*button*/) {
     if(this->songInfo->getBeatmapID() > 0) {
-        env->openURLInDefaultBrowser(UString::format("https://osu.ppy.sh/b/%ld", this->songInfo->getBeatmapID()));
+        env->openURLInDefaultBrowser(fmt::format("https://osu.ppy.sh/b/{}", this->songInfo->getBeatmapID()));
         osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
     }
 }

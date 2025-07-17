@@ -130,23 +130,12 @@ void LinuxEnvironment::restart() {
     this->shutdown();
 }
 
-void LinuxEnvironment::openURLInDefaultBrowser(UString url) {
-    if(fork() == 0) exit(execl("/usr/bin/xdg-open", "xdg-open", url.toUtf8(), (char *)nullptr));
-}
-
-void LinuxEnvironment::openDirectory(std::string path) {
-    std::string cmd("xdg-open ");
-    cmd.append(path);
-
-    system(cmd.c_str());
-}
-
 UString LinuxEnvironment::getUsername() {
     passwd *pwd = getpwuid(getuid());
     if(pwd != nullptr && pwd->pw_name != nullptr)
-        return UString(pwd->pw_name);
+        return {pwd->pw_name};
     else
-        return UString("");
+        return {""};
 }
 
 std::vector<UString> LinuxEnvironment::getLogicalDrives() {
@@ -369,7 +358,7 @@ Vector2 LinuxEnvironment::getWindowPos() {
 
     XGetGeometry(this->display, this->window, &rootRet, &x, &y, &width, &height, &borderWidth, &depth);
 
-    return Vector2(x, y);
+    return {x, y};
 
     // server coordinates
     /*
@@ -396,7 +385,7 @@ Vector2 LinuxEnvironment::getWindowSize() {
 
     XGetGeometry(this->display, this->window, &rootRet, &x, &y, &width, &height, &borderWidth, &depth);
 
-    return Vector2(width, height);
+    return {width, height};
 }
 
 Vector2 LinuxEnvironment::getWindowSizeServer() {

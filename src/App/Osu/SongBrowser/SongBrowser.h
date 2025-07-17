@@ -107,16 +107,16 @@ class SongBrowser : public ScreenBackable {
     void rebuildScoreButtons();
     void updateSongButtonLayout();
 
-    inline const std::vector<CollectionButton *> &getCollectionButtons() const { return this->collectionButtons; }
+    [[nodiscard]] inline const std::vector<CollectionButton *> &getCollectionButtons() const { return this->collectionButtons; }
 
-    inline bool isInSearch() const { return this->bInSearch; }
-    inline bool isRightClickScrolling() const { return this->bSongBrowserRightClickScrolling; }
+    [[nodiscard]] inline bool isInSearch() const { return this->bInSearch; }
+    [[nodiscard]] inline bool isRightClickScrolling() const { return this->bSongBrowserRightClickScrolling; }
 
-    inline Beatmap *getSelectedBeatmap() const { return this->beatmap; }
+    [[nodiscard]] inline Beatmap *getSelectedBeatmap() const { return this->beatmap; }
 
     inline InfoLabel *getInfoLabel() { return this->songInfo; }
 
-    inline GROUP getGroupingMode() const { return this->group; }
+    [[nodiscard]] inline GROUP getGroupingMode() const { return this->group; }
 
     enum class SORT : uint8_t {
         SORT_ARTIST,

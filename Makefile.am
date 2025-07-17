@@ -63,7 +63,7 @@ $(DEPS_CACHE)/zlib-$(ZLIB_VERSION).source:
 # always needed (if not on host)
 $(DEPS_CACHE)/FMT-$(FMT_VERSION).source:
 	$(MKDIR_P) $(DEPS_CACHE)
-	$(WGET) -qO $(DEPS_CACHE)/fmt-$(FMT_VERSION).tar.gz "https://github.com/fmtlib/fmt/archive/refs/tags/$(FMT_VERSION).tar.gz" && \
+	$(WGET) -qO $(DEPS_CACHE)/fmt-$(FMT_VERSION).tar.gz "https://github.com/fmtlib/fmt/archive/$(FMT_VERSION).tar.gz" && \
 	touch $@
 
 # always needed (if not on host)

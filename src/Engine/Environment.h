@@ -34,9 +34,8 @@ class Environment {
     virtual void shutdown() = 0;
     virtual void restart() = 0;
     static const std::string &getExeFolder();
-    virtual void openURLInDefaultBrowser(UString url) = 0;
-    virtual void openDirectory(std::string path) = 0;
-
+    static void openURLInDefaultBrowser(const std::string &url) noexcept;
+    static void openFileBrowser(const std::string &initialpath) noexcept;
 
     // user
     virtual UString getUsername() = 0;

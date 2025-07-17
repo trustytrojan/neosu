@@ -7,6 +7,7 @@
 #include <SDL3/SDL_filesystem.h>
 #include <SDL3/SDL_messagebox.h>
 #include <SDL3/SDL_dialog.h>
+#include <SDL3/SDL_misc.h>
 
 #ifdef MCENGINE_PLATFORM_WINDOWS
 #include "WinDebloatDefs.h"
@@ -66,6 +67,31 @@ const std::string &Environment::getPathToSelf(const char *argv0) {
     return pathStr;
 }
 
+void Environment::openURLInDefaultBrowser(const std::string &url) noexcept {
+    if(!SDL_OpenURL(url.c_str())) debugLogF("Failed to open URL: {:s}\n", SDL_GetError());
+}
+
+// just open the file manager in a certain folder, but not do anything with it
+void Environment::openFileBrowser(const std::string &initialpath) noexcept {
+    std::string pathToOpen{initialpath};
+    if(pathToOpen.empty())
+        pathToOpen = getExeFolder();
+    else
+        pathToOpen = getFolderFromFilePath(pathToOpen);
+
+    // prepend with file:/// to open it as a URI
+    if constexpr(Env::cfg(OS::WINDOWS))
+        pathToOpen = fmt::format("file:///{}", pathToOpen);
+    else {
+        if(pathToOpen[0] != '/')
+            pathToOpen = fmt::format("file:///{}", pathToOpen);
+        else
+            pathToOpen = fmt::format("file://{}", pathToOpen);
+    }
+
+    if(!SDL_OpenURL(pathToOpen.c_str())) debugLogF("Failed to open file URI {:s}: {:s}\n", pathToOpen, SDL_GetError());
+}
+
 const std::string &Environment::getExeFolder() {
     static std::string pathStr{};
     if(!pathStr.empty()) return pathStr;
@@ -84,7 +110,7 @@ const std::string &Environment::getUserDataPath() {
     static std::string userdataStr{};
     if(!userdataStr.empty()) return userdataStr;
 
-    userdataStr = "."; // set it to non-empty to avoid endlessly failing if SDL_GetPrefPath fails once
+    userdataStr = ".";  // set it to non-empty to avoid endlessly failing if SDL_GetPrefPath fails once
 
     char *path = SDL_GetPrefPath("", "");
     if(path != nullptr) {

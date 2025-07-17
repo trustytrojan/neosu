@@ -128,15 +128,6 @@ void WinEnvironment::setClipBoardText(UString text) {
     }
 }
 
-void WinEnvironment::openURLInDefaultBrowser(UString url) {
-    ShellExecuteW(this->hwnd, L"open", url.wc_str(), NULL, NULL, SW_SHOW);
-}
-
-void WinEnvironment::openDirectory(std::string path) {
-    UString wpath(path.c_str());
-    ShellExecuteW(this->hwnd, L"open", wpath.wc_str(), NULL, NULL, SW_SHOW);
-}
-
 std::vector<std::string> WinEnvironment::getFilesInFolder(const std::string &folderOrig) noexcept {
     // Since we want to avoid wide strings in the codebase as much as possible,
     // we convert wide paths to UTF-8 (as they fucking should be).

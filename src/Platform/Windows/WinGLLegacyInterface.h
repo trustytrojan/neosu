@@ -34,13 +34,13 @@ class WinGLLegacyInterface : public OpenGLLegacyInterface {
 
    public:
     WinGLLegacyInterface(HWND hwnd);
-    virtual ~WinGLLegacyInterface();
+    ~WinGLLegacyInterface() override;
 
     // scene
-    void endScene();
+    void endScene() override;
 
     // device settings
-    void setVSync(bool vsync);
+    void setVSync(bool vsync) override;
 
     // ILLEGAL:
     bool checkGLHardwareAcceleration();

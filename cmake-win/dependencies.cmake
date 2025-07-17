@@ -27,9 +27,9 @@ set(BZIP2_VERSION "1ea1ac188ad4b9cb662e3f8314673c63df95a589")
 set(BZIP2_URL "https://github.com/libarchive/bzip2/archive/${BZIP2_VERSION}.tar.gz")
 set(BZIP2_HASH "SHA512=a1aae1e884f85a225e2a1ddf610f11dda672bc242d4e8d0cda3534efb438b3a0306ec1d130eec378d46abb48f6875687d6b20dcc18a6037a4455f531c22d50f6")
 
-set(FMT_VERSION "11.2.0")
-set(FMT_URL "https://github.com/fmtlib/fmt/archive/refs/tags/${FMT_VERSION}.tar.gz")
-set(FMT_HASH "SHA512=46974efd36e613477351aa357c451cee434da797c2a505f9f86d73e394dcb35dc2dc0cda66abb98c023e8f24deac9d8e3ee6f9f6c0971cc4c00e37c34aa7f15f")
+set(FMT_VERSION "553ec11ec06fbe0beebfbb45f9dc3c9eabd83d28")
+set(FMT_URL "https://github.com/fmtlib/fmt/archive/${FMT_VERSION}.tar.gz")
+set(FMT_HASH "SHA512=6ef962d1509395a5f0fedc645c2d1a48f748debec5f2a2be7004e4c5d99610471b0b133a9656d25f875b4fba676c3a5076347a46c900dd78bb8bc9d3279553a1")
 
 set(GLM_VERSION "1.0.1")
 set(GLM_URL "https://github.com/g-truc/glm/archive/refs/tags/${GLM_VERSION}.tar.gz")

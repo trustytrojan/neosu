@@ -99,10 +99,10 @@ class ResourceManager final {
                                                bool keepInSystemMemory = false);
 
     // resource access by name
-    Image *getImage(std::string resourceName) const { return tryGet<Image>(resourceName); }
-    McFont *getFont(std::string resourceName) const { return tryGet<McFont>(resourceName); }
-    Sound *getSound(std::string resourceName) const { return tryGet<Sound>(resourceName); }
-    Shader *getShader(std::string resourceName) const { return tryGet<Shader>(resourceName); }
+    [[nodiscard]] Image *getImage(std::string resourceName) const { return tryGet<Image>(resourceName); }
+    [[nodiscard]] McFont *getFont(std::string resourceName) const { return tryGet<McFont>(resourceName); }
+    [[nodiscard]] Sound *getSound(std::string resourceName) const { return tryGet<Sound>(resourceName); }
+    [[nodiscard]] Shader *getShader(std::string resourceName) const { return tryGet<Shader>(resourceName); }
 
     // methods for getting all resources of a type
     [[nodiscard]] constexpr const std::vector<Image *> &getImages() const { return this->vImages; }

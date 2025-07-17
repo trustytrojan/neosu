@@ -32,6 +32,7 @@ Changelog::Changelog() : ScreenBackable() {
         R"(- Crop screenshots to the internal/letterboxed osu! resolution, instead of keeping the black borders)",
         R"(- Added "Sort Skins Alphabetically" option, for sorting skins in a different order (ignoring prefixes))",
         R"(- Added support for filtering by "creator=" in the song browser)",
+        R"(- Added support for parsing McOsu "scores.db" databases for local scores)",
     };
     changelogs.push_back(v39_00);
 
@@ -533,6 +534,6 @@ void Changelog::onChangeClicked(CBaseUIButton *button) {
         debugLog("url = %s\n", url.toUtf8());
 
         osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
-        env->openURLInDefaultBrowser(url);
+        env->openURLInDefaultBrowser(url.toUtf8());
     }
 }
