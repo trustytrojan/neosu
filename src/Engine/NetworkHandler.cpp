@@ -262,9 +262,10 @@ size_t NetworkHandler::headerCallback(char* buffer, size_t size, size_t nitems, 
     size_t colon_pos = header.find(':');
     if(colon_pos != std::string::npos) {
         std::string key = header.substr(0, colon_pos);
-        // lowercase the key for consistency between platforms
-        std::ranges::transform(key, key.begin(), [](char c) { return std::tolower(c); });
         std::string value = header.substr(colon_pos + 1);
+
+        // lowercase the key for consistency between platforms/curl builds
+        SString::to_lower(key);
 
         // trim whitespace
         SString::trim(&key);

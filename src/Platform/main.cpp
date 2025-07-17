@@ -3,11 +3,11 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
-#include <algorithm>
 #include <filesystem>
 
 #include "BaseEnvironment.h"
 
+#include "SString.h"
 #include "fmt/format.h"
 
 #include "LinuxMain.h"
@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
     setcwdexe(Environment::getPathToSelf(argv[0]));
 
     std::string lowerPackageName = PACKAGE_NAME;
-    std::ranges::transform(lowerPackageName, lowerPackageName.begin(), [](char c) { return std::tolower(c); });
+    SString::lower(lowerPackageName);
 
     // set up some common app metadata (SDL says these should be called as early as possible)
     SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_NAME_STRING, PACKAGE_NAME);

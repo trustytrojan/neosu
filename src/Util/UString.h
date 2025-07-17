@@ -258,27 +258,6 @@ class UString {
     [[nodiscard]] bool equalsIgnoreCase(const UString &ustr) const;
     [[nodiscard]] bool lessThanIgnoreCase(const UString &ustr) const;
 
-    // for strict-weak-ordering
-    [[nodiscard]] bool lessThanIgnoreCaseStrict(const UString &rhs) const noexcept { return ncasecomp{}(*this, rhs); }
-
-    class ncasecomp {
-       public:
-        bool operator()(const UString &lhs, const UString &rhs) const noexcept;
-
-       private:
-        // consistent case normalization that avoids locale-dependent behavior (to use with std::sort to satisfy
-        // strict-weak-ordering)
-        static constexpr wchar_t normalizeCase(wchar_t ch) noexcept {
-            // ASCII fast path
-            if(ch >= L'A' && ch <= L'Z') return ch + (L'a' - L'A');
-            // clamp to valid wchar_t range
-            if(ch <= 0xFFFF) return static_cast<wchar_t>(std::towlower(static_cast<std::wint_t>(ch)));
-            // outside BMP (basic multi-lingual plane) is returned as-is to stay deterministic because they aren't
-            // handled by UString currently
-            return ch;
-        }
-    };
-
     friend struct std::hash<UString>;
 
    private:

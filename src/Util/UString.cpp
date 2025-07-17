@@ -626,23 +626,3 @@ void UString::updateUtf8() {
     this->iLengthUtf8 = newLength;
     encode(this->sUnicode, this->sUtf8.data());
 }
-
-// comparator helper for strict-weak-ordering rules
-bool UString::ncasecomp::operator()(const UString &lhs, const UString &rhs) const noexcept {
-    const auto lhsView = lhs.unicodeView();
-    const auto rhsView = rhs.unicodeView();
-
-    const auto lhsLen = lhsView.length();
-    const auto rhsLen = rhsView.length();
-    const auto minLen = std::min(lhsLen, rhsLen);
-
-    for(size_t i = 0; i < minLen; ++i) {
-        const auto lhsChar = normalizeCase(lhsView[i]);
-        const auto rhsChar = normalizeCase(rhsView[i]);
-
-        if(lhsChar != rhsChar) return lhsChar < rhsChar;
-    }
-
-    // if all compared characters are equal, shorter string is less
-    return lhsLen < rhsLen;
-}
