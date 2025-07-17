@@ -757,6 +757,8 @@ DXGI_LIBS
 DXGI_CFLAGS
 EGL_LIBS
 EGL_CFLAGS
+XRANDR_LIBS
+XRANDR_CFLAGS
 XI_LIBS
 XI_CFLAGS
 X11_LIBS
@@ -967,6 +969,8 @@ X11_CFLAGS
 X11_LIBS
 XI_CFLAGS
 XI_LIBS
+XRANDR_CFLAGS
+XRANDR_LIBS
 EGL_CFLAGS
 EGL_LIBS
 DXGI_CFLAGS
@@ -1690,6 +1694,9 @@ Some influential environment variables:
   X11_LIBS    linker flags for X11, overriding pkg-config
   XI_CFLAGS   C compiler flags for XI, overriding pkg-config
   XI_LIBS     linker flags for XI, overriding pkg-config
+  XRANDR_CFLAGS
+              C compiler flags for XRANDR, overriding pkg-config
+  XRANDR_LIBS linker flags for XRANDR, overriding pkg-config
   EGL_CFLAGS  C compiler flags for EGL, overriding pkg-config
   EGL_LIBS    linker flags for EGL, overriding pkg-config
   DXGI_CFLAGS C compiler flags for DXGI, overriding pkg-config
@@ -9801,6 +9808,158 @@ then :
 PKG_CONFIG="$PKG_CONFIG --static"
 
 pkg_failed=no
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for xrandr" >&5
+printf %s "checking for xrandr... " >&6; }
+
+if test -n "$XRANDR_CFLAGS"; then
+    pkg_cv_XRANDR_CFLAGS="$XRANDR_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"xrandr\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "xrandr") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_XRANDR_CFLAGS=`$PKG_CONFIG --cflags "xrandr" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$XRANDR_LIBS"; then
+    pkg_cv_XRANDR_LIBS="$XRANDR_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"xrandr\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "xrandr") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_XRANDR_LIBS=`$PKG_CONFIG --libs "xrandr" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+                XRANDR_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "xrandr" 2>&1`
+        else
+                XRANDR_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "xrandr" 2>&1`
+        fi
+        # Put the nasty error message in config.log where it belongs
+        echo "$XRANDR_PKG_ERRORS" >&5
+
+        as_fn_error $? "Missing xrandr libs, required for Linux" "$LINENO" 5
+elif test $pkg_failed = untried; then
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+        as_fn_error $? "Missing xrandr libs, required for Linux" "$LINENO" 5
+else
+        XRANDR_CFLAGS=$pkg_cv_XRANDR_CFLAGS
+        XRANDR_LIBS=$pkg_cv_XRANDR_LIBS
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+printf "%s\n" "yes" >&6; }
+        have_xrandr=yes
+fi
+PKG_CONFIG=$_save_PKG_CONFIG
+else case e in #(
+  e)
+pkg_failed=no
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for xrandr" >&5
+printf %s "checking for xrandr... " >&6; }
+
+if test -n "$XRANDR_CFLAGS"; then
+    pkg_cv_XRANDR_CFLAGS="$XRANDR_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"xrandr\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "xrandr") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_XRANDR_CFLAGS=`$PKG_CONFIG --cflags "xrandr" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$XRANDR_LIBS"; then
+    pkg_cv_XRANDR_LIBS="$XRANDR_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"xrandr\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "xrandr") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_XRANDR_LIBS=`$PKG_CONFIG --libs "xrandr" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+                XRANDR_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "xrandr" 2>&1`
+        else
+                XRANDR_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "xrandr" 2>&1`
+        fi
+        # Put the nasty error message in config.log where it belongs
+        echo "$XRANDR_PKG_ERRORS" >&5
+
+        as_fn_error $? "Missing xrandr libs, required for Linux" "$LINENO" 5
+elif test $pkg_failed = untried; then
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+        as_fn_error $? "Missing xrandr libs, required for Linux" "$LINENO" 5
+else
+        XRANDR_CFLAGS=$pkg_cv_XRANDR_CFLAGS
+        XRANDR_LIBS=$pkg_cv_XRANDR_LIBS
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+printf "%s\n" "yes" >&6; }
+        have_xrandr=yes
+fi ;;
+esac
+fi
+
+
+    if test "x$enable_static" = "xyes"
+then :
+  _save_PKG_CONFIG=$PKG_CONFIG
+PKG_CONFIG="$PKG_CONFIG --static"
+
+pkg_failed=no
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for egl" >&5
 printf %s "checking for egl... " >&6; }
 
@@ -9953,6 +10112,7 @@ else case e in #(
         have_gl="not required"
         have_x11="not required"
         have_xi="not required"
+        have_xrandr="not required"
         have_egl="not required"
      ;;
 esac
@@ -14328,6 +14488,7 @@ neosu build configuration:
 Dependencies:
     libX11              ${have_x11-no}
     libXi (XInput)      ${have_xi-no}
+    xrandr              ${have_xrandr-no}
     libGL               ${have_gl-no}
     libGLU              ${have_glu-no}
     libEGL              ${have_egl-no}
@@ -14375,6 +14536,7 @@ neosu build configuration:
 Dependencies:
     libX11              ${have_x11-no}
     libXi (XInput)      ${have_xi-no}
+    xrandr              ${have_xrandr-no}
     libGL               ${have_gl-no}
     libGLU              ${have_glu-no}
     libEGL              ${have_egl-no}

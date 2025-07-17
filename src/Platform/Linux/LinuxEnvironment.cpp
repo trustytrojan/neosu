@@ -513,9 +513,9 @@ void LinuxEnvironment::setMousePos(double x, double y) {
 
 void LinuxEnvironment::setCursorClip(bool clip, McRect rect) {
     if(clip) {
-        this->bCursorClipped = XI2Handler::grab(this->display, true, false);
+        this->bCursorClipped = XI2Handler::grab(this->display, this->window, true, false);
     } else {
-        this->bCursorClipped = XI2Handler::grab(this->display, false, false);
+        this->bCursorClipped = XI2Handler::grab(this->display, this->window, false, false);
     }
     if(this->bCursorClipped) this->cursorClip = rect;
 }

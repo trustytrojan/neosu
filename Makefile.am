@@ -829,6 +829,7 @@ neosu_CXXFLAGS := \
 	$(AUDIO_CFLAGS) \
 	$(X11_CFLAGS) \
 	$(XI_CFLAGS) \
+	$(XRANDR_CFLAGS) \
 	$(GL_CFLAGS) \
 	$(GLU_CFLAGS) \
 	$(EGL_CFLAGS) \
@@ -859,6 +860,7 @@ neosu_LDFLAGS := \
 	$(AUDIO_LIBS) \
 	$(X11_LIBS) \
 	$(XI_LIBS) \
+	$(XRANDR_LIBS) \
 	$(GL_LIBS) \
 	$(GLU_LIBS) \
 	$(EGL_LIBS) \

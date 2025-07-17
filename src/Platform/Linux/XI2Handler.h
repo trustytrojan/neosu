@@ -24,7 +24,7 @@ void updateDeviceCache(Display *display);
 
 // XI2 pointer grab wrapper for explicit (cursor clip) and implicit (button press) grabs
 // returns true if grab is active
-bool grab(Display *display, bool enable, bool grabHack = false);
+bool grab(Display *display, Window window, bool enable, bool grabHack = false);
 
 extern int clientPointerDevID;
 

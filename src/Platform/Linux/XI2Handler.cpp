@@ -64,7 +64,7 @@ static void cacheDeviceInfo(Display *display, int deviceId) {
 
 }  // namespace
 
-bool grab(Display *display, bool enable, bool grabHack) {
+bool grab(Display *display, Window window, bool enable, bool grabHack) {
     if(enable || grabHack) {
         // don't grab if already grabbed
         if(g_explicitGrab) {
@@ -83,8 +83,9 @@ bool grab(Display *display, bool enable, bool grabHack) {
         mask.mask_len = maskBits.size();
         mask.mask = maskBits.data();
 
-        int ret = XIGrabDevice(display, clientPointerDevID, DefaultRootWindow(display), CurrentTime, None,
-                               GrabModeAsync, GrabModeAsync, False, &mask);
+        // grab relative to the application window
+        int ret = XIGrabDevice(display, clientPointerDevID, window, CurrentTime, None, GrabModeAsync, GrabModeAsync,
+                               False, &mask);
         if(ret == GrabSuccess || ret == AlreadyGrabbed) {
             if(!grabHack) {
                 g_explicitGrab = true;
@@ -134,7 +135,7 @@ void handleGenericEvent(Display *dpy, XEvent &xev) {
 
                 // workaround for XI2 server bug: grab-ungrab device during button events
                 // to ensure we receive raw motion events (freedesktop.org bug #26922)
-                if(pressed && !g_explicitGrab) grab(dpy, true, true);
+                if(pressed && !g_explicitGrab) grab(dpy, event->event, true, true);
 
                 switch(event->detail) {
                     case 1:  // left button

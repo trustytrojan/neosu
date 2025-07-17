@@ -656,12 +656,14 @@ AS_IF([test "$renderer" != "dx11"], [
         PKG_CHECK_AUTO([GL], [gl], [have_gl=yes], [AC_MSG_ERROR([Missing gl libs, required for OpenGL])])
         PKG_CHECK_AUTO([X11], [x11], [have_x11=yes], [AC_MSG_ERROR([Missing x11 libs, required for OpenGL on Linux])])
         PKG_CHECK_AUTO([XI], [xi], [have_xi=yes], [AC_MSG_ERROR([Missing xi (xinput) libs, required for OpenGL on Linux])])
+        PKG_CHECK_AUTO([XRANDR], [xrandr], [have_xrandr=yes], [AC_MSG_ERROR([Missing xrandr libs, required for Linux])])
         PKG_CHECK_AUTO([EGL], [egl], [have_egl=yes], [AC_MSG_ERROR([Missing egl libs, required for OpenGL on Linux])])
     ], [
         have_glu="not required"
         have_gl="not required"
         have_x11="not required"
         have_xi="not required"
+        have_xrandr="not required"
         have_egl="not required"
     ])
 ],[
@@ -916,6 +918,7 @@ neosu build configuration:
 Dependencies:
     libX11              ${have_x11-no}
     libXi (XInput)      ${have_xi-no}
+    xrandr              ${have_xrandr-no}
     libGL               ${have_gl-no}
     libGLU              ${have_glu-no}
     libEGL              ${have_egl-no}
