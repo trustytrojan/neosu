@@ -121,7 +121,7 @@ struct alignas(1) TIMINGPOINT {
     void saveMaps();
 
     void loadScores();
-    u32 importOldNeosuScores();
+    u32 importOldMcNeosuScores();
     u32 importPeppyScores();
     void saveScores();
     bool addScoreRaw(const FinishedScore &score);

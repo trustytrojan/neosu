@@ -50,11 +50,12 @@ class SongBrowser : public ScreenBackable {
         GROUP_ARTIST,
         GROUP_BPM,
         GROUP_CREATOR,
-        GROUP_DATEADDED,
+        //GROUP_DATEADDED, // unimpl
         GROUP_DIFFICULTY,
         GROUP_LENGTH,
         GROUP_TITLE,
-        GROUP_COLLECTIONS
+        GROUP_COLLECTIONS,
+        GROUP_MAX
     };
 
     friend class SongBrowserBackgroundSearchMatcher;
@@ -126,6 +127,7 @@ class SongBrowser : public ScreenBackable {
         SORT_LENGTH,
         SORT_TITLE,
         SORT_RANKACHIEVED,
+        SORT_MAX
     };
 
     struct SORTING_METHOD {
@@ -187,11 +189,11 @@ class SongBrowser : public ScreenBackable {
     std::mt19937 rngalg;
 
     GROUP group;
-    std::vector<GROUPING> groupings;
+    std::array<GROUPING, static_cast<size_t>(GROUP::GROUP_MAX)> groupings;
 
     SORTING_COMPARATOR sortingComparator;
     SORT sortingMethod;
-    std::vector<SORTING_METHOD> sortingMethods;
+    std::array<SORTING_METHOD, static_cast<size_t>(SORT::SORT_MAX)> sortingMethods;
 
     // top bar left
     CBaseUIContainer *topbarLeft;

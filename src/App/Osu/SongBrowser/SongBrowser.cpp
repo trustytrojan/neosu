@@ -314,29 +314,28 @@ SongBrowser::SongBrowser() : ScreenBackable() {
 
     // sorting/grouping + methods
     this->group = GROUP::GROUP_NO_GROUPING;
-    {
-        this->groupings.push_back({GROUP::GROUP_NO_GROUPING, "No Grouping", 0});
-        this->groupings.push_back({GROUP::GROUP_ARTIST, "By Artist", 1});
-        this->groupings.push_back({GROUP::GROUP_BPM, "By BPM", 2});
-        this->groupings.push_back({GROUP::GROUP_CREATOR, "By Creator", 3});
-        /// m_groupings.push_back({GROUP::GROUP_DATEADDED, "By Date Added", 4}); // not yet possible
-        this->groupings.push_back({GROUP::GROUP_DIFFICULTY, "By Difficulty", 5});
-        this->groupings.push_back({GROUP::GROUP_LENGTH, "By Length", 6});
-        this->groupings.push_back({GROUP::GROUP_TITLE, "By Title", 7});
-        this->groupings.push_back({GROUP::GROUP_COLLECTIONS, "Collections", 8});
-    }
+    this->groupings = {{{.type = GROUP::GROUP_NO_GROUPING, .name = "No Grouping", .id = 0},
+                        {.type = GROUP::GROUP_ARTIST, .name = "By Artist", .id = 1},
+                        {.type = GROUP::GROUP_BPM, .name = "By BPM", .id = 2},
+                        {.type = GROUP::GROUP_CREATOR, .name = "By Creator", .id = 3},
+                        //{GROUP::GROUP_DATEADDED, "By Date Added", 4}); // not yet possible
+                        {.type = GROUP::GROUP_DIFFICULTY, .name = "By Difficulty", .id = 5},
+                        {.type = GROUP::GROUP_LENGTH, .name = "By Length", .id = 6},
+                        {.type = GROUP::GROUP_TITLE, .name = "By Title", .id = 7},
+                        {.type = GROUP::GROUP_COLLECTIONS, .name = "Collections", .id = 8}}};
 
     this->sortingMethod = SORT::SORT_ARTIST;
     this->sortingComparator = sort_by_artist;
 
-    this->sortingMethods.push_back({SORT::SORT_ARTIST, "By Artist", sort_by_artist});
-    this->sortingMethods.push_back({SORT::SORT_BPM, "By BPM", sort_by_bpm});
-    this->sortingMethods.push_back({SORT::SORT_CREATOR, "By Creator", sort_by_creator});
-    this->sortingMethods.push_back({SORT::SORT_DATEADDED, "By Date Added", sort_by_date_added});
-    this->sortingMethods.push_back({SORT::SORT_DIFFICULTY, "By Difficulty", sort_by_difficulty});
-    this->sortingMethods.push_back({SORT::SORT_LENGTH, "By Length", sort_by_length});
-    this->sortingMethods.push_back({SORT::SORT_TITLE, "By Title", sort_by_title});
-    this->sortingMethods.push_back({SORT::SORT_RANKACHIEVED, "By Rank Achieved", sort_by_grade});
+    this->sortingMethods = {
+        {{.type = SORT::SORT_ARTIST, .name = "By Artist", .comparator = sort_by_artist},
+         {.type = SORT::SORT_BPM, .name = "By BPM", .comparator = sort_by_bpm},
+         {.type = SORT::SORT_CREATOR, .name = "By Creator", .comparator = sort_by_creator},
+         {.type = SORT::SORT_DATEADDED, .name = "By Date Added", .comparator = sort_by_date_added},
+         {.type = SORT::SORT_DIFFICULTY, .name = "By Difficulty", .comparator = sort_by_difficulty},
+         {.type = SORT::SORT_LENGTH, .name = "By Length", .comparator = sort_by_length},
+         {.type = SORT::SORT_TITLE, .name = "By Title", .comparator = sort_by_title},
+         {.type = SORT::SORT_RANKACHIEVED, .name = "By Rank Achieved", .comparator = sort_by_grade}}};
 
     // vars
     this->bSongBrowserRightClickScrollCheck = false;
@@ -511,9 +510,9 @@ SongBrowser::~SongBrowser() {
     for(auto &creatorCollectionButton : this->creatorCollectionButtons) {
         delete creatorCollectionButton;
     }
-    for(auto &dateaddedCollectionButton : this->dateaddedCollectionButtons) {
-        delete dateaddedCollectionButton;
-    }
+    // for(auto &dateaddedCollectionButton : this->dateaddedCollectionButtons) {
+    //     delete dateaddedCollectionButton;
+    // }
     for(auto &lengthCollectionButton : this->lengthCollectionButtons) {
         delete lengthCollectionButton;
     }
@@ -1643,9 +1642,9 @@ void SongBrowser::refreshBeatmaps() {
         delete creatorCollectionButton;
     }
     this->creatorCollectionButtons.clear();
-    for(auto &dateaddedCollectionButton : this->dateaddedCollectionButtons) {
-        delete dateaddedCollectionButton;
-    }
+    // for(auto &dateaddedCollectionButton : this->dateaddedCollectionButtons) {
+    //     delete dateaddedCollectionButton;
+    // }
     this->dateaddedCollectionButtons.clear();
     for(auto &lengthCollectionButton : this->lengthCollectionButtons) {
         delete lengthCollectionButton;
@@ -2888,39 +2887,10 @@ void SongBrowser::rebuildSongButtonsAndVisibleSongButtonsWithSearchMatchSupport(
                     this->visibleSongButtons.push_back(songButton);
             }
         } else {
-            std::vector<CollectionButton *> *groupButtons = NULL;
-            {
-                switch(this->group) {
-                    case GROUP::GROUP_NO_GROUPING:
-                        break;
-                    case GROUP::GROUP_ARTIST:
-                        groupButtons = &this->artistCollectionButtons;
-                        break;
-                    case GROUP::GROUP_BPM:
-                        groupButtons = &this->bpmCollectionButtons;
-                        break;
-                    case GROUP::GROUP_CREATOR:
-                        groupButtons = &this->creatorCollectionButtons;
-                        break;
-                    case GROUP::GROUP_DIFFICULTY:
-                        groupButtons = &this->difficultyCollectionButtons;
-                        break;
-                    case GROUP::GROUP_LENGTH:
-                        groupButtons = &this->lengthCollectionButtons;
-                        break;
-                    case GROUP::GROUP_TITLE:
-                        groupButtons = &this->titleCollectionButtons;
-                        break;
-                    case GROUP::GROUP_COLLECTIONS:
-                        groupButtons = &this->collectionButtons;
-                        break;
-                    default:
-                        break;
-                }
-            }
+            std::vector<CollectionButton *> *groupButtons = getCollectionButtonsForGroup(this->group);
 
-            if(groupButtons != NULL) {
-                for(auto &groupButton : *groupButtons) {
+            if(groupButtons != nullptr) {
+                for(const auto &groupButton : *groupButtons) {
                     bool isAnyMatchInGroup = false;
 
                     const auto &children = groupButton->getChildren();
@@ -3048,10 +3018,12 @@ std::vector<CollectionButton *> *SongBrowser::getCollectionButtonsForGroup(GROUP
             return &this->titleCollectionButtons;
         case GROUP::GROUP_BPM:
             return &this->bpmCollectionButtons;
-        case GROUP::GROUP_DATEADDED:
-            return &this->dateaddedCollectionButtons;
+        // case GROUP::GROUP_DATEADDED:
+        //     return &this->dateaddedCollectionButtons;
         case GROUP::GROUP_COLLECTIONS:
             return &this->collectionButtons;
+        default:
+            return nullptr;
     }
     return nullptr;
 }

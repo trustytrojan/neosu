@@ -1351,112 +1351,330 @@ void Database::loadScores() {
         }
     }
 
-    u32 nb_old_neosu_imported = this->importOldNeosuScores();
+    u32 nb_old_mcneosu_imported = this->importOldMcNeosuScores();
     u32 nb_peppy_imported = this->importPeppyScores();
     this->bScoresLoaded = true;
 
-    u32 scores_total = nb_old_neosu_imported + nb_neosu_scores + nb_peppy_imported;
-    debugLog("Loaded %i scores (%d old neosu, %d neosu, %d peppy)\n", scores_total, nb_old_neosu_imported,
+    u32 scores_total = nb_old_mcneosu_imported + nb_neosu_scores + nb_peppy_imported;
+    debugLog("Loaded %i scores (%d old mc/neosu, %d neosu, %d peppy)\n", scores_total, nb_old_mcneosu_imported,
              nb_neosu_scores, nb_peppy_imported);
 }
 
-u32 Database::importOldNeosuScores() {
-    BanchoFile::Reader db("scores.db");
-
-    u32 db_version = db.read<u32>();
-    u32 nb_beatmaps = db.read<u32>();
-    if(db_version == 0) {
-        // scores.db doesn't exist
-        return 0;
-    }
-
-    // 20240412 is the only scores.db version in which replays are saved.
-    // Don't bother importing if we don't have replays.
-    if(db_version != 20240412) {
-        debugLog("Unsupported scores.db version.\n");
-        return 0;
-    }
-
+// import scores from mcosu, and scores from neosu scores.db if version == 20240412 (before rename to neosu_scores.db,
+// may contain replays)
+u32 Database::importOldMcNeosuScores() {
+    bool is_neosu = true;
+    constexpr auto latest_mcosu_custom_scores_ver = 20210110;
+    u32 db_version = 0;
     int nb_imported = 0;
-    for(u32 b = 0; b < nb_beatmaps; b++) {
-        auto md5hash = db.read_hash();
-        u32 nb_scores = db.read<u32>();
 
-        for(u32 s = 0; s < nb_scores; s++) {
-            db.skip<u8>();   // gamemode (always 0)
-            db.skip<u32>();  // score version
+    // mcosu logic
+    int makeBackupType = 0;
+    const int backupLessThanVersion = 20210103;
+    const int backupMoreThanVersion = 20210105;
+    // end mcosu logic
 
-            FinishedScore sc;
-            sc.unixTimestamp = db.read<u64>();
-            sc.playerName = db.read_string();
-            sc.num300s = db.read<u16>();
-            sc.num100s = db.read<u16>();
-            sc.num50s = db.read<u16>();
-            sc.numGekis = db.read<u16>();
-            sc.numKatus = db.read<u16>();
-            sc.numMisses = db.read<u16>();
-            sc.score = db.read<u64>();
-            sc.comboMax = db.read<u16>();
-            sc.mods = Replay::Mods::from_legacy(db.read<u32>());
-            sc.numSliderBreaks = db.read<u16>();
-            sc.ppv2_version = 20220902;
-            sc.ppv2_score = db.read<f32>();
-            sc.unstableRate = db.read<f32>();
-            sc.hitErrorAvgMin = db.read<f32>();
-            sc.hitErrorAvgMax = db.read<f32>();
-            sc.ppv2_total_stars = db.read<f32>();
-            sc.ppv2_aim_stars = db.read<f32>();
-            sc.ppv2_speed_stars = db.read<f32>();
-            sc.mods.speed = db.read<f32>();
-            sc.mods.cs_override = db.read<f32>();
-            sc.mods.ar_override = db.read<f32>();
-            sc.mods.od_override = db.read<f32>();
-            sc.mods.hp_override = db.read<f32>();
-            sc.maxPossibleCombo = db.read<u32>();
-            sc.numHitObjects = db.read<u32>();
-            sc.numCircles = db.read<u32>();
-            sc.bancho_score_id = db.read<u32>();
-            sc.client = "neosu-win64-release-35.10";  // we don't know the actual version
-            sc.server = db.read_string();
+    {
+        BanchoFile::Reader dbCheck("scores.db");
+        if(!dbCheck.good()) {
+            return 0;
+        }
 
-            std::string experimentalModsConVars = db.read_string();
-            auto cvrs = UString(experimentalModsConVars.c_str());
-            auto experimentalMods = cvrs.split(";");
-            for(auto mod : experimentalMods) {
-                if(mod == UString("")) continue;
-                if(mod == UString("fposu_mod_strafing")) sc.mods.flags |= Replay::ModFlags::FPoSu_Strafing;
-                if(mod == UString("osu_mod_wobble")) sc.mods.flags |= Replay::ModFlags::Wobble1;
-                if(mod == UString("osu_mod_wobble2")) sc.mods.flags |= Replay::ModFlags::Wobble2;
-                if(mod == UString("osu_mod_arwobble")) sc.mods.flags |= Replay::ModFlags::ARWobble;
-                if(mod == UString("osu_mod_timewarp")) sc.mods.flags |= Replay::ModFlags::Timewarp;
-                if(mod == UString("osu_mod_artimewarp")) sc.mods.flags |= Replay::ModFlags::ARTimewarp;
-                if(mod == UString("osu_mod_minimize")) sc.mods.flags |= Replay::ModFlags::Minimize;
-                if(mod == UString("osu_mod_fadingcursor")) sc.mods.flags |= Replay::ModFlags::FadingCursor;
-                if(mod == UString("osu_mod_fps")) sc.mods.flags |= Replay::ModFlags::FPS;
-                if(mod == UString("osu_mod_jigsaw1")) sc.mods.flags |= Replay::ModFlags::Jigsaw1;
-                if(mod == UString("osu_mod_jigsaw2")) sc.mods.flags |= Replay::ModFlags::Jigsaw2;
-                if(mod == UString("osu_mod_fullalternate")) sc.mods.flags |= Replay::ModFlags::FullAlternate;
-                if(mod == UString("osu_mod_reverse_sliders")) sc.mods.flags |= Replay::ModFlags::ReverseSliders;
-                if(mod == UString("osu_mod_no50s")) sc.mods.flags |= Replay::ModFlags::No50s;
-                if(mod == UString("osu_mod_no100s")) sc.mods.flags |= Replay::ModFlags::No100s;
-                if(mod == UString("osu_mod_ming3012")) sc.mods.flags |= Replay::ModFlags::Ming3012;
-                if(mod == UString("osu_mod_halfwindow")) sc.mods.flags |= Replay::ModFlags::HalfWindow;
-                if(mod == UString("osu_mod_millhioref")) sc.mods.flags |= Replay::ModFlags::Millhioref;
-                if(mod == UString("osu_mod_mafham")) sc.mods.flags |= Replay::ModFlags::Mafham;
-                if(mod == UString("osu_mod_strict_tracking")) sc.mods.flags |= Replay::ModFlags::StrictTracking;
-                if(mod == UString("osu_playfield_mirror_horizontal"))
-                    sc.mods.flags |= Replay::ModFlags::MirrorHorizontal;
-                if(mod == UString("osu_playfield_mirror_vertical")) sc.mods.flags |= Replay::ModFlags::MirrorVertical;
-                if(mod == UString("osu_mod_shirone")) sc.mods.flags |= Replay::ModFlags::Shirone;
-                if(mod == UString("osu_mod_approach_different")) sc.mods.flags |= Replay::ModFlags::ApproachDifferent;
+        db_version = dbCheck.read<u32>();
+        if(db_version == 0) {
+            // scores.db doesn't exist
+            return 0;
+        }
+
+        // 20240412 is the only neosu scores.db version in which replays are saved,
+        // treat other versions as coming from mcosu
+        if(db_version != 20240412) {
+            is_neosu = false;
+            if(db_version > latest_mcosu_custom_scores_ver) {  // newest mcosu scores.db version
+                debugLog("Unsupported custom scores.db version.\n");
+                return 0;
             }
+        }
+    }
 
-            sc.beatmap_hash = md5hash;
-            sc.perfect = sc.comboMax >= sc.maxPossibleCombo;
-            sc.grade = sc.calculate_grade();
+    {
+        BanchoFile::Reader db("scores.db");
+        if(!db.good()) {
+            return 0;
+        }
 
-            if(this->addScoreRaw(sc)) {
-                nb_imported++;
+        db.skip<u32>();  // skip version, we already checked
+
+        if(is_neosu) {
+            u32 nb_beatmaps = db.read<u32>();
+            for(u32 b = 0; b < nb_beatmaps; b++) {
+                auto md5hash = db.read_hash();
+                u32 nb_scores = db.read<u32>();
+
+                for(u32 s = 0; s < nb_scores; s++) {
+                    db.skip<u8>();   // gamemode (always 0)
+                    db.skip<u32>();  // score version
+
+                    FinishedScore sc;
+                    sc.unixTimestamp = db.read<u64>();
+                    sc.playerName = db.read_string();
+                    sc.num300s = db.read<u16>();
+                    sc.num100s = db.read<u16>();
+                    sc.num50s = db.read<u16>();
+                    sc.numGekis = db.read<u16>();
+                    sc.numKatus = db.read<u16>();
+                    sc.numMisses = db.read<u16>();
+                    sc.score = db.read<u64>();
+                    sc.comboMax = db.read<u16>();
+                    sc.mods = Replay::Mods::from_legacy(db.read<u32>());
+                    sc.numSliderBreaks = db.read<u16>();
+                    sc.ppv2_version = 20220902;
+                    sc.ppv2_score = db.read<f32>();
+                    sc.unstableRate = db.read<f32>();
+                    sc.hitErrorAvgMin = db.read<f32>();
+                    sc.hitErrorAvgMax = db.read<f32>();
+                    sc.ppv2_total_stars = db.read<f32>();
+                    sc.ppv2_aim_stars = db.read<f32>();
+                    sc.ppv2_speed_stars = db.read<f32>();
+                    sc.mods.speed = db.read<f32>();
+                    sc.mods.cs_override = db.read<f32>();
+                    sc.mods.ar_override = db.read<f32>();
+                    sc.mods.od_override = db.read<f32>();
+                    sc.mods.hp_override = db.read<f32>();
+                    sc.maxPossibleCombo = db.read<u32>();
+                    sc.numHitObjects = db.read<u32>();
+                    sc.numCircles = db.read<u32>();
+                    sc.bancho_score_id = db.read<u32>();
+                    sc.client = "neosu-win64-release-35.10";  // we don't know the actual version
+                    sc.server = db.read_string();
+
+                    std::string experimentalModsConVars = db.read_string();
+                    auto cvrs = UString(experimentalModsConVars.c_str());
+                    auto experimentalMods = cvrs.split(";");
+                    for(auto mod : experimentalMods) {
+                        if(mod == UString("")) continue;
+                        if(mod == UString("fposu_mod_strafing")) sc.mods.flags |= Replay::ModFlags::FPoSu_Strafing;
+                        if(mod == UString("osu_mod_wobble")) sc.mods.flags |= Replay::ModFlags::Wobble1;
+                        if(mod == UString("osu_mod_wobble2")) sc.mods.flags |= Replay::ModFlags::Wobble2;
+                        if(mod == UString("osu_mod_arwobble")) sc.mods.flags |= Replay::ModFlags::ARWobble;
+                        if(mod == UString("osu_mod_timewarp")) sc.mods.flags |= Replay::ModFlags::Timewarp;
+                        if(mod == UString("osu_mod_artimewarp")) sc.mods.flags |= Replay::ModFlags::ARTimewarp;
+                        if(mod == UString("osu_mod_minimize")) sc.mods.flags |= Replay::ModFlags::Minimize;
+                        if(mod == UString("osu_mod_fadingcursor")) sc.mods.flags |= Replay::ModFlags::FadingCursor;
+                        if(mod == UString("osu_mod_fps")) sc.mods.flags |= Replay::ModFlags::FPS;
+                        if(mod == UString("osu_mod_jigsaw1")) sc.mods.flags |= Replay::ModFlags::Jigsaw1;
+                        if(mod == UString("osu_mod_jigsaw2")) sc.mods.flags |= Replay::ModFlags::Jigsaw2;
+                        if(mod == UString("osu_mod_fullalternate")) sc.mods.flags |= Replay::ModFlags::FullAlternate;
+                        if(mod == UString("osu_mod_reverse_sliders")) sc.mods.flags |= Replay::ModFlags::ReverseSliders;
+                        if(mod == UString("osu_mod_no50s")) sc.mods.flags |= Replay::ModFlags::No50s;
+                        if(mod == UString("osu_mod_no100s")) sc.mods.flags |= Replay::ModFlags::No100s;
+                        if(mod == UString("osu_mod_ming3012")) sc.mods.flags |= Replay::ModFlags::Ming3012;
+                        if(mod == UString("osu_mod_halfwindow")) sc.mods.flags |= Replay::ModFlags::HalfWindow;
+                        if(mod == UString("osu_mod_millhioref")) sc.mods.flags |= Replay::ModFlags::Millhioref;
+                        if(mod == UString("osu_mod_mafham")) sc.mods.flags |= Replay::ModFlags::Mafham;
+                        if(mod == UString("osu_mod_strict_tracking")) sc.mods.flags |= Replay::ModFlags::StrictTracking;
+                        if(mod == UString("osu_playfield_mirror_horizontal"))
+                            sc.mods.flags |= Replay::ModFlags::MirrorHorizontal;
+                        if(mod == UString("osu_playfield_mirror_vertical"))
+                            sc.mods.flags |= Replay::ModFlags::MirrorVertical;
+                        if(mod == UString("osu_mod_shirone")) sc.mods.flags |= Replay::ModFlags::Shirone;
+                        if(mod == UString("osu_mod_approach_different"))
+                            sc.mods.flags |= Replay::ModFlags::ApproachDifferent;
+                    }
+
+                    sc.beatmap_hash = md5hash;
+                    sc.perfect = sc.comboMax >= sc.maxPossibleCombo;
+                    sc.grade = sc.calculate_grade();
+
+                    if(this->addScoreRaw(sc)) {
+                        nb_imported++;
+                    }
+                }
+            }
+        } else {  // mcosu (this is copy-pasted from mcosu-ng)
+            const int numBeatmaps = db.read<int32_t>();
+
+            if(db_version > backupMoreThanVersion)
+                makeBackupType = 2;
+            else if(db_version < backupLessThanVersion)
+                makeBackupType = 1;
+
+            debugLogF("Custom scores: version = {}, numBeatmaps = {}\n", db_version, numBeatmaps);
+
+            if(db_version <= latest_mcosu_custom_scores_ver) {
+                for(int b = 0; b < numBeatmaps; b++) {
+                    const auto md5hash = db.read_hash();
+                    const int numScores = db.read<int32_t>();
+
+                    if(md5hash.length() < 32) {
+                        debugLogF("WARNING: Invalid score on beatmap {} with md5hash.length() = {}!\n", b,
+                                  md5hash.length());
+                        continue;
+                    } else if(md5hash.length() > 32) {
+                        debugLogF("ERROR: Corrupt score database/entry detected, stopping.\n");
+                        break;
+                    }
+
+                    if(cv::debug.getBool())
+                        debugLogF("Beatmap[{}]: md5hash = {:s}, numScores = {}\n", b, md5hash.hash.data(), numScores);
+
+                    for(int s = 0; s < numScores; s++) {
+                        const auto gamemode =
+                            db.read<uint8_t>();  // NOTE: abused as isImportedLegacyScore flag (because I forgot to
+                                                 // add a version cap to old builds)
+                        const int scoreVersion = db.read<int32_t>();
+                        if(db_version == 20210103 && scoreVersion > 20190103) {
+                            /* isImportedLegacyScore = */ db.skip<uint8_t>();  // too lazy to handle this logic
+                        }
+                        const auto unixTimestamp = db.read<uint64_t>();
+
+                        // default
+                        const std::string playerName{db.read_string()};
+
+                        const auto num300s = db.read<uint16_t>();
+                        const auto num100s = db.read<uint16_t>();
+                        const auto num50s = db.read<uint16_t>();
+                        const auto numGekis = db.read<uint16_t>();
+                        const auto numKatus = db.read<uint16_t>();
+                        const auto numMisses = db.read<uint16_t>();
+
+                        const auto score = db.read<int64_t>();
+                        const auto maxCombo = db.read<uint16_t>();
+                        const auto mods = Replay::Mods::from_legacy(db.read<int32_t>());
+
+                        // custom
+                        const short numSliderBreaks = db.read<uint16_t>();
+                        const auto pp = db.read<f32>();
+                        const auto unstableRate = db.read<f32>();
+                        const auto hitErrorAvgMin = db.read<f32>();
+                        const auto hitErrorAvgMax = db.read<f32>();
+                        const auto starsTomTotal = db.read<f32>();
+                        const auto starsTomAim = db.read<f32>();
+                        const auto starsTomSpeed = db.read<f32>();
+                        const auto speedMultiplier = db.read<f32>();
+                        const auto CS = db.read<f32>();
+                        const auto AR = db.read<f32>();
+                        const auto OD = db.read<f32>();
+                        const auto HP = db.read<f32>();
+
+                        int maxPossibleCombo = -1;
+                        int numHitObjects = -1;
+                        int numCircles = -1;
+                        if(scoreVersion > 20180722) {
+                            maxPossibleCombo = db.read<int32_t>();
+                            numHitObjects = db.read<int32_t>();
+                            numCircles = db.read<int32_t>();
+                        }
+
+                        std::string experimentalModsConVars = db.read_string();
+                        auto experimentalMods = SString::split(experimentalModsConVars, ";");
+
+                        if(gamemode == 0x0 ||
+                           (db_version > 20210103 &&
+                            scoreVersion > 20190103))  // gamemode filter (osu!standard) // HACKHACK: for
+                                                       // explanation see hackIsImportedLegacyScoreFlag
+                        {
+                            FinishedScore sc;
+
+                            sc.unixTimestamp = unixTimestamp;
+
+                            // default
+                            sc.playerName = playerName;
+
+                            sc.num300s = num300s;
+                            sc.num100s = num100s;
+                            sc.num50s = num50s;
+                            sc.numGekis = numGekis;
+                            sc.numKatus = numKatus;
+                            sc.numMisses = numMisses;
+                            sc.score = score;
+                            sc.comboMax = maxCombo;
+                            sc.perfect = (maxPossibleCombo > 0 && sc.comboMax > 0 && sc.comboMax >= maxPossibleCombo);
+                            sc.mods = mods;
+
+                            // custom
+                            sc.numSliderBreaks = numSliderBreaks;
+                            sc.ppv2_version = 20220902;
+                            sc.ppv2_score = pp;
+                            sc.unstableRate = unstableRate;
+                            sc.hitErrorAvgMin = hitErrorAvgMin;
+                            sc.hitErrorAvgMax = hitErrorAvgMax;
+                            sc.ppv2_total_stars = starsTomTotal;
+                            sc.ppv2_aim_stars = starsTomAim;
+                            sc.ppv2_speed_stars = starsTomSpeed;
+                            sc.mods.speed = speedMultiplier;
+                            sc.mods.cs_override = CS;
+                            sc.mods.ar_override = AR;
+                            sc.mods.od_override = OD;
+                            sc.mods.hp_override = HP;
+                            sc.maxPossibleCombo = maxPossibleCombo;
+                            sc.numHitObjects = numHitObjects;
+                            sc.numCircles = numCircles;
+                            for(const auto &mod : experimentalMods) {
+                                if(mod == "") continue;
+                                if(mod == "fposu_mod_strafing") sc.mods.flags |= Replay::ModFlags::FPoSu_Strafing;
+                                if(mod == "osu_mod_wobble") sc.mods.flags |= Replay::ModFlags::Wobble1;
+                                if(mod == "osu_mod_wobble2") sc.mods.flags |= Replay::ModFlags::Wobble2;
+                                if(mod == "osu_mod_arwobble") sc.mods.flags |= Replay::ModFlags::ARWobble;
+                                if(mod == "osu_mod_timewarp") sc.mods.flags |= Replay::ModFlags::Timewarp;
+                                if(mod == "osu_mod_artimewarp") sc.mods.flags |= Replay::ModFlags::ARTimewarp;
+                                if(mod == "osu_mod_minimize") sc.mods.flags |= Replay::ModFlags::Minimize;
+                                if(mod == "osu_mod_fadingcursor") sc.mods.flags |= Replay::ModFlags::FadingCursor;
+                                if(mod == "osu_mod_fps") sc.mods.flags |= Replay::ModFlags::FPS;
+                                if(mod == "osu_mod_jigsaw1") sc.mods.flags |= Replay::ModFlags::Jigsaw1;
+                                if(mod == "osu_mod_jigsaw2") sc.mods.flags |= Replay::ModFlags::Jigsaw2;
+                                if(mod == "osu_mod_fullalternate") sc.mods.flags |= Replay::ModFlags::FullAlternate;
+                                if(mod == "osu_mod_reverse_sliders") sc.mods.flags |= Replay::ModFlags::ReverseSliders;
+                                if(mod == "osu_mod_no50s") sc.mods.flags |= Replay::ModFlags::No50s;
+                                if(mod == "osu_mod_no100s") sc.mods.flags |= Replay::ModFlags::No100s;
+                                if(mod == "osu_mod_ming3012") sc.mods.flags |= Replay::ModFlags::Ming3012;
+                                if(mod == "osu_mod_halfwindow") sc.mods.flags |= Replay::ModFlags::HalfWindow;
+                                if(mod == "osu_mod_millhioref") sc.mods.flags |= Replay::ModFlags::Millhioref;
+                                if(mod == "osu_mod_mafham") sc.mods.flags |= Replay::ModFlags::Mafham;
+                                if(mod == "osu_mod_strict_tracking") sc.mods.flags |= Replay::ModFlags::StrictTracking;
+                                if(mod == "osu_playfield_mirror_horizontal")
+                                    sc.mods.flags |= Replay::ModFlags::MirrorHorizontal;
+                                if(mod == "osu_playfield_mirror_vertical")
+                                    sc.mods.flags |= Replay::ModFlags::MirrorVertical;
+                                if(mod == "osu_mod_shirone") sc.mods.flags |= Replay::ModFlags::Shirone;
+                                if(mod == "osu_mod_approach_different")
+                                    sc.mods.flags |= Replay::ModFlags::ApproachDifferent;
+                            }
+
+                            sc.beatmap_hash = md5hash;
+                            sc.perfect = sc.comboMax >= sc.maxPossibleCombo;
+                            sc.grade = sc.calculate_grade();
+
+                            if(this->addScoreRaw(sc)) {
+                                nb_imported++;
+                            }
+                        }
+                    }
+                }
+                debugLogF("Loaded {} individual scores.\n", nb_imported);
+            } else
+                debugLogF("Newer scores.db version is not backwards compatible with old clients.\n");
+        }
+
+        // one-time-backup for special occasions (sanity)
+        if(makeBackupType > 0) {
+            File originalScoresFile("scores.db");
+            if(originalScoresFile.canRead()) {
+                std::string backupScoresFilePath = "scores.db";
+                const int forcedBackupCounter = 5;
+                backupScoresFilePath.append(fmt::format(
+                    ".{}_{}.backup", (makeBackupType < 2 ? backupLessThanVersion : latest_mcosu_custom_scores_ver),
+                    forcedBackupCounter));
+
+                if(!env->fileExists(backupScoresFilePath))  // NOTE: avoid overwriting when people switch betas
+                {
+                    File backupScoresFile(backupScoresFilePath, File::TYPE::WRITE);
+                    if(backupScoresFile.canWrite()) {
+                        const char *originalScoresFileBytes = originalScoresFile.readFile();
+                        if(originalScoresFileBytes != NULL)
+                            backupScoresFile.write(originalScoresFileBytes, originalScoresFile.getFileSize());
+                    }
+                }
             }
         }
     }

@@ -631,7 +631,7 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> & /*
         }
     }
 
-    CoUninitialize();
+    doCoUninitialize();
 
     // release the timers
     SAFE_DELETE(deltaTimer);
