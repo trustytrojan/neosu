@@ -1,12 +1,18 @@
+//================ Copyright (c) 2017, PG, All rights reserved. =================//
+//
+// Purpose:		OpenGL baking support for vao
+//
+// $NoKeywords: $glvao
+//===============================================================================//
+
 #include "OpenGLVertexArrayObject.h"
 
 #ifdef MCENGINE_FEATURE_OPENGL
 
-#include "ConVar.h"
 #include "Engine.h"
+#include "ConVar.h"
+
 #include "OpenGLHeaders.h"
-
-
 
 OpenGLVertexArrayObject::OpenGLVertexArrayObject(Graphics::PRIMITIVE primitive, Graphics::USAGE_TYPE usage,
                                                  bool keepInSystemMemory)
@@ -24,7 +30,7 @@ OpenGLVertexArrayObject::OpenGLVertexArrayObject(Graphics::PRIMITIVE primitive, 
 }
 
 void OpenGLVertexArrayObject::init() {
-    if(!this->bAsyncReady || this->vertices.size() < 2) return;
+    if(!(this->bAsyncReady.load()) || this->vertices.size() < 2) return;
 
     // handle partial reloads
 
@@ -171,7 +177,7 @@ void OpenGLVertexArrayObject::init() {
     }
 
     // free memory
-    if(!this->bKeepInSystemMemory) this->clear();
+    if(!this->bKeepInSystemMemory) clear();
 
     this->bReady = true;
 }
@@ -201,20 +207,20 @@ void OpenGLVertexArrayObject::destroy() {
 
 void OpenGLVertexArrayObject::draw() {
     if(!this->bReady) {
-        debugLog("WARNING: OpenGLVertexArrayObject::draw() called, but was not ready!\n");
+        debugLogF("WARNING: called, but was not ready!\n");
         return;
     }
 
     const int start = std::clamp<int>(this->iDrawRangeFromIndex > -1
-                                     ? this->iDrawRangeFromIndex
-                                     : nearestMultipleUp((int)(this->iNumVertices * this->fDrawPercentFromPercent),
-                                                         this->iDrawPercentNearestMultiple),
-                                 0, this->iNumVertices);
+                                          ? this->iDrawRangeFromIndex
+                                          : nearestMultipleUp((int)(this->iNumVertices * this->fDrawPercentFromPercent),
+                                                              this->iDrawPercentNearestMultiple),
+                                      0, this->iNumVertices);
     const int end = std::clamp<int>(this->iDrawRangeToIndex > -1
-                                   ? this->iDrawRangeToIndex
-                                   : nearestMultipleDown((int)(this->iNumVertices * this->fDrawPercentToPercent),
-                                                         this->iDrawPercentNearestMultiple),
-                               0, this->iNumVertices);
+                                        ? this->iDrawRangeToIndex
+                                        : nearestMultipleDown((int)(this->iNumVertices * this->fDrawPercentToPercent),
+                                                              this->iDrawPercentNearestMultiple),
+                                    0, this->iNumVertices);
 
     if(start > end || std::abs(end - start) == 0) return;
 

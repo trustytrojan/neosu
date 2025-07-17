@@ -53,6 +53,8 @@ class VertexArrayObject : public Resource {
     [[nodiscard]] inline unsigned int getNumVertices() const { return this->iNumVertices; }
     [[nodiscard]] inline bool hasTexcoords() const { return this->bHasTexcoords; }
 
+    virtual void draw() { assert(false); }  // implementation dependent (gl/dx11/etc.)
+
     // type inspection
     [[nodiscard]] Type getResType() const final { return VAO; }
 

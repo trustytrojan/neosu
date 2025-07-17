@@ -33,6 +33,7 @@ Changelog::Changelog() : ScreenBackable() {
         R"(- Added "Sort Skins Alphabetically" option, for sorting skins in a different order (ignoring prefixes))",
         R"(- Added support for filtering by "creator=" in the song browser)",
         R"(- Added support for parsing McOsu "scores.db" databases for local scores)",
+        R"(- Added "Max Queued Frames" slider to options menu (and associated renderer logic), for improved latency)",
     };
     changelogs.push_back(v39_00);
 

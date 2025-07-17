@@ -259,11 +259,13 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/Engine/Renderer/neosu-NullImage.$(OBJEXT) \
 	src/Engine/Renderer/neosu-NullRenderTarget.$(OBJEXT) \
 	src/Engine/Renderer/neosu-NullShader.$(OBJEXT) \
-	src/Engine/Renderer/neosu-OpenGLImage.$(OBJEXT) \
-	src/Engine/Renderer/neosu-OpenGLLegacyInterface.$(OBJEXT) \
-	src/Engine/Renderer/neosu-OpenGLRenderTarget.$(OBJEXT) \
-	src/Engine/Renderer/neosu-OpenGLShader.$(OBJEXT) \
-	src/Engine/Renderer/neosu-OpenGLVertexArrayObject.$(OBJEXT) \
+	src/Engine/Renderer/OpenGL/neosu-OpenGLImage.$(OBJEXT) \
+	src/Engine/Renderer/OpenGL/neosu-OpenGLLegacyInterface.$(OBJEXT) \
+	src/Engine/Renderer/OpenGL/neosu-OpenGLRenderTarget.$(OBJEXT) \
+	src/Engine/Renderer/OpenGL/neosu-OpenGLShader.$(OBJEXT) \
+	src/Engine/Renderer/OpenGL/neosu-OpenGLStateCache.$(OBJEXT) \
+	src/Engine/Renderer/OpenGL/neosu-OpenGLSync.$(OBJEXT) \
+	src/Engine/Renderer/OpenGL/neosu-OpenGLVertexArrayObject.$(OBJEXT) \
 	src/Engine/Resources/neosu-AsyncResourceLoader.$(OBJEXT) \
 	src/Engine/Resources/neosu-Resource.$(OBJEXT) \
 	src/Engine/Resources/neosu-ResourceManager.$(OBJEXT) \
@@ -439,11 +441,13 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/Engine/Renderer/$(DEPDIR)/neosu-NullImage.Po \
 	src/Engine/Renderer/$(DEPDIR)/neosu-NullRenderTarget.Po \
 	src/Engine/Renderer/$(DEPDIR)/neosu-NullShader.Po \
-	src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLImage.Po \
-	src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLLegacyInterface.Po \
-	src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLRenderTarget.Po \
-	src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLShader.Po \
-	src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLVertexArrayObject.Po \
+	src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLImage.Po \
+	src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLLegacyInterface.Po \
+	src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLRenderTarget.Po \
+	src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLShader.Po \
+	src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLStateCache.Po \
+	src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLSync.Po \
+	src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLVertexArrayObject.Po \
 	src/Engine/Resources/$(DEPDIR)/neosu-AsyncResourceLoader.Po \
 	src/Engine/Resources/$(DEPDIR)/neosu-Resource.Po \
 	src/Engine/Resources/$(DEPDIR)/neosu-ResourceManager.Po \
@@ -926,11 +930,13 @@ neosu_SOURCES = \
 	src/Engine/Renderer/NullImage.cpp \
 	src/Engine/Renderer/NullRenderTarget.cpp \
 	src/Engine/Renderer/NullShader.cpp \
-	src/Engine/Renderer/OpenGLImage.cpp \
-	src/Engine/Renderer/OpenGLLegacyInterface.cpp \
-	src/Engine/Renderer/OpenGLRenderTarget.cpp \
-	src/Engine/Renderer/OpenGLShader.cpp \
-	src/Engine/Renderer/OpenGLVertexArrayObject.cpp \
+	src/Engine/Renderer/OpenGL/OpenGLImage.cpp \
+	src/Engine/Renderer/OpenGL/OpenGLLegacyInterface.cpp \
+	src/Engine/Renderer/OpenGL/OpenGLRenderTarget.cpp \
+	src/Engine/Renderer/OpenGL/OpenGLShader.cpp \
+	src/Engine/Renderer/OpenGL/OpenGLStateCache.cpp \
+	src/Engine/Renderer/OpenGL/OpenGLSync.cpp \
+	src/Engine/Renderer/OpenGL/OpenGLVertexArrayObject.cpp \
 	src/Engine/Resources/AsyncResourceLoader.cpp \
 	src/Engine/Resources/Resource.cpp \
 	src/Engine/Resources/ResourceManager.cpp \
@@ -1554,21 +1560,33 @@ src/Engine/Renderer/neosu-NullRenderTarget.$(OBJEXT):  \
 src/Engine/Renderer/neosu-NullShader.$(OBJEXT):  \
 	src/Engine/Renderer/$(am__dirstamp) \
 	src/Engine/Renderer/$(DEPDIR)/$(am__dirstamp)
-src/Engine/Renderer/neosu-OpenGLImage.$(OBJEXT):  \
-	src/Engine/Renderer/$(am__dirstamp) \
-	src/Engine/Renderer/$(DEPDIR)/$(am__dirstamp)
-src/Engine/Renderer/neosu-OpenGLLegacyInterface.$(OBJEXT):  \
-	src/Engine/Renderer/$(am__dirstamp) \
-	src/Engine/Renderer/$(DEPDIR)/$(am__dirstamp)
-src/Engine/Renderer/neosu-OpenGLRenderTarget.$(OBJEXT):  \
-	src/Engine/Renderer/$(am__dirstamp) \
-	src/Engine/Renderer/$(DEPDIR)/$(am__dirstamp)
-src/Engine/Renderer/neosu-OpenGLShader.$(OBJEXT):  \
-	src/Engine/Renderer/$(am__dirstamp) \
-	src/Engine/Renderer/$(DEPDIR)/$(am__dirstamp)
-src/Engine/Renderer/neosu-OpenGLVertexArrayObject.$(OBJEXT):  \
-	src/Engine/Renderer/$(am__dirstamp) \
-	src/Engine/Renderer/$(DEPDIR)/$(am__dirstamp)
+src/Engine/Renderer/OpenGL/$(am__dirstamp):
+	@$(MKDIR_P) src/Engine/Renderer/OpenGL
+	@: >>src/Engine/Renderer/OpenGL/$(am__dirstamp)
+src/Engine/Renderer/OpenGL/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) src/Engine/Renderer/OpenGL/$(DEPDIR)
+	@: >>src/Engine/Renderer/OpenGL/$(DEPDIR)/$(am__dirstamp)
+src/Engine/Renderer/OpenGL/neosu-OpenGLImage.$(OBJEXT):  \
+	src/Engine/Renderer/OpenGL/$(am__dirstamp) \
+	src/Engine/Renderer/OpenGL/$(DEPDIR)/$(am__dirstamp)
+src/Engine/Renderer/OpenGL/neosu-OpenGLLegacyInterface.$(OBJEXT):  \
+	src/Engine/Renderer/OpenGL/$(am__dirstamp) \
+	src/Engine/Renderer/OpenGL/$(DEPDIR)/$(am__dirstamp)
+src/Engine/Renderer/OpenGL/neosu-OpenGLRenderTarget.$(OBJEXT):  \
+	src/Engine/Renderer/OpenGL/$(am__dirstamp) \
+	src/Engine/Renderer/OpenGL/$(DEPDIR)/$(am__dirstamp)
+src/Engine/Renderer/OpenGL/neosu-OpenGLShader.$(OBJEXT):  \
+	src/Engine/Renderer/OpenGL/$(am__dirstamp) \
+	src/Engine/Renderer/OpenGL/$(DEPDIR)/$(am__dirstamp)
+src/Engine/Renderer/OpenGL/neosu-OpenGLStateCache.$(OBJEXT):  \
+	src/Engine/Renderer/OpenGL/$(am__dirstamp) \
+	src/Engine/Renderer/OpenGL/$(DEPDIR)/$(am__dirstamp)
+src/Engine/Renderer/OpenGL/neosu-OpenGLSync.$(OBJEXT):  \
+	src/Engine/Renderer/OpenGL/$(am__dirstamp) \
+	src/Engine/Renderer/OpenGL/$(DEPDIR)/$(am__dirstamp)
+src/Engine/Renderer/OpenGL/neosu-OpenGLVertexArrayObject.$(OBJEXT):  \
+	src/Engine/Renderer/OpenGL/$(am__dirstamp) \
+	src/Engine/Renderer/OpenGL/$(DEPDIR)/$(am__dirstamp)
 src/Engine/Resources/$(am__dirstamp):
 	@$(MKDIR_P) src/Engine/Resources
 	@: >>src/Engine/Resources/$(am__dirstamp)
@@ -1753,6 +1771,7 @@ mostlyclean-compile:
 	-rm -f src/Engine/*.$(OBJEXT)
 	-rm -f src/Engine/Input/*.$(OBJEXT)
 	-rm -f src/Engine/Renderer/*.$(OBJEXT)
+	-rm -f src/Engine/Renderer/OpenGL/*.$(OBJEXT)
 	-rm -f src/Engine/Resources/*.$(OBJEXT)
 	-rm -f src/Engine/Sound/*.$(OBJEXT)
 	-rm -f src/Engine/Sound/BASS/*.$(OBJEXT)
@@ -1881,11 +1900,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/$(DEPDIR)/neosu-NullImage.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/$(DEPDIR)/neosu-NullRenderTarget.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/$(DEPDIR)/neosu-NullShader.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLImage.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLLegacyInterface.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLRenderTarget.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLShader.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLVertexArrayObject.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLImage.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLLegacyInterface.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLRenderTarget.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLShader.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLStateCache.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLSync.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLVertexArrayObject.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Resources/$(DEPDIR)/neosu-AsyncResourceLoader.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Resources/$(DEPDIR)/neosu-Resource.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Resources/$(DEPDIR)/neosu-ResourceManager.Po@am__quote@ # am--include-marker
@@ -3518,75 +3539,103 @@ src/Engine/Renderer/neosu-NullShader.obj: src/Engine/Renderer/NullShader.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/neosu-NullShader.obj `if test -f 'src/Engine/Renderer/NullShader.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/NullShader.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/NullShader.cpp'; fi`
 
-src/Engine/Renderer/neosu-OpenGLImage.o: src/Engine/Renderer/OpenGLImage.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/neosu-OpenGLImage.o -MD -MP -MF src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLImage.Tpo -c -o src/Engine/Renderer/neosu-OpenGLImage.o `test -f 'src/Engine/Renderer/OpenGLImage.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGLImage.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLImage.Tpo src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLImage.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGLImage.cpp' object='src/Engine/Renderer/neosu-OpenGLImage.o' libtool=no @AMDEPBACKSLASH@
+src/Engine/Renderer/OpenGL/neosu-OpenGLImage.o: src/Engine/Renderer/OpenGL/OpenGLImage.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/OpenGL/neosu-OpenGLImage.o -MD -MP -MF src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLImage.Tpo -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLImage.o `test -f 'src/Engine/Renderer/OpenGL/OpenGLImage.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGL/OpenGLImage.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLImage.Tpo src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLImage.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGL/OpenGLImage.cpp' object='src/Engine/Renderer/OpenGL/neosu-OpenGLImage.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/neosu-OpenGLImage.o `test -f 'src/Engine/Renderer/OpenGLImage.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGLImage.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLImage.o `test -f 'src/Engine/Renderer/OpenGL/OpenGLImage.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGL/OpenGLImage.cpp
 
-src/Engine/Renderer/neosu-OpenGLImage.obj: src/Engine/Renderer/OpenGLImage.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/neosu-OpenGLImage.obj -MD -MP -MF src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLImage.Tpo -c -o src/Engine/Renderer/neosu-OpenGLImage.obj `if test -f 'src/Engine/Renderer/OpenGLImage.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGLImage.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGLImage.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLImage.Tpo src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLImage.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGLImage.cpp' object='src/Engine/Renderer/neosu-OpenGLImage.obj' libtool=no @AMDEPBACKSLASH@
+src/Engine/Renderer/OpenGL/neosu-OpenGLImage.obj: src/Engine/Renderer/OpenGL/OpenGLImage.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/OpenGL/neosu-OpenGLImage.obj -MD -MP -MF src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLImage.Tpo -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLImage.obj `if test -f 'src/Engine/Renderer/OpenGL/OpenGLImage.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGL/OpenGLImage.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGL/OpenGLImage.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLImage.Tpo src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLImage.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGL/OpenGLImage.cpp' object='src/Engine/Renderer/OpenGL/neosu-OpenGLImage.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/neosu-OpenGLImage.obj `if test -f 'src/Engine/Renderer/OpenGLImage.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGLImage.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGLImage.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLImage.obj `if test -f 'src/Engine/Renderer/OpenGL/OpenGLImage.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGL/OpenGLImage.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGL/OpenGLImage.cpp'; fi`
 
-src/Engine/Renderer/neosu-OpenGLLegacyInterface.o: src/Engine/Renderer/OpenGLLegacyInterface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/neosu-OpenGLLegacyInterface.o -MD -MP -MF src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLLegacyInterface.Tpo -c -o src/Engine/Renderer/neosu-OpenGLLegacyInterface.o `test -f 'src/Engine/Renderer/OpenGLLegacyInterface.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGLLegacyInterface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLLegacyInterface.Tpo src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLLegacyInterface.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGLLegacyInterface.cpp' object='src/Engine/Renderer/neosu-OpenGLLegacyInterface.o' libtool=no @AMDEPBACKSLASH@
+src/Engine/Renderer/OpenGL/neosu-OpenGLLegacyInterface.o: src/Engine/Renderer/OpenGL/OpenGLLegacyInterface.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/OpenGL/neosu-OpenGLLegacyInterface.o -MD -MP -MF src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLLegacyInterface.Tpo -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLLegacyInterface.o `test -f 'src/Engine/Renderer/OpenGL/OpenGLLegacyInterface.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGL/OpenGLLegacyInterface.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLLegacyInterface.Tpo src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLLegacyInterface.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGL/OpenGLLegacyInterface.cpp' object='src/Engine/Renderer/OpenGL/neosu-OpenGLLegacyInterface.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/neosu-OpenGLLegacyInterface.o `test -f 'src/Engine/Renderer/OpenGLLegacyInterface.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGLLegacyInterface.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLLegacyInterface.o `test -f 'src/Engine/Renderer/OpenGL/OpenGLLegacyInterface.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGL/OpenGLLegacyInterface.cpp
 
-src/Engine/Renderer/neosu-OpenGLLegacyInterface.obj: src/Engine/Renderer/OpenGLLegacyInterface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/neosu-OpenGLLegacyInterface.obj -MD -MP -MF src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLLegacyInterface.Tpo -c -o src/Engine/Renderer/neosu-OpenGLLegacyInterface.obj `if test -f 'src/Engine/Renderer/OpenGLLegacyInterface.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGLLegacyInterface.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGLLegacyInterface.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLLegacyInterface.Tpo src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLLegacyInterface.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGLLegacyInterface.cpp' object='src/Engine/Renderer/neosu-OpenGLLegacyInterface.obj' libtool=no @AMDEPBACKSLASH@
+src/Engine/Renderer/OpenGL/neosu-OpenGLLegacyInterface.obj: src/Engine/Renderer/OpenGL/OpenGLLegacyInterface.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/OpenGL/neosu-OpenGLLegacyInterface.obj -MD -MP -MF src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLLegacyInterface.Tpo -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLLegacyInterface.obj `if test -f 'src/Engine/Renderer/OpenGL/OpenGLLegacyInterface.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGL/OpenGLLegacyInterface.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGL/OpenGLLegacyInterface.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLLegacyInterface.Tpo src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLLegacyInterface.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGL/OpenGLLegacyInterface.cpp' object='src/Engine/Renderer/OpenGL/neosu-OpenGLLegacyInterface.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/neosu-OpenGLLegacyInterface.obj `if test -f 'src/Engine/Renderer/OpenGLLegacyInterface.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGLLegacyInterface.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGLLegacyInterface.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLLegacyInterface.obj `if test -f 'src/Engine/Renderer/OpenGL/OpenGLLegacyInterface.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGL/OpenGLLegacyInterface.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGL/OpenGLLegacyInterface.cpp'; fi`
 
-src/Engine/Renderer/neosu-OpenGLRenderTarget.o: src/Engine/Renderer/OpenGLRenderTarget.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/neosu-OpenGLRenderTarget.o -MD -MP -MF src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLRenderTarget.Tpo -c -o src/Engine/Renderer/neosu-OpenGLRenderTarget.o `test -f 'src/Engine/Renderer/OpenGLRenderTarget.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGLRenderTarget.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLRenderTarget.Tpo src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLRenderTarget.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGLRenderTarget.cpp' object='src/Engine/Renderer/neosu-OpenGLRenderTarget.o' libtool=no @AMDEPBACKSLASH@
+src/Engine/Renderer/OpenGL/neosu-OpenGLRenderTarget.o: src/Engine/Renderer/OpenGL/OpenGLRenderTarget.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/OpenGL/neosu-OpenGLRenderTarget.o -MD -MP -MF src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLRenderTarget.Tpo -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLRenderTarget.o `test -f 'src/Engine/Renderer/OpenGL/OpenGLRenderTarget.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGL/OpenGLRenderTarget.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLRenderTarget.Tpo src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLRenderTarget.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGL/OpenGLRenderTarget.cpp' object='src/Engine/Renderer/OpenGL/neosu-OpenGLRenderTarget.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/neosu-OpenGLRenderTarget.o `test -f 'src/Engine/Renderer/OpenGLRenderTarget.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGLRenderTarget.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLRenderTarget.o `test -f 'src/Engine/Renderer/OpenGL/OpenGLRenderTarget.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGL/OpenGLRenderTarget.cpp
 
-src/Engine/Renderer/neosu-OpenGLRenderTarget.obj: src/Engine/Renderer/OpenGLRenderTarget.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/neosu-OpenGLRenderTarget.obj -MD -MP -MF src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLRenderTarget.Tpo -c -o src/Engine/Renderer/neosu-OpenGLRenderTarget.obj `if test -f 'src/Engine/Renderer/OpenGLRenderTarget.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGLRenderTarget.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGLRenderTarget.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLRenderTarget.Tpo src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLRenderTarget.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGLRenderTarget.cpp' object='src/Engine/Renderer/neosu-OpenGLRenderTarget.obj' libtool=no @AMDEPBACKSLASH@
+src/Engine/Renderer/OpenGL/neosu-OpenGLRenderTarget.obj: src/Engine/Renderer/OpenGL/OpenGLRenderTarget.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/OpenGL/neosu-OpenGLRenderTarget.obj -MD -MP -MF src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLRenderTarget.Tpo -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLRenderTarget.obj `if test -f 'src/Engine/Renderer/OpenGL/OpenGLRenderTarget.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGL/OpenGLRenderTarget.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGL/OpenGLRenderTarget.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLRenderTarget.Tpo src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLRenderTarget.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGL/OpenGLRenderTarget.cpp' object='src/Engine/Renderer/OpenGL/neosu-OpenGLRenderTarget.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/neosu-OpenGLRenderTarget.obj `if test -f 'src/Engine/Renderer/OpenGLRenderTarget.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGLRenderTarget.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGLRenderTarget.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLRenderTarget.obj `if test -f 'src/Engine/Renderer/OpenGL/OpenGLRenderTarget.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGL/OpenGLRenderTarget.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGL/OpenGLRenderTarget.cpp'; fi`
 
-src/Engine/Renderer/neosu-OpenGLShader.o: src/Engine/Renderer/OpenGLShader.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/neosu-OpenGLShader.o -MD -MP -MF src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLShader.Tpo -c -o src/Engine/Renderer/neosu-OpenGLShader.o `test -f 'src/Engine/Renderer/OpenGLShader.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGLShader.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLShader.Tpo src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLShader.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGLShader.cpp' object='src/Engine/Renderer/neosu-OpenGLShader.o' libtool=no @AMDEPBACKSLASH@
+src/Engine/Renderer/OpenGL/neosu-OpenGLShader.o: src/Engine/Renderer/OpenGL/OpenGLShader.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/OpenGL/neosu-OpenGLShader.o -MD -MP -MF src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLShader.Tpo -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLShader.o `test -f 'src/Engine/Renderer/OpenGL/OpenGLShader.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGL/OpenGLShader.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLShader.Tpo src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLShader.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGL/OpenGLShader.cpp' object='src/Engine/Renderer/OpenGL/neosu-OpenGLShader.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/neosu-OpenGLShader.o `test -f 'src/Engine/Renderer/OpenGLShader.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGLShader.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLShader.o `test -f 'src/Engine/Renderer/OpenGL/OpenGLShader.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGL/OpenGLShader.cpp
 
-src/Engine/Renderer/neosu-OpenGLShader.obj: src/Engine/Renderer/OpenGLShader.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/neosu-OpenGLShader.obj -MD -MP -MF src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLShader.Tpo -c -o src/Engine/Renderer/neosu-OpenGLShader.obj `if test -f 'src/Engine/Renderer/OpenGLShader.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGLShader.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGLShader.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLShader.Tpo src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLShader.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGLShader.cpp' object='src/Engine/Renderer/neosu-OpenGLShader.obj' libtool=no @AMDEPBACKSLASH@
+src/Engine/Renderer/OpenGL/neosu-OpenGLShader.obj: src/Engine/Renderer/OpenGL/OpenGLShader.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/OpenGL/neosu-OpenGLShader.obj -MD -MP -MF src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLShader.Tpo -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLShader.obj `if test -f 'src/Engine/Renderer/OpenGL/OpenGLShader.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGL/OpenGLShader.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGL/OpenGLShader.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLShader.Tpo src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLShader.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGL/OpenGLShader.cpp' object='src/Engine/Renderer/OpenGL/neosu-OpenGLShader.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/neosu-OpenGLShader.obj `if test -f 'src/Engine/Renderer/OpenGLShader.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGLShader.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGLShader.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLShader.obj `if test -f 'src/Engine/Renderer/OpenGL/OpenGLShader.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGL/OpenGLShader.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGL/OpenGLShader.cpp'; fi`
 
-src/Engine/Renderer/neosu-OpenGLVertexArrayObject.o: src/Engine/Renderer/OpenGLVertexArrayObject.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/neosu-OpenGLVertexArrayObject.o -MD -MP -MF src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLVertexArrayObject.Tpo -c -o src/Engine/Renderer/neosu-OpenGLVertexArrayObject.o `test -f 'src/Engine/Renderer/OpenGLVertexArrayObject.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGLVertexArrayObject.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLVertexArrayObject.Tpo src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLVertexArrayObject.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGLVertexArrayObject.cpp' object='src/Engine/Renderer/neosu-OpenGLVertexArrayObject.o' libtool=no @AMDEPBACKSLASH@
+src/Engine/Renderer/OpenGL/neosu-OpenGLStateCache.o: src/Engine/Renderer/OpenGL/OpenGLStateCache.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/OpenGL/neosu-OpenGLStateCache.o -MD -MP -MF src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLStateCache.Tpo -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLStateCache.o `test -f 'src/Engine/Renderer/OpenGL/OpenGLStateCache.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGL/OpenGLStateCache.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLStateCache.Tpo src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLStateCache.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGL/OpenGLStateCache.cpp' object='src/Engine/Renderer/OpenGL/neosu-OpenGLStateCache.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/neosu-OpenGLVertexArrayObject.o `test -f 'src/Engine/Renderer/OpenGLVertexArrayObject.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGLVertexArrayObject.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLStateCache.o `test -f 'src/Engine/Renderer/OpenGL/OpenGLStateCache.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGL/OpenGLStateCache.cpp
 
-src/Engine/Renderer/neosu-OpenGLVertexArrayObject.obj: src/Engine/Renderer/OpenGLVertexArrayObject.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/neosu-OpenGLVertexArrayObject.obj -MD -MP -MF src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLVertexArrayObject.Tpo -c -o src/Engine/Renderer/neosu-OpenGLVertexArrayObject.obj `if test -f 'src/Engine/Renderer/OpenGLVertexArrayObject.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGLVertexArrayObject.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGLVertexArrayObject.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLVertexArrayObject.Tpo src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLVertexArrayObject.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGLVertexArrayObject.cpp' object='src/Engine/Renderer/neosu-OpenGLVertexArrayObject.obj' libtool=no @AMDEPBACKSLASH@
+src/Engine/Renderer/OpenGL/neosu-OpenGLStateCache.obj: src/Engine/Renderer/OpenGL/OpenGLStateCache.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/OpenGL/neosu-OpenGLStateCache.obj -MD -MP -MF src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLStateCache.Tpo -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLStateCache.obj `if test -f 'src/Engine/Renderer/OpenGL/OpenGLStateCache.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGL/OpenGLStateCache.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGL/OpenGLStateCache.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLStateCache.Tpo src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLStateCache.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGL/OpenGLStateCache.cpp' object='src/Engine/Renderer/OpenGL/neosu-OpenGLStateCache.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/neosu-OpenGLVertexArrayObject.obj `if test -f 'src/Engine/Renderer/OpenGLVertexArrayObject.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGLVertexArrayObject.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGLVertexArrayObject.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLStateCache.obj `if test -f 'src/Engine/Renderer/OpenGL/OpenGLStateCache.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGL/OpenGLStateCache.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGL/OpenGLStateCache.cpp'; fi`
+
+src/Engine/Renderer/OpenGL/neosu-OpenGLSync.o: src/Engine/Renderer/OpenGL/OpenGLSync.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/OpenGL/neosu-OpenGLSync.o -MD -MP -MF src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLSync.Tpo -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLSync.o `test -f 'src/Engine/Renderer/OpenGL/OpenGLSync.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGL/OpenGLSync.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLSync.Tpo src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLSync.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGL/OpenGLSync.cpp' object='src/Engine/Renderer/OpenGL/neosu-OpenGLSync.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLSync.o `test -f 'src/Engine/Renderer/OpenGL/OpenGLSync.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGL/OpenGLSync.cpp
+
+src/Engine/Renderer/OpenGL/neosu-OpenGLSync.obj: src/Engine/Renderer/OpenGL/OpenGLSync.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/OpenGL/neosu-OpenGLSync.obj -MD -MP -MF src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLSync.Tpo -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLSync.obj `if test -f 'src/Engine/Renderer/OpenGL/OpenGLSync.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGL/OpenGLSync.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGL/OpenGLSync.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLSync.Tpo src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLSync.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGL/OpenGLSync.cpp' object='src/Engine/Renderer/OpenGL/neosu-OpenGLSync.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLSync.obj `if test -f 'src/Engine/Renderer/OpenGL/OpenGLSync.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGL/OpenGLSync.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGL/OpenGLSync.cpp'; fi`
+
+src/Engine/Renderer/OpenGL/neosu-OpenGLVertexArrayObject.o: src/Engine/Renderer/OpenGL/OpenGLVertexArrayObject.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/OpenGL/neosu-OpenGLVertexArrayObject.o -MD -MP -MF src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLVertexArrayObject.Tpo -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLVertexArrayObject.o `test -f 'src/Engine/Renderer/OpenGL/OpenGLVertexArrayObject.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGL/OpenGLVertexArrayObject.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLVertexArrayObject.Tpo src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLVertexArrayObject.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGL/OpenGLVertexArrayObject.cpp' object='src/Engine/Renderer/OpenGL/neosu-OpenGLVertexArrayObject.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLVertexArrayObject.o `test -f 'src/Engine/Renderer/OpenGL/OpenGLVertexArrayObject.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGL/OpenGLVertexArrayObject.cpp
+
+src/Engine/Renderer/OpenGL/neosu-OpenGLVertexArrayObject.obj: src/Engine/Renderer/OpenGL/OpenGLVertexArrayObject.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/OpenGL/neosu-OpenGLVertexArrayObject.obj -MD -MP -MF src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLVertexArrayObject.Tpo -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLVertexArrayObject.obj `if test -f 'src/Engine/Renderer/OpenGL/OpenGLVertexArrayObject.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGL/OpenGLVertexArrayObject.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGL/OpenGLVertexArrayObject.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLVertexArrayObject.Tpo src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLVertexArrayObject.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGL/OpenGLVertexArrayObject.cpp' object='src/Engine/Renderer/OpenGL/neosu-OpenGLVertexArrayObject.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLVertexArrayObject.obj `if test -f 'src/Engine/Renderer/OpenGL/OpenGLVertexArrayObject.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGL/OpenGLVertexArrayObject.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGL/OpenGLVertexArrayObject.cpp'; fi`
 
 src/Engine/Resources/neosu-AsyncResourceLoader.o: src/Engine/Resources/AsyncResourceLoader.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Resources/neosu-AsyncResourceLoader.o -MD -MP -MF src/Engine/Resources/$(DEPDIR)/neosu-AsyncResourceLoader.Tpo -c -o src/Engine/Resources/neosu-AsyncResourceLoader.o `test -f 'src/Engine/Resources/AsyncResourceLoader.cpp' || echo '$(srcdir)/'`src/Engine/Resources/AsyncResourceLoader.cpp
@@ -4484,6 +4533,8 @@ distclean-generic:
 	-$(am__rm_f) src/Engine/Input/$(am__dirstamp)
 	-$(am__rm_f) src/Engine/Renderer/$(DEPDIR)/$(am__dirstamp)
 	-$(am__rm_f) src/Engine/Renderer/$(am__dirstamp)
+	-$(am__rm_f) src/Engine/Renderer/OpenGL/$(DEPDIR)/$(am__dirstamp)
+	-$(am__rm_f) src/Engine/Renderer/OpenGL/$(am__dirstamp)
 	-$(am__rm_f) src/Engine/Resources/$(DEPDIR)/$(am__dirstamp)
 	-$(am__rm_f) src/Engine/Resources/$(am__dirstamp)
 	-$(am__rm_f) src/Engine/Sound/$(DEPDIR)/$(am__dirstamp)
@@ -4630,11 +4681,13 @@ distclean: distclean-am
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-NullImage.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-NullRenderTarget.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-NullShader.Po
-	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLImage.Po
-	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLLegacyInterface.Po
-	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLRenderTarget.Po
-	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLShader.Po
-	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLVertexArrayObject.Po
+	-rm -f src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLImage.Po
+	-rm -f src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLLegacyInterface.Po
+	-rm -f src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLRenderTarget.Po
+	-rm -f src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLShader.Po
+	-rm -f src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLStateCache.Po
+	-rm -f src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLSync.Po
+	-rm -f src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLVertexArrayObject.Po
 	-rm -f src/Engine/Resources/$(DEPDIR)/neosu-AsyncResourceLoader.Po
 	-rm -f src/Engine/Resources/$(DEPDIR)/neosu-Resource.Po
 	-rm -f src/Engine/Resources/$(DEPDIR)/neosu-ResourceManager.Po
@@ -4838,11 +4891,13 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-NullImage.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-NullRenderTarget.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-NullShader.Po
-	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLImage.Po
-	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLLegacyInterface.Po
-	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLRenderTarget.Po
-	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLShader.Po
-	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLVertexArrayObject.Po
+	-rm -f src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLImage.Po
+	-rm -f src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLLegacyInterface.Po
+	-rm -f src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLRenderTarget.Po
+	-rm -f src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLShader.Po
+	-rm -f src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLStateCache.Po
+	-rm -f src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLSync.Po
+	-rm -f src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLVertexArrayObject.Po
 	-rm -f src/Engine/Resources/$(DEPDIR)/neosu-AsyncResourceLoader.Po
 	-rm -f src/Engine/Resources/$(DEPDIR)/neosu-Resource.Po
 	-rm -f src/Engine/Resources/$(DEPDIR)/neosu-ResourceManager.Po

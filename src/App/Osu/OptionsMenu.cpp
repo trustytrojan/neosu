@@ -558,6 +558,15 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
         this->addCheckbox("High Priority", "Sets the game process priority to high", &cv::win_processpriority);
 
     this->addCheckbox("Show FPS Counter", &cv::draw_fps);
+
+    if constexpr(Env::cfg(REND::GL | REND::GLES32)) {
+        CBaseUISlider *prerenderedFramesSlider =
+            addSlider("Max Queued Frames", 1.0f, 3.0f, &cv::r_sync_max_frames, -1.0f, true);
+        prerenderedFramesSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangeInt>(this));
+        prerenderedFramesSlider->setKeyDelta(1);
+        addLabel("Raise for higher fps, decrease for lower latency")->setTextColor(0xff666666);
+    }
+
     this->addSpacer();
 
     this->addCheckbox("Unlimited FPS", &cv::fps_unlimited);
@@ -1750,9 +1759,11 @@ void OptionsMenu::updateLayout() {
                     if(this->elements[i].elements.size() == 1) {
                         auto *textboxPointer = dynamic_cast<CBaseUITextbox *>(this->elements[i].elements[0]);
                         if(textboxPointer != NULL) {
-                            // HACKHACK: don't override textbox with the mp_password_temporary (which gets deleted on login)
+                            // HACKHACK: don't override textbox with the mp_password_temporary (which gets deleted on
+                            // login)
                             UString textToSet{this->elements[i].cvar->getString().c_str()};
-                            if(this->elements[i].cvar == &cv::mp_password_temporary && cv::mp_password_temporary.getString().empty()) {
+                            if(this->elements[i].cvar == &cv::mp_password_temporary &&
+                               cv::mp_password_temporary.getString().empty()) {
                                 textToSet = cv::mp_password_md5.getString().c_str();
                             }
                             textboxPointer->setText(textToSet);

@@ -1,3 +1,10 @@
+//================ Copyright (c) 2016, PG, All rights reserved. =================//
+//
+// Purpose:		raw legacy opengl graphics interface
+//
+// $NoKeywords: $lgli
+//===============================================================================//
+
 #include "OpenGLLegacyInterface.h"
 
 #ifdef MCENGINE_FEATURE_OPENGL
@@ -5,22 +12,17 @@
 #include "Camera.h"
 #include "ConVar.h"
 #include "Engine.h"
+
 #include "Font.h"
-#include "OpenGLHeaders.h"
 #include "OpenGLImage.h"
 #include "OpenGLRenderTarget.h"
 #include "OpenGLShader.h"
 #include "OpenGLVertexArrayObject.h"
 
-#define GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX 0x9047
-#define GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX 0x9048
-#define GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX 0x9049
-#define GPU_MEMORY_INFO_EVICTION_COUNT_NVX 0x904A
-#define GPU_MEMORY_INFO_EVICTED_MEMORY_NVX 0x904B
+#include "OpenGLHeaders.h"
+#include "OpenGLStateCache.h"
 
-#define VBO_FREE_MEMORY_ATI 0x87FB
-#define TEXTURE_FREE_MEMORY_ATI 0x87FC
-#define RENDERBUFFER_FREE_MEMORY_ATI 0x87FD
+#include <utility>
 
 OpenGLLegacyInterface::OpenGLLegacyInterface() : Graphics() {
     // renderer
@@ -32,18 +34,19 @@ OpenGLLegacyInterface::OpenGLLegacyInterface() : Graphics() {
     this->color = 0xffffffff;
     this->fClearZ = 1;
     this->fZ = 1;
+
+    this->syncobj = new OpenGLSync();
 }
 
 void OpenGLLegacyInterface::init() {
-	// resolve GL functions
-	if (!gladLoadGL())
-	{
-		debugLog("gladLoadGL() error\n");
-		engine->showMessageErrorFatal("OpenGL Error", "Couldn't gladLoadGL()!\nThe engine will exit now.");
-		engine->shutdown();
-		return;
-	}
-	debugLogF("OpenGL Version: {}\n", reinterpret_cast<const char *>(glGetString(GL_VERSION)));
+    // resolve GL functions
+    if(!gladLoadGL()) {
+        debugLog("gladLoadGL() error\n");
+        engine->showMessageErrorFatal("OpenGL Error", "Couldn't gladLoadGL()!\nThe engine will exit now.");
+        engine->shutdown();
+        return;
+    }
+    debugLogF("OpenGL Version: {}\n", reinterpret_cast<const char *>(glGetString(GL_VERSION)));
 
     // enable
     glEnable(GL_TEXTURE_2D);
@@ -68,25 +71,26 @@ void OpenGLLegacyInterface::init() {
     // culling
     glFrontFace(GL_CCW);
 
-    // wireframe mode
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    // initialize the state cache
+    OpenGLStateCache::getInstance().initialize();
 }
 
-OpenGLLegacyInterface::~OpenGLLegacyInterface() {}
+OpenGLLegacyInterface::~OpenGLLegacyInterface() { SAFE_DELETE(this->syncobj); }
 
 void OpenGLLegacyInterface::beginScene() {
     this->bInScene = true;
+    this->syncobj->begin();
 
     Matrix4 defaultProjectionMatrix =
         Camera::buildMatrixOrtho2D(0, this->vResolution.x, this->vResolution.y, 0, -1.0f, 1.0f);
 
     // push main transforms
-    this->pushTransform();
-    this->setProjectionMatrix(defaultProjectionMatrix);
-    this->translate(cv::r_globaloffset_x.getFloat(), cv::r_globaloffset_y.getFloat());
+    pushTransform();
+    setProjectionMatrix(defaultProjectionMatrix);
+    translate(cv::r_globaloffset_x.getFloat(), cv::r_globaloffset_y.getFloat());
 
     // and apply them
-    this->updateTransform();
+    updateTransform();
 
     // set clear color and clear
     // glClearColor(1, 1, 1, 1);
@@ -95,19 +99,23 @@ void OpenGLLegacyInterface::beginScene() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     // display any errors of previous frames
-    this->handleGLErrors();
+    handleGLErrors();
 }
 
 void OpenGLLegacyInterface::endScene() {
-    this->popTransform();
+    popTransform();
 
-    this->checkStackLeaks();
+#ifdef _DEBUG
+    checkStackLeaks();
 
     if(this->clipRectStack.size() > 0) {
         engine->showMessageErrorFatal("ClipRect Stack Leak", "Make sure all push*() have a pop*()!");
         engine->shutdown();
     }
 
+#endif
+
+    this->syncobj->end();
     this->bInScene = false;
 }
 
@@ -119,17 +127,11 @@ void OpenGLLegacyInterface::setColor(Color color) {
     this->color = color;
     // glColor4f(((unsigned char)(this->color >> 16))  / 255.0f, ((unsigned char)(this->color >> 8)) / 255.0f,
     // ((unsigned char)(this->color >> 0)) / 255.0f, ((unsigned char)(this->color >> 24)) / 255.0f);
-    glColor4ub((unsigned char)(this->color >> 16), (unsigned char)(this->color >> 8), (unsigned char)(this->color >> 0),
-               (unsigned char)(this->color >> 24));
+    glColor4ub(this->color.R(), this->color.G(), this->color.B(), this->color.A());
 }
 
 void OpenGLLegacyInterface::setAlpha(float alpha) {
-    Color tempColor = this->color;
-
-    tempColor &= 0x00ffffff;
-    tempColor |= ((int)(255.0f * alpha)) << 24;
-
-    this->setColor(tempColor);
+    setColor(rgba(this->color.Rf(), this->color.Gf(), this->color.Bf(), alpha));
 }
 
 void OpenGLLegacyInterface::drawPixels(int x, int y, int width, int height, Graphics::DRAWPIXELS_TYPE type,
@@ -140,17 +142,19 @@ void OpenGLLegacyInterface::drawPixels(int x, int y, int width, int height, Grap
 }
 
 void OpenGLLegacyInterface::drawPixel(int x, int y) {
-    this->updateTransform();
+    updateTransform();
 
     glDisable(GL_TEXTURE_2D);
 
     glBegin(GL_POINTS);
-    { glVertex2i(x, y); }
+    {
+        glVertex2i(x, y);
+    }
     glEnd();
 }
 
 void OpenGLLegacyInterface::drawLine(int x1, int y1, int x2, int y2) {
-    this->updateTransform();
+    updateTransform();
 
     glDisable(GL_TEXTURE_2D);
 
@@ -162,10 +166,10 @@ void OpenGLLegacyInterface::drawLine(int x1, int y1, int x2, int y2) {
     glEnd();
 }
 
-void OpenGLLegacyInterface::drawLine(Vector2 pos1, Vector2 pos2) { this->drawLine(pos1.x, pos1.y, pos2.x, pos2.y); }
+void OpenGLLegacyInterface::drawLine(Vector2 pos1, Vector2 pos2) { drawLine(pos1.x, pos1.y, pos2.x, pos2.y); }
 
 void OpenGLLegacyInterface::drawRect(int x, int y, int width, int height) {
-    this->updateTransform();
+    updateTransform();
 
     glDisable(GL_TEXTURE_2D);
 
@@ -188,25 +192,25 @@ void OpenGLLegacyInterface::drawRect(int x, int y, int width, int height) {
 
 void OpenGLLegacyInterface::drawRect(int x, int y, int width, int height, Color top, Color right, Color bottom,
                                      Color left) {
-    this->updateTransform();
+    updateTransform();
 
     glDisable(GL_TEXTURE_2D);
 
     glBegin(GL_LINES);
     {
-        this->setColor(top);
+        setColor(top);
         glVertex2f((x + 1) + 0.5f, y + 0.5f);
         glVertex2f((x + width) + 0.5f, y + 0.5f);
 
-        this->setColor(left);
+        setColor(left);
         glVertex2f(x + 0.5f, y + 0.5f);
         glVertex2f(x + 0.5f, (y + height) + 0.5f);
 
-        this->setColor(bottom);
+        setColor(bottom);
         glVertex2f(x + 0.5f, (y + height) + 0.5f);
         glVertex2f((x + width + 1) + 0.5f, (y + height) + 0.5f);
 
-        this->setColor(right);
+        setColor(right);
         glVertex2f((x + width) + 0.5f, y + 0.5f);
         glVertex2f((x + width) + 0.5f, (y + height) + 0.5f);
     }
@@ -214,7 +218,7 @@ void OpenGLLegacyInterface::drawRect(int x, int y, int width, int height, Color 
 }
 
 void OpenGLLegacyInterface::fillRect(int x, int y, int width, int height) {
-    this->updateTransform();
+    updateTransform();
 
     glDisable(GL_TEXTURE_2D);
 
@@ -235,7 +239,7 @@ void OpenGLLegacyInterface::fillRoundedRect(int x, int y, int width, int height,
     double i = 0;
     const double factor = 0.05;
 
-    this->updateTransform();
+    updateTransform();
 
     glDisable(GL_TEXTURE_2D);
 
@@ -269,29 +273,29 @@ void OpenGLLegacyInterface::fillRoundedRect(int x, int y, int width, int height,
 
 void OpenGLLegacyInterface::fillGradient(int x, int y, int width, int height, Color topLeftColor, Color topRightColor,
                                          Color bottomLeftColor, Color bottomRightColor) {
-    this->updateTransform();
+    updateTransform();
 
     glDisable(GL_TEXTURE_2D);
 
     glBegin(GL_QUADS);
     {
-        this->setColor(topLeftColor);
+        setColor(topLeftColor);
         glVertex2i(x, y);
 
-        this->setColor(topRightColor);
+        setColor(topRightColor);
         glVertex2i((x + width), y);
 
-        this->setColor(bottomRightColor);
+        setColor(bottomRightColor);
         glVertex2i((x + width), (y + height));
 
-        this->setColor(bottomLeftColor);
+        setColor(bottomLeftColor);
         glVertex2i(x, (y + height));
     }
     glEnd();
 }
 
 void OpenGLLegacyInterface::drawQuad(int x, int y, int width, int height) {
-    this->updateTransform();
+    updateTransform();
 
     glBegin(GL_QUADS);
     {
@@ -313,23 +317,23 @@ void OpenGLLegacyInterface::drawQuad(int x, int y, int width, int height) {
 void OpenGLLegacyInterface::drawQuad(Vector2 topLeft, Vector2 topRight, Vector2 bottomRight, Vector2 bottomLeft,
                                      Color topLeftColor, Color topRightColor, Color bottomRightColor,
                                      Color bottomLeftColor) {
-    this->updateTransform();
+    updateTransform();
 
     glBegin(GL_QUADS);
     {
-        this->setColor(topLeftColor);
+        setColor(topLeftColor);
         glTexCoord2f(0, 0);
         glVertex2f(topLeft.x, topLeft.y);
 
-        this->setColor(bottomLeftColor);
+        setColor(bottomLeftColor);
         glTexCoord2f(0, 1);
         glVertex2f(bottomLeft.x, bottomLeft.y);
 
-        this->setColor(bottomRightColor);
+        setColor(bottomRightColor);
         glTexCoord2f(1, 1);
         glVertex2f(bottomRight.x, bottomRight.y);
 
-        this->setColor(topRightColor);
+        setColor(topRightColor);
         glTexCoord2f(1, 0);
         glVertex2f(topRight.x, topRight.y);
     }
@@ -400,10 +404,10 @@ void OpenGLLegacyInterface::drawImage(Image *image, AnchorPoint anchor) {
     }
 }
 
-void OpenGLLegacyInterface::drawString(McFont *font, const UString& text) {
+void OpenGLLegacyInterface::drawString(McFont *font, const UString &text) {
     if(font == NULL || text.length() < 1 || !font->isReady()) return;
 
-    this->updateTransform();
+    updateTransform();
 
     if(cv::r_debug_flush_drawstring.getBool()) {
         glFinish();
@@ -418,7 +422,7 @@ void OpenGLLegacyInterface::drawString(McFont *font, const UString& text) {
 void OpenGLLegacyInterface::drawVAO(VertexArrayObject *vao) {
     if(vao == NULL) return;
 
-    this->updateTransform();
+    updateTransform();
 
     // HACKHACK: disable texturing for special primitives, also for untextured vaos
     if(vao->getPrimitive() == Graphics::PRIMITIVE::PRIMITIVE_LINES ||
@@ -427,7 +431,7 @@ void OpenGLLegacyInterface::drawVAO(VertexArrayObject *vao) {
 
     // if baked, then we can directly draw the buffer
     if(vao->isReady()) {
-        ((OpenGLVertexArrayObject *)vao)->draw();
+        vao->draw();
         return;
     }
 
@@ -438,7 +442,7 @@ void OpenGLLegacyInterface::drawVAO(VertexArrayObject *vao) {
 
     glBegin(primitiveToOpenGL(vao->getPrimitive()));
     for(size_t i = 0; i < vertices.size(); i++) {
-        if(i < colors.size()) this->setColor(colors[i]);
+        if(i < colors.size()) setColor(colors[i]);
 
         for(size_t t = 0; t < texcoords.size(); t++) {
             if(i < texcoords[t].size()) glMultiTexCoord2f(GL_TEXTURE0 + t, texcoords[t][i].x, texcoords[t][i].y);
@@ -453,20 +457,20 @@ void OpenGLLegacyInterface::drawVAO(VertexArrayObject *vao) {
 
 void OpenGLLegacyInterface::setClipRect(McRect clipRect) {
     if(cv::r_debug_disable_cliprect.getBool()) return;
-    // if (this->bIs3DScene) return; // HACKHACK:TODO:
+    // if (m_bIs3DScene) return; // HACKHACK:TODO:
 
     // HACKHACK: compensate for viewport changes caused by RenderTargets!
     int viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
 
-    // debugLog("viewport = %i, %i, %i, %i\n", viewport[0], viewport[1], viewport[2], viewport[3]);
+    // debugLogF("viewport = {}, {}, {}, {}\n", viewport[0], viewport[1], viewport[2], viewport[3]);
 
     glEnable(GL_SCISSOR_TEST);
     glScissor((int)clipRect.getX() + viewport[0],
               viewport[3] - ((int)clipRect.getY() - viewport[1] - 1 + (int)clipRect.getHeight()),
               (int)clipRect.getWidth(), (int)clipRect.getHeight());
 
-    // debugLog("scissor = %i, %i, %i, %i\n", (int)clipRect.getX()+viewport[0],
+    // debugLogF("scissor = {}, {}, {}, {}\n", (int)clipRect.getX()+viewport[0],
     // viewport[3]-((int)clipRect.getY()-viewport[1]-1+(int)clipRect.getHeight()), (int)clipRect.getWidth(),
     // (int)clipRect.getHeight());
 }
@@ -477,16 +481,16 @@ void OpenGLLegacyInterface::pushClipRect(McRect clipRect) {
     else
         this->clipRectStack.push(clipRect);
 
-    this->setClipRect(this->clipRectStack.top());
+    setClipRect(this->clipRectStack.top());
 }
 
 void OpenGLLegacyInterface::popClipRect() {
     this->clipRectStack.pop();
 
     if(this->clipRectStack.size() > 0)
-        this->setClipRect(this->clipRectStack.top());
+        setClipRect(this->clipRectStack.top());
     else
-        this->setClipping(false);
+        setClipping(false);
 }
 
 void OpenGLLegacyInterface::pushStencil() {
@@ -598,7 +602,7 @@ std::vector<unsigned char> OpenGLLegacyInterface::getScreenshot() {
     // take screenshot
     unsigned char *pixels = new unsigned char[numElements];
     glFinish();
-    for(int y = 0; y < height; y++)  // flip it while reading
+    for(int y = 0; std::cmp_less(y, height); y++)  // flip it while reading
     {
         glReadPixels(0, (height - (y + 1)), width, 1, GL_RGB, GL_UNSIGNED_BYTE, &(pixels[y * width * 3]));
     }
@@ -611,55 +615,13 @@ std::vector<unsigned char> OpenGLLegacyInterface::getScreenshot() {
     return result;
 }
 
-UString OpenGLLegacyInterface::getVendor() {
-    const GLubyte *vendor = glGetString(GL_VENDOR);
-    return reinterpret_cast<const char *>(vendor);
-}
-
-UString OpenGLLegacyInterface::getModel() {
-    const GLubyte *model = glGetString(GL_RENDERER);
-    return reinterpret_cast<const char *>(model);
-}
-
-UString OpenGLLegacyInterface::getVersion() {
-    const GLubyte *version = glGetString(GL_VERSION);
-    return reinterpret_cast<const char *>(version);
-}
-
-int OpenGLLegacyInterface::getVRAMTotal() {
-    int nvidiaMemory = -1;
-    int atiMemory = -1;
-
-    glGetIntegerv(GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &nvidiaMemory);
-    glGetIntegerv(TEXTURE_FREE_MEMORY_ATI, &atiMemory);
-
-    glGetError();  // clear error state
-
-    if(nvidiaMemory < 1)
-        return atiMemory;
-    else
-        return nvidiaMemory;
-}
-
-int OpenGLLegacyInterface::getVRAMRemaining() {
-    int nvidiaMemory = -1;
-    int atiMemory = -1;
-
-    glGetIntegerv(GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &nvidiaMemory);
-    glGetIntegerv(TEXTURE_FREE_MEMORY_ATI, &atiMemory);
-
-    glGetError();  // clear error state
-
-    if(nvidiaMemory < 1)
-        return atiMemory;
-    else
-        return nvidiaMemory;
-}
-
 void OpenGLLegacyInterface::onResolutionChange(Vector2 newResolution) {
     // rebuild viewport
     this->vResolution = newResolution;
     glViewport(0, 0, this->vResolution.x, this->vResolution.y);
+
+    // update state cache with the new viewport
+    OpenGLStateCache::getInstance().setCurrentViewport(0, 0, this->vResolution.x, this->vResolution.y);
 
     // special case: custom rendertarget resolution rendering, update active projection matrix immediately
     if(this->bInScene) {
@@ -747,8 +709,62 @@ int OpenGLLegacyInterface::compareFuncToOpenGL(Graphics::COMPARE_FUNC compareFun
 }
 
 void OpenGLLegacyInterface::handleGLErrors() {
-    int error = glGetError();
-    if(error != 0) debugLog("OpenGL Error: %i on frame %i\n", error, engine->getFrameCount());
+    // no
+}
+
+UString OpenGLLegacyInterface::getVendor() {
+    const GLubyte *vendor = glGetString(GL_VENDOR);
+    return reinterpret_cast<const char *>(vendor);
+}
+
+UString OpenGLLegacyInterface::getModel() {
+    const GLubyte *model = glGetString(GL_RENDERER);
+    return reinterpret_cast<const char *>(model);
+}
+
+UString OpenGLLegacyInterface::getVersion() {
+    const GLubyte *version = glGetString(GL_VERSION);
+    return reinterpret_cast<const char *>(version);
+}
+
+#define GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX 0x9047
+#define GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX 0x9048
+#define GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX 0x9049
+#define GPU_MEMORY_INFO_EVICTION_COUNT_NVX 0x904A
+#define GPU_MEMORY_INFO_EVICTED_MEMORY_NVX 0x904B
+
+#define VBO_FREE_MEMORY_ATI 0x87FB
+#define TEXTURE_FREE_MEMORY_ATI 0x87FC
+#define RENDERBUFFER_FREE_MEMORY_ATI 0x87FD
+
+int OpenGLLegacyInterface::getVRAMTotal() {
+    int nvidiaMemory = -1;
+    int atiMemory = -1;
+
+    glGetIntegerv(GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &nvidiaMemory);
+    glGetIntegerv(TEXTURE_FREE_MEMORY_ATI, &atiMemory);
+
+    glGetError();  // clear error state
+
+    if(nvidiaMemory < 1)
+        return atiMemory;
+    else
+        return nvidiaMemory;
+}
+
+int OpenGLLegacyInterface::getVRAMRemaining() {
+    int nvidiaMemory = -1;
+    int atiMemory = -1;
+
+    glGetIntegerv(GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &nvidiaMemory);
+    glGetIntegerv(TEXTURE_FREE_MEMORY_ATI, &atiMemory);
+
+    glGetError();  // clear error state
+
+    if(nvidiaMemory < 1)
+        return atiMemory;
+    else
+        return nvidiaMemory;
 }
 
 #endif

@@ -820,7 +820,8 @@ CONVAR(mouse_sensitivity, "mouse_sensitivity", 1.0f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(mp_autologin, "mp_autologin", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
 CONVAR(mp_oauth_token, "mp_oauth_token", "", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_HIDDEN);
 CONVAR(mp_password_md5, "mp_password_md5", "", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_HIDDEN);
-CONVAR(mp_password_temporary, "mp_password_temporary", "", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_HIDDEN | FCVAR_INTERNAL);
+CONVAR(mp_password_temporary, "mp_password_temporary", "",
+       FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_HIDDEN | FCVAR_INTERNAL);
 CONVAR(mp_server, "mp_server", "akatsuki.gg", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
 CONVAR(name, "name", "Guest", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
 CONVAR(nightcore_enjoyer, "nightcore_enjoyer", false, FCVAR_BANCHO_COMPATIBLE);
@@ -879,14 +880,24 @@ CONVAR(r_debug_font_atlas_padding, "r_debug_font_atlas_padding", 1, FCVAR_BANCHO
        "padding between glyphs in the atlas to prevent bleeding");
 CONVAR(r_debug_font_unicode, "r_debug_font_unicode", false, FCVAR_BANCHO_COMPATIBLE,
        "debug messages for unicode/fallback font related stuff");
+CONVAR(r_sync_timeout, "r_sync_timeout", 5000000, FCVAR_BANCHO_COMPATIBLE,
+       "timeout in microseconds for GPU synchronization operations");
+CONVAR(r_sync_enabled, "r_sync_enabled", true, FCVAR_BANCHO_COMPATIBLE,
+       "enable explicit GPU synchronization for OpenGL");
+CONVAR(r_sync_debug, "r_sync_debug", false, FCVAR_HIDDEN | FCVAR_BANCHO_COMPATIBLE,
+       "print debug information about sync objects");
+CONVAR(r_sync_max_frames, "r_sync_max_frames", 1, FCVAR_BANCHO_COMPATIBLE,
+       "maximum pre-rendered frames allowed in rendering pipeline");  // (a la "Max Prerendered Frames")
+CONVAR(r_opengl_legacy_vao_use_vertex_array, "r_opengl_legacy_vao_use_vertex_array",
+       Env::cfg(REND::GLES32) ? true : false, FCVAR_LOCKED,
+       "dramatically reduces per-vao draw calls, but completely breaks legacy ffp draw calls (vertices work, but "
+       "texcoords/normals/etc. are NOT in gl_MultiTexCoord0 -> requiring a shader with attributes)");
+CONVAR(debug_opengl, "debug_opengl", false, FCVAR_LOCKED);
 CONVAR(font_load_system, "font_load_system", true, FCVAR_LOCKED,
        "try to load a similar system font if a glyph is missing in the bundled fonts");
 CONVAR(r_globaloffset_x, "r_globaloffset_x", 0.0f, FCVAR_LOCKED);
 CONVAR(r_globaloffset_y, "r_globaloffset_y", 0.0f, FCVAR_LOCKED);
 CONVAR(r_image_unbind_after_drawimage, "r_image_unbind_after_drawimage", true, FCVAR_BANCHO_COMPATIBLE);
-CONVAR(r_opengl_legacy_vao_use_vertex_array, "r_opengl_legacy_vao_use_vertex_array", false, FCVAR_LOCKED,
-       "dramatically reduces per-vao draw calls, but completely breaks legacy ffp draw calls (vertices work, but "
-       "texcoords/normals/etc. are NOT in gl_MultiTexCoord0 -> requiring a shader with attributes)");
 CONVAR(rankingscreen_pp, "osu_rankingscreen_pp", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(rankingscreen_topbar_height_percent, "osu_rankingscreen_topbar_height_percent", 0.785f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(relax_offset, "osu_relax_offset", -12, FCVAR_BANCHO_COMPATIBLE | FCVAR_GAMEPLAY,

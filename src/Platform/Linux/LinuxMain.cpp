@@ -20,6 +20,7 @@
 #include <X11/Xlib.h>
 #include <X11/extensions/XI2.h>
 #include <X11/extensions/XInput2.h>
+#include <X11/Xutil.h>
 #include <unistd.h>
 
 #include "OpenGLHeaders.h"

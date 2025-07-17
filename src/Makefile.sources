@@ -112,11 +112,13 @@ neosu_SOURCES = \
 	src/Engine/Renderer/NullImage.cpp \
 	src/Engine/Renderer/NullRenderTarget.cpp \
 	src/Engine/Renderer/NullShader.cpp \
-	src/Engine/Renderer/OpenGLImage.cpp \
-	src/Engine/Renderer/OpenGLLegacyInterface.cpp \
-	src/Engine/Renderer/OpenGLRenderTarget.cpp \
-	src/Engine/Renderer/OpenGLShader.cpp \
-	src/Engine/Renderer/OpenGLVertexArrayObject.cpp \
+	src/Engine/Renderer/OpenGL/OpenGLImage.cpp \
+	src/Engine/Renderer/OpenGL/OpenGLLegacyInterface.cpp \
+	src/Engine/Renderer/OpenGL/OpenGLRenderTarget.cpp \
+	src/Engine/Renderer/OpenGL/OpenGLShader.cpp \
+	src/Engine/Renderer/OpenGL/OpenGLStateCache.cpp \
+	src/Engine/Renderer/OpenGL/OpenGLSync.cpp \
+	src/Engine/Renderer/OpenGL/OpenGLVertexArrayObject.cpp \
 	src/Engine/Resources/AsyncResourceLoader.cpp \
 	src/Engine/Resources/Resource.cpp \
 	src/Engine/Resources/ResourceManager.cpp \
