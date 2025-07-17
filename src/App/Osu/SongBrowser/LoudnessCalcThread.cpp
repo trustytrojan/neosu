@@ -1,13 +1,16 @@
 #include "LoudnessCalcThread.h"
 
 #include <atomic>
-#include <chrono>
 #include <utility>
 
 #include "DatabaseBeatmap.h"
 #include "Engine.h"
 #include "Sound.h"
 #include "SoundEngine.h"
+
+#ifdef MCENGINE_FEATURE_BASS
+#include "BassManager.h"
+#endif
 
 // static member definitions
 std::unique_ptr<VolNormalization> VolNormalization::instance = nullptr;
@@ -21,25 +24,38 @@ struct VolNormalization::LoudnessCalcThread {
 
     std::atomic<u32> nb_computed{0};
     std::atomic<u32> nb_total{0};
-#ifdef MCENGINE_FEATURE_BASS // TODO:
+#ifdef MCENGINE_FEATURE_BASS
    public:
     LoudnessCalcThread(std::vector<DatabaseBeatmap *> maps_to_calc) {
         this->dead = false;
         this->maps = std::move(maps_to_calc);
         this->nb_total = this->maps.size() + 1;
-        this->thr = std::thread(&LoudnessCalcThread::run, this);
+        if(soundEngine->getTypeId() == SoundEngine::BASS) {  // TODO
+            this->thr = std::thread(&LoudnessCalcThread::run, this);
+        }
     }
 
     ~LoudnessCalcThread() {
         this->dead = true;
-        this->thr.join();
+        if(this->thr.joinable()) {
+            this->thr.join();
+        }
     }
+
+    LoudnessCalcThread &operator=(const LoudnessCalcThread &) = delete;
+    LoudnessCalcThread &operator=(LoudnessCalcThread &&) = delete;
+    LoudnessCalcThread(const LoudnessCalcThread &) = delete;
+    LoudnessCalcThread(LoudnessCalcThread &&) = delete;
 
    private:
     void run() {
-        std::string last_song = "";
+        UString last_song = "";
         f32 last_loudness = 0.f;
-        f32 buf[44100];
+        std::array<f32, 44100> buf{};
+
+        while(!BassManager::isLoaded()) {  // this should never happen, but just in case
+            Timing::sleepMS(100);
+        }
 
         BASS_SetDevice(0);
         BASS_SetConfig(BASS_CONFIG_UPDATETHREADS, 0);
@@ -53,17 +69,19 @@ struct VolNormalization::LoudnessCalcThread {
             if(this->dead.load()) return;
             if(diff2->loudness.load() != 0.f) continue;
 
-            auto song = diff2->getFullSoundFilePath();
+            UString song{diff2->getFullSoundFilePath()};
             if(song == last_song) {
                 diff2->loudness = last_loudness;
                 this->nb_computed++;
                 continue;
             }
 
-            auto decoder = BASS_StreamCreateFile(false, song.c_str(), 0, 0, BASS_STREAM_DECODE | BASS_SAMPLE_MONO);
+            constexpr unsigned int flags =
+                BASS_STREAM_DECODE | BASS_SAMPLE_MONO | (Env::cfg(OS::WINDOWS) ? BASS_UNICODE : 0U);
+            auto decoder = BASS_StreamCreateFile(BASS_FILE_NAME, song.plat_str(), 0, 0, flags);
             if(!decoder) {
                 auto err_str = BassManager::getErrorUString();
-                debugLog("BASS_StreamCreateFile(%s): %s\n", song.c_str(), err_str.toUtf8());
+                debugLog("BASS_StreamCreateFile(%s): %s\n", song.toUtf8(), err_str.toUtf8());
                 this->nb_computed++;
                 continue;
             }
@@ -82,7 +100,7 @@ struct VolNormalization::LoudnessCalcThread {
             // Thanks, Microsoft!
             int c;
             do {
-                c = BASS_ChannelGetData(decoder, buf, sizeof(buf));
+                c = BASS_ChannelGetData(decoder, buf.data(), buf.size());
             } while(c >= 0);
 
             BASS_ChannelFree(decoder);
@@ -91,7 +109,7 @@ struct VolNormalization::LoudnessCalcThread {
             BASS_Loudness_GetLevel(loudness, BASS_LOUDNESS_INTEGRATED, &integrated_loudness);
             BASS_Loudness_Stop(loudness);
             if(integrated_loudness == -HUGE_VAL) {
-                debugLog("No loudness information available for '%s' (silent song?)\n", song.c_str());
+                debugLog("No loudness information available for '%s' (silent song?)\n", song.toUtf8());
             } else {
                 diff2->loudness = integrated_loudness;
                 diff2->update_overrides();
@@ -104,13 +122,13 @@ struct VolNormalization::LoudnessCalcThread {
 
         this->nb_computed++;
     }
-#else
+#else  // TODO:
     LoudnessCalcThread(std::vector<DatabaseBeatmap *> maps_to_calc) { (void)maps_to_calc; }
 #endif
 };
 
 u32 VolNormalization::get_computed_instance() {
-    if constexpr(!Env::cfg(AUD::BASS)) return 0;  // TODO
+    if(!Env::cfg(AUD::BASS) || soundEngine->getTypeId() != SoundEngine::BASS) return 0;  // TODO
     u32 x = 0;
     for(auto thr : this->threads) {
         x += thr->nb_computed.load();
@@ -119,7 +137,7 @@ u32 VolNormalization::get_computed_instance() {
 }
 
 u32 VolNormalization::get_total_instance() {
-    if constexpr(!Env::cfg(AUD::BASS)) return 0;  // TODO
+    if(!Env::cfg(AUD::BASS) || soundEngine->getTypeId() != SoundEngine::BASS) return 0;  // TODO
     u32 x = 0;
     for(auto thr : this->threads) {
         x += thr->nb_total.load();
@@ -128,7 +146,7 @@ u32 VolNormalization::get_total_instance() {
 }
 
 void VolNormalization::start_calc_instance(const std::vector<DatabaseBeatmap *> &maps_to_calc) {
-    if constexpr(!Env::cfg(AUD::BASS)) return;  // TODO
+    if(!Env::cfg(AUD::BASS) || soundEngine->getTypeId() != SoundEngine::BASS) return;  // TODO
     this->abort_instance();
     if(maps_to_calc.empty()) return;
     if(!cv::normalize_loudness.getBool()) return;
@@ -155,7 +173,7 @@ void VolNormalization::start_calc_instance(const std::vector<DatabaseBeatmap *> 
 }
 
 void VolNormalization::abort_instance() {
-    if constexpr(!Env::cfg(AUD::BASS)) return;  // TODO
+    if(!Env::cfg(AUD::BASS) || soundEngine->getTypeId() != SoundEngine::BASS) return;  // TODO
     for(auto thr : this->threads) {
         delete thr;
     }

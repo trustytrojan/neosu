@@ -3,6 +3,13 @@
 #include "UString.h"
 #include "BassManager.h"
 
+#define SOUND_ENGINE_TYPE(ClassName, TypeID, ParentClass)               \
+    static constexpr TypeId TYPE_ID = TypeID;                           \
+    [[nodiscard]] TypeId getTypeId() const override { return TYPE_ID; } \
+    [[nodiscard]] bool isTypeOf(TypeId typeId) const override {         \
+        return typeId == TYPE_ID || ParentClass::isTypeOf(typeId);      \
+    }
+
 enum class OutputDriver : uint8_t {
     NONE,
     BASS,         // directsound/wasapi non-exclusive mode/alsa
@@ -24,6 +31,9 @@ class SoundEngine {
     using SOUNDHANDLE = unsigned long;
 
    public:
+    using TypeId = uint8_t;
+    enum SndEngineType : TypeId { BASS, SOLOUD };
+
     SoundEngine();
     ~SoundEngine();
     void restart();
@@ -58,6 +68,24 @@ class SoundEngine {
     void onFreqChanged(float oldValue, float newValue);
     void onParamChanged(float oldValue, float newValue);
 
+    // type inspection
+    //[[nodiscard]] virtual TypeId getTypeId() const = 0;
+    //[[nodiscard]] virtual bool isTypeOf(TypeId /*type_id*/) const { return false; }
+    template <typename T>
+    [[nodiscard]] bool isType() const {
+        return isTypeOf(T::TYPE_ID);
+    }
+    template <typename T>
+    T *as() {
+        return isType<T>() ? static_cast<T *>(this) : nullptr;
+    }
+    template <typename T>
+    const T *as() const {
+        return isType<T>() ? static_cast<const T *>(this) : nullptr;
+    }
+    // temp until SoLoud is added
+    [[nodiscard]] TypeId getTypeId() const { return BASS; }
+    //SOUND_ENGINE_TYPE(SoundEngine, BASS, SoundEngine)
    private:
     std::vector<OUTPUT_DEVICE> outputDevices;
 

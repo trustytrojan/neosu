@@ -84,7 +84,7 @@ void Sound::initAsync() {
         if constexpr(Env::cfg(OS::WINDOWS)) flags |= BASS_UNICODE;
 
         if(this->bInterrupted.load()) return;
-        this->stream = BASS_StreamCreateFile(false, file_path.plat_str(), 0, 0, flags);
+        this->stream = BASS_StreamCreateFile(BASS_FILE_NAME, file_path.plat_str(), 0, 0, flags);
         if(!this->stream) {
             debugLog("BASS_StreamCreateFile() returned error %d on file %s\n", BASS_ErrorGetCode(),
                      this->sFilePath.c_str());

@@ -400,7 +400,7 @@ void OpenGLLegacyInterface::drawImage(Image *image, AnchorPoint anchor) {
     }
 }
 
-void OpenGLLegacyInterface::drawString(McFont *font, UString text) {
+void OpenGLLegacyInterface::drawString(McFont *font, const UString& text) {
     if(font == NULL || text.length() < 1 || !font->isReady()) return;
 
     this->updateTransform();
@@ -412,7 +412,7 @@ void OpenGLLegacyInterface::drawString(McFont *font, UString text) {
         glFlush();
     }
 
-    font->drawString(text.toUtf8());
+    font->drawString(text);
 }
 
 void OpenGLLegacyInterface::drawVAO(VertexArrayObject *vao) {

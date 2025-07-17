@@ -215,6 +215,7 @@ using WASAPIPROC = bass_EXTERN::WASAPIPROC;
     bool init();
 	// close the libraries (BassSoundEngine destructor)
 	void cleanup();
+    bool isLoaded();
 
 	std::string getFailedLoad();
 

@@ -40,7 +40,7 @@ VertexArrayObject *NullGraphicsInterface::createVertexArrayObject(Graphics::PRIM
     return new VertexArrayObject(primitive, usage, keepInSystemMemory);
 }
 
-void NullGraphicsInterface::drawString(McFont * /*font*/, UString  /*text*/) { ; }
+void NullGraphicsInterface::drawString(McFont * /*font*/, const UString&  /*text*/) { ; }
 UString NullGraphicsInterface::getVendor() { return "<NULL>"; }
 UString NullGraphicsInterface::getModel() { return "<NULL>"; }
 UString NullGraphicsInterface::getVersion() { return "<NULL>"; }

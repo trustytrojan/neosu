@@ -97,8 +97,9 @@ BASS_LIBRARIES(GENERATE_LIBRARY_LOADER)
 
 };  // namespace BassFuncs
 
-namespace {
-static HPLUGIN plBassFlac = 0;
+namespace { // static
+HPLUGIN plBassFlac = 0;
+bool loaded = false;
 
 void unloadPlugins() {
     if(plBassFlac) {
@@ -116,10 +117,10 @@ HPLUGIN loadPlugin(const std::string &pluginname) {
     if(!env->fileExists(tryPath.toUtf8())) tryPath = UString::fmt("lib" PREF_PATHSEP "{}", LNAMESTR(pluginname));
 
     // make it a fully qualified path
-    if (env->fileExists(tryPath.toUtf8()))
-    	tryPath = UString::fmt("{}{}", env->getFolderFromFilePath(tryPath.toUtf8()), LNAMESTR(pluginname));
+    if(env->fileExists(tryPath.toUtf8()))
+        tryPath = UString::fmt("{}{}", env->getFolderFromFilePath(tryPath.toUtf8()), LNAMESTR(pluginname));
     else
-    	tryPath = LNAMESTR(pluginname); // maybe bass will find it?
+        tryPath = LNAMESTR(pluginname);  // maybe bass will find it?
 
     ret = BASS_PluginLoad(
         (const char *)tryPath.plat_str(),
@@ -136,10 +137,13 @@ HPLUGIN loadPlugin(const std::string &pluginname) {
     return ret;
 #undef LNAMESTR
 }
+
 }  // namespace
 
+bool isLoaded() { return loaded; }
+
 bool init() {
-    cleanup();  // don't init more than once
+    if(loaded) return true;
 
 #define LOAD_LIBRARY(libname, ...) \
     if(!load_##libname()) {        \
@@ -158,7 +162,7 @@ bool init() {
     // if we got here, we loaded everything
     failedLoad = "none";
 
-    return true;
+    return (loaded = true);
 }
 
 void cleanup() {
@@ -184,6 +188,8 @@ void cleanup() {
     // reset to null
 #define RESET_FUNCTION(name) name = nullptr;
     ALL_BASS_FUNCTIONS(RESET_FUNCTION)
+
+    loaded = false;
 }
 
 std::string getFailedLoad() { return failedLoad; }

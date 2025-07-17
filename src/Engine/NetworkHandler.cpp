@@ -7,7 +7,6 @@
 #include <curl/curl.h>
 #include <chrono>
 #include <utility>
-#include <utility>
 
 std::unique_ptr<Bancho> bancho = nullptr;
 
@@ -301,7 +300,7 @@ NetworkHandler::Response NetworkHandler::performSyncRequest(const UString& url, 
     }
 
     // create sync request
-    auto request = std::make_unique<NetworkRequest>(url, [](Response) {}, options);
+    auto request = std::make_unique<NetworkRequest>(url, [](const Response&) {}, options);
     request->is_sync = true;
     request->sync_id = sync_id;
 
