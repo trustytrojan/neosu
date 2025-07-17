@@ -5,6 +5,7 @@
 #include <iostream>
 #include <utility>
 
+#include "SString.h"
 #include "crypto.h"
 #include "AnimationHandler.h"
 #include "Bancho.h"
@@ -397,7 +398,9 @@ class OptionsMenuResetButton : public CBaseUIButton {
 
         if(this->isMouseInside()) {
             osu->getTooltipOverlay()->begin();
-            { osu->getTooltipOverlay()->addLine("Reset"); }
+            {
+                osu->getTooltipOverlay()->addLine("Reset");
+            }
             osu->getTooltipOverlay()->end();
         }
     }
@@ -1554,21 +1557,21 @@ void OptionsMenu::onKeyDown(KeyboardEvent &e) {
     }
 
     // searching text delete
-    if(this->sSearchString.length() > 0) {
+    if(!this->sSearchString.empty()) {
         switch(e.getKeyCode()) {
             case KEY_DELETE:
             case KEY_BACKSPACE:
-                if(this->sSearchString.length() > 0) {
+                if(!this->sSearchString.empty()) {
                     if(keyboard->isControlDown()) {
                         // delete everything from the current caret position to the left, until after the first
                         // non-space character (but including it)
                         bool foundNonSpaceChar = false;
                         while(this->sSearchString.length() > 0) {
-                            UString curChar = this->sSearchString.substr(this->sSearchString.length() - 1, 1);
+                            std::string curChar{this->sSearchString.substr(this->sSearchString.length() - 1, 1)};
 
-                            if(foundNonSpaceChar && curChar.isWhitespaceOnly()) break;
+                            if(foundNonSpaceChar && SString::whitespace_only(curChar)) break;
 
-                            if(!curChar.isWhitespaceOnly()) foundNonSpaceChar = true;
+                            if(!SString::whitespace_only(curChar)) foundNonSpaceChar = true;
 
                             this->sSearchString.erase(this->sSearchString.length() - 1, 1);
                             e.consume();
@@ -1596,7 +1599,7 @@ void OptionsMenu::onKeyDown(KeyboardEvent &e) {
 
     // paste clipboard support
     if(!e.isConsumed() && keyboard->isControlDown() && e == KEY_V) {
-        const UString clipstring = env->getClipBoardText();
+        const std::string clipstring{env->getClipBoardText().toUtf8()};
         if(clipstring.length() > 0) {
             this->sSearchString.append(clipstring);
             this->scheduleSearchUpdate();
@@ -1620,10 +1623,7 @@ void OptionsMenu::onChar(KeyboardEvent &e) {
        this->fSearchOnCharKeybindHackTime > engine->getTime())
         return;
 
-    KEYCODE charCode = e.getCharCode();
-    UString stringChar = "";
-    stringChar.insert(0, charCode);
-    this->sSearchString.append(stringChar);
+    this->sSearchString.append(std::string{static_cast<char>(e.getCharCode())});
 
     this->scheduleSearchUpdate();
 
@@ -1818,7 +1818,7 @@ void OptionsMenu::updateLayout() {
     bool inSkipSubSection = false;
     bool sectionTitleMatch = false;
     bool subSectionTitleMatch = false;
-    const std::string search = this->sSearchString.length() > 0 ? this->sSearchString.toUtf8() : "";
+    const std::string search = this->sSearchString.length() > 0 ? this->sSearchString.c_str() : "";
     for(int i = 0; i < this->elements.size(); i++) {
         if(this->elements[i].render_condition == RenderCondition::ASIO_ENABLED && !soundEngine->isASIO()) continue;
         if(this->elements[i].render_condition == RenderCondition::WASAPI_ENABLED && !soundEngine->isWASAPI()) continue;
@@ -1846,7 +1846,7 @@ void OptionsMenu::updateLayout() {
                 bool sectionMatch = false;
 
                 const std::string sectionTitle = this->elements[i].elements[0]->getName().toUtf8();
-                sectionTitleMatch = Osu::findIgnoreCase(sectionTitle, search);
+                sectionTitleMatch = SString::find_ncase(sectionTitle, search);
 
                 subSectionTitleMatch = false;
                 if(inSkipSection) inSkipSection = false;
@@ -1859,7 +1859,7 @@ void OptionsMenu::updateLayout() {
                         if(this->elements[s].elements[e]->getName().length() > 0) {
                             std::string tags = this->elements[s].elements[e]->getName().toUtf8();
 
-                            if(Osu::findIgnoreCase(tags, search)) {
+                            if(SString::find_ncase(tags, search)) {
                                 sectionMatch = true;
                                 break;
                             }
@@ -1877,7 +1877,7 @@ void OptionsMenu::updateLayout() {
 
                 const std::string subSectionTitle = this->elements[i].elements[0]->getName().toUtf8();
                 subSectionTitleMatch =
-                    Osu::findIgnoreCase(subSectionTitle, search) || Osu::findIgnoreCase(searchTags, search);
+                    SString::find_ncase(subSectionTitle, search) || SString::find_ncase(searchTags, search);
 
                 if(inSkipSubSection) inSkipSubSection = false;
 
@@ -1889,7 +1889,7 @@ void OptionsMenu::updateLayout() {
                         if(this->elements[s].elements[e]->getName().length() > 0) {
                             std::string tags = this->elements[s].elements[e]->getName().toUtf8();
 
-                            if(Osu::findIgnoreCase(tags, search)) {
+                            if(SString::find_ncase(tags, search)) {
                                 subSectionMatch = true;
                                 break;
                             }
@@ -1909,7 +1909,7 @@ void OptionsMenu::updateLayout() {
                         if(this->elements[i].elements[e]->getName().length() > 0) {
                             std::string tags = this->elements[i].elements[e]->getName().toUtf8();
 
-                            if(Osu::findIgnoreCase(tags, search)) {
+                            if(SString::find_ncase(tags, search)) {
                                 contentMatch = true;
                                 break;
                             }

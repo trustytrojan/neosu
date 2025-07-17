@@ -9,7 +9,7 @@
 #define KEYBOARDEVENT_H
 
 #include <cstdint>
-using KEYCODE = uint_fast16_t;
+using KEYCODE = uint16_t;
 
 class KeyboardEvent {
    public:

@@ -8,7 +8,8 @@
 #include "DatabaseBeatmap.h"
 #include "Engine.h"
 #include "Osu.h"
-#include "ResourceManager.h"
+#include "SString.h"
+#include "Font.h"
 
 UIRankingScreenInfoLabel::UIRankingScreenInfoLabel(float xPos, float yPos, float xSize, float ySize, UString name)
     : CBaseUIElement(xPos, yPos, xSize, ySize, std::move(name)) {
@@ -98,7 +99,7 @@ void UIRankingScreenInfoLabel::setFromBeatmap(Beatmap * /*beatmap*/, DatabaseBea
 
     std::time_t now_c = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     this->sDate = std::ctime(&now_c);
-    trim(&this->sDate);
+    SString::trim(&this->sDate);
 }
 
 UString UIRankingScreenInfoLabel::buildPlayerString() {

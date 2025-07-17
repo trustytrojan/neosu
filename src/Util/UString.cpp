@@ -646,13 +646,3 @@ bool UString::ncasecomp::operator()(const UString &lhs, const UString &rhs) cons
     // if all compared characters are equal, shorter string is less
     return lhsLen < rhsLen;
 }
-
-// unrelated to UString, but where else to put it...
-void trim(std::string *str) {
-    while(!str->empty() && str->front() == ' ') {
-        str->erase(0, 1);
-    }
-    while(!str->empty() && (str->back() == ' ' || str->back() == '\r')) {
-        str->pop_back();
-    }
-}

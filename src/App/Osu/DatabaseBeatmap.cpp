@@ -9,6 +9,7 @@
 #include <sstream>
 #include <utility>
 
+#include "SString.h"
 #include "Bancho.h"  // md5
 #include "Beatmap.h"
 #include "Circle.h"
@@ -985,7 +986,7 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
                 memset(stringBuffer, '\0', 1024);
                 if(sscanf(curLineChar, " AudioFilename : %1023[^\n]", stringBuffer) == 1) {
                     this->sAudioFileName = stringBuffer;
-                    trim(&this->sAudioFileName);
+                    SString::trim(&this->sAudioFileName);
                 }
 
                 sscanf(curLineChar, " StackLeniency : %f \n", &this->fStackLeniency);
@@ -998,37 +999,37 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
                 memset(stringBuffer, '\0', 1024);
                 if(sscanf(curLineChar, " Title :%1023[^\n]", stringBuffer) == 1) {
                     this->sTitle = stringBuffer;
-                    trim(&this->sTitle);
+                    SString::trim(&this->sTitle);
                 }
 
                 memset(stringBuffer, '\0', 1024);
                 if(sscanf(curLineChar, " Artist :%1023[^\n]", stringBuffer) == 1) {
                     this->sArtist = stringBuffer;
-                    trim(&this->sArtist);
+                    SString::trim(&this->sArtist);
                 }
 
                 memset(stringBuffer, '\0', 1024);
                 if(sscanf(curLineChar, " Creator :%1023[^\n]", stringBuffer) == 1) {
                     this->sCreator = stringBuffer;
-                    trim(&this->sCreator);
+                    SString::trim(&this->sCreator);
                 }
 
                 memset(stringBuffer, '\0', 1024);
                 if(sscanf(curLineChar, " Version :%1023[^\n]", stringBuffer) == 1) {
                     this->sDifficultyName = stringBuffer;
-                    trim(&this->sDifficultyName);
+                    SString::trim(&this->sDifficultyName);
                 }
 
                 memset(stringBuffer, '\0', 1024);
                 if(sscanf(curLineChar, " Source :%1023[^\n]", stringBuffer) == 1) {
                     this->sSource = stringBuffer;
-                    trim(&this->sSource);
+                    SString::trim(&this->sSource);
                 }
 
                 memset(stringBuffer, '\0', 1024);
                 if(sscanf(curLineChar, " Tags :%1023[^\n]", stringBuffer) == 1) {
                     this->sTags = stringBuffer;
-                    trim(&this->sTags);
+                    SString::trim(&this->sTags);
                 }
 
                 sscanf(curLineChar, " BeatmapID : %ld \n", &this->iID);

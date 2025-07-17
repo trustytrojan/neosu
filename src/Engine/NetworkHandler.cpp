@@ -2,6 +2,7 @@
 #include "Engine.h"
 #include "Bancho.h"
 #include "Thread.h"
+#include "SString.h"
 
 #include "curl_blob.h"
 #include <curl/curl.h>
@@ -266,10 +267,8 @@ size_t NetworkHandler::headerCallback(char* buffer, size_t size, size_t nitems, 
         std::string value = header.substr(colon_pos + 1);
 
         // trim whitespace
-        key.erase(0, key.find_first_not_of(" \t"));
-        key.erase(key.find_last_not_of(" \t\r\n") + 1);
-        value.erase(0, value.find_first_not_of(" \t"));
-        value.erase(value.find_last_not_of(" \t\r\n") + 1);
+        SString::trim(&key);
+        SString::trim(&value);
 
         request->response.headers[key] = value;
     }

@@ -2,11 +2,11 @@
 
 #include <mutex>
 
+#include "SString.h"
 #include "CBaseUIButton.h"
 #include "CBaseUIContainer.h"
 #include "CBaseUILabel.h"
 #include "CBaseUIScrollView.h"
-#include "CBaseUITextField.h"
 #include "CBaseUITextbox.h"
 #include "ConVar.h"
 #include "Engine.h"
@@ -84,7 +84,7 @@ void Console::processCommand(std::string command) {
     if(command.length() < 1) return;
 
     // remove whitespace from beginning/end of string
-    trim(&command);
+    SString::trim(&command);
 
     // handle multiple commands separated by semicolons
     if(command.find(';') != std::string::npos && command.find("echo") == std::string::npos) {

@@ -12,7 +12,7 @@ class UISearchOverlay : public CBaseUIElement {
     void setDrawNumResults(bool drawNumResults) { this->bDrawNumResults = drawNumResults; }
     void setOffsetRight(int offsetRight) { this->iOffsetRight = offsetRight; }
 
-    void setSearchString(UString searchString, UString hardcodedSearchString = "") {
+    inline void setSearchString(std::string searchString, std::string hardcodedSearchString = "") {
         this->sSearchString = std::move(searchString);
         this->sHardcodedSearchString = std::move(hardcodedSearchString);
     }
@@ -26,8 +26,8 @@ class UISearchOverlay : public CBaseUIElement {
     int iOffsetRight;
     bool bDrawNumResults;
 
-    UString sSearchString;
-    UString sHardcodedSearchString;
+    std::string sSearchString;
+    std::string sHardcodedSearchString;
     int iNumFoundResults;
 
     bool bSearching;

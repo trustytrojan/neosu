@@ -3,6 +3,7 @@
 #include <cstring>
 #include <utility>
 
+#include "SString.h"
 #include "MD5Hash.h"
 #include "BanchoFile.h"
 #include "Collections.h"
@@ -790,15 +791,15 @@ void Database::loadDB() {
             }
 
             std::string artistName = db.read_string();
-            trim(&artistName);
+            SString::trim(&artistName);
             std::string artistNameUnicode = db.read_string();
             std::string songTitle = db.read_string();
-            trim(&songTitle);
+            SString::trim(&songTitle);
             std::string songTitleUnicode = db.read_string();
             std::string creatorName = db.read_string();
-            trim(&creatorName);
+            SString::trim(&creatorName);
             std::string difficultyName = db.read_string();
-            trim(&difficultyName);
+            SString::trim(&difficultyName);
             std::string audioFileName = db.read_string();
 
             auto md5hash = db.read_hash();
@@ -927,8 +928,8 @@ void Database::loadDB() {
 
             auto songSource = db.read_string();
             auto songTags = db.read_string();
-            trim(&songSource);
-            trim(&songTags);
+            SString::trim(&songSource);
+            SString::trim(&songTags);
 
             short onlineOffset = db.read<u16>();
             db.skip_string();  // song title font
@@ -939,7 +940,7 @@ void Database::loadDB() {
             // somehow, some beatmaps may have spaces at the start/end of their
             // path, breaking the Windows API (e.g. https://osu.ppy.sh/s/215347)
             auto path = db.read_string();
-            trim(&path);
+            SString::trim(&path);
 
             /*long long lastOnlineCheck = */ db.skip<u64>();
 

@@ -278,7 +278,7 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     int iNumResetEverythingPressed;
 
     // search
-    UString sSearchString;
+    std::string sSearchString;
     float fSearchOnCharKeybindHackTime;
 
     // notelock

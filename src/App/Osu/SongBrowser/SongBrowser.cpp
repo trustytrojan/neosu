@@ -51,6 +51,7 @@
 #include "UISearchOverlay.h"
 #include "UserCard.h"
 #include "VertexArrayObject.h"
+#include "SString.h"
 
 #include <chrono>
 #include <utility>
@@ -68,8 +69,8 @@ class SongBrowserBackgroundSearchMatcher : public Resource {
     void kill() { this->bDead = true; }
     void revive() { this->bDead = false; }
 
-    void setSongButtonsAndSearchString(const std::vector<SongButton *> &songButtons, const UString &searchString,
-                                       const UString &hardcodedSearchString) {
+    void setSongButtonsAndSearchString(const std::vector<SongButton *> &songButtons, const std::string &searchString,
+                                       const std::string &hardcodedSearchString) {
         this->songButtons = songButtons;
 
         this->sSearchString.clear();
@@ -93,7 +94,7 @@ class SongBrowserBackgroundSearchMatcher : public Resource {
         }
 
         // flag matches across entire database
-        const std::vector<UString> searchStringTokens = this->sSearchString.split(" ");
+        const std::vector<std::string> searchStringTokens = SString::split(this->sSearchString, " ");
         for(size_t i = 0; i < this->songButtons.size(); i++) {
             const auto &children = this->songButtons[i]->getChildren();
             if(children.size() > 0) {
@@ -117,14 +118,14 @@ class SongBrowserBackgroundSearchMatcher : public Resource {
    private:
     std::atomic<bool> bDead;
 
-    UString sSearchString;
-    UString sHardcodedSearchString;
+    std::string sSearchString;
+    std::string sHardcodedSearchString;
     std::vector<SongButton *> songButtons;
 };
 
 class ScoresStillLoadingElement : public CBaseUILabel {
    public:
-    ScoresStillLoadingElement(const UString& text) : CBaseUILabel(0, 0, 0, 0, "", text) {
+    ScoresStillLoadingElement(const UString &text) : CBaseUILabel(0, 0, 0, 0, "", text) {
         this->sIconString.insert(0, Icons::GLOBE);
     }
 
@@ -172,7 +173,7 @@ class ScoresStillLoadingElement : public CBaseUILabel {
 
 class NoRecordsSetElement : public CBaseUILabel {
    public:
-    NoRecordsSetElement(const UString& text) : CBaseUILabel(0, 0, 0, 0, "", text) {
+    NoRecordsSetElement(const UString &text) : CBaseUILabel(0, 0, 0, 0, "", text) {
         this->sIconString.insert(0, Icons::TROPHY);
     }
 
@@ -394,8 +395,7 @@ SongBrowser::SongBrowser() : ScreenBackable() {
         // "hardcoded" grouping tabs
         this->groupByCollectionBtn = new CBaseUIButton(0, 0, 0, 0, "", "Collections");
         this->groupByCollectionBtn->setDrawBackground(false);
-        this->groupByCollectionBtn->setClickCallback(
-            SA::MakeDelegate<&SongBrowser::onQuickGroupClicked>(this));
+        this->groupByCollectionBtn->setClickCallback(SA::MakeDelegate<&SongBrowser::onQuickGroupClicked>(this));
         this->groupByCollectionBtn->grabs_clicks = true;
         this->topbarRight->addBaseUIElement(this->groupByCollectionBtn);
         this->groupByArtistBtn = new CBaseUIButton(0, 0, 0, 0, "", "By Artist");
@@ -405,8 +405,7 @@ SongBrowser::SongBrowser() : ScreenBackable() {
         this->topbarRight->addBaseUIElement(this->groupByArtistBtn);
         this->groupByDifficultyBtn = new CBaseUIButton(0, 0, 0, 0, "", "By Difficulty");
         this->groupByDifficultyBtn->setDrawBackground(false);
-        this->groupByDifficultyBtn->setClickCallback(
-            SA::MakeDelegate<&SongBrowser::onQuickGroupClicked>(this));
+        this->groupByDifficultyBtn->setClickCallback(SA::MakeDelegate<&SongBrowser::onQuickGroupClicked>(this));
         this->groupByDifficultyBtn->grabs_clicks = true;
         this->topbarRight->addBaseUIElement(this->groupByDifficultyBtn);
         this->groupByNothingBtn = new CBaseUIButton(0, 0, 0, 0, "", "No Grouping");
@@ -512,7 +511,7 @@ SongBrowser::~SongBrowser() {
     }
 
     this->scoreBrowser->getContainer()->empty();
-    for(ScoreButton* button : this->scoreButtonCache) {
+    for(ScoreButton *button : this->scoreButtonCache) {
         SAFE_DELETE(button);
     }
     this->scoreButtonCache.clear();
@@ -673,12 +672,12 @@ void SongBrowser::draw() {
 
                 const Color aimStrainColor =
                     argb(alpha, cv::hud_scrubbing_timeline_strains_aim_color_r.getInt() / 255.0f,
-                           cv::hud_scrubbing_timeline_strains_aim_color_g.getInt() / 255.0f,
-                           cv::hud_scrubbing_timeline_strains_aim_color_b.getInt() / 255.0f);
+                         cv::hud_scrubbing_timeline_strains_aim_color_g.getInt() / 255.0f,
+                         cv::hud_scrubbing_timeline_strains_aim_color_b.getInt() / 255.0f);
                 const Color speedStrainColor =
                     argb(alpha, cv::hud_scrubbing_timeline_strains_speed_color_r.getInt() / 255.0f,
-                           cv::hud_scrubbing_timeline_strains_speed_color_g.getInt() / 255.0f,
-                           cv::hud_scrubbing_timeline_strains_speed_color_b.getInt() / 255.0f);
+                         cv::hud_scrubbing_timeline_strains_speed_color_g.getInt() / 255.0f,
+                         cv::hud_scrubbing_timeline_strains_speed_color_b.getInt() / 255.0f);
 
                 g->setDepthBuffer(true);
                 for(int i = 0; i < aimStrains.size(); i++) {
@@ -1107,11 +1106,11 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
                         // non-space character (but including it)
                         bool foundNonSpaceChar = false;
                         while(this->sSearchString.length() > 0) {
-                            UString curChar = this->sSearchString.substr(this->sSearchString.length() - 1, 1);
+                            std::string curChar = this->sSearchString.substr(this->sSearchString.length() - 1, 1);
 
-                            if(foundNonSpaceChar && curChar.isWhitespaceOnly()) break;
+                            if(foundNonSpaceChar && SString::whitespace_only(curChar)) break;
 
-                            if(!curChar.isWhitespaceOnly()) foundNonSpaceChar = true;
+                            if(!SString::whitespace_only(curChar)) foundNonSpaceChar = true;
 
                             this->sSearchString.erase(this->sSearchString.length() - 1, 1);
                         }
@@ -1136,7 +1135,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
     // paste clipboard support
     if(key == KEY_V) {
         if(keyboard->isControlDown()) {
-            const UString clipstring = env->getClipBoardText();
+            const std::string clipstring{env->getClipBoardText().toUtf8()};
             if(clipstring.length() > 0) {
                 this->sSearchString.append(clipstring);
                 this->scheduleSearchUpdate(false);
@@ -1354,10 +1353,7 @@ void SongBrowser::onChar(KeyboardEvent &e) {
     if(this->bF1Pressed || this->bF2Pressed || this->bF3Pressed) return;
 
     // handle searching
-    KEYCODE charCode = e.getCharCode();
-    UString stringChar = "";
-    stringChar.insert(0, charCode);
-    this->sSearchString.append(stringChar);
+    this->sSearchString.append(std::string{static_cast<char>(e.getCharCode())});
 
     this->scheduleSearchUpdate();
 }
@@ -1542,7 +1538,7 @@ void SongBrowser::onDifficultySelected(DatabaseBeatmap *diff2, bool play) {
     if(play) {
         if(bancho->is_in_a_multi_room()) {
             bancho->room.map_name = UString::format("%s - %s [%s]", diff2->getArtist().c_str(),
-                                                   diff2->getTitle().c_str(), diff2->getDifficultyName().c_str());
+                                                    diff2->getTitle().c_str(), diff2->getDifficultyName().c_str());
             bancho->room.map_md5 = diff2->getMD5Hash();
             bancho->room.map_id = diff2->getID();
 
@@ -2006,12 +2002,14 @@ void SongBrowser::updateSongButtonLayout() {
 }
 
 bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
-                                const std::vector<UString> &searchStringTokens) {
+                                const std::vector<std::string> &searchStringTokens) {
     if(databaseBeatmap == NULL) return false;
 
-    const std::vector<DatabaseBeatmap *> &diffs = databaseBeatmap->getDifficulties();
-    const bool isContainer = (diffs.size() > 0);
-    const int numDiffs = (isContainer ? diffs.size() : 1);
+    const std::vector<const DatabaseBeatmap *> tmpContainer{databaseBeatmap};
+    const auto &diffs = databaseBeatmap->getDifficulties().size() > 0
+                            ? databaseBeatmap->getDifficulties<const DatabaseBeatmap>()
+                            : tmpContainer;
+
     auto speed = osu->getSelectedBeatmap()->getSpeedMultiplier();
 
     // TODO: optimize this dumpster fire. can at least cache the parsed tokens and literal strings array instead of
@@ -2019,14 +2017,14 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
 
     // intelligent search parser
     // all strings which are not expressions get appended with spaces between, then checked with one call to
-    // findSubstringInDifficulty() the rest is interpreted NOTE: this code is quite shitty. the order of the operators
+    // findSubstringInDiff() the rest is interpreted NOTE: this code is quite shitty. the order of the operators
     // array does matter, because find() is used to detect their presence (and '=' would then break '<=' etc.)
     enum operatorId : uint8_t { EQ, LT, GT, LE, GE, NE };
-    static const std::vector<std::pair<UString, operatorId>> operators = {
-        std::pair<UString, operatorId>("<=", LE), std::pair<UString, operatorId>(">=", GE),
-        std::pair<UString, operatorId>("<", LT),  std::pair<UString, operatorId>(">", GT),
-        std::pair<UString, operatorId>("!=", NE), std::pair<UString, operatorId>("==", EQ),
-        std::pair<UString, operatorId>("=", EQ),
+    static const std::vector<std::pair<std::string, operatorId>> operators = {
+        std::pair<std::string, operatorId>("<=", LE), std::pair<std::string, operatorId>(">=", GE),
+        std::pair<std::string, operatorId>("<", LT),  std::pair<std::string, operatorId>(">", GT),
+        std::pair<std::string, operatorId>("!=", NE), std::pair<std::string, operatorId>("==", EQ),
+        std::pair<std::string, operatorId>("=", EQ),
     };
 
     enum keywordId : uint8_t {
@@ -2045,69 +2043,66 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
         LENGTH,
         STARS,
     };
-    static const std::vector<std::pair<UString, keywordId>> keywords = {
-        std::pair<UString, keywordId>("ar", AR),
-        std::pair<UString, keywordId>("cs", CS),
-        std::pair<UString, keywordId>("od", OD),
-        std::pair<UString, keywordId>("hp", HP),
-        std::pair<UString, keywordId>("bpm", BPM),
-        std::pair<UString, keywordId>("opm", OPM),
-        std::pair<UString, keywordId>("cpm", CPM),
-        std::pair<UString, keywordId>("spm", SPM),
-        std::pair<UString, keywordId>("object", OBJECTS),
-        std::pair<UString, keywordId>("objects", OBJECTS),
-        std::pair<UString, keywordId>("circle", CIRCLES),
-        std::pair<UString, keywordId>("circles", CIRCLES),
-        std::pair<UString, keywordId>("slider", SLIDERS),
-        std::pair<UString, keywordId>("sliders", SLIDERS),
-        std::pair<UString, keywordId>("spinner", SPINNERS),
-        std::pair<UString, keywordId>("spinners", SPINNERS),
-        std::pair<UString, keywordId>("length", LENGTH),
-        std::pair<UString, keywordId>("len", LENGTH),
-        std::pair<UString, keywordId>("stars", STARS),
-        std::pair<UString, keywordId>("star", STARS)};
+    static const std::vector<std::pair<std::string, keywordId>> keywords = {
+        std::pair<std::string, keywordId>("ar", AR),
+        std::pair<std::string, keywordId>("cs", CS),
+        std::pair<std::string, keywordId>("od", OD),
+        std::pair<std::string, keywordId>("hp", HP),
+        std::pair<std::string, keywordId>("bpm", BPM),
+        std::pair<std::string, keywordId>("opm", OPM),
+        std::pair<std::string, keywordId>("cpm", CPM),
+        std::pair<std::string, keywordId>("spm", SPM),
+        std::pair<std::string, keywordId>("object", OBJECTS),
+        std::pair<std::string, keywordId>("objects", OBJECTS),
+        std::pair<std::string, keywordId>("circle", CIRCLES),
+        std::pair<std::string, keywordId>("circles", CIRCLES),
+        std::pair<std::string, keywordId>("slider", SLIDERS),
+        std::pair<std::string, keywordId>("sliders", SLIDERS),
+        std::pair<std::string, keywordId>("spinner", SPINNERS),
+        std::pair<std::string, keywordId>("spinners", SPINNERS),
+        std::pair<std::string, keywordId>("length", LENGTH),
+        std::pair<std::string, keywordId>("len", LENGTH),
+        std::pair<std::string, keywordId>("stars", STARS),
+        std::pair<std::string, keywordId>("star", STARS)};
 
     // split search string into tokens
     // parse over all difficulties
     bool expressionMatches = false;  // if any diff matched all expressions
-    std::vector<UString> literalSearchStrings;
-    for(size_t d = 0; d < numDiffs; d++) {
-        const DatabaseBeatmap *diff = (isContainer ? diffs[d] : databaseBeatmap);
-
+    std::vector<std::string> literalSearchStrings;
+    for(const auto *diff : diffs) {
         bool expressionsMatch = true;  // if the current search string (meaning only the expressions in this case)
                                        // matches the current difficulty
 
-        for(size_t i = 0; i < searchStringTokens.size(); i++) {
+        for(const auto &searchStringToken : searchStringTokens) {
             // debugLog("token[%i] = %s\n", i, tokens[i].toUtf8());
             //  determine token type, interpret expression
             bool expression = false;
-            for(size_t o = 0; o < operators.size(); o++) {
-                if(searchStringTokens[i].find(operators[o].first) != -1) {
+            for(const auto &o : operators) {
+                if(searchStringToken.find(o.first) != std::string::npos) {
                     // split expression into left and right parts (only accept singular expressions, things like
                     // "0<bpm<1" will not work with this)
                     // debugLog("splitting by string %s\n", operators[o].first.toUtf8());
-                    std::vector<UString> values = searchStringTokens[i].split(operators[o].first);
+                    std::vector<std::string> values{SString::split(searchStringToken, o.first)};
                     if(values.size() == 2 && values[0].length() > 0 && values[1].length() > 0) {
-                        const UString lvalue = values[0];
-                        const int rvaluePercentIndex = values[1].find("%");
-                        const bool rvalueIsPercent = (rvaluePercentIndex != -1);
+                        const std::string &lvalue = values[0];
+                        const auto rvaluePercentIndex = values[1].find('%');
+                        const bool rvalueIsPercent = (rvaluePercentIndex != std::string::npos);
                         const float rvalue =
-                            (rvaluePercentIndex == -1
-                                 ? values[1].toFloat()
-                                 : values[1]
-                                       .substr(0, rvaluePercentIndex)
-                                       .toFloat());  // this must always be a number (at least, assume it is)
+                            (rvaluePercentIndex == std::string::npos
+                                 ? std::strtof(values[1].c_str(), nullptr)
+                                 : std::strtof(values[1].substr(0, rvaluePercentIndex).c_str(),
+                                               nullptr));  // this must always be a number (at least, assume it is)
 
                         // find lvalue keyword in array (only continue if keyword exists)
-                        for(size_t k = 0; k < keywords.size(); k++) {
-                            if(keywords[k].first == lvalue) {
+                        for(const auto &keyword : keywords) {
+                            if(keyword.first == lvalue) {
                                 expression = true;
 
                                 // we now have a valid expression: the keyword, the operator and the value
 
                                 // solve keyword
                                 float compareValue = 5.0f;
-                                switch(keywords[k].second) {
+                                switch(keyword.second) {
                                     case AR:
                                         compareValue = diff->getAR();
                                         break;
@@ -2169,7 +2164,7 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
                                                  : diff->getNumSpinners());
                                         break;
                                     case LENGTH:
-                                        compareValue = diff->getLengthMS() / 1000;
+                                        compareValue = diff->getLengthMS() / 1000.0f;
                                         break;
                                     case STARS:
                                         compareValue = std::round(diff->getStarsNomod() * 100.0f) /
@@ -2179,7 +2174,7 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
 
                                 // solve operator
                                 bool matches = false;
-                                switch(operators[o].second) {
+                                switch(o.second) {
                                     case LE:
                                         if(compareValue <= rvalue) matches = true;
                                         break;
@@ -2220,16 +2215,17 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
                 // only add it if it doesn't exist yet
                 // this check is only necessary due to multiple redundant parser executions (one per diff!)
                 bool exists = false;
-                for(size_t l = 0; l < literalSearchStrings.size(); l++) {
-                    if(literalSearchStrings[l] == searchStringTokens[i]) {
+                for(const auto &literalSearchString : literalSearchStrings) {
+                    if(literalSearchString == searchStringToken) {
                         exists = true;
                         break;
                     }
                 }
 
                 if(!exists) {
-                    const UString litAdd = searchStringTokens[i].trim();
-                    if(litAdd.length() > 0 && !litAdd.isWhitespaceOnly()) literalSearchStrings.push_back(litAdd);
+                    std::string litAdd{searchStringToken};
+                    SString::trim(&litAdd);
+                    if(!SString::whitespace_only(litAdd)) literalSearchStrings.push_back(litAdd);
                 }
             }
         }
@@ -2245,8 +2241,8 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
     if(!expressionMatches) return false;
 
     bool hasAnyValidLiteralSearchString = false;
-    for(size_t i = 0; i < literalSearchStrings.size(); i++) {
-        if(literalSearchStrings[i].length() > 0) {
+    for(const auto &literalSearchString : literalSearchStrings) {
+        if(literalSearchString.length() > 0) {
             hasAnyValidLiteralSearchString = true;
             break;
         }
@@ -2254,13 +2250,27 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
 
     // early return here for literal match/contains
     if(hasAnyValidLiteralSearchString) {
-        for(size_t i = 0; i < numDiffs; i++) {
-            const DatabaseBeatmap *diff = (isContainer ? diffs[i] : databaseBeatmap);
+        static constexpr auto findSubstringInDiff = [](const DatabaseBeatmap *diff,
+                                                       const std::string &searchString) -> bool {
+            if(!diff->getTitle().empty() && SString::find_ncase(diff->getTitle(), searchString)) return true;
+            if(!diff->getArtist().empty() && SString::find_ncase(diff->getArtist(), searchString)) return true;
+            if(!diff->getCreator().empty() && SString::find_ncase(diff->getCreator(), searchString)) return true;
+            if(!diff->getDifficultyName().empty() && SString::find_ncase(diff->getDifficultyName(), searchString))
+                return true;
+            if(!diff->getSource().empty() && SString::find_ncase(diff->getSource(), searchString)) return true;
+            if(!diff->getTags().empty() && SString::find_ncase(diff->getTags(), searchString)) return true;
 
+            if(diff->getID() > 0 && SString::find_ncase(std::to_string(diff->getID()), searchString)) return true;
+            if(diff->getSetID() > 0 && SString::find_ncase(std::to_string(diff->getSetID()), searchString)) return true;
+
+            return false;
+        };
+
+        for(const auto *diff : diffs) {
             bool atLeastOneFullMatch = true;
 
-            for(size_t s = 0; s < literalSearchStrings.size(); s++) {
-                if(!findSubstringInDifficulty(diff, literalSearchStrings[s])) atLeastOneFullMatch = false;
+            for(const auto &literalSearchString : literalSearchStrings) {
+                if(!findSubstringInDiff(diff, literalSearchString)) atLeastOneFullMatch = false;
             }
 
             // as soon as one diff matches all strings, we are done
@@ -2272,42 +2282,6 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
     }
 
     return expressionMatches;
-}
-
-bool SongBrowser::findSubstringInDifficulty(const DatabaseBeatmap *diff, const UString &searchString) {
-    if(!diff->getTitle().empty()) {
-        if(UString{diff->getTitle()}.findIgnoreCase(searchString) != -1) return true;
-    }
-
-    if(!diff->getArtist().empty()) {
-        if(UString{diff->getArtist()}.findIgnoreCase(searchString) != -1) return true;
-    }
-
-    if(!diff->getCreator().empty()) {
-        if(UString{diff->getCreator()}.findIgnoreCase(searchString) != -1) return true;
-    }
-
-    if(!diff->getDifficultyName().empty()) {
-        if(UString{diff->getDifficultyName()}.findIgnoreCase(searchString) != -1) return true;
-    }
-
-    if(!diff->getSource().empty()) {
-        if(UString{diff->getSource()}.findIgnoreCase(searchString) != -1) return true;
-    }
-
-    if(!diff->getTags().empty()) {
-        if(UString{diff->getTags()}.findIgnoreCase(searchString) != -1) return true;
-    }
-
-    if(diff->getID() > 0) {
-        if(UString::fmt("{:d}", diff->getID()).findIgnoreCase(searchString) != -1) return true;
-    }
-
-    if(diff->getSetID() > 0) {
-        if(UString::fmt("{:d}", diff->getSetID()).findIgnoreCase(searchString) != -1) return true;
-    }
-
-    return false;
 }
 
 void SongBrowser::updateLayout() {
@@ -2515,8 +2489,7 @@ void SongBrowser::rebuildScoreButtons() {
                 } else {
                     SAFE_DELETE(this->localBestButton);
                     this->localBestButton = new ScoreButton(this->contextMenu, 0, 0, 0, 0);
-                    this->localBestButton->setClickCallback(
-                        SA::MakeDelegate<&SongBrowser::onScoreClicked>(this));
+                    this->localBestButton->setClickCallback(SA::MakeDelegate<&SongBrowser::onScoreClicked>(this));
                     this->localBestButton->map_hash = diff2->getMD5Hash();
                     this->localBestButton->setScore(*local_best, diff2);
                     this->localBestButton->resetHighlight();
@@ -2538,8 +2511,7 @@ void SongBrowser::rebuildScoreButtons() {
                 if(local_best != local_scores.end()) {
                     SAFE_DELETE(this->localBestButton);
                     this->localBestButton = new ScoreButton(this->contextMenu, 0, 0, 0, 0);
-                    this->localBestButton->setClickCallback(
-                        SA::MakeDelegate<&SongBrowser::onScoreClicked>(this));
+                    this->localBestButton->setClickCallback(SA::MakeDelegate<&SongBrowser::onScoreClicked>(this));
                     this->localBestButton->map_hash = diff2->getMD5Hash();
                     this->localBestButton->setScore(*local_best, diff2);
                     this->localBestButton->resetHighlight();
@@ -2995,7 +2967,7 @@ void SongBrowser::onSortScoresClicked(CBaseUIButton *button) {
     this->contextMenu->setClickCallback(SA::MakeDelegate<&SongBrowser::onSortScoresChange>(this));
 }
 
-void SongBrowser::onSortScoresChange(const UString& text, int  /*id*/) {
+void SongBrowser::onSortScoresChange(const UString &text, int /*id*/) {
     cv::songbrowser_scores_sortingtype.setValue(text);  // NOTE: remember
     this->scoreSortButton->setText(text);
     this->rebuildScoreButtons();
@@ -3048,7 +3020,7 @@ void SongBrowser::onGroupClicked(CBaseUIButton *button) {
     this->contextMenu->setClickCallback(SA::MakeDelegate<&SongBrowser::onGroupChange>(this));
 }
 
-void SongBrowser::onGroupChange(const UString& text, int id) {
+void SongBrowser::onGroupChange(const UString &text, int id) {
     this->groupByCollectionBtn->setTextBrightColor(defaultColor);
     this->groupByArtistBtn->setTextBrightColor(defaultColor);
     this->groupByDifficultyBtn->setTextBrightColor(defaultColor);
@@ -3112,9 +3084,9 @@ void SongBrowser::onSortClicked(CBaseUIButton *button) {
     this->contextMenu->setClickCallback(SA::MakeDelegate<&SongBrowser::onSortChange>(this));
 }
 
-void SongBrowser::onSortChange(const UString& text, int  /*id*/) { this->onSortChangeInt(text, true); }
+void SongBrowser::onSortChange(const UString &text, int /*id*/) { this->onSortChangeInt(text, true); }
 
-void SongBrowser::onSortChangeInt(const UString& text, bool  /*autoScroll*/) {
+void SongBrowser::onSortChangeInt(const UString &text, bool /*autoScroll*/) {
     SORTING_METHOD *sortingMethod = &this->sortingMethods[3];
     for(size_t i = 0; i < this->sortingMethods.size(); i++) {
         if(this->sortingMethods[i].name == text) {
@@ -3209,7 +3181,7 @@ void SongBrowser::onGroupNoGrouping() {
     this->onAfterSortingOrGroupChange();
 }
 
-void SongBrowser::onGroupCollections(bool  /*autoScroll*/) {
+void SongBrowser::onGroupCollections(bool /*autoScroll*/) {
     this->group = GROUP::GROUP_COLLECTIONS;
     this->groupByCollectionBtn->setTextBrightColor(highlightColor);
 
@@ -3350,9 +3322,11 @@ void SongBrowser::onSelectionOptions() {
     }
 }
 
-void SongBrowser::onModeChange(const UString& text) { this->onModeChange2(text); }
+void SongBrowser::onModeChange(const UString &text) { this->onModeChange2(text); }
 
-void SongBrowser::onModeChange2(const UString& text, int id) { cv::mod_fposu.setValue(id == 2 || text == UString("fposu")); }
+void SongBrowser::onModeChange2(const UString &text, int id) {
+    cv::mod_fposu.setValue(id == 2 || text == UString("fposu"));
+}
 
 void SongBrowser::onScoreClicked(CBaseUIButton *button) {
     ScoreButton *scoreButton = (ScoreButton *)button;
@@ -3378,7 +3352,7 @@ void SongBrowser::onScoreContextMenu(ScoreButton *scoreButton, int id) {
     }
 }
 
-void SongBrowser::onSongButtonContextMenu(SongButton *songButton, const UString& text, int id) {
+void SongBrowser::onSongButtonContextMenu(SongButton *songButton, const UString &text, int id) {
     // debugLog("SongBrowser::onSongButtonContextMenu(%p, %s, %i)\n", songButton, text.toUtf8(), id);
 
     struct CollectionManagementHelper {
@@ -3513,7 +3487,7 @@ void SongBrowser::onSongButtonContextMenu(SongButton *songButton, const UString&
     }
 }
 
-void SongBrowser::onCollectionButtonContextMenu(CollectionButton * /*collectionButton*/, const UString& text, int id) {
+void SongBrowser::onCollectionButtonContextMenu(CollectionButton * /*collectionButton*/, const UString &text, int id) {
     std::string collection_name = text.toUtf8();
 
     if(id == 2) {  // delete collection
@@ -3552,7 +3526,7 @@ void SongBrowser::highlightScore(u64 unixTimestamp) {
     }
 }
 
-void SongBrowser::recalculateStarsForSelectedBeatmap(bool  /*force*/) {
+void SongBrowser::recalculateStarsForSelectedBeatmap(bool /*force*/) {
     if(this->beatmap->getSelectedDifficulty2() == NULL) return;
 
     this->beatmap->getSelectedDifficulty2()->pp.pp = -1.0;

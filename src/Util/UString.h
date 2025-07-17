@@ -351,7 +351,4 @@ UString UString::join(const Range &range, std::string_view delim) noexcept {
     return result;
 }
 
-// not related to UString
-void trim(std::string *str);
-
 #endif  // USTRING_H

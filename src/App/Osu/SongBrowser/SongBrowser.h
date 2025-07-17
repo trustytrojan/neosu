@@ -140,8 +140,7 @@ class SongBrowser : public ScreenBackable {
         int id;
     };
 
-    static bool searchMatcher(const DatabaseBeatmap *databaseBeatmap, const std::vector<UString> &searchStringTokens);
-    static bool findSubstringInDifficulty(const DatabaseBeatmap *diff, const UString &searchString);
+    static bool searchMatcher(const DatabaseBeatmap *databaseBeatmap, const std::vector<std::string> &searchStringTokens);
 
     void updateLayout() override;
     void onBack() override;
@@ -291,9 +290,9 @@ class SongBrowser : public ScreenBackable {
 
     // search
     UISearchOverlay *search;
-    UString sSearchString;
-    UString sPrevSearchString;
-    UString sPrevHardcodedSearchString;
+    std::string sSearchString;
+    std::string sPrevSearchString;
+    std::string sPrevHardcodedSearchString;
     float fSearchWaitTime;
     bool bInSearch;
     GROUP searchPrevGroup;

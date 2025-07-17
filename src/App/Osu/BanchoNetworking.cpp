@@ -10,6 +10,8 @@
 #include <unistd.h>
 #endif
 
+#include "SString.h"
+
 #include "Bancho.h"
 #include "BanchoLeaderboard.h"
 #include "BanchoProtocol.h"
@@ -115,8 +117,7 @@ void send_bancho_packet_async(Packet outgoing) {
             if(colon_pos != std::string::npos) {
                 std::string token = auth_header.substr(colon_pos + 1);
                 // trim whitespace
-                token.erase(0, token.find_first_not_of(" \t"));
-                token.erase(token.find_last_not_of(" \t\r\n") + 1);
+                SString::trim(&token);
                 options.headers["osu-token"] = token;
             }
         }
@@ -301,8 +302,7 @@ void disconnect() {
                 size_t colon_pos = auth_header.find(':');
                 if(colon_pos != std::string::npos) {
                     std::string token = auth_header.substr(colon_pos + 1);
-                    token.erase(0, token.find_first_not_of(" \t"));
-                    token.erase(token.find_last_not_of(" \t\r\n") + 1);
+                    SString::trim(&token);
                     options.headers["osu-token"] = token;
                 }
             }

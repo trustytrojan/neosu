@@ -154,9 +154,9 @@ class DatabaseBeatmap {
     DatabaseBeatmap(std::vector<DatabaseBeatmap *> *difficulties, BeatmapType type);
     ~DatabaseBeatmap();
 
-    static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string& osuFilePath, float AR, float CS,
+    static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string &osuFilePath, float AR, float CS,
                                                         float speedMultiplier, bool calculateStarsInaccurately = false);
-    static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string& osuFilePath, float AR, float CS,
+    static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string &osuFilePath, float AR, float CS,
                                                         float speedMultiplier, bool calculateStarsInaccurately,
                                                         const std::atomic<bool> &dead);
     static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(PRIMITIVE_CONTAINER &c, float AR, float CS,
@@ -182,9 +182,12 @@ class DatabaseBeatmap {
     [[nodiscard]] inline std::string getFolder() const { return this->sFolder; }
     [[nodiscard]] inline std::string getFilePath() const { return this->sFilePath; }
 
-    [[nodiscard]] inline const std::vector<DatabaseBeatmap *> &getDifficulties() const {
-        static std::vector<DatabaseBeatmap *> empty;
-        return this->difficulties == NULL ? empty : *this->difficulties;
+    template <typename T = DatabaseBeatmap>
+    [[nodiscard]] inline const std::vector<T *> &getDifficulties() const
+        requires(std::is_same_v<std::remove_cv_t<T>, DatabaseBeatmap>)
+    {
+        static std::vector<T *> empty;
+        return this->difficulties == NULL ? empty : reinterpret_cast<const std::vector<T *> &>(*this->difficulties);
     }
 
     [[nodiscard]] inline const MD5Hash &getMD5Hash() const { return this->sMD5Hash; }
@@ -323,8 +326,8 @@ class DatabaseBeatmap {
     friend class Database;
     friend class BackgroundImageHandler;
 
-    static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string& osuFilePath);
-    static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string& osuFilePath, const std::atomic<bool> &dead);
+    static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string &osuFilePath);
+    static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string &osuFilePath, const std::atomic<bool> &dead);
     static CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT calculateSliderTimesClicksTicks(
         int beatmapVersion, std::vector<SLIDER> &sliders, zarray<DatabaseBeatmap::TIMINGPOINT> &timingpoints,
         float sliderMultiplier, float sliderTickRate);

@@ -1,5 +1,6 @@
 #include "Osu.h"
 
+#include <algorithm>
 #include <sstream>
 #include <utility>
 
@@ -2182,11 +2183,4 @@ float Osu::getUIScale() {
         return cv::ui_scale.getFloat();
 
     return ((cv::ui_scale_to_dpi.getBool() ? env->getDPIScale() : 1.0f) * cv::ui_scale.getFloat());
-}
-
-bool Osu::findIgnoreCase(const std::string &haystack, const std::string &needle) {
-    auto it = std::search(haystack.begin(), haystack.end(), needle.begin(), needle.end(),
-                          [](char ch1, char ch2) { return std::tolower(ch1) == std::tolower(ch2); });
-
-    return (it != haystack.end());
 }

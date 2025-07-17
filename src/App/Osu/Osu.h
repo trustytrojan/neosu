@@ -52,8 +52,6 @@ class Osu : public App, public MouseListener {
     static float getUIScale(float osuResolutionRatio);
     static float getUIScale();  // NOTE: includes premultiplied dpi scale!
 
-    static bool findIgnoreCase(const std::string &haystack, const std::string &needle);
-
     Osu();
     ~Osu() override;
 
