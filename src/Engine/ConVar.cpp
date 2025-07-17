@@ -204,7 +204,7 @@ int ConVarHandler::getNumConVars() const { return _getGlobalConVarArray().size()
 
 ConVar *ConVarHandler::getConVarByName(const ConVarString &name, bool warnIfNotFound) const {
     ConVar *found = _getConVar(name);
-    if(found != NULL) return found;
+    if(found != NULL && !found->isFlagSet(FCVAR_INTERNAL)) return found;
 
     if(warnIfNotFound) {
         ConVarString errormsg = ConVarString("ENGINE: ConVar \"");

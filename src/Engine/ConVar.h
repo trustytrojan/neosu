@@ -39,6 +39,9 @@ enum FCVAR_FLAGS : uint8_t {
 
     // this cvar affects gameplay
     FCVAR_GAMEPLAY = (1 << 4),
+
+    // don't load this cvar from configs or save them to configs
+    FCVAR_INTERNAL = (1 << 5)
 };
 
 class ConVar {

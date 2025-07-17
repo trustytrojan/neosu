@@ -382,13 +382,26 @@ void reconnect() {
         }
     }
 
-    UString password{cv::mp_password.getString()};
-    if(password.length() == 0) {
-        // No password: don't try to log in
+    {
+        auto *tempConVar = &cv::mp_password_temporary;
+        if(!tempConVar->getString().empty() &&
+           tempConVar->getString() != cv::mp_password_md5.getString())  // HACK: find a better way to do this...
+        {
+            const char *tempStr{tempConVar->getString().c_str()};
+            const auto hash{Bancho::md5((u8 *)tempStr, strlen(tempStr))};
+            cv::mp_password_md5.setValue(hash.hash.data());
+            tempConVar->resetDefaults();
+        }
+    }
+    if(cv::mp_password_md5.getString().length() != 32) {
+        // debugLogF("no password, md5: {} length: {}\n", cv::mp_password_md5.getString().length(),
+        // cv::mp_password_md5.getString());
+        //  No password: don't try to log in
         return;
     }
-    const char *pw = password.toUtf8();  // password needs to stay in scope!
-    bancho->pw_md5 = Bancho::md5((u8 *)pw, strlen(pw));
+
+    bancho->pw_md5 = {cv::mp_password_md5.getString().c_str()};
+    //    bancho->pw_md5 = Bancho::md5((u8 *)pw, strlen(pw));
 
     // Admins told me they don't want score submission enabled
     constexpr auto submit_blacklist = std::array{

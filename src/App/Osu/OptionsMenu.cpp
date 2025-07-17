@@ -1218,7 +1218,8 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->elements.back().render_condition = RenderCondition::PASSWORD_AUTH;
     this->nameTextbox = this->addTextbox(cv::name.getString().c_str(), &cv::name);
     this->elements.back().render_condition = RenderCondition::PASSWORD_AUTH;
-    this->passwordTextbox = this->addTextbox(cv::mp_password.getString().c_str(), &cv::mp_password);
+    const auto &md5pass = cv::mp_password_md5.getString();
+    this->passwordTextbox = this->addTextbox(md5pass.empty() ? "" : md5pass.c_str(), &cv::mp_password_temporary);
     this->passwordTextbox->is_password = true;
     this->elements.back().render_condition = RenderCondition::PASSWORD_AUTH;
     this->logInButton = this->addButton("Log in");
@@ -1515,7 +1516,7 @@ void OptionsMenu::mouse_update(bool *propagate_clicks) {
     if(this->osuFolderTextbox->hitEnter()) this->updateOsuFolder();
 
     cv::name.setValue(this->nameTextbox->getText());
-    cv::mp_password.setValue(this->passwordTextbox->getText());
+    cv::mp_password_temporary.setValue(this->passwordTextbox->getText());
     cv::mp_server.setValue(this->serverTextbox->getText());
     if(this->nameTextbox->hitEnter()) {
         cv::name.setValue(this->nameTextbox->getText());
@@ -1748,7 +1749,14 @@ void OptionsMenu::updateLayout() {
                 if(this->elements[i].cvar != NULL) {
                     if(this->elements[i].elements.size() == 1) {
                         auto *textboxPointer = dynamic_cast<CBaseUITextbox *>(this->elements[i].elements[0]);
-                        if(textboxPointer != NULL) textboxPointer->setText(this->elements[i].cvar->getString().c_str());
+                        if(textboxPointer != NULL) {
+                            // HACKHACK: don't override textbox with the mp_password_temporary (which gets deleted on login)
+                            UString textToSet{this->elements[i].cvar->getString().c_str()};
+                            if(this->elements[i].cvar == &cv::mp_password_temporary && cv::mp_password_temporary.getString().empty()) {
+                                textToSet = cv::mp_password_md5.getString().c_str();
+                            }
+                            textboxPointer->setText(textToSet);
+                        }
                     } else if(this->elements[i].elements.size() == 2) {
                         auto *textboxPointer = dynamic_cast<CBaseUITextbox *>(this->elements[i].elements[1]);
                         if(textboxPointer != NULL) textboxPointer->setText(this->elements[i].cvar->getString().c_str());
@@ -2589,6 +2597,8 @@ void OptionsMenu::onLogInClicked() {
         // Manually clicked disconnect button: clear oauth token
         cv::mp_oauth_token.setValue("");
     } else {
+        // debugLogF("DEBUG: manually clicked login, password: {} md5: {}\n", cv::mp_password_temporary.getString(),
+        //           cv::mp_password_md5.getString());
         if(this->should_use_oauth_login()) {
             bancho->endpoint = cv::mp_server.getString().c_str();
 
@@ -2598,7 +2608,7 @@ void OptionsMenu::onLogInClicked() {
             auto challenge_b64 = crypto::baseconv::encode64(&bancho->oauth_challenge[0], 32);
             auto scheme = cv::use_https.getBool() ? "https://" : "http://";
             auto url = fmt::format("{:s}{:s}/connect?challenge={:s}", scheme, bancho->endpoint.toUtf8(),
-                                       (const char *)challenge_b64.data());
+                                   (const char *)challenge_b64.data());
 
             env->openURLInDefaultBrowser(url);
         } else {
@@ -3579,6 +3589,7 @@ void OptionsMenu::save() {
             bool cvar_found = false;
             auto parts = line.split(" ");
             for(auto convar : convar->getConVarArray()) {
+                if(convar->isFlagSet(FCVAR_INTERNAL)) continue;
                 if(UString{convar->getName()} == parts[0]) {
                     cvar_found = true;
                     break;
@@ -3599,7 +3610,7 @@ void OptionsMenu::save() {
             return;
         }
 
-        for(const auto& line : user_lines) {
+        for(const auto &line : user_lines) {
             out << line.toUtf8() << "\n";
         }
         out << "\n";
@@ -3610,7 +3621,7 @@ void OptionsMenu::save() {
         out << "\n";
 
         for(auto convar : convar->getConVarArray()) {
-            if(!convar->hasValue()) continue;
+            if(!convar->hasValue() || convar->isFlagSet(FCVAR_INTERNAL)) continue;
             if(convar->getString() == convar->getDefaultString()) continue;
             out << convar->getName() << " " << convar->getString() << "\n";
         }
