@@ -125,6 +125,7 @@ struct alignas(1) TIMINGPOINT {
     u32 importPeppyScores();
     void saveScores();
     bool addScoreRaw(const FinishedScore &score);
+    bool isScoreAlreadyInDB(u64 unix_timestamp, const MD5Hash &map_hash);
 
     Timing::Timer *importTimer;
     bool bIsFirstLoad;   // only load differences after first raw load

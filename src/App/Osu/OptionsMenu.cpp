@@ -3599,7 +3599,7 @@ void OptionsMenu::save() {
             return;
         }
 
-        for(auto line : user_lines) {
+        for(const auto& line : user_lines) {
             out << line.toUtf8() << "\n";
         }
         out << "\n";

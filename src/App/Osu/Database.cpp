@@ -1,5 +1,6 @@
 #include "Database.h"
 
+#include <algorithm>
 #include <cstring>
 #include <utility>
 
@@ -169,12 +170,12 @@ Database::~Database() {
     lct_set_map(NULL);
     VolNormalization::abort();
     MapCalcThread::abort();
-    for(int i = 0; i < this->beatmapsets.size(); i++) {
-        delete this->beatmapsets[i];
+    for(auto &beatmapset : this->beatmapsets) {
+        delete beatmapset;
     }
 
-    for(int i = 0; i < this->scoreSortingMethods.size(); i++) {
-        delete this->scoreSortingMethods[i].comparator;
+    for(auto &scoreSortingMethod : this->scoreSortingMethods) {
+        delete scoreSortingMethod.comparator;
     }
 
     unload_collections();
@@ -264,14 +265,24 @@ int Database::addScore(const FinishedScore &score) {
     return -1;
 }
 
-bool Database::addScoreRaw(const FinishedScore &score) {
+bool Database::isScoreAlreadyInDB(u64 unix_timestamp, const MD5Hash &map_hash) {
     std::scoped_lock lock(this->scores_mtx);
-    for(const auto &other : this->scores[score.beatmap_hash]) {
-        if(other.unixTimestamp == score.unixTimestamp) {
+    for(const auto &other : this->scores[map_hash]) {
+        if(other.unixTimestamp == unix_timestamp) {
             // Score has already been added
-            return false;
+            return true;
         }
     }
+
+    return false;
+}
+
+bool Database::addScoreRaw(const FinishedScore &score) {
+    if(this->isScoreAlreadyInDB(score.unixTimestamp, score.beatmap_hash)) {
+        return false;
+    }
+
+    std::scoped_lock lock(this->scores_mtx);
 
     this->scores[score.beatmap_hash].push_back(score);
     if(score.hitdeltas.empty()) {
@@ -300,8 +311,8 @@ void Database::sortScoresInPlace(std::vector<FinishedScore> &scores) {
         return;
     }
 
-    for(int i = 0; i < this->scoreSortingMethods.size(); i++) {
-        if(cv::songbrowser_scores_sortingtype.getString() == this->scoreSortingMethods[i].name.utf8View()) {
+    for(auto &scoreSortingMethod : this->scoreSortingMethods) {
+        if(cv::songbrowser_scores_sortingtype.getString() == scoreSortingMethod.name.utf8View()) {
             struct COMPARATOR_WRAPPER {
                 SCORE_SORTING_COMPARATOR *comp;
                 bool operator()(FinishedScore const &a, FinishedScore const &b) const {
@@ -309,9 +320,9 @@ void Database::sortScoresInPlace(std::vector<FinishedScore> &scores) {
                 }
             };
             COMPARATOR_WRAPPER comparatorWrapper;
-            comparatorWrapper.comp = this->scoreSortingMethods[i].comparator;
+            comparatorWrapper.comp = scoreSortingMethod.comparator;
 
-            std::sort(scores.begin(), scores.end(), comparatorWrapper);
+            std::ranges::sort(scores, comparatorWrapper);
             return;
         }
     }
@@ -331,7 +342,7 @@ std::vector<UString> Database::getPlayerNamesWithPPScores() {
     std::vector<MD5Hash> keys;
     keys.reserve(this->scores.size());
 
-    for(auto kv : this->scores) {
+    for(const auto &kv : this->scores) {
         keys.push_back(kv.first);
     }
 
@@ -347,7 +358,7 @@ std::vector<UString> Database::getPlayerNamesWithPPScores() {
 
     std::vector<UString> names;
     names.reserve(tempNames.size());
-    for(auto k : tempNames) {
+    for(const auto &k : tempNames) {
         if(k.length() > 0) names.emplace_back(k.c_str());
     }
 
@@ -357,7 +368,7 @@ std::vector<UString> Database::getPlayerNamesWithPPScores() {
 std::vector<UString> Database::getPlayerNamesWithScoresForUserSwitcher() {
     std::scoped_lock lock(this->scores_mtx);
     std::unordered_set<std::string> tempNames;
-    for(auto kv : this->scores) {
+    for(const auto &kv : this->scores) {
         const MD5Hash &key = kv.first;
         for(auto &score : this->scores[key]) {
             tempNames.insert(score.playerName);
@@ -369,7 +380,7 @@ std::vector<UString> Database::getPlayerNamesWithScoresForUserSwitcher() {
 
     std::vector<UString> names;
     names.reserve(tempNames.size());
-    for(auto k : tempNames) {
+    for(const auto &k : tempNames) {
         if(k.length() > 0) names.emplace_back(k.c_str());
     }
 
@@ -388,7 +399,7 @@ Database::PlayerPPScores Database::getPlayerPPScores(const UString &playerName) 
     std::vector<MD5Hash> keys;
     keys.reserve(this->scores.size());
 
-    for(auto kv : this->scores) {
+    for(const auto &kv : this->scores) {
         keys.push_back(kv.first);
     }
 
@@ -432,7 +443,7 @@ Database::PlayerPPScores Database::getPlayerPPScores(const UString &playerName) 
     }
 
     // sort by pp
-    std::sort(scores.begin(), scores.end(), ScoreSortComparator());
+    std::ranges::sort(scores, ScoreSortComparator());
 
     ppScores.ppScores = std::move(scores);
     ppScores.totalScore = totalScore;
@@ -554,8 +565,7 @@ DatabaseBeatmap *Database::getBeatmapDifficulty(i32 map_id) {
 DatabaseBeatmap *Database::getBeatmapSet(i32 set_id) {
     if(this->isLoading()) return NULL;
 
-    for(size_t i = 0; i < this->beatmapsets.size(); i++) {
-        DatabaseBeatmap *beatmap = this->beatmapsets[i];
+    for(auto beatmap : this->beatmapsets) {
         if(beatmap->getSetID() == set_id) {
             return beatmap;
         }
@@ -1100,17 +1110,17 @@ void Database::loadDB() {
         }
 
         // build beatmap sets
-        for(int i = 0; i < beatmapSets.size(); i++) {
-            if(this->bInterruptLoad.load()) break;        // cancellation point
-            if(beatmapSets[i].diffs2->empty()) continue;  // sanity check
+        for(auto &beatmapSet : beatmapSets) {
+            if(this->bInterruptLoad.load()) break;    // cancellation point
+            if(beatmapSet.diffs2->empty()) continue;  // sanity check
 
-            if(beatmapSets[i].setID > 0) {
-                BeatmapSet *set = new BeatmapSet(beatmapSets[i].diffs2, DatabaseBeatmap::BeatmapType::PEPPY_BEATMAPSET);
+            if(beatmapSet.setID > 0) {
+                BeatmapSet *set = new BeatmapSet(beatmapSet.diffs2, DatabaseBeatmap::BeatmapType::PEPPY_BEATMAPSET);
                 this->beatmapsets.push_back(set);
             } else {
                 // set with invalid ID: treat all its diffs separately. we'll group the diffs by title+artist.
                 std::unordered_map<std::string, std::vector<DatabaseBeatmap *> *> titleArtistToBeatmap;
-                for(auto diff : (*beatmapSets[i].diffs2)) {
+                for(auto diff : (*beatmapSet.diffs2)) {
                     std::string titleArtist = diff->getTitle();
                     titleArtist.append("|");
                     titleArtist.append(diff->getArtist());
@@ -1123,7 +1133,7 @@ void Database::loadDB() {
                     titleArtistToBeatmap[titleArtist]->push_back(diff);
                 }
 
-                for(auto scuffed_set : titleArtistToBeatmap) {
+                for(const auto &scuffed_set : titleArtistToBeatmap) {
                     BeatmapSet *set =
                         new BeatmapSet(scuffed_set.second, DatabaseBeatmap::BeatmapType::PEPPY_BEATMAPSET);
                     this->beatmapsets.push_back(set);
@@ -1449,36 +1459,35 @@ u32 Database::importOldMcNeosuScores() {
                     sc.server = db.read_string();
 
                     std::string experimentalModsConVars = db.read_string();
-                    auto cvrs = UString(experimentalModsConVars.c_str());
-                    auto experimentalMods = cvrs.split(";");
-                    for(auto mod : experimentalMods) {
-                        if(mod == UString("")) continue;
-                        if(mod == UString("fposu_mod_strafing")) sc.mods.flags |= Replay::ModFlags::FPoSu_Strafing;
-                        if(mod == UString("osu_mod_wobble")) sc.mods.flags |= Replay::ModFlags::Wobble1;
-                        if(mod == UString("osu_mod_wobble2")) sc.mods.flags |= Replay::ModFlags::Wobble2;
-                        if(mod == UString("osu_mod_arwobble")) sc.mods.flags |= Replay::ModFlags::ARWobble;
-                        if(mod == UString("osu_mod_timewarp")) sc.mods.flags |= Replay::ModFlags::Timewarp;
-                        if(mod == UString("osu_mod_artimewarp")) sc.mods.flags |= Replay::ModFlags::ARTimewarp;
-                        if(mod == UString("osu_mod_minimize")) sc.mods.flags |= Replay::ModFlags::Minimize;
-                        if(mod == UString("osu_mod_fadingcursor")) sc.mods.flags |= Replay::ModFlags::FadingCursor;
-                        if(mod == UString("osu_mod_fps")) sc.mods.flags |= Replay::ModFlags::FPS;
-                        if(mod == UString("osu_mod_jigsaw1")) sc.mods.flags |= Replay::ModFlags::Jigsaw1;
-                        if(mod == UString("osu_mod_jigsaw2")) sc.mods.flags |= Replay::ModFlags::Jigsaw2;
-                        if(mod == UString("osu_mod_fullalternate")) sc.mods.flags |= Replay::ModFlags::FullAlternate;
-                        if(mod == UString("osu_mod_reverse_sliders")) sc.mods.flags |= Replay::ModFlags::ReverseSliders;
-                        if(mod == UString("osu_mod_no50s")) sc.mods.flags |= Replay::ModFlags::No50s;
-                        if(mod == UString("osu_mod_no100s")) sc.mods.flags |= Replay::ModFlags::No100s;
-                        if(mod == UString("osu_mod_ming3012")) sc.mods.flags |= Replay::ModFlags::Ming3012;
-                        if(mod == UString("osu_mod_halfwindow")) sc.mods.flags |= Replay::ModFlags::HalfWindow;
-                        if(mod == UString("osu_mod_millhioref")) sc.mods.flags |= Replay::ModFlags::Millhioref;
-                        if(mod == UString("osu_mod_mafham")) sc.mods.flags |= Replay::ModFlags::Mafham;
-                        if(mod == UString("osu_mod_strict_tracking")) sc.mods.flags |= Replay::ModFlags::StrictTracking;
-                        if(mod == UString("osu_playfield_mirror_horizontal"))
+                    auto experimentalMods = SString::split(experimentalModsConVars, ";");
+                    for(const auto &mod : experimentalMods) {
+                        if(mod == "") continue;
+                        if(mod == "fposu_mod_strafing") sc.mods.flags |= Replay::ModFlags::FPoSu_Strafing;
+                        if(mod == "osu_mod_wobble") sc.mods.flags |= Replay::ModFlags::Wobble1;
+                        if(mod == "osu_mod_wobble2") sc.mods.flags |= Replay::ModFlags::Wobble2;
+                        if(mod == "osu_mod_arwobble") sc.mods.flags |= Replay::ModFlags::ARWobble;
+                        if(mod == "osu_mod_timewarp") sc.mods.flags |= Replay::ModFlags::Timewarp;
+                        if(mod == "osu_mod_artimewarp") sc.mods.flags |= Replay::ModFlags::ARTimewarp;
+                        if(mod == "osu_mod_minimize") sc.mods.flags |= Replay::ModFlags::Minimize;
+                        if(mod == "osu_mod_fadingcursor") sc.mods.flags |= Replay::ModFlags::FadingCursor;
+                        if(mod == "osu_mod_fps") sc.mods.flags |= Replay::ModFlags::FPS;
+                        if(mod == "osu_mod_jigsaw1") sc.mods.flags |= Replay::ModFlags::Jigsaw1;
+                        if(mod == "osu_mod_jigsaw2") sc.mods.flags |= Replay::ModFlags::Jigsaw2;
+                        if(mod == "osu_mod_fullalternate") sc.mods.flags |= Replay::ModFlags::FullAlternate;
+                        if(mod == "osu_mod_reverse_sliders") sc.mods.flags |= Replay::ModFlags::ReverseSliders;
+                        if(mod == "osu_mod_no50s") sc.mods.flags |= Replay::ModFlags::No50s;
+                        if(mod == "osu_mod_no100s") sc.mods.flags |= Replay::ModFlags::No100s;
+                        if(mod == "osu_mod_ming3012") sc.mods.flags |= Replay::ModFlags::Ming3012;
+                        if(mod == "osu_mod_halfwindow") sc.mods.flags |= Replay::ModFlags::HalfWindow;
+                        if(mod == "osu_mod_millhioref") sc.mods.flags |= Replay::ModFlags::Millhioref;
+                        if(mod == "osu_mod_mafham") sc.mods.flags |= Replay::ModFlags::Mafham;
+                        if(mod == "osu_mod_strict_tracking") sc.mods.flags |= Replay::ModFlags::StrictTracking;
+                        if(mod == "osu_playfield_mirror_horizontal")
                             sc.mods.flags |= Replay::ModFlags::MirrorHorizontal;
-                        if(mod == UString("osu_playfield_mirror_vertical"))
+                        if(mod == "osu_playfield_mirror_vertical")
                             sc.mods.flags |= Replay::ModFlags::MirrorVertical;
-                        if(mod == UString("osu_mod_shirone")) sc.mods.flags |= Replay::ModFlags::Shirone;
-                        if(mod == UString("osu_mod_approach_different"))
+                        if(mod == "osu_mod_shirone") sc.mods.flags |= Replay::ModFlags::Shirone;
+                        if(mod == "osu_mod_approach_different")
                             sc.mods.flags |= Replay::ModFlags::ApproachDifferent;
                     }
 
@@ -1499,7 +1508,7 @@ u32 Database::importOldMcNeosuScores() {
             else if(db_version < backupLessThanVersion)
                 makeBackupType = 1;
 
-            debugLogF("Custom scores: version = {}, numBeatmaps = {}\n", db_version, numBeatmaps);
+            debugLogF("McOsu scores: version = {}, numBeatmaps = {}\n", db_version, numBeatmaps);
 
             if(db_version <= latest_mcosu_custom_scores_ver) {
                 for(int b = 0; b < numBeatmaps; b++) {
@@ -1527,6 +1536,22 @@ u32 Database::importOldMcNeosuScores() {
                             /* isImportedLegacyScore = */ db.skip<uint8_t>();  // too lazy to handle this logic
                         }
                         const auto unixTimestamp = db.read<uint64_t>();
+                        if(this->isScoreAlreadyInDB(unixTimestamp, md5hash)) {
+                            db.skip_string();  // playerName
+                            u32 bytesToSkipUntilNextScore = 0;
+                            bytesToSkipUntilNextScore +=
+                                (sizeof(uint16_t) * 8) + (sizeof(int64_t)) + (sizeof(int32_t)) + (sizeof(f32) * 12);
+                            if(scoreVersion > 20180722) {
+                                // maxPossibleCombos
+                                bytesToSkipUntilNextScore += sizeof(int32_t) * 3;
+                            }
+                            db.skip_bytes(bytesToSkipUntilNextScore);
+                            db.skip_string();  // experimentalMods
+                            if(cv::debug.getBool()) {
+                                debugLogF("skipped score {} (already loaded from neosu_scores.db)\n", md5hash.hash.data());
+                            }
+                            continue;
+                        }
 
                         // default
                         const std::string playerName{db.read_string()};
@@ -1543,7 +1568,7 @@ u32 Database::importOldMcNeosuScores() {
                         const auto mods = Replay::Mods::from_legacy(db.read<int32_t>());
 
                         // custom
-                        const short numSliderBreaks = db.read<uint16_t>();
+                        const auto numSliderBreaks = db.read<uint16_t>();
                         const auto pp = db.read<f32>();
                         const auto unstableRate = db.read<f32>();
                         const auto hitErrorAvgMin = db.read<f32>();
@@ -1644,6 +1669,7 @@ u32 Database::importOldMcNeosuScores() {
                             sc.beatmap_hash = md5hash;
                             sc.perfect = sc.comboMax >= sc.maxPossibleCombo;
                             sc.grade = sc.calculate_grade();
+                            sc.client = fmt::format("mcosu-{}", scoreVersion);
 
                             if(this->addScoreRaw(sc)) {
                                 nb_imported++;
@@ -1898,12 +1924,12 @@ BeatmapSet *Database::loadRawBeatmap(const std::string &beatmapPath) {
     // try loading all diffs
     std::vector<BeatmapDifficulty *> *diffs2 = new std::vector<BeatmapDifficulty *>();
     std::vector<std::string> beatmapFiles = env->getFilesInFolder(beatmapPath);
-    for(int i = 0; i < beatmapFiles.size(); i++) {
-        std::string ext = env->getFileExtensionFromFilePath(beatmapFiles[i]);
+    for(const auto &beatmapFile : beatmapFiles) {
+        std::string ext = env->getFileExtensionFromFilePath(beatmapFile);
         if(ext.compare("osu") != 0) continue;
 
         std::string fullFilePath = beatmapPath;
-        fullFilePath.append(beatmapFiles[i]);
+        fullFilePath.append(beatmapFile);
 
         BeatmapDifficulty *diff2 =
             new BeatmapDifficulty(fullFilePath, beatmapPath, DatabaseBeatmap::BeatmapType::NEOSU_DIFFICULTY);

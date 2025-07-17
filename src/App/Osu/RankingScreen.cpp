@@ -443,7 +443,14 @@ void RankingScreen::setScore(FinishedScore score) {
     this->score = score;
 
     this->retry_btn->bVisible2 = is_same_player && !bancho->is_in_a_multi_room();
-    this->watch_btn->bVisible2 = !bancho->is_in_a_multi_room();
+
+    if(!this->score.has_possible_replay()) {  // e.g. mcosu scores will never have replays
+        this->watch_btn->setEnabled(false);
+        this->watch_btn->setTextColor(0xff888888);
+        this->watch_btn->setTextDarkColor(0xff000000);
+    } else {
+        this->watch_btn->bVisible2 = !bancho->is_in_a_multi_room();
+    }
 
     this->bIsUnranked = false;
 
@@ -494,7 +501,8 @@ void RankingScreen::setScore(FinishedScore score) {
     if(score.mods.flags & Replay::ModFlags::Timewarp) this->enabledExperimentalMods.push_back(&cv::mod_timewarp);
     if(score.mods.flags & Replay::ModFlags::ARTimewarp) this->enabledExperimentalMods.push_back(&cv::mod_artimewarp);
     if(score.mods.flags & Replay::ModFlags::Minimize) this->enabledExperimentalMods.push_back(&cv::mod_minimize);
-    if(score.mods.flags & Replay::ModFlags::FadingCursor) this->enabledExperimentalMods.push_back(&cv::mod_fadingcursor);
+    if(score.mods.flags & Replay::ModFlags::FadingCursor)
+        this->enabledExperimentalMods.push_back(&cv::mod_fadingcursor);
     if(score.mods.flags & Replay::ModFlags::FPS) this->enabledExperimentalMods.push_back(&cv::mod_fps);
     if(score.mods.flags & Replay::ModFlags::Jigsaw1) this->enabledExperimentalMods.push_back(&cv::mod_jigsaw1);
     if(score.mods.flags & Replay::ModFlags::Jigsaw2) this->enabledExperimentalMods.push_back(&cv::mod_jigsaw2);
@@ -523,8 +531,8 @@ void RankingScreen::setBeatmapInfo(Beatmap *beatmap, DatabaseBeatmap *diff2) {
     this->score.diff2 = diff2;
     this->songInfo->setFromBeatmap(beatmap, diff2);
 
-    UString local_name{cv::name.getString()};
-    this->songInfo->setPlayer(this->bIsUnranked ? "neosu" : local_name.toUtf8());
+    const std::string scorePlayer = this->score.playerName.empty() ? cv::name.getString() : this->score.playerName;
+    this->songInfo->setPlayer(this->bIsUnranked ? "neosu" : scorePlayer);
 
     // @PPV3: update m_score.ppv3_score, this->score.ppv3_aim_stars, this->score.ppv3_speed_stars,
     //        m_fHitErrorAvgMin, this->fHitErrorAvgMax, this->fUnstableRate
@@ -544,9 +552,9 @@ void RankingScreen::updateLayout() {
                                 this->rankingTitle->getImage()->getHeight() * this->rankingTitle->getScale().y);
     this->rankingTitle->setRelPos(this->getSize().x - this->rankingTitle->getSize().x - osu->getUIScale(20.0f), 0);
 
-    this->songInfo->setSize(osu->getScreenWidth(),
-                            std::max(this->songInfo->getMinimumHeight(),
-                                this->rankingTitle->getSize().y * cv::rankingscreen_topbar_height_percent.getFloat()));
+    this->songInfo->setSize(osu->getScreenWidth(), std::max(this->songInfo->getMinimumHeight(),
+                                                            this->rankingTitle->getSize().y *
+                                                                cv::rankingscreen_topbar_height_percent.getFloat()));
 
     this->rankings->setSize(osu->getScreenSize().x + 2, osu->getScreenSize().y - this->songInfo->getSize().y + 3);
     this->rankings->setRelPosY(this->songInfo->getSize().y - 1);
@@ -568,10 +576,11 @@ void RankingScreen::updateLayout() {
     this->rankingPanel->setImage(osu->getSkin()->getRankingPanel());
     this->rankingPanel->setScale(Osu::getImageScale(hardcodedOsuRankingPanelImageSize, 317.0f),
                                  Osu::getImageScale(hardcodedOsuRankingPanelImageSize, 317.0f));
-    this->rankingPanel->setSize(std::max(hardcodedOsuRankingPanelImageSize.x * this->rankingPanel->getScale().x,
-                                    this->rankingPanel->getImage()->getWidth() * this->rankingPanel->getScale().x),
-                                std::max(hardcodedOsuRankingPanelImageSize.y * this->rankingPanel->getScale().y,
-                                    this->rankingPanel->getImage()->getHeight() * this->rankingPanel->getScale().y));
+    this->rankingPanel->setSize(
+        std::max(hardcodedOsuRankingPanelImageSize.x * this->rankingPanel->getScale().x,
+                 this->rankingPanel->getImage()->getWidth() * this->rankingPanel->getScale().x),
+        std::max(hardcodedOsuRankingPanelImageSize.y * this->rankingPanel->getScale().y,
+                 this->rankingPanel->getImage()->getHeight() * this->rankingPanel->getScale().y));
 
     this->rankingIndex->setSize(this->rankings->getSize().x + 2, osu->getScreenHeight() * 0.07f * uiScale);
     this->rankingIndex->setBackgroundColor(0xff745e13);
@@ -629,7 +638,7 @@ void RankingScreen::setGrade(FinishedScore::Grade grade) {
     }
 
     const float uiScale = /*cv::ui_scale.getFloat()*/ 1.0f;  // NOTE: no uiScale for rankingPanel and rankingGrade,
-                                                            // doesn't really work due to legacy layout expectations
+                                                             // doesn't really work due to legacy layout expectations
 
     const float rankingGradeImageScale = Osu::getImageScale(hardcodedOsuRankingGradeImageSize, 230.0f) * uiScale;
     this->rankingGrade->setScale(rankingGradeImageScale, rankingGradeImageScale);

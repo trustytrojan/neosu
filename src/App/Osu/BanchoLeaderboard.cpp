@@ -1,18 +1,17 @@
 #include "BanchoLeaderboard.h"
 
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 
-#include <sstream>
 #include <vector>
 
 #include "Bancho.h"
 #include "BanchoNetworking.h"
 #include "BanchoUsers.h"
-#include "ConVar.h"
 #include "Database.h"
 #include "Engine.h"
 #include "ModSelector.h"
+#include "SString.h"
 #include "SongBrowser/SongBrowser.h"
 
 // Since strtok_r SUCKS I'll just make my own
@@ -36,23 +35,23 @@ FinishedScore parse_score(char *score_line) {
     score.client = "peppy-unknown";
     score.server = bancho->endpoint.toUtf8();
 
-    auto tokens = UString(score_line).split("|");
+    auto tokens = SString::split(score_line, "|");
     if(tokens.size() < 15) return score;
 
-    score.bancho_score_id = strtoul(tokens[0].toUtf8(), NULL, 10);
-    score.playerName = tokens[1].toUtf8();
-    score.score = strtoul(tokens[2].toUtf8(), NULL, 10);
-    score.comboMax = strtoul(tokens[3].toUtf8(), NULL, 10);
-    score.num50s = strtoul(tokens[4].toUtf8(), NULL, 10);
-    score.num100s = strtoul(tokens[5].toUtf8(), NULL, 10);
-    score.num300s = strtoul(tokens[6].toUtf8(), NULL, 10);
-    score.numMisses = strtoul(tokens[7].toUtf8(), NULL, 10);
-    score.numKatus = strtoul(tokens[8].toUtf8(), NULL, 10);
-    score.numGekis = strtoul(tokens[9].toUtf8(), NULL, 10);
-    score.perfect = strtoul(tokens[10].toUtf8(), NULL, 10) == 1;
-    score.mods = Replay::Mods::from_legacy(strtoul(tokens[11].toUtf8(), NULL, 10));
-    score.player_id = strtoul(tokens[12].toUtf8(), NULL, 10);
-    score.unixTimestamp = strtoul(tokens[14].toUtf8(), NULL, 10);
+    score.bancho_score_id = strtoul(tokens[0].c_str(), NULL, 10);
+    score.playerName = tokens[1].c_str();
+    score.score = strtoul(tokens[2].c_str(), NULL, 10);
+    score.comboMax = static_cast<i32>(strtol(tokens[3].c_str(), NULL, 10));
+    score.num50s = static_cast<i32>(strtol(tokens[4].c_str(), NULL, 10));
+    score.num100s = static_cast<i32>(strtol(tokens[5].c_str(), NULL, 10));
+    score.num300s = static_cast<i32>(strtol(tokens[6].c_str(), NULL, 10));
+    score.numMisses = static_cast<i32>(strtol(tokens[7].c_str(), NULL, 10));
+    score.numKatus = static_cast<i32>(strtol(tokens[8].c_str(), NULL, 10));
+    score.numGekis = static_cast<i32>(strtol(tokens[9].c_str(), NULL, 10));
+    score.perfect = strtoul(tokens[10].c_str(), NULL, 10) == 1;
+    score.mods = Replay::Mods::from_legacy(static_cast<i32>(strtol(tokens[11].c_str(), NULL, 10)));
+    score.player_id = strtoul(tokens[12].c_str(), NULL, 10);
+    score.unixTimestamp = strtoul(tokens[14].c_str(), NULL, 10);
 
     // @PPV3: score can only be ppv2, AND we need to recompute ppv2 on it
     // might also be missing some important fields here, double check

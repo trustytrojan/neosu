@@ -255,7 +255,7 @@ void ChatChannel::updateLayout(Vector2 pos, Vector2 size) {
     this->ui->setSize(size);
     this->y_total = 7;
 
-    for(auto msg : this->messages) {
+    for(const auto& msg : this->messages) {
         this->add_message(msg);
     }
 
@@ -1082,7 +1082,7 @@ void Chat::onDisconnect() {
     }
     this->channels.clear();
 
-    for(auto chan : Bancho::chat_channels) {
+    for(const auto& chan : Bancho::chat_channels) {
         delete chan.second;
     }
     Bancho::chat_channels.clear();

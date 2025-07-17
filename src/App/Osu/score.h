@@ -73,7 +73,8 @@ struct FinishedScore {
     MD5Hash beatmap_hash;
     std::vector<LegacyReplay::Frame> replay;  // not always loaded
 
-    bool is_peppy_imported() { return this->bancho_score_id != 0 || this->peppy_replay_tms != 0; }
+    [[nodiscard]] bool is_peppy_imported() const { return this->bancho_score_id != 0 || this->peppy_replay_tms != 0; }
+    [[nodiscard]] bool has_possible_replay() const { return !this->client.contains("mcosu"); }
     [[nodiscard]] f64 get_pp() const;
     [[nodiscard]] Grade calculate_grade() const;
 };

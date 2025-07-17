@@ -1,12 +1,17 @@
 #include "Collections.h"
 
+#include <algorithm>
+#include <utility>
+
 #include "BanchoFile.h"
-#include "BanchoProtocol.h"
 #include "ConVar.h"
 #include "Database.h"
 #include "Engine.h"
 
+namespace {  // static namespace
 bool collections_loaded = false;
+}
+
 std::vector<Collection*> collections;
 
 void Collection::delete_collection() {
@@ -17,21 +22,21 @@ void Collection::delete_collection() {
 
 void Collection::add_map(MD5Hash map_hash) {
     {
-        auto it = std::find(this->deleted_maps.begin(), this->deleted_maps.end(), map_hash);
+        auto it = std::ranges::find(this->deleted_maps, map_hash);
         if(it != this->deleted_maps.end()) {
             this->deleted_maps.erase(it);
         }
     }
 
     {
-        auto it = std::find(this->neosu_maps.begin(), this->neosu_maps.end(), map_hash);
+        auto it = std::ranges::find(this->neosu_maps, map_hash);
         if(it == this->neosu_maps.end()) {
             this->neosu_maps.push_back(map_hash);
         }
     }
 
     {
-        auto it = std::find(this->maps.begin(), this->maps.end(), map_hash);
+        auto it = std::ranges::find(this->maps, map_hash);
         if(it == this->maps.end()) {
             this->maps.push_back(map_hash);
         }
@@ -40,21 +45,21 @@ void Collection::add_map(MD5Hash map_hash) {
 
 void Collection::remove_map(MD5Hash map_hash) {
     {
-        auto it = std::find(this->maps.begin(), this->maps.end(), map_hash);
+        auto it = std::ranges::find(this->maps, map_hash);
         if(it != this->maps.end()) {
             this->maps.erase(it);
         }
     }
 
     {
-        auto it = std::find(this->neosu_maps.begin(), this->neosu_maps.end(), map_hash);
+        auto it = std::ranges::find(this->neosu_maps, map_hash);
         if(it != this->neosu_maps.end()) {
             this->neosu_maps.erase(it);
         }
     }
 
     {
-        auto it = std::find(this->peppy_maps.begin(), this->peppy_maps.end(), map_hash);
+        auto it = std::ranges::find(this->peppy_maps, map_hash);
         if(it != this->peppy_maps.end()) {
             this->deleted_maps.push_back(map_hash);
         }
@@ -94,7 +99,7 @@ bool load_collections() {
 
     unload_collections();
 
-    auto osu_database_version = cv::database_version.getInt();
+    auto osu_database_version = cv::database_version.getVal<u32>();
 
     std::string peppy_collections_path = cv::osu_folder.getString();
     peppy_collections_path.append("collection.db");
@@ -108,7 +113,7 @@ bool load_collections() {
             debugLog("osu!stable collection.db version more recent than neosu, loading might fail.\n");
         }
 
-        for(int c = 0; c < nb_collections; c++) {
+        for(int c = 0; std::cmp_less(c, nb_collections); c++) {
             auto name = peppy_collections.read_string();
             u32 nb_maps = peppy_collections.read<u32>();
 
@@ -139,7 +144,7 @@ bool load_collections() {
             BanchoFile::copy("collections.db", backup_path.toUtf8());
         }
 
-        for(int c = 0; c < nb_collections; c++) {
+        for(int c = 0; std::cmp_less(c, nb_collections); c++) {
             auto name = neosu_collections.read_string();
             auto collection = get_or_create_collection(name);
 
@@ -149,10 +154,10 @@ bool load_collections() {
             }
 
             collection->deleted_maps.reserve(nb_deleted_maps);
-            for(int d = 0; d < nb_deleted_maps; d++) {
+            for(int d = 0; std::cmp_less(d, nb_deleted_maps); d++) {
                 auto map_hash = neosu_collections.read_hash();
 
-                auto it = std::find(collection->maps.begin(), collection->maps.end(), map_hash);
+                auto it = std::ranges::find(collection->maps, map_hash);
                 if(it != collection->maps.end()) {
                     collection->maps.erase(it);
                 }
@@ -164,10 +169,10 @@ bool load_collections() {
             collection->maps.reserve(collection->maps.size() + nb_maps);
             collection->neosu_maps.reserve(nb_maps);
 
-            for(int m = 0; m < nb_maps; m++) {
+            for(int m = 0; std::cmp_less(m, nb_maps); m++) {
                 auto map_hash = neosu_collections.read_hash();
 
-                auto it = std::find(collection->maps.begin(), collection->maps.end(), map_hash);
+                auto it = std::ranges::find(collection->maps, map_hash);
                 if(it == collection->maps.end()) {
                     collection->maps.push_back(map_hash);
                 }

@@ -512,7 +512,13 @@ void ScoreButton::onRightMouseUpInside() {
         this->contextMenu->begin(0, true);
         {
             this->contextMenu->addButton("Use Mods", 1);  // for scores without mods this will just nomod
-            this->contextMenu->addButton("View replay", 2);
+            auto *replayButton = this->contextMenu->addButton("View replay", 2);
+            if(!this->score.has_possible_replay())  // e.g. mcosu scores will never have replays
+            {
+                replayButton->setEnabled(false);
+                replayButton->setTextColor(0xff888888);
+                replayButton->setTextDarkColor(0xff000000);
+            }
 
             CBaseUIButton *spacer = this->contextMenu->addButton("---");
             spacer->setEnabled(false);
@@ -589,11 +595,16 @@ void ScoreButton::onDeleteScoreConfirmed(const UString & /*text*/, int id) {
     osu->getSongBrowser()->onScoreContextMenu(this, 2);
 }
 
-void ScoreButton::setScore(const FinishedScore &score, DatabaseBeatmap *diff2, int index, const UString & /*titleString*/,
-                           float  /*weight*/) {
+void ScoreButton::setScore(const FinishedScore &score, DatabaseBeatmap *diff2, int index,
+                           const UString & /*titleString*/, float /*weight*/) {
     this->score = score;
     this->score.beatmap_hash = diff2->getMD5Hash();
     this->score.diff2 = diff2;
+    // debugLogF(
+    //     "score.beatmap_hash {} this->beatmap_hash {} score.has_possible_replay {} this->has_possible_replay {} "
+    //     "score.playername {} this->playername {}\n",
+    //     score.beatmap_hash.hash.data(), this->score.beatmap_hash.hash.data(), score.has_possible_replay(),
+    //     this->score.has_possible_replay(), score.playerName, this->score.playerName);
     this->iScoreIndexNumber = index;
 
     f32 AR = score.mods.ar_override;

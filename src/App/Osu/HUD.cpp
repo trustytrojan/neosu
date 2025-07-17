@@ -1276,7 +1276,7 @@ std::vector<SCORE_ENTRY> HUD::getCurrentScores() {
 
         int nb_slots = 0;
         const auto &scores_ref = *singleplayer_scores;
-        for(auto score : scores_ref) {
+        for(const auto& score : scores_ref) {
             SCORE_ENTRY scoreEntry;
             scoreEntry.entry_id = -(nb_slots + 1);
             scoreEntry.player_id = score.player_id;
@@ -1343,7 +1343,7 @@ void HUD::resetScoreboard() {
     int player_entry_id = bancho->is_in_a_multi_room() ? bancho->user_id.load() : 0;
     auto scores = this->getCurrentScores();
     int i = 0;
-    for(auto score : scores) {
+    for(const auto& score : scores) {
         auto slot = new ScoreboardSlot(score, i);
         if(score.entry_id == player_entry_id) {
             this->player_slot = slot;
