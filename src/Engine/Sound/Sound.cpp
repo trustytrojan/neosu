@@ -99,6 +99,11 @@ void Sound::initAsync() {
             return;
         }
 
+        BASS_ChannelSetAttribute(this->stream, BASS_ATTRIB_TEMPO_OPTION_USE_QUICKALGO, false);
+        BASS_ChannelSetAttribute(this->stream, BASS_ATTRIB_TEMPO_OPTION_OVERLAP_MS, 4.0f);
+        BASS_ChannelSetAttribute(this->stream, BASS_ATTRIB_TEMPO_OPTION_SEQUENCE_MS, 30.0f);
+        BASS_ChannelSetAttribute(this->stream, BASS_ATTRIB_TEMPO_OPTION_OLDPOS, 1);  // use old position calculation
+
         // Only compute the length once
         if(this->bInterrupted.load()) return;
         i64 length = BASS_ChannelGetLength(this->stream, BASS_POS_BYTE);

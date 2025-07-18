@@ -56,13 +56,13 @@ set(DISCORDSDK_URL "https://web.archive.org/web/20250505113314/https://dl-game-s
 set(DISCORDSDK_HASH "SHA512=4c8f72c7bdf92bc969fb86b96ea0d835e01b9bab1a2cc27ae00bdac1b9733a1303ceadfe138c24a7609b76d61d49999a335dd596cf3f335d894702e2aa23406f")
 
 # BASS BINARIES
-set(BASS_VERSION "20250611")
+set(BASS_VERSION "20250718")
 
 set(BASS_URL "https://web.archive.org/web/20250603164509/https://www.un4seen.com/stuff/bass.zip")
 set(BASS_HASH "SHA512=d0fa29a34fa55e704a24162b23979d9ab8b75b89c11fe63d2bb71302786f8127df8017202c868e5e8b7efc8472c5144ab3a7b0591fe4b4dbc495224a7c5c9071")
 
-set(BASSFX_URL "https://web.archive.org/web/20250603164652/https://www.un4seen.com/stuff/bass_fx.zip")
-set(BASSFX_HASH "SHA512=0826a0fe9e35e86e7e9d6883441e6e9e604914ab0a46c04dfb209b055bc9f0806dbff468d27481c5b5fcd573b62af2abad4c286549d165d324d17ef306aa6921")
+set(BASSFX_URL "https://web.archive.org/web/20250718191402/https://www.un4seen.com/stuff/bass_fx.zip")
+set(BASSFX_HASH "SHA512=561572d0f6d5f108dfa11d786c664923bdb9aebc4d49a78a66f5826bcdfe102254c0308000a00cb79b6eb007938845f8625ea0ed3c4f9ff72806a48562ddd800")
 
 set(BASSMIX_URL "https://web.archive.org/web/20250603164713/https://www.un4seen.com/stuff/bassmix.zip")
 set(BASSMIX_HASH "SHA512=e7139b71f53b30bd27f2991006781f69a5e0e415996fcd41a7122908b0245cc6e1efb82b66409b80dc4d7cb4eb0d6d445cf3eaff52fe6f7c43bbd9872ea7949b")
