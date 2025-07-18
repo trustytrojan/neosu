@@ -1060,7 +1060,9 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
     // if cursor is to the left edge of the screen, force center currently selected beatmap/diff
     // but only if the context menu is currently not visible (since we don't want move things while e.g. managing
     // collections etc.)
-    if(mouse->getPos().x < osu->getScreenWidth() * 0.1f && !this->contextMenu->isVisible()) {
+    static uint8_t throttle = 255;  // slow!
+    if(!(++throttle % 8) && !osu->getOptionsMenu()->isVisible() && mouse->getPos().x < osu->getScreenWidth() * 0.1f &&
+       !this->contextMenu->isVisible()) {
         this->scheduled_scroll_to_selected_button = true;
     }
 
@@ -2048,28 +2050,27 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
         STARS,
         CREATOR
     };
-    static constexpr auto keywords = std::array{
-        std::pair<std::string, keywordId>("ar", AR),
-        std::pair<std::string, keywordId>("cs", CS),
-        std::pair<std::string, keywordId>("od", OD),
-        std::pair<std::string, keywordId>("hp", HP),
-        std::pair<std::string, keywordId>("bpm", BPM),
-        std::pair<std::string, keywordId>("opm", OPM),
-        std::pair<std::string, keywordId>("cpm", CPM),
-        std::pair<std::string, keywordId>("spm", SPM),
-        std::pair<std::string, keywordId>("object", OBJECTS),
-        std::pair<std::string, keywordId>("objects", OBJECTS),
-        std::pair<std::string, keywordId>("circle", CIRCLES),
-        std::pair<std::string, keywordId>("circles", CIRCLES),
-        std::pair<std::string, keywordId>("slider", SLIDERS),
-        std::pair<std::string, keywordId>("sliders", SLIDERS),
-        std::pair<std::string, keywordId>("spinner", SPINNERS),
-        std::pair<std::string, keywordId>("spinners", SPINNERS),
-        std::pair<std::string, keywordId>("length", LENGTH),
-        std::pair<std::string, keywordId>("len", LENGTH),
-        std::pair<std::string, keywordId>("stars", STARS),
-        std::pair<std::string, keywordId>("star", STARS),
-        std::pair<std::string, keywordId>("creator", CREATOR)};
+    static constexpr auto keywords = std::array{std::pair<std::string, keywordId>("ar", AR),
+                                                std::pair<std::string, keywordId>("cs", CS),
+                                                std::pair<std::string, keywordId>("od", OD),
+                                                std::pair<std::string, keywordId>("hp", HP),
+                                                std::pair<std::string, keywordId>("bpm", BPM),
+                                                std::pair<std::string, keywordId>("opm", OPM),
+                                                std::pair<std::string, keywordId>("cpm", CPM),
+                                                std::pair<std::string, keywordId>("spm", SPM),
+                                                std::pair<std::string, keywordId>("object", OBJECTS),
+                                                std::pair<std::string, keywordId>("objects", OBJECTS),
+                                                std::pair<std::string, keywordId>("circle", CIRCLES),
+                                                std::pair<std::string, keywordId>("circles", CIRCLES),
+                                                std::pair<std::string, keywordId>("slider", SLIDERS),
+                                                std::pair<std::string, keywordId>("sliders", SLIDERS),
+                                                std::pair<std::string, keywordId>("spinner", SPINNERS),
+                                                std::pair<std::string, keywordId>("spinners", SPINNERS),
+                                                std::pair<std::string, keywordId>("length", LENGTH),
+                                                std::pair<std::string, keywordId>("len", LENGTH),
+                                                std::pair<std::string, keywordId>("stars", STARS),
+                                                std::pair<std::string, keywordId>("star", STARS),
+                                                std::pair<std::string, keywordId>("creator", CREATOR)};
 
     // split search string into tokens
     // parse over all difficulties

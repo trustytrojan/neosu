@@ -114,7 +114,7 @@ void process_leaderboard_response(Packet response) {
     // NOTE: We're not doing anything with the "info" struct.
     //       Server can return partial responses in some cases, so make sure
     //       you actually received the data if you plan on using it.
-    OnlineMapInfo info = {0};
+    OnlineMapInfo info{};
     MD5Hash beatmap_hash = (char *)response.extra;
     std::vector<FinishedScore> scores;
     char *body = (char *)response.memory;

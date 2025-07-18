@@ -1,6 +1,6 @@
 #include "Skin.h"
 
-#include <string.h>
+#include <cstring>
 
 #include <utility>
 
@@ -15,11 +15,10 @@
 #include "NotificationOverlay.h"
 #include "Osu.h"
 #include "ResourceManager.h"
+#include "SString.h"
 #include "SkinImage.h"
 #include "SoundEngine.h"
 #include "VolumeOverlay.h"
-
-
 
 #define OSU_BITMASK_HITWHISTLE 0x2
 #define OSU_BITMASK_HITFINISH 0x4
@@ -62,7 +61,7 @@ void Skin::unpack(const char *filepath) {
         if(entry.isDirectory()) continue;
 
         std::string filename = entry.getFilename();
-        auto folders = UString(filename).split("/");
+        const auto folders = SString::split(filename, "/");
         std::string file_path = skin_root;
 
         for(const auto &folder : folders) {
@@ -70,12 +69,12 @@ void Skin::unpack(const char *filepath) {
                 env->createDirectory(file_path);
             }
 
-            if(folder == UString("..")) {
+            if(folder == "..") {
                 // security check: skip files with path traversal attempts
                 goto skip_file;
             } else {
                 file_path.append("/");
-                file_path.append(folder.toUtf8());
+                file_path.append(folder.c_str());
             }
         }
 
@@ -88,7 +87,7 @@ void Skin::unpack(const char *filepath) {
     }
 }
 
-Skin::Skin(const UString& name, std::string filepath, bool isDefaultSkin) {
+Skin::Skin(const UString &name, std::string filepath, bool isDefaultSkin) {
     this->sName = name.utf8View();
     this->sFilePath = std::move(filepath);
     this->bIsDefaultSkin = isDefaultSkin;
@@ -329,8 +328,7 @@ Skin::Skin(const UString& name, std::string filepath, bool isDefaultSkin) {
     this->load();
 
     // convar callbacks
-    cv::ignore_beatmap_sample_volume.setCallback(
-        SA::MakeDelegate<&Skin::onIgnoreBeatmapSampleVolumeChange>(this));
+    cv::ignore_beatmap_sample_volume.setCallback(SA::MakeDelegate<&Skin::onIgnoreBeatmapSampleVolumeChange>(this));
 }
 
 Skin::~Skin() {
@@ -443,7 +441,7 @@ void Skin::load() {
 
     // skin ini
     this->randomizeFilePath();
-	this->sSkinIniFilePath = this->sFilePath + "skin.ini";
+    this->sSkinIniFilePath = this->sFilePath + "skin.ini";
 
     bool parseSkinIni1Status = true;
     bool parseSkinIni2Status = true;
@@ -1088,7 +1086,7 @@ void Skin::load() {
         osu->getNotificationOverlay()->addNotification("Error: Couldn't load DEFAULT skin.ini!!!", 0xffff0000);
 }
 
-void Skin::loadBeatmapOverride(const std::string& /*filepath*/) {
+void Skin::loadBeatmapOverride(const std::string & /*filepath*/) {
     // debugLog("Skin::loadBeatmapOverride( %s )\n", filepath.c_str());
     //  TODO: beatmap skin support
 }
@@ -1316,7 +1314,8 @@ void Skin::resetSampleVolume() {
 }
 
 void Skin::setSampleVolume(float volume, bool force) {
-    if(cv::ignore_beatmap_sample_volume.getBool() && (int)(cv::volume_effects.getFloat() * 100.0f) == this->iSampleVolume)
+    if(cv::ignore_beatmap_sample_volume.getBool() &&
+       (int)(cv::volume_effects.getFloat() * 100.0f) == this->iSampleVolume)
         return;
 
     const float newSampleVolume =
@@ -1486,8 +1485,8 @@ void Skin::randomizeFilePath() {
         this->sFilePath = this->filepathsForRandomSkin[rand() % this->filepathsForRandomSkin.size()];
 }
 
-SkinImage *Skin::createSkinImage(const std::string& skinElementName, Vector2 baseSizeForScaling2x, float osuSize,
-                                 bool ignoreDefaultSkin, const std::string& animationSeparator) {
+SkinImage *Skin::createSkinImage(const std::string &skinElementName, Vector2 baseSizeForScaling2x, float osuSize,
+                                 bool ignoreDefaultSkin, const std::string &animationSeparator) {
     SkinImage *skinImage =
         new SkinImage(this, skinElementName, baseSizeForScaling2x, osuSize, animationSeparator, ignoreDefaultSkin);
     this->images.push_back(skinImage);
@@ -1499,8 +1498,8 @@ SkinImage *Skin::createSkinImage(const std::string& skinElementName, Vector2 bas
     return skinImage;
 }
 
-void Skin::checkLoadImage(Image **addressOfPointer, const std::string& skinElementName, const std::string& resourceName,
-                          bool ignoreDefaultSkin, const std::string& fileExtension, bool forceLoadMipmaps) {
+void Skin::checkLoadImage(Image **addressOfPointer, const std::string &skinElementName, const std::string &resourceName,
+                          bool ignoreDefaultSkin, const std::string &fileExtension, bool forceLoadMipmaps) {
     if(*addressOfPointer != m_missingTexture) return;  // we are already loaded
 
     // NOTE: only the default skin is loaded with a resource name (it must never be unloaded by other instances), and it
@@ -1601,7 +1600,8 @@ void Skin::checkLoadImage(Image **addressOfPointer, const std::string& skinEleme
     if(existsFilepath2) {
         if(cv::skin_async.getBool()) resourceManager->requestNextLoadAsync();
 
-        *addressOfPointer = resourceManager->loadImageAbs(filepath2, "", cv::skin_mipmaps.getBool() || forceLoadMipmaps);
+        *addressOfPointer =
+            resourceManager->loadImageAbs(filepath2, "", cv::skin_mipmaps.getBool() || forceLoadMipmaps);
         (*addressOfPointer)->is_2x = false;
         this->resources.push_back(*addressOfPointer);
     }
@@ -1616,7 +1616,7 @@ void Skin::checkLoadImage(Image **addressOfPointer, const std::string& skinEleme
     }
 }
 
-void Skin::checkLoadSound(Sound **addressOfPointer, const std::string& skinElementName, std::string resourceName,
+void Skin::checkLoadSound(Sound **addressOfPointer, const std::string &skinElementName, std::string resourceName,
                           bool isOverlayable, bool isSample, bool loop, bool fallback_to_default,
                           float hardcodedVolumeMultiplier) {
     if(*addressOfPointer != NULL) return;  // we are already loaded
@@ -1627,7 +1627,8 @@ void Skin::checkLoadSound(Sound **addressOfPointer, const std::string& skinEleme
     // random skin support
     this->randomizeFilePath();
 
-    auto try_load_sound = [=](const std::string& base_path, const std::string& filename, const std::string& resource_name, bool loop) {
+    auto try_load_sound = [=](const std::string &base_path, const std::string &filename,
+                              const std::string &resource_name, bool loop) {
         const char *extensions[] = {".wav", ".mp3", ".ogg"};
         for(int i = 0; i < 3; i++) {
             std::string fn = filename;
@@ -1691,7 +1692,7 @@ void Skin::checkLoadSound(Sound **addressOfPointer, const std::string& skinEleme
     this->filepathsForExport.push_back(sound->getFilePath());
 }
 
-bool Skin::compareFilenameWithSkinElementName(const std::string& filename, const std::string& skinElementName) {
+bool Skin::compareFilenameWithSkinElementName(const std::string &filename, const std::string &skinElementName) {
     if(filename.length() == 0 || skinElementName.length() == 0) return false;
     return filename.substr(0, filename.find_last_of('.')) == skinElementName;
 }

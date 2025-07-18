@@ -18,6 +18,7 @@
 #include "Engine.h"
 #include "NetworkHandler.h"
 #include "Osu.h"
+#include "SString.h"
 #include "SongBrowser/SongBrowser.h"
 
 namespace {  // static
@@ -264,7 +265,7 @@ i32 extract_beatmapset_id(const u8* data, size_t data_s) {
     return -1;
 }
 
-bool extract_beatmapset(const u8* data, size_t data_s, std::string &map_dir) {
+bool extract_beatmapset(const u8* data, size_t data_s, std::string& map_dir) {
     debugLog("Extracting beatmapset (%d bytes)\n", data_s);
 
     Archive archive(data, data_s);
@@ -287,7 +288,7 @@ bool extract_beatmapset(const u8* data, size_t data_s, std::string &map_dir) {
         if(entry.isDirectory()) continue;
 
         std::string filename = entry.getFilename();
-        auto folders = UString(filename).split("/");
+        const auto folders = SString::split(filename, "/");
         std::string file_path = map_dir;
 
         for(const auto& folder : folders) {
@@ -295,12 +296,12 @@ bool extract_beatmapset(const u8* data, size_t data_s, std::string &map_dir) {
                 env->createDirectory(file_path);
             }
 
-            if(folder == UString("..")) {
+            if(folder == "..") {
                 // security check: skip files with path traversal attempts
                 goto skip_file;
             } else {
                 file_path.append("/");
-                file_path.append(folder.toUtf8());
+                file_path.append(folder.c_str());
             }
         }
 
