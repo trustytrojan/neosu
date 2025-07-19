@@ -50,7 +50,8 @@ Engine::Engine(i32 argc, char **argv) {
     setvbuf(stderr, NULL, _IONBF, 0);
 
     // print debug information
-    debugLog("-= Engine Startup =-\n");
+    debugLogF("-= Engine Startup =-\n");
+    debugLogF("cmdline: {:s}\n", UString::join(env->getCommandLine()));
 
     // timing
     this->timer = new Timer();
@@ -69,13 +70,13 @@ Engine::Engine(i32 argc, char **argv) {
     this->vScreenSize = env->getWindowSize();
     this->vNewScreenSize = this->vScreenSize;
 
-    debugLog("Engine: OsuScreenSize = (%ix%i)\n", (int)this->vScreenSize.x, (int)this->vScreenSize.y);
+    debugLogF("Engine: ScreenSize = ({}x{})\n", (int)this->vScreenSize.x, (int)this->vScreenSize.y);
 
     // custom
     this->bDrawing = false;
 
     // initialize all engine subsystems (the order does matter!)
-    debugLog("\nEngine: Initializing subsystems ...\n");
+    debugLog("Engine: Initializing subsystems ...\n");
     {
         // input devices
         mouse = std::make_unique<Mouse>();
@@ -100,7 +101,19 @@ Engine::Engine(i32 argc, char **argv) {
         resourceManager = std::make_unique<ResourceManager>();
         runtime_assert(resourceManager.get(), "Resource manager menu failed to initialize!");
 
-        soundEngine = std::make_unique<SoundEngine>();
+        SoundEngine::SndEngineType type = Env::cfg(AUD::BASS)     ? SoundEngine::BASS
+                                          : Env::cfg(AUD::SOLOUD) ? SoundEngine::SOLOUD
+                                                                  : SoundEngine::BASS;
+        {
+            auto args = env->getLaunchArgs();
+            auto soundString = args["-sound"].value_or("bass").trim();
+            soundString.lowerCase();
+            if(Env::cfg(AUD::BASS) && soundString == "bass")
+                type = SoundEngine::BASS;
+            else if(Env::cfg(AUD::SOLOUD) && soundString == "soloud")
+                type = SoundEngine::SOLOUD;
+        }
+        soundEngine.reset(SoundEngine::createSoundEngine(type));
         runtime_assert(soundEngine.get(), "Sound engine failed to initialize!");
 
         animationHandler = std::make_unique<AnimationHandler>();
@@ -114,11 +127,11 @@ Engine::Engine(i32 argc, char **argv) {
         // engine time starts now
         this->timer->start();
     }
-    debugLog("Engine: Initializing subsystems done.\n\n");
+    debugLog("Engine: Initializing subsystems done.\n");
 }
 
 Engine::~Engine() {
-    debugLog("\n-= Engine Shutdown =-\n");
+    debugLog("-= Engine Shutdown =-\n");
 
     // reset() all static unique_ptrs
     debugLog("Engine: Freeing app...\n");
@@ -505,22 +518,22 @@ void Engine::toggleFullscreen() {
 
 void Engine::disableFullscreen() { env->disableFullscreen(); }
 
-void Engine::showMessageInfo(const UString& title, const UString& message) {
+void Engine::showMessageInfo(const UString &title, const UString &message) {
     debugLog("INFO: [%s] | %s\n", title.toUtf8(), message.toUtf8());
     env->showMessageInfo(title, message);
 }
 
-void Engine::showMessageWarning(const UString& title, const UString& message) {
+void Engine::showMessageWarning(const UString &title, const UString &message) {
     debugLog("WARNING: [%s] | %s\n", title.toUtf8(), message.toUtf8());
     env->showMessageWarning(title, message);
 }
 
-void Engine::showMessageError(const UString& title, const UString& message) {
+void Engine::showMessageError(const UString &title, const UString &message) {
     debugLog("ERROR: [%s] | %s\n", title.toUtf8(), message.toUtf8());
     env->showMessageError(title, message);
 }
 
-void Engine::showMessageErrorFatal(const UString& title, const UString& message) {
+void Engine::showMessageErrorFatal(const UString &title, const UString &message) {
     debugLog("FATAL ERROR: [%s] | %s\n", title.toUtf8(), message.toUtf8());
     env->showMessageErrorFatal(title, message);
 }

@@ -174,8 +174,6 @@ class Engine {
         static void log(const char *func, fmt::format_string<Args...> fmt, Args &&...args) {
             auto contextPrefix = fmt::format("[{}] ", func);
             trim_to_last_scope(contextPrefix);
-            contextPrefix.erase(0, contextPrefix.find_last_of("::"));
-
             auto message = fmt::format(fmt, std::forward<Args>(args)...);
             Engine::logImpl(contextPrefix + message);
         }

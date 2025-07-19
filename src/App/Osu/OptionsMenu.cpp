@@ -38,7 +38,6 @@
 #include "SliderRenderer.h"
 #include "SongBrowser/LoudnessCalcThread.h"
 #include "SongBrowser/SongBrowser.h"
-#include "SoundEngine.h"
 #include "TooltipOverlay.h"
 #include "UIBackButton.h"
 #include "UIButton.h"
@@ -47,6 +46,11 @@
 #include "UIModSelectorModButton.h"
 #include "UISearchOverlay.h"
 #include "UISlider.h"
+
+#include "SoundEngine.h"
+#if defined(MCENGINE_PLATFORM_WINDOWS) && defined(MCENGINE_FEATURE_BASS)
+#include "BassSoundEngine.h"  // for ASIO-specific stuff
+#endif
 
 // Addresses for which we should use OAuth login instead of username:password login
 static constexpr auto oauth_servers = std::array{
@@ -727,7 +731,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
 
     this->addSubSection("Volume");
 
-    if constexpr(Env::cfg(AUD::BASS)) {
+    if (Env::cfg(AUD::BASS) && soundEngine->getTypeId() == SoundEngine::BASS) {
         this->addCheckbox("Normalize loudness across songs", &cv::normalize_loudness)
             ->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onLoudnessNormalizationToggle>(this));
     }
@@ -1839,8 +1843,12 @@ void OptionsMenu::updateLayout() {
     bool subSectionTitleMatch = false;
     const std::string search = this->sSearchString.length() > 0 ? this->sSearchString.c_str() : "";
     for(int i = 0; i < this->elements.size(); i++) {
-        if(this->elements[i].render_condition == RenderCondition::ASIO_ENABLED && !soundEngine->isASIO()) continue;
-        if(this->elements[i].render_condition == RenderCondition::WASAPI_ENABLED && !soundEngine->isWASAPI()) continue;
+        if(this->elements[i].render_condition == RenderCondition::ASIO_ENABLED &&
+           !(soundEngine->getOutputDriverType() == SoundEngine::OutputDriver::BASS_ASIO))
+            continue;
+        if(this->elements[i].render_condition == RenderCondition::WASAPI_ENABLED &&
+           !(soundEngine->getOutputDriverType() == SoundEngine::OutputDriver::BASS_WASAPI))
+            continue;
         if(this->elements[i].render_condition == RenderCondition::SCORE_SUBMISSION_POLICY &&
            bancho->score_submission_policy != ServerPolicy::NO_PREFERENCE)
             continue;

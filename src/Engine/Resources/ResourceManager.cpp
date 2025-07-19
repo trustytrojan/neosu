@@ -266,8 +266,9 @@ McFont *ResourceManager::loadFont(std::string filepath, std::string resourceName
     return fnt;
 }
 
-McFont *ResourceManager::loadFont(std::string filepath, std::string resourceName, const std::vector<wchar_t>& characters,
-                                  int fontSize, bool antialiasing, int fontDPI) {
+McFont *ResourceManager::loadFont(std::string filepath, std::string resourceName,
+                                  const std::vector<wchar_t> &characters, int fontSize, bool antialiasing,
+                                  int fontDPI) {
     auto res = checkIfExistsAndHandle<McFont>(resourceName);
     if(res != nullptr) return res;
 
@@ -281,13 +282,14 @@ McFont *ResourceManager::loadFont(std::string filepath, std::string resourceName
     return fnt;
 }
 
-Sound *ResourceManager::loadSound(std::string filepath, std::string resourceName, bool stream, bool threeD, bool loop) {
+Sound *ResourceManager::loadSound(std::string filepath, std::string resourceName, bool stream, bool overlayable,
+                                  bool loop) {
     auto res = checkIfExistsAndHandle<Sound>(resourceName);
     if(res != nullptr) return res;
 
     // create instance and load it
     filepath.insert(0, ResourceManager::PATH_DEFAULT_SOUNDS);
-    Sound *snd = new Sound(filepath, stream, threeD, loop);
+    Sound *snd = Sound::createSound(filepath, stream, overlayable, loop);
     setResourceName(snd, resourceName);
 
     loadResource(snd, true);
@@ -295,13 +297,13 @@ Sound *ResourceManager::loadSound(std::string filepath, std::string resourceName
     return snd;
 }
 
-Sound *ResourceManager::loadSoundAbs(std::string filepath, std::string resourceName, bool stream, bool threeD,
+Sound *ResourceManager::loadSoundAbs(std::string filepath, std::string resourceName, bool stream, bool overlayable,
                                      bool loop) {
     auto res = checkIfExistsAndHandle<Sound>(resourceName);
     if(res != nullptr) return res;
 
     // create instance and load it
-    Sound *snd = new Sound(std::move(filepath), stream, threeD, loop);
+    Sound *snd = Sound::createSound(std::move(filepath), stream, overlayable, loop);
     setResourceName(snd, resourceName);
 
     loadResource(snd, true);

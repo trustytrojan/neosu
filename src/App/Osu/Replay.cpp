@@ -64,7 +64,8 @@ f32 Replay::Mods::get_naive_od(DatabaseBeatmap *diff2) const {
     if(this->od_override >= 0.0f) OD = this->od_override;
 
     if(this->flags & Replay::ModFlags::ODOverrideLock) {
-        OD = GameRules::getRawConstantOverallDifficultyForSpeedMultiplier(GameRules::getRawHitWindow300(OD), this->speed);
+        OD = GameRules::getRawConstantOverallDifficultyForSpeedMultiplier(GameRules::getRawHitWindow300(OD),
+                                                                          this->speed);
     }
 
     return OD;
@@ -180,38 +181,38 @@ void Replay::Mods::use(Mods mods) {
     mod_selector->resetMods();
 
     // Set cvars
-    cv::mod_nofail.setValue(mods.flags & Replay::ModFlags::NoFail);
-    cv::mod_easy.setValue(mods.flags & Replay::ModFlags::Easy);
-    cv::mod_hidden.setValue(mods.flags & Replay::ModFlags::Hidden);
-    cv::mod_hardrock.setValue(mods.flags & Replay::ModFlags::HardRock);
-    cv::mod_flashlight.setValue(mods.flags & Replay::ModFlags::Flashlight);
-    cv::mod_suddendeath.setValue(mods.flags & Replay::ModFlags::SuddenDeath);
-    cv::mod_perfect.setValue(mods.flags & Replay::ModFlags::Perfect);
-    cv::mod_nightmare.setValue(mods.flags & Replay::ModFlags::Nightmare);
-    cv::nightcore_enjoyer.setValue(mods.flags & Replay::ModFlags::NoPitchCorrection);
-    cv::mod_touchdevice.setValue(mods.flags & Replay::ModFlags::TouchDevice);
-    cv::mod_spunout.setValue(mods.flags & Replay::ModFlags::SpunOut);
-    cv::mod_scorev2.setValue(mods.flags & Replay::ModFlags::ScoreV2);
-    cv::mod_fposu.setValue(mods.flags & Replay::ModFlags::FPoSu);
-    cv::mod_target.setValue(mods.flags & Replay::ModFlags::Target);
-    cv::ar_override_lock.setValue(mods.flags & Replay::ModFlags::AROverrideLock);
-    cv::od_override_lock.setValue(mods.flags & Replay::ModFlags::ODOverrideLock);
-    cv::mod_timewarp.setValue(mods.flags & Replay::ModFlags::Timewarp);
-    cv::mod_artimewarp.setValue(mods.flags & Replay::ModFlags::ARTimewarp);
-    cv::mod_minimize.setValue(mods.flags & Replay::ModFlags::Minimize);
-    cv::mod_jigsaw1.setValue(mods.flags & Replay::ModFlags::Jigsaw1);
-    cv::mod_jigsaw2.setValue(mods.flags & Replay::ModFlags::Jigsaw2);
-    cv::mod_wobble.setValue(mods.flags & Replay::ModFlags::Wobble1);
-    cv::mod_wobble2.setValue(mods.flags & Replay::ModFlags::Wobble2);
-    cv::mod_arwobble.setValue(mods.flags & Replay::ModFlags::ARWobble);
-    cv::mod_fullalternate.setValue(mods.flags & Replay::ModFlags::FullAlternate);
-    cv::mod_shirone.setValue(mods.flags & Replay::ModFlags::Shirone);
-    cv::mod_mafham.setValue(mods.flags & Replay::ModFlags::Mafham);
-    cv::mod_halfwindow.setValue(mods.flags & Replay::ModFlags::HalfWindow);
-    cv::mod_halfwindow_allow_300s.setValue(mods.flags & Replay::ModFlags::HalfWindowAllow300s);
-    cv::mod_ming3012.setValue(mods.flags & Replay::ModFlags::Ming3012);
-    cv::mod_no100s.setValue(mods.flags & Replay::ModFlags::No100s);
-    cv::mod_no50s.setValue(mods.flags & Replay::ModFlags::No50s);
+    cv::mod_nofail.setValue<bool>(!!(mods.flags & Replay::ModFlags::NoFail));
+    cv::mod_easy.setValue<bool>(!!(mods.flags & Replay::ModFlags::Easy));
+    cv::mod_hidden.setValue<bool>(!!(mods.flags & Replay::ModFlags::Hidden));
+    cv::mod_hardrock.setValue<bool>(!!(mods.flags & Replay::ModFlags::HardRock));
+    cv::mod_flashlight.setValue<bool>(!!(mods.flags & Replay::ModFlags::Flashlight));
+    cv::mod_suddendeath.setValue<bool>(!!(mods.flags & Replay::ModFlags::SuddenDeath));
+    cv::mod_perfect.setValue<bool>(!!(mods.flags & Replay::ModFlags::Perfect));
+    cv::mod_nightmare.setValue<bool>(!!(mods.flags & Replay::ModFlags::Nightmare));
+    cv::nightcore_enjoyer.setValue<bool>(!!(mods.flags & Replay::ModFlags::NoPitchCorrection));
+    cv::mod_touchdevice.setValue<bool>(!!(mods.flags & Replay::ModFlags::TouchDevice));
+    cv::mod_spunout.setValue<bool>(!!(mods.flags & Replay::ModFlags::SpunOut));
+    cv::mod_scorev2.setValue<bool>(!!(mods.flags & Replay::ModFlags::ScoreV2));
+    cv::mod_fposu.setValue<bool>(!!(mods.flags & Replay::ModFlags::FPoSu));
+    cv::mod_target.setValue<bool>(!!(mods.flags & Replay::ModFlags::Target));
+    cv::ar_override_lock.setValue<bool>(!!(mods.flags & Replay::ModFlags::AROverrideLock));
+    cv::od_override_lock.setValue<bool>(!!(mods.flags & Replay::ModFlags::ODOverrideLock));
+    cv::mod_timewarp.setValue<bool>(!!(mods.flags & Replay::ModFlags::Timewarp));
+    cv::mod_artimewarp.setValue<bool>(!!(mods.flags & Replay::ModFlags::ARTimewarp));
+    cv::mod_minimize.setValue<bool>(!!(mods.flags & Replay::ModFlags::Minimize));
+    cv::mod_jigsaw1.setValue<bool>(!!(mods.flags & Replay::ModFlags::Jigsaw1));
+    cv::mod_jigsaw2.setValue<bool>(!!(mods.flags & Replay::ModFlags::Jigsaw2));
+    cv::mod_wobble.setValue<bool>(!!(mods.flags & Replay::ModFlags::Wobble1));
+    cv::mod_wobble2.setValue<bool>(!!(mods.flags & Replay::ModFlags::Wobble2));
+    cv::mod_arwobble.setValue<bool>(!!(mods.flags & Replay::ModFlags::ARWobble));
+    cv::mod_fullalternate.setValue<bool>(!!(mods.flags & Replay::ModFlags::FullAlternate));
+    cv::mod_shirone.setValue<bool>(!!(mods.flags & Replay::ModFlags::Shirone));
+    cv::mod_mafham.setValue<bool>(!!(mods.flags & Replay::ModFlags::Mafham));
+    cv::mod_halfwindow.setValue<bool>(!!(mods.flags & Replay::ModFlags::HalfWindow));
+    cv::mod_halfwindow_allow_300s.setValue<bool>(!!(mods.flags & Replay::ModFlags::HalfWindowAllow300s));
+    cv::mod_ming3012.setValue<bool>(!!(mods.flags & Replay::ModFlags::Ming3012));
+    cv::mod_no100s.setValue<bool>(!!(mods.flags & Replay::ModFlags::No100s));
+    cv::mod_no50s.setValue<bool>(!!(mods.flags & Replay::ModFlags::No50s));
     cv::notelock_type.setValue(mods.notelock_type);
     cv::autopilot_lenience.setValue(mods.autopilot_lenience);
     cv::mod_timewarp_multiplier.setValue(mods.timewarp_multiplier);
@@ -235,8 +236,8 @@ void Replay::Mods::use(Mods mods) {
         cv::mod_relax.setValue(false);
     } else {
         cv::mod_autoplay.setValue(false);
-        cv::mod_autopilot.setValue(mods.flags & Replay::ModFlags::Autopilot);
-        cv::mod_relax.setValue(mods.flags & Replay::ModFlags::Relax);
+        cv::mod_autopilot.setValue<bool>(!!(mods.flags & Replay::ModFlags::Autopilot));
+        cv::mod_relax.setValue<bool>(!!(mods.flags & Replay::ModFlags::Relax));
     }
 
     f32 speed_override = mods.speed == 1.f ? -1.f : mods.speed;
@@ -245,8 +246,8 @@ void Replay::Mods::use(Mods mods) {
     // Update mod selector UI
     mod_selector->enableModsFromFlags(mods.to_legacy());
     cv::speed_override.setValue(speed_override);  // enableModsFromFlags() edits cv::speed_override
-    mod_selector->ARLock->setChecked(mods.flags & Replay::ModFlags::AROverrideLock);
-    mod_selector->ODLock->setChecked(mods.flags & Replay::ModFlags::AROverrideLock);
+    mod_selector->ARLock->setChecked(!!(mods.flags & Replay::ModFlags::AROverrideLock));
+    mod_selector->ODLock->setChecked(!!(mods.flags & Replay::ModFlags::AROverrideLock));
     mod_selector->speedSlider->setValue(mods.speed, false, false);
     mod_selector->CSSlider->setValue(mods.cs_override, false, false);
     mod_selector->ARSlider->setValue(mods.ar_override, false, false);

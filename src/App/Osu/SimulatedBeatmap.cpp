@@ -23,11 +23,11 @@ SimulatedBeatmap::SimulatedBeatmap(DatabaseBeatmap *diff2, Replay::Mods mods_) {
     this->selectedDifficulty2 = diff2;
     this->mods = mods_;
     this->live_score.mods = mods_;
-    this->mod_halfwindow = this->mods.flags & Replay::ModFlags::HalfWindow;
-    this->mod_halfwindow_allow_300s = this->mods.flags & Replay::ModFlags::HalfWindowAllow300s;
-    this->mod_ming3012 = this->mods.flags & Replay::ModFlags::Ming3012;
-    this->mod_no100s = this->mods.flags & Replay::ModFlags::No100s;
-    this->mod_no50s = this->mods.flags & Replay::ModFlags::No50s;
+    this->mod_halfwindow = !!(this->mods.flags & Replay::ModFlags::HalfWindow);
+    this->mod_halfwindow_allow_300s = !!(this->mods.flags & Replay::ModFlags::HalfWindowAllow300s);
+    this->mod_ming3012 = !!(this->mods.flags & Replay::ModFlags::Ming3012);
+    this->mod_no100s = !!(this->mods.flags & Replay::ModFlags::No100s);
+    this->mod_no50s = !!(this->mods.flags & Replay::ModFlags::No50s);
 
     this->nb_hitobjects = diff2->getNumObjects();
 

@@ -123,6 +123,8 @@ neosu_SOURCES = \
 	src/Engine/Resources/Resource.cpp \
 	src/Engine/Resources/ResourceManager.cpp \
 	src/Engine/Sound/BASS/BassManager.cpp \
+	src/Engine/Sound/BASS/BassSound.cpp \
+	src/Engine/Sound/BASS/BassSoundEngine.cpp \
 	src/Engine/Sound/PlaybackInterpolator.cpp \
 	src/Engine/Sound/Sound.cpp \
 	src/Engine/Sound/SoundEngine.cpp \

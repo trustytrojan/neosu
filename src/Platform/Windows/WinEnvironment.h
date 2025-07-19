@@ -10,7 +10,8 @@ class WinEnvironment : public Environment {
     static long getWindowStyleWindowed();
 
    public:
-    WinEnvironment(HWND hwnd, HINSTANCE hinstance);
+    WinEnvironment(HWND hwnd, HINSTANCE hinstance, const std::vector<UString> &argCmdline,
+                     const std::unordered_map<UString, std::optional<UString>> &argMap);
     ~WinEnvironment() override;
 
     void update() override;

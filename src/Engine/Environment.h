@@ -18,7 +18,8 @@ extern Environment *env;
 
 class Environment {
    public:
-    Environment();
+    Environment(const std::vector<UString> &argCmdline,
+                const std::unordered_map<UString, std::optional<UString>> &argMap);
     virtual ~Environment() { env = NULL; }
 
     virtual void update() { ; }
@@ -30,6 +31,11 @@ class Environment {
     // resolved and cached at early startup with argv[0]
     // contains the full canonical path to the current exe
     static const std::string &getPathToSelf(const char *argv0 = nullptr);
+
+    [[nodiscard]] inline const std::unordered_map<UString, std::optional<UString>> &getLaunchArgs() const {
+        return mArgMap;
+    }
+    [[nodiscard]] inline const std::vector<UString> &getCommandLine() const { return vCmdLine; }
 
     virtual void shutdown() = 0;
     virtual void restart() = 0;
@@ -128,6 +134,8 @@ class Environment {
 
    protected:
     bool bFullscreenWindowedBorderless;
+    std::unordered_map<UString, std::optional<UString>> mArgMap;
+    std::vector<UString> vCmdLine;
 
    private:
     // static callbacks/helpers

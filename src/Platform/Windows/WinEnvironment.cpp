@@ -27,7 +27,9 @@ std::vector<McRect> WinEnvironment::vMonitors;
 int WinEnvironment::iNumCoresForProcessAffinity = -1;
 HHOOK WinEnvironment::hKeyboardHook = NULL;
 
-WinEnvironment::WinEnvironment(HWND hwnd, HINSTANCE hinstance) : Environment() {
+WinEnvironment::WinEnvironment(HWND hwnd, HINSTANCE hinstance, const std::vector<UString> &argCmdline,
+                               const std::unordered_map<UString, std::optional<UString>> &argMap)
+    : Environment(argCmdline, argMap) {
     env = this;
     this->hwnd = hwnd;
     this->hInstance = hinstance;
@@ -54,8 +56,7 @@ WinEnvironment::WinEnvironment(HWND hwnd, HINSTANCE hinstance) : Environment() {
 
     // convar callbacks
     cv::win_processpriority.setCallback(SA::MakeDelegate<&WinEnvironment::onProcessPriorityChange>(this));
-    cv::win_disable_windows_key.setCallback(
-        SA::MakeDelegate<&WinEnvironment::onDisableWindowsKeyChange>(this));
+    cv::win_disable_windows_key.setCallback(SA::MakeDelegate<&WinEnvironment::onDisableWindowsKeyChange>(this));
 
     setProcessPriority(cv::win_processpriority.getInt());
 }
@@ -779,7 +780,8 @@ long WinEnvironment::getWindowStyleWindowed() {
     return style;
 }
 
-BOOL CALLBACK WinEnvironment::monitorEnumProc(HMONITOR hMonitor, HDC /*hdcMonitor*/, LPRECT lprcMonitor, LPARAM /*dwData*/) {
+BOOL CALLBACK WinEnvironment::monitorEnumProc(HMONITOR hMonitor, HDC /*hdcMonitor*/, LPRECT lprcMonitor,
+                                              LPARAM /*dwData*/) {
     MONITORINFO monitorInfo;
     monitorInfo.cbSize = sizeof(MONITORINFO);
     GetMonitorInfo(hMonitor, &monitorInfo);

@@ -324,7 +324,7 @@ Main *mainloopPtrHack = nullptr;  // FIXME: why is the handle_cmdline_args shit 
 
 bool WindowsMain::bSupportsPerMonitorDpiAwareness = false;
 
-WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> & /*argCmdline*/,
+WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> & argCmdline,
                          const std::unordered_map<UString, std::optional<UString>> &argMap) {
     mainloopPtrHack = this;
     // @spec: TEST THIS?
@@ -503,7 +503,7 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> & /*
     ShowWindow(hwnd, SW_SHOWNORMAL);
 
     // initialize engine
-    baseEnv = new WinEnvironment(hwnd, hInstance);
+    baseEnv = new WinEnvironment(hwnd, hInstance, argCmdline, argMap);
     engine = new Engine(argc, argv);
     engine->loadApp();
 

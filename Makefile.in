@@ -270,6 +270,8 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/Engine/Resources/neosu-Resource.$(OBJEXT) \
 	src/Engine/Resources/neosu-ResourceManager.$(OBJEXT) \
 	src/Engine/Sound/BASS/neosu-BassManager.$(OBJEXT) \
+	src/Engine/Sound/BASS/neosu-BassSound.$(OBJEXT) \
+	src/Engine/Sound/BASS/neosu-BassSoundEngine.$(OBJEXT) \
 	src/Engine/Sound/neosu-PlaybackInterpolator.$(OBJEXT) \
 	src/Engine/Sound/neosu-Sound.$(OBJEXT) \
 	src/Engine/Sound/neosu-SoundEngine.$(OBJEXT) \
@@ -455,6 +457,8 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/Engine/Sound/$(DEPDIR)/neosu-Sound.Po \
 	src/Engine/Sound/$(DEPDIR)/neosu-SoundEngine.Po \
 	src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassManager.Po \
+	src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassSound.Po \
+	src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassSoundEngine.Po \
 	src/GUI/$(DEPDIR)/neosu-CBaseUIBoxShadow.Po \
 	src/GUI/$(DEPDIR)/neosu-CBaseUIButton.Po \
 	src/GUI/$(DEPDIR)/neosu-CBaseUICheckbox.Po \
@@ -941,6 +945,8 @@ neosu_SOURCES = \
 	src/Engine/Resources/Resource.cpp \
 	src/Engine/Resources/ResourceManager.cpp \
 	src/Engine/Sound/BASS/BassManager.cpp \
+	src/Engine/Sound/BASS/BassSound.cpp \
+	src/Engine/Sound/BASS/BassSoundEngine.cpp \
 	src/Engine/Sound/PlaybackInterpolator.cpp \
 	src/Engine/Sound/Sound.cpp \
 	src/Engine/Sound/SoundEngine.cpp \
@@ -1611,6 +1617,12 @@ src/Engine/Sound/BASS/$(DEPDIR)/$(am__dirstamp):
 src/Engine/Sound/BASS/neosu-BassManager.$(OBJEXT):  \
 	src/Engine/Sound/BASS/$(am__dirstamp) \
 	src/Engine/Sound/BASS/$(DEPDIR)/$(am__dirstamp)
+src/Engine/Sound/BASS/neosu-BassSound.$(OBJEXT):  \
+	src/Engine/Sound/BASS/$(am__dirstamp) \
+	src/Engine/Sound/BASS/$(DEPDIR)/$(am__dirstamp)
+src/Engine/Sound/BASS/neosu-BassSoundEngine.$(OBJEXT):  \
+	src/Engine/Sound/BASS/$(am__dirstamp) \
+	src/Engine/Sound/BASS/$(DEPDIR)/$(am__dirstamp)
 src/Engine/Sound/$(am__dirstamp):
 	@$(MKDIR_P) src/Engine/Sound
 	@: >>src/Engine/Sound/$(am__dirstamp)
@@ -1914,6 +1926,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Sound/$(DEPDIR)/neosu-Sound.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Sound/$(DEPDIR)/neosu-SoundEngine.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassManager.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassSound.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassSoundEngine.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI/$(DEPDIR)/neosu-CBaseUIBoxShadow.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI/$(DEPDIR)/neosu-CBaseUIButton.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI/$(DEPDIR)/neosu-CBaseUICheckbox.Po@am__quote@ # am--include-marker
@@ -3693,6 +3707,34 @@ src/Engine/Sound/BASS/neosu-BassManager.obj: src/Engine/Sound/BASS/BassManager.c
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Sound/BASS/neosu-BassManager.obj `if test -f 'src/Engine/Sound/BASS/BassManager.cpp'; then $(CYGPATH_W) 'src/Engine/Sound/BASS/BassManager.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Sound/BASS/BassManager.cpp'; fi`
 
+src/Engine/Sound/BASS/neosu-BassSound.o: src/Engine/Sound/BASS/BassSound.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Sound/BASS/neosu-BassSound.o -MD -MP -MF src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassSound.Tpo -c -o src/Engine/Sound/BASS/neosu-BassSound.o `test -f 'src/Engine/Sound/BASS/BassSound.cpp' || echo '$(srcdir)/'`src/Engine/Sound/BASS/BassSound.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassSound.Tpo src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassSound.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Sound/BASS/BassSound.cpp' object='src/Engine/Sound/BASS/neosu-BassSound.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Sound/BASS/neosu-BassSound.o `test -f 'src/Engine/Sound/BASS/BassSound.cpp' || echo '$(srcdir)/'`src/Engine/Sound/BASS/BassSound.cpp
+
+src/Engine/Sound/BASS/neosu-BassSound.obj: src/Engine/Sound/BASS/BassSound.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Sound/BASS/neosu-BassSound.obj -MD -MP -MF src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassSound.Tpo -c -o src/Engine/Sound/BASS/neosu-BassSound.obj `if test -f 'src/Engine/Sound/BASS/BassSound.cpp'; then $(CYGPATH_W) 'src/Engine/Sound/BASS/BassSound.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Sound/BASS/BassSound.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassSound.Tpo src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassSound.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Sound/BASS/BassSound.cpp' object='src/Engine/Sound/BASS/neosu-BassSound.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Sound/BASS/neosu-BassSound.obj `if test -f 'src/Engine/Sound/BASS/BassSound.cpp'; then $(CYGPATH_W) 'src/Engine/Sound/BASS/BassSound.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Sound/BASS/BassSound.cpp'; fi`
+
+src/Engine/Sound/BASS/neosu-BassSoundEngine.o: src/Engine/Sound/BASS/BassSoundEngine.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Sound/BASS/neosu-BassSoundEngine.o -MD -MP -MF src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassSoundEngine.Tpo -c -o src/Engine/Sound/BASS/neosu-BassSoundEngine.o `test -f 'src/Engine/Sound/BASS/BassSoundEngine.cpp' || echo '$(srcdir)/'`src/Engine/Sound/BASS/BassSoundEngine.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassSoundEngine.Tpo src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassSoundEngine.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Sound/BASS/BassSoundEngine.cpp' object='src/Engine/Sound/BASS/neosu-BassSoundEngine.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Sound/BASS/neosu-BassSoundEngine.o `test -f 'src/Engine/Sound/BASS/BassSoundEngine.cpp' || echo '$(srcdir)/'`src/Engine/Sound/BASS/BassSoundEngine.cpp
+
+src/Engine/Sound/BASS/neosu-BassSoundEngine.obj: src/Engine/Sound/BASS/BassSoundEngine.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Sound/BASS/neosu-BassSoundEngine.obj -MD -MP -MF src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassSoundEngine.Tpo -c -o src/Engine/Sound/BASS/neosu-BassSoundEngine.obj `if test -f 'src/Engine/Sound/BASS/BassSoundEngine.cpp'; then $(CYGPATH_W) 'src/Engine/Sound/BASS/BassSoundEngine.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Sound/BASS/BassSoundEngine.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassSoundEngine.Tpo src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassSoundEngine.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Sound/BASS/BassSoundEngine.cpp' object='src/Engine/Sound/BASS/neosu-BassSoundEngine.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Sound/BASS/neosu-BassSoundEngine.obj `if test -f 'src/Engine/Sound/BASS/BassSoundEngine.cpp'; then $(CYGPATH_W) 'src/Engine/Sound/BASS/BassSoundEngine.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Sound/BASS/BassSoundEngine.cpp'; fi`
+
 src/Engine/Sound/neosu-PlaybackInterpolator.o: src/Engine/Sound/PlaybackInterpolator.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Sound/neosu-PlaybackInterpolator.o -MD -MP -MF src/Engine/Sound/$(DEPDIR)/neosu-PlaybackInterpolator.Tpo -c -o src/Engine/Sound/neosu-PlaybackInterpolator.o `test -f 'src/Engine/Sound/PlaybackInterpolator.cpp' || echo '$(srcdir)/'`src/Engine/Sound/PlaybackInterpolator.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Sound/$(DEPDIR)/neosu-PlaybackInterpolator.Tpo src/Engine/Sound/$(DEPDIR)/neosu-PlaybackInterpolator.Po
@@ -4695,6 +4737,8 @@ distclean: distclean-am
 	-rm -f src/Engine/Sound/$(DEPDIR)/neosu-Sound.Po
 	-rm -f src/Engine/Sound/$(DEPDIR)/neosu-SoundEngine.Po
 	-rm -f src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassManager.Po
+	-rm -f src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassSound.Po
+	-rm -f src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassSoundEngine.Po
 	-rm -f src/GUI/$(DEPDIR)/neosu-CBaseUIBoxShadow.Po
 	-rm -f src/GUI/$(DEPDIR)/neosu-CBaseUIButton.Po
 	-rm -f src/GUI/$(DEPDIR)/neosu-CBaseUICheckbox.Po
@@ -4905,6 +4949,8 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/Engine/Sound/$(DEPDIR)/neosu-Sound.Po
 	-rm -f src/Engine/Sound/$(DEPDIR)/neosu-SoundEngine.Po
 	-rm -f src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassManager.Po
+	-rm -f src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassSound.Po
+	-rm -f src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassSoundEngine.Po
 	-rm -f src/GUI/$(DEPDIR)/neosu-CBaseUIBoxShadow.Po
 	-rm -f src/GUI/$(DEPDIR)/neosu-CBaseUIButton.Po
 	-rm -f src/GUI/$(DEPDIR)/neosu-CBaseUICheckbox.Po

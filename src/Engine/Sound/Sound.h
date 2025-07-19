@@ -1,50 +1,57 @@
 #pragma once
 
-#include "BassManager.h"
 #include "Resource.h"
 #include "PlaybackInterpolator.h"
 
+#define SOUND_TYPE(ClassName, TypeID, ParentClass)                      \
+    static constexpr TypeId TYPE_ID = TypeID;                           \
+    [[nodiscard]] TypeId getTypeId() const override { return TYPE_ID; } \
+    [[nodiscard]] bool isTypeOf(TypeId typeId) const override {         \
+        return typeId == TYPE_ID || ParentClass::isTypeOf(typeId);      \
+    }
+
 class SoundEngine;
+
+using SOUNDHANDLE = uint32_t;
 
 class Sound : public Resource {
     friend class SoundEngine;
 
    public:
-    using SOUNDHANDLE = unsigned long;
+    using TypeId = uint8_t;
+    enum SndType : TypeId { BASS, SOLOUD, SDL };
 
    public:
     Sound(std::string filepath, bool stream, bool overlayable, bool loop);
-    ~Sound() override { this->destroy(); }
 
-    std::vector<HCHANNEL> mixer_channels;
-    std::vector<HCHANNEL> getActiveChannels();
-    HCHANNEL getChannel();
+    // Factory method to create the appropriate sound object
+    static Sound *createSound(std::string filepath, bool stream, bool overlayable, bool loop);
 
-    u32 setPosition(f64 percent);
-    void setPositionMS(unsigned long ms);
-    void setPositionMS_fast(u32 ms);
+    virtual u32 setPosition(f64 percent) = 0;
+    virtual void setPositionMS(unsigned long ms) = 0;
+    virtual void setPositionMS_fast(u32 ms) = 0;
 
-    void setVolume(float volume);
-    void setSpeed(float speed);
-    void setFrequency(float frequency);
-    void setPan(float pan);
-    void setLoop(bool loop);
+    virtual void setVolume(float volume) = 0;
+    virtual void setSpeed(float speed) = 0;
+    virtual void setFrequency(float frequency) = 0;
+    virtual void setPan(float pan) = 0;
+    virtual void setLoop(bool loop) = 0;
 
-    float getPosition();
-    u32 getPositionMS();
-    u32 getLengthMS();
-    float getPan() { return this->fPan; }
-    float getSpeed();
-    float getFrequency();
+    virtual float getPosition() = 0;
+    virtual u32 getPositionMS() = 0;
+    virtual u32 getLengthMS() = 0;
+    [[nodiscard]] constexpr float getPan() const { return this->fPan; }
+    virtual float getSpeed() = 0;
+    virtual float getFrequency() = 0;
 
-    bool isPlaying();
-    bool isFinished();
+    virtual bool isPlaying() = 0;
+    virtual bool isFinished() = 0;
 
-    [[nodiscard]] inline bool isStream() const { return this->bStream; }
-    [[nodiscard]] inline bool isLooped() const { return this->bIsLooped; }
-    [[nodiscard]] inline bool isOverlayable() const { return this->bIsOverlayable; }
+    virtual void rebuild(std::string newFilePath) = 0;
 
-    void rebuild(std::string newFilePath);
+    [[nodiscard]] constexpr bool isStream() const { return this->bStream; }
+    [[nodiscard]] constexpr bool isLooped() const { return this->bIsLooped; }
+    [[nodiscard]] constexpr bool isOverlayable() const { return this->bIsOverlayable; }
 
     // type inspection
     [[nodiscard]] Type getResType() const final { return SOUND; }
@@ -52,27 +59,45 @@ class Sound : public Resource {
     Sound *asSound() final { return this; }
     [[nodiscard]] const Sound *asSound() const final { return this; }
 
-   private:
-    void init() override;
-    void initAsync() override;
-    void destroy() override;
+    // type inspection
+    [[nodiscard]] virtual TypeId getTypeId() const = 0;
+    [[nodiscard]] virtual bool isTypeOf(TypeId /*type_id*/) const { return false; }
+    template <typename T>
+    [[nodiscard]] bool isType() const {
+        return isTypeOf(T::TYPE_ID);
+    }
+    template <typename T>
+    T *as() {
+        return isType<T>() ? static_cast<T *>(this) : nullptr;
+    }
+    template <typename T>
+    const T *as() const {
+        return isType<T>() ? static_cast<const T *>(this) : nullptr;
+    }
 
-    SOUNDHANDLE stream = 0;
-    SOUNDHANDLE sample = 0;
+   protected:
+    void init() override = 0;
+    void initAsync() override = 0;
+    void destroy() override = 0;
 
-    bool bStarted = false;
-    bool bPaused = false;
     bool bStream;
     bool bIsLooped;
     bool bIsOverlayable;
 
-    float fPan;
-    float fSpeed;
-    float fVolume;
-    f64 fLastPlayTime = 0.0;
-    f64 fChannelCreationTime = 0.0;
-    u32 paused_position_ms = 0;
-    u32 length = 0;
+    bool bIgnored{false};  // early check for audio file validity
+    bool bStarted{false};
+    bool bPaused{false};
+
+    float fPan{0.0f};
+    float fSpeed{1.0f};
+    float fVolume{1.0f};
+    f64 fLastPlayTime{0.0};
+    f64 fChannelCreationTime{0.0};
+    u32 paused_position_ms{0};
+    u32 length{0};
 
     PlaybackInterpolator interpolator;
+
+   private:
+    static bool isValidAudioFile(const std::string &filePath, const std::string &fileExt);
 };

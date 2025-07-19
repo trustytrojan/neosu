@@ -68,13 +68,13 @@ class ResourceManager final {
     // fonts
     McFont *loadFont(std::string filepath, std::string resourceName, int fontSize = 16, bool antialiasing = true,
                      int fontDPI = 96);
-    McFont *loadFont(std::string filepath, std::string resourceName, const std::vector<wchar_t>& characters, int fontSize = 16,
-                     bool antialiasing = true, int fontDPI = 96);
+    McFont *loadFont(std::string filepath, std::string resourceName, const std::vector<wchar_t> &characters,
+                     int fontSize = 16, bool antialiasing = true, int fontDPI = 96);
 
     // sounds
-    Sound *loadSound(std::string filepath, std::string resourceName, bool stream = false, bool threeD = false,
+    Sound *loadSound(std::string filepath, std::string resourceName, bool stream = false, bool overlayable = false,
                      bool loop = false);
-    Sound *loadSoundAbs(std::string filepath, std::string resourceName, bool stream = false, bool threeD = false,
+    Sound *loadSoundAbs(std::string filepath, std::string resourceName, bool stream = false, bool overlayable = false,
                         bool loop = false);
 
     // shaders

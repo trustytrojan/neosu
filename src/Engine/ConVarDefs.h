@@ -1053,13 +1053,16 @@ CONVAR(snd_play_interp_ratio, "snd_play_interp_ratio", 0.50f, FCVAR_BANCHO_COMPA
 CONVAR(snd_ready_delay, "snd_ready_delay", 0.0f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "after a sound engine restart, wait this many seconds before marking it as ready");
 CONVAR(snd_restart, "snd_restart");
+CONVAR(debug_snd, "debug_snd", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(snd_restrict_play_frame, "snd_restrict_play_frame", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "only allow one new channel per frame for overlayable sounds (prevents lag and earrape)");
 CONVAR(snd_updateperiod, "snd_updateperiod", 10, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "BASS_CONFIG_UPDATEPERIOD length in milliseconds");
-CONVAR(snd_wav_file_min_size, "snd_wav_file_min_size", 51, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
+CONVAR(snd_file_min_size, "snd_file_min_size", 64, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "minimum file size in bytes for WAV files to be considered valid (everything below will "
        "fail to load), this is a workaround for BASS crashes");
+CONVAR(snd_force_load_unknown, "snd_force_load_unknown", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
+       "force loading of assumed invalid audio files");
 CONVAR(songbrowser_background_fade_in_duration, "osu_songbrowser_background_fade_in_duration", 0.1f,
        FCVAR_BANCHO_COMPATIBLE);
 CONVAR(songbrowser_button_active_color_a, "osu_songbrowser_button_active_color_a", 220 + 10, FCVAR_BANCHO_COMPATIBLE);

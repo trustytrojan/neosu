@@ -40,8 +40,8 @@
 //	Main entry point  //
 //********************//
 
-LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> & /*argCmdline*/,
-                     const std::unordered_map<UString, std::optional<UString>> & /*argMap*/) {
+LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> & argCmdline,
+                     const std::unordered_map<UString, std::optional<UString>> & argMap) {
     this->dpy = XOpenDisplay(nullptr);
     if(this->dpy == nullptr) {
         printf("FATAL ERROR: XOpenDisplay() can't connect to X server!\n\n");
@@ -165,7 +165,7 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> & /*argC
     deltaTimer->update();
 
     // initialize engine
-    baseEnv = new LinuxEnvironment(this->dpy, this->clientWindow);
+    baseEnv = new LinuxEnvironment(this->dpy, this->clientWindow, argCmdline, argMap);
     engine = new Engine(argc, argv);
     engine->loadApp();
 

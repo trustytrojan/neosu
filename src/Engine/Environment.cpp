@@ -15,7 +15,11 @@
 #include <libloaderapi.h>
 #endif
 
-Environment::Environment() { this->bFullscreenWindowedBorderless = false; }
+Environment::Environment(const std::vector<UString> &argCmdline,
+                         const std::unordered_map<UString, std::optional<UString>> &argMap)
+    : mArgMap(argMap), vCmdLine(argCmdline) {
+    this->bFullscreenWindowedBorderless = false;
+}
 
 void Environment::setFullscreenWindowedBorderless(bool fullscreenWindowedBorderless) {
     this->bFullscreenWindowedBorderless = fullscreenWindowedBorderless;

@@ -10,7 +10,8 @@
 
 class LinuxEnvironment : public Environment {
    public:
-    LinuxEnvironment(Display *display, Window window);
+    LinuxEnvironment(Display *display, Window window, const std::vector<UString> &argCmdline,
+                     const std::unordered_map<UString, std::optional<UString>> &argMap);
     ~LinuxEnvironment() override;
 
     void update() override;

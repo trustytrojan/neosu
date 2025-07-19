@@ -164,13 +164,15 @@ std::unique_ptr<DirectoryCache> File::s_directoryCache = std::make_unique<Direct
 //------------------------------------------------------------------------------
 // public
 File::FILETYPE File::existsCaseInsensitive(std::string &filePath) {
-    auto fsPath = fs::path(UString(filePath).plat_str());
+    UString filePathUStr{filePath};
+    auto fsPath = fs::path(filePathUStr.plat_str());
 
     return existsCaseInsensitive(filePath, fsPath);
 }
 
 File::FILETYPE File::exists(const std::string &filePath) {
-    const auto fsPath = fs::path(UString(filePath).plat_str());
+    UString filePathUStr{filePath};
+    const auto fsPath = fs::path(filePathUStr.plat_str());
     return exists(filePath, fsPath);
 }
 
@@ -208,7 +210,8 @@ File::FILETYPE File::existsCaseInsensitive(std::string &filePath, fs::path &path
 
     // now update the given paths with the actual found path
     filePath = resolvedPath;
-    path = fs::path(UString(filePath).plat_str());
+    UString filePathUStr{filePath};
+    path = fs::path(filePathUStr.plat_str());
     return fileType;
 }
 
@@ -246,7 +249,8 @@ File::File(std::string filePath, TYPE type) : sFilePath(filePath), fileType(type
 
 bool File::openForReading() {
     // resolve the file path (handles case-insensitive matching)
-    fs::path path(UString(this->sFilePath).plat_str());
+    UString filePathUStr{this->sFilePath};
+    fs::path path(filePathUStr.plat_str());
     auto fileType = existsCaseInsensitive(this->sFilePath, path);
 
     if(fileType != File::FILETYPE::FILE) {
@@ -292,7 +296,8 @@ bool File::openForReading() {
 
 bool File::openForWriting() {
     // get filesystem path
-    fs::path path(UString(this->sFilePath).plat_str());
+    UString filePathUStr{this->sFilePath};
+    fs::path path(filePathUStr.plat_str());
 
     // create parent directories if needed
     if(!path.parent_path().empty()) {

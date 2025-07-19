@@ -35,7 +35,8 @@ typedef struct {
 bool LinuxEnvironment::bResizable = true;
 std::vector<McRect> LinuxEnvironment::vMonitors;
 
-LinuxEnvironment::LinuxEnvironment(Display *display, Window window) : Environment() {
+LinuxEnvironment::LinuxEnvironment(Display *display, Window window, const std::vector<UString> &argCmdline,
+                const std::unordered_map<UString, std::optional<UString>> &argMap) : Environment(argCmdline, argMap) {
     env = this;
     this->display = display;
     this->window = window;
