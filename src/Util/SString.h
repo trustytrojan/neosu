@@ -23,7 +23,7 @@ static constexpr forceinline void trim(std::string* str) {
     str->erase(str->find_last_not_of(" \t\r\n") + 1);
 }
 
-static constexpr forceinline bool find_ncase(const std::string& haystack, const std::string& needle) {
+static constexpr forceinline bool contains_ncase(const std::string& haystack, const std::string& needle) {
     return !haystack.empty() && !std::ranges::search(haystack, needle, [](char ch1, char ch2) {
                                      return std::tolower(ch1) == std::tolower(ch2);
                                  }).empty();
@@ -51,7 +51,7 @@ static constexpr forceinline bool less_than_ncase(const std::string& lhs, const 
 
     const auto lhsLen = lhs.length();
     const auto rhsLen = rhs.length();
-    const auto minLen = std::min(lhsLen, rhsLen);
+    const auto minLen = (std::min)(lhsLen, rhsLen);
 
     const auto lowerLhs = lower(lhs);
     const auto lowerRhs = lower(rhs);

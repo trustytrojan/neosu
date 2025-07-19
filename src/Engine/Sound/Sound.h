@@ -19,7 +19,7 @@ class Sound : public Resource {
 
    public:
     using TypeId = uint8_t;
-    enum SndType : TypeId { BASS, SOLOUD, SDL };
+    enum SndType : TypeId { BASS, SOLOUD };
 
    public:
     Sound(std::string filepath, bool stream, bool overlayable, bool loop);
@@ -29,10 +29,11 @@ class Sound : public Resource {
 
     virtual u32 setPosition(f64 percent) = 0;
     virtual void setPositionMS(unsigned long ms) = 0;
-    virtual void setPositionMS_fast(u32 ms) = 0;
+    virtual void setPositionMS_fast(u32 ms) { this->setPositionMS(ms); }
 
     virtual void setVolume(float volume) = 0;
     virtual void setSpeed(float speed) = 0;
+    virtual void setPitch(float pitch) { this->fPitch = pitch; }
     virtual void setFrequency(float frequency) = 0;
     virtual void setPan(float pan) = 0;
     virtual void setLoop(bool loop) = 0;
@@ -40,9 +41,10 @@ class Sound : public Resource {
     virtual float getPosition() = 0;
     virtual u32 getPositionMS() = 0;
     virtual u32 getLengthMS() = 0;
-    [[nodiscard]] constexpr float getPan() const { return this->fPan; }
-    virtual float getSpeed() = 0;
     virtual float getFrequency() = 0;
+    virtual float getPan() { return this->fPan; }
+    virtual float getSpeed() { return this->fSpeed; }
+    virtual float getPitch() { return this->fPitch; }
 
     virtual bool isPlaying() = 0;
     virtual bool isFinished() = 0;
@@ -80,6 +82,9 @@ class Sound : public Resource {
     void initAsync() override = 0;
     void destroy() override = 0;
 
+    inline void setLastPlayTime(f64 lastPlayTime) { this->fLastPlayTime = lastPlayTime; }
+    [[nodiscard]] constexpr f64 getLastPlayTime() const { return this->fLastPlayTime; }
+
     bool bStream;
     bool bIsLooped;
     bool bIsOverlayable;
@@ -90,6 +95,7 @@ class Sound : public Resource {
 
     float fPan{0.0f};
     float fSpeed{1.0f};
+    float fPitch{1.0f};
     float fVolume{1.0f};
     f64 fLastPlayTime{0.0};
     f64 fChannelCreationTime{0.0};

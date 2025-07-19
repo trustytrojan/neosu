@@ -1053,7 +1053,7 @@ CONVAR(snd_play_interp_ratio, "snd_play_interp_ratio", 0.50f, FCVAR_BANCHO_COMPA
 CONVAR(snd_ready_delay, "snd_ready_delay", 0.0f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "after a sound engine restart, wait this many seconds before marking it as ready");
 CONVAR(snd_restart, "snd_restart");
-CONVAR(debug_snd, "debug_snd", false, FCVAR_BANCHO_COMPATIBLE);
+CONVAR(debug_snd, "debug_snd", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_NOSAVE);
 CONVAR(snd_restrict_play_frame, "snd_restrict_play_frame", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "only allow one new channel per frame for overlayable sounds (prevents lag and earrape)");
 CONVAR(snd_updateperiod, "snd_updateperiod", 10, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
@@ -1221,6 +1221,15 @@ CONVAR(win_snd_wasapi_exclusive, "win_snd_wasapi_exclusive", true, FCVAR_BANCHO_
 CONVAR(win_snd_wasapi_period_size, "win_snd_wasapi_period_size", 0.0f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "interval between OutputWasapiProc calls in seconds (e.g. 0.016 = 16 ms) (0 = use default)");
 
+CONVAR(snd_soloud_buffer, "snd_soloud_buffer", 0, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
+       "SoLoud audio device buffer size (recommended to leave this on 0/auto)");
+CONVAR(snd_soloud_backend, "snd_soloud_backend", "MiniAudio", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
+       R"(SoLoud backend, "MiniAudio" or "SDL3" (MiniAudio is default))");
+CONVAR(snd_sanity_simultaneous_limit, "snd_sanity_simultaneous_limit", 128, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
+       "The maximum number of overlayable sounds that are allowed to be active at once");
+CONVAR(snd_soloud_prefer_ffmpeg, "snd_soloud_prefer_ffmpeg", 0, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
+       "(0=no, 1=streams, 2=streams+samples) prioritize using ffmpeg as a decoder (if available) over other decoder "
+       "backends");
 // Temporary
 CONVAR(enable_spectating, "enable_spectating", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
 

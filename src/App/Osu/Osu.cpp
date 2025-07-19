@@ -227,18 +227,19 @@ Osu::Osu() {
 
     // Initialize sound here so we can load the preferred device from config
     // Avoids initializing the sound device twice, which can take a while depending on the driver
-    soundEngine->updateOutputDevices(true);
-    soundEngine->initializeOutputDevice(soundEngine->getWantedDevice());
-    cv::snd_output_device.setValue(soundEngine->getOutputDeviceName());
-    cv::snd_freq.setCallback(SA::MakeDelegate<&SoundEngine::onFreqChanged>(soundEngine.get()));
-    cv::snd_restart.setCallback(SA::MakeDelegate<&SoundEngine::restart>(soundEngine.get()));
-    cv::win_snd_wasapi_exclusive.setCallback(
-        SA::MakeDelegate<&SoundEngine::onParamChanged>(soundEngine.get()));
-    cv::win_snd_wasapi_buffer_size.setCallback(
-        SA::MakeDelegate<&SoundEngine::onParamChanged>(soundEngine.get()));
-    cv::win_snd_wasapi_period_size.setCallback(
-        SA::MakeDelegate<&SoundEngine::onParamChanged>(soundEngine.get()));
-    cv::asio_buffer_size.setCallback(SA::MakeDelegate<&SoundEngine::onParamChanged>(soundEngine.get()));
+    if(Env::cfg(AUD::BASS) && soundEngine->getTypeId() == SoundEngine::BASS) {
+        soundEngine->updateOutputDevices(true);
+        soundEngine->initializeOutputDevice(soundEngine->getWantedDevice());
+        cv::snd_output_device.setValue(soundEngine->getOutputDeviceName());
+        cv::snd_freq.setCallback(SA::MakeDelegate<&SoundEngine::onFreqChanged>(soundEngine.get()));
+        cv::snd_restart.setCallback(SA::MakeDelegate<&SoundEngine::restart>(soundEngine.get()));
+        cv::win_snd_wasapi_exclusive.setCallback(SA::MakeDelegate<&SoundEngine::onParamChanged>(soundEngine.get()));
+        cv::win_snd_wasapi_buffer_size.setCallback(SA::MakeDelegate<&SoundEngine::onParamChanged>(soundEngine.get()));
+        cv::win_snd_wasapi_period_size.setCallback(SA::MakeDelegate<&SoundEngine::onParamChanged>(soundEngine.get()));
+        cv::asio_buffer_size.setCallback(SA::MakeDelegate<&SoundEngine::onParamChanged>(soundEngine.get()));
+    } else if(Env::cfg(AUD::SOLOUD) && soundEngine->getTypeId() == SoundEngine::SOLOUD) {
+        this->setupSoloud();
+    }
 
     // Initialize skin after sound engine has started, or else sounds won't load properly
     cv::skin.setCallback(SA::MakeDelegate<&Osu::onSkinChange>(this));
@@ -2183,4 +2184,57 @@ float Osu::getUIScale() {
         return cv::ui_scale.getFloat();
 
     return ((cv::ui_scale_to_dpi.getBool() ? env->getDPIScale() : 1.0f) * cv::ui_scale.getFloat());
+}
+
+void Osu::setupSoloud() {
+    cv::universal_offset_hardcoded.setValue(20.0f);  // set +20ms universal offset here to match BASS better (at least
+                                                     // on windows, on linux BASS always needs ~-30ms offset so people
+                                                     // need to adjust)
+
+    // need to save this state somewhere to share data between callback stages
+    static bool was_playing_state = false;
+    static unsigned long prev_position_ms = 0;
+
+    static auto outputChangedBeforeCallback = [pwas_playing = &was_playing_state,
+                                               pprev_position_ms = &prev_position_ms]() -> void {
+        if(osu && osu->getSelectedBeatmap() && osu->getSelectedBeatmap()->getMusic()) {
+            *pwas_playing = osu->getSelectedBeatmap()->getMusic()->isPlaying();
+            *pprev_position_ms = osu->getSelectedBeatmap()->getMusic()->getPositionMS();
+        } else {
+            *pwas_playing = false;
+            *pprev_position_ms = 0;
+        }
+    };
+    // the actual reset will be sandwiched between these during restart
+    static auto outputChangedAfterCallback = [pwas_playing = &was_playing_state,
+                                              pprev_position_ms = &prev_position_ms]() -> void {
+        // part 2 of callback
+        if(osu && osu->optionsMenu && osu->optionsMenu->outputDeviceLabel && osu->getSkin()) {
+            osu->optionsMenu->outputDeviceLabel->setText(soundEngine->getOutputDeviceName());
+            osu->getSkin()->reloadSounds();
+            osu->optionsMenu->onOutputDeviceResetUpdate();
+
+            // start playing music again after audio device changed
+            if(osu->getSelectedBeatmap() && osu->getSelectedBeatmap()->getMusic()) {
+                if(osu->isInPlayMode()) {
+                    osu->getSelectedBeatmap()->unloadMusic();
+                    osu->getSelectedBeatmap()->loadMusic(false);
+                    osu->getSelectedBeatmap()->getMusic()->setLoop(false);
+                    osu->getSelectedBeatmap()->getMusic()->setPositionMS(*pprev_position_ms);
+                } else {
+                    osu->getSelectedBeatmap()->unloadMusic();
+                    osu->getSelectedBeatmap()->select();
+                    osu->getSelectedBeatmap()->getMusic()->setPositionMS(*pprev_position_ms);
+                }
+            }
+
+            if(*pwas_playing) {
+                osu->music_unpause_scheduled = true;
+            }
+            osu->optionsMenu->scheduleLayoutUpdate();
+        }
+    };
+    soundEngine->setDeviceChangeBeforeCallback(outputChangedBeforeCallback);
+    soundEngine->setDeviceChangeAfterCallback(outputChangedAfterCallback);
+    soundEngine->initializeOutputDevice(soundEngine->getWantedDevice());
 }

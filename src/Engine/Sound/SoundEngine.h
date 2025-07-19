@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Delegate.h"
 #include "UString.h"
 
 #define SOUND_ENGINE_TYPE(ClassName, TypeID, ParentClass)               \
@@ -28,19 +29,19 @@ class SoundEngine {
 
    protected:
     struct OUTPUT_DEVICE {
-        int id;
-        bool enabled;
-        bool isDefault;
-        UString name;
-        OutputDriver driver;
+        int id{-1};
+        bool enabled{true};
+        bool isDefault{false};
+        UString name{"Default"};
+        OutputDriver driver{OutputDriver::NONE};
     };
 
    public:
     using TypeId = uint8_t;
     enum SndEngineType : TypeId { BASS, SOLOUD };
 
-    SoundEngine();
-    virtual ~SoundEngine() = default;
+    SoundEngine() = default;
+    virtual ~SoundEngine() { this->restartCBs = {}; }
 
     SoundEngine &operator=(const SoundEngine &) = delete;
     SoundEngine &operator=(SoundEngine &&) = delete;
@@ -52,28 +53,36 @@ class SoundEngine {
     static SoundEngine *createSoundEngine(SndEngineType type = BASS);
 
     virtual void restart() = 0;
-    virtual void shutdown() = 0;
-    virtual void update() = 0;
+    virtual void shutdown() { ; }
+    virtual void update() { ; }
 
     virtual bool play(Sound *snd, float pan = 0.0f, float pitch = 0.f) = 0;
     virtual void pause(Sound *snd) = 0;
     virtual void stop(Sound *snd) = 0;
 
     virtual bool isReady() = 0;
-    virtual bool hasExclusiveOutput() = 0;
+    virtual bool hasExclusiveOutput() { return false; }
 
     virtual void setOutputDevice(const OUTPUT_DEVICE &device) = 0;
     virtual void setVolume(float volume) = 0;
 
-    virtual OUTPUT_DEVICE getDefaultDevice() = 0;
-    virtual OUTPUT_DEVICE getWantedDevice() = 0;
-    virtual std::vector<OUTPUT_DEVICE> getOutputDevices() = 0;
+    OUTPUT_DEVICE getDefaultDevice();
+    OUTPUT_DEVICE getWantedDevice();
+    std::vector<OUTPUT_DEVICE> getOutputDevices();
 
     virtual void updateOutputDevices(bool printInfo) = 0;
     virtual bool initializeOutputDevice(const OUTPUT_DEVICE &device) = 0;
 
-    virtual void onFreqChanged(float oldValue, float newValue) = 0;
-    virtual void onParamChanged(float oldValue, float newValue) = 0;
+    virtual void onFreqChanged(float /* oldValue */, float /* newValue */) { ; }
+    virtual void onParamChanged(float /* oldValue */, float /* newValue */) { ; }
+
+    using AudioOutputChangedCallback = SA::delegate<void()>;
+    inline void setDeviceChangeBeforeCallback(const AudioOutputChangedCallback &callback) {
+        this->restartCBs[0] = callback;
+    }
+    inline void setDeviceChangeAfterCallback(const AudioOutputChangedCallback &callback) {
+        this->restartCBs[1] = callback;
+    }
 
     [[nodiscard]] inline const UString &getOutputDeviceName() const { return this->currentOutputDevice.name; }
     [[nodiscard]] constexpr auto getOutputDriverType() const { return this->currentOutputDevice.driver; }
@@ -97,9 +106,10 @@ class SoundEngine {
 
    protected:
     std::vector<OUTPUT_DEVICE> outputDevices;
-
     OUTPUT_DEVICE currentOutputDevice;
 
-    double ready_since{-1.0};
     float fVolume{1.0f};
+
+    std::array<AudioOutputChangedCallback, 2>
+        restartCBs;  // first to exec before restart, second to exec after restart
 };

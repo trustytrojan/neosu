@@ -26,6 +26,7 @@
 
 // TODO: use fontconfig on linux?
 #ifdef _WIN32
+#include "WinDebloatDefs.h"
 #include <shlobj.h>
 #include <windows.h>
 #endif

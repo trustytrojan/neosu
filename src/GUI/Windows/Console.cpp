@@ -80,7 +80,7 @@ Console::Console() : CBaseUIWindow(350, 100, 620, 550, "Console") {
 
 Console::~Console() {}
 
-void Console::processCommand(std::string command) {
+void Console::processCommand(std::string command, bool fromFile) {
     if(command.length() < 1) return;
 
     // remove whitespace from beginning/end of string
@@ -111,7 +111,12 @@ void Console::processCommand(std::string command) {
 
     // get convar
     ConVar *var = convar->getConVarByName(commandName, false);
-    if(var == NULL) {
+    if(var == NULL || var->isFlagSet(FCVAR_NOEXEC) || (fromFile && var->isFlagSet(FCVAR_NOLOAD))) {
+#ifdef _DEBUG
+        if(var) {
+            debugLogF("not executing {}, flags: {}\n", var->getName(), ConVarHandler::flagsToString(var->getFlags()));
+        }
+#endif
         debugLog("Unknown command: %s\n", commandName);
         return;
     }
@@ -195,7 +200,7 @@ void Console::execConfigFile(std::string filename) {
     }
 
     // process the collected commands
-    for(const auto &cmd : cmds) processCommand(cmd.toUtf8());
+    for(const auto &cmd : cmds) processCommand(cmd.toUtf8(), true);
 }
 
 void Console::mouse_update(bool *propagate_clicks) {

@@ -25,6 +25,12 @@ if(CPU_COUNT EQUAL 0)
     set(CPU_COUNT 4)
 endif()
 
+if(WINEBUILD)
+    set(CMAKE_COMPAT_GENERATOR "Ninja")
+else()
+    set(CMAKE_COMPAT_GENERATOR "${CMAKE_GENERATOR}")
+endif()
+
 # Shared dependency cache and install dirs
 set(DEPS_CACHE "${CMAKE_SOURCE_DIR}/depcache")
 set(DEPS_PREFIX "${CMAKE_BINARY_DIR}/deps")
@@ -55,7 +61,7 @@ set(PKG_CONFIG_ARGN "--msvc-syntax")
 string(REGEX REPLACE "/EH[^ ]*" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 set(COMMON_C_FLAGS "/utf-8" "/D_HAS_EXCEPTIONS=0")
-set(COMMON_CXX_FLAGS "/utf-8" "/Zc:preprocessor" "/GR" "/D_HAS_EXCEPTIONS=0")
+set(COMMON_CXX_FLAGS "/utf-8" "/Zc:preprocessor" "/GR" "/D_HAS_EXCEPTIONS=0" "/DSOLOUD_NO_ASSERTS")
 set(DEBUG_FLAGS "/Zi" "/Od" "/RTC1")
 set(RELEASE_FLAGS "/O2" "/Oi" "/Oy" "/Gw" "/GL" "/GS-" "/Gy")
 
@@ -290,6 +296,45 @@ ExternalProject_Add(curl_external
     BUILD_COMMAND cmake --build <BINARY_DIR> --config ${CMAKE_BUILD_TYPE} --parallel ${CPU_COUNT}
 )
 
+ExternalProject_Add(mpg123_external
+    URL ${MPG123_URL}
+    URL_HASH ${MPG123_HASH}
+    DOWNLOAD_DIR ${DEPS_CACHE}
+    SOURCE_SUBDIR ports/cmake
+    # weird... unix makefiles just blows up in an incomprehensible way
+    CMAKE_ARGS
+        ${EXTERNAL_PROJECT_CMAKE_ARGS}
+        -DBUILD_LIBOUT123=OFF
+    BUILD_COMMAND cmake --build <BINARY_DIR> --config ${CMAKE_BUILD_TYPE} --parallel ${CPU_COUNT}
+)
+
+ExternalProject_Add(soundtouch_external
+    URL ${SOUNDTOUCH_URL}
+    URL_HASH ${SOUNDTOUCH_HASH}
+    DOWNLOAD_DIR ${DEPS_CACHE}
+    CMAKE_ARGS
+        ${EXTERNAL_PROJECT_CMAKE_ARGS}
+        -DST_NO_EXCEPTION_HANDLING=1
+        -DSOUNDSTRETCH=OFF
+        -DSOUNDTOUCH_DLL=OFF
+        -DOPENMP=OFF
+    BUILD_COMMAND cmake --build <BINARY_DIR> --config ${CMAKE_BUILD_TYPE} --parallel ${CPU_COUNT}
+)
+
+ExternalProject_Add(soloud_external
+    URL ${SOLOUD_URL}
+    URL_HASH ${SOLOUD_HASH}
+    DOWNLOAD_DIR ${DEPS_CACHE}
+    DEPENDS sdl3_external mpg123_external
+    CMAKE_ARGS
+        ${EXTERNAL_PROJECT_CMAKE_ARGS}
+        -DSOLOUD_WITH_SDL3=ON
+        -DSOLOUD_WITH_MPG123=ON
+        -DSOLOUD_WITH_FFMPEG=OFF # way too lazy
+        -DPKG_CONFIG_ARGN="--msvc-syntax"
+    BUILD_COMMAND cmake --build <BINARY_DIR> --config ${CMAKE_BUILD_TYPE} --parallel ${CPU_COUNT}
+)
+
 # Discord SDK (pre-built binary)
 ExternalProject_Add(discordsdk_external
     URL ${DISCORDSDK_URL}
@@ -444,6 +489,9 @@ ExternalProject_Add(neosu_main
         lzma_external
         libarchive_external
         curl_external
+        mpg123_external
+        soundtouch_external
+        soloud_external
         discordsdk_external
         bass_external
         bassfx_external

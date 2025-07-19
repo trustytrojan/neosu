@@ -66,31 +66,7 @@ BassSoundEngine::BassSoundEngine() : SoundEngine() {
 
     // if set to 1, increases sample playback latency by 10 ms
     BASS_SetConfig(BASS_CONFIG_VISTA_TRUEPOS, 0);
-}
-
-BassSoundEngine::~BassSoundEngine() { BassManager::cleanup(); }
-
-SoundEngine::OUTPUT_DEVICE BassSoundEngine::getWantedDevice() {
-    auto wanted_name = cv::snd_output_device.getString();
-    for(auto device : this->outputDevices) {
-        if(device.enabled && device.name.utf8View() == wanted_name) {
-            return device;
-        }
-    }
-
-    debugLogF("Could not find sound device '{:s}', initializing default one instead.\n", wanted_name);
-    return this->getDefaultDevice();
-}
-
-SoundEngine::OUTPUT_DEVICE BassSoundEngine::getDefaultDevice() {
-    for(auto device : this->outputDevices) {
-        if(device.enabled && device.isDefault) {
-            return device;
-        }
-    }
-
-    debugLog("Could not find a working sound device!\n");
-    return {
+    this->currentOutputDevice = {
         .id = 0,
         .enabled = true,
         .isDefault = true,
@@ -98,6 +74,8 @@ SoundEngine::OUTPUT_DEVICE BassSoundEngine::getDefaultDevice() {
         .driver = OutputDriver::NONE,
     };
 }
+
+BassSoundEngine::~BassSoundEngine() { BassManager::cleanup(); }
 
 void BassSoundEngine::updateOutputDevices(bool /*printInfo*/) {
     this->outputDevices.clear();
@@ -465,8 +443,6 @@ void BassSoundEngine::shutdown() {
     BASS_Free();  // free "No sound" device
 }
 
-void BassSoundEngine::update() {}
-
 bool BassSoundEngine::play(Sound *snd, float pan, float pitch) {
     auto [bassSound, channel] = GETHANDLE(BassSound, getChannel());
     if(!bassSound) {
@@ -660,18 +636,6 @@ void BassSoundEngine::onParamChanged(float oldValue, float newValue) {
     const int newValueMS = static_cast<int>(std::round(newValue * 1000.0f));
 
     if(oldValueMS != newValueMS) this->restart();
-}
-
-std::vector<SoundEngine::OUTPUT_DEVICE> BassSoundEngine::getOutputDevices() {
-    std::vector<SoundEngine::OUTPUT_DEVICE> outputDevices;
-
-    for(size_t i = 0; i < this->outputDevices.size(); i++) {
-        if(this->outputDevices[i].enabled) {
-            outputDevices.push_back(this->outputDevices[i]);
-        }
-    }
-
-    return outputDevices;
 }
 
 #endif

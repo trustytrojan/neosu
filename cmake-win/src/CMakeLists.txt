@@ -25,6 +25,10 @@ if(NOT DEPS_INSTALL_DIR)
     set(DEPS_INSTALL_DIR "${CMAKE_BINARY_DIR}/../deps/install")
 endif()
 
+# soundtouch's cmake interface is broken and cmake complains about a non-existent directory
+make_directory(${DEPS_INSTALL_DIR}/COMPONENT)
+make_directory(${DEPS_INSTALL_DIR}/SoundTouch)
+
 # Dependencies cache directory (passed from superbuild)
 if(NOT DEPS_CACHE)
     set(DEPS_CACHE "${CMAKE_BINARY_DIR}/../depcache")
@@ -43,6 +47,7 @@ set(PROJECT_URL "https://github.com/kiwec/neosu")
 set(MCENGINE_PLATFORM_WINDOWS ON)
 set(MCENGINE_FEATURE_OPENGL ON)
 set(MCENGINE_FEATURE_BASS ON)
+set(MCENGINE_FEATURE_SOLOUD ON)
 
 # Generate config.h
 configure_file(
@@ -71,6 +76,9 @@ find_package(PNG REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(LibLZMA REQUIRED)
 find_package(CURL REQUIRED)
+find_package(MPG123 REQUIRED)
+find_package(SoundTouch REQUIRED)
+find_package(SoLoud REQUIRED)
 
 # Find packages that provide config files
 find_package(fmt REQUIRED)
@@ -127,6 +135,7 @@ target_include_directories(neosu PRIVATE
     ${BASS_CACHE_DIR}/bassasio/include
     ${BASS_CACHE_DIR}/basswasapi/include
     ${DEPS_INSTALL_DIR}/include
+    ${DEPS_INSTALL_DIR}/include/soundtouch # thanks...
     ${BZIP2_STATIC_INCLUDE_DIRS}
     ${LIBARCHIVE_STATIC_INCLUDE_DIRS}
 )
@@ -148,6 +157,8 @@ target_compile_definitions(neosu PRIVATE
     GLM_ENABLE_EXPERIMENTAL
     FMT_USE_EXCEPTIONS=0
     _HAS_EXCEPTIONS=0
+    ST_NO_EXCEPTION_HANDLING=1
+    SOLOUD_NO_ASSERTS=1
     $<$<CONFIG:Release>:NDEBUG>
     $<$<CONFIG:Debug>:_DEBUG>
 )
@@ -178,6 +189,9 @@ target_link_libraries(neosu PRIVATE
     fmt::fmt
     LibLZMA::LibLZMA
     CURL::libcurl
+    SoundTouch::SoundTouch
+    SoLoud::soloud
+    MPG123::libmpg123
     discord_game_sdk.dll.lib
     ${DEPS_INSTALL_DIR}/lib/bz2_static.lib # cool awesome
     ${LIBARCHIVE_STATIC_LIBRARIES}

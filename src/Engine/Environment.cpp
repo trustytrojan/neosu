@@ -189,10 +189,10 @@ std::string Environment::getFolderFromFilePath(const std::string &filepath) noex
 }
 
 std::string Environment::getFileExtensionFromFilePath(const std::string &filepath, bool /*includeDot*/) noexcept {
-    const int idx = UString{filepath}.findLast(".");
-    if(idx != -1)
-        return filepath.substr(idx + 1);
-    else
+    const auto extIdx = filepath.find_last_of('.');
+    if(extIdx != std::string::npos) {
+        return filepath.substr(extIdx + 1);
+    } else
         return {""};
 }
 
@@ -316,16 +316,17 @@ std::string Environment::getThingFromPathHelper(const std::string &path, bool fo
     if(path.empty()) return path;
     namespace fs = std::filesystem;
 
-    UString ustrPath{path};  // convenience for rebasing, findlast is kinda annoying
+    std::string retPath{path};
 
     // find the last path separator (either / or \)
-    int lastSlash = ustrPath.findLast("/");
-    if(lastSlash == -1) lastSlash = ustrPath.findLast("\\");
+    auto lastSlash = retPath.find_last_of('/');
+    if(lastSlash == std::string::npos) lastSlash = retPath.find_last_of('\\');
 
     if(folder) {
         // if path ends with separator, it's already a directory
-        bool endsWithSeparator = ustrPath.endsWith("/") || ustrPath.endsWith("\\");
+        bool endsWithSeparator = retPath.back() == '/' || retPath.back() == '\\';
 
+        UString ustrPath{retPath};
         std::error_code ec;
         auto abs_path = fs::canonical(ustrPath.plat_str(), ec);
 
@@ -340,18 +341,19 @@ std::string Environment::getThingFromPathHelper(const std::string &path, bool fo
                 ustrPath = abs_path.parent_path().c_str();
         } else if(!endsWithSeparator)  // canonical failed, handle manually (if it's not already a directory)
         {
-            if(lastSlash != -1)  // return parent
+            if(lastSlash != std::string::npos)  // return parent
                 ustrPath = ustrPath.substr(0, lastSlash);
             else  // no separators found, just use ./
-                ustrPath = UString::fmt(".{}{}", Env::cfg(OS::WINDOWS) ? "\\" : "/", ustrPath);
+                ustrPath = UString::fmt("." PREF_PATHSEP "{}", ustrPath);
         }
+        retPath = ustrPath.utf8View();
         // make sure whatever we got now ends with a slash
-        if(!ustrPath.endsWith("/") && !ustrPath.endsWith("\\")) ustrPath = ustrPath + PREF_PATHSEP;
-    } else if(lastSlash != -1)  // just return the file
+        if(retPath.back() != '/' && retPath.back() != '\\') retPath = retPath + PREF_PATHSEP;
+    } else if(lastSlash != std::string::npos)  // just return the file
     {
-        ustrPath = ustrPath.substr(lastSlash + 1);
+        retPath = retPath.substr(lastSlash + 1);
     }
     // else: no separators found, entire path is the filename
 
-    return std::string{ustrPath.utf8View()};
+    return retPath;
 }

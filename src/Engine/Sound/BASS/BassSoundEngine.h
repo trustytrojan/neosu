@@ -23,8 +23,6 @@ class BassSoundEngine final : public SoundEngine {
     void restart() override;
     void shutdown() override;
 
-    void update() override;
-
     bool play(Sound *snd, float pan = 0.0f, float pitch = 0.f) override;
     void pause(Sound *snd) override;
     void stop(Sound *snd) override;
@@ -34,10 +32,6 @@ class BassSoundEngine final : public SoundEngine {
 
     void setOutputDevice(const OUTPUT_DEVICE &device) override;
     void setVolume(float volume) override;
-
-    OUTPUT_DEVICE getDefaultDevice() override;
-    OUTPUT_DEVICE getWantedDevice() override;
-    std::vector<OUTPUT_DEVICE> getOutputDevices() override;
 
     void updateOutputDevices(bool printInfo) override;
     bool initializeOutputDevice(const OUTPUT_DEVICE &device) override;
@@ -51,6 +45,7 @@ class BassSoundEngine final : public SoundEngine {
     bool isWASAPI() { return this->currentOutputDevice.driver == OutputDriver::BASS_WASAPI; }
     bool init_bass_mixer(const OUTPUT_DEVICE &device);
 
+    double ready_since{-1.0};
     SOUNDHANDLE g_bassOutputMixer = 0;
 };
 

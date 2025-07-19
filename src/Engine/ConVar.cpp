@@ -117,12 +117,9 @@ void ConVar::execFloat(float args) {
 void ConVar::resetDefaults() {
     std::scoped_lock<std::mutex> lock{this->flagLock};
 
-    if (this->fDefaultValue != this->fDefaultDefaultValue)
-        this->fDefaultValue = this->fDefaultDefaultValue;
-    if (this->sDefaultValue != this->sDefaultDefaultValue)
-        this->sDefaultValue = this->sDefaultDefaultValue;
-    if (this->iFlags != this->iDefaultFlags)
-        this->iFlags = this->iDefaultFlags;
+    if(this->fDefaultValue != this->fDefaultDefaultValue) this->fDefaultValue = this->fDefaultDefaultValue;
+    if(this->sDefaultValue != this->sDefaultDefaultValue) this->sDefaultValue = this->sDefaultDefaultValue;
+    if(this->iFlags != this->iDefaultFlags) this->iFlags = this->iDefaultFlags;
 }
 
 void ConVar::setFlags(uint8_t new_flags) {
@@ -270,6 +267,16 @@ ConVarString ConVarHandler::flagsToString(uint8_t flags) {
                 string.append(string.length() > 0 ? " bancho_submittable" : "bancho_submittable");
             if(flags & FCVAR_BANCHO_COMPATIBLE)
                 string.append(string.length() > 0 ? " bancho_compatible" : "bancho_compatible");
+#ifdef _DEBUG
+            bool internal = flags & FCVAR_INTERNAL;
+            if(internal) {
+                string.append(string.length() > 0 ? " internal" : "internal");
+            } else {
+                if(flags & FCVAR_NOEXEC) string.append(string.length() > 0 ? " noexec" : "noexec");
+                if(flags & FCVAR_NOSAVE) string.append(string.length() > 0 ? " nosave" : "nosave");
+                if(flags & FCVAR_NOLOAD) string.append(string.length() > 0 ? " noload" : "noload");
+            }
+#endif
         }
     }
     return string;

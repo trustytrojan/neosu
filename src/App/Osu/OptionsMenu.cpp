@@ -1873,7 +1873,7 @@ void OptionsMenu::updateLayout() {
                 bool sectionMatch = false;
 
                 const std::string sectionTitle = this->elements[i].elements[0]->getName().toUtf8();
-                sectionTitleMatch = SString::find_ncase(sectionTitle, search);
+                sectionTitleMatch = SString::contains_ncase(sectionTitle, search);
 
                 subSectionTitleMatch = false;
                 if(inSkipSection) inSkipSection = false;
@@ -1886,7 +1886,7 @@ void OptionsMenu::updateLayout() {
                         if(this->elements[s].elements[e]->getName().length() > 0) {
                             std::string tags = this->elements[s].elements[e]->getName().toUtf8();
 
-                            if(SString::find_ncase(tags, search)) {
+                            if(SString::contains_ncase(tags, search)) {
                                 sectionMatch = true;
                                 break;
                             }
@@ -1904,7 +1904,7 @@ void OptionsMenu::updateLayout() {
 
                 const std::string subSectionTitle = this->elements[i].elements[0]->getName().toUtf8();
                 subSectionTitleMatch =
-                    SString::find_ncase(subSectionTitle, search) || SString::find_ncase(searchTags, search);
+                    SString::contains_ncase(subSectionTitle, search) || SString::contains_ncase(searchTags, search);
 
                 if(inSkipSubSection) inSkipSubSection = false;
 
@@ -1916,7 +1916,7 @@ void OptionsMenu::updateLayout() {
                         if(this->elements[s].elements[e]->getName().length() > 0) {
                             std::string tags = this->elements[s].elements[e]->getName().toUtf8();
 
-                            if(SString::find_ncase(tags, search)) {
+                            if(SString::contains_ncase(tags, search)) {
                                 subSectionMatch = true;
                                 break;
                             }
@@ -1936,7 +1936,7 @@ void OptionsMenu::updateLayout() {
                         if(this->elements[i].elements[e]->getName().length() > 0) {
                             std::string tags = this->elements[i].elements[e]->getName().toUtf8();
 
-                            if(SString::find_ncase(tags, search)) {
+                            if(SString::contains_ncase(tags, search)) {
                                 contentMatch = true;
                                 break;
                             }
@@ -2998,12 +2998,14 @@ void OptionsMenu::onSliderChangeUIScale(CBaseUISlider *slider) {
 
 void OptionsMenu::OpenASIOSettings() {
 #if defined(MCENGINE_PLATFORM_WINDOWS) && defined(MCENGINE_FEATURE_BASS)
+    if(soundEngine->getTypeId() != SoundEngine::SndEngineType::BASS) return;
     BASS_ASIO_ControlPanel();
 #endif
 }
 
 void OptionsMenu::onASIOBufferChange([[maybe_unused]] CBaseUISlider *slider) {
 #if defined(MCENGINE_PLATFORM_WINDOWS) && defined(MCENGINE_FEATURE_BASS)
+    if(soundEngine->getTypeId() != SoundEngine::SndEngineType::BASS) return;
     if(!this->updating_layout) this->bASIOBufferChangeScheduled = true;
 
     BASS_ASIO_INFO info{};
@@ -3608,7 +3610,7 @@ void OptionsMenu::save() {
             bool cvar_found = false;
             auto parts = line.split(" ");
             for(auto convar : convar->getConVarArray()) {
-                if(convar->isFlagSet(FCVAR_INTERNAL)) continue;
+                if(convar->isFlagSet(FCVAR_INTERNAL) || convar->isFlagSet(FCVAR_NOSAVE)) continue;
                 if(UString{convar->getName()} == parts[0]) {
                     cvar_found = true;
                     break;
@@ -3640,7 +3642,7 @@ void OptionsMenu::save() {
         out << "\n";
 
         for(auto convar : convar->getConVarArray()) {
-            if(!convar->hasValue() || convar->isFlagSet(FCVAR_INTERNAL)) continue;
+            if(!convar->hasValue() || convar->isFlagSet(FCVAR_INTERNAL) || convar->isFlagSet(FCVAR_NOSAVE)) continue;
             if(convar->getString() == convar->getDefaultString()) continue;
             out << convar->getName() << " " << convar->getString() << "\n";
         }

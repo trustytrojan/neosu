@@ -31,10 +31,15 @@ WINESERVER="${WINESERVER:-wineserver}"
 
 export WINEPREFIX=$PWD/.winepfx
 
+export WINEBUILD=1
+
+# mkdir -p "$WINEPREFIX/dosdevices/" # shorten paths
+# ln -s "$(realpath "$PWD"/../)" "$WINEPREFIX/dosdevices/d:" 2>/dev/null
+
 doit() {
-	wineserver -k # kill a potential old server
-	wineserver -p # start a new server
-	wine wineboot # run a process to start up all background wine processes
+	$WINESERVER -k # kill a potential old server
+	$WINESERVER -p # start a new server
+	$WINE wineboot # run a process to start up all background wine processes
 
 	mkdir -p "$INSTALL_DIR" "$BUILD_DIR" &&
 		cmake -S . -B "$BUILD_DIR" -G "Unix Makefiles" \
@@ -50,7 +55,7 @@ doit() {
 			-DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
 			-DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
 			-DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
-			-DCMAKE_HOST_SYSTEM_PROCESSOR=AMD64 -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" &&
+			-DCMAKE_HOST_SYSTEM_PROCESSOR=AMD64 -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" -DWINEBUILD=ON &&
 
 		# Build the superbuild (dependencies + initial project configuration)
 		cmake --build "$BUILD_DIR" --config "$BUILD_TYPE" --parallel "$(nproc)"
@@ -62,4 +67,4 @@ doit() {
 }
 
 doit
-wineserver -k
+$WINESERVER -k

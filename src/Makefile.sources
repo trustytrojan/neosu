@@ -126,6 +126,9 @@ neosu_SOURCES = \
 	src/Engine/Sound/BASS/BassSound.cpp \
 	src/Engine/Sound/BASS/BassSoundEngine.cpp \
 	src/Engine/Sound/PlaybackInterpolator.cpp \
+	src/Engine/Sound/SoLoud/SoLoudFX.cpp \
+	src/Engine/Sound/SoLoud/SoLoudSound.cpp \
+	src/Engine/Sound/SoLoud/SoLoudSoundEngine.cpp \
 	src/Engine/Sound/Sound.cpp \
 	src/Engine/Sound/SoundEngine.cpp \
 	src/Engine/TextureAtlas.cpp \

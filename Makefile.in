@@ -273,6 +273,9 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/Engine/Sound/BASS/neosu-BassSound.$(OBJEXT) \
 	src/Engine/Sound/BASS/neosu-BassSoundEngine.$(OBJEXT) \
 	src/Engine/Sound/neosu-PlaybackInterpolator.$(OBJEXT) \
+	src/Engine/Sound/SoLoud/neosu-SoLoudFX.$(OBJEXT) \
+	src/Engine/Sound/SoLoud/neosu-SoLoudSound.$(OBJEXT) \
+	src/Engine/Sound/SoLoud/neosu-SoLoudSoundEngine.$(OBJEXT) \
 	src/Engine/Sound/neosu-Sound.$(OBJEXT) \
 	src/Engine/Sound/neosu-SoundEngine.$(OBJEXT) \
 	src/Engine/neosu-TextureAtlas.$(OBJEXT) \
@@ -459,6 +462,9 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassManager.Po \
 	src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassSound.Po \
 	src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassSoundEngine.Po \
+	src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudFX.Po \
+	src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudSound.Po \
+	src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudSoundEngine.Po \
 	src/GUI/$(DEPDIR)/neosu-CBaseUIBoxShadow.Po \
 	src/GUI/$(DEPDIR)/neosu-CBaseUIButton.Po \
 	src/GUI/$(DEPDIR)/neosu-CBaseUICheckbox.Po \
@@ -948,6 +954,9 @@ neosu_SOURCES = \
 	src/Engine/Sound/BASS/BassSound.cpp \
 	src/Engine/Sound/BASS/BassSoundEngine.cpp \
 	src/Engine/Sound/PlaybackInterpolator.cpp \
+	src/Engine/Sound/SoLoud/SoLoudFX.cpp \
+	src/Engine/Sound/SoLoud/SoLoudSound.cpp \
+	src/Engine/Sound/SoLoud/SoLoudSoundEngine.cpp \
 	src/Engine/Sound/Sound.cpp \
 	src/Engine/Sound/SoundEngine.cpp \
 	src/Engine/TextureAtlas.cpp \
@@ -1632,6 +1641,21 @@ src/Engine/Sound/$(DEPDIR)/$(am__dirstamp):
 src/Engine/Sound/neosu-PlaybackInterpolator.$(OBJEXT):  \
 	src/Engine/Sound/$(am__dirstamp) \
 	src/Engine/Sound/$(DEPDIR)/$(am__dirstamp)
+src/Engine/Sound/SoLoud/$(am__dirstamp):
+	@$(MKDIR_P) src/Engine/Sound/SoLoud
+	@: >>src/Engine/Sound/SoLoud/$(am__dirstamp)
+src/Engine/Sound/SoLoud/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) src/Engine/Sound/SoLoud/$(DEPDIR)
+	@: >>src/Engine/Sound/SoLoud/$(DEPDIR)/$(am__dirstamp)
+src/Engine/Sound/SoLoud/neosu-SoLoudFX.$(OBJEXT):  \
+	src/Engine/Sound/SoLoud/$(am__dirstamp) \
+	src/Engine/Sound/SoLoud/$(DEPDIR)/$(am__dirstamp)
+src/Engine/Sound/SoLoud/neosu-SoLoudSound.$(OBJEXT):  \
+	src/Engine/Sound/SoLoud/$(am__dirstamp) \
+	src/Engine/Sound/SoLoud/$(DEPDIR)/$(am__dirstamp)
+src/Engine/Sound/SoLoud/neosu-SoLoudSoundEngine.$(OBJEXT):  \
+	src/Engine/Sound/SoLoud/$(am__dirstamp) \
+	src/Engine/Sound/SoLoud/$(DEPDIR)/$(am__dirstamp)
 src/Engine/Sound/neosu-Sound.$(OBJEXT):  \
 	src/Engine/Sound/$(am__dirstamp) \
 	src/Engine/Sound/$(DEPDIR)/$(am__dirstamp)
@@ -1787,6 +1811,7 @@ mostlyclean-compile:
 	-rm -f src/Engine/Resources/*.$(OBJEXT)
 	-rm -f src/Engine/Sound/*.$(OBJEXT)
 	-rm -f src/Engine/Sound/BASS/*.$(OBJEXT)
+	-rm -f src/Engine/Sound/SoLoud/*.$(OBJEXT)
 	-rm -f src/GUI/*.$(OBJEXT)
 	-rm -f src/GUI/Windows/*.$(OBJEXT)
 	-rm -f src/GUI/Windows/VinylScratcher/*.$(OBJEXT)
@@ -1928,6 +1953,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassManager.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassSound.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassSoundEngine.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudFX.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudSound.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudSoundEngine.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI/$(DEPDIR)/neosu-CBaseUIBoxShadow.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI/$(DEPDIR)/neosu-CBaseUIButton.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI/$(DEPDIR)/neosu-CBaseUICheckbox.Po@am__quote@ # am--include-marker
@@ -3749,6 +3777,48 @@ src/Engine/Sound/neosu-PlaybackInterpolator.obj: src/Engine/Sound/PlaybackInterp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Sound/neosu-PlaybackInterpolator.obj `if test -f 'src/Engine/Sound/PlaybackInterpolator.cpp'; then $(CYGPATH_W) 'src/Engine/Sound/PlaybackInterpolator.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Sound/PlaybackInterpolator.cpp'; fi`
 
+src/Engine/Sound/SoLoud/neosu-SoLoudFX.o: src/Engine/Sound/SoLoud/SoLoudFX.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Sound/SoLoud/neosu-SoLoudFX.o -MD -MP -MF src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudFX.Tpo -c -o src/Engine/Sound/SoLoud/neosu-SoLoudFX.o `test -f 'src/Engine/Sound/SoLoud/SoLoudFX.cpp' || echo '$(srcdir)/'`src/Engine/Sound/SoLoud/SoLoudFX.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudFX.Tpo src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudFX.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Sound/SoLoud/SoLoudFX.cpp' object='src/Engine/Sound/SoLoud/neosu-SoLoudFX.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Sound/SoLoud/neosu-SoLoudFX.o `test -f 'src/Engine/Sound/SoLoud/SoLoudFX.cpp' || echo '$(srcdir)/'`src/Engine/Sound/SoLoud/SoLoudFX.cpp
+
+src/Engine/Sound/SoLoud/neosu-SoLoudFX.obj: src/Engine/Sound/SoLoud/SoLoudFX.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Sound/SoLoud/neosu-SoLoudFX.obj -MD -MP -MF src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudFX.Tpo -c -o src/Engine/Sound/SoLoud/neosu-SoLoudFX.obj `if test -f 'src/Engine/Sound/SoLoud/SoLoudFX.cpp'; then $(CYGPATH_W) 'src/Engine/Sound/SoLoud/SoLoudFX.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Sound/SoLoud/SoLoudFX.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudFX.Tpo src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudFX.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Sound/SoLoud/SoLoudFX.cpp' object='src/Engine/Sound/SoLoud/neosu-SoLoudFX.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Sound/SoLoud/neosu-SoLoudFX.obj `if test -f 'src/Engine/Sound/SoLoud/SoLoudFX.cpp'; then $(CYGPATH_W) 'src/Engine/Sound/SoLoud/SoLoudFX.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Sound/SoLoud/SoLoudFX.cpp'; fi`
+
+src/Engine/Sound/SoLoud/neosu-SoLoudSound.o: src/Engine/Sound/SoLoud/SoLoudSound.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Sound/SoLoud/neosu-SoLoudSound.o -MD -MP -MF src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudSound.Tpo -c -o src/Engine/Sound/SoLoud/neosu-SoLoudSound.o `test -f 'src/Engine/Sound/SoLoud/SoLoudSound.cpp' || echo '$(srcdir)/'`src/Engine/Sound/SoLoud/SoLoudSound.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudSound.Tpo src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudSound.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Sound/SoLoud/SoLoudSound.cpp' object='src/Engine/Sound/SoLoud/neosu-SoLoudSound.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Sound/SoLoud/neosu-SoLoudSound.o `test -f 'src/Engine/Sound/SoLoud/SoLoudSound.cpp' || echo '$(srcdir)/'`src/Engine/Sound/SoLoud/SoLoudSound.cpp
+
+src/Engine/Sound/SoLoud/neosu-SoLoudSound.obj: src/Engine/Sound/SoLoud/SoLoudSound.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Sound/SoLoud/neosu-SoLoudSound.obj -MD -MP -MF src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudSound.Tpo -c -o src/Engine/Sound/SoLoud/neosu-SoLoudSound.obj `if test -f 'src/Engine/Sound/SoLoud/SoLoudSound.cpp'; then $(CYGPATH_W) 'src/Engine/Sound/SoLoud/SoLoudSound.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Sound/SoLoud/SoLoudSound.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudSound.Tpo src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudSound.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Sound/SoLoud/SoLoudSound.cpp' object='src/Engine/Sound/SoLoud/neosu-SoLoudSound.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Sound/SoLoud/neosu-SoLoudSound.obj `if test -f 'src/Engine/Sound/SoLoud/SoLoudSound.cpp'; then $(CYGPATH_W) 'src/Engine/Sound/SoLoud/SoLoudSound.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Sound/SoLoud/SoLoudSound.cpp'; fi`
+
+src/Engine/Sound/SoLoud/neosu-SoLoudSoundEngine.o: src/Engine/Sound/SoLoud/SoLoudSoundEngine.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Sound/SoLoud/neosu-SoLoudSoundEngine.o -MD -MP -MF src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudSoundEngine.Tpo -c -o src/Engine/Sound/SoLoud/neosu-SoLoudSoundEngine.o `test -f 'src/Engine/Sound/SoLoud/SoLoudSoundEngine.cpp' || echo '$(srcdir)/'`src/Engine/Sound/SoLoud/SoLoudSoundEngine.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudSoundEngine.Tpo src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudSoundEngine.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Sound/SoLoud/SoLoudSoundEngine.cpp' object='src/Engine/Sound/SoLoud/neosu-SoLoudSoundEngine.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Sound/SoLoud/neosu-SoLoudSoundEngine.o `test -f 'src/Engine/Sound/SoLoud/SoLoudSoundEngine.cpp' || echo '$(srcdir)/'`src/Engine/Sound/SoLoud/SoLoudSoundEngine.cpp
+
+src/Engine/Sound/SoLoud/neosu-SoLoudSoundEngine.obj: src/Engine/Sound/SoLoud/SoLoudSoundEngine.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Sound/SoLoud/neosu-SoLoudSoundEngine.obj -MD -MP -MF src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudSoundEngine.Tpo -c -o src/Engine/Sound/SoLoud/neosu-SoLoudSoundEngine.obj `if test -f 'src/Engine/Sound/SoLoud/SoLoudSoundEngine.cpp'; then $(CYGPATH_W) 'src/Engine/Sound/SoLoud/SoLoudSoundEngine.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Sound/SoLoud/SoLoudSoundEngine.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudSoundEngine.Tpo src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudSoundEngine.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Sound/SoLoud/SoLoudSoundEngine.cpp' object='src/Engine/Sound/SoLoud/neosu-SoLoudSoundEngine.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Sound/SoLoud/neosu-SoLoudSoundEngine.obj `if test -f 'src/Engine/Sound/SoLoud/SoLoudSoundEngine.cpp'; then $(CYGPATH_W) 'src/Engine/Sound/SoLoud/SoLoudSoundEngine.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Sound/SoLoud/SoLoudSoundEngine.cpp'; fi`
+
 src/Engine/Sound/neosu-Sound.o: src/Engine/Sound/Sound.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Sound/neosu-Sound.o -MD -MP -MF src/Engine/Sound/$(DEPDIR)/neosu-Sound.Tpo -c -o src/Engine/Sound/neosu-Sound.o `test -f 'src/Engine/Sound/Sound.cpp' || echo '$(srcdir)/'`src/Engine/Sound/Sound.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Sound/$(DEPDIR)/neosu-Sound.Tpo src/Engine/Sound/$(DEPDIR)/neosu-Sound.Po
@@ -4583,6 +4653,8 @@ distclean-generic:
 	-$(am__rm_f) src/Engine/Sound/$(am__dirstamp)
 	-$(am__rm_f) src/Engine/Sound/BASS/$(DEPDIR)/$(am__dirstamp)
 	-$(am__rm_f) src/Engine/Sound/BASS/$(am__dirstamp)
+	-$(am__rm_f) src/Engine/Sound/SoLoud/$(DEPDIR)/$(am__dirstamp)
+	-$(am__rm_f) src/Engine/Sound/SoLoud/$(am__dirstamp)
 	-$(am__rm_f) src/GUI/$(DEPDIR)/$(am__dirstamp)
 	-$(am__rm_f) src/GUI/$(am__dirstamp)
 	-$(am__rm_f) src/GUI/Windows/$(DEPDIR)/$(am__dirstamp)
@@ -4739,6 +4811,9 @@ distclean: distclean-am
 	-rm -f src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassManager.Po
 	-rm -f src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassSound.Po
 	-rm -f src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassSoundEngine.Po
+	-rm -f src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudFX.Po
+	-rm -f src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudSound.Po
+	-rm -f src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudSoundEngine.Po
 	-rm -f src/GUI/$(DEPDIR)/neosu-CBaseUIBoxShadow.Po
 	-rm -f src/GUI/$(DEPDIR)/neosu-CBaseUIButton.Po
 	-rm -f src/GUI/$(DEPDIR)/neosu-CBaseUICheckbox.Po
@@ -4951,6 +5026,9 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassManager.Po
 	-rm -f src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassSound.Po
 	-rm -f src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassSoundEngine.Po
+	-rm -f src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudFX.Po
+	-rm -f src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudSound.Po
+	-rm -f src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudSoundEngine.Po
 	-rm -f src/GUI/$(DEPDIR)/neosu-CBaseUIBoxShadow.Po
 	-rm -f src/GUI/$(DEPDIR)/neosu-CBaseUIButton.Po
 	-rm -f src/GUI/$(DEPDIR)/neosu-CBaseUICheckbox.Po

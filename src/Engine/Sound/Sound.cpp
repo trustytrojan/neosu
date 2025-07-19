@@ -4,7 +4,7 @@
 #include "ConVar.h"
 
 #include "BassSound.h"
-// #include "SoLoudSound.h"
+#include "SoLoudSound.h"
 
 #include "File.h"
 #include "ResourceManager.h"

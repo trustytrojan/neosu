@@ -2266,16 +2266,16 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
     if(hasAnyValidLiteralSearchString) {
         static constexpr auto findSubstringInDiff = [](const DatabaseBeatmap *diff,
                                                        const std::string &searchString) -> bool {
-            if(!diff->getTitle().empty() && SString::find_ncase(diff->getTitle(), searchString)) return true;
-            if(!diff->getArtist().empty() && SString::find_ncase(diff->getArtist(), searchString)) return true;
-            if(!diff->getCreator().empty() && SString::find_ncase(diff->getCreator(), searchString)) return true;
-            if(!diff->getDifficultyName().empty() && SString::find_ncase(diff->getDifficultyName(), searchString))
+            if(!diff->getTitle().empty() && SString::contains_ncase(diff->getTitle(), searchString)) return true;
+            if(!diff->getArtist().empty() && SString::contains_ncase(diff->getArtist(), searchString)) return true;
+            if(!diff->getCreator().empty() && SString::contains_ncase(diff->getCreator(), searchString)) return true;
+            if(!diff->getDifficultyName().empty() && SString::contains_ncase(diff->getDifficultyName(), searchString))
                 return true;
-            if(!diff->getSource().empty() && SString::find_ncase(diff->getSource(), searchString)) return true;
-            if(!diff->getTags().empty() && SString::find_ncase(diff->getTags(), searchString)) return true;
+            if(!diff->getSource().empty() && SString::contains_ncase(diff->getSource(), searchString)) return true;
+            if(!diff->getTags().empty() && SString::contains_ncase(diff->getTags(), searchString)) return true;
 
-            if(diff->getID() > 0 && SString::find_ncase(std::to_string(diff->getID()), searchString)) return true;
-            if(diff->getSetID() > 0 && SString::find_ncase(std::to_string(diff->getSetID()), searchString)) return true;
+            if(diff->getID() > 0 && SString::contains_ncase(std::to_string(diff->getID()), searchString)) return true;
+            if(diff->getSetID() > 0 && SString::contains_ncase(std::to_string(diff->getSetID()), searchString)) return true;
 
             return false;
         };

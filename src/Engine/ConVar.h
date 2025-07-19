@@ -40,8 +40,15 @@ enum FCVAR_FLAGS : uint8_t {
     // this cvar affects gameplay
     FCVAR_GAMEPLAY = (1 << 4),
 
-    // don't load this cvar from configs or save them to configs
-    FCVAR_INTERNAL = (1 << 5)
+    // don't save this cvar to configs
+    FCVAR_NOSAVE = (1 << 5),
+    // don't load this cvar from configs
+    FCVAR_NOLOAD = (1 << 6),
+    // don't allow this convar to be manually set from console
+    FCVAR_NOEXEC = (1 << 7),
+
+    // don't save, load, or allow this convar to be modified (basically, make it completely invisible outside of engine code)
+    FCVAR_INTERNAL = FCVAR_NOEXEC | FCVAR_NOSAVE | FCVAR_NOLOAD
 };
 
 class ConVar {
@@ -254,7 +261,7 @@ class ConVar {
                !std::holds_alternative<std::monostate>(this->changeCallback);
     }
 
-    [[nodiscard]] inline bool isFlagSet(uint8_t flag) const { return (bool)(this->iFlags & flag); }
+    [[nodiscard]] inline bool isFlagSet(uint8_t flag) const { return (bool)((this->iFlags & flag) == flag); }
 
    private:
     [[nodiscard]] bool isUnlocked() const;

@@ -2,6 +2,8 @@
 
 #include "WinEnvironment.h"
 
+#include "WinDebloatDefs.h"
+
 #include <winuser.h>
 #include <wingdi.h>
 #include <commdlg.h>

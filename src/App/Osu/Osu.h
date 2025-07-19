@@ -209,6 +209,8 @@ class Osu : public App, public MouseListener {
 
     void onUserCardChange(const UString& new_username);
 
+    void setupSoloud();
+
     // interfaces
     VolumeOverlay *volumeOverlay = NULL;
     MainMenu *mainMenu = NULL;

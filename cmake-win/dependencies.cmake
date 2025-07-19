@@ -43,6 +43,18 @@ set(LIBARCHIVE_VERSION "3.8.1")
 set(LIBARCHIVE_URL "https://github.com/libarchive/libarchive/releases/download/v${LIBARCHIVE_VERSION}/libarchive-${LIBARCHIVE_VERSION}.tar.gz")
 set(LIBARCHIVE_HASH "SHA512=0eed931378e998590ec97b191322e5c48019cce447d9dbbbcbadd3008e26fdf000a11c45cbeefa0567bd101422afc0da10248220afa280dea1a9b4f91d8ee653")
 
+set(MPG123_VERSION "ec6ead5fc1102d64efbb6a04865f59454198c3fc")
+set(MPG123_URL "https://github.com/madebr/mpg123/archive/${MPG123_VERSION}.tar.gz")
+set(MPG123_HASH "SHA512=1ab5f881aa3653b01deb4f2a0f993d70bd8239a8e74c4caca7cc0ed72420816ce6b13f5b88a0ae5a35edf69ae4402f8583623daa6bffe271577e12bf7ea66197")
+
+set(SOUNDTOUCH_VERSION "2.4.0")
+set(SOUNDTOUCH_URL "https://codeberg.org/soundtouch/soundtouch/archive/${SOUNDTOUCH_VERSION}.tar.gz")
+set(SOUNDTOUCH_HASH "SHA512=8bd199c6363104ba6c9af1abbd3c4da3567ccda5fe3a68298917817fc9312ecb0914609afba1abd864307b0a596becf450bc7073eeec17b1de5a7c5086fbc45e")
+
+set(SOLOUD_VERSION "f71505cbc5eeb0f3fd5a160e327d4e13eee15bf5")
+set(SOLOUD_URL "https://github.com/whrvt/neoloud/archive/${SOLOUD_VERSION}.tar.gz")
+set(SOLOUD_HASH "SHA512=c52fc32dd6d5a79689d517be04d804627716e0cec2a049cdb97140b0b426352a822253222a995579477ea906ffcab85df584d93fd539847539d78c4d0fa45de0")
+
 set(CURL_VERSION "8.14.1")
 string(REPLACE "." "_" _curl_ver_temp "${CURL_VERSION}")
 set(CURL_URL "https://github.com/curl/curl/releases/download/curl-${_curl_ver_temp}/curl-${CURL_VERSION}.tar.gz")

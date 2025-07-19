@@ -181,11 +181,13 @@ static constexpr auto OPTIMAL_UNROLL = 6;
 static constexpr auto OPTIMAL_UNROLL = 4;
 #endif
 
+#define MC_DO_PRAGMA(x) _Pragma(#x)
+#define MC_MESSAGE(msg) MC_DO_PRAGMA(message (msg))
+
 #if defined(__GNUC__) || defined(__clang__)
 #define likely(x) __builtin_expect(bool(x), 1)
 #define unlikely(x) __builtin_expect(bool(x), 0)
 #define forceinline __attribute__((always_inline)) inline
-#define MC_DO_PRAGMA(x) _Pragma(#x)
 
 #ifdef __clang__
 #define MC_VECTORIZE_LOOP _Pragma("clang loop vectorize(enable)")
@@ -214,7 +216,6 @@ static constexpr auto OPTIMAL_UNROLL = 4;
 #define likely(x) (x)
 #define unlikely(x) (x)
 #define forceinline __forceinline
-#define MC_DO_PRAGMA(x)
 #define MC_VECTORIZE_LOOP
 #define MC_UNR_cnt(num)
 #define MC_VEC_UNR_cnt(num)

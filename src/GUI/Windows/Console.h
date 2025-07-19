@@ -9,7 +9,7 @@ class McFont;
 
 class Console : public CBaseUIWindow {
    public:
-    static void processCommand(std::string command);
+    static void processCommand(std::string command, bool fromFile = false);
     static void execConfigFile(std::string filename);
 
    public:
