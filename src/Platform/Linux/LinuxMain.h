@@ -3,12 +3,14 @@
 #ifdef __linux__
 
 #include "LinuxEnvironment.h"
+#include <unordered_set>
 
 class Engine;
 
 class LinuxMain {
    public:
-    LinuxMain(int argc, char *argv[], const std::vector<UString>& argCmdline, const std::unordered_map<UString, std::optional<UString>> &argMap);
+    LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdline,
+              const std::unordered_map<UString, std::optional<UString>> &argMap);
 
     static int ret;
 
@@ -32,7 +34,11 @@ class LinuxMain {
     XIC ic{0};
     int xi2opcode{0};
 
+    // keycode tracking for stuck key prevention
+    std::unordered_set<unsigned int> pressedKeycodes;
+
     void WndProc();
+    KEYCODE normalizeKeysym(KEYCODE keysym);
 };
 
 using Main = LinuxMain;

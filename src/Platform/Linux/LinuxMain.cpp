@@ -14,6 +14,8 @@
 #include "Timing.h"
 #include "FPSLimiter.h"
 
+#include "KeyboardKeys.h"
+
 #define XLIB_ILLEGAL_ACCESS
 #include <X11/X.h>
 #include <X11/Xatom.h>
@@ -40,8 +42,8 @@
 //	Main entry point  //
 //********************//
 
-LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> & argCmdline,
-                     const std::unordered_map<UString, std::optional<UString>> & argMap) {
+LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdline,
+                     const std::unordered_map<UString, std::optional<UString>> &argMap) {
     this->dpy = XOpenDisplay(nullptr);
     if(this->dpy == nullptr) {
         printf("FATAL ERROR: XOpenDisplay() can't connect to X server!\n\n");
@@ -244,6 +246,18 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> & argCmd
 //	Message loop  //
 //****************//
 
+KEYCODE LinuxMain::normalizeKeysym(KEYCODE keysym) {
+    switch(keysym) {
+        case XK_ISO_Left_Tab:  // shift+tab variant
+            return KEY_TAB;
+        case XK_KP_Enter:  // numpad enter
+            return KEY_ENTER;
+        // need to add more on a case-by-case basis... annoying
+        default:
+            return keysym;
+    }
+}
+
 void LinuxMain::WndProc() {
     switch(this->xev.type) {
         case GenericEvent:
@@ -264,6 +278,8 @@ void LinuxMain::WndProc() {
 
         case FocusIn:
             this->bHasFocus = true;
+            // clear keys on focus in/out to prevent stuck keys
+            this->pressedKeycodes.clear();
             if(baseEnv != NULL) {
                 baseEnv->invalidateMousePos();  // force refresh on focus
             }
@@ -274,6 +290,7 @@ void LinuxMain::WndProc() {
 
         case FocusOut:
             this->bHasFocus = false;
+            this->pressedKeycodes.clear();
             if(baseEnv != NULL) {
                 baseEnv->invalidateMousePos();  // force refresh on unfocus
             }
@@ -290,33 +307,38 @@ void LinuxMain::WndProc() {
         // keyboard (TODO: move to xinput2)
         case KeyPress: {
             XKeyEvent *ke = &this->xev.xkey;
-            unsigned long key = XLookupKeysym(
-                ke, /*(ke->state&ShiftMask) ? 1 : 0*/ 1);  // WARNING: these two must be the same (see below)
-            // printf("X: keyPress = %i\n", key);
+            // always use shifted keysym for consistency, needs to be same as in KeyRelease
+            unsigned long keysym = XLookupKeysym(ke, 1);
 
             if(engine != NULL) {
-                engine->onKeyboardKeyDown(key);
+                // check if this physical key is already pressed (prevents stuck keys)
+                if(this->pressedKeycodes.find(ke->keycode) == this->pressedKeycodes.end()) {
+                    this->pressedKeycodes.insert(ke->keycode);
+
+                    // normalize shifted/unshifted keysym
+                    KEYCODE normalizedKey = normalizeKeysym(keysym);
+                    engine->onKeyboardKeyDown(normalizedKey);
+                }
             }
 
+            // handle character input separately (this should still use modified lookup)
             constexpr int buffSize = 20;
             std::array<char, buffSize> buf{};
             Status status = 0;
-            KeySym keysym = 0;
-            int length = Xutf8LookupString(this->ic, (XKeyPressedEvent *)&this->xev.xkey, buf.data(), buffSize, &keysym,
-                                           &status);
+            KeySym textKeysym = 0;
+            int length = Xutf8LookupString(this->ic, (XKeyPressedEvent *)&this->xev.xkey, buf.data(), buffSize,
+                                           &textKeysym, &status);
 
             if(length > 0) {
                 buf[buffSize - 1] = 0;
-                // printf("buff = %s\n", buf);
                 if(engine != NULL) engine->onKeyboardChar(buf[0]);
             }
         } break;
 
         case KeyRelease: {
             XKeyEvent *ke = &this->xev.xkey;
-            unsigned long key = XLookupKeysym(
-                ke, /*(ke->state & ShiftMask) ? 1 : 0*/ 1);  // WARNING: these two must be the same (see above)
-            // printf("X: keyRelease = %i\n", key);
+            // always use shifted keysym for consistency, needs to be same as in KeyPress
+            unsigned long keysym = XLookupKeysym(ke, 1);
 
             if(engine != NULL) {
                 // LINUX: fuck X11 key repeats with release events inbetween
@@ -328,7 +350,14 @@ void LinuxMain::WndProc() {
                         break;  // throw the event away
                 }
 
-                engine->onKeyboardKeyUp(key);
+                // only process if this physical key was actually pressed
+                if(this->pressedKeycodes.find(ke->keycode) != this->pressedKeycodes.end()) {
+                    this->pressedKeycodes.erase(ke->keycode);
+
+                    // normalize shifted/unshifted keysym
+                    KEYCODE normalizedKey = normalizeKeysym(keysym);
+                    engine->onKeyboardKeyUp(normalizedKey);
+                }
             }
         } break;
 
