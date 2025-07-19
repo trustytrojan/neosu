@@ -1,54 +1,40 @@
 #include "ByteBufferedFile.h"
 
 #include "Engine.h"
+#include <system_error>
 
-ByteBufferedFile::Reader::Reader(const char *path) {
-    this->file = fopen(path, "rb");
-    if(this->file == NULL) {
-        this->set_error("Failed to open file for reading: " + std::string(strerror(errno)));
-        debugLogF("Failed to open '{:s}': {:s}\n", path, strerror(errno));
+ByteBufferedFile::Reader::Reader(const std::filesystem::path& path) : buffer(READ_BUFFER_SIZE) {
+    this->file.open(path, std::ios::binary);
+    if(!this->file.is_open()) {
+        this->set_error("Failed to open file for reading: " + std::generic_category().message(errno));
+        debugLogF("Failed to open '{:s}': {:s}\n", path.string().c_str(),
+                  std::generic_category().message(errno).c_str());
         return;
     }
 
-    if(fseek(this->file, 0, SEEK_END)) {
+    this->file.seekg(0, std::ios::end);
+    if(this->file.fail()) {
         goto seek_error;
     }
 
-    this->total_size = ftell(this->file);
+    this->total_size = this->file.tellg();
 
-    if(fseek(this->file, 0, SEEK_SET)) {
+    this->file.seekg(0, std::ios::beg);
+    if(this->file.fail()) {
         goto seek_error;
     }
 
-    this->buffer = (u8 *)malloc(READ_BUFFER_SIZE);
-
-    if(this->buffer == NULL) {
-        this->set_error("Failed to allocate read buffer");
-        fclose(this->file);
-        this->file = NULL;
-        return;
-    }
-
-    return; // success
+    return;  // success
 
 seek_error:
-    this->set_error("Failed to initialize file reader: " + std::string(strerror(errno)));
-    debugLogF("Failed to initialize file reader '{:s}': {:s}\n", path, strerror(errno));
-    fclose(this->file);
-    this->file = NULL;
+    this->set_error("Failed to initialize file reader: " + std::generic_category().message(errno));
+    debugLogF("Failed to initialize file reader '{:s}': {:s}\n", path.string().c_str(),
+              std::generic_category().message(errno).c_str());
+    this->file.close();
     return;
 }
 
-ByteBufferedFile::Reader::~Reader() {
-    if(this->file != NULL) {
-        fclose(this->file);
-    }
-    if(this->buffer != NULL) {
-        free(this->buffer);
-    }
-}
-
-void ByteBufferedFile::Reader::set_error(const std::string &error_msg) {
+void ByteBufferedFile::Reader::set_error(const std::string& error_msg) {
     if(!this->error_flag) {  // only set first error
         this->error_flag = true;
         this->last_error = error_msg;
@@ -74,7 +60,7 @@ MD5Hash ByteBufferedFile::Reader::read_hash() {
         len = 32;
     }
 
-    if(this->read_bytes((u8 *)hash.hash.data(), len) != len) {
+    if(this->read_bytes(reinterpret_cast<u8*>(hash.hash.data()), len) != len) {
         // just continue, don't set error flag
         debugLogF("WARNING: failed to read {} bytes to obtain hash.\n", len);
         extra = len;
@@ -93,15 +79,13 @@ std::string ByteBufferedFile::Reader::read_string() {
     if(empty_check == 0) return {};
 
     u32 len = this->read_uleb128();
-    u8 *str = new u8[len + 1];
-    if(this->read_bytes(str, len) != len) {
+    auto str = std::make_unique<u8[]>(len + 1);
+    if(this->read_bytes(str.get(), len) != len) {
         this->set_error("Failed to read " + std::to_string(len) + " bytes for string");
-        delete[] str;
         return {};
     }
 
-    std::string str_out((const char *)str, len);
-    delete[] str;
+    std::string str_out(reinterpret_cast<const char*>(str.get()), len);
 
     return str_out;
 }
@@ -136,44 +120,38 @@ void ByteBufferedFile::Reader::skip_string() {
     this->skip_bytes(len);
 }
 
-ByteBufferedFile::Writer::Writer(const char *path) {
+ByteBufferedFile::Writer::Writer(const std::filesystem::path& path) : buffer(WRITE_BUFFER_SIZE) {
     this->file_path = path;
     this->tmp_file_path = this->file_path;
-    this->tmp_file_path.append(".tmp");
+    this->tmp_file_path += ".tmp";
 
-    this->file = fopen(this->tmp_file_path.c_str(), "wb");
-    if(this->file == NULL) {
-        this->set_error("Failed to open file for writing: " + std::string(strerror(errno)));
-        debugLogF("Failed to open '{:s}': {:s}\n", path, strerror(errno));
-        return;
-    }
-
-    this->buffer = (u8 *)malloc(WRITE_BUFFER_SIZE);
-    if(this->buffer == NULL) {
-        this->set_error("Failed to allocate write buffer");
-        fclose(this->file);
-        this->file = NULL;
+    this->file.open(this->tmp_file_path, std::ios::binary);
+    if(!this->file.is_open()) {
+        this->set_error("Failed to open file for writing: " + std::generic_category().message(errno));
+        debugLogF("Failed to open '{:s}': {:s}\n", path.string().c_str(),
+                  std::generic_category().message(errno).c_str());
         return;
     }
 }
 
 ByteBufferedFile::Writer::~Writer() {
-    if(this->file != NULL) {
+    if(this->file.is_open()) {
         this->flush();
-        fclose(this->file);
+        this->file.close();
 
         if(!this->error_flag) {
-            env->deleteFile(this->file_path);  // Windows (the Microsoft docs are LYING)
-            env->renameFile(this->tmp_file_path, this->file_path);
+            std::error_code ec;
+            std::filesystem::remove(this->file_path, ec);  // Windows (the Microsoft docs are LYING)
+            std::filesystem::rename(this->tmp_file_path, this->file_path, ec);
+            if(ec) {
+                // can't set error in destructor, but log it
+                debugLogF("Failed to rename temporary file: {:s}\n", ec.message().c_str());
+            }
         }
-    }
-
-    if(this->buffer != NULL) {
-        free(this->buffer);
     }
 }
 
-void ByteBufferedFile::Writer::set_error(const std::string &error_msg) {
+void ByteBufferedFile::Writer::set_error(const std::string& error_msg) {
     if(!this->error_flag) {  // only set first error
         this->error_flag = true;
         this->last_error = error_msg;
@@ -187,7 +165,7 @@ void ByteBufferedFile::Writer::write_hash(MD5Hash hash) {
 
     this->write<u8>(0x0B);
     this->write<u8>(0x20);
-    this->write_bytes((u8 *)hash.hash.data(), 32);
+    this->write_bytes(reinterpret_cast<u8*>(hash.hash.data()), 32);
 }
 
 void ByteBufferedFile::Writer::write_string(std::string str) {
@@ -206,23 +184,24 @@ void ByteBufferedFile::Writer::write_string(std::string str) {
 
     u32 len = str.length();
     this->write_uleb128(len);
-    this->write_bytes((u8 *)str.c_str(), len);
+    this->write_bytes(reinterpret_cast<u8*>(const_cast<char*>(str.c_str())), len);
 }
 
 void ByteBufferedFile::Writer::flush() {
-    if(this->error_flag || this->file == NULL) {
+    if(this->error_flag || !this->file.is_open()) {
         return;
     }
 
-    if(fwrite(this->buffer, 1, this->pos, this->file) != this->pos) {
-        this->set_error("Failed to write to file: " + std::string(strerror(errno)));
+    this->file.write(reinterpret_cast<const char*>(this->buffer.data()), this->pos);
+    if(this->file.fail()) {
+        this->set_error("Failed to write to file: " + std::generic_category().message(errno));
         return;
     }
     this->pos = 0;
 }
 
-void ByteBufferedFile::Writer::write_bytes(u8 *bytes, size_t n) {
-    if(this->error_flag || this->file == NULL) {
+void ByteBufferedFile::Writer::write_bytes(u8* bytes, size_t n) {
+    if(this->error_flag || !this->file.is_open()) {
         return;
     }
 
@@ -239,7 +218,7 @@ void ByteBufferedFile::Writer::write_bytes(u8 *bytes, size_t n) {
         return;
     }
 
-    memcpy(this->buffer + this->pos, bytes, n);
+    memcpy(this->buffer.data() + this->pos, bytes, n);
     this->pos += n;
 }
 
@@ -264,7 +243,7 @@ void ByteBufferedFile::Writer::write_uleb128(u32 num) {
     }
 }
 
-void ByteBufferedFile::copy(const char *from_path, const char *to_path) {
+void ByteBufferedFile::copy(const std::filesystem::path& from_path, const std::filesystem::path& to_path) {
     Reader from(from_path);
     Writer to(to_path);
 
@@ -278,20 +257,16 @@ void ByteBufferedFile::copy(const char *from_path, const char *to_path) {
         return;
     }
 
-    u8 *buf = (u8 *)malloc(READ_BUFFER_SIZE);
-    if(buf == NULL) {
-        debugLogF("Failed to allocate copy buffer\n");
-        return;
-    }
+    std::vector<u8> buf(READ_BUFFER_SIZE);
 
     u32 remaining = from.total_size;
     while(remaining > 0 && from.good() && to.good()) {
-        u32 len = std::min(remaining, (u32)READ_BUFFER_SIZE);
-        if(from.read_bytes(buf, len) != len) {
+        u32 len = std::min(remaining, static_cast<u32>(READ_BUFFER_SIZE));
+        if(from.read_bytes(buf.data(), len) != len) {
             debugLogF("Copy failed: could not read {} bytes, {} remaining\n", len, remaining);
             break;
         }
-        to.write_bytes(buf, len);
+        to.write_bytes(buf.data(), len);
         remaining -= len;
     }
 
@@ -301,6 +276,4 @@ void ByteBufferedFile::copy(const char *from_path, const char *to_path) {
     if(!to.good()) {
         debugLogF("Copy failed during write: {:s}\n", to.error().data());
     }
-
-    free(buf);
 }

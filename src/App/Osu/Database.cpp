@@ -605,7 +605,7 @@ void Database::loadDB() {
 
     std::string osuDbFilePath = cv::osu_folder.getString();
     osuDbFilePath.append(PREF_PATHSEP "osu!.db");
-    ByteBufferedFile::Reader db(osuDbFilePath.c_str());
+    ByteBufferedFile::Reader db(osuDbFilePath);
     ByteBufferedFile::Reader neosu_maps("neosu_maps.db");
 
     u32 db_size_sum = neosu_maps.total_size + db.total_size;
@@ -636,8 +636,8 @@ void Database::loadDB() {
         u32 version = neosu_maps.read<u32>();
         if(version < NEOSU_MAPS_DB_VERSION) {
             // Reading from older database version: backup just in case
-            auto backup_path = UString::format("neosu_maps.db.%d", version);
-            ByteBufferedFile::copy("neosu_maps.db", backup_path.toUtf8());
+            auto backup_path = fmt::format("neosu_maps.db.{}", version);
+            ByteBufferedFile::copy("neosu_maps.db", backup_path);
         }
 
         u32 nb_sets = neosu_maps.read<u32>();
@@ -1263,8 +1263,8 @@ void Database::loadScores() {
             return;
         } else if(db_version < NEOSU_SCORE_DB_VERSION) {
             // Reading from older database version: backup just in case
-            auto backup_path = UString::format("neosu_scores.db.%d", db_version);
-            ByteBufferedFile::copy("neosu_scores.db", backup_path.toUtf8());
+            auto backup_path = fmt::format("neosu_scores.db.{}", db_version);
+            ByteBufferedFile::copy("neosu_scores.db", backup_path);
         }
 
         u32 nb_beatmaps = db.read<u32>();
@@ -1713,7 +1713,7 @@ u32 Database::importPeppyScores() {
 
     std::string scoresPath = cv::osu_folder.getString();
     scoresPath.append("/scores.db");
-    ByteBufferedFile::Reader db(scoresPath.c_str());
+    ByteBufferedFile::Reader db(scoresPath);
 
     u32 db_version = db.read<u32>();
     u32 nb_beatmaps = db.read<u32>();

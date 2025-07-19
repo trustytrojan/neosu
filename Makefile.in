@@ -159,7 +159,6 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/App/Osu/neosu-BackgroundImageHandler.$(OBJEXT) \
 	src/App/Osu/neosu-Bancho.$(OBJEXT) \
 	src/App/Osu/neosu-BanchoAes.$(OBJEXT) \
-	src/App/Osu/neosu-BanchoFile.$(OBJEXT) \
 	src/App/Osu/neosu-BanchoLeaderboard.$(OBJEXT) \
 	src/App/Osu/neosu-BanchoNetworking.$(OBJEXT) \
 	src/App/Osu/neosu-BanchoProtocol.$(OBJEXT) \
@@ -240,6 +239,7 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/App/Osu/neosu-score.$(OBJEXT) \
 	src/Engine/neosu-AnimationHandler.$(OBJEXT) \
 	src/Engine/neosu-Archival.$(OBJEXT) \
+	src/Engine/neosu-ByteBufferedFile.$(OBJEXT) \
 	src/Engine/neosu-Camera.$(OBJEXT) \
 	src/Engine/neosu-ConVar.$(OBJEXT) \
 	src/Engine/neosu-DiscordInterface.$(OBJEXT) \
@@ -344,7 +344,6 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/App/Osu/$(DEPDIR)/neosu-BackgroundImageHandler.Po \
 	src/App/Osu/$(DEPDIR)/neosu-Bancho.Po \
 	src/App/Osu/$(DEPDIR)/neosu-BanchoAes.Po \
-	src/App/Osu/$(DEPDIR)/neosu-BanchoFile.Po \
 	src/App/Osu/$(DEPDIR)/neosu-BanchoLeaderboard.Po \
 	src/App/Osu/$(DEPDIR)/neosu-BanchoNetworking.Po \
 	src/App/Osu/$(DEPDIR)/neosu-BanchoProtocol.Po \
@@ -425,6 +424,7 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongDifficultyButton.Po \
 	src/Engine/$(DEPDIR)/neosu-AnimationHandler.Po \
 	src/Engine/$(DEPDIR)/neosu-Archival.Po \
+	src/Engine/$(DEPDIR)/neosu-ByteBufferedFile.Po \
 	src/Engine/$(DEPDIR)/neosu-Camera.Po \
 	src/Engine/$(DEPDIR)/neosu-ConVar.Po \
 	src/Engine/$(DEPDIR)/neosu-DiscordInterface.Po \
@@ -840,7 +840,6 @@ neosu_SOURCES = \
 	src/App/Osu/BackgroundImageHandler.cpp \
 	src/App/Osu/Bancho.cpp \
 	src/App/Osu/BanchoAes.cpp \
-	src/App/Osu/BanchoFile.cpp \
 	src/App/Osu/BanchoLeaderboard.cpp \
 	src/App/Osu/BanchoNetworking.cpp \
 	src/App/Osu/BanchoProtocol.cpp \
@@ -921,6 +920,7 @@ neosu_SOURCES = \
 	src/App/Osu/score.cpp \
 	src/Engine/AnimationHandler.cpp \
 	src/Engine/Archival.cpp \
+	src/Engine/ByteBufferedFile.cpp \
 	src/Engine/Camera.cpp \
 	src/Engine/ConVar.cpp \
 	src/Engine/DiscordInterface.cpp \
@@ -1305,8 +1305,6 @@ src/App/Osu/neosu-Bancho.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/neosu-BanchoAes.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
-src/App/Osu/neosu-BanchoFile.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
-	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/neosu-BanchoLeaderboard.$(OBJEXT):  \
 	src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
@@ -1517,6 +1515,9 @@ src/Engine/neosu-AnimationHandler.$(OBJEXT):  \
 	src/Engine/$(am__dirstamp) \
 	src/Engine/$(DEPDIR)/$(am__dirstamp)
 src/Engine/neosu-Archival.$(OBJEXT): src/Engine/$(am__dirstamp) \
+	src/Engine/$(DEPDIR)/$(am__dirstamp)
+src/Engine/neosu-ByteBufferedFile.$(OBJEXT):  \
+	src/Engine/$(am__dirstamp) \
 	src/Engine/$(DEPDIR)/$(am__dirstamp)
 src/Engine/neosu-Camera.$(OBJEXT): src/Engine/$(am__dirstamp) \
 	src/Engine/$(DEPDIR)/$(am__dirstamp)
@@ -1835,7 +1836,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-BackgroundImageHandler.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-Bancho.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-BanchoAes.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-BanchoFile.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-BanchoLeaderboard.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-BanchoNetworking.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-BanchoProtocol.Po@am__quote@ # am--include-marker
@@ -1916,6 +1916,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongDifficultyButton.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-AnimationHandler.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-Archival.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-ByteBufferedFile.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-Camera.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-ConVar.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-DiscordInterface.Po@am__quote@ # am--include-marker
@@ -2180,20 +2181,6 @@ src/App/Osu/neosu-BanchoAes.obj: src/App/Osu/BanchoAes.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/BanchoAes.cpp' object='src/App/Osu/neosu-BanchoAes.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-BanchoAes.obj `if test -f 'src/App/Osu/BanchoAes.cpp'; then $(CYGPATH_W) 'src/App/Osu/BanchoAes.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/BanchoAes.cpp'; fi`
-
-src/App/Osu/neosu-BanchoFile.o: src/App/Osu/BanchoFile.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-BanchoFile.o -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-BanchoFile.Tpo -c -o src/App/Osu/neosu-BanchoFile.o `test -f 'src/App/Osu/BanchoFile.cpp' || echo '$(srcdir)/'`src/App/Osu/BanchoFile.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/$(DEPDIR)/neosu-BanchoFile.Tpo src/App/Osu/$(DEPDIR)/neosu-BanchoFile.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/BanchoFile.cpp' object='src/App/Osu/neosu-BanchoFile.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-BanchoFile.o `test -f 'src/App/Osu/BanchoFile.cpp' || echo '$(srcdir)/'`src/App/Osu/BanchoFile.cpp
-
-src/App/Osu/neosu-BanchoFile.obj: src/App/Osu/BanchoFile.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-BanchoFile.obj -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-BanchoFile.Tpo -c -o src/App/Osu/neosu-BanchoFile.obj `if test -f 'src/App/Osu/BanchoFile.cpp'; then $(CYGPATH_W) 'src/App/Osu/BanchoFile.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/BanchoFile.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/$(DEPDIR)/neosu-BanchoFile.Tpo src/App/Osu/$(DEPDIR)/neosu-BanchoFile.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/BanchoFile.cpp' object='src/App/Osu/neosu-BanchoFile.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-BanchoFile.obj `if test -f 'src/App/Osu/BanchoFile.cpp'; then $(CYGPATH_W) 'src/App/Osu/BanchoFile.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/BanchoFile.cpp'; fi`
 
 src/App/Osu/neosu-BanchoLeaderboard.o: src/App/Osu/BanchoLeaderboard.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-BanchoLeaderboard.o -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-BanchoLeaderboard.Tpo -c -o src/App/Osu/neosu-BanchoLeaderboard.o `test -f 'src/App/Osu/BanchoLeaderboard.cpp' || echo '$(srcdir)/'`src/App/Osu/BanchoLeaderboard.cpp
@@ -3314,6 +3301,20 @@ src/Engine/neosu-Archival.obj: src/Engine/Archival.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Archival.cpp' object='src/Engine/neosu-Archival.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/neosu-Archival.obj `if test -f 'src/Engine/Archival.cpp'; then $(CYGPATH_W) 'src/Engine/Archival.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Archival.cpp'; fi`
+
+src/Engine/neosu-ByteBufferedFile.o: src/Engine/ByteBufferedFile.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/neosu-ByteBufferedFile.o -MD -MP -MF src/Engine/$(DEPDIR)/neosu-ByteBufferedFile.Tpo -c -o src/Engine/neosu-ByteBufferedFile.o `test -f 'src/Engine/ByteBufferedFile.cpp' || echo '$(srcdir)/'`src/Engine/ByteBufferedFile.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/$(DEPDIR)/neosu-ByteBufferedFile.Tpo src/Engine/$(DEPDIR)/neosu-ByteBufferedFile.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/ByteBufferedFile.cpp' object='src/Engine/neosu-ByteBufferedFile.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/neosu-ByteBufferedFile.o `test -f 'src/Engine/ByteBufferedFile.cpp' || echo '$(srcdir)/'`src/Engine/ByteBufferedFile.cpp
+
+src/Engine/neosu-ByteBufferedFile.obj: src/Engine/ByteBufferedFile.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/neosu-ByteBufferedFile.obj -MD -MP -MF src/Engine/$(DEPDIR)/neosu-ByteBufferedFile.Tpo -c -o src/Engine/neosu-ByteBufferedFile.obj `if test -f 'src/Engine/ByteBufferedFile.cpp'; then $(CYGPATH_W) 'src/Engine/ByteBufferedFile.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/ByteBufferedFile.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/$(DEPDIR)/neosu-ByteBufferedFile.Tpo src/Engine/$(DEPDIR)/neosu-ByteBufferedFile.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/ByteBufferedFile.cpp' object='src/Engine/neosu-ByteBufferedFile.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/neosu-ByteBufferedFile.obj `if test -f 'src/Engine/ByteBufferedFile.cpp'; then $(CYGPATH_W) 'src/Engine/ByteBufferedFile.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/ByteBufferedFile.cpp'; fi`
 
 src/Engine/neosu-Camera.o: src/Engine/Camera.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/neosu-Camera.o -MD -MP -MF src/Engine/$(DEPDIR)/neosu-Camera.Tpo -c -o src/Engine/neosu-Camera.o `test -f 'src/Engine/Camera.cpp' || echo '$(srcdir)/'`src/Engine/Camera.cpp
@@ -4693,7 +4694,6 @@ distclean: distclean-am
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-BackgroundImageHandler.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Bancho.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-BanchoAes.Po
-	-rm -f src/App/Osu/$(DEPDIR)/neosu-BanchoFile.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-BanchoLeaderboard.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-BanchoNetworking.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-BanchoProtocol.Po
@@ -4774,6 +4774,7 @@ distclean: distclean-am
 	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongDifficultyButton.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-AnimationHandler.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Archival.Po
+	-rm -f src/Engine/$(DEPDIR)/neosu-ByteBufferedFile.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Camera.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-ConVar.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-DiscordInterface.Po
@@ -4908,7 +4909,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-BackgroundImageHandler.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Bancho.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-BanchoAes.Po
-	-rm -f src/App/Osu/$(DEPDIR)/neosu-BanchoFile.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-BanchoLeaderboard.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-BanchoNetworking.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-BanchoProtocol.Po
@@ -4989,6 +4989,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongDifficultyButton.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-AnimationHandler.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Archival.Po
+	-rm -f src/Engine/$(DEPDIR)/neosu-ByteBufferedFile.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Camera.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-ConVar.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-DiscordInterface.Po

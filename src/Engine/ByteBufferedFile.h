@@ -5,6 +5,9 @@
 #include <string>
 #include <string_view>
 #include <algorithm>
+#include <filesystem>
+#include <fstream>
+#include <vector>
 
 #include "MD5Hash.h"
 #include "types.h"
@@ -25,8 +28,8 @@ class ByteBufferedFile {
    public:
     class Reader {
        public:
-        Reader(const char* path);
-        ~Reader();
+        Reader(const std::filesystem::path &path);
+        ~Reader() = default;
 
         Reader &operator=(const Reader &) = delete;
         Reader &operator=(Reader &&) = delete;
@@ -34,9 +37,9 @@ class ByteBufferedFile {
         Reader(Reader &&) = delete;
 
         // always_inline is a 2x speedup here
-        [[nodiscard]] always_inline_attr size_t read_bytes(u8* out, size_t len) {
-            if(this->error_flag || !this->file) {
-                if(out != NULL) {
+        [[nodiscard]] always_inline_attr size_t read_bytes(u8 *out, size_t len) {
+            if(this->error_flag || !this->file.is_open()) {
+                if(out != nullptr) {
                     memset(out, 0, len);
                 }
                 return 0;
@@ -45,7 +48,7 @@ class ByteBufferedFile {
             if(len > READ_BUFFER_SIZE) {
                 this->set_error("Attempted to read " + std::to_string(len) + " bytes (exceeding buffer size " +
                                 std::to_string(READ_BUFFER_SIZE) + ")");
-                if(out != NULL) {
+                if(out != nullptr) {
                     memset(out, 0, len);
                 }
                 return 0;
@@ -59,17 +62,20 @@ class ByteBufferedFile {
 
                 if(this->write_pos + bytes_to_read <= READ_BUFFER_SIZE) {
                     // no wrap needed, read directly
-                    size_t bytes_read = fread(this->buffer + this->write_pos, 1, bytes_to_read, this->file);
+                    this->file.read(reinterpret_cast<char *>(this->buffer.data() + this->write_pos), bytes_to_read);
+                    size_t bytes_read = this->file.gcount();
                     this->write_pos = (this->write_pos + bytes_read) % READ_BUFFER_SIZE;
                     this->buffered_bytes += bytes_read;
                 } else {
                     // wrap needed, read in two parts
                     size_t first_part = READ_BUFFER_SIZE - this->write_pos;
-                    size_t bytes_read = fread(this->buffer + this->write_pos, 1, first_part, this->file);
+                    this->file.read(reinterpret_cast<char *>(this->buffer.data() + this->write_pos), first_part);
+                    size_t bytes_read = this->file.gcount();
 
                     if(bytes_read == first_part && bytes_to_read > first_part) {
                         size_t second_part = bytes_to_read - first_part;
-                        size_t second_read = fread(this->buffer, 1, second_part, this->file);
+                        this->file.read(reinterpret_cast<char *>(this->buffer.data()), second_part);
+                        size_t second_read = this->file.gcount();
                         bytes_read += second_read;
                         this->write_pos = second_read;
                     } else {
@@ -82,24 +88,24 @@ class ByteBufferedFile {
 
             if(this->buffered_bytes < len) {
                 // couldn't read enough data
-                if(out != NULL) {
+                if(out != nullptr) {
                     memset(out, 0, len);
                 }
                 return 0;
             }
 
             // read from ring buffer
-            if(out != NULL) {
+            if(out != nullptr) {
                 if(this->read_pos + len <= READ_BUFFER_SIZE) {
                     // no wrap needed
-                    memcpy(out, this->buffer + this->read_pos, len);
+                    memcpy(out, this->buffer.data() + this->read_pos, len);
                 } else {
                     // wrap needed
                     size_t first_part = std::min(len, READ_BUFFER_SIZE - this->read_pos);
                     size_t second_part = len - first_part;
 
-                    memcpy(out, this->buffer + this->read_pos, first_part);
-                    memcpy(out + first_part, this->buffer, second_part);
+                    memcpy(out, this->buffer.data() + this->read_pos, first_part);
+                    memcpy(out + first_part, this->buffer.data(), second_part);
                 }
             }
 
@@ -115,14 +121,14 @@ class ByteBufferedFile {
             static_assert(sizeof(T) < READ_BUFFER_SIZE);
 
             T result;
-            if((this->read_bytes((u8*)&result, sizeof(T))) != sizeof(T)) {
+            if((this->read_bytes(reinterpret_cast<u8 *>(&result), sizeof(T))) != sizeof(T)) {
                 memset(&result, 0, sizeof(T));
             }
             return result;
         }
 
         always_inline_attr void skip_bytes(u32 n) {
-            if(this->error_flag || !this->file) {
+            if(this->error_flag || !this->file.is_open()) {
                 return;
             }
 
@@ -142,7 +148,8 @@ class ByteBufferedFile {
             this->total_pos += skip_from_buffer;
 
             // seek in the file to skip the rest
-            if(fseek(this->file, skip_from_file, SEEK_CUR) != 0) {
+            this->file.seekg(skip_from_file, std::ios::cur);
+            if(this->file.fail()) {
                 this->set_error("Failed to seek " + std::to_string(skip_from_file) + " bytes");
                 return;
             }
@@ -174,11 +181,11 @@ class ByteBufferedFile {
         size_t total_pos{0};
 
        private:
-        void set_error(const std::string& error_msg);
+        void set_error(const std::string &error_msg);
 
-        FILE* file{nullptr};
+        std::ifstream file;
 
-        u8* buffer{nullptr};
+        std::vector<u8> buffer;
         size_t read_pos{0};        // current read position in ring buffer
         size_t write_pos{0};       // current write position in ring buffer
         size_t buffered_bytes{0};  // amount of data currently buffered
@@ -189,7 +196,7 @@ class ByteBufferedFile {
 
     class Writer {
        public:
-        Writer(const char* path);
+        Writer(const std::filesystem::path &path);
         ~Writer();
 
         Writer &operator=(const Writer &) = delete;
@@ -201,28 +208,28 @@ class ByteBufferedFile {
         [[nodiscard]] std::string_view error() const { return this->last_error; }
 
         void flush();
-        void write_bytes(u8* bytes, size_t n);
+        void write_bytes(u8 *bytes, size_t n);
         void write_hash(MD5Hash hash);
         void write_string(std::string str);
         void write_uleb128(u32 num);
 
         template <typename T>
         void write(T t) {
-            this->write_bytes((u8*)&t, sizeof(T));
+            this->write_bytes(reinterpret_cast<u8 *>(&t), sizeof(T));
         }
 
        private:
-        void set_error(const std::string& error_msg);
+        void set_error(const std::string &error_msg);
 
-        std::string file_path;
-        std::string tmp_file_path;
-        FILE* file{nullptr};
+        std::filesystem::path file_path;
+        std::filesystem::path tmp_file_path;
+        std::ofstream file;
 
-        u8* buffer{nullptr};
+        std::vector<u8> buffer;
         size_t pos{0};
         bool error_flag{false};
         std::string last_error;
     };
 
-    static void copy(const char* from_path, const char* to_path);
+    static void copy(const std::filesystem::path &from_path, const std::filesystem::path &to_path);
 };

@@ -104,7 +104,7 @@ bool load_collections() {
     std::string peppy_collections_path = cv::osu_folder.getString();
     peppy_collections_path.append("collection.db");
 
-    ByteBufferedFile::Reader peppy_collections(peppy_collections_path.c_str());
+    ByteBufferedFile::Reader peppy_collections(peppy_collections_path);
     if(peppy_collections.total_size > 0) {
         u32 version = peppy_collections.read<u32>();
         u32 nb_collections = peppy_collections.read<u32>();
@@ -140,8 +140,8 @@ bool load_collections() {
             return false;
         } else if(version < COLLECTIONS_DB_VERSION) {
             // Reading from older database version: backup just in case
-            auto backup_path = UString::format("collections.db.%d", version);
-            ByteBufferedFile::copy("collections.db", backup_path.toUtf8());
+            auto backup_path = fmt::format("collections.db.{}", version);
+            ByteBufferedFile::copy("collections.db", backup_path);
         }
 
         for(int c = 0; std::cmp_less(c, nb_collections); c++) {
