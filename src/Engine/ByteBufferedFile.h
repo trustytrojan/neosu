@@ -17,7 +17,7 @@
 #define always_inline_attr
 #endif
 
-class BanchoFile {
+class ByteBufferedFile {
    private:
     static constexpr const size_t READ_BUFFER_SIZE{512ULL * 4096};
     static constexpr const size_t WRITE_BUFFER_SIZE{512ULL * 4096};

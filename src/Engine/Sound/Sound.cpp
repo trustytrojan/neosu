@@ -45,6 +45,8 @@ Sound *Sound::createSound(std::string filepath, bool stream, bool overlayable, b
     return nullptr;
 }
 
+#define MAKEDWORD(a, b, c, d) (((d) << 24) | ((c) << 16) | ((b) << 8) | (a))
+
 // quick heuristic to check if it's going to be worth loading the audio,
 // tolerate some junk data at the start of the files but check for valid headers
 bool Sound::isValidAudioFile(const std::string &filePath, const std::string &fileExt) {

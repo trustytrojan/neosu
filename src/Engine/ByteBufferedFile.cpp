@@ -1,12 +1,12 @@
-#include "BanchoFile.h"
+#include "ByteBufferedFile.h"
 
 #include "Engine.h"
 
-BanchoFile::Reader::Reader(const char *path) {
+ByteBufferedFile::Reader::Reader(const char *path) {
     this->file = fopen(path, "rb");
     if(this->file == NULL) {
         this->set_error("Failed to open file for reading: " + std::string(strerror(errno)));
-        debugLog("Failed to open '%s': %s\n", path, strerror(errno));
+        debugLogF("Failed to open '{:s}': {:s}\n", path, strerror(errno));
         return;
     }
 
@@ -33,13 +33,13 @@ BanchoFile::Reader::Reader(const char *path) {
 
 seek_error:
     this->set_error("Failed to initialize file reader: " + std::string(strerror(errno)));
-    debugLog("Failed to initialize file reader '%s': %s\n", path, strerror(errno));
+    debugLogF("Failed to initialize file reader '{:s}': {:s}\n", path, strerror(errno));
     fclose(this->file);
     this->file = NULL;
     return;
 }
 
-BanchoFile::Reader::~Reader() {
+ByteBufferedFile::Reader::~Reader() {
     if(this->file != NULL) {
         fclose(this->file);
     }
@@ -48,14 +48,14 @@ BanchoFile::Reader::~Reader() {
     }
 }
 
-void BanchoFile::Reader::set_error(const std::string &error_msg) {
+void ByteBufferedFile::Reader::set_error(const std::string &error_msg) {
     if(!this->error_flag) {  // only set first error
         this->error_flag = true;
         this->last_error = error_msg;
     }
 }
 
-MD5Hash BanchoFile::Reader::read_hash() {
+MD5Hash ByteBufferedFile::Reader::read_hash() {
     MD5Hash hash;
 
     if(this->error_flag) {
@@ -69,14 +69,14 @@ MD5Hash BanchoFile::Reader::read_hash() {
     u32 extra = 0;
     if(len > 32) {
         // just continue, don't set error flag
-        debugLog("WARNING: Expected 32 bytes for hash, got %d!\n", len);
+        debugLogF("WARNING: Expected 32 bytes for hash, got {}!\n", len);
         extra = len - 32;
         len = 32;
     }
 
     if(this->read_bytes((u8 *)hash.hash.data(), len) != len) {
         // just continue, don't set error flag
-        debugLog("WARNING: failed to read %d bytes to obtain hash.\n", len);
+        debugLogF("WARNING: failed to read {} bytes to obtain hash.\n", len);
         extra = len;
     }
     this->skip_bytes(extra);
@@ -84,7 +84,7 @@ MD5Hash BanchoFile::Reader::read_hash() {
     return hash;
 }
 
-std::string BanchoFile::Reader::read_string() {
+std::string ByteBufferedFile::Reader::read_string() {
     if(this->error_flag) {
         return {};
     }
@@ -106,7 +106,7 @@ std::string BanchoFile::Reader::read_string() {
     return str_out;
 }
 
-u32 BanchoFile::Reader::read_uleb128() {
+u32 ByteBufferedFile::Reader::read_uleb128() {
     if(this->error_flag) {
         return 0;
     }
@@ -124,7 +124,7 @@ u32 BanchoFile::Reader::read_uleb128() {
     return result;
 }
 
-void BanchoFile::Reader::skip_string() {
+void ByteBufferedFile::Reader::skip_string() {
     if(this->error_flag) {
         return;
     }
@@ -136,7 +136,7 @@ void BanchoFile::Reader::skip_string() {
     this->skip_bytes(len);
 }
 
-BanchoFile::Writer::Writer(const char *path) {
+ByteBufferedFile::Writer::Writer(const char *path) {
     this->file_path = path;
     this->tmp_file_path = this->file_path;
     this->tmp_file_path.append(".tmp");
@@ -144,7 +144,7 @@ BanchoFile::Writer::Writer(const char *path) {
     this->file = fopen(this->tmp_file_path.c_str(), "wb");
     if(this->file == NULL) {
         this->set_error("Failed to open file for writing: " + std::string(strerror(errno)));
-        debugLog("Failed to open '%s': %s\n", path, strerror(errno));
+        debugLogF("Failed to open '{:s}': {:s}\n", path, strerror(errno));
         return;
     }
 
@@ -157,7 +157,7 @@ BanchoFile::Writer::Writer(const char *path) {
     }
 }
 
-BanchoFile::Writer::~Writer() {
+ByteBufferedFile::Writer::~Writer() {
     if(this->file != NULL) {
         this->flush();
         fclose(this->file);
@@ -173,14 +173,14 @@ BanchoFile::Writer::~Writer() {
     }
 }
 
-void BanchoFile::Writer::set_error(const std::string &error_msg) {
+void ByteBufferedFile::Writer::set_error(const std::string &error_msg) {
     if(!this->error_flag) {  // only set first error
         this->error_flag = true;
         this->last_error = error_msg;
     }
 }
 
-void BanchoFile::Writer::write_hash(MD5Hash hash) {
+void ByteBufferedFile::Writer::write_hash(MD5Hash hash) {
     if(this->error_flag) {
         return;
     }
@@ -190,7 +190,7 @@ void BanchoFile::Writer::write_hash(MD5Hash hash) {
     this->write_bytes((u8 *)hash.hash.data(), 32);
 }
 
-void BanchoFile::Writer::write_string(std::string str) {
+void ByteBufferedFile::Writer::write_string(std::string str) {
     if(this->error_flag) {
         return;
     }
@@ -209,7 +209,7 @@ void BanchoFile::Writer::write_string(std::string str) {
     this->write_bytes((u8 *)str.c_str(), len);
 }
 
-void BanchoFile::Writer::flush() {
+void ByteBufferedFile::Writer::flush() {
     if(this->error_flag || this->file == NULL) {
         return;
     }
@@ -221,7 +221,7 @@ void BanchoFile::Writer::flush() {
     this->pos = 0;
 }
 
-void BanchoFile::Writer::write_bytes(u8 *bytes, size_t n) {
+void ByteBufferedFile::Writer::write_bytes(u8 *bytes, size_t n) {
     if(this->error_flag || this->file == NULL) {
         return;
     }
@@ -243,7 +243,7 @@ void BanchoFile::Writer::write_bytes(u8 *bytes, size_t n) {
     this->pos += n;
 }
 
-void BanchoFile::Writer::write_uleb128(u32 num) {
+void ByteBufferedFile::Writer::write_uleb128(u32 num) {
     if(this->error_flag) {
         return;
     }
@@ -264,23 +264,23 @@ void BanchoFile::Writer::write_uleb128(u32 num) {
     }
 }
 
-void BanchoFile::copy(const char *from_path, const char *to_path) {
+void ByteBufferedFile::copy(const char *from_path, const char *to_path) {
     Reader from(from_path);
     Writer to(to_path);
 
     if(!from.good()) {
-        debugLog("Failed to open source file for copying: %s\n", from.error().data());
+        debugLogF("Failed to open source file for copying: {:s}\n", from.error().data());
         return;
     }
 
     if(!to.good()) {
-        debugLog("Failed to open destination file for copying: %s\n", to.error().data());
+        debugLogF("Failed to open destination file for copying: {:s}\n", to.error().data());
         return;
     }
 
     u8 *buf = (u8 *)malloc(READ_BUFFER_SIZE);
     if(buf == NULL) {
-        debugLog("Failed to allocate copy buffer\n");
+        debugLogF("Failed to allocate copy buffer\n");
         return;
     }
 
@@ -288,7 +288,7 @@ void BanchoFile::copy(const char *from_path, const char *to_path) {
     while(remaining > 0 && from.good() && to.good()) {
         u32 len = std::min(remaining, (u32)READ_BUFFER_SIZE);
         if(from.read_bytes(buf, len) != len) {
-            debugLog("Copy failed: could not read %u bytes, %u remaining\n", len, remaining);
+            debugLogF("Copy failed: could not read {} bytes, {} remaining\n", len, remaining);
             break;
         }
         to.write_bytes(buf, len);
@@ -296,10 +296,10 @@ void BanchoFile::copy(const char *from_path, const char *to_path) {
     }
 
     if(!from.good()) {
-        debugLog("Copy failed during read: %s\n", from.error().data());
+        debugLogF("Copy failed during read: {:s}\n", from.error().data());
     }
     if(!to.good()) {
-        debugLog("Copy failed during write: %s\n", to.error().data());
+        debugLogF("Copy failed during write: {:s}\n", to.error().data());
     }
 
     free(buf);

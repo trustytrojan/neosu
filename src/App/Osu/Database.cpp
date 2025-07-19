@@ -6,7 +6,7 @@
 
 #include "SString.h"
 #include "MD5Hash.h"
-#include "BanchoFile.h"
+#include "ByteBufferedFile.h"
 #include "Collections.h"
 #include "ConVar.h"
 #include "Database.h"
@@ -605,8 +605,8 @@ void Database::loadDB() {
 
     std::string osuDbFilePath = cv::osu_folder.getString();
     osuDbFilePath.append(PREF_PATHSEP "osu!.db");
-    BanchoFile::Reader db(osuDbFilePath.c_str());
-    BanchoFile::Reader neosu_maps("neosu_maps.db");
+    ByteBufferedFile::Reader db(osuDbFilePath.c_str());
+    ByteBufferedFile::Reader neosu_maps("neosu_maps.db");
 
     u32 db_size_sum = neosu_maps.total_size + db.total_size;
 
@@ -637,7 +637,7 @@ void Database::loadDB() {
         if(version < NEOSU_MAPS_DB_VERSION) {
             // Reading from older database version: backup just in case
             auto backup_path = UString::format("neosu_maps.db.%d", version);
-            BanchoFile::copy("neosu_maps.db", backup_path.toUtf8());
+            ByteBufferedFile::copy("neosu_maps.db", backup_path.toUtf8());
         }
 
         u32 nb_sets = neosu_maps.read<u32>();
@@ -1166,7 +1166,7 @@ void Database::saveMaps() {
     Timer t;
     t.start();
 
-    BanchoFile::Writer maps("neosu_maps.db");
+    ByteBufferedFile::Writer maps("neosu_maps.db");
     maps.write<u32>(NEOSU_MAPS_DB_VERSION);
 
     // Save neosu-downloaded maps
@@ -1249,7 +1249,7 @@ void Database::loadScores() {
     this->scores_to_convert.clear();
 
     u32 nb_neosu_scores = 0;
-    BanchoFile::Reader db("neosu_scores.db");
+    ByteBufferedFile::Reader db("neosu_scores.db");
     if(!this->bScoresLoaded && db.total_size > 0) {
         u8 magic_bytes[6] = {0};
         if(db.read_bytes(magic_bytes, 5) != 5 || memcmp(magic_bytes, "NEOSC", 5) != 0) {
@@ -1264,7 +1264,7 @@ void Database::loadScores() {
         } else if(db_version < NEOSU_SCORE_DB_VERSION) {
             // Reading from older database version: backup just in case
             auto backup_path = UString::format("neosu_scores.db.%d", db_version);
-            BanchoFile::copy("neosu_scores.db", backup_path.toUtf8());
+            ByteBufferedFile::copy("neosu_scores.db", backup_path.toUtf8());
         }
 
         u32 nb_beatmaps = db.read<u32>();
@@ -1385,7 +1385,7 @@ u32 Database::importOldMcNeosuScores() {
     // end mcosu logic
 
     {
-        BanchoFile::Reader dbCheck("scores.db");
+        ByteBufferedFile::Reader dbCheck("scores.db");
         if(!dbCheck.good()) {
             return 0;
         }
@@ -1408,7 +1408,7 @@ u32 Database::importOldMcNeosuScores() {
     }
 
     {
-        BanchoFile::Reader db("scores.db");
+        ByteBufferedFile::Reader db("scores.db");
         if(!db.good()) {
             return 0;
         }
@@ -1713,7 +1713,7 @@ u32 Database::importPeppyScores() {
 
     std::string scoresPath = cv::osu_folder.getString();
     scoresPath.append("/scores.db");
-    BanchoFile::Reader db(scoresPath.c_str());
+    ByteBufferedFile::Reader db(scoresPath.c_str());
 
     u32 db_version = db.read<u32>();
     u32 nb_beatmaps = db.read<u32>();
@@ -1819,7 +1819,7 @@ void Database::saveScores() {
     const double startTime = Timing::getTimeReal();
 
     std::scoped_lock lock(this->scores_mtx);
-    BanchoFile::Writer db("neosu_scores.db");
+    ByteBufferedFile::Writer db("neosu_scores.db");
     db.write_bytes((u8 *)"NEOSC", 5);
     db.write<u32>(NEOSU_SCORE_DB_VERSION);
 

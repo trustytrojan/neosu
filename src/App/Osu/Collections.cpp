@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <utility>
 
-#include "BanchoFile.h"
+#include "ByteBufferedFile.h"
 #include "ConVar.h"
 #include "Database.h"
 #include "Engine.h"
@@ -104,7 +104,7 @@ bool load_collections() {
     std::string peppy_collections_path = cv::osu_folder.getString();
     peppy_collections_path.append("collection.db");
 
-    BanchoFile::Reader peppy_collections(peppy_collections_path.c_str());
+    ByteBufferedFile::Reader peppy_collections(peppy_collections_path.c_str());
     if(peppy_collections.total_size > 0) {
         u32 version = peppy_collections.read<u32>();
         u32 nb_collections = peppy_collections.read<u32>();
@@ -129,7 +129,7 @@ bool load_collections() {
         }
     }
 
-    BanchoFile::Reader neosu_collections("collections.db");
+    ByteBufferedFile::Reader neosu_collections("collections.db");
     if(neosu_collections.total_size > 0) {
         u32 version = neosu_collections.read<u32>();
         u32 nb_collections = neosu_collections.read<u32>();
@@ -141,7 +141,7 @@ bool load_collections() {
         } else if(version < COLLECTIONS_DB_VERSION) {
             // Reading from older database version: backup just in case
             auto backup_path = UString::format("collections.db.%d", version);
-            BanchoFile::copy("collections.db", backup_path.toUtf8());
+            ByteBufferedFile::copy("collections.db", backup_path.toUtf8());
         }
 
         for(int c = 0; std::cmp_less(c, nb_collections); c++) {
@@ -215,7 +215,7 @@ bool save_collections() {
 
     const double startTime = Timing::getTimeReal();
 
-    BanchoFile::Writer db("collections.db");
+    ByteBufferedFile::Writer db("collections.db");
     db.write<u32>(COLLECTIONS_DB_VERSION);
 
     u32 nb_collections = collections.size();
