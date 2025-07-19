@@ -53,7 +53,7 @@ class SoLoudSound final : public Sound {
     u32 getLengthMS() override;
     float getSpeed() override;
     float getPitch() override;
-    float getFrequency() override;
+    inline float getFrequency() override { return this->fFrequency; }
 
     bool isPlaying() override;
     bool isFinished() override;

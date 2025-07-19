@@ -374,19 +374,6 @@ float SoLoudSound::getPitch() {
     return this->fPitch;
 }
 
-float SoLoudSound::getFrequency() {
-    if(!this->bReady || !this->handle) return 44100.0f;
-
-    // get sample rate from active voice, unless we changed the frequency through pitch for streams, then just return
-    // our own frequency
-    if(!this->bStream) {
-        float currentFreq = soloud->getSamplerate(this->handle);
-        if(currentFreq > 0) this->fFrequency = currentFreq;
-    }
-
-    return this->fFrequency;
-}
-
 bool SoLoudSound::isPlaying() {
     if(!this->bReady || !this->handle) return false;
 
