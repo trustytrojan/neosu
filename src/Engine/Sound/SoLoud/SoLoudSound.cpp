@@ -32,7 +32,7 @@ void SoLoudSound::init() {
         this->bReady = true;
 }
 
-SoLoudSound::~SoLoudSound() { destroy(); }
+SoLoudSound::~SoLoudSound() { this->destroy(); }
 
 void SoLoudSound::initAsync() {
     Sound::initAsync();
@@ -151,6 +151,15 @@ void SoLoudSound::destroy() {
 
         this->audioSource = nullptr;
     }
+
+    // need to reset this because the soloud handle has been destroyed
+    this->bIsLoopingActuallySet = false;
+    this->fFrequency = 44100.0f;
+    this->fPitch = 1.0f;
+    this->fSpeed = 1.0f;
+    this->fPan = 0.0f;
+    this->fVolume = 1.0f;
+    this->fLastPlayTime = 0.0f;
 }
 
 u32 SoLoudSound::setPosition(f64 percent) {
@@ -304,17 +313,20 @@ void SoLoudSound::setPan(float pan) {
 }
 
 void SoLoudSound::setLoop(bool loop) {
-    if(!this->bReady || !this->audioSource || this->bIsLooped == loop) return;
-
-    if(cv::debug_snd.getBool()) debugLogF("setLoop {}\n", loop);
+    if(!this->bReady || !this->audioSource || this->bIsLoopingActuallySet == loop) return;
 
     this->bIsLooped = loop;
+
+    if(cv::debug_snd.getBool()) debugLogF("setLoop {}\n", loop);
 
     // apply to the source
     this->audioSource->setLooping(loop);
 
     // apply to the active voice
-    if(this->handle != 0) soloud->setLooping(this->handle, loop);
+    if(this->handle != 0) {
+        soloud->setLooping(this->handle, loop);
+        this->bIsLoopingActuallySet = loop;
+    }
 }
 
 void SoLoudSound::setOverlayable(bool overlayable) {

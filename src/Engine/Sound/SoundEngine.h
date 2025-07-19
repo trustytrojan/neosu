@@ -84,6 +84,9 @@ class SoundEngine {
         this->restartCBs[1] = callback;
     }
 
+    // call this once app init is done, i.e. configs are read, so convar callbacks aren't spuriously fired during init
+    virtual void allowInternalCallbacks() { ; }
+
     [[nodiscard]] inline const UString &getOutputDeviceName() const { return this->currentOutputDevice.name; }
     [[nodiscard]] constexpr auto getOutputDriverType() const { return this->currentOutputDevice.driver; }
     [[nodiscard]] constexpr float getVolume() const { return this->fVolume; }

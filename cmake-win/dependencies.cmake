@@ -51,9 +51,9 @@ set(SOUNDTOUCH_VERSION "2.4.0")
 set(SOUNDTOUCH_URL "https://codeberg.org/soundtouch/soundtouch/archive/${SOUNDTOUCH_VERSION}.tar.gz")
 set(SOUNDTOUCH_HASH "SHA512=8bd199c6363104ba6c9af1abbd3c4da3567ccda5fe3a68298917817fc9312ecb0914609afba1abd864307b0a596becf450bc7073eeec17b1de5a7c5086fbc45e")
 
-set(SOLOUD_VERSION "f71505cbc5eeb0f3fd5a160e327d4e13eee15bf5")
+set(SOLOUD_VERSION "0aa5d49e7117a15554c22ed9f060207bc9a34c45")
 set(SOLOUD_URL "https://github.com/whrvt/neoloud/archive/${SOLOUD_VERSION}.tar.gz")
-set(SOLOUD_HASH "SHA512=c52fc32dd6d5a79689d517be04d804627716e0cec2a049cdb97140b0b426352a822253222a995579477ea906ffcab85df584d93fd539847539d78c4d0fa45de0")
+set(SOLOUD_HASH "SHA512=a7e1383afeb507bdd4117b7d4c20fbf01c41ef57cdecbe1dbb7f6c33f2909a8daecc16fe7697b423fa98cdbb9a8314f0b10b8b7354e61d540c4e2eafdd38f322")
 
 set(CURL_VERSION "8.14.1")
 string(REPLACE "." "_" _curl_ver_temp "${CURL_VERSION}")

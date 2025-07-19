@@ -3051,9 +3051,6 @@ void SongBrowser::onGroupChange(const UString &text, int id) {
     this->groupByNothingBtn->setTextBrightColor(defaultColor);
 
     switch(grouping->type) {
-        case GROUP::GROUP_NO_GROUPING:
-            this->groupByNothingBtn->setTextBrightColor(highlightColor);
-            break;
         case GROUP::GROUP_ARTIST:
             this->groupByArtistBtn->setTextBrightColor(highlightColor);
             break;
@@ -3063,7 +3060,9 @@ void SongBrowser::onGroupChange(const UString &text, int id) {
         case GROUP::GROUP_COLLECTIONS:
             this->groupByCollectionBtn->setTextBrightColor(highlightColor);
             break;
+        case GROUP::GROUP_NO_GROUPING:
         default:
+            this->groupByNothingBtn->setTextBrightColor(highlightColor);
             break;
     }
 

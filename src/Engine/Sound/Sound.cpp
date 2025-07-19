@@ -11,13 +11,6 @@
 #include "SoundEngine.h"
 #include "SString.h"
 
-Sound::Sound(std::string filepath, bool stream, bool overlayable, bool loop)
-    : Resource(std::move(filepath)), bStream(stream), bIsLooped(loop), bIsOverlayable(overlayable) {
-    this->bStream = stream;
-    this->bIsLooped = loop;
-    this->bIsOverlayable = overlayable;
-}
-
 void Sound::initAsync() {
     if(cv::debug_rm.getBool()) debugLogF("Resource Manager: Loading {:s}\n", this->sFilePath);
 

@@ -47,6 +47,8 @@ class SoLoudSoundEngine final : public SoundEngine {
     void setOutputDevice(const OUTPUT_DEVICE &device) override;
     void setVolume(float volume) override;
 
+    void allowInternalCallbacks() override;
+
     SOUND_ENGINE_TYPE(SoLoudSoundEngine, SOLOUD, SoundEngine)
    private:
     bool playSound(SoLoudSound *soloudSound, float pan, float pitch);
@@ -54,9 +56,11 @@ class SoLoudSoundEngine final : public SoundEngine {
 
     void setVolumeGradual(unsigned int handle, float targetVol, float fadeTimeMs = 10.0f);
     void updateOutputDevices(bool printInfo) override;
+
     bool initializeOutputDevice(const OUTPUT_DEVICE &device) override;
 
     void setOutputDeviceByName(const UString &desiredDeviceName);
+    bool setOutputDeviceInt(const OUTPUT_DEVICE &desiredDevice, bool force = false);
 
     int iMaxActiveVoices;
     void onMaxActiveChange(float newMax);

@@ -52,6 +52,8 @@ class BassSound final : public Sound {
     std::vector<HCHANNEL> getActiveChannels();
     HCHANNEL getChannel();
 
+    f64 fChannelCreationTime{0.0};
+
     std::vector<HCHANNEL> mixer_channels;
     SOUNDHANDLE stream{0};
     SOUNDHANDLE sample{0};

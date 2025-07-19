@@ -33,7 +33,12 @@ Changelog::Changelog() : ScreenBackable() {
         R"(- Added "Sort Skins Alphabetically" option, for sorting skins in a different order (ignoring prefixes))",
         R"(- Added support for filtering by "creator=" in the song browser)",
         R"(- Added support for parsing McOsu "scores.db" databases for local scores)",
-        R"(- Added "Max Queued Frames" slider to options menu (and associated renderer logic), for improved latency)",
+        R"(- Added "Max Queued Frames" slider to options menu (and associated renderer logic), for lower input lag)",
+        R"(- Added the SoLoud audio backend, as an alternative to BASS)",
+        R"(  - Latency should be much lower than regular BASS)",
+        R"(  - Currently selectable by passing "-sound soloud" to the launch arguments, Windows builds have shortcuts provided to do so)",
+        R"(  - BASS will remain as default for the foreseeable future, but testing is highly encouraged)",
+        R"(  - No exclusive mode support or loudness normalization yet)",
     };
     changelogs.push_back(v39_00);
 

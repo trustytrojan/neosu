@@ -46,26 +46,15 @@ SoLoudSoundEngine::SoLoudSoundEngine() : SoundEngine() {
     this->mSoloudDevices = {};
 
     this->initializeOutputDevice(defaultOutputDevice);
-
-    // convar callbacks
-    cv::snd_freq.setCallback(SA::MakeDelegate<&SoLoudSoundEngine::restart>(this));
-    cv::snd_restart.setCallback(SA::MakeDelegate<&SoLoudSoundEngine::restart>(this));
-    cv::snd_output_device.setCallback(SA::MakeDelegate<&SoLoudSoundEngine::setOutputDeviceByName>(this));
-    cv::snd_soloud_backend.setCallback(SA::MakeDelegate<&SoLoudSoundEngine::restart>(this));
-    cv::snd_sanity_simultaneous_limit.setCallback(SA::MakeDelegate<&SoLoudSoundEngine::onMaxActiveChange>(this));
 }
 
-SoLoudSoundEngine::~SoLoudSoundEngine() {
-    if(this->isReady()) soloud->deinit();
-    soloud.reset();
-}
-
-void SoLoudSoundEngine::restart() { this->setOutputDevice(this->currentOutputDevice); }
+void SoLoudSoundEngine::restart() { this->setOutputDeviceInt(this->getWantedDevice(), true); }
 
 bool SoLoudSoundEngine::play(Sound *snd, float pan, float pitch) {
     if(!this->isReady() || snd == NULL || !snd->isReady()) return false;
 
-    MC_MESSAGE("FIXME: audio pitch may be inaccurate! need to convert caller's pitch properly like old McOsu for SoLoud")
+    MC_MESSAGE(
+        "FIXME: audio pitch may be inaccurate! need to convert caller's pitch properly like old McOsu for SoLoud")
 
     // @spec: adding 1 here because kiwec changed the calling code in some way that i dont understand yet
     pitch += 1.0f;
@@ -217,25 +206,78 @@ void SoLoudSoundEngine::stop(Sound *snd) {
 void SoLoudSoundEngine::setOutputDeviceByName(const UString &desiredDeviceName) {
     for(const auto &device : this->outputDevices) {
         if(device.name == desiredDeviceName) {
-            auto previousOutputDevice = this->currentOutputDevice;
-            if(!initializeOutputDevice(device)) initializeOutputDevice(previousOutputDevice);
+            this->setOutputDeviceInt(device);
             return;
         }
     }
 
-    debugLog("couldn't find output device \"{:s}\"!\n", desiredDeviceName.toUtf8());
-    initializeOutputDevice({});  // initialize default
+    debugLogF("couldn't find output device \"{:s}\"!\n", desiredDeviceName.toUtf8());
+    this->initializeOutputDevice(this->getDefaultDevice());  // initialize default
 }
 
 void SoLoudSoundEngine::setOutputDevice(const SoundEngine::OUTPUT_DEVICE &device) {
-    // TODO: This is blocking main thread, can freeze for a long time on some sound cards
-    auto previous = this->currentOutputDevice;
-    if(!this->initializeOutputDevice(device)) {
-        if((device.id == previous.id && device.driver == previous.driver) || !this->initializeOutputDevice(previous)) {
-            // We failed to reinitialize the device, don't start an infinite loop, just give up
-            this->currentOutputDevice = {};
+    this->setOutputDeviceInt(device, false);
+}
+
+bool SoLoudSoundEngine::setOutputDeviceInt(const SoundEngine::OUTPUT_DEVICE &desiredDevice, bool force) {
+    if(force || !this->bReady) {
+        // TODO: This is blocking main thread, can freeze for a long time on some sound cards
+        auto previous = this->currentOutputDevice;
+        if(!this->initializeOutputDevice(desiredDevice)) {
+            if((desiredDevice.id == previous.id && desiredDevice.driver == previous.driver) ||
+               !this->initializeOutputDevice(previous)) {
+                // We failed to reinitialize the device, don't start an infinite loop, just give up
+                this->currentOutputDevice = {};
+                return false;
+            }
+        }
+        return true;
+    }
+    for(const auto &device : this->outputDevices) {
+        if(device.name == desiredDevice.name) {
+            if(device.id != this->currentOutputDevice.id) {
+                auto previous = this->currentOutputDevice;
+                if(!this->initializeOutputDevice(desiredDevice)) this->initializeOutputDevice(previous);
+            } else {
+                debugLogF("\"{:s}\" already is the current device.\n", desiredDevice.name);
+                return false;
+            }
+
+            return true;
         }
     }
+
+    debugLogF("couldn't find output device \"{:s}\"!\n", desiredDevice.name);
+    return false;
+}
+
+// delay setting these until after everything is fully init, so we don't restart multiple times while reading config
+void SoLoudSoundEngine::allowInternalCallbacks() {
+    // convar callbacks
+    cv::snd_freq.setCallback(SA::MakeDelegate<&SoLoudSoundEngine::restart>(this));
+    cv::snd_restart.setCallback(SA::MakeDelegate<&SoLoudSoundEngine::restart>(this));
+    cv::snd_soloud_backend.setCallback(SA::MakeDelegate<&SoLoudSoundEngine::restart>(this));
+    cv::snd_sanity_simultaneous_limit.setCallback(SA::MakeDelegate<&SoLoudSoundEngine::onMaxActiveChange>(this));
+    cv::snd_output_device.setCallback(SA::MakeDelegate<&SoLoudSoundEngine::setOutputDeviceByName>(this));
+
+    bool doRestart = (cv::snd_freq.getDefaultFloat() != cv::snd_freq.getFloat()) ||
+                     (cv::snd_restart.getDefaultFloat() != cv::snd_restart.getFloat()) ||
+                     (cv::snd_soloud_backend.getDefaultString() != cv::snd_soloud_backend.getString());
+
+    if(doRestart) this->restart();
+
+    bool doMaxActive =
+        cv::snd_sanity_simultaneous_limit.getDefaultFloat() != cv::snd_sanity_simultaneous_limit.getFloat();
+    if(doMaxActive) this->onMaxActiveChange(cv::snd_sanity_simultaneous_limit.getFloat());
+
+    // if we restarted already, then we already set the output device to the desired one
+    bool doChangeOutput = !doRestart && (cv::snd_output_device.getDefaultString() != cv::snd_output_device.getString());
+    if(doChangeOutput) this->setOutputDeviceByName(UString{cv::snd_output_device.getString()});
+}
+
+SoLoudSoundEngine::~SoLoudSoundEngine() {
+    if(this->isReady()) soloud->deinit();
+    soloud.reset();
 }
 
 void SoLoudSoundEngine::setVolume(float volume) {
@@ -414,7 +456,7 @@ bool SoLoudSoundEngine::initializeOutputDevice(const OUTPUT_DEVICE &device) {
         this->iMaxActiveVoices);
 
     // init global volume
-    setVolume(fVolume);
+    this->setVolume(fVolume);
 
     // run callbacks pt. 2
     if(this->restartCBs[1] != nullptr) this->restartCBs[1]();

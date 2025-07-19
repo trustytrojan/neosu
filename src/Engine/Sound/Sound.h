@@ -22,7 +22,8 @@ class Sound : public Resource {
     enum SndType : TypeId { BASS, SOLOUD };
 
    public:
-    Sound(std::string filepath, bool stream, bool overlayable, bool loop);
+    Sound(std::string filepath, bool stream, bool overlayable, bool loop)
+        : Resource(std::move(filepath)), bStream(stream), bIsLooped(loop), bIsOverlayable(overlayable) {}
 
     // Factory method to create the appropriate sound object
     static Sound *createSound(std::string filepath, bool stream, bool overlayable, bool loop);
@@ -98,7 +99,6 @@ class Sound : public Resource {
     float fPitch{1.0f};
     float fVolume{1.0f};
     f64 fLastPlayTime{0.0};
-    f64 fChannelCreationTime{0.0};
     u32 paused_position_ms{0};
     u32 length{0};
 

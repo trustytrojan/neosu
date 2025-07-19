@@ -2192,22 +2192,20 @@ void Osu::setupSoloud() {
                                                      // need to adjust)
 
     // need to save this state somewhere to share data between callback stages
-    static bool was_playing_state = false;
+    static bool was_playing = false;
     static unsigned long prev_position_ms = 0;
 
-    static auto outputChangedBeforeCallback = [pwas_playing = &was_playing_state,
-                                               pprev_position_ms = &prev_position_ms]() -> void {
+    static auto outputChangedBeforeCallback = [&]() -> void {
         if(osu && osu->getSelectedBeatmap() && osu->getSelectedBeatmap()->getMusic()) {
-            *pwas_playing = osu->getSelectedBeatmap()->getMusic()->isPlaying();
-            *pprev_position_ms = osu->getSelectedBeatmap()->getMusic()->getPositionMS();
+            was_playing = osu->getSelectedBeatmap()->getMusic()->isPlaying();
+            prev_position_ms = osu->getSelectedBeatmap()->getMusic()->getPositionMS();
         } else {
-            *pwas_playing = false;
-            *pprev_position_ms = 0;
+            was_playing = false;
+            prev_position_ms = 0;
         }
     };
     // the actual reset will be sandwiched between these during restart
-    static auto outputChangedAfterCallback = [pwas_playing = &was_playing_state,
-                                              pprev_position_ms = &prev_position_ms]() -> void {
+    static auto outputChangedAfterCallback = [&]() -> void {
         // part 2 of callback
         if(osu && osu->optionsMenu && osu->optionsMenu->outputDeviceLabel && osu->getSkin()) {
             osu->optionsMenu->outputDeviceLabel->setText(soundEngine->getOutputDeviceName());
@@ -2220,15 +2218,15 @@ void Osu::setupSoloud() {
                     osu->getSelectedBeatmap()->unloadMusic();
                     osu->getSelectedBeatmap()->loadMusic(false);
                     osu->getSelectedBeatmap()->getMusic()->setLoop(false);
-                    osu->getSelectedBeatmap()->getMusic()->setPositionMS(*pprev_position_ms);
+                    osu->getSelectedBeatmap()->getMusic()->setPositionMS(prev_position_ms);
                 } else {
                     osu->getSelectedBeatmap()->unloadMusic();
                     osu->getSelectedBeatmap()->select();
-                    osu->getSelectedBeatmap()->getMusic()->setPositionMS(*pprev_position_ms);
+                    osu->getSelectedBeatmap()->getMusic()->setPositionMS(prev_position_ms);
                 }
             }
 
-            if(*pwas_playing) {
+            if(was_playing) {
                 osu->music_unpause_scheduled = true;
             }
             osu->optionsMenu->scheduleLayoutUpdate();
@@ -2237,4 +2235,7 @@ void Osu::setupSoloud() {
     soundEngine->setDeviceChangeBeforeCallback(outputChangedBeforeCallback);
     soundEngine->setDeviceChangeAfterCallback(outputChangedAfterCallback);
     soundEngine->initializeOutputDevice(soundEngine->getWantedDevice());
+    soundEngine
+        ->allowInternalCallbacks();  // this sets convar callbacks for things that require a soundengine reinit, do it
+                                     // only after init so config files don't restart it over and over again
 }
