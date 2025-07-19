@@ -1671,7 +1671,11 @@ void SongBrowser::refreshBeatmaps() {
     this->searchPrevGroup = GROUP::GROUP_NO_GROUPING;
 
     // force no grouping
-    if(this->group != GROUP::GROUP_NO_GROUPING) this->onGroupChange("", 0);
+    if(this->group != GROUP::GROUP_NO_GROUPING) {
+        this->onGroupChange("", 0);
+    } else {
+        this->groupByNothingBtn->setTextBrightColor(highlightColor);
+    }
 
     // start loading
     this->bBeatmapRefreshScheduled = true;
@@ -2275,7 +2279,8 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
             if(!diff->getTags().empty() && SString::contains_ncase(diff->getTags(), searchString)) return true;
 
             if(diff->getID() > 0 && SString::contains_ncase(std::to_string(diff->getID()), searchString)) return true;
-            if(diff->getSetID() > 0 && SString::contains_ncase(std::to_string(diff->getSetID()), searchString)) return true;
+            if(diff->getSetID() > 0 && SString::contains_ncase(std::to_string(diff->getSetID()), searchString))
+                return true;
 
             return false;
         };
@@ -3032,7 +3037,7 @@ std::vector<CollectionButton *> *SongBrowser::getCollectionButtonsForGroup(GROUP
 }
 
 void SongBrowser::onGroupChange(const UString &text, int id) {
-    GROUPING *grouping = (this->groupings.size() > 0 ? &this->groupings[0] : NULL);
+    GROUPING *grouping = &this->groupings[0];
     for(auto &groupingI : this->groupings) {
         if(groupingI.id == id || (text.length() > 1 && groupingI.name == text)) {
             grouping = &groupingI;
