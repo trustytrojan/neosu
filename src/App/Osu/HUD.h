@@ -150,8 +150,6 @@ class HUD : public OsuScreen {
                                float beatmapPercentFinishedPlayable, const std::vector<BREAK> &breaks);
     void drawInputOverlay(int numK1, int numK2, int numM1, int numM2);
 
-    void drawStatisticText(const UString& text);
-
     float getCursorScaleFactor();
     float getCursorTrailScaleFactor();
 
