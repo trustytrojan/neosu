@@ -29,16 +29,16 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG v39_00;
     v39_00.title = PACKAGE_VERSION " " __DATE__;
     v39_00.changes = {
+        R"(- Added the SoLoud audio backend, as an alternative to BASS)",
+        R"(  - Currently selectable by passing "-sound soloud" to the launch arguments, Windows builds have shortcuts provided to do so)",
+        R"(  - Latency should be much lower than regular BASS)",
+        R"(  - BASS will remain as default for the foreseeable future, but testing is highly encouraged)",
+        R"(  - No exclusive mode support or loudness normalization yet)",
+        R"(- Added support for parsing McOsu "scores.db" databases for local scores)",
+        R"(- Added "Max Queued Frames" slider to options menu (and associated renderer logic), for lower input lag)",
         R"(- Crop screenshots to the internal/letterboxed osu! resolution, instead of keeping the black borders)",
         R"(- Added "Sort Skins Alphabetically" option, for sorting skins in a different order (ignoring prefixes))",
         R"(- Added support for filtering by "creator=" in the song browser)",
-        R"(- Added support for parsing McOsu "scores.db" databases for local scores)",
-        R"(- Added "Max Queued Frames" slider to options menu (and associated renderer logic), for lower input lag)",
-        R"(- Added the SoLoud audio backend, as an alternative to BASS)",
-        R"(  - Latency should be much lower than regular BASS)",
-        R"(  - Currently selectable by passing "-sound soloud" to the launch arguments, Windows builds have shortcuts provided to do so)",
-        R"(  - BASS will remain as default for the foreseeable future, but testing is highly encouraged)",
-        R"(  - No exclusive mode support or loudness normalization yet)",
     };
     changelogs.push_back(v39_00);
 
