@@ -175,7 +175,6 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/App/Osu/neosu-DatabaseBeatmap.$(OBJEXT) \
 	src/App/Osu/neosu-DifficultyCalculator.$(OBJEXT) \
 	src/App/Osu/neosu-Downloader.$(OBJEXT) \
-	src/App/Osu/neosu-GameRules.$(OBJEXT) \
 	src/App/Osu/neosu-HUD.$(OBJEXT) \
 	src/App/Osu/neosu-HitObject.$(OBJEXT) \
 	src/App/Osu/neosu-Icons.$(OBJEXT) \
@@ -360,7 +359,6 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/App/Osu/$(DEPDIR)/neosu-DatabaseBeatmap.Po \
 	src/App/Osu/$(DEPDIR)/neosu-DifficultyCalculator.Po \
 	src/App/Osu/$(DEPDIR)/neosu-Downloader.Po \
-	src/App/Osu/$(DEPDIR)/neosu-GameRules.Po \
 	src/App/Osu/$(DEPDIR)/neosu-HUD.Po \
 	src/App/Osu/$(DEPDIR)/neosu-HitObject.Po \
 	src/App/Osu/$(DEPDIR)/neosu-Icons.Po \
@@ -856,7 +854,6 @@ neosu_SOURCES = \
 	src/App/Osu/DatabaseBeatmap.cpp \
 	src/App/Osu/DifficultyCalculator.cpp \
 	src/App/Osu/Downloader.cpp \
-	src/App/Osu/GameRules.cpp \
 	src/App/Osu/HUD.cpp \
 	src/App/Osu/HitObject.cpp \
 	src/App/Osu/Icons.cpp \
@@ -1343,8 +1340,6 @@ src/App/Osu/neosu-DifficultyCalculator.$(OBJEXT):  \
 	src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/neosu-Downloader.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
-	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
-src/App/Osu/neosu-GameRules.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/neosu-HUD.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
@@ -1852,7 +1847,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-DatabaseBeatmap.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-DifficultyCalculator.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-Downloader.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-GameRules.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-HUD.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-HitObject.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-Icons.Po@am__quote@ # am--include-marker
@@ -2405,20 +2399,6 @@ src/App/Osu/neosu-Downloader.obj: src/App/Osu/Downloader.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/Downloader.cpp' object='src/App/Osu/neosu-Downloader.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-Downloader.obj `if test -f 'src/App/Osu/Downloader.cpp'; then $(CYGPATH_W) 'src/App/Osu/Downloader.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/Downloader.cpp'; fi`
-
-src/App/Osu/neosu-GameRules.o: src/App/Osu/GameRules.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-GameRules.o -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-GameRules.Tpo -c -o src/App/Osu/neosu-GameRules.o `test -f 'src/App/Osu/GameRules.cpp' || echo '$(srcdir)/'`src/App/Osu/GameRules.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/$(DEPDIR)/neosu-GameRules.Tpo src/App/Osu/$(DEPDIR)/neosu-GameRules.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/GameRules.cpp' object='src/App/Osu/neosu-GameRules.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-GameRules.o `test -f 'src/App/Osu/GameRules.cpp' || echo '$(srcdir)/'`src/App/Osu/GameRules.cpp
-
-src/App/Osu/neosu-GameRules.obj: src/App/Osu/GameRules.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-GameRules.obj -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-GameRules.Tpo -c -o src/App/Osu/neosu-GameRules.obj `if test -f 'src/App/Osu/GameRules.cpp'; then $(CYGPATH_W) 'src/App/Osu/GameRules.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/GameRules.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/$(DEPDIR)/neosu-GameRules.Tpo src/App/Osu/$(DEPDIR)/neosu-GameRules.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/GameRules.cpp' object='src/App/Osu/neosu-GameRules.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-GameRules.obj `if test -f 'src/App/Osu/GameRules.cpp'; then $(CYGPATH_W) 'src/App/Osu/GameRules.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/GameRules.cpp'; fi`
 
 src/App/Osu/neosu-HUD.o: src/App/Osu/HUD.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-HUD.o -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-HUD.Tpo -c -o src/App/Osu/neosu-HUD.o `test -f 'src/App/Osu/HUD.cpp' || echo '$(srcdir)/'`src/App/Osu/HUD.cpp
@@ -4710,7 +4690,6 @@ distclean: distclean-am
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-DatabaseBeatmap.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-DifficultyCalculator.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Downloader.Po
-	-rm -f src/App/Osu/$(DEPDIR)/neosu-GameRules.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-HUD.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-HitObject.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Icons.Po
@@ -4925,7 +4904,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-DatabaseBeatmap.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-DifficultyCalculator.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Downloader.Po
-	-rm -f src/App/Osu/$(DEPDIR)/neosu-GameRules.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-HUD.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-HitObject.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Icons.Po

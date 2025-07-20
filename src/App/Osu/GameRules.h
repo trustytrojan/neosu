@@ -172,8 +172,8 @@ class GameRules {
     //	Playfield  //
     //*************//
 
-    static const int OSU_COORD_WIDTH;
-    static const int OSU_COORD_HEIGHT;
+    static constexpr const int OSU_COORD_WIDTH = 512;
+    static constexpr const int OSU_COORD_HEIGHT = 384;
 
     static float getPlayfieldScaleFactor() {
         const int engineScreenWidth = osu->getScreenWidth();
