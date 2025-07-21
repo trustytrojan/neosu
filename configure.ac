@@ -725,7 +725,7 @@ AC_SUBST([FFMPEG_VERSION], [7.1]) # pre-built, used for soloud
 
 AC_SUBST([DISCORDSDK_VERSION], [2.5.6]) # pre-built
 
-AC_SUBST([BASS_VERSION], [20250718]) # just mark the date so we can invalidate the cache if necessary
+AC_SUBST([BASS_VERSION], [20250721]) # just mark the date so we can invalidate the cache if necessary
 
 AS_IF([test "$SYSNAME" = "linux"], [
     PKG_CHECK_AUTO([BLKID], [blkid], [have_blkid=yes], [AC_MSG_ERROR([Missing blkid, required for linux builds.])])
