@@ -36,7 +36,7 @@ endif()
 
 # BASS version (passed from superbuild)
 if(NOT BASS_VERSION)
-    set(BASS_VERSION "20250611")
+    set(BASS_VERSION "20250721")
 endif()
 
 # Set variables for config.h generation
