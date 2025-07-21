@@ -28,6 +28,9 @@ class Environment {
     virtual Graphics *createRenderer() = 0;
 
     // system
+    virtual void shutdown() = 0;
+    virtual void restart() = 0;
+
     // resolved and cached at early startup with argv[0]
     // contains the full canonical path to the current exe
     static const std::string &getPathToSelf(const char *argv0 = nullptr);
@@ -37,11 +40,13 @@ class Environment {
     }
     [[nodiscard]] inline const std::vector<UString> &getCommandLine() const { return vCmdLine; }
 
-    virtual void shutdown() = 0;
-    virtual void restart() = 0;
+    // i.e. getenv()
+    static std::string getEnvVariable(const std::string &varToQuery) noexcept;
+
     static const std::string &getExeFolder();
     static void openURLInDefaultBrowser(const std::string &url) noexcept;
     static void openFileBrowser(const std::string &initialpath) noexcept;
+
 
     // user
     virtual UString getUsername() = 0;

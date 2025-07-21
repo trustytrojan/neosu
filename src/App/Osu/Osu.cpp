@@ -355,7 +355,11 @@ Osu::Osu() {
         BANCHO::Net::reconnect();
     }
 
-    this->updateHandler->checkForUpdates();
+    // don't auto update if this env var is set to anything other than 0 or empty (if it is set)
+    const std::string extUpdater = Environment::getEnvVariable("NEOSU_EXTERNAL_UPDATE_PROVIDER");
+    if(cv::auto_update.getBool() && (extUpdater.empty() || std::strtol(extUpdater.c_str(), nullptr, 10) == 0)) {
+        this->updateHandler->checkForUpdates();
+    }
 
 #ifdef _WIN32
     // Process cmdline args now, after everything has been initialized
@@ -2187,13 +2191,10 @@ float Osu::getUIScale() {
 }
 
 void Osu::setupSoloud() {
-    // cv::universal_offset_hardcoded.setValue(20.0f);  // set +20ms universal offset here to match BASS better (at least
-    //                                                  // on windows, on linux BASS always needs ~-30ms offset so people
+    cv::universal_offset_hardcoded.setValue(15.0f);  // set +15ms universal offset here to match BASS better (at least
+    //                                                  // on windows, on linux BASS always needs ~-30ms offset so
+    //                                                  people
     //                                                  // need to adjust)
-    // hmm... maybe not, just let users set a global offset
-    // it's auto-adjusted to some degree in SoLoudFX.cpp
-
-    cv::universal_offset_hardcoded.setValue(0.0f);
 
     // need to save this state somewhere to share data between callback stages
     static bool was_playing = false;

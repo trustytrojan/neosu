@@ -96,6 +96,24 @@ void Environment::openFileBrowser(const std::string &initialpath) noexcept {
     if(!SDL_OpenURL(pathToOpen.c_str())) debugLogF("Failed to open file URI {:s}: {:s}\n", pathToOpen, SDL_GetError());
 }
 
+std::string Environment::getEnvVariable(const std::string &varToQuery) noexcept {
+    static SDL_Environment *sdlEnv = nullptr;
+    static bool sdlEnvInit = false;
+    if(!sdlEnvInit) {
+        sdlEnvInit = true;
+        sdlEnv = SDL_GetEnvironment();
+    }
+
+    const char *varVal = nullptr;
+    if(sdlEnv && !varToQuery.empty()) {
+        varVal = SDL_GetEnvironmentVariable(sdlEnv, varToQuery.c_str());
+        if (varVal) {
+            return std::string{varVal};
+        }
+    }
+    return {""};
+}
+
 const std::string &Environment::getExeFolder() {
     static std::string pathStr{};
     if(!pathStr.empty()) return pathStr;
