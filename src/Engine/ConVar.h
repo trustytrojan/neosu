@@ -47,7 +47,8 @@ enum FCVAR_FLAGS : uint8_t {
     // don't allow this convar to be manually set from console
     FCVAR_NOEXEC = (1 << 7),
 
-    // don't save, load, or allow this convar to be modified (basically, make it completely invisible outside of engine code)
+    // don't save, load, or allow this convar to be modified (basically, make it completely invisible outside of engine
+    // code)
     FCVAR_INTERNAL = FCVAR_NOEXEC | FCVAR_NOSAVE | FCVAR_NOLOAD
 };
 
@@ -298,20 +299,24 @@ class ConVar {
         this->type = getTypeFor<T>();
 
         // set default value
-        if constexpr(std::is_same_v<std::decay_t<T>, std::string_view> || std::is_same_v<std::decay_t<T>, const char *>)
-            setDefaultStringInt(defaultValue);
-        else
+        if constexpr(std::is_convertible_v<std::decay_t<T>, float> && !std::is_same_v<std::decay_t<T>, UString> &&
+                     !std::is_same_v<std::decay_t<T>, std::string_view> &&
+                     !std::is_same_v<std::decay_t<T>, const char *>)
             setDefaultFloatInt(static_cast<float>(defaultValue));
+        else
+            setDefaultStringInt(defaultValue);
 
         // set "default default" value
         this->fDefaultDefaultValue = this->fDefaultValue;
         this->sDefaultDefaultValue = this->sDefaultValue;
 
         // set initial value (without triggering callbacks)
-        if constexpr(std::is_same_v<std::decay_t<T>, std::string_view> || std::is_same_v<std::decay_t<T>, const char *>)
-            setValueInt(defaultValue);
-        else
+        if constexpr(std::is_convertible_v<std::decay_t<T>, float> && !std::is_same_v<std::decay_t<T>, UString> &&
+                     !std::is_same_v<std::decay_t<T>, std::string_view> &&
+                     !std::is_same_v<std::decay_t<T>, const char *>)
             setValueInt(static_cast<float>(defaultValue));
+        else
+            setValueInt(defaultValue);
 
         // set callback if provided
         if constexpr(!std::is_same_v<Callback, std::nullptr_t>) {
@@ -339,29 +344,32 @@ class ConVar {
 
         // determine float and string representations depending on whether setValue("string") or setValue(float) was
         // called
-        const auto [newFloat, newUString] = [&]() {
-            if constexpr(std::is_convertible_v<std::decay_t<T>, float> && !std::is_same_v<std::decay_t<T>, UString>) {
-                const float f = std::forward<T>(value);
-                return std::make_pair(f, UString::fmt("{:g}", f));
-            } else if constexpr(std::is_same_v<std::decay_t<T>, std::string_view>) {
-                const float f = !value.empty() ? std::strtof(std::string{value}.c_str(), nullptr) : 0.0f;
-                return std::make_pair(f, UString{value});
-            } else {
+        const auto [newFloat, newString] = [&]() -> std::pair<float, std::string> {
+            if constexpr(std::is_convertible_v<std::decay_t<T>, float> && !std::is_same_v<std::decay_t<T>, UString> &&
+                         !std::is_same_v<std::decay_t<T>, std::string_view> &&
+                         !std::is_same_v<std::decay_t<T>, const char *>) {
+                const auto f = static_cast<float>(value);
+                return std::make_pair(f, fmt::format("{:g}", f));
+            } else if constexpr(std::is_same_v<std::decay_t<T>, UString>) {
                 const UString s = std::forward<T>(value);
-                const float f = (s.length() > 0) ? s.toFloat() : 0.0f;
+                const float f = !s.isEmpty() ? s.toFloat() : 0.0f;
+                return std::make_pair(f, std::string{s.toUtf8()});
+            } else {
+                const std::string s{std::forward<T>(value)};
+                const float f = !s.empty() ? std::strtof(s.c_str(), nullptr) : 0.0f;
                 return std::make_pair(f, s);
             }
         }();
 
         // backup previous values
         const float oldFloat = this->fValue.load();
-        const UString oldUString{this->sValue};
+        const std::string oldString{this->sValue};
 
         // set new values
         this->fValue = newFloat;
-        this->sValue = newUString.utf8View();
+        this->sValue = newString;
 
-        if(likely(doCallback)) {
+        if(doCallback) {
             // handle possible execution callbacks
             if(!std::holds_alternative<std::monostate>(this->callback)) {
                 std::visit(
@@ -370,7 +378,7 @@ class ConVar {
                         if constexpr(std::is_same_v<CallbackType, NativeConVarCallback>)
                             callback();
                         else if constexpr(std::is_same_v<CallbackType, NativeConVarCallbackArgs>)
-                            callback(newUString);
+                            callback(UString{newString});
                         else if constexpr(std::is_same_v<CallbackType, NativeConVarCallbackFloat>)
                             callback(newFloat);
                     },
@@ -383,7 +391,7 @@ class ConVar {
                     [&](auto &&callback) {
                         using CallbackType = std::decay_t<decltype(callback)>;
                         if constexpr(std::is_same_v<CallbackType, NativeConVarChangeCallback>)
-                            callback(oldUString, newUString);
+                            callback(UString{oldString}, UString{newString});
                         else if constexpr(std::is_same_v<CallbackType, NativeConVarChangeCallbackFloat>)
                             callback(oldFloat, newFloat);
                     },
