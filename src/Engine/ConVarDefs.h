@@ -58,6 +58,10 @@ extern void onRichPresenceChange(const UString &, const UString &);
 extern void _osu_songbrowser_search_hardcoded_filter(const UString &, const UString &);
 extern void _vprof(float);
 extern void _volume(const UString &, const UString &);
+namespace BANCHO::Net {
+extern void reconnect();
+extern void disconnect();
+}
 #endif
 
 // ########################################################################################################################
@@ -322,6 +326,7 @@ CONVAR(debug_rt, "debug_rt", false, FCVAR_LOCKED | FCVAR_GAMEPLAY,
        "draws all rendertargets with a translucent green background");
 CONVAR(debug_shaders, "debug_shaders", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(debug_vprof, "debug_vprof", false, FCVAR_BANCHO_COMPATIBLE);
+CONVAR(debug_network, "debug_network", false, FCVAR_HIDDEN | FCVAR_PRIVATE | FCVAR_GAMEPLAY | FCVAR_NOSAVE | FCVAR_NOLOAD);
 CONVAR(disable_mousebuttons, "osu_disable_mousebuttons", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(disable_mousewheel, "osu_disable_mousewheel", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(drain_kill, "osu_drain_kill", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_GAMEPLAY,
@@ -823,6 +828,8 @@ CONVAR(mp_password_md5, "mp_password_md5", "", FCVAR_BANCHO_COMPATIBLE | FCVAR_P
 CONVAR(mp_password_temporary, "mp_password_temporary", "",
        FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_HIDDEN | FCVAR_INTERNAL);
 CONVAR(mp_server, "mp_server", "akatsuki.gg", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
+CONVAR(mp_disconnect, "mp_disconnect", FCVAR_BANCHO_COMPATIBLE, CFUNC(BANCHO::Net::disconnect));
+CONVAR(mp_reconnect, "mp_reconnect", FCVAR_BANCHO_COMPATIBLE, CFUNC(BANCHO::Net::reconnect));
 CONVAR(name, "name", "Guest", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
 CONVAR(nightcore_enjoyer, "nightcore_enjoyer", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(normalize_loudness, "normalize_loudness", true, FCVAR_BANCHO_COMPATIBLE, "normalize loudness across songs");

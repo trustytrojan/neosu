@@ -55,10 +55,10 @@ set(SOLOUD_VERSION "0aa5d49e7117a15554c22ed9f060207bc9a34c45")
 set(SOLOUD_URL "https://github.com/whrvt/neoloud/archive/${SOLOUD_VERSION}.tar.gz")
 set(SOLOUD_HASH "SHA512=a7e1383afeb507bdd4117b7d4c20fbf01c41ef57cdecbe1dbb7f6c33f2909a8daecc16fe7697b423fa98cdbb9a8314f0b10b8b7354e61d540c4e2eafdd38f322")
 
-set(CURL_VERSION "8.14.1")
+set(CURL_VERSION "8.15.0")
 string(REPLACE "." "_" _curl_ver_temp "${CURL_VERSION}")
 set(CURL_URL "https://github.com/curl/curl/releases/download/curl-${_curl_ver_temp}/curl-${CURL_VERSION}.tar.gz")
-set(CURL_HASH "SHA512=22307bd41d5ded22e7e53e2412b3218763db9b7c32b1254df26172e6cf00d1650c66874dfc03037da89a5bd72ffbca1eeb83784be62a38d5779484376f3a53c7")
+set(CURL_HASH "SHA512=382b8480e3cc89170370334c03f8b72a64e29630f8ee8d4390b01f99f63c5519fda53dc4103eb774051c8c5a673c177c6afa3c179d60de7a6a76ff1de37706ac")
 unset(_curl_ver_temp)
 
 # BINARY DEPENDENCIES

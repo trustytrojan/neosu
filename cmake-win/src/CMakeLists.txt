@@ -42,6 +42,7 @@ endif()
 # Set variables for config.h generation
 set(PROJECT_TARNAME "neosu")
 set(PROJECT_URL "https://github.com/kiwec/neosu")
+string(TIMESTAMP BUILD_TIMESTAMP %y%m%d%H UTC)
 
 # Platform and feature detection
 set(MCENGINE_PLATFORM_WINDOWS ON)

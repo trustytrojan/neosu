@@ -199,6 +199,7 @@ int NetworkHandler::progressCallback(void* clientp, curl_off_t dltotal, curl_off
 }
 
 void NetworkHandler::setupCurlHandle(CURL* handle, NetworkRequest* request) {
+    curl_easy_setopt(handle, CURLOPT_VERBOSE, cv::debug_network.getVal<long>());
     curl_easy_setopt(handle, CURLOPT_URL, request->url.toUtf8());
     curl_easy_setopt(handle, CURLOPT_CONNECTTIMEOUT, request->options.connectTimeout);
     curl_easy_setopt(handle, CURLOPT_TIMEOUT, request->options.timeout);
@@ -208,6 +209,7 @@ void NetworkHandler::setupCurlHandle(CURL* handle, NetworkRequest* request) {
     curl_easy_setopt(handle, CURLOPT_HEADERDATA, request);
     curl_easy_setopt(handle, CURLOPT_SSL_VERIFYPEER, true);
     curl_easy_setopt(handle, CURLOPT_NOSIGNAL, 1L);
+    curl_easy_setopt(handle, CURLOPT_FAILONERROR, 1L); // fail on HTTP responses >= 400
 
     if(!request->options.userAgent.empty()) {
         curl_easy_setopt(handle, CURLOPT_USERAGENT, request->options.userAgent.c_str());

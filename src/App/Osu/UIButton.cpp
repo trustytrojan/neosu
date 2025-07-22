@@ -43,7 +43,7 @@ void UIButton::draw() {
 
     float middleWidth = this->vSize.x - leftWidth - rightWidth;
 
-    auto color = this->is_loading ? Color(0xff333333) : this->color;
+    auto color = this->is_loading ? rgba(0x33, 0x33, 0x33, 0xff) : this->color;
     const auto red =
         static_cast<Channel>(std::max(static_cast<float>(color.R()) * this->fBrightness, this->fAnim * 255.0f));
     const auto green =

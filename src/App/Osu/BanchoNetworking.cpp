@@ -143,11 +143,13 @@ void send_bancho_packet_async(Packet outgoing) {
                 }
                 return;
             }
+
             // // debug
-            // Engine::logRaw("DEBUG headers:\n");
-            // for (const auto &headerstr : response.headers)
-            // {
-            //     Engine::logRaw("{:s} {:s}\n", headerstr.first.c_str(), headerstr.second.c_str());
+            // if (cv::debug_network.getBool()) {
+            //     Engine::logRaw("DEBUG headers:\n");
+            //     for(const auto &headerstr : response.headers) {
+            //         Engine::logRaw("{:s} {:s}\n", headerstr.first.c_str(), headerstr.second.c_str());
+            //     }
             // }
 
             // Update auth token
@@ -171,11 +173,12 @@ void send_bancho_packet_async(Packet outgoing) {
 
             // parse response packets
             Packet response_packet = {
-                .memory = (u8 *)malloc(response.body.length()),
-                .size = response.body.length(),
+                .memory = (u8 *)malloc(response.body.length() + 1),  // +1 for null terminator
+                .size = response.body.length() + 1,
                 .pos = 0,
             };
             memcpy(response_packet.memory, response.body.data(), response.body.length());
+            response_packet.memory[response.body.length()] = '\0';  // null terminate
 
             while(response_packet.pos < response_packet.size) {
                 if(response_packet.pos + 7 > response_packet.size) break;  // need at least packet header
@@ -193,7 +196,7 @@ void send_bancho_packet_async(Packet outgoing) {
 
                 Packet incoming = {
                     .id = packet_id,
-                    .memory = (u8 *)malloc(packet_len),
+                    .memory = (u8 *)calloc(packet_len, sizeof(*Packet::memory)),
                     .size = packet_len,
                     .pos = 0,
                 };

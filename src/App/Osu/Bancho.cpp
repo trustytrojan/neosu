@@ -189,6 +189,9 @@ MD5Hash Bancho::md5(u8 *msg, size_t msg_len) {
 
 void Bancho::handle_packet(Packet *packet) {
     // XXX: This is a bit of a mess, should at least group packets by type for readability
+    if (cv::debug_network.getBool() && packet) {
+        debugLogF("packet id: {}\n", packet->id);
+    }
     if(packet->id == USER_ID) {
         i32 new_user_id = proto::read<i32>(packet);
         bancho->user_id.store(new_user_id);
