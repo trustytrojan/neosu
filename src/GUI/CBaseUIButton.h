@@ -15,18 +15,13 @@ class CBaseUIButton : public CBaseUIElement {
 
     void click(bool left = true, bool right = false) { this->onClicked(left, right); }
 
-    // callbacks, either void, with the held left/right buttons, or with ourself as the argument
-    using ButtonClickVoidCallback = SA::delegate<void()>;
-    using ButtonClickButtonsHeldCallback = SA::delegate<void(bool left, bool right)>;
-    using ButtonClickThisCallback = SA::delegate<void(CBaseUIButton *)>;
+    // callbacks, either void, with ourself as the argument, or with the held left/right buttons
+    using ButtonClickCallback = SA::auto_callback<CBaseUIButton, bool, bool>;
 
-    using ButtonClickCallback = std::variant<std::monostate,           // empty
-                                             ButtonClickVoidCallback,  // void()
-                                             ButtonClickButtonsHeldCallback, // void(bool left, bool right)
-                                             ButtonClickThisCallback   // void(CBaseUIButton *)
-                                             >;
-
-    CBaseUIButton *setClickCallback(const ButtonClickCallback &clickCallback);
+    CBaseUIButton* setClickCallback(auto&& callback) {
+        this->clickCallback = std::forward<decltype(callback)>(callback);
+        return this;
+    }
 
     // set
     CBaseUIButton *setDrawFrame(bool drawFrame) {
@@ -122,5 +117,5 @@ class CBaseUIButton : public CBaseUIElement {
     float fStringWidth;
     float fStringHeight;
 
-    ButtonClickCallback clickCallback{std::monostate()};
+    ButtonClickCallback clickCallback;
 };

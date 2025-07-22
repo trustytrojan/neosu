@@ -44,7 +44,7 @@ void UIContextMenuButton::onMouseInside() {
     }
 }
 
-void UIContextMenuButton::onMouseDownInside(bool left, bool right) { soundEngine->play(osu->getSkin()->clickButton); }
+void UIContextMenuButton::onMouseDownInside(bool  /*left*/, bool  /*right*/) { soundEngine->play(osu->getSkin()->clickButton); }
 
 void UIContextMenuButton::setTooltipText(const UString& text) { this->tooltipTextLines = text.split("\n"); }
 
@@ -289,7 +289,7 @@ void UIContextMenu::setVisible2(bool visible2) {
     if(this->parent != NULL) this->parent->setScrollSizeToContent();  // and update parent scroll size
 }
 
-void UIContextMenu::onMouseDownOutside(bool left, bool right) { this->setVisible2(false); }
+void UIContextMenu::onMouseDownOutside(bool  /*left*/, bool  /*right*/) { this->setVisible2(false); }
 
 void UIContextMenu::onClick(CBaseUIButton *button) {
     this->setVisible2(false);

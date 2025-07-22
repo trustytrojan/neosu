@@ -651,7 +651,7 @@ void CBaseUITextbox::onResized() {
     this->setText(this->sText);
 }
 
-void CBaseUITextbox::onMouseDownInside(bool left, bool right) {
+void CBaseUITextbox::onMouseDownInside(bool  /*left*/, bool  /*right*/) {
     // force busy, can't drag scroll release (textbox requires full focus due to text selection)
     this->bBusy = true;
 }

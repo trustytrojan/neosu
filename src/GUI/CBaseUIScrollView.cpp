@@ -602,16 +602,16 @@ void CBaseUIScrollView::scrollToBottom() { this->scrollToY(-this->vScrollSize.y)
 
 void CBaseUIScrollView::scrollToTop() { this->scrollToY(0); }
 
-void CBaseUIScrollView::onMouseDownOutside(bool left, bool right) { this->container->stealFocus(); }
+void CBaseUIScrollView::onMouseDownOutside(bool  /*left*/, bool  /*right*/) { this->container->stealFocus(); }
 
-void CBaseUIScrollView::onMouseDownInside(bool left, bool right) {
+void CBaseUIScrollView::onMouseDownInside(bool  /*left*/, bool  /*right*/) {
     this->bBusy = true;
     this->vMouseBackup2 = mouse->getPos();  // to avoid spastic movement at scroll start
 }
 
-void CBaseUIScrollView::onMouseUpInside(bool left, bool right) { this->bBusy = false; }
+void CBaseUIScrollView::onMouseUpInside(bool  /*left*/, bool  /*right*/) { this->bBusy = false; }
 
-void CBaseUIScrollView::onMouseUpOutside(bool left, bool right) { this->bBusy = false; }
+void CBaseUIScrollView::onMouseUpOutside(bool  /*left*/, bool  /*right*/) { this->bBusy = false; }
 
 void CBaseUIScrollView::onFocusStolen() {
     this->bActive = false;

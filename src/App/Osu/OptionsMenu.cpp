@@ -134,7 +134,7 @@ class OptionsMenuSkinPreviewElement : public CBaseUIElement {
         }
     }
 
-    void onMouseUpInside(bool left, bool right) override {
+    void onMouseUpInside(bool  /*left*/, bool  /*right*/) override {
         this->iMode++;
         this->iMode = this->iMode % 3;
     }

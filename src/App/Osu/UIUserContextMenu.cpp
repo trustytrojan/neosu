@@ -148,4 +148,4 @@ UIUserLabel::UIUserLabel(u32 user_id, const UString& username) : CBaseUILabel() 
     this->setDrawBackground(false);
 }
 
-void UIUserLabel::onMouseUpInside(bool left, bool right) { osu->user_actions->open(this->user_id); }
+void UIUserLabel::onMouseUpInside(bool  /*left*/, bool  /*right*/) { osu->user_actions->open(this->user_id); }
