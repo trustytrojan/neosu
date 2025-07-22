@@ -15,6 +15,10 @@
 #include <libloaderapi.h>
 #endif
 
+#include <string>
+#include <sstream>
+#include <iomanip>
+
 Environment::Environment(const std::vector<UString> &argCmdline,
                          const std::unordered_map<UString, std::optional<UString>> &argMap)
     : mArgMap(argMap), vCmdLine(argCmdline) {
@@ -71,8 +75,52 @@ const std::string &Environment::getPathToSelf(const char *argv0) {
     return pathStr;
 }
 
+std::string Environment::encodeStringToURL(const std::string &stringToConvert) noexcept {
+    std::ostringstream escaped;
+    escaped.fill('0');
+    escaped << std::hex;
+
+    for(const char c : stringToConvert) {
+        // keep alphanumerics and other accepted characters intact
+        if(std::isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~' || c == '/') {
+            escaped << c;
+        } else {
+            // any other characters are percent-encoded
+            escaped << std::uppercase;
+            escaped << '%' << std::setw(2) << int(static_cast<unsigned char>(c));
+            escaped << std::nouppercase;
+        }
+    }
+
+    return escaped.str();
+}
+
+std::string Environment::filesystemPathToURI(const std::filesystem::path &path) noexcept {
+    namespace fs = std::filesystem;
+    // convert to absolute path and normalize
+    auto abs_path = fs::absolute(path);
+    // convert to path with forward slashes
+    const UString path_str = UString{abs_path.generic_string()};
+    // URL encode the path
+    std::string uri = encodeStringToURL(path_str.toUtf8());
+
+    // prepend with file:///
+    if(uri[0] == '/')
+        uri = fmt::format("file://{}", uri);
+    else
+        uri = fmt::format("file:///{}", uri);
+
+    // add trailing slash if it's a directory
+    if(fs::is_directory(abs_path) && !uri.ends_with('/')) {
+        uri += '/';
+    }
+    return uri;
+}
+
 void Environment::openURLInDefaultBrowser(const std::string &url) noexcept {
-    if(!SDL_OpenURL(url.c_str())) debugLogF("Failed to open URL: {:s}\n", SDL_GetError());
+    if(!SDL_OpenURL(url.c_str())) {
+        debugLogF("Failed to open URL: {:s}\n", SDL_GetError());
+    }
 }
 
 // just open the file manager in a certain folder, but not do anything with it
@@ -83,17 +131,12 @@ void Environment::openFileBrowser(const std::string &initialpath) noexcept {
     else
         pathToOpen = getFolderFromFilePath(pathToOpen);
 
-    // prepend with file:/// to open it as a URI
-    if constexpr(Env::cfg(OS::WINDOWS))
-        pathToOpen = fmt::format("file:///{}", pathToOpen);
-    else {
-        if(pathToOpen[0] != '/')
-            pathToOpen = fmt::format("file:///{}", pathToOpen);
-        else
-            pathToOpen = fmt::format("file://{}", pathToOpen);
-    }
+    namespace fs = std::filesystem;
+    std::string encodedPath =
+        Env::cfg(OS::WINDOWS) ? fmt::format("file:///{}", pathToOpen) : filesystemPathToURI(fs::path{pathToOpen});
 
-    if(!SDL_OpenURL(pathToOpen.c_str())) debugLogF("Failed to open file URI {:s}: {:s}\n", pathToOpen, SDL_GetError());
+    if(!SDL_OpenURL(encodedPath.c_str()))
+        debugLogF("Failed to open file URI {:s}: {:s}\n", encodedPath, SDL_GetError());
 }
 
 std::string Environment::getEnvVariable(const std::string &varToQuery) noexcept {
@@ -107,7 +150,7 @@ std::string Environment::getEnvVariable(const std::string &varToQuery) noexcept 
     const char *varVal = nullptr;
     if(sdlEnv && !varToQuery.empty()) {
         varVal = SDL_GetEnvironmentVariable(sdlEnv, varToQuery.c_str());
-        if (varVal) {
+        if(varVal) {
             return std::string{varVal};
         }
     }

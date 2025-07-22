@@ -12,6 +12,8 @@
 #include <unistd.h>  // isatty libc++
 #endif
 
+#include <filesystem>
+
 class Environment;
 
 extern Environment *env;
@@ -44,9 +46,12 @@ class Environment {
     static std::string getEnvVariable(const std::string &varToQuery) noexcept;
 
     static const std::string &getExeFolder();
+
+    // replace non-alphanum characters in a string to %-encoded ones viable for a URL
+    [[nodiscard]] static std::string encodeStringToURL(const std::string &stringToConvert) noexcept;
+
     static void openURLInDefaultBrowser(const std::string &url) noexcept;
     static void openFileBrowser(const std::string &initialpath) noexcept;
-
 
     // user
     virtual UString getUsername() = 0;
@@ -155,4 +160,7 @@ class Environment {
     static std::string getThingFromPathHelper(
         const std::string &path,
         bool folder) noexcept;  // code sharing for getFolderFromFilePath/getFileNameFromFilePath
+
+    // internal path conversion helper, SDL_URLOpen needs a URL-encoded URI on Unix (because it goes to xdg-open)
+    [[nodiscard]] static std::string filesystemPathToURI(const std::filesystem::path &path) noexcept;
 };
