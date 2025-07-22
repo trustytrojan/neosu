@@ -72,7 +72,7 @@ class Button : public CBaseUIButton {
 
     enum class MOVE_AWAY_STATE : uint8_t { MOVE_CENTER, MOVE_UP, MOVE_DOWN };
 
-    void onClicked() override;
+    void onClicked(bool left = true, bool right = false) override;
     void onMouseInside() override;
     void onMouseOutside() override;
 

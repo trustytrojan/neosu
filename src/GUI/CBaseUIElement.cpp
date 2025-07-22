@@ -13,6 +13,14 @@ bool CBaseUIElement::isVisibleOnScreen() {
     return visrect.contains(elemPosNudgedIn);
 }
 
+void CBaseUIElement::stealFocus() {
+    uint8_t checkLeft = this->bHandleLeftMouse ? 0b10 : 0;
+    uint8_t checkRight = this->bHandleRightMouse ? 0b01 : 0;
+    this->mouseInsideCheck = checkLeft | checkRight;
+    this->bActive = false;
+    this->onFocusStolen();
+}
+
 void CBaseUIElement::mouse_update(bool *propagate_clicks) {
     // check if mouse is inside element
     McRect temp = McRect(this->vPos.x + 1, this->vPos.y + 1, this->vSize.x - 1, this->vSize.y - 1);
@@ -36,41 +44,49 @@ void CBaseUIElement::mouse_update(bool *propagate_clicks) {
             osu->getTooltipOverlay()->addLine(this->disabled_reason);
             osu->getTooltipOverlay()->end();
         }
-
         return;
     }
 
-    if(mouse->isLeftDown() && *propagate_clicks) {
-        this->bMouseUpCheck = true;
+    uint8_t leftClick = (this->bHandleLeftMouse && mouse->isLeftDown()) ? 0b10 : 0;
+    uint8_t rightClick = (this->bHandleRightMouse && mouse->isRightDown()) ? 0b01 : 0;
+    uint8_t buttonMask = (leftClick | rightClick);
+
+    if(buttonMask && *propagate_clicks) {
+        this->mouseUpCheck |= buttonMask;
         if(this->bMouseInside) {
             *propagate_clicks = !this->grabs_clicks;
         }
 
         // onMouseDownOutside
-        if(!this->bMouseInside && !this->bMouseInsideCheck) {
-            this->bMouseInsideCheck = true;
-            this->onMouseDownOutside();
+        if(!this->bMouseInside && !(this->mouseInsideCheck & buttonMask)) {
+            this->mouseInsideCheck |= buttonMask;
+            this->onMouseDownOutside(leftClick, rightClick);
         }
 
         // onMouseDownInside
-        if(this->bMouseInside && !this->bMouseInsideCheck) {
+        if(this->bMouseInside && !(this->mouseInsideCheck & buttonMask)) {
             this->bActive = true;
-            this->bMouseInsideCheck = true;
-            this->onMouseDownInside();
+            this->mouseInsideCheck |= buttonMask;
+            this->onMouseDownInside(leftClick, rightClick);
         }
-    } else {
-        if(this->bMouseUpCheck) {
-            if(this->bActive) {
-                if(this->bMouseInside)
-                    this->onMouseUpInside();
-                else
-                    this->onMouseUpOutside();
+    }
 
-                if(!this->bKeepActive) this->bActive = false;
-            }
-        }
+    // detect which buttons were released for mouse up events
+    uint8_t releasedButtons = this->mouseUpCheck & (~buttonMask);
+    if(releasedButtons && this->bActive) {
+        if(this->bMouseInside)
+            this->onMouseUpInside(releasedButtons & 0b10, releasedButtons & 0b01);
+        else
+            this->onMouseUpOutside(releasedButtons & 0b10, releasedButtons & 0b01);
 
-        this->bMouseInsideCheck = false;
-        this->bMouseUpCheck = false;
+        if(!this->bKeepActive) this->bActive = false;
+    }
+
+    // remove released buttons from mouseUpCheck
+    this->mouseUpCheck &= buttonMask;
+
+    // reset mouseInsideCheck if all buttons are released
+    if(buttonMask == 0) {
+        this->mouseInsideCheck = 0;
     }
 }

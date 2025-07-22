@@ -48,8 +48,8 @@ void UIBackButton::mouse_update(bool *propagate_clicks) {
     CBaseUIButton::mouse_update(propagate_clicks);
 }
 
-void UIBackButton::onMouseDownInside() {
-    CBaseUIButton::onMouseDownInside();
+void UIBackButton::onMouseDownInside(bool left, bool right) {
+    CBaseUIButton::onMouseDownInside(left, right);
 
     soundEngine->play(osu->getSkin()->backButtonClick);
 }

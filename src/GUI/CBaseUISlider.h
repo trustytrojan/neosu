@@ -68,9 +68,9 @@ class CBaseUISlider : public CBaseUIElement {
     bool hasChanged();
 
     void onFocusStolen() override;
-    void onMouseUpInside() override;
-    void onMouseUpOutside() override;
-    void onMouseDownInside() override;
+    void onMouseUpInside(bool left = true, bool right = false) override;
+    void onMouseUpOutside(bool left = true, bool right = false) override;
+    void onMouseDownInside(bool left = true, bool right = false) override;
     void onResized() override;
 
    protected:

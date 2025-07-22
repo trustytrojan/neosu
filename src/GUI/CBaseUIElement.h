@@ -43,7 +43,7 @@ class CBaseUIElement : public KeyboardListener {
 
     virtual bool isActive() { return this->bActive || this->isBusy(); }
     virtual bool isVisible() { return this->bVisible; }
-	bool isVisibleOnScreen(); // x,y within engine rectangle
+    bool isVisibleOnScreen();  // x,y within engine rectangle
     virtual bool isEnabled() { return this->bEnabled; }
     virtual bool isBusy() { return this->bBusy && this->isVisible(); }
     virtual bool isMouseInside() { return this->bMouseInside && this->isVisible(); }
@@ -146,13 +146,16 @@ class CBaseUIElement : public KeyboardListener {
         this->sName = std::move(name);
         return this;
     }
-
-    // actions
-    void stealFocus() {
-        this->bMouseInsideCheck = true;
-        this->bActive = false;
-        this->onFocusStolen();
+    virtual CBaseUIElement *setHandleLeftMouse(bool handle) {
+        this->bHandleLeftMouse = handle;
+        return this;
     }
+    virtual CBaseUIElement *setHandleRightMouse(bool handle) {
+        this->bHandleRightMouse = handle;
+        return this;
+    }
+    // actions
+    void stealFocus();
 
     // events
     virtual void onResized() { ; }
@@ -164,10 +167,10 @@ class CBaseUIElement : public KeyboardListener {
 
     virtual void onMouseInside() { ; }
     virtual void onMouseOutside() { ; }
-    virtual void onMouseDownInside() { ; }
-    virtual void onMouseDownOutside() { ; }
-    virtual void onMouseUpInside() { ; }
-    virtual void onMouseUpOutside() { ; }
+    virtual void onMouseDownInside(bool /*left*/ = true, bool /*right*/ = false) { ; }
+    virtual void onMouseDownOutside(bool /*left*/ = true, bool /*right*/ = false) { ; }
+    virtual void onMouseUpInside(bool /*left*/ = true, bool /*right*/ = false) { ; }
+    virtual void onMouseUpOutside(bool /*left*/ = true, bool /*right*/ = false) { ; }
 
     // vars
     UString sName;
@@ -181,6 +184,9 @@ class CBaseUIElement : public KeyboardListener {
     bool bKeepActive = false;  // once clicked, don't lose m_bActive, we have to manually release it (e.g. textbox)
     bool bMouseInside = false;
 
+    bool bHandleLeftMouse = true;
+    bool bHandleRightMouse = false;
+
     // position and size
     Vector2 vPos;
     Vector2 vmPos;
@@ -190,6 +196,6 @@ class CBaseUIElement : public KeyboardListener {
     const char *disabled_reason = NULL;
 
    private:
-    bool bMouseInsideCheck = false;
-    bool bMouseUpCheck = false;
+    uint8_t mouseInsideCheck{0};
+    uint8_t mouseUpCheck{0};
 };

@@ -42,7 +42,7 @@ class ScoreButton : public CBaseUIButton {
 
     void updateElapsedTimeString();
 
-    void onClicked() override;
+    void onClicked(bool left = true, bool right = false) override;
 
     void onMouseInside() override;
     void onMouseOutside() override;

@@ -102,10 +102,10 @@ class CBaseUIScrollView : public CBaseUIElement {
 
     // events
     void onResized() override;
-    void onMouseDownOutside() override;
-    void onMouseDownInside() override;
-    void onMouseUpInside() override;
-    void onMouseUpOutside() override;
+    void onMouseDownOutside(bool left = true, bool right = false) override;
+    void onMouseDownInside(bool left = true, bool right = false) override;
+    void onMouseUpInside(bool left = true, bool right = false) override;
+    void onMouseUpOutside(bool left = true, bool right = false) override;
 
     void onFocusStolen() override;
     void onEnabled() override;

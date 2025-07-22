@@ -44,7 +44,7 @@ class UIContextMenu : public CBaseUIScrollView {
     bool isVisible() override { return this->bVisible2; }
 
    private:
-    void onMouseDownOutside() override;
+    void onMouseDownOutside(bool left = true, bool right = false) override;
 
     void onClick(CBaseUIButton *button);
     void onHitEnter(UIContextMenuTextbox *textbox);
@@ -74,7 +74,7 @@ class UIContextMenuButton : public CBaseUIButton {
     void mouse_update(bool *propagate_clicks) override;
 
     void onMouseInside() override;
-    void onMouseDownInside() override;
+    void onMouseDownInside(bool left = true, bool right = false) override;
 
     [[nodiscard]] inline int getID() const { return this->iID; }
 

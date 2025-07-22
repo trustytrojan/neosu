@@ -134,7 +134,7 @@ class OptionsMenuSkinPreviewElement : public CBaseUIElement {
         }
     }
 
-    void onMouseUpInside() override {
+    void onMouseUpInside(bool left, bool right) override {
         this->iMode++;
         this->iMode = this->iMode % 3;
     }
@@ -308,9 +308,9 @@ class OptionsMenuKeyBindLabel : public CBaseUILabel {
     void setTextColorUnbound(Color textColorUnbound) { this->textColorUnbound = textColorUnbound; }
 
    private:
-    void onMouseUpInside() override {
-        CBaseUILabel::onMouseUpInside();
-        this->bindButton->click();
+    void onMouseUpInside(bool left, bool right) override {
+        CBaseUILabel::onMouseUpInside(left, right);
+        this->bindButton->click(left, right);
     }
 
     ConVar *key;
@@ -1236,6 +1236,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->passwordTextbox->is_password = true;
     this->elements.back().render_condition = RenderCondition::PASSWORD_AUTH;
     this->logInButton = this->addButton("Log in");
+    this->logInButton->setHandleRightMouse(true); // for canceling logins
     this->logInButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onLogInClicked>(this));
     this->logInButton->setColor(0xff00ff00);
     this->logInButton->setTextColor(0xffffffff);
@@ -2606,11 +2607,13 @@ void OptionsMenu::onOutputDeviceResetUpdate() {
 
 void OptionsMenu::onOutputDeviceRestart() { soundEngine->restart(); }
 
-void OptionsMenu::onLogInClicked() {
-    if(this->logInButton->is_loading) return;
+void OptionsMenu::onLogInClicked(bool left, bool right) {
+    if(left && this->logInButton->is_loading) {
+        return;
+    }
     soundEngine->play(osu->getSkin()->getMenuHit());
 
-    if(bancho->is_online()) {
+    if((right && this->logInButton->is_loading) || bancho->is_online()) {
         BANCHO::Net::disconnect();
 
         // Manually clicked disconnect button: clear oauth token

@@ -245,10 +245,10 @@ void Button::deselect() { this->bSelected = false; }
 
 void Button::resetAnimations() { this->setMoveAwayState(MOVE_AWAY_STATE::MOVE_CENTER, false); }
 
-void Button::onClicked() {
+void Button::onClicked(bool left, bool right) {
     soundEngine->play(osu->getSkin()->selectDifficulty);
 
-    CBaseUIButton::onClicked();
+    CBaseUIButton::onClicked(left, right);
 
     this->select(true, true);
 }

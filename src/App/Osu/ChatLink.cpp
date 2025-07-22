@@ -49,7 +49,7 @@ void ChatLink::open_beatmap_link(i32 map_id, i32 set_id) {
     }
 }
 
-void ChatLink::onMouseUpInside() {
+void ChatLink::onMouseUpInside(bool left, bool right) {
     std::string link_str = this->link.toUtf8();
     std::smatch match;
 

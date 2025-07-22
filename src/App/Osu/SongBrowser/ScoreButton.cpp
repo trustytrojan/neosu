@@ -474,9 +474,9 @@ void ScoreButton::updateElapsedTimeString() {
     }
 }
 
-void ScoreButton::onClicked() {
+void ScoreButton::onClicked(bool left, bool right) {
     soundEngine->play(osu->getSkin()->getMenuHit());
-    CBaseUIButton::onClicked();
+    CBaseUIButton::onClicked(left, right);
 }
 
 void ScoreButton::onMouseInside() {

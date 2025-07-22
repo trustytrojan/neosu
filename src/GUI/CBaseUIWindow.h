@@ -98,9 +98,9 @@ class CBaseUIWindow : public CBaseUIElement {
     inline int getTitleBarHeight() { return this->iTitleBarHeight; }
 
     // events
-    void onMouseDownInside() override;
-    void onMouseUpInside() override;
-    void onMouseUpOutside() override;
+    void onMouseDownInside(bool left = true, bool right = false) override;
+    void onMouseUpInside(bool left = true, bool right = false) override;
+    void onMouseUpOutside(bool left = true, bool right = false) override;
 
     void onMoved() override;
     void onResized() override;

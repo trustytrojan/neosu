@@ -493,20 +493,20 @@ CBaseUIWindow *CBaseUIWindow::enableCoherenceMode() {
     return this;
 }
 
-void CBaseUIWindow::onMouseDownInside() {
+void CBaseUIWindow::onMouseDownInside(bool left, bool right) {
     this->bBusy = true;
     bool wtf = true;
     this->titleBarContainer->mouse_update(&wtf);  // why is this called here lol?
     if(!this->titleBarContainer->isBusy()) this->udpateResizeAndMoveLogic(true);
 }
 
-void CBaseUIWindow::onMouseUpInside() {
+void CBaseUIWindow::onMouseUpInside(bool left, bool right) {
     this->bBusy = false;
     this->bResizing = false;
     this->bMoving = false;
 }
 
-void CBaseUIWindow::onMouseUpOutside() {
+void CBaseUIWindow::onMouseUpOutside(bool left, bool right) {
     this->bBusy = false;
     this->bResizing = false;
     this->bMoving = false;

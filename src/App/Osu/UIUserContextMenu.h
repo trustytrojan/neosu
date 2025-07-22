@@ -34,7 +34,7 @@ class UIUserLabel : public CBaseUILabel {
    public:
     UIUserLabel(u32 user_id, const UString& username);
 
-    void onMouseUpInside() override;
+    void onMouseUpInside(bool left = true, bool right = false) override;
 
     u32 user_id;
 };

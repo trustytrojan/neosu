@@ -209,7 +209,7 @@ void CBaseUIContainer::onDisabled() {
     }
 }
 
-void CBaseUIContainer::onMouseDownOutside() { this->onFocusStolen(); }
+void CBaseUIContainer::onMouseDownOutside(bool left, bool right) { this->onFocusStolen(); }
 
 bool CBaseUIContainer::isBusy() {
     if(!this->bVisible) return false;

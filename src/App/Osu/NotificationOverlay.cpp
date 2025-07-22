@@ -40,11 +40,11 @@ ToastElement::ToastElement(const UString& text, Color borderColor_arg) : CBaseUI
     this->setSize(TOAST_WIDTH, (font->getHeight() * 1.5 * this->lines.size()) + (TOAST_INNER_Y_MARGIN * 2.0));
 }
 
-void ToastElement::onClicked() {
+void ToastElement::onClicked(bool left, bool right) {
     // Set creationTime to -10 so toast is deleted in NotificationOverlay::mouse_update
     this->creationTime = -10.0;
 
-    CBaseUIButton::onClicked();
+    CBaseUIButton::onClicked(left, right);
 }
 
 void ToastElement::draw() {

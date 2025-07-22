@@ -115,10 +115,10 @@ void UIButton::onMouseInside() {
 
 void UIButton::onMouseOutside() { this->fBrightness = 0.85f; }
 
-void UIButton::onClicked() {
-    if(this->is_loading) return;
+void UIButton::onClicked(bool left, bool right) {
+    CBaseUIButton::onClicked(left, right);
 
-    CBaseUIButton::onClicked();
+    if(this->is_loading) return;
 
     this->animateClickColor();
 

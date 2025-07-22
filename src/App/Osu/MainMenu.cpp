@@ -52,7 +52,7 @@ class MainMenuButton : public CBaseUIButton {
    public:
     MainMenuButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text);
 
-    void onMouseDownInside() override;
+    void onMouseDownInside(bool left = true, bool right = false) override;
     void onMouseInside() override;
 };
 
@@ -1458,9 +1458,9 @@ void MainMenuCubeButton::onMouseOutside() {
 MainMenuButton::MainMenuButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
     : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), std::move(text)) {}
 
-void MainMenuButton::onMouseDownInside() {
+void MainMenuButton::onMouseDownInside(bool left, bool right) {
     if(g_main_menu->cube->isMouseInside()) return;
-    CBaseUIButton::onMouseDownInside();
+    CBaseUIButton::onMouseDownInside(left, right);
 }
 
 void MainMenuButton::onMouseInside() {

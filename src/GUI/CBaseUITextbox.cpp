@@ -651,13 +651,13 @@ void CBaseUITextbox::onResized() {
     this->setText(this->sText);
 }
 
-void CBaseUITextbox::onMouseDownInside() {
+void CBaseUITextbox::onMouseDownInside(bool left, bool right) {
     // force busy, can't drag scroll release (textbox requires full focus due to text selection)
     this->bBusy = true;
 }
 
-void CBaseUITextbox::onMouseDownOutside() {
-    CBaseUIElement::onMouseDownOutside();
+void CBaseUITextbox::onMouseDownOutside(bool left, bool right) {
+    CBaseUIElement::onMouseDownOutside(left, right);
 
     this->bBusy = false;
     this->bActive = false;
@@ -665,14 +665,14 @@ void CBaseUITextbox::onMouseDownOutside() {
     this->deselectText();
 }
 
-void CBaseUITextbox::onMouseUpInside() {
-    CBaseUIElement::onMouseUpInside();
+void CBaseUITextbox::onMouseUpInside(bool left, bool right) {
+    CBaseUIElement::onMouseUpInside(left, right);
 
     this->bBusy = false;
 }
 
-void CBaseUITextbox::onMouseUpOutside() {
-    CBaseUIElement::onMouseUpOutside();
+void CBaseUITextbox::onMouseUpOutside(bool left, bool right) {
+    CBaseUIElement::onMouseUpOutside(left, right);
 
     this->bBusy = false;
 }

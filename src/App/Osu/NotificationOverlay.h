@@ -9,7 +9,7 @@ class ToastElement : public CBaseUIButton {
     ~ToastElement() override { ; }
 
     void draw() override;
-    void onClicked() override;
+    void onClicked(bool left = true, bool right = false) override;
 
     std::vector<UString> lines;
     Color borderColor;

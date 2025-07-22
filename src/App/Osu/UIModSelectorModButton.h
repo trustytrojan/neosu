@@ -10,7 +10,7 @@ class UIModSelectorModButton : public CBaseUIButton {
 
     void draw() override;
     void mouse_update(bool *propagate_clicks) override;
-    void onClicked() override;
+    void onClicked(bool left = true, bool right = false) override;
 
     void resetState();
 

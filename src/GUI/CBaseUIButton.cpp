@@ -101,12 +101,27 @@ void CBaseUIButton::drawHoverRect(int distance) {
                 this->vPos.y + this->vSize.y + 1);
 }
 
-void CBaseUIButton::onMouseUpInside() { this->onClicked(); }
+void CBaseUIButton::onMouseUpInside(bool left, bool right) { this->onClicked(left, right); }
 
-void CBaseUIButton::onClicked() {
-    if(this->clickCallback != NULL) this->clickCallback(this);
+CBaseUIButton *CBaseUIButton::setClickCallback(const ButtonClickCallback &clickCallback) {
+    this->clickCallback = clickCallback;
+    return this;
+}
 
-    if(this->clickVoidCallback != NULL) this->clickVoidCallback();
+void CBaseUIButton::onClicked(bool left, bool right) {
+    if(!std::holds_alternative<std::monostate>(this->clickCallback)) {
+        std::visit(
+            [&](auto &&callback) {
+                using CallbackType = std::decay_t<decltype(callback)>;
+                if constexpr(std::is_same_v<CallbackType, ButtonClickVoidCallback>)
+                    callback();
+                else if constexpr(std::is_same_v<CallbackType, ButtonClickButtonsHeldCallback>)
+                    callback(left, right);
+                else if constexpr(std::is_same_v<CallbackType, ButtonClickThisCallback>)
+                    callback(this);
+            },
+            this->clickCallback);
+    }
 }
 
 void CBaseUIButton::updateStringMetrics() {

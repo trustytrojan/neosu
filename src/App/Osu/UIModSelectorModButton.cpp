@@ -100,7 +100,7 @@ void UIModSelectorModButton::resetState() {
     this->setState(0);
 }
 
-void UIModSelectorModButton::onClicked() {
+void UIModSelectorModButton::onClicked(bool left, bool right) {
     if(!this->bAvailable) return;
 
     // increase state, wrap around, switch on and off

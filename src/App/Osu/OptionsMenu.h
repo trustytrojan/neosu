@@ -123,7 +123,7 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     void onOutputDeviceResetClicked();
     void onOutputDeviceResetUpdate();
     void onOutputDeviceRestart();
-    void onLogInClicked();
+    void onLogInClicked(bool left, bool right);
     void onCM360CalculatorLinkClicked();
     void onNotelockSelect();
     void onNotelockSelect2(const UString &notelockType, int id = -1);

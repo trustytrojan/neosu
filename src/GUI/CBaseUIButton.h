@@ -13,19 +13,20 @@ class CBaseUIButton : public CBaseUIElement {
 
     void draw() override;
 
-    void click() { this->onClicked(); }
+    void click(bool left = true, bool right = false) { this->onClicked(left, right); }
 
-    // callbacks, either void or with ourself as the argument
+    // callbacks, either void, with the held left/right buttons, or with ourself as the argument
     using ButtonClickVoidCallback = SA::delegate<void()>;
-    CBaseUIButton *setClickCallback(const ButtonClickVoidCallback& clickCallback) {
-        this->clickVoidCallback = clickCallback;
-        return this;
-    }
-    using ButtonClickCallback = SA::delegate<void(CBaseUIButton *)>;
-    CBaseUIButton *setClickCallback(const ButtonClickCallback& clickCallback) {
-        this->clickCallback = clickCallback;
-        return this;
-    }
+    using ButtonClickButtonsHeldCallback = SA::delegate<void(bool left, bool right)>;
+    using ButtonClickThisCallback = SA::delegate<void(CBaseUIButton *)>;
+
+    using ButtonClickCallback = std::variant<std::monostate,           // empty
+                                             ButtonClickVoidCallback,  // void()
+                                             ButtonClickButtonsHeldCallback, // void(bool left, bool right)
+                                             ButtonClickThisCallback   // void(CBaseUIButton *)
+                                             >;
+
+    CBaseUIButton *setClickCallback(const ButtonClickCallback &clickCallback);
 
     // set
     CBaseUIButton *setDrawFrame(bool drawFrame) {
@@ -90,15 +91,15 @@ class CBaseUIButton : public CBaseUIElement {
     [[nodiscard]] inline Color getTextColor() const { return this->textColor; }
     [[nodiscard]] inline UString getText() const { return this->sText; }
     [[nodiscard]] inline McFont *getFont() const { return this->font; }
-    [[nodiscard]] inline ButtonClickCallback getClickCallback() const { return this->clickCallback; }
+    [[nodiscard]] inline const ButtonClickCallback &getClickCallback() const { return this->clickCallback; }
     [[nodiscard]] inline bool isTextLeft() const { return this->bTextLeft; }
 
     // events
-    void onMouseUpInside() override;
+    void onMouseUpInside(bool left = true, bool right = false) override;
     void onResized() override { this->updateStringMetrics(); }
 
    protected:
-    virtual void onClicked();
+    virtual void onClicked(bool left = true, bool right = false);
 
     virtual void drawText();
 
@@ -121,6 +122,5 @@ class CBaseUIButton : public CBaseUIElement {
     float fStringWidth;
     float fStringHeight;
 
-    ButtonClickVoidCallback clickVoidCallback;
-    ButtonClickCallback clickCallback;
+    ButtonClickCallback clickCallback{std::monostate()};
 };

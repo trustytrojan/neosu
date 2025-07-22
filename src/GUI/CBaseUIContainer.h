@@ -38,7 +38,7 @@ class CBaseUIContainer : public CBaseUIElement {
     bool isBusy() override;
     bool isActive() override;
 
-    void onMouseDownOutside() override;
+    void onMouseDownOutside(bool left = true, bool right = false) override;
 
     void onFocusStolen() override;
     void onEnabled() override;

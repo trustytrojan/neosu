@@ -89,10 +89,10 @@ class CBaseUITextbox : public CBaseUIElement {
     virtual void drawText();
 
     // events
-    void onMouseDownInside() override;
-    void onMouseDownOutside() override;
-    void onMouseUpInside() override;
-    void onMouseUpOutside() override;
+    void onMouseDownInside(bool left = true, bool right = false) override;
+    void onMouseDownOutside(bool left = true, bool right = false) override;
+    void onMouseUpInside(bool left = true, bool right = false) override;
+    void onMouseUpOutside(bool left = true, bool right = false) override;
     void onResized() override;
 
     void handleCaretKeyboardMove();

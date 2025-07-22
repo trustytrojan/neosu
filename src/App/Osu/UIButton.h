@@ -27,7 +27,7 @@ class UIButton : public CBaseUIButton {
     bool bVisible2 = true;
 
    private:
-    void onClicked() override;
+    void onClicked(bool left = true, bool right = false) override;
     void onFocusStolen() override;
 
     bool bDefaultSkin;

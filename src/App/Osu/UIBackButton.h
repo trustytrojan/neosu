@@ -8,7 +8,7 @@ class UIBackButton : public CBaseUIButton {
     void draw() override;
     void mouse_update(bool *propagate_clicks) override;
 
-    void onMouseDownInside() override;
+    void onMouseDownInside(bool left = true, bool right = false) override;
     void onMouseInside() override;
     void onMouseOutside() override;
 
