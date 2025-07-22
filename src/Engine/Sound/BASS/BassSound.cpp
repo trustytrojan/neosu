@@ -148,6 +148,7 @@ void BassSound::destroy() {
     this->fChannelCreationTime = 0.0;
     this->bPaused = false;
     this->paused_position_ms = 0;
+    this->bIgnored = false;
 }
 
 u32 BassSound::setPosition(f64 percent) {

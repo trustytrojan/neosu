@@ -29,6 +29,8 @@ void Sound::initAsync() {
                 fileExtensionLowerCase, this->sFilePath);
             this->bIgnored = false;
         }
+    } else {
+        this->bIgnored = false;
     }
 }
 
