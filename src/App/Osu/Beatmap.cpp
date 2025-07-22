@@ -3497,7 +3497,7 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
 
     FinishedScore score;
     UString client_ver = "neosu-" OS_NAME "-" NEOSU_STREAM "-";
-    client_ver.append(UString::format("%.2f", cv::version.getFloat()));
+    client_ver.append(UString::fmt("{:.2f}", cv::version.getFloat()));
     score.client = client_ver.toUtf8();
 
     score.unixTimestamp =

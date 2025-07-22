@@ -1,5 +1,12 @@
 /* src/config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Defined to the UTC YYMMDDHHMM of the last run of ./configure. Used for
+   differentiating dev builds. */
+#undef BUILD_TIMESTAMP
+
+/* Defined if this is an in-between-releases build. */
+#undef CI_DEVBUILD
+
 /* Define to 1 if you have the <glm/vec3.hpp> header file. */
 #undef HAVE_GLM_VEC3_HPP
 
@@ -68,6 +75,9 @@
 
 /* Define if compiling for Windows. */
 #undef MCENGINE_PLATFORM_WINDOWS
+
+/* Defined to the version of neosu being built. */
+#undef NEOSU_VERSION
 
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT

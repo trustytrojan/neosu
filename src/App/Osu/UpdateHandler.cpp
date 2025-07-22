@@ -22,16 +22,19 @@ UpdateHandler::UpdateHandler() {
 void UpdateHandler::checkForUpdates() {
     if(!cv::auto_update.getBool() || cv::debug.getBool()) return;
 
-    if(this->iNumRetries > 0) debugLog("UpdateHandler::checkForUpdates() retry %i ...\n", this->iNumRetries);
+    if(this->iNumRetries > 0) {
+        debugLog("UpdateHandler: update check retry %i ...\n", this->iNumRetries);
+    }
 
-    requestUpdate();
+    this->requestUpdate();
 }
 
 void UpdateHandler::requestUpdate() {
-    debugLog("UpdateHandler::requestUpdate()\n");
     this->status = STATUS::STATUS_CHECKING_FOR_UPDATE;
 
     UString versionUrl = "https://" NEOSU_DOMAIN "/update/" OS_NAME "/latest-version.txt";
+
+    debugLogF("UpdateHandler: Checking for a newer version from {}\n", versionUrl);
 
     NetworkHandler::RequestOptions options;
     options.timeout = 10;
@@ -39,42 +42,59 @@ void UpdateHandler::requestUpdate() {
 
     networkHandler->httpRequestAsync(
         versionUrl,
-        [this](const NetworkHandler::Response& response) { this->onVersionCheckComplete(response.body, response.success); },
+        [this](const NetworkHandler::Response &response) {
+            this->onVersionCheckComplete(response.body, response.success);
+        },
         options);
 }
 
 void UpdateHandler::onVersionCheckComplete(const std::string &response, bool success) {
     if(!success || response.empty()) {
         this->status = STATUS::STATUS_UP_TO_DATE;
-        debugLog("Failed to check for updates :/\n");
+        debugLog("UpdateHandler ERROR: Failed to check for updates :/\n");
         return;
     }
 
-    float fLatestVersion = strtof(response.c_str(), NULL);
-    if(fLatestVersion == 0.f) {
+    float latest_version = strtof(response.c_str(), NULL);
+
+    [[maybe_unused]] float latest_build_timestamp = 0.0f;
+
+    if(latest_version == 0.f) {
         this->status = STATUS::STATUS_UP_TO_DATE;
-        debugLog("Failed to parse version number\n");
+        debugLog("UpdateHandler ERROR: Failed to parse version number\n");
         return;
     }
 
     float current_version = cv::version.getFloat();
-    if(current_version >= fLatestVersion) {
+
+    bool should_update = false;
+
+    if constexpr(Env::cfg(STREAM::EDGE)) {
+        float current_build_timestamp = cv::build_timestamp.getFloat();
+        should_update = current_version < latest_version || (current_build_timestamp < latest_build_timestamp);
+    } else {
+        should_update = current_version < latest_version;
+    }
+
+    if(!should_update) {
         // We're already up to date
         this->status = STATUS::STATUS_UP_TO_DATE;
-        debugLog("We're already up to date (current v%.2f, latest v%.2f)\n", current_version, fLatestVersion);
+        debugLog("UpdateHandler: We're already up to date (current v%.2f, latest v%.2f)\n", current_version,
+                 latest_version);
         return;
     }
 
-    debugLog("Downloading latest update... (current v%.2f, latest v%.2f)\n", current_version, fLatestVersion);
-    this->update_url = UString::format("https://" NEOSU_DOMAIN "/update/" OS_NAME "/v%.2f.zip", fLatestVersion);
+    debugLog("UpdateHandler: Downloading latest update... (current v%.2f, latest v%.2f)\n", current_version,
+             latest_version);
+    this->update_url = UString::format("https://" NEOSU_DOMAIN "/update/" OS_NAME "/v%.2f.zip", latest_version);
 
-    downloadUpdate();
+    this->downloadUpdate();
 }
 
 void UpdateHandler::downloadUpdate() {
     UString url = this->update_url;
 
-    debugLog("UpdateHandler::downloadUpdate( %s )\n", url.toUtf8());
+    debugLog("UpdateHandler: Downloading URL %s\n", url.toUtf8());
     this->status = STATUS::STATUS_DOWNLOADING_UPDATE;
 
     NetworkHandler::RequestOptions options;
@@ -83,20 +103,20 @@ void UpdateHandler::downloadUpdate() {
     options.followRedirects = true;
 
     networkHandler->httpRequestAsync(
-        url, [this](const NetworkHandler::Response& response) { this->onDownloadComplete(response.body, response.success); },
+        url,
+        [this](const NetworkHandler::Response &response) { this->onDownloadComplete(response.body, response.success); },
         options);
 }
 
 void UpdateHandler::onDownloadComplete(const std::string &data, bool success) {
     if(!success || data.length() < 2) {
-        debugLog("UpdateHandler::downloadUpdate() error, downloaded file is too small or failed (%zu bytes)!\n",
-                 data.length());
+        debugLog("UpdateHandler ERROR: downloaded file is too small or failed (%zu bytes)!\n", data.length());
         this->status = STATUS::STATUS_ERROR;
 
         // retry logic
         this->iNumRetries++;
         if(this->iNumRetries < 4) {
-            checkForUpdates();
+            this->checkForUpdates();
         }
         return;
     }
@@ -108,40 +128,40 @@ void UpdateHandler::onDownloadComplete(const std::string &data, bool success) {
         file.write(data.data(), static_cast<std::streamsize>(data.length()));
         file.close();
 
-        debugLog("UpdateHandler::downloadUpdate() finished successfully.\n");
-        installUpdate(TEMP_UPDATE_DOWNLOAD_FILEPATH);
+        debugLog("UpdateHandler: Update finished successfully.\n");
+        this->installUpdate(TEMP_UPDATE_DOWNLOAD_FILEPATH);
     } else {
-        debugLog("UpdateHandler::downloadUpdate() error, can't write file!\n");
+        debugLog("UpdateHandler ERROR: Can't write file!\n");
         this->status = STATUS::STATUS_ERROR;
 
         // retry logic
         this->iNumRetries++;
         if(this->iNumRetries < 4) {
-            checkForUpdates();
+            this->checkForUpdates();
         }
     }
 }
 
 void UpdateHandler::installUpdate(const std::string &zipFilePath) {
-    debugLog("UpdateHandler::installUpdate( %s )\n", zipFilePath.c_str());
+    debugLog("UpdateHandler: installing %s\n", zipFilePath.c_str());
     this->status = STATUS::STATUS_INSTALLING_UPDATE;
 
     if(!env->fileExists(zipFilePath)) {
-        debugLog("UpdateHandler::installUpdate() error, \"%s\" does not exist!\n", zipFilePath.c_str());
+        debugLog("UpdateHandler ERROR: \"%s\" does not exist!\n", zipFilePath.c_str());
         this->status = STATUS::STATUS_ERROR;
         return;
     }
 
     Archive archive(zipFilePath);
     if(!archive.isValid()) {
-        debugLog("UpdateHandler::installUpdate() error, couldn't open archive!\n");
+        debugLog("UpdateHandler ERROR: couldn't open archive!\n");
         this->status = STATUS::STATUS_ERROR;
         return;
     }
 
     auto entries = archive.getAllEntries();
     if(entries.empty()) {
-        debugLog("UpdateHandler::installUpdate() error, archive is empty!\n");
+        debugLog("UpdateHandler ERROR: archive is empty!\n");
         this->status = STATUS::STATUS_ERROR;
         return;
     }
@@ -151,7 +171,7 @@ void UpdateHandler::installUpdate(const std::string &zipFilePath) {
     if(!entries.empty() && entries[0].isDirectory()) {
         mainDirectory = entries[0].getFilename();
     } else {
-        debugLog("UpdateHandler::installUpdate() error, first entry is not the main directory!\n");
+        debugLog("UpdateHandler ERROR: first entry is not the main directory!\n");
         this->status = STATUS::STATUS_ERROR;
         return;
     }
@@ -217,7 +237,7 @@ void UpdateHandler::installUpdate(const std::string &zipFilePath) {
                 debugLog("UpdateHandler: Failed to extract file %s\n", outFilePath.c_str());
             }
         } else if(mainDirectoryOffset != 0) {
-            debugLog("UpdateHandler::installUpdate() warning, ignoring file \"%s\" because it's not in the main dir!\n",
+            debugLog("UpdateHandler WARNING: Ignoring file \"%s\" because it's not in the main dir!\n",
                      fileName.c_str());
         }
     }

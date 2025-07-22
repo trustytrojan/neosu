@@ -5,7 +5,9 @@
 
 #include "BanchoProtocol.h"
 
-#ifdef _DEBUG
+#if defined(CI_DEVBUILD)
+#define NEOSU_STREAM "edge"
+#elif defined(_DEBUG)
 #define NEOSU_STREAM "dev"
 #else
 #define NEOSU_STREAM "release"

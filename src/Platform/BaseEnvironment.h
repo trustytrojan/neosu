@@ -15,27 +15,33 @@
 #include <type_traits>
 
 namespace Env {
-enum class OS : uint32_t {
+enum class OS : uint8_t {
     WINDOWS = 1 << 0,
     LINUX = 1 << 1,
     WASM = 1 << 2,
     MAC = 1 << 3,
     NONE = 0,
 };
-enum class FEAT : uint32_t {
+enum class STREAM : uint8_t {
+    RELEASE = 1 << 0,
+    EDGE = 1 << 1,
+    DEBUG = 1 << 2,
+    NONE = 0,
+};
+enum class FEAT : uint8_t {
     STEAM = 1 << 0,
     DISCORD = 1 << 1,
     MAINCB = 1 << 2,
     NONE = 0,
 };
-enum class AUD : uint32_t {
+enum class AUD : uint8_t {
     BASS = 1 << 0,
     WASAPI = 1 << 1,
     SDL = 1 << 2,
     SOLOUD = 1 << 3,
     NONE = 0,
 };
-enum class REND : uint32_t {
+enum class REND : uint8_t {
     GL = 1 << 0,
     GLES32 = 1 << 1,
     DX11 = 1 << 2,
@@ -43,16 +49,19 @@ enum class REND : uint32_t {
 };
 
 constexpr OS operator|(OS lhs, OS rhs) {
-    return static_cast<OS>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
+    return static_cast<OS>(static_cast<uint8_t>(lhs) | static_cast<uint8_t>(rhs));
+}
+constexpr STREAM operator|(STREAM lhs, STREAM rhs) {
+    return static_cast<STREAM>(static_cast<uint8_t>(lhs) | static_cast<uint8_t>(rhs));
 }
 constexpr FEAT operator|(FEAT lhs, FEAT rhs) {
-    return static_cast<FEAT>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
+    return static_cast<FEAT>(static_cast<uint8_t>(lhs) | static_cast<uint8_t>(rhs));
 }
 constexpr AUD operator|(AUD lhs, AUD rhs) {
-    return static_cast<AUD>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
+    return static_cast<AUD>(static_cast<uint8_t>(lhs) | static_cast<uint8_t>(rhs));
 }
 constexpr REND operator|(REND lhs, REND rhs) {
-    return static_cast<REND>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
+    return static_cast<REND>(static_cast<uint8_t>(lhs) | static_cast<uint8_t>(rhs));
 }
 
 // system McOsu was compiled for
@@ -69,6 +78,17 @@ consteval OS getOS() {
 #else
 #error "Compiling for an unknown target!"
     return OS::NONE;
+#endif
+}
+
+// release stream
+consteval STREAM getReleaseStream() {
+#if defined(CI_DEVBUILD)
+    return STREAM::EDGE;
+#elif defined(_DEBUG)
+    return STREAM::DEBUG;
+#else  // TODO: add actual release identifier for tagged builds
+    return STREAM::RELEASE;
 #endif
 }
 
@@ -138,13 +158,15 @@ constexpr bool always_false_v = false;
 template <typename T>
 consteval bool matchesCurrentConfig(T mask) {
     if constexpr(std::is_same_v<T, OS>) {
-        return (static_cast<uint32_t>(mask) & static_cast<uint32_t>(getOS())) != 0;
+        return (static_cast<uint8_t>(mask) & static_cast<uint8_t>(getOS())) != 0;
+    } else if constexpr(std::is_same_v<T, STREAM>) {
+        return (static_cast<uint8_t>(mask) & static_cast<uint8_t>(getReleaseStream())) != 0;
     } else if constexpr(std::is_same_v<T, FEAT>) {
-        return (static_cast<uint32_t>(mask) & static_cast<uint32_t>(getFeatures())) != 0;
+        return (static_cast<uint8_t>(mask) & static_cast<uint8_t>(getFeatures())) != 0;
     } else if constexpr(std::is_same_v<T, AUD>) {
-        return (static_cast<uint32_t>(mask) & static_cast<uint32_t>(getAudioBackend())) != 0;
+        return (static_cast<uint8_t>(mask) & static_cast<uint8_t>(getAudioBackend())) != 0;
     } else if constexpr(std::is_same_v<T, REND>) {
-        return (static_cast<uint32_t>(mask) & static_cast<uint32_t>(getRenderers())) != 0;
+        return (static_cast<uint8_t>(mask) & static_cast<uint8_t>(getRenderers())) != 0;
     } else {
         static_assert(always_false_v<T>, "Unsupported type for cfg");
         return false;
@@ -170,6 +192,7 @@ using Env::AUD;
 using Env::FEAT;
 using Env::OS;
 using Env::REND;
+using Env::STREAM;
 
 #ifdef __AVX512F__
 static constexpr auto OPTIMAL_UNROLL = 10;
@@ -182,7 +205,7 @@ static constexpr auto OPTIMAL_UNROLL = 4;
 #endif
 
 #define MC_DO_PRAGMA(x) _Pragma(#x)
-#define MC_MESSAGE(msg) MC_DO_PRAGMA(message (msg))
+#define MC_MESSAGE(msg) MC_DO_PRAGMA(message(msg))
 
 #if defined(__GNUC__) || defined(__clang__)
 #define likely(x) __builtin_expect(bool(x), 1)

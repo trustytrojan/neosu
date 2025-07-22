@@ -3042,6 +3042,24 @@ ac_config_headers="$ac_config_headers src/config.h"
 
  # default `make install`s to ./dist/bin/ (modify with --prefix=)
 
+if test "$CI_DEVBUILD" = "1"
+then :
+
+
+printf "%s\n" "#define CI_DEVBUILD 1" >>confdefs.h
+
+
+fi
+
+
+printf "%s\n" "#define NEOSU_VERSION PACKAGE_VERSION" >>confdefs.h
+
+
+_tstamp="\""$(TZ=UTC date +%y%m%d%H%M)"\""
+
+printf "%s\n" "#define BUILD_TIMESTAMP $_tstamp" >>confdefs.h
+
+
 # shut up wine (i need to find what part of configure is doing the "checking if we are cross compiling" check and remove it)
 export DISPLAY= WAYLAND_DISPLAY= WINEDLLOVERRIDES="mscoree=;mshtml=;winex11.drv=;winewayland.drv=" WINEDEBUG=-all
 

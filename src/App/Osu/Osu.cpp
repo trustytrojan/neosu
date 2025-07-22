@@ -84,7 +84,7 @@ Osu::Osu() {
 
     srand(time(NULL));
 
-    bancho->neosu_version = UString::format("%.2f-" NEOSU_STREAM, cv::version.getFloat());
+    bancho->neosu_version = UString::fmt("{:.2f}-" NEOSU_STREAM, cv::version.getFloat());
     bancho->user_agent = UString::format("Mozilla/5.0 (compatible; neosu/%s; +https://" NEOSU_DOMAIN "/)",
                                          bancho->neosu_version.toUtf8());
 

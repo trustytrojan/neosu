@@ -5,6 +5,15 @@ AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_HEADERS([src/config.h])
 AC_PREFIX_DEFAULT([dist]) # default `make install`s to ./dist/bin/ (modify with --prefix=)
 
+AS_IF([test "$CI_DEVBUILD" = "1"], [
+    AC_DEFINE([CI_DEVBUILD], [1], [Defined if this is an in-between-releases build.])
+])
+
+AC_DEFINE_UNQUOTED([NEOSU_VERSION], [PACKAGE_VERSION], [Defined to the version of neosu being built.])
+
+_tstamp="\""$(TZ=UTC date +%y%m%d%H%M)"\""
+AC_DEFINE_UNQUOTED([BUILD_TIMESTAMP], [$_tstamp], [Defined to the UTC YYMMDDHHMM of the last run of ./configure. Used for differentiating dev builds.])
+
 # shut up wine (i need to find what part of configure is doing the "checking if we are cross compiling" check and remove it)
 export DISPLAY= WAYLAND_DISPLAY= WINEDLLOVERRIDES="mscoree=;mshtml=;winex11.drv=;winewayland.drv=" WINEDEBUG=-all
 

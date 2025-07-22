@@ -33,8 +33,6 @@
 
 static float button_sound_cooldown = 0.f;
 
-
-
 UString MainMenu::NEOSU_MAIN_BUTTON_TEXT = UString("neosu");
 UString MainMenu::NEOSU_MAIN_BUTTON_SUBTEXT = UString("Multiplayer Client");
 
@@ -176,7 +174,24 @@ MainMenu::MainMenu() : OsuScreen() {
             File versionFile("version.txt");
             if(versionFile.canRead()) {
                 float version = std::stof(versionFile.readLine());
-                if(version < cv::version.getFloat()) this->bDrawVersionNotificationArrow = true;
+                float buildstamp = 0.0f;
+                if(versionFile.canRead()) {
+                    buildstamp = std::stof(versionFile.readLine());
+                    if(std::isfinite(buildstamp) && buildstamp < 30000000.0f && buildstamp > 25000000.0f) {
+                        buildstamp = 0.0f;  // ignore bogus dates (before 2025 or after 2030)
+                    }
+                }
+                // debugLogF("versionFile version: {} our version: {}{}\n", version, cv::version.getFloat(),
+                //           buildstamp > 0.0f ? fmt::format(" build timestamp: {}", buildstamp) : "");
+                if constexpr(Env::cfg(STREAM::EDGE)) {
+                    if(version < cv::version.getFloat() || (buildstamp > 0 && buildstamp < cv::build_timestamp.getFloat())) {
+                        this->bDrawVersionNotificationArrow = true;
+                    }
+                } else {
+                    if(version < cv::version.getFloat()) {
+                        this->bDrawVersionNotificationArrow = true;
+                    }
+                }
                 if(version < 35.06) {
                     // SoundEngine choking issues have been fixed, option has been removed from settings menu
                     // We leave the cvar available as it could still be useful for some players
@@ -208,8 +223,7 @@ MainMenu::MainMenu() : OsuScreen() {
     this->cube->setClickCallback(SA::MakeDelegate<&MainMenu::onCubePressed>(this));
     this->addBaseUIElement(this->cube);
 
-    this->addMainMenuButton("Singleplayer")
-        ->setClickCallback(SA::MakeDelegate<&MainMenu::onPlayButtonPressed>(this));
+    this->addMainMenuButton("Singleplayer")->setClickCallback(SA::MakeDelegate<&MainMenu::onPlayButtonPressed>(this));
     this->addMainMenuButton("Multiplayer")
         ->setClickCallback(SA::MakeDelegate<&MainMenu::onMultiplayerButtonPressed>(this));
     this->addMainMenuButton("Options (CTRL + O)")
@@ -230,7 +244,16 @@ MainMenu::MainMenu() : OsuScreen() {
     }
 
     this->versionButton = new CBaseUIButton(0, 0, 0, 0, "", "");
-    UString versionString = UString::format("Version %.2f", cv::version.getFloat());
+
+    UString versionString;
+
+    if constexpr(Env::cfg(STREAM::EDGE)) {
+        versionString = UString::fmt("Version {:.2f} ({:s})", cv::version.getFloat(), cv::build_timestamp.getString());
+        this->versionButton->setTextColor(rgb(255, 220, 220));
+    } else {
+        versionString = UString::fmt("Version {:.2f}", cv::version.getFloat());
+    }
+
     this->versionButton->setText(versionString);
     this->versionButton->setDrawBackground(false);
     this->versionButton->setDrawFrame(false);
@@ -322,8 +345,8 @@ void MainMenu::draw() {
             this->fBackgroundFadeInTime = engine->getTime();
         else if(this->fBackgroundFadeInTime > 0.0f && engine->getTime() > this->fBackgroundFadeInTime) {
             alpha = std::clamp<float>((engine->getTime() - this->fBackgroundFadeInTime) /
-                                     cv::songbrowser_background_fade_in_duration.getFloat(),
-                                 0.0f, 1.0f);
+                                          cv::songbrowser_background_fade_in_duration.getFloat(),
+                                      0.0f, 1.0f);
             alpha = 1.0f - (1.0f - alpha) * (1.0f - alpha);
         }
     }
@@ -472,11 +495,11 @@ void MainMenu::draw() {
     }
 
     const Color cubeColor = argb(1.0f, std::lerp(0.0f, 0.5f, this->fMainMenuAnimFriendPercent),
-                                   std::lerp(0.0f, 0.768f, this->fMainMenuAnimFriendPercent),
-                                   std::lerp(0.0f, 0.965f, this->fMainMenuAnimFriendPercent));
+                                 std::lerp(0.0f, 0.768f, this->fMainMenuAnimFriendPercent),
+                                 std::lerp(0.0f, 0.965f, this->fMainMenuAnimFriendPercent));
     const Color cubeBorderColor = argb(1.0f, std::lerp(1.0f, 0.5f, this->fMainMenuAnimFriendPercent),
-                                         std::lerp(1.0f, 0.768f, this->fMainMenuAnimFriendPercent),
-                                         std::lerp(1.0f, 0.965f, this->fMainMenuAnimFriendPercent));
+                                       std::lerp(1.0f, 0.768f, this->fMainMenuAnimFriendPercent),
+                                       std::lerp(1.0f, 0.965f, this->fMainMenuAnimFriendPercent));
 
     // front side
     g->pushTransform();
@@ -906,10 +929,11 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
     {
         this->fMainMenuAnimFriendPercent =
             1.0f - std::clamp<float>((this->fMainMenuAnimDuration > 0.0f
-                                     ? (this->fMainMenuAnimTime - engine->getTime()) / this->fMainMenuAnimDuration
-                                     : 0.0f),
-                                0.0f, 1.0f);
-        this->fMainMenuAnimFriendPercent = std::clamp<float>((this->fMainMenuAnimFriendPercent - 0.5f) / 0.5f, 0.0f, 1.0f);
+                                          ? (this->fMainMenuAnimTime - engine->getTime()) / this->fMainMenuAnimDuration
+                                          : 0.0f),
+                                     0.0f, 1.0f);
+        this->fMainMenuAnimFriendPercent =
+            std::clamp<float>((this->fMainMenuAnimFriendPercent - 0.5f) / 0.5f, 0.0f, 1.0f);
         if(this->bMainMenuAnimFriend) this->fMainMenuAnimFriendPercent = 1.0f;
         if(!this->bMainMenuAnimFriendScheduled) this->fMainMenuAnimFriendPercent = 0.0f;
 
@@ -1005,7 +1029,8 @@ void MainMenu::selectRandomBeatmap() {
     } else {
         // Database is not loaded yet, load a random map and select it
         auto songs_folder{db->getOsuSongsFolder()};
-        auto mapset_folders = env->directoryExists(songs_folder) ? env->getFoldersInFolder(songs_folder) : std::vector<std::string>{};
+        auto mapset_folders =
+            env->directoryExists(songs_folder) ? env->getFoldersInFolder(songs_folder) : std::vector<std::string>{};
         auto mapset_folders2 = env->getFoldersInFolder(MCENGINE_DATA_DIR "maps/");
         auto nb_mapsets = mapset_folders.size();
         auto nb_mapsets2 = mapset_folders2.size();
@@ -1091,7 +1116,7 @@ void MainMenu::onMiddleChange(bool down) {
     }
 }
 
-void MainMenu::onResolutionChange(Vector2  /*newResolution*/) {
+void MainMenu::onResolutionChange(Vector2 /*newResolution*/) {
     this->updateLayout();
     this->setMenuElementsVisible(this->bMenuElementsVisible);
 }
@@ -1285,7 +1310,9 @@ void MainMenu::setMenuElementsVisible(bool visible, bool animate) {
 void MainMenu::writeVersionFile() {
     // remember, don't show the notification arrow until the version changes again
     std::ofstream versionFile("version.txt", std::ios::out | std::ios::trunc);
-    if(versionFile.good()) versionFile << cv::version.getFloat();
+    if(versionFile.good()) {
+        versionFile << cv::version.getString() << '\n' << cv::build_timestamp.getString();
+    }
 }
 
 MainMenuButton *MainMenu::addMainMenuButton(UString text) {
