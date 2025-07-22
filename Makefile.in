@@ -94,7 +94,7 @@ target_triplet = @target@
 bin_PROGRAMS = neosu$(EXEEXT)
 @BUILD_CURL_TRUE@@WIN_PLATFORM_TRUE@am__append_1 = -I$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/include -DWITH_GZFILEOP -DCURL_STATICLIB
 @BUILD_CURL_TRUE@@WIN_PLATFORM_TRUE@am__append_2 = -L$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib $(shell find $(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib -type f -not $(lbq) -name '*dll*' $(rbq) -execdir printf '%s ' '{''}' ';' | $(SED) -e 's|./lib|-l|g' -e 's|\.a||g' -e 's|-lcurl|-l:libcurl.a|g') $\
-@BUILD_CURL_TRUE@@WIN_PLATFORM_TRUE@			-lws2_32 -lwldap32 -lcrypt32 -lbcrypt
+@BUILD_CURL_TRUE@@WIN_PLATFORM_TRUE@			-lws2_32 -lwldap32 -lcrypt32 -lbcrypt -lsecur32 -liphlpapi
 
 @BUILD_CURL_TRUE@@WIN_PLATFORM_FALSE@am__append_3 = -I$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/include -DWITH_GZFILEOP -DCURL_STATICLIB
 @BUILD_CURL_TRUE@@WIN_PLATFORM_FALSE@am__append_4 = -L$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib $(shell find $(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib -type f -not $(lbq) -name '*dll*' $(rbq) -execdir printf '%s ' '{''}' ';' | $(SED) -e 's|./lib|-l|g' -e 's|\.a||g' -e 's|-lcurl|-l:libcurl.a|g') $\
