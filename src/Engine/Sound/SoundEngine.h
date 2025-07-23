@@ -89,7 +89,7 @@ class SoundEngine {
 
     [[nodiscard]] inline const UString &getOutputDeviceName() const { return this->currentOutputDevice.name; }
     [[nodiscard]] constexpr auto getOutputDriverType() const { return this->currentOutputDevice.driver; }
-    [[nodiscard]] constexpr float getVolume() const { return this->fVolume; }
+    [[nodiscard]] constexpr float getVolume() const { return this->fMasterVolume; }
 
     // type inspection
     [[nodiscard]] virtual TypeId getTypeId() const = 0;
@@ -111,7 +111,7 @@ class SoundEngine {
     std::vector<OUTPUT_DEVICE> outputDevices;
     OUTPUT_DEVICE currentOutputDevice;
 
-    float fVolume{1.0f};
+    float fMasterVolume{1.0f};
 
     std::array<AudioOutputChangedCallback, 2>
         restartCBs;  // first to exec before restart, second to exec after restart

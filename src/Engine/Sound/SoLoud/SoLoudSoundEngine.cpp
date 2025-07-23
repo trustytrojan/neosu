@@ -53,8 +53,8 @@ void SoLoudSoundEngine::restart() { this->setOutputDeviceInt(this->getWantedDevi
 bool SoLoudSoundEngine::play(Sound *snd, float pan, float pitch) {
     if(!this->isReady() || snd == NULL || !snd->isReady()) return false;
 
-    MC_MESSAGE(
-        "FIXME: audio pitch may be inaccurate! need to convert caller's pitch properly like old McOsu for SoLoud")
+    // MC_MESSAGE(
+    //     "FIXME: audio pitch may be inaccurate! need to convert caller's pitch properly like old McOsu for SoLoud")
 
     // @spec: adding 1 here because kiwec changed the calling code in some way that i dont understand yet
     pitch += 1.0f;
@@ -271,30 +271,38 @@ void SoLoudSoundEngine::allowInternalCallbacks() {
                      (cv::snd_restart.getDefaultFloat() != cv::snd_restart.getFloat()) ||
                      (cv::snd_soloud_backend.getDefaultString() != cv::snd_soloud_backend.getString());
 
-    if(doRestart) this->restart();
+    if(doRestart) {
+        this->restart();
+    }
 
     bool doMaxActive =
         cv::snd_sanity_simultaneous_limit.getDefaultFloat() != cv::snd_sanity_simultaneous_limit.getFloat();
-    if(doMaxActive) this->onMaxActiveChange(cv::snd_sanity_simultaneous_limit.getFloat());
+    if(doMaxActive) {
+        this->onMaxActiveChange(cv::snd_sanity_simultaneous_limit.getFloat());
+    }
 
     // if we restarted already, then we already set the output device to the desired one
     bool doChangeOutput = !doRestart && (cv::snd_output_device.getDefaultString() != cv::snd_output_device.getString());
-    if(doChangeOutput) this->setOutputDeviceByName(UString{cv::snd_output_device.getString()});
+    if(doChangeOutput) {
+        this->setOutputDeviceByName(UString{cv::snd_output_device.getString()});
+    }
 }
 
 SoLoudSoundEngine::~SoLoudSoundEngine() {
-    if(this->isReady()) soloud->deinit();
+    if(soloud && this->isReady()) {
+        soloud->deinit();
+    }
     soloud.reset();
 }
 
 void SoLoudSoundEngine::setVolume(float volume) {
     if(!this->isReady()) return;
 
-    fVolume = std::clamp<float>(volume, 0.0f, 1.0f);
+    this->fMasterVolume = std::clamp<float>(volume, 0.0f, 1.0f);
 
     // if (cv::debug_snd.getBool())
     // 	debugLogF("setting global volume to {:f}\n", fVolume);
-    soloud->setGlobalVolume(fVolume);
+    soloud->setGlobalVolume(this->fMasterVolume);
 }
 
 void SoLoudSoundEngine::setVolumeGradual(unsigned int handle, float targetVol, float fadeTimeMs) {
@@ -463,10 +471,12 @@ bool SoLoudSoundEngine::initializeOutputDevice(const OUTPUT_DEVICE &device) {
         this->iMaxActiveVoices);
 
     // init global volume
-    this->setVolume(fVolume);
+    this->setVolume(this->fMasterVolume);
 
     // run callbacks pt. 2
-    if(this->restartCBs[1] != nullptr) this->restartCBs[1]();
+    if(this->restartCBs[1] != nullptr) {
+        this->restartCBs[1]();
+    }
     return true;
 }
 

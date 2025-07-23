@@ -603,26 +603,26 @@ void BassSoundEngine::setOutputDevice(const SoundEngine::OUTPUT_DEVICE &device) 
 void BassSoundEngine::setVolume(float volume) {
     if(!this->isReady()) return;
 
-    this->fVolume = std::clamp<float>(volume, 0.0f, 1.0f);
+    this->fMasterVolume = std::clamp<float>(volume, 0.0f, 1.0f);
     if(this->currentOutputDevice.driver == OutputDriver::BASS_ASIO) {
 #ifdef _WIN32
-        BASS_ASIO_ChannelSetVolume(false, 0, this->fVolume);
-        BASS_ASIO_ChannelSetVolume(false, 1, this->fVolume);
+        BASS_ASIO_ChannelSetVolume(false, 0, this->fMasterVolume);
+        BASS_ASIO_ChannelSetVolume(false, 1, this->fMasterVolume);
 #endif
     } else if(this->currentOutputDevice.driver == OutputDriver::BASS_WASAPI) {
 #ifdef _WIN32
         if(hasExclusiveOutput()) {
             // Device volume doesn't seem to work, so we'll use DSP instead
-            BASS_ChannelSetAttribute(g_bassOutputMixer, BASS_ATTRIB_VOLDSP, this->fVolume);
+            BASS_ChannelSetAttribute(g_bassOutputMixer, BASS_ATTRIB_VOLDSP, this->fMasterVolume);
         } else {
-            BASS_WASAPI_SetVolume(BASS_WASAPI_CURVE_WINDOWS | BASS_WASAPI_VOL_SESSION, this->fVolume);
+            BASS_WASAPI_SetVolume(BASS_WASAPI_CURVE_WINDOWS | BASS_WASAPI_VOL_SESSION, this->fMasterVolume);
         }
 #endif
     } else {
         // 0 (silent) - 10000 (full).
-        BASS_SetConfig(BASS_CONFIG_GVOL_SAMPLE, (DWORD)(this->fVolume * 10000));
-        BASS_SetConfig(BASS_CONFIG_GVOL_STREAM, (DWORD)(this->fVolume * 10000));
-        BASS_SetConfig(BASS_CONFIG_GVOL_MUSIC, (DWORD)(this->fVolume * 10000));
+        BASS_SetConfig(BASS_CONFIG_GVOL_SAMPLE, (DWORD)(this->fMasterVolume * 10000));
+        BASS_SetConfig(BASS_CONFIG_GVOL_STREAM, (DWORD)(this->fMasterVolume * 10000));
+        BASS_SetConfig(BASS_CONFIG_GVOL_MUSIC, (DWORD)(this->fMasterVolume * 10000));
     }
 }
 
