@@ -9,7 +9,8 @@
 #include <chrono>
 #include <utility>
 
-std::unique_ptr<Bancho> bancho = nullptr;
+Bancho* NetworkHandler::s_banchoInstance = nullptr;
+mcatomic_ref<Bancho*> bancho{NetworkHandler::s_banchoInstance};
 
 // internal request structure
 struct NetworkRequest {
@@ -38,8 +39,8 @@ NetworkHandler::NetworkHandler() : multi_handle(nullptr) {
         return;
     }
 
-    bancho = std::make_unique<Bancho>();
-    runtime_assert(bancho.get(), "Bancho failed to initialize!");
+    s_banchoInstance = new Bancho();
+    runtime_assert(s_banchoInstance, "Bancho failed to initialize!");
 
     // start network thread
     this->network_thread = std::make_unique<McThread>(
@@ -67,7 +68,7 @@ NetworkHandler::~NetworkHandler() {
         this->active_requests.clear();
     }
 
-    bancho.reset();
+    SAFE_DELETE(s_banchoInstance);
 
     if(this->multi_handle) {
         curl_multi_cleanup(this->multi_handle);

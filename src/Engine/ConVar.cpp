@@ -155,7 +155,7 @@ void ConVar::setDefaultStringInt(const std::string_view &defaultValue) {
 
 bool ConVar::isUnlocked() const {
     if(this->isFlagSet(FCVAR_PRIVATE)) return true;
-    if(!bancho || !bancho->is_online()) return true;
+    if(bancho == nullptr || !bancho->is_online()) return true;
 
     if(bancho->is_in_a_multi_room()) {
         return this->isFlagSet(FCVAR_BANCHO_COMPATIBLE);

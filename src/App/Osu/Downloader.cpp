@@ -30,7 +30,7 @@ class DownloadManager {
         std::atomic<int> response_code{0};
         std::vector<u8> data;
         std::mutex data_mutex;
-        bool completed{false};
+        std::atomic<bool> completed{false};
         std::chrono::steady_clock::time_point retry_after{};
     };
 
@@ -97,7 +97,7 @@ class DownloadManager {
             if(response.success && response.responseCode == 200) {
                 request->data = std::vector<u8>(response.body.begin(), response.body.end());
                 request->progress.store(1.0f);
-                request->completed = true;
+                request->completed.store(true);
             } else {
                 if(!response.success) {
                     debugLog("Failed to download %s: network error\n", request->url.c_str());
@@ -113,7 +113,7 @@ class DownloadManager {
                     return;
                 } else {
                     request->progress.store(-1.0f);
-                    request->completed = true;
+                    request->completed.store(true);
                 }
             }
         }
@@ -226,7 +226,7 @@ void download(const char* url, float* progress, std::vector<u8>& out, int* respo
     *progress = request->progress.load();
     *response_code = request->response_code.load();
 
-    if(request->completed) {
+    if(request->completed.load()) {
         std::scoped_lock lock(request->data_mutex);
         if(*response_code == 200) {
             out = request->data;

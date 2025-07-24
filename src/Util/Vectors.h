@@ -17,7 +17,8 @@
 #include <glm/vec4.hpp>
 #include <iostream>
 
-static constexpr auto VECTOR_NORMALIZE_EPSILON = 0.000001;
+static constexpr auto VECTOR_FLOAT_NORMALIZE_EPSILON = 0.000001f;
+static constexpr auto VECTOR_DOUBLE_NORMALIZE_EPSILON = VECTOR_FLOAT_NORMALIZE_EPSILON / 10e6;
 
 ///////////////////////////////////////////////////////////////////////////////
 // 2D vector
@@ -40,7 +41,7 @@ struct Vector2 : public glm::vec2 {
         return glm::distance(static_cast<const glm::vec2 &>(*this), static_cast<const glm::vec2 &>(vec));
     }
     Vector2 &normalize() {
-        if(glm::length(static_cast<const glm::vec2 &>(*this)) < VECTOR_NORMALIZE_EPSILON) return *this;
+        if(glm::length(static_cast<const glm::vec2 &>(*this)) < VECTOR_FLOAT_NORMALIZE_EPSILON) return *this;
         *this = glm::normalize(static_cast<const glm::vec2 &>(*this));
         return *this;
     }
@@ -53,7 +54,7 @@ struct Vector2 : public glm::vec2 {
     }
     Vector2 &nudge(const Vector2 &vec, float amount) {
         glm::vec2 dir = static_cast<const glm::vec2 &>(*this) - static_cast<const glm::vec2 &>(vec);
-        if(glm::length(dir) > VECTOR_NORMALIZE_EPSILON) {
+        if(glm::length(dir) > VECTOR_FLOAT_NORMALIZE_EPSILON) {
             dir = glm::normalize(dir);
             *this += dir * amount;
         }
@@ -133,7 +134,7 @@ struct Vector2d : public glm::dvec2 {
         return glm::distance(static_cast<const glm::dvec2 &>(*this), static_cast<const glm::dvec2 &>(vec));
     }
     Vector2d &normalize() {
-        if(glm::length(static_cast<const glm::dvec2 &>(*this)) < VECTOR_NORMALIZE_EPSILON) return *this;
+        if(glm::length(static_cast<const glm::dvec2 &>(*this)) < VECTOR_DOUBLE_NORMALIZE_EPSILON) return *this;
         *this = glm::normalize(static_cast<const glm::dvec2 &>(*this));
         return *this;
     }
@@ -146,7 +147,7 @@ struct Vector2d : public glm::dvec2 {
     }
     Vector2d &nudge(const Vector2d &vec, double amount) {
         glm::dvec2 dir = static_cast<const glm::dvec2 &>(*this) - static_cast<const glm::dvec2 &>(vec);
-        if(glm::length(dir) > VECTOR_NORMALIZE_EPSILON) {
+        if(glm::length(dir) > VECTOR_DOUBLE_NORMALIZE_EPSILON) {
             dir = glm::normalize(dir);
             *this += dir * amount;
         }
@@ -222,7 +223,7 @@ struct Vector3 : public glm::vec3 {
     void zero() { *this = glm::vec3(0.0f); }
     void set(float x, float y, float z) { *this = glm::vec3(x, y, z); }
     void setLength(float length) {
-        if(glm::length(static_cast<const glm::vec3 &>(*this)) > VECTOR_NORMALIZE_EPSILON) {
+        if(glm::length(static_cast<const glm::vec3 &>(*this)) > VECTOR_FLOAT_NORMALIZE_EPSILON) {
             *this = glm::normalize(static_cast<const glm::vec3 &>(*this)) * length;
         }
     }
@@ -231,7 +232,7 @@ struct Vector3 : public glm::vec3 {
         return glm::distance(static_cast<const glm::vec3 &>(*this), static_cast<const glm::vec3 &>(vec));
     }
     Vector3 &normalize() {
-        if(glm::length(static_cast<const glm::vec3 &>(*this)) < VECTOR_NORMALIZE_EPSILON) return *this;
+        if(glm::length(static_cast<const glm::vec3 &>(*this)) < VECTOR_FLOAT_NORMALIZE_EPSILON) return *this;
         *this = glm::normalize(static_cast<const glm::vec3 &>(*this));
         return *this;
     }
@@ -247,7 +248,7 @@ struct Vector3 : public glm::vec3 {
     }
     Vector3 &nudge(const Vector3 &vec, float amount) {
         glm::vec3 dir = static_cast<const glm::vec3 &>(*this) - static_cast<const glm::vec3 &>(vec);
-        if(glm::length(dir) > VECTOR_NORMALIZE_EPSILON) {
+        if(glm::length(dir) > VECTOR_FLOAT_NORMALIZE_EPSILON) {
             dir = glm::normalize(dir);
             *this += dir * amount;
         }
@@ -333,7 +334,7 @@ struct Vector4 : public glm::vec4 {
         return glm::distance(static_cast<const glm::vec4 &>(*this), static_cast<const glm::vec4 &>(vec));
     }
     Vector4 &normalize() {
-        if(glm::length(static_cast<const glm::vec4 &>(*this)) < VECTOR_NORMALIZE_EPSILON) return *this;
+        if(glm::length(static_cast<const glm::vec4 &>(*this)) < VECTOR_FLOAT_NORMALIZE_EPSILON) return *this;
         *this = glm::normalize(static_cast<const glm::vec4 &>(*this));
         return *this;
     }
@@ -346,7 +347,7 @@ struct Vector4 : public glm::vec4 {
     }
     Vector4 &nudge(const Vector4 &vec, float amount) {
         glm::vec4 dir = static_cast<const glm::vec4 &>(*this) - static_cast<const glm::vec4 &>(vec);
-        if(glm::length(dir) > VECTOR_NORMALIZE_EPSILON) {
+        if(glm::length(dir) > VECTOR_FLOAT_NORMALIZE_EPSILON) {
             dir = glm::normalize(dir);
             *this += dir * amount;
         }

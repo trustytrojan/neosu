@@ -194,7 +194,7 @@ void Bancho::handle_packet(Packet *packet) {
     }
     if(packet->id == USER_ID) {
         i32 new_user_id = proto::read<i32>(packet);
-        bancho->user_id.store(new_user_id);
+        bancho->user_id = new_user_id;
         osu->optionsMenu->update_login_button();
 
         if(new_user_id > 0) {
@@ -224,9 +224,9 @@ void Bancho::handle_packet(Packet *packet) {
         } else {
             cv::mp_autologin.setValue(false);
 
-            debugLog("Failed to log in, server returned code %d.\n", bancho->user_id.load());
+            debugLog("Failed to log in, server returned code %d.\n", bancho->user_id);
             UString errmsg = UString::format("Failed to log in: %s (code %d)\n", BANCHO::Net::cho_token.toUtf8(),
-                                             bancho->user_id.load());
+                                             bancho->user_id);
             if(new_user_id == -2) {
                 errmsg = "Client version is too old to connect to this server.";
             } else if(new_user_id == -3 || new_user_id == -4) {
@@ -288,7 +288,7 @@ void Bancho::handle_packet(Packet *packet) {
         user->global_rank = proto::read<u32>(packet);
         user->pp = proto::read<u16>(packet);
 
-        if(stats_user_id == bancho->user_id.load()) {
+        if(stats_user_id == bancho->user_id) {
             osu->userButton->updateUserStats();
         }
         if(stats_user_id == bancho->spectated_player_id) {
@@ -299,7 +299,7 @@ void Bancho::handle_packet(Packet *packet) {
     } else if(packet->id == USER_LOGOUT) {
         i32 logged_out_id = proto::read<u32>(packet);
         proto::read<u8>(packet);
-        if(logged_out_id == bancho->user_id.load()) {
+        if(logged_out_id == bancho->user_id) {
             debugLog("Logged out.\n");
             BANCHO::Net::disconnect();
         } else {

@@ -6,6 +6,7 @@
 #include "Osu.h"
 #include "Overrides.h"
 #include "Resource.h"
+#include "templates.h"
 
 class BeatmapInterface;
 class HitObject;

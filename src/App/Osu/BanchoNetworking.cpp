@@ -453,12 +453,12 @@ void update_networking() {
     if(bancho->spectating) seconds_between_pings = 1;
     if(bancho->is_in_a_multi_room() && seconds_between_pings > 3) seconds_between_pings = 3;
     bool should_ping = difftime(time(NULL), last_packet_tms) > seconds_between_pings;
-    if(bancho->user_id.load() <= 0) should_ping = false;
+    if(bancho->user_id <= 0) should_ping = false;
 
     // Handle login and outgoing packet processing
     if(try_logging_in) {
         try_logging_in = false;
-        if(bancho->user_id.load() <= 0) {
+        if(bancho->user_id <= 0) {
             Packet login = Bancho::build_login_packet();
             send_bancho_packet_async(login);
         }

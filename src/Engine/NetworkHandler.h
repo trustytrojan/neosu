@@ -1,5 +1,6 @@
 #pragma once
 #include "UString.h"
+#include "templates.h"
 
 #include <memory>
 #include <mutex>
@@ -87,8 +88,11 @@ class NetworkHandler {
     static size_t headerCallback(char* buffer, size_t size, size_t nitems, void* userdata);
     static size_t writeCallback(void* contents, size_t size, size_t nmemb, void* userp);
     static int progressCallback(void* clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t, curl_off_t);
+
+public:
+    static Bancho* s_banchoInstance;
 };
 
 // allocate the global Bancho here, early in engine startup
 // it's a bit out of place but that's fine
-extern std::unique_ptr<Bancho> bancho;
+extern mcatomic_ref<Bancho*> bancho;

@@ -1341,7 +1341,7 @@ void HUD::resetScoreboard() {
     }
     this->slots.clear();
 
-    int player_entry_id = bancho->is_in_a_multi_room() ? bancho->user_id.load() : 0;
+    int player_entry_id = bancho->is_in_a_multi_room() ? bancho->user_id : 0;
     auto scores = this->getCurrentScores();
     int i = 0;
     for(const auto &score : scores) {

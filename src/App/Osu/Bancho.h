@@ -5,6 +5,7 @@
 #include <mutex>
 #include <unordered_map>
 
+#include "templates.h"
 #include "BanchoProtocol.h"
 #include "UString.h"
 
@@ -28,14 +29,14 @@ struct Bancho {
     UString neosu_version;
 
     UString endpoint;
-    std::atomic<i32> user_id{0};
+    i32 user_id{0};
     UString username;
     MD5Hash pw_md5;
-    u8 oauth_challenge[32];
-    u8 oauth_verifier[32];
+    u8 oauth_challenge[32]{};
+    u8 oauth_verifier[32]{};
     Room room;
 
-    std::atomic<bool> spectating{false};
+    bool spectating{false};
     i32 spectated_player_id{0};
     std::vector<u32> spectators;
     std::vector<u32> fellow_spectators;
@@ -54,18 +55,14 @@ struct Bancho {
     bool match_started{false};
     Slot last_scores[16];
 
-    [[nodiscard]] inline bool is_online() const { return this->user_id.load() > 0; }
-
-    // needs the mutex due to being accessed by other threads
+    [[nodiscard]] inline bool is_online() const { return this->user_id > 0; }
 
     // Room ID can be 0 on private servers! So we check if the room has players instead.
     [[nodiscard]] inline bool is_in_a_multi_room() const {
-        std::scoped_lock lock{this->bancho_get_lock};
         return this->room.nb_players > 0;
     }
 
     [[nodiscard]] inline bool is_playing_a_multi_map() const {
-        std::scoped_lock lock{this->bancho_get_lock};
         return this->match_started;
     }
 
@@ -80,11 +77,8 @@ struct Bancho {
     static void handle_packet(Packet *packet);
     static Packet build_login_packet();
     static std::unordered_map<std::string, Bancho::Channel *> chat_channels;
-
-   private:
-    mutable std::mutex bancho_get_lock;
 };
 
 // initialized by NetworkHandler
 // declared here for convenience
-extern std::unique_ptr<Bancho> bancho;
+extern mcatomic_ref<Bancho *> bancho;
