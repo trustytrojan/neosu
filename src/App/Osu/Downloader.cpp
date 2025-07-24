@@ -22,7 +22,13 @@
 #include "SongBrowser/SongBrowser.h"
 
 namespace {  // static
-class DownloadManager : public std::enable_shared_from_this<DownloadManager> {
+
+class DownloadManager;
+
+// shared global instance
+std::shared_ptr<DownloadManager> s_download_manager;
+
+class DownloadManager {
    private:
     struct DownloadRequest {
         std::string url;
@@ -79,11 +85,10 @@ class DownloadManager : public std::enable_shared_from_this<DownloadManager> {
         options.followRedirects = true;
         options.progressCallback = [request](float progress) { request->progress.store(progress); };
 
-        // capture shared_ptr to keep DownloadManager alive during callback
-        auto self = shared_from_this();
+        // capture s_download_manager as a copy to keep DownloadManager alive during callback
         networkHandler->httpRequestAsync(
             UString(request->url),
-            [self, request](NetworkHandler::Response response) {
+            [self = s_download_manager, request](NetworkHandler::Response response) {
                 self->onDownloadComplete(request, std::move(response));
             },
             options);
@@ -175,9 +180,6 @@ class DownloadManager : public std::enable_shared_from_this<DownloadManager> {
         return request;
     }
 };
-
-// shared global instance
-std::shared_ptr<DownloadManager> s_download_manager;
 
 // helper
 std::unordered_map<i32, i32> beatmap_to_beatmapset;
