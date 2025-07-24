@@ -57,7 +57,7 @@ ChatChannel::ChatChannel(Chat *chat, UString name_arg) {
 }
 
 ChatChannel::~ChatChannel() {
-    delete this->ui;
+    SAFE_DELETE(this->ui);
     this->chat->button_container->deleteBaseUIElement(this->btn);
 }
 
@@ -127,7 +127,7 @@ void ChatChannel::add_message(ChatMessage msg) {
 
     std::wstring msg_text = msg.text.wc_str();
     std::wsmatch match;
-    std::vector<CBaseUILabel *> text_fragments;
+    std::vector<CBaseUILabel *> temp_text_fragments;
     std::wstring::const_iterator search_start = msg_text.cbegin();
     int text_idx = 0;
     while(std::regex_search(search_start, msg_text.cend(), match, url_regex)) {
@@ -171,18 +171,18 @@ void ChatChannel::add_message(ChatMessage msg) {
         auto url_start = search_idx + match_pos;
         auto preceding_text = msg.text.substr(text_idx, url_start - text_idx);
         if(preceding_text.length() > 0) {
-            text_fragments.push_back(new CBaseUILabel(0, 0, 0, 0, "", preceding_text));
+            temp_text_fragments.push_back(new CBaseUILabel(0, 0, 0, 0, "", preceding_text));
         }
 
         auto link = new ChatLink(0, 0, 0, 0, link_url, link_label);
-        text_fragments.push_back(link);
+        temp_text_fragments.push_back(link);
 
         text_idx = url_start + match_len;
         search_start = msg_text.cbegin() + text_idx;
     }
     if(search_start != msg_text.cend()) {
         auto text = msg.text.substr(text_idx);
-        text_fragments.push_back(new CBaseUILabel(0, 0, 0, 0, "", text));
+        temp_text_fragments.push_back(new CBaseUILabel(0, 0, 0, 0, "", text));
     }
     if(is_action) {
         // Only appending now to prevent this character from being included in a link
@@ -196,7 +196,7 @@ void ChatChannel::add_message(ChatMessage msg) {
 
     // We got a bunch of text fragments, now position them, and if we start a new line,
     // possibly divide them into more text fragments.
-    for(auto fragment : text_fragments) {
+    for(auto fragment : temp_text_fragments) {
         UString text_str("");
         auto fragment_text = fragment->getText();
 
@@ -243,6 +243,10 @@ void ChatChannel::add_message(ChatMessage msg) {
         }
 
         x = line_width;
+    }
+
+    for(auto &fragment : temp_text_fragments) {
+        SAFE_DELETE(fragment);
     }
 
     this->y_total += line_height;
@@ -292,7 +296,12 @@ Chat::Chat() : OsuScreen() {
     this->updateLayout(osu->getScreenSize());
 }
 
-Chat::~Chat() { delete this->button_container; }
+Chat::~Chat() {
+    for(auto &chan : this->channels) {
+        SAFE_DELETE(chan);
+    }
+    SAFE_DELETE(this->button_container);
+}
 
 void Chat::draw() {
     const bool isAnimating = anim->isAnimating(&this->fAnimation);

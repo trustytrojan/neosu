@@ -418,8 +418,8 @@ Osu::~Osu() {
 
     SAFE_DELETE(this->windowManager);
 
-    for(int i = 0; i < this->screens.size(); i++) {
-        SAFE_DELETE(this->screens[i]);
+    for(auto & screen : this->screens) {
+        SAFE_DELETE(screen);
     }
 
     SAFE_DELETE(this->fposu);

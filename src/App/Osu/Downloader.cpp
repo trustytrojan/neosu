@@ -57,7 +57,7 @@ class DownloadManager {
         if(elapsed < std::chrono::milliseconds(100)) return;
 
         // check for retry delays
-        auto& request = this->download_queue.front();
+        auto request = this->download_queue.front();
         if(request->retry_after > now) return;
 
         // ready to start next download
@@ -66,6 +66,7 @@ class DownloadManager {
     }
 
     void startDownloadNow(const std::shared_ptr<DownloadRequest>& request) {
+        if(this->shutting_down.load()) return;
         this->currently_downloading.store(true);
         this->last_download_start = std::chrono::steady_clock::now();
 
@@ -87,6 +88,7 @@ class DownloadManager {
     }
 
     void onDownloadComplete(const std::shared_ptr<DownloadRequest>& request, NetworkHandler::Response response) {
+        if(this->shutting_down.load()) return;
         this->currently_downloading.store(false);
 
         // update request with results
