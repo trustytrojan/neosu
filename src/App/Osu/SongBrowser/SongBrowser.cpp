@@ -1729,8 +1729,7 @@ void SongBrowser::addBeatmapSet(BeatmapSet *mapset) {
                         : 0,
                     0, 11);
                 auto &children = this->difficultyCollectionButtons[index]->getChildren();
-                auto it = std::ranges::lower_bound(children, diff_btn, sort_by_difficulty);
-                children.insert(it, diff_btn);
+                children.push_back(diff_btn);
             }
         }
 
@@ -1753,8 +1752,7 @@ void SongBrowser::addBeatmapSet(BeatmapSet *mapset) {
                     index = 5;
                 }
                 auto &children = this->bpmCollectionButtons[index]->getChildren();
-                auto it = std::ranges::lower_bound(children, diff_btn, sort_by_bpm);
-                children.insert(it, diff_btn);
+                children.push_back(diff_btn);
             }
         }
 
@@ -1785,8 +1783,7 @@ void SongBrowser::addBeatmapSet(BeatmapSet *mapset) {
                     children = &this->lengthCollectionButtons[6]->getChildren();
                 }
 
-                auto it = std::ranges::lower_bound(*children, diff_btn, sort_by_length);
-                children->insert(it, diff_btn);
+                children->push_back(diff_btn);
             }
         }
     }
@@ -1814,9 +1811,11 @@ void SongBrowser::addSongButtonToAlphanumericGroup(SongButton *btn, std::vector<
         children = &group[27]->getChildren();
     }
 
-    auto it = std::ranges::lower_bound(*children, btn, this->sortingComparator);
-    if(cv::debug.getBool()) debugLog("Inserting %s at index %d\n", name.c_str(), it - children->begin());
-    children->insert(it, btn);
+    if(cv::debug.getBool()) {
+        debugLog("Inserting %s\n", name.c_str());
+    }
+
+    children->push_back(btn);
 }
 
 void SongBrowser::requestNextScrollToSongButtonJumpFix(SongDifficultyButton *diffButton) {
@@ -2616,10 +2615,12 @@ void SongBrowser::checkHandleKillBackgroundSearchMatcher() {
 }
 
 void SongBrowser::onDatabaseLoadingFinished() {
+    Timer t(true);
+
     // having a copy of the vector in here is actually completely unnecessary
     this->beatmaps = std::vector<DatabaseBeatmap *>(db->getDatabaseBeatmaps());
 
-    debugLog("SongBrowser::onDatabaseLoadingFinished() : %i beatmapsets.\n", this->beatmaps.size());
+    debugLogF("Loading {} beatmapsets from database.\n", this->beatmaps.size());
 
     // initialize all collection (grouped) buttons
     {
@@ -2800,6 +2801,9 @@ void SongBrowser::onDatabaseLoadingFinished() {
     if(this->beatmap->getSelectedDifficulty2() == NULL) {
         this->selectRandomBeatmap();
     }
+
+    t.update();
+    debugLogF("Took {} seconds.\n", t.getElapsedTime());
 }
 
 void SongBrowser::onSearchUpdate() {
