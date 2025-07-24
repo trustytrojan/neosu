@@ -67,123 +67,120 @@ void OpenGLShader::disable() {
     OpenGLStateCache::getInstance().setCurrentProgram(this->iProgramBackup);
 }
 
-void OpenGLShader::setUniform1f(const UString &name, float value) {
+void OpenGLShader::setUniform1f(const std::string_view &name, float value) {
     if(!this->bReady) return;
 
     const int id = getAndCacheUniformLocation(name);
     if(id != -1)
         glUniform1fARB(id, value);
     else if(cv::debug_shaders.getBool())
-        debugLogF("OpenGLShader Warning: Can't find uniform {:s}\n", name.toUtf8());
+        debugLogF("OpenGLShader Warning: Can't find uniform {:s}\n", name);
 }
 
-void OpenGLShader::setUniform1fv(const UString &name, int count, float *values) {
+void OpenGLShader::setUniform1fv(const std::string_view &name, int count, float *values) {
     if(!this->bReady) return;
 
     const int id = getAndCacheUniformLocation(name);
     if(id != -1)
         glUniform1fvARB(id, count, values);
     else if(cv::debug_shaders.getBool())
-        debugLogF("OpenGLShader Warning: Can't find uniform {:s}\n", name.toUtf8());
+        debugLogF("OpenGLShader Warning: Can't find uniform {:s}\n", name);
 }
 
-void OpenGLShader::setUniform1i(const UString &name, int value) {
+void OpenGLShader::setUniform1i(const std::string_view &name, int value) {
     if(!this->bReady) return;
 
     const int id = getAndCacheUniformLocation(name);
     if(id != -1)
         glUniform1iARB(id, value);
     else if(cv::debug_shaders.getBool())
-        debugLogF("OpenGLShader Warning: Can't find uniform {:s}\n", name.toUtf8());
+        debugLogF("OpenGLShader Warning: Can't find uniform {:s}\n", name);
 }
 
-void OpenGLShader::setUniform2f(const UString &name, float value1, float value2) {
+void OpenGLShader::setUniform2f(const std::string_view &name, float value1, float value2) {
     if(!this->bReady) return;
 
     const int id = getAndCacheUniformLocation(name);
     if(id != -1)
         glUniform2fARB(id, value1, value2);
     else if(cv::debug_shaders.getBool())
-        debugLogF("OpenGLShader Warning: Can't find uniform {:s}\n", name.toUtf8());
+        debugLogF("OpenGLShader Warning: Can't find uniform {:s}\n", name);
 }
 
-void OpenGLShader::setUniform2fv(const UString &name, int count, float *vectors) {
+void OpenGLShader::setUniform2fv(const std::string_view &name, int count, float *vectors) {
     if(!this->bReady) return;
 
     const int id = getAndCacheUniformLocation(name);
     if(id != -1)
         glUniform2fv(id, count, (float *)&vectors[0]);
     else if(cv::debug_shaders.getBool())
-        debugLogF("OpenGLShader Warning: Can't find uniform {:s}\n", name.toUtf8());
+        debugLogF("OpenGLShader Warning: Can't find uniform {:s}\n", name);
 }
 
-void OpenGLShader::setUniform3f(const UString &name, float x, float y, float z) {
+void OpenGLShader::setUniform3f(const std::string_view &name, float x, float y, float z) {
     if(!this->bReady) return;
 
     const int id = getAndCacheUniformLocation(name);
     if(id != -1)
         glUniform3fARB(id, x, y, z);
     else if(cv::debug_shaders.getBool())
-        debugLogF("OpenGLShader Warning: Can't find uniform {:s}\n", name.toUtf8());
+        debugLogF("OpenGLShader Warning: Can't find uniform {:s}\n", name);
 }
 
-void OpenGLShader::setUniform3fv(const UString &name, int count, float *vectors) {
+void OpenGLShader::setUniform3fv(const std::string_view &name, int count, float *vectors) {
     if(!this->bReady) return;
 
     const int id = getAndCacheUniformLocation(name);
     if(id != -1)
         glUniform3fv(id, count, (float *)&vectors[0]);
     else if(cv::debug_shaders.getBool())
-        debugLogF("OpenGLShader Warning: Can't find uniform {:s}\n", name.toUtf8());
+        debugLogF("OpenGLShader Warning: Can't find uniform {:s}\n", name);
 }
 
-void OpenGLShader::setUniform4f(const UString &name, float x, float y, float z, float w) {
+void OpenGLShader::setUniform4f(const std::string_view &name, float x, float y, float z, float w) {
     if(!this->bReady) return;
 
     const int id = getAndCacheUniformLocation(name);
     if(id != -1)
         glUniform4fARB(id, x, y, z, w);
     else if(cv::debug_shaders.getBool())
-        debugLogF("OpenGLShader Warning: Can't find uniform {:s}\n", name.toUtf8());
+        debugLogF("OpenGLShader Warning: Can't find uniform {:s}\n", name);
 }
 
-void OpenGLShader::setUniformMatrix4fv(const UString &name, Matrix4 &matrix) {
+void OpenGLShader::setUniformMatrix4fv(const std::string_view &name, Matrix4 &matrix) {
     if(!this->bReady) return;
 
     const int id = getAndCacheUniformLocation(name);
     if(id != -1)
         glUniformMatrix4fv(id, 1, GL_FALSE, matrix.get());
     else if(cv::debug_shaders.getBool())
-        debugLogF("OpenGLShader Warning: Can't find uniform {:s}\n", name.toUtf8());
+        debugLogF("OpenGLShader Warning: Can't find uniform {:s}\n", name);
 }
 
-void OpenGLShader::setUniformMatrix4fv(const UString &name, float *v) {
+void OpenGLShader::setUniformMatrix4fv(const std::string_view &name, float *v) {
     if(!this->bReady) return;
 
     const int id = getAndCacheUniformLocation(name);
     if(id != -1)
         glUniformMatrix4fv(id, 1, GL_FALSE, v);
     else if(cv::debug_shaders.getBool())
-        debugLogF("OpenGLShader Warning: Can't find uniform {:s}\n", name.toUtf8());
+        debugLogF("OpenGLShader Warning: Can't find uniform {:s}\n", name);
 }
 
-int OpenGLShader::getAttribLocation(const UString &name) {
-    if(!this->bReady) return -1;
+int OpenGLShader::getAttribLocation(const std::string_view &name) {
+    if(!this->bReady || name[name.size()] != '\0') return -1;
 
-    return glGetAttribLocation(this->iProgram, name.toUtf8());
+    return glGetAttribLocation(this->iProgram, name.data());
 }
 
-int OpenGLShader::getAndCacheUniformLocation(const UString &name) {
+int OpenGLShader::getAndCacheUniformLocation(const std::string_view &name) {
     if(!this->bReady) return -1;
 
-    this->sTempStringBuffer.reserve(name.lengthUtf8());
-    this->sTempStringBuffer.assign(name.toUtf8(), name.lengthUtf8());
-
-    const auto cachedValue = this->uniformLocationCache.find(this->sTempStringBuffer);
+    const auto cachedValue = this->uniformLocationCache.find(name);
     const bool cached = (cachedValue != this->uniformLocationCache.end());
 
-    const int id = (cached ? cachedValue->second : glGetUniformLocationARB(this->iProgram, name.toUtf8()));
-    if(!cached && id != -1) this->uniformLocationCache[this->sTempStringBuffer] = id;
+    const int id = (cached ? cachedValue->second : name[name.size()] == '\0' ? glGetUniformLocationARB(this->iProgram, name.data()) : -1);
+    if(!cached && id != -1) this->uniformLocationCache[name] = id;
 
     return id;
 }

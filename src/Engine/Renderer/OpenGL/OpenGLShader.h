@@ -21,20 +21,20 @@ class OpenGLShader final : public Shader {
     void enable() override;
     void disable() override;
 
-    void setUniform1f(const UString &name, float value) override;
-    void setUniform1fv(const UString &name, int count, float *values) override;
-    void setUniform1i(const UString &name, int value) override;
-    void setUniform2f(const UString &name, float x, float y) override;
-    void setUniform2fv(const UString &name, int count, float *vectors) override;
-    void setUniform3f(const UString &name, float x, float y, float z) override;
-    void setUniform3fv(const UString &name, int count, float *vectors) override;
-    void setUniform4f(const UString &name, float x, float y, float z, float w) override;
-    void setUniformMatrix4fv(const UString &name, Matrix4 &matrix) override;
-    void setUniformMatrix4fv(const UString &name, float *v) override;
+    void setUniform1f(const std::string_view &name, float value) override;
+    void setUniform1fv(const std::string_view &name, int count, float *values) override;
+    void setUniform1i(const std::string_view &name, int value) override;
+    void setUniform2f(const std::string_view &name, float x, float y) override;
+    void setUniform2fv(const std::string_view &name, int count, float *vectors) override;
+    void setUniform3f(const std::string_view &name, float x, float y, float z) override;
+    void setUniform3fv(const std::string_view &name, int count, float *vectors) override;
+    void setUniform4f(const std::string_view &name, float x, float y, float z, float w) override;
+    void setUniformMatrix4fv(const std::string_view &name, Matrix4 &matrix) override;
+    void setUniformMatrix4fv(const std::string_view &name, float *v) override;
 
     // ILLEGAL:
-    int getAttribLocation(const UString &name);
-    int getAndCacheUniformLocation(const UString &name);
+    int getAttribLocation(const std::string_view &name);
+    int getAndCacheUniformLocation(const std::string_view &name);
 
    private:
     void init() override;
@@ -57,8 +57,7 @@ class OpenGLShader final : public Shader {
 
     int iProgramBackup;
 
-    std::unordered_map<std::string, int> uniformLocationCache;
-    std::string sTempStringBuffer;
+    std::unordered_map<std::string_view, int> uniformLocationCache;
 };
 
 #endif

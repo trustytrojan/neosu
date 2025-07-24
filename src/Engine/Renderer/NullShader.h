@@ -18,52 +18,52 @@ class NullShader : public Shader {
     void enable() override { ; }
     void disable() override { ; }
 
-    void setUniform1f(const UString &name, float value) override {
+    void setUniform1f(const std::string_view &name, float value) override {
         (void)name;
         (void)value;
     }
-    void setUniform1fv(const UString &name, int count, float *values) override {
+    void setUniform1fv(const std::string_view &name, int count, float *values) override {
         (void)name;
         (void)count;
         (void)values;
     }
-    void setUniform1i(const UString &name, int value) override {
+    void setUniform1i(const std::string_view &name, int value) override {
         (void)name;
         (void)value;
     }
-    void setUniform2f(const UString &name, float x, float y) override {
+    void setUniform2f(const std::string_view &name, float x, float y) override {
         (void)name;
         (void)x;
         (void)y;
     }
-    void setUniform2fv(const UString &name, int count, float *vectors) override {
+    void setUniform2fv(const std::string_view &name, int count, float *vectors) override {
         (void)name;
         (void)count;
         (void)vectors;
     }
-    void setUniform3f(const UString &name, float x, float y, float z) override {
+    void setUniform3f(const std::string_view &name, float x, float y, float z) override {
         (void)name;
         (void)x;
         (void)y;
         (void)z;
     }
-    void setUniform3fv(const UString &name, int count, float *vectors) override {
+    void setUniform3fv(const std::string_view &name, int count, float *vectors) override {
         (void)name;
         (void)count;
         (void)vectors;
     }
-    void setUniform4f(const UString &name, float x, float y, float z, float w) override {
+    void setUniform4f(const std::string_view &name, float x, float y, float z, float w) override {
         (void)name;
         (void)x;
         (void)y;
         (void)z;
         (void)w;
     }
-    void setUniformMatrix4fv(const UString &name, Matrix4 &matrix) override {
+    void setUniformMatrix4fv(const std::string_view &name, Matrix4 &matrix) override {
         (void)name;
         (void)matrix;
     }
-    void setUniformMatrix4fv(const UString &name, float *v) override {
+    void setUniformMatrix4fv(const std::string_view &name, float *v) override {
         (void)name;
         (void)v;
     }
