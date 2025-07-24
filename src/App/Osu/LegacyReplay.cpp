@@ -7,7 +7,6 @@
 
 #include <cstdlib>
 
-#include <sstream>
 #include <string>
 
 #include "Bancho.h"
@@ -19,6 +18,7 @@
 #include "Osu.h"
 #include "SongBrowser/SongBrowser.h"
 #include "score.h"
+#include "SString.h"
 
 namespace proto = BANCHO::Proto;
 
@@ -84,16 +84,16 @@ std::vector<LegacyReplay::Frame> LegacyReplay::get_frames(u8* replay_data, i32 r
         while(*line) {
             LegacyReplay::Frame frame;
 
-            char* ms = strtok_x('|', &line);
+            char* ms = SString::strtok_x('|', &line);
             frame.milliseconds_since_last_frame = strtoul(ms, NULL, 10);
 
-            char* x = strtok_x('|', &line);
+            char* x = SString::strtok_x('|', &line);
             frame.x = strtof(x, NULL);
 
-            char* y = strtok_x('|', &line);
+            char* y = SString::strtok_x('|', &line);
             frame.y = strtof(y, NULL);
 
-            char* flags = strtok_x(',', &line);
+            char* flags = SString::strtok_x(',', &line);
             frame.key_flags = strtoul(flags, NULL, 10);
 
             if(frame.milliseconds_since_last_frame != -12345) {

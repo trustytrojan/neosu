@@ -70,7 +70,3 @@ constexpr void runtime_assert(bool cond, const char *reason)
 // UTIL
 
 inline bool isInt(float f) { return (f == static_cast<float>(static_cast<int>(f))); }
-
-// ANSI/IEEE 754-1985
-
-char *strtok_x(char d, char **str);

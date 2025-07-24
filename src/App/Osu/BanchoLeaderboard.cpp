@@ -14,21 +14,6 @@
 #include "SString.h"
 #include "SongBrowser/SongBrowser.h"
 
-// Since strtok_r SUCKS I'll just make my own
-// Returns the token start, and edits str to after the token end (unless '\0').
-// @spec: why is this here
-char *strtok_x(char d, char **str) {
-    char *old = *str;
-    while(**str != '\0' && **str != d) {
-        (*str)++;
-    }
-    if(**str != '\0') {
-        **str = '\0';
-        (*str)++;
-    }
-    return old;
-}
-
 namespace {  // static namespace
 FinishedScore parse_score(char *score_line) {
     FinishedScore score;
@@ -119,41 +104,41 @@ void process_leaderboard_response(Packet response) {
     std::vector<FinishedScore> scores;
     char *body = (char *)response.memory;
 
-    char *ranked_status = strtok_x('|', &body);
+    char *ranked_status = SString::strtok_x('|', &body);
     info.ranked_status = strtol(ranked_status, NULL, 10);
 
-    char *server_has_osz2 = strtok_x('|', &body);
+    char *server_has_osz2 = SString::strtok_x('|', &body);
     info.server_has_osz2 = !strcmp(server_has_osz2, "true");
 
-    char *beatmap_id = strtok_x('|', &body);
+    char *beatmap_id = SString::strtok_x('|', &body);
     info.beatmap_id = strtoul(beatmap_id, NULL, 10);
 
-    char *beatmap_set_id = strtok_x('|', &body);
+    char *beatmap_set_id = SString::strtok_x('|', &body);
     info.beatmap_set_id = strtoul(beatmap_set_id, NULL, 10);
 
-    char *nb_scores = strtok_x('|', &body);
+    char *nb_scores = SString::strtok_x('|', &body);
     info.nb_scores = static_cast<i32>(strtol(nb_scores, NULL, 10));
 
-    char *fa_track_id = strtok_x('|', &body);
+    char *fa_track_id = SString::strtok_x('|', &body);
     (void)fa_track_id;
 
-    char *fa_license_text = strtok_x('\n', &body);
+    char *fa_license_text = SString::strtok_x('\n', &body);
     (void)fa_license_text;
 
-    char *online_offset = strtok_x('\n', &body);
+    char *online_offset = SString::strtok_x('\n', &body);
     info.online_offset = static_cast<i32>(strtol(online_offset, NULL, 10));
 
-    char *map_name = strtok_x('\n', &body);
+    char *map_name = SString::strtok_x('\n', &body);
     (void)map_name;
 
-    char *user_ratings = strtok_x('\n', &body);
+    char *user_ratings = SString::strtok_x('\n', &body);
     (void)user_ratings;  // no longer used
 
-    char *pb_score = strtok_x('\n', &body);
+    char *pb_score = SString::strtok_x('\n', &body);
     (void)pb_score;
 
     char *score_line = NULL;
-    while((score_line = strtok_x('\n', &body))[0] != '\0') {
+    while((score_line = SString::strtok_x('\n', &body))[0] != '\0') {
         FinishedScore score = parse_score(score_line);
         score.beatmap_hash = beatmap_hash;
         scores.push_back(score);
