@@ -101,10 +101,13 @@ class DatabaseLoader : public Resource {
 
    protected:
     void init() override {
+        if(this->bNeedRawLoad) {
+            this->db->scheduleLoadRaw();
+        } else {
+            MapCalcThread::start_calc(this->db->maps_to_recalc);
+            VolNormalization::start_calc(this->db->loudness_to_calc);
+        }
         this->bReady = true;
-        MapCalcThread::start_calc(this->db->maps_to_recalc);
-        VolNormalization::start_calc(this->db->loudness_to_calc);
-
         sct_calc(this->db->scores_to_convert);
 
         delete this;  // commit sudoku
@@ -122,7 +125,12 @@ class DatabaseLoader : public Resource {
         VolNormalization::abort();
         MapCalcThread::abort();
         this->db->beatmapsets.clear();  // TODO @kiwec: this just leaks memory?
-        this->db->loadDB();
+        if(env->fileExists(fmt::format("{}" PREF_PATHSEP "osu!.db", cv::osu_folder.getString())) &&
+           cv::database_enabled.getBool()) {
+            this->db->loadDB();
+        } else {
+            this->bNeedRawLoad = true;
+        }
 
         this->bAsyncReady = true;
     }
@@ -130,6 +138,7 @@ class DatabaseLoader : public Resource {
     void destroy() override { ; }
 
    private:
+    bool bNeedRawLoad{false};
     Database *db;
 };
 
@@ -179,6 +188,63 @@ Database::~Database() {
     }
 
     unload_collections();
+}
+
+void Database::update() {
+    // loadRaw() logic
+    if(this->bRawBeatmapLoadScheduled) {
+        Timer t;
+
+        while(t.getElapsedTime() < 0.033f) {
+            if(this->bInterruptLoad.load()) break;  // cancellation point
+
+            if(this->rawLoadBeatmapFolders.size() > 0 &&
+               this->iCurRawBeatmapLoadIndex < this->rawLoadBeatmapFolders.size()) {
+                std::string curBeatmap = this->rawLoadBeatmapFolders[this->iCurRawBeatmapLoadIndex++];
+                this->rawBeatmapFolders.push_back(
+                    curBeatmap);  // for future incremental loads, so that we know what's been loaded already
+
+                std::string fullBeatmapPath = this->sRawBeatmapLoadOsuSongFolder;
+                fullBeatmapPath.append(curBeatmap);
+                fullBeatmapPath.append("/");
+
+                this->addBeatmapSet(fullBeatmapPath);
+            }
+
+            // update progress
+            this->fLoadingProgress = (float)this->iCurRawBeatmapLoadIndex / (float)this->iNumBeatmapsToLoad;
+
+            // check if we are finished
+            if(this->iCurRawBeatmapLoadIndex >= this->iNumBeatmapsToLoad ||
+               std::cmp_greater(this->iCurRawBeatmapLoadIndex, (this->rawLoadBeatmapFolders.size() - 1))) {
+                this->rawLoadBeatmapFolders.clear();
+                this->bRawBeatmapLoadScheduled = false;
+                this->importTimer->update();
+
+                debugLogF("Refresh finished, added {} beatmaps in {:f} seconds.\n", this->beatmapsets.size(),
+                         this->importTimer->getElapsedTime());
+
+                // TODO: does this even work for raw loads?
+                load_collections();
+
+                for(auto &set : this->beatmapsets) {
+                    for(auto &diff : *set->difficulties) {
+                        if(diff->fStarsNomod <= 0.f) {
+                            diff->fStarsNomod *= -1.f;
+                            this->maps_to_recalc.push_back(diff);
+                        }
+                    }
+                }
+                // TODO: loudness calc/overrides?
+                MapCalcThread::start_calc(this->maps_to_recalc);
+                this->fLoadingProgress = 1.0f;
+
+                break;
+            }
+
+            t.update();
+        }
+    }
 }
 
 void Database::load() {
@@ -597,6 +663,69 @@ const std::string &Database::getOsuSongsFolder() {
     songs_folder.append(PREF_PATHSEP);
 
     return songs_folder;
+}
+
+void Database::scheduleLoadRaw() {
+    this->sRawBeatmapLoadOsuSongFolder = cv::osu_folder.getString();
+    {
+        const std::string &customBeatmapDirectory = this->getOsuSongsFolder();
+        if(customBeatmapDirectory.length() < 1)
+            this->sRawBeatmapLoadOsuSongFolder.append("Songs" PREF_PATHSEP);
+        else
+            this->sRawBeatmapLoadOsuSongFolder = customBeatmapDirectory;
+    }
+
+    debugLogF("Database: sRawBeatmapLoadOsuSongFolder = {:s}\n", this->sRawBeatmapLoadOsuSongFolder);
+
+    this->rawLoadBeatmapFolders = env->getFoldersInFolder(this->sRawBeatmapLoadOsuSongFolder);
+    this->iNumBeatmapsToLoad = this->rawLoadBeatmapFolders.size();
+
+    // if this isn't the first load, only load the differences
+    if(!this->bIsFirstLoad) {
+        std::vector<std::string> toLoad;
+        for(int i = 0; i < this->iNumBeatmapsToLoad; i++) {
+            bool alreadyLoaded = false;
+            for(const auto &rawBeatmapFolder : this->rawBeatmapFolders) {
+                if(this->rawLoadBeatmapFolders[i] == rawBeatmapFolder) {
+                    alreadyLoaded = true;
+                    break;
+                }
+            }
+
+            if(!alreadyLoaded) toLoad.push_back(this->rawLoadBeatmapFolders[i]);
+        }
+
+        // only load differences
+        this->rawLoadBeatmapFolders = toLoad;
+        this->iNumBeatmapsToLoad = this->rawLoadBeatmapFolders.size();
+
+        debugLogF("Database: Found {} new/changed beatmaps.\n", this->iNumBeatmapsToLoad);
+
+        this->bFoundChanges = this->iNumBeatmapsToLoad > 0;
+        if(this->bFoundChanges)
+            osu->getNotificationOverlay()->addNotification(
+                UString::format(this->iNumBeatmapsToLoad == 1 ? "Adding %i new beatmap." : "Adding %i new beatmaps.",
+                                this->iNumBeatmapsToLoad),
+                0xff00ff00);
+        else
+            osu->getNotificationOverlay()->addNotification(
+                UString::format("No new beatmaps detected.", this->iNumBeatmapsToLoad), 0xff00ff00);
+    }
+
+    debugLogF("Database: Building beatmap database ...\n");
+    debugLogF("Database: Found {} folders to load.\n", this->rawLoadBeatmapFolders.size());
+
+    // only start loading if we have something to load
+    if(this->rawLoadBeatmapFolders.size() > 0) {
+        this->fLoadingProgress = 0.0f;
+        this->iCurRawBeatmapLoadIndex = 0;
+
+        this->bRawBeatmapLoadScheduled = true;
+        this->importTimer->start();
+    } else
+        this->fLoadingProgress = 1.0f;
+
+    this->bIsFirstLoad = false;
 }
 
 void Database::loadDB() {

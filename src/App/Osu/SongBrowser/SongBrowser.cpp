@@ -897,6 +897,7 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
 
     // refresh logic (blocks every other call in the update() function below it!)
     if(this->bBeatmapRefreshScheduled) {
+        db->update(); // raw load logic
         // check if we are finished loading
         if(db->isFinished()) {
             this->bBeatmapRefreshScheduled = false;

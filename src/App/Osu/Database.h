@@ -8,9 +8,8 @@
 #include "cbase.h"
 #include "score.h"
 
-namespace Timing
-{
-    class Timer;
+namespace Timing {
+class Timer;
 }
 class ConVar;
 
@@ -23,15 +22,14 @@ typedef DatabaseBeatmap BeatmapSet;
 #define NEOSU_MAPS_DB_VERSION 20240812
 #define NEOSU_SCORE_DB_VERSION 20240725
 
-
 class Database {
 // Field ordering matters here
 #pragma pack(push, 1)
-struct alignas(1) TIMINGPOINT {
-    double msPerBeat;
-    double offset;
-    bool timingChange;
-};
+    struct alignas(1) TIMINGPOINT {
+        double msPerBeat;
+        double offset;
+        bool timingChange;
+    };
 #pragma pack(pop)
    public:
     struct PlayerStats {
@@ -63,13 +61,15 @@ struct alignas(1) TIMINGPOINT {
     Database();
     ~Database();
 
+    void update();
+
     void load();
     void cancel();
     void save();
 
-    BeatmapSet *addBeatmapSet(const std::string& beatmapFolderPath, i32 set_id_override = -1);
+    BeatmapSet *addBeatmapSet(const std::string &beatmapFolderPath, i32 set_id_override = -1);
 
-    int addScore(const FinishedScore& score);
+    int addScore(const FinishedScore &score);
     void deleteScore(MD5Hash beatmapMD5Hash, u64 scoreUnixTimestamp);
     void sortScoresInPlace(std::vector<FinishedScore> &scores);
     void sortScores(MD5Hash beatmapMD5Hash);
@@ -77,8 +77,8 @@ struct alignas(1) TIMINGPOINT {
 
     std::vector<UString> getPlayerNamesWithPPScores();
     std::vector<UString> getPlayerNamesWithScoresForUserSwitcher();
-    PlayerPPScores getPlayerPPScores(const UString& playerName);
-    PlayerStats calculatePlayerStats(const UString& playerName);
+    PlayerPPScores getPlayerPPScores(const UString &playerName);
+    PlayerStats calculatePlayerStats(const UString &playerName);
     static float getWeightForIndex(int i);
     static float getBonusPPForNumScores(size_t numScores);
     static unsigned long long getRequiredScoreForLevel(int level);
@@ -103,8 +103,10 @@ struct alignas(1) TIMINGPOINT {
     std::unordered_map<MD5Hash, std::vector<FinishedScore>> online_scores;
     static const std::string &getOsuSongsFolder();
 
-    BeatmapSet *loadRawBeatmap(const std::string& beatmapPath);  // only used for raw loading without db
+    BeatmapSet *loadRawBeatmap(const std::string &beatmapPath);  // only used for raw loading without db
 
+    UString parseLegacyCfgBeatmapDirectoryParameter();
+    void scheduleLoadRaw();
     void loadDB();
     std::mutex peppy_overrides_mtx;
     std::unordered_map<MD5Hash, MapOverrides> peppy_overrides;
@@ -153,6 +155,13 @@ struct alignas(1) TIMINGPOINT {
     bool bDidScoresChangeForStats;
     PlayerStats prevPlayerStats;
     std::vector<SCORE_SORTING_METHOD> scoreSortingMethods;
+
+    // raw load
+    bool bRawBeatmapLoadScheduled;
+    int iCurRawBeatmapLoadIndex;
+    std::string sRawBeatmapLoadOsuSongFolder;
+    std::vector<std::string> rawBeatmapFolders;
+    std::vector<std::string> rawLoadBeatmapFolders;
 };
 
 extern Database *db;
