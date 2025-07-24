@@ -22,7 +22,7 @@
 #include "SongBrowser/SongBrowser.h"
 
 namespace {  // static
-class DownloadManager {
+class DownloadManager : public std::enable_shared_from_this<DownloadManager> {
    private:
     struct DownloadRequest {
         std::string url;
@@ -79,10 +79,12 @@ class DownloadManager {
         options.followRedirects = true;
         options.progressCallback = [request](float progress) { request->progress.store(progress); };
 
+        // capture shared_ptr to keep DownloadManager alive during callback
+        auto self = shared_from_this();
         networkHandler->httpRequestAsync(
             UString(request->url),
-            [this, request](NetworkHandler::Response response) {
-                this->onDownloadComplete(request, std::move(response));
+            [self, request](NetworkHandler::Response response) {
+                self->onDownloadComplete(request, std::move(response));
             },
             options);
     }
@@ -175,7 +177,7 @@ class DownloadManager {
 };
 
 // shared global instance
-std::unique_ptr<DownloadManager> s_download_manager;
+std::shared_ptr<DownloadManager> s_download_manager;
 
 // helper
 std::unordered_map<i32, i32> beatmap_to_beatmapset;
@@ -185,18 +187,18 @@ i32 get_beatmapset_id_from_osu_file(const u8* osu_data, size_t s_osu_data) {
     std::string line;
     for(size_t i = 0; i < s_osu_data; i++) {
         if(osu_data[i] == '\n') {
-            if(line.find("//") != 0) {
+            if(!line.starts_with("//")) {
                 sscanf(line.c_str(), " BeatmapSetID : %i \n", &set_id);
                 if(set_id != -1) return set_id;
             }
 
             line = "";
         } else {
-            line.push_back(osu_data[i]);
+            line.push_back(static_cast<char>(osu_data[i]));
         }
     }
 
-    if(line.find("//") != 0) {
+    if(!line.starts_with("//")) {
         sscanf(line.c_str(), " BeatmapSetID : %i \n", &set_id);
     }
 
@@ -215,7 +217,7 @@ void abort_downloads() {
 
 void download(const char* url, float* progress, std::vector<u8>& out, int* response_code) {
     if(!s_download_manager) {
-        s_download_manager = std::make_unique<DownloadManager>();
+        s_download_manager = std::make_shared<DownloadManager>();
     }
 
     auto request = s_download_manager->start_download(std::string(url));
@@ -493,9 +495,9 @@ void process_beatmapset_info_response(Packet packet) {
     }
 
     // {set_id}.osz|{artist}|{title}|{creator}|{status}|10.0|{last_update}|{set_id}|0|0|0|0|0
-    auto tokens = UString((char*)packet.memory).split("|");
+    auto tokens = SString::split(std::string{(char*)packet.memory}, "|");
     if(tokens.size() < 13) return;
 
-    beatmap_to_beatmapset[map_id] = strtoul(tokens[7].toUtf8(), NULL, 10);
+    beatmap_to_beatmapset[map_id] = static_cast<i32>(strtol(tokens[7].c_str(), NULL, 10));
 }
 }  // namespace Downloader
