@@ -338,8 +338,8 @@ void ScoreButton::mouse_update(bool *propagate_clicks) {
         if(this->score.mods.ar_override != -1.f) request.AR = this->score.mods.ar_override;
         if(this->score.mods.cs_override != -1.f) request.CS = this->score.mods.cs_override;
         if(this->score.mods.od_override != -1.f) request.OD = this->score.mods.od_override;
-        request.rx = this->score.mods.flags & Replay::ModFlags::Relax;
-        request.td = this->score.mods.flags & Replay::ModFlags::TouchDevice;
+        request.rx = ModMasks::eq(this->score.mods.flags, Replay::ModFlags::Relax);
+        request.td = ModMasks::eq(this->score.mods.flags, Replay::ModFlags::TouchDevice);
         request.comboMax = this->score.comboMax;
         request.numMisses = this->score.numMisses;
         request.num300s = this->score.num300s;
@@ -711,31 +711,42 @@ void ScoreButton::setScore(const FinishedScore &score, DatabaseBeatmap *diff2, i
     else
         tooltipMods.append("None");
 
+    using namespace ModMasks;
+    using namespace Replay::ModFlags;
+
     this->tooltipLines.push_back(tooltipMods);
-    if(score.mods.flags & Replay::ModFlags::ApproachDifferent) this->tooltipLines.emplace_back("+ approach different");
-    if(score.mods.flags & Replay::ModFlags::ARTimewarp) this->tooltipLines.emplace_back("+ AR timewarp");
-    if(score.mods.flags & Replay::ModFlags::ARWobble) this->tooltipLines.emplace_back("+ AR wobble");
-    if(score.mods.flags & Replay::ModFlags::FadingCursor) this->tooltipLines.emplace_back("+ fading cursor");
-    if(score.mods.flags & Replay::ModFlags::FullAlternate) this->tooltipLines.emplace_back("+ full alternate");
-    if(score.mods.flags & Replay::ModFlags::FPoSu_Strafing) this->tooltipLines.emplace_back("+ FPoSu strafing");
-    if(score.mods.flags & Replay::ModFlags::FPS) this->tooltipLines.emplace_back("+ FPS");
-    if(score.mods.flags & Replay::ModFlags::HalfWindow) this->tooltipLines.emplace_back("+ half window");
-    if(score.mods.flags & Replay::ModFlags::Jigsaw1) this->tooltipLines.emplace_back("+ jigsaw1");
-    if(score.mods.flags & Replay::ModFlags::Jigsaw2) this->tooltipLines.emplace_back("+ jigsaw2");
-    if(score.mods.flags & Replay::ModFlags::Mafham) this->tooltipLines.emplace_back("+ mafham");
-    if(score.mods.flags & Replay::ModFlags::Millhioref) this->tooltipLines.emplace_back("+ millhioref");
-    if(score.mods.flags & Replay::ModFlags::Minimize) this->tooltipLines.emplace_back("+ minimize");
-    if(score.mods.flags & Replay::ModFlags::Ming3012) this->tooltipLines.emplace_back("+ ming3012");
-    if(score.mods.flags & Replay::ModFlags::MirrorHorizontal) this->tooltipLines.emplace_back("+ mirror (horizontal)");
-    if(score.mods.flags & Replay::ModFlags::MirrorVertical) this->tooltipLines.emplace_back("+ mirror (vertical)");
-    if(score.mods.flags & Replay::ModFlags::No50s) this->tooltipLines.emplace_back("+ no 50s");
-    if(score.mods.flags & Replay::ModFlags::No100s) this->tooltipLines.emplace_back("+ no 100s");
-    if(score.mods.flags & Replay::ModFlags::ReverseSliders) this->tooltipLines.emplace_back("+ reverse sliders");
-    if(score.mods.flags & Replay::ModFlags::Timewarp) this->tooltipLines.emplace_back("+ timewarp");
-    if(score.mods.flags & Replay::ModFlags::Shirone) this->tooltipLines.emplace_back("+ shirone");
-    if(score.mods.flags & Replay::ModFlags::StrictTracking) this->tooltipLines.emplace_back("+ strict tracking");
-    if(score.mods.flags & Replay::ModFlags::Wobble1) this->tooltipLines.emplace_back("+ wobble1");
-    if(score.mods.flags & Replay::ModFlags::Wobble2) this->tooltipLines.emplace_back("+ wobble2");
+    if(eq(score.mods.flags, ApproachDifferent))
+        this->tooltipLines.emplace_back("+ approach different");
+    if(eq(score.mods.flags, ARTimewarp)) this->tooltipLines.emplace_back("+ AR timewarp");
+    if(eq(score.mods.flags, ARWobble)) this->tooltipLines.emplace_back("+ AR wobble");
+    if(eq(score.mods.flags, FadingCursor))
+        this->tooltipLines.emplace_back("+ fading cursor");
+    if(eq(score.mods.flags, FullAlternate))
+        this->tooltipLines.emplace_back("+ full alternate");
+    if(eq(score.mods.flags, FPoSu_Strafing))
+        this->tooltipLines.emplace_back("+ FPoSu strafing");
+    if(eq(score.mods.flags, FPS)) this->tooltipLines.emplace_back("+ FPS");
+    if(eq(score.mods.flags, HalfWindow)) this->tooltipLines.emplace_back("+ half window");
+    if(eq(score.mods.flags, Jigsaw1)) this->tooltipLines.emplace_back("+ jigsaw1");
+    if(eq(score.mods.flags, Jigsaw2)) this->tooltipLines.emplace_back("+ jigsaw2");
+    if(eq(score.mods.flags, Mafham)) this->tooltipLines.emplace_back("+ mafham");
+    if(eq(score.mods.flags, Millhioref)) this->tooltipLines.emplace_back("+ millhioref");
+    if(eq(score.mods.flags, Minimize)) this->tooltipLines.emplace_back("+ minimize");
+    if(eq(score.mods.flags, Ming3012)) this->tooltipLines.emplace_back("+ ming3012");
+    if(eq(score.mods.flags, MirrorHorizontal))
+        this->tooltipLines.emplace_back("+ mirror (horizontal)");
+    if(eq(score.mods.flags, MirrorVertical))
+        this->tooltipLines.emplace_back("+ mirror (vertical)");
+    if(eq(score.mods.flags, No50s)) this->tooltipLines.emplace_back("+ no 50s");
+    if(eq(score.mods.flags, No100s)) this->tooltipLines.emplace_back("+ no 100s");
+    if(eq(score.mods.flags, ReverseSliders))
+        this->tooltipLines.emplace_back("+ reverse sliders");
+    if(eq(score.mods.flags, Timewarp)) this->tooltipLines.emplace_back("+ timewarp");
+    if(eq(score.mods.flags, Shirone)) this->tooltipLines.emplace_back("+ shirone");
+    if(eq(score.mods.flags, StrictTracking))
+        this->tooltipLines.emplace_back("+ strict tracking");
+    if(eq(score.mods.flags, Wobble1)) this->tooltipLines.emplace_back("+ wobble1");
+    if(eq(score.mods.flags, Wobble2)) this->tooltipLines.emplace_back("+ wobble2");
 
     // custom
     this->updateElapsedTimeString();
@@ -765,25 +776,29 @@ SkinImage *ScoreButton::getGradeImage(FinishedScore::Grade grade) {
 }
 
 UString ScoreButton::getModsStringForDisplay(Replay::Mods mods) {
+    using namespace ModMasks;
+    using namespace Replay::ModFlags;
+
     UString modsString;
 
-    if(mods.flags & Replay::ModFlags::NoFail) modsString.append("NF,");
-    if(mods.flags & Replay::ModFlags::Easy) modsString.append("EZ,");
-    if(mods.flags & Replay::ModFlags::TouchDevice) modsString.append("TD,");
-    if(mods.flags & Replay::ModFlags::Hidden) modsString.append("HD,");
-    if(mods.flags & Replay::ModFlags::HardRock) modsString.append("HR,");
-    if(mods.flags & Replay::ModFlags::SuddenDeath) modsString.append("SD,");
-    if(mods.flags & Replay::ModFlags::Relax) modsString.append("Relax,");
-    if(mods.flags & Replay::ModFlags::Flashlight) modsString.append("FL,");
-    if(mods.flags & Replay::ModFlags::SpunOut) modsString.append("SO,");
-    if(mods.flags & Replay::ModFlags::Autopilot) modsString.append("AP,");
-    if(mods.flags & Replay::ModFlags::Perfect) modsString.append("PF,");
-    if(mods.flags & Replay::ModFlags::ScoreV2) modsString.append("v2,");
-    if(mods.flags & Replay::ModFlags::Target) modsString.append("Target,");
-    if(mods.flags & Replay::ModFlags::Nightmare) modsString.append("Nightmare,");
-    if(mods.flags & (Replay::ModFlags::MirrorHorizontal | Replay::ModFlags::MirrorVertical))
+    if(eq(mods.flags, NoFail)) modsString.append("NF,");
+    if(eq(mods.flags, Easy)) modsString.append("EZ,");
+    if(eq(mods.flags, TouchDevice)) modsString.append("TD,");
+    if(eq(mods.flags, Hidden)) modsString.append("HD,");
+    if(eq(mods.flags, HardRock)) modsString.append("HR,");
+    if(eq(mods.flags, SuddenDeath)) modsString.append("SD,");
+    if(eq(mods.flags, Relax)) modsString.append("Relax,");
+    if(eq(mods.flags, Flashlight)) modsString.append("FL,");
+    if(eq(mods.flags, SpunOut)) modsString.append("SO,");
+    if(eq(mods.flags, Autopilot)) modsString.append("AP,");
+    if(eq(mods.flags, Perfect)) modsString.append("PF,");
+    if(eq(mods.flags, ScoreV2)) modsString.append("v2,");
+    if(eq(mods.flags, Target)) modsString.append("Target,");
+    if(eq(mods.flags, Nightmare)) modsString.append("Nightmare,");
+    if(eq(mods.flags, MirrorHorizontal) ||
+       eq(mods.flags, MirrorVertical))
         modsString.append("Mirror,");
-    if(mods.flags & Replay::ModFlags::FPoSu) modsString.append("FPoSu,");
+    if(eq(mods.flags, FPoSu)) modsString.append("FPoSu,");
 
     if(modsString.length() > 0) modsString = modsString.substr(0, modsString.length() - 1);
 

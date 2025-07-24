@@ -157,7 +157,7 @@ Room::Room(Packet *packet) {
     }
 
     this->map_name = read_string(packet);
-    this->map_id = read<u32>(packet);
+    this->map_id = read<i32>(packet);
 
     auto hash_str = read_string(packet);
     this->map_md5 = hash_str.toUtf8();
@@ -175,12 +175,12 @@ Room::Room(Packet *packet) {
         }
 
         if(this->slots[s].has_player()) {
-            this->slots[s].player_id = read<u32>(packet);
+            this->slots[s].player_id = read<i32>(packet);
             this->nb_players++;
         }
     }
 
-    this->host_id = read<u32>(packet);
+    this->host_id = read<i32>(packet);
     this->mode = read<u8>(packet);
     this->win_condition = read<u8>(packet);
     this->team_type = read<u8>(packet);
@@ -202,7 +202,7 @@ void Room::pack(Packet *packet) {
     write_string(packet, this->name.toUtf8());
     write_string(packet, this->password.toUtf8());
     write_string(packet, this->map_name.toUtf8());
-    write<u32>(packet, this->map_id);
+    write<i32>(packet, this->map_id);
     write_string(packet, this->map_md5.hash.data());
     for(int i = 0; i < 16; i++) {
         write<u8>(packet, this->slots[i].status);
@@ -212,11 +212,11 @@ void Room::pack(Packet *packet) {
     }
     for(int s = 0; s < 16; s++) {
         if(this->slots[s].has_player()) {
-            write<u32>(packet, this->slots[s].player_id);
+            write<i32>(packet, this->slots[s].player_id);
         }
     }
 
-    write<u32>(packet, this->host_id);
+    write<i32>(packet, this->host_id);
     write<u8>(packet, this->mode);
     write<u8>(packet, this->win_condition);
     write<u8>(packet, this->team_type);

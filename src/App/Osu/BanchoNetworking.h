@@ -35,12 +35,13 @@ struct APIRequest {
     i32 extra_int = 0;  // lazy
 };
 
-struct ReplayExtraInfo {
-    MD5Hash diff2_md5;
-    i32 mod_flags;
-    UString username;
-    i32 player_id;
-};
+// unused?
+// struct ReplayExtraInfo {
+//     MD5Hash diff2_md5;
+//     u32 mod_flags;
+//     UString username;
+//     i32 player_id;
+// };
 
 namespace BANCHO::Net {
 

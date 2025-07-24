@@ -5,7 +5,7 @@
 #include "UString.h"
 
 struct UserInfo {
-    u32 user_id = 0;
+    i32 user_id = 0;
     bool irc_user = false;
 
     // Presence (via USER_PRESENCE_REQUEST or USER_PRESENCE_REQUEST_ALL)
@@ -41,15 +41,15 @@ struct UserInfo {
 namespace BANCHO::User
 {
 
-extern std::unordered_map<u32, UserInfo*> online_users;
-extern std::vector<u32> friends;
-extern std::vector<u32> stats_requests;
+extern std::unordered_map<i32, UserInfo*> online_users;
+extern std::vector<i32> friends;
+extern std::vector<i32> stats_requests;
 
-void logout_user(u32 user_id);
+void logout_user(i32 user_id);
 UserInfo* find_user(const UString& username);
 UserInfo* find_user_starting_with(UString prefix, const UString& last_match);
-UserInfo* try_get_user_info(u32 user_id, bool wants_presence = false);
-UserInfo* get_user_info(u32 user_id, bool wants_presence = false);
+UserInfo* try_get_user_info(i32 user_id, bool wants_presence = false);
+UserInfo* get_user_info(i32 user_id, bool wants_presence = false);
 
 void request_presence_batch();
 }

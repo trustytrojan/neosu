@@ -18,7 +18,7 @@
 
 static const u32 AVATAR_MARGIN = 4;
 
-UserCard2::UserCard2(u32 user_id) : CBaseUIButton() {
+UserCard2::UserCard2(i32 user_id) : CBaseUIButton() {
     this->info = BANCHO::User::get_user_info(user_id, true);
     this->avatar = new UIAvatar(user_id, 0.f, 0.f, 0.f, 0.f);
     this->avatar->on_screen = true;

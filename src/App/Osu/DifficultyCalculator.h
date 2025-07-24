@@ -246,7 +246,7 @@ class DifficultyCalculator {
                              i32 c300 = -1, i32 c100 = 0, i32 c50 = 0);
 
     // pp, fully static
-    static f64 calculatePPv2(i32 modsLegacy, f64 timescale, f64 ar, f64 od, f64 aim, f64 aimSliderFactor,
+    static f64 calculatePPv2(u32 modsLegacy, f64 timescale, f64 ar, f64 od, f64 aim, f64 aimSliderFactor,
                              f64 aimDifficultStrains, f64 speed, f64 speedNotes, f64 speedDifficultStrains,
                              i32 numCircles, i32 numSliders, i32 numSpinners, i32 maxPossibleCombo, i32 combo,
                              i32 misses, i32 c300, i32 c100, i32 c50);

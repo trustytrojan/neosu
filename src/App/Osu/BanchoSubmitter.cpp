@@ -115,7 +115,7 @@ void submit_score(FinishedScore score) {
             idiot_check.append(UString::format("%d%s", score.comboMax, score.perfect ? "True" : "False"));
             idiot_check.append(
                 UString::format("%s%d%s", bancho->username.toUtf8(), score.score, GRADES[(int)score.grade]));
-            idiot_check.append(UString::format("%dQ%s", score.mods.to_legacy(), score.passed ? "True" : "False"));
+            idiot_check.append(UString::format("%uQ%s", score.mods.to_legacy(), score.passed ? "True" : "False"));
             idiot_check.append(UString::format("0%d%s", OSU_VERSION_DATEONLY, score_time));
             idiot_check.append(bancho->client_hashes);
 
@@ -133,7 +133,7 @@ void submit_score(FinishedScore score) {
         score_data.append(UString::format(":%d", score.comboMax));
         score_data.append(UString::format(":%s", score.perfect ? "True" : "False"));
         score_data.append(UString::format(":%s", GRADES[(int)score.grade]));
-        score_data.append(UString::format(":%d", score.mods.to_legacy()));
+        score_data.append(UString::format(":%u", score.mods.to_legacy()));
         score_data.append(UString::format(":%s", score.passed ? "True" : "False"));
         score_data.append(":0");  // gamemode, always std
         score_data.append(UString::format(":%s", score_time));

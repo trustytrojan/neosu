@@ -212,7 +212,7 @@ class Beatmap : public BeatmapInterface {
     [[nodiscard]] bool isKey2Down() const override;
     [[nodiscard]] bool isClickHeld() const override;
     [[nodiscard]] Replay::Mods getMods() const override;
-    [[nodiscard]] i32 getModsLegacy() const override;
+    [[nodiscard]] u32 getModsLegacy() const override;
 
     [[nodiscard]] std::string getTitle() const;
     [[nodiscard]] std::string getArtist() const;

@@ -74,15 +74,15 @@ void LiveScore::reset() {
 }
 
 float LiveScore::getScoreMultiplier() {
-    bool ez = this->mods.flags & Replay::ModFlags::Easy;
-    bool nf = this->mods.flags & Replay::ModFlags::NoFail;
-    bool sv2 = this->mods.flags & Replay::ModFlags::ScoreV2;
-    bool hr = this->mods.flags & Replay::ModFlags::HardRock;
-    bool fl = this->mods.flags & Replay::ModFlags::Flashlight;
-    bool hd = this->mods.flags & Replay::ModFlags::Hidden;
-    bool so = this->mods.flags & Replay::ModFlags::SpunOut;
-    bool rx = this->mods.flags & Replay::ModFlags::Relax;
-    bool ap = this->mods.flags & Replay::ModFlags::Autopilot;
+    bool ez = ModMasks::eq(this->mods.flags, Replay::ModFlags::Easy);
+    bool nf = ModMasks::eq(this->mods.flags, Replay::ModFlags::NoFail);
+    bool sv2 = ModMasks::eq(this->mods.flags, Replay::ModFlags::ScoreV2);
+    bool hr = ModMasks::eq(this->mods.flags, Replay::ModFlags::HardRock);
+    bool fl = ModMasks::eq(this->mods.flags, Replay::ModFlags::Flashlight);
+    bool hd = ModMasks::eq(this->mods.flags, Replay::ModFlags::Hidden);
+    bool so = ModMasks::eq(this->mods.flags, Replay::ModFlags::SpunOut);
+    bool rx = ModMasks::eq(this->mods.flags, Replay::ModFlags::Relax);
+    bool ap = ModMasks::eq(this->mods.flags, Replay::ModFlags::Autopilot);
 
     float multiplier = 1.0f;
 
@@ -187,7 +187,7 @@ void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject * /*hitObject*
 
     // recalculate score v2
     this->iScoreV2ComboPortion += (unsigned long long)((double)hitValue * (1.0 + (double)scoreComboMultiplier / 10.0));
-    if(this->mods.flags & Replay::ModFlags::ScoreV2) {
+    if(ModMasks::eq(this->mods.flags, Replay::ModFlags::ScoreV2)) {
         const double maximumAccurateHits = beatmap->nb_hitobjects;
 
         if(totalNumHits > 0) {
@@ -201,8 +201,8 @@ void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject * /*hitObject*
     // recalculate grade
     this->grade = FinishedScore::Grade::D;
 
-    bool hd = this->mods.flags & Replay::ModFlags::Hidden;
-    bool fl = this->mods.flags & Replay::ModFlags::Flashlight;
+    bool hd = ModMasks::eq(this->mods.flags, Replay::ModFlags::Hidden);
+    bool fl = ModMasks::eq(this->mods.flags, Replay::ModFlags::Flashlight);
 
     if(percent300s > 0.6f) this->grade = FinishedScore::Grade::C;
     if((percent300s > 0.7f && this->iNumMisses == 0) || (percent300s > 0.8f)) this->grade = FinishedScore::Grade::B;
@@ -438,7 +438,7 @@ UString LiveScore::getModsStringForRichPresence() {
     return modsString;
 }
 
-unsigned long long LiveScore::getScore() { return this->mods.flags & Replay::ModFlags::ScoreV2 ? this->iScoreV2 : this->iScoreV1; }
+unsigned long long LiveScore::getScore() { return ModMasks::eq(this->mods.flags, Replay::ModFlags::ScoreV2) ? this->iScoreV2 : this->iScoreV1; }
 
 void LiveScore::onScoreChange() {
     if(this->simulating || !osu->room) return;
@@ -477,8 +477,8 @@ f64 FinishedScore::get_pp() const {
 
 FinishedScore::Grade FinishedScore::calculate_grade() const {
     float totalNumHits = this->numMisses + this->num50s + this->num100s + this->num300s;
-    bool modHidden = (this->mods.flags & Replay::ModFlags::Hidden);
-    bool modFlashlight = (this->mods.flags & Replay::ModFlags::Flashlight);
+    bool modHidden = (ModMasks::eq(this->mods.flags, Replay::ModFlags::Hidden));
+    bool modFlashlight = (ModMasks::eq(this->mods.flags, Replay::ModFlags::Flashlight));
 
     float percent300s = 0.0f;
     float percent50s = 0.0f;

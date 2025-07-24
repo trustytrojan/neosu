@@ -156,7 +156,7 @@ struct Slot {
     // From ROOM_CREATED, ROOM_UPDATED
     u8 status = 0;  // bitfield of [quit, complete, playing, no_map, ready, not_ready, locked, open]
     u8 team = 0;
-    u32 player_id = 0;
+    i32 player_id = 0;
     u32 mods = 0;
 
     // From MATCH_PLAYER_SKIPPED

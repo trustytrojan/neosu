@@ -13,7 +13,7 @@ struct FinishedScore {
     Replay::Mods mods;
 
     u64 unixTimestamp = 0;
-    u32 player_id = 0;
+    i32 player_id = 0;
     std::string playerName;
     DatabaseBeatmap *diff2 = NULL;
     u64 play_time_ms = 0;

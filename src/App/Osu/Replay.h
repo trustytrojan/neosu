@@ -86,7 +86,7 @@ struct Mods {
     f32 jigsaw_followcircle_radius_factor = 0.f;
     f32 shirone_combo = 20.f;
 
-    [[nodiscard]] i32 to_legacy() const;
+    [[nodiscard]] u32 to_legacy() const;
 
     // Get AR/OD, ignoring mods which change it over time
     // Used for ppv2 calculations.
@@ -94,7 +94,7 @@ struct Mods {
     f32 get_naive_od(DatabaseBeatmap *diff2) const;
 
     static Mods from_cvars();
-    static Mods from_legacy(i32 legacy_flags);
+    static Mods from_legacy(u32 legacy_flags);
     static void use(Mods mods);
 };
 

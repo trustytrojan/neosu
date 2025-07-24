@@ -4,7 +4,7 @@
 class DatabaseBeatmap;
 
 struct pp_calc_request {
-    i32 mods_legacy;
+    u32 mods_legacy;
     f32 speed;
     f32 AR;
     f32 CS;

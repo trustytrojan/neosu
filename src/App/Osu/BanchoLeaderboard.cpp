@@ -49,8 +49,8 @@ FinishedScore parse_score(char *score_line) {
     score.numKatus = static_cast<i32>(strtol(tokens[8].c_str(), NULL, 10));
     score.numGekis = static_cast<i32>(strtol(tokens[9].c_str(), NULL, 10));
     score.perfect = strtoul(tokens[10].c_str(), NULL, 10) == 1;
-    score.mods = Replay::Mods::from_legacy(static_cast<i32>(strtol(tokens[11].c_str(), NULL, 10)));
-    score.player_id = strtoul(tokens[12].c_str(), NULL, 10);
+    score.mods = Replay::Mods::from_legacy(static_cast<u32>(strtol(tokens[11].c_str(), NULL, 10)));
+    score.player_id = static_cast<i32>(strtol(tokens[12].c_str(), NULL, 10));
     score.unixTimestamp = strtoul(tokens[14].c_str(), NULL, 10);
 
     // @PPV3: score can only be ppv2, AND we need to recompute ppv2 on it
@@ -94,7 +94,7 @@ void fetch_online_scores(DatabaseBeatmap *beatmap) {
     path.append(UString::format("&f=%s", encoded_filename));
     curl_free(encoded_filename);
     curl_easy_cleanup(curl);
-    path.append(UString::format("&m=0&i=%d&mods=%d&h=&a=0&us=%s&ha=%s", beatmap->getSetID(),
+    path.append(UString::format("&m=0&i=%d&mods=%u&h=&a=0&us=%s&ha=%s", beatmap->getSetID(),
                                 osu->modSelector->getModFlags(), bancho->username.toUtf8(), bancho->pw_md5.hash.data())
                     .toUtf8());
 
@@ -132,7 +132,7 @@ void process_leaderboard_response(Packet response) {
     info.beatmap_set_id = strtoul(beatmap_set_id, NULL, 10);
 
     char *nb_scores = strtok_x('|', &body);
-    info.nb_scores = strtoul(nb_scores, NULL, 10);
+    info.nb_scores = static_cast<i32>(strtol(nb_scores, NULL, 10));
 
     char *fa_track_id = strtok_x('|', &body);
     (void)fa_track_id;
@@ -141,7 +141,7 @@ void process_leaderboard_response(Packet response) {
     (void)fa_license_text;
 
     char *online_offset = strtok_x('\n', &body);
-    info.online_offset = strtol(online_offset, NULL, 10);
+    info.online_offset = static_cast<i32>(strtol(online_offset, NULL, 10));
 
     char *map_name = strtok_x('\n', &body);
     (void)map_name;

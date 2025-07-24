@@ -255,7 +255,7 @@ void ChatChannel::updateLayout(Vector2 pos, Vector2 size) {
     this->ui->setSize(size);
     this->y_total = 7;
 
-    for(const auto& msg : this->messages) {
+    for(const auto &msg : this->messages) {
         this->add_message(msg);
     }
 
@@ -343,8 +343,8 @@ void Chat::mouse_update(bool *propagate_clicks) {
         bool is_above_bottom = card->getPos().y <= this->user_list->getPos().y + this->user_list->getSize().y;
         bool is_below_top = card->getPos().y + card->getSize().y >= this->user_list->getPos().y;
         if(is_outdated && is_above_bottom && is_below_top) {
-            if(std::find(BANCHO::User::stats_requests.begin(), BANCHO::User::stats_requests.end(),
-                         card->info->user_id) == BANCHO::User::stats_requests.end()) {
+            if(std::ranges::find(BANCHO::User::stats_requests, card->info->user_id) ==
+               BANCHO::User::stats_requests.end()) {
                 BANCHO::User::stats_requests.push_back(card->info->user_id);
             }
         }
@@ -429,7 +429,7 @@ void Chat::handle_command(const UString &msg) {
         } else {
             Packet packet;
             packet.id = FRIEND_ADD;
-            proto::write<u32>(&packet, user->user_id);
+            proto::write<i32>(&packet, user->user_id);
             BANCHO::Net::send_packet(packet);
 
             BANCHO::User::friends.push_back(user->user_id);
@@ -468,7 +468,7 @@ void Chat::handle_command(const UString &msg) {
         if(user->is_friend()) {
             Packet packet;
             packet.id = FRIEND_REMOVE;
-            proto::write<u32>(&packet, user->user_id);
+            proto::write<i32>(&packet, user->user_id);
             BANCHO::Net::send_packet(packet);
 
             auto it = std::ranges::find(BANCHO::User::friends, user->user_id);
@@ -513,7 +513,7 @@ void Chat::handle_command(const UString &msg) {
         proto::write_string(&packet, (char *)bancho->username.toUtf8());
         proto::write_string(&packet, (char *)invite_msg.toUtf8());
         proto::write_string(&packet, (char *)username.toUtf8());
-        proto::write<u32>(&packet, bancho->user_id);
+        proto::write<i32>(&packet, bancho->user_id);
         BANCHO::Net::send_packet(packet);
 
         this->addSystemMessage(UString::format("%s has been invited to the game.", username.toUtf8()));
@@ -809,7 +809,7 @@ void Chat::addMessage(UString channel_name, const ChatMessage &msg, bool mark_un
         proto::write_string(&packet, (char *)bancho->username.toUtf8());
         proto::write_string(&packet, (char *)this->away_msg.toUtf8());
         proto::write_string(&packet, (char *)msg.author_name.toUtf8());
-        proto::write<u32>(&packet, bancho->user_id);
+        proto::write<i32>(&packet, bancho->user_id);
         BANCHO::Net::send_packet(packet);
 
         // Server doesn't echo the message back
@@ -1064,7 +1064,7 @@ void Chat::send_message(const UString &msg) {
     proto::write_string(&packet, (char *)bancho->username.toUtf8());
     proto::write_string(&packet, (char *)msg.toUtf8());
     proto::write_string(&packet, (char *)this->selected_channel->name.toUtf8());
-    proto::write<u32>(&packet, bancho->user_id);
+    proto::write<i32>(&packet, bancho->user_id);
     BANCHO::Net::send_packet(packet);
 
     // Server doesn't echo the message back
@@ -1082,7 +1082,7 @@ void Chat::onDisconnect() {
     }
     this->channels.clear();
 
-    for(const auto& chan : Bancho::chat_channels) {
+    for(const auto &chan : Bancho::chat_channels) {
         delete chan.second;
     }
     Bancho::chat_channels.clear();
@@ -1171,6 +1171,5 @@ bool Chat::isMouseInChat() {
 
 void Chat::askWhatChannelToJoin(CBaseUIButton * /*btn*/) {
     // XXX: Could display nicer UI with full channel list (chat_channels in Bancho.cpp)
-    osu->prompt->prompt("Type in the channel you want to join (e.g. '#osu'):",
-                        SA::MakeDelegate<&Chat::join>(this));
+    osu->prompt->prompt("Type in the channel you want to join (e.g. '#osu'):", SA::MakeDelegate<&Chat::join>(this));
 }

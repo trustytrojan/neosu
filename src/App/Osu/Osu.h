@@ -299,7 +299,7 @@ class Osu : public App, public MouseListener {
 
     // replay
     UString watched_user_name;
-    u32 watched_user_id = 0;
+    i32 watched_user_id = 0;
 
     // custom
     bool music_unpause_scheduled = false;

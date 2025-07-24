@@ -1185,9 +1185,10 @@ void ModSelector::resetMods() {
 u32 ModSelector::getModFlags() { return osu->getScore()->getModsLegacy(); }
 
 void ModSelector::enableModsFromFlags(u32 flags) {
-    if(flags & (LegacyFlags::DoubleTime | LegacyFlags::Nightcore)) {
+    using namespace ModMasks;
+    if(legacy_eq(flags, LegacyFlags::DoubleTime) || legacy_eq(flags, LegacyFlags::Nightcore)) {
         cv::speed_override.setValue(1.5f);
-    } else if(flags & LegacyFlags::HalfTime) {
+    } else if(legacy_eq(flags, LegacyFlags::HalfTime)) {
         cv::speed_override.setValue(0.75f);
     } else {
         cv::speed_override.setValue(-1.f);
@@ -1195,25 +1196,25 @@ void ModSelector::enableModsFromFlags(u32 flags) {
 
     cv::mod_suddendeath.setValue(false);
     cv::mod_perfect.setValue(false);
-    if(flags & LegacyFlags::Perfect) {
+    if(legacy_eq(flags, LegacyFlags::Perfect)) {
         this->modButtonSuddendeath->setState(1);
         this->modButtonSuddendeath->setOn(true, true);
-    } else if(flags & LegacyFlags::SuddenDeath) {
+    } else if(legacy_eq(flags, LegacyFlags::SuddenDeath)) {
         this->modButtonSuddendeath->setState(0);
         this->modButtonSuddendeath->setOn(true, true);
     }
 
-    this->modButtonNofail->setOn(flags & LegacyFlags::NoFail, true);
-    this->modButtonEasy->setOn(flags & LegacyFlags::Easy, true);
-    this->modButtonTD->setOn(flags & LegacyFlags::TouchDevice, true);
-    this->modButtonHidden->setOn(flags & LegacyFlags::Hidden, true);
-    this->modButtonHardrock->setOn(flags & LegacyFlags::HardRock, true);
-    this->modButtonRelax->setOn(flags & LegacyFlags::Relax, true);
-    this->modButtonSpunout->setOn(flags & LegacyFlags::SpunOut, true);
-    this->modButtonAutopilot->setOn(flags & LegacyFlags::Autopilot, true);
-    this->getModButtonOnGrid(4, 2)->setOn(flags & LegacyFlags::Target, true);
-    this->modButtonFlashlight->setOn(flags & LegacyFlags::Flashlight, true);
-    this->modButtonScoreV2->setOn(flags & LegacyFlags::ScoreV2, true);
+    this->modButtonNofail->setOn(legacy_eq(flags, LegacyFlags::NoFail), true);
+    this->modButtonEasy->setOn(legacy_eq(flags, LegacyFlags::Easy), true);
+    this->modButtonTD->setOn(legacy_eq(flags, LegacyFlags::TouchDevice), true);
+    this->modButtonHidden->setOn(legacy_eq(flags, LegacyFlags::Hidden), true);
+    this->modButtonHardrock->setOn(legacy_eq(flags, LegacyFlags::HardRock), true);
+    this->modButtonRelax->setOn(legacy_eq(flags, LegacyFlags::Relax), true);
+    this->modButtonSpunout->setOn(legacy_eq(flags, LegacyFlags::SpunOut), true);
+    this->modButtonAutopilot->setOn(legacy_eq(flags, LegacyFlags::Autopilot), true);
+    this->getModButtonOnGrid(4, 2)->setOn(legacy_eq(flags, LegacyFlags::Target), true);
+    this->modButtonFlashlight->setOn(legacy_eq(flags, LegacyFlags::Flashlight), true);
+    this->modButtonScoreV2->setOn(legacy_eq(flags, LegacyFlags::ScoreV2), true);
 
     osu->updateMods();
 }

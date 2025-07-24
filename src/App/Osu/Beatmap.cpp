@@ -4184,4 +4184,4 @@ f32 Beatmap::getRawApproachTime() const {
 
 Replay::Mods Beatmap::getMods() const { return osu->getScore()->mods; }
 
-i32 Beatmap::getModsLegacy() const { return osu->getScore()->getModsLegacy(); }
+u32 Beatmap::getModsLegacy() const { return osu->getScore()->getModsLegacy(); }

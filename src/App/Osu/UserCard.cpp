@@ -19,7 +19,7 @@
 
 // NOTE: selected username is stored in m_sText
 
-UserCard::UserCard(u32 user_id) : CBaseUIButton() {
+UserCard::UserCard(i32 user_id) : CBaseUIButton() {
     this->setID(user_id);
 
     this->fPP = 0.0f;

@@ -1,7 +1,14 @@
 #pragma once
 
+#include "types.h"
+
+namespace ModMasks {
+static inline bool eq(u64 flags, u64 mod) { return (flags & mod) == mod; }
+static inline bool legacy_eq(u32 legacy_flags, u32 legacy_mod) { return (legacy_flags & legacy_mod) == legacy_mod; }
+}
+
 namespace LegacyFlags {
-enum {
+enum : u32 {
     NoFail = 1 << 0,
     Easy = 1 << 1,
     TouchDevice = 1 << 2,

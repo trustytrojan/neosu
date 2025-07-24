@@ -44,22 +44,22 @@
 void UIModList::draw() {
     std::vector<SkinImage *> mods;
 
-    if(*this->flags & LegacyFlags::Perfect)
+    if(ModMasks::legacy_eq(*this->flags, LegacyFlags::Perfect))
         mods.push_back(osu->getSkin()->getSelectionModPerfect());
-    else if(*this->flags & LegacyFlags::SuddenDeath)
+    else if(ModMasks::legacy_eq(*this->flags, LegacyFlags::SuddenDeath))
         mods.push_back(osu->getSkin()->getSelectionModSuddenDeath());
 
-    if(*this->flags & LegacyFlags::NoFail) mods.push_back(osu->getSkin()->getSelectionModNoFail());
-    if(*this->flags & LegacyFlags::Easy) mods.push_back(osu->getSkin()->getSelectionModEasy());
-    if(*this->flags & LegacyFlags::TouchDevice) mods.push_back(osu->getSkin()->getSelectionModTD());
-    if(*this->flags & LegacyFlags::Hidden) mods.push_back(osu->getSkin()->getSelectionModHidden());
-    if(*this->flags & LegacyFlags::HardRock) mods.push_back(osu->getSkin()->getSelectionModHardRock());
-    if(*this->flags & LegacyFlags::Relax) mods.push_back(osu->getSkin()->getSelectionModRelax());
-    if(*this->flags & LegacyFlags::Autoplay) mods.push_back(osu->getSkin()->getSelectionModAutoplay());
-    if(*this->flags & LegacyFlags::SpunOut) mods.push_back(osu->getSkin()->getSelectionModSpunOut());
-    if(*this->flags & LegacyFlags::Autopilot) mods.push_back(osu->getSkin()->getSelectionModAutopilot());
-    if(*this->flags & LegacyFlags::Target) mods.push_back(osu->getSkin()->getSelectionModTarget());
-    if(*this->flags & LegacyFlags::ScoreV2) mods.push_back(osu->getSkin()->getSelectionModScorev2());
+    if(ModMasks::legacy_eq(*this->flags, LegacyFlags::NoFail)) mods.push_back(osu->getSkin()->getSelectionModNoFail());
+    if(ModMasks::legacy_eq(*this->flags, LegacyFlags::Easy)) mods.push_back(osu->getSkin()->getSelectionModEasy());
+    if(ModMasks::legacy_eq(*this->flags, LegacyFlags::TouchDevice)) mods.push_back(osu->getSkin()->getSelectionModTD());
+    if(ModMasks::legacy_eq(*this->flags, LegacyFlags::Hidden)) mods.push_back(osu->getSkin()->getSelectionModHidden());
+    if(ModMasks::legacy_eq(*this->flags, LegacyFlags::HardRock)) mods.push_back(osu->getSkin()->getSelectionModHardRock());
+    if(ModMasks::legacy_eq(*this->flags, LegacyFlags::Relax)) mods.push_back(osu->getSkin()->getSelectionModRelax());
+    if(ModMasks::legacy_eq(*this->flags, LegacyFlags::Autoplay)) mods.push_back(osu->getSkin()->getSelectionModAutoplay());
+    if(ModMasks::legacy_eq(*this->flags, LegacyFlags::SpunOut)) mods.push_back(osu->getSkin()->getSelectionModSpunOut());
+    if(ModMasks::legacy_eq(*this->flags, LegacyFlags::Autopilot)) mods.push_back(osu->getSkin()->getSelectionModAutopilot());
+    if(ModMasks::legacy_eq(*this->flags, LegacyFlags::Target)) mods.push_back(osu->getSkin()->getSelectionModTarget());
+    if(ModMasks::legacy_eq(*this->flags, LegacyFlags::ScoreV2)) mods.push_back(osu->getSkin()->getSelectionModScorev2());
 
     g->setColor(0xffffffff);
     Vector2 modPos = this->vPos;

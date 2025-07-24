@@ -472,14 +472,14 @@ void Circle::update(long curPos, f64 frame_time) {
     const auto mods = this->bi->getMods();
     const long delta = curPos - this->click_time;
 
-    if(mods.flags & Replay::ModFlags::Autoplay) {
+    if(ModMasks::eq(mods.flags, Replay::ModFlags::Autoplay)) {
         if(curPos >= this->click_time) {
             this->onHit(LiveScore::HIT::HIT_300, 0);
         }
         return;
     }
 
-    if(mods.flags & Replay::ModFlags::Relax) {
+    if(ModMasks::eq(mods.flags, Replay::ModFlags::Relax)) {
         if(curPos >= this->click_time + (long)cv::relax_offset.getInt() && !this->bi->isPaused() &&
            !this->bi->isContinueScheduled()) {
             const Vector2 pos = this->bi->osuCoords2Pixels(this->vRawPos);

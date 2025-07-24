@@ -944,8 +944,8 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
         request.OD = mods.get_naive_od(diff2);
         request.CS = diff2->getCS();
         if(mods.cs_override != -1.f) request.CS = mods.cs_override;
-        request.rx = mods.flags & Replay::ModFlags::Relax;
-        request.td = mods.flags & Replay::ModFlags::TouchDevice;
+        request.rx = ModMasks::eq(mods.flags, Replay::ModFlags::Relax);
+        request.td = ModMasks::eq(mods.flags, Replay::ModFlags::TouchDevice);
         request.comboMax = -1;
         request.numMisses = 0;
         request.num300s = diff2->getNumObjects();

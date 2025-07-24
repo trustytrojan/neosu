@@ -7,7 +7,7 @@ class UIAvatar;
 
 class UserCard : public CBaseUIButton {
    public:
-    UserCard(u32 user_id);
+    UserCard(i32 user_id);
     ~UserCard() override;
 
     void draw() override;
@@ -16,7 +16,7 @@ class UserCard : public CBaseUIButton {
     void updateUserStats();
     void setID(u32 new_id);
 
-    u32 user_id = 0;
+    i32 user_id = 0;
 
    private:
     UIAvatar *avatar = NULL;

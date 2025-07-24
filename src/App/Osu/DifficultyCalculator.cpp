@@ -487,7 +487,7 @@ f64 DifficultyCalculator::calculateStarDiffForHitObjectsInt(std::vector<DiffObje
                : 0.0;
 }
 
-f64 DifficultyCalculator::calculatePPv2(i32 modsLegacy, f64 timescale, f64 ar, f64 od, f64 aim, f64 aimSliderFactor,
+f64 DifficultyCalculator::calculatePPv2(u32 modsLegacy, f64 timescale, f64 ar, f64 od, f64 aim, f64 aimSliderFactor,
                                         f64 aimDifficultStrains, f64 speed, f64 speedNotes, f64 speedDifficultStrains,
                                         i32 numCircles, i32 numSliders, i32 numSpinners, i32 maxPossibleCombo,
                                         i32 combo, i32 misses, i32 c300, i32 c100, i32 c50) {
@@ -509,7 +509,7 @@ f64 DifficultyCalculator::calculatePPv2(i32 modsLegacy, f64 timescale, f64 ar, f
 
     i32 totalHits = c300 + c100 + c50 + misses;
     f64 accuracy = (totalHits > 0 ? (f64)(c300 * 300 + c100 * 100 + c50 * 50) / (f64)(totalHits * 300) : 0.0);
-    i32 amountHitObjectsWithAccuracy = (modsLegacy & LegacyFlags::ScoreV2 ? (numCircles + numSliders) : numCircles);
+    i32 amountHitObjectsWithAccuracy = (ModMasks::legacy_eq(modsLegacy, LegacyFlags::ScoreV2) ? (numCircles + numSliders) : numCircles);
 
     // calculateEffectiveMissCount @
     // https://github.com/ppy/osu/blob/master/osu.Game.Rulesets.Osu/Difficulty/OsuPerformanceCalculator.cs required
@@ -526,15 +526,15 @@ f64 DifficultyCalculator::calculatePPv2(i32 modsLegacy, f64 timescale, f64 ar, f
     // custom multipliers for nofail and spunout
     f64 multiplier = 1.15;  // keep final pp normalized across changes
     {
-        if(modsLegacy & LegacyFlags::NoFail)
+        if(ModMasks::legacy_eq(modsLegacy, LegacyFlags::NoFail))
             multiplier *= std::max(
                 0.9, 1.0 - 0.02 * effectiveMissCount);  // see https://github.com/ppy/osu-performance/pull/127/files
 
-        if((modsLegacy & LegacyFlags::SpunOut) && totalHits > 0)
+        if((ModMasks::legacy_eq(modsLegacy, LegacyFlags::SpunOut)) && totalHits > 0)
             multiplier *= 1.0 - pow((f64)numSpinners / (f64)totalHits,
                                     0.85);  // see https://github.com/ppy/osu-performance/pull/110/
 
-        if((modsLegacy & LegacyFlags::Relax)) {
+        if((ModMasks::legacy_eq(modsLegacy, LegacyFlags::Relax))) {
             f64 okMultiplier = std::max(0.0, od > 0.0 ? 1.0 - pow(od / 13.33, 1.8) : 1.0);   // 100
             f64 mehMultiplier = std::max(0.0, od > 0.0 ? 1.0 - pow(od / 13.33, 5.0) : 1.0);  // 50
             effectiveMissCount =
@@ -543,7 +543,7 @@ f64 DifficultyCalculator::calculatePPv2(i32 modsLegacy, f64 timescale, f64 ar, f
     }
 
     f64 aimValue = 0.0;
-    if(!(modsLegacy & LegacyFlags::Autopilot)) {
+    if(!(ModMasks::legacy_eq(modsLegacy, LegacyFlags::Autopilot))) {
         f64 rawAim = aim;
         aimValue = pow(5.0 * std::max(1.0, rawAim / 0.0675) - 4.0, 3.0) / 100000.0;
 
@@ -560,7 +560,7 @@ f64 DifficultyCalculator::calculatePPv2(i32 modsLegacy, f64 timescale, f64 ar, f
 
         // ar bonus
         f64 approachRateFactor = 0.0;  // see https://github.com/ppy/osu-performance/pull/125/
-        if(!(modsLegacy & LegacyFlags::Relax)) {
+        if(!(ModMasks::legacy_eq(modsLegacy, LegacyFlags::Relax))) {
             if(ar > 10.33)
                 approachRateFactor =
                     0.3 *
@@ -577,7 +577,7 @@ f64 DifficultyCalculator::calculatePPv2(i32 modsLegacy, f64 timescale, f64 ar, f
         aimValue *= 1.0 + approachRateFactor * lengthBonus;
 
         // hidden
-        if(modsLegacy & LegacyFlags::Hidden)
+        if(ModMasks::legacy_eq(modsLegacy, LegacyFlags::Hidden))
             aimValue *= 1.0 + 0.04 * (std::max(12.0 - ar,
                                                0.0));  // NOTE: clamped to 0 because neosu allows AR > 12
 
@@ -600,7 +600,7 @@ f64 DifficultyCalculator::calculatePPv2(i32 modsLegacy, f64 timescale, f64 ar, f
     }
 
     f64 speedValue = 0.0;
-    if(!(modsLegacy & LegacyFlags::Relax)) {
+    if(!(ModMasks::legacy_eq(modsLegacy, LegacyFlags::Relax))) {
         speedValue = pow(5.0 * std::max(1.0, speed / 0.0675) - 4.0, 3.0) / 100000.0;
 
         // length bonus
@@ -624,7 +624,7 @@ f64 DifficultyCalculator::calculatePPv2(i32 modsLegacy, f64 timescale, f64 ar, f
         speedValue *= 1.0 + approachRateFactor * lengthBonus;
 
         // hidden
-        if(modsLegacy & LegacyFlags::Hidden)
+        if(ModMasks::legacy_eq(modsLegacy, LegacyFlags::Hidden))
             speedValue *= 1.0 + 0.04 * (std::max(12.0 - ar,
                                                  0.0));  // NOTE: clamped to 0 because neosu allows AR > 12
 
@@ -645,7 +645,7 @@ f64 DifficultyCalculator::calculatePPv2(i32 modsLegacy, f64 timescale, f64 ar, f
     }
 
     f64 accuracyValue = 0.0;
-    if(!(modsLegacy & LegacyFlags::Relax)) {
+    if(!(ModMasks::legacy_eq(modsLegacy, LegacyFlags::Relax))) {
         f64 betterAccuracyPercentage;
         if(amountHitObjectsWithAccuracy > 0)
             betterAccuracyPercentage =
@@ -664,9 +664,9 @@ f64 DifficultyCalculator::calculatePPv2(i32 modsLegacy, f64 timescale, f64 ar, f
         accuracyValue *= std::min(1.15, pow(amountHitObjectsWithAccuracy / 1000.0, 0.3));
 
         // hidden bonus
-        if(modsLegacy & LegacyFlags::Hidden) accuracyValue *= 1.08;
+        if(ModMasks::legacy_eq(modsLegacy, LegacyFlags::Hidden)) accuracyValue *= 1.08;
         // flashlight bonus
-        if(modsLegacy & LegacyFlags::Flashlight) accuracyValue *= 1.02;
+        if(ModMasks::legacy_eq(modsLegacy, LegacyFlags::Flashlight)) accuracyValue *= 1.02;
     }
 
     f64 totalValue = pow(pow(aimValue, 1.1) + pow(speedValue, 1.1) + pow(accuracyValue, 1.1), 1.0 / 1.1) * multiplier;

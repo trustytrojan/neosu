@@ -521,7 +521,7 @@ void receive_bancho_packets() {
             packet.id = USER_STATS_REQUEST;
             proto::write<u16>(&packet, BANCHO::User::stats_requests.size());
             for(auto user_id : BANCHO::User::stats_requests) {
-                proto::write<u32>(&packet, user_id);
+                proto::write<i32>(&packet, user_id);
             }
             send_packet(packet);
 

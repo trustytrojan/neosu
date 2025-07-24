@@ -337,8 +337,8 @@ void RankingScreen::mouse_update(bool *propagate_clicks) {
         request.OD = this->score.mods.get_naive_od(this->score.diff2);
         request.CS = this->score.diff2->getCS();
         if(this->score.mods.cs_override != -1.f) request.CS = this->score.mods.cs_override;
-        request.rx = this->score.mods.flags & Replay::ModFlags::Relax;
-        request.td = this->score.mods.flags & Replay::ModFlags::TouchDevice;
+        request.rx = ModMasks::eq(this->score.mods.flags, Replay::ModFlags::Relax);
+        request.td = ModMasks::eq(this->score.mods.flags, Replay::ModFlags::TouchDevice);
         request.comboMax = this->score.comboMax;
         request.numMisses = this->score.numMisses;
         request.num300s = this->score.num300s;
@@ -477,53 +477,55 @@ void RankingScreen::setScore(FinishedScore score) {
     } else
         this->sMods = "";
 
-    this->bModSS = score.mods.flags & Replay::ModFlags::Perfect;
-    this->bModSD = score.mods.flags & Replay::ModFlags::SuddenDeath;
-    this->bModEZ = score.mods.flags & Replay::ModFlags::Easy;
-    this->bModHD = score.mods.flags & Replay::ModFlags::Hidden;
-    this->bModHR = score.mods.flags & Replay::ModFlags::HardRock;
-    this->bModNightmare = score.mods.flags & Replay::ModFlags::Nightmare;
-    this->bModScorev2 = score.mods.flags & Replay::ModFlags::ScoreV2;
-    this->bModTarget = score.mods.flags & Replay::ModFlags::Target;
-    this->bModSpunout = score.mods.flags & Replay::ModFlags::SpunOut;
-    this->bModRelax = score.mods.flags & Replay::ModFlags::Relax;
-    this->bModNF = score.mods.flags & Replay::ModFlags::NoFail;
-    this->bModAutopilot = score.mods.flags & Replay::ModFlags::Autopilot;
-    this->bModAuto = score.mods.flags & Replay::ModFlags::Autoplay;
-    this->bModTD = score.mods.flags & Replay::ModFlags::TouchDevice;
+    using namespace ModMasks;
+    using namespace Replay::ModFlags;
+    this->bModSS = eq(score.mods.flags, Perfect);
+    this->bModSD = eq(score.mods.flags, SuddenDeath);
+    this->bModEZ = eq(score.mods.flags, Easy);
+    this->bModHD = eq(score.mods.flags, Hidden);
+    this->bModHR = eq(score.mods.flags, HardRock);
+    this->bModNightmare = eq(score.mods.flags, Nightmare);
+    this->bModScorev2 = eq(score.mods.flags, ScoreV2);
+    this->bModTarget = eq(score.mods.flags, Target);
+    this->bModSpunout = eq(score.mods.flags, SpunOut);
+    this->bModRelax = eq(score.mods.flags, Relax);
+    this->bModNF = eq(score.mods.flags, NoFail);
+    this->bModAutopilot = eq(score.mods.flags, Autopilot);
+    this->bModAuto = eq(score.mods.flags, Autoplay);
+    this->bModTD = eq(score.mods.flags, TouchDevice);
 
     this->enabledExperimentalMods.clear();
-    if(score.mods.flags & Replay::ModFlags::FPoSu_Strafing)
+    if(eq(score.mods.flags, FPoSu_Strafing))
         this->enabledExperimentalMods.push_back(&cv::fposu_mod_strafing);
-    if(score.mods.flags & Replay::ModFlags::Wobble1) this->enabledExperimentalMods.push_back(&cv::mod_wobble);
-    if(score.mods.flags & Replay::ModFlags::Wobble2) this->enabledExperimentalMods.push_back(&cv::mod_wobble2);
-    if(score.mods.flags & Replay::ModFlags::ARWobble) this->enabledExperimentalMods.push_back(&cv::mod_arwobble);
-    if(score.mods.flags & Replay::ModFlags::Timewarp) this->enabledExperimentalMods.push_back(&cv::mod_timewarp);
-    if(score.mods.flags & Replay::ModFlags::ARTimewarp) this->enabledExperimentalMods.push_back(&cv::mod_artimewarp);
-    if(score.mods.flags & Replay::ModFlags::Minimize) this->enabledExperimentalMods.push_back(&cv::mod_minimize);
-    if(score.mods.flags & Replay::ModFlags::FadingCursor)
+    if(eq(score.mods.flags, Wobble1)) this->enabledExperimentalMods.push_back(&cv::mod_wobble);
+    if(eq(score.mods.flags, Wobble2)) this->enabledExperimentalMods.push_back(&cv::mod_wobble2);
+    if(eq(score.mods.flags, ARWobble)) this->enabledExperimentalMods.push_back(&cv::mod_arwobble);
+    if(eq(score.mods.flags, Timewarp)) this->enabledExperimentalMods.push_back(&cv::mod_timewarp);
+    if(eq(score.mods.flags, ARTimewarp)) this->enabledExperimentalMods.push_back(&cv::mod_artimewarp);
+    if(eq(score.mods.flags, Minimize)) this->enabledExperimentalMods.push_back(&cv::mod_minimize);
+    if(eq(score.mods.flags, FadingCursor))
         this->enabledExperimentalMods.push_back(&cv::mod_fadingcursor);
-    if(score.mods.flags & Replay::ModFlags::FPS) this->enabledExperimentalMods.push_back(&cv::mod_fps);
-    if(score.mods.flags & Replay::ModFlags::Jigsaw1) this->enabledExperimentalMods.push_back(&cv::mod_jigsaw1);
-    if(score.mods.flags & Replay::ModFlags::Jigsaw2) this->enabledExperimentalMods.push_back(&cv::mod_jigsaw2);
-    if(score.mods.flags & Replay::ModFlags::FullAlternate)
+    if(eq(score.mods.flags, FPS)) this->enabledExperimentalMods.push_back(&cv::mod_fps);
+    if(eq(score.mods.flags, Jigsaw1)) this->enabledExperimentalMods.push_back(&cv::mod_jigsaw1);
+    if(eq(score.mods.flags, Jigsaw2)) this->enabledExperimentalMods.push_back(&cv::mod_jigsaw2);
+    if(eq(score.mods.flags, FullAlternate))
         this->enabledExperimentalMods.push_back(&cv::mod_fullalternate);
-    if(score.mods.flags & Replay::ModFlags::ReverseSliders)
+    if(eq(score.mods.flags, ReverseSliders))
         this->enabledExperimentalMods.push_back(&cv::mod_reverse_sliders);
-    if(score.mods.flags & Replay::ModFlags::No50s) this->enabledExperimentalMods.push_back(&cv::mod_no50s);
-    if(score.mods.flags & Replay::ModFlags::No100s) this->enabledExperimentalMods.push_back(&cv::mod_no100s);
-    if(score.mods.flags & Replay::ModFlags::Ming3012) this->enabledExperimentalMods.push_back(&cv::mod_ming3012);
-    if(score.mods.flags & Replay::ModFlags::HalfWindow) this->enabledExperimentalMods.push_back(&cv::mod_halfwindow);
-    if(score.mods.flags & Replay::ModFlags::Millhioref) this->enabledExperimentalMods.push_back(&cv::mod_millhioref);
-    if(score.mods.flags & Replay::ModFlags::Mafham) this->enabledExperimentalMods.push_back(&cv::mod_mafham);
-    if(score.mods.flags & Replay::ModFlags::StrictTracking)
+    if(eq(score.mods.flags, No50s)) this->enabledExperimentalMods.push_back(&cv::mod_no50s);
+    if(eq(score.mods.flags, No100s)) this->enabledExperimentalMods.push_back(&cv::mod_no100s);
+    if(eq(score.mods.flags, Ming3012)) this->enabledExperimentalMods.push_back(&cv::mod_ming3012);
+    if(eq(score.mods.flags, HalfWindow)) this->enabledExperimentalMods.push_back(&cv::mod_halfwindow);
+    if(eq(score.mods.flags, Millhioref)) this->enabledExperimentalMods.push_back(&cv::mod_millhioref);
+    if(eq(score.mods.flags, Mafham)) this->enabledExperimentalMods.push_back(&cv::mod_mafham);
+    if(eq(score.mods.flags, StrictTracking))
         this->enabledExperimentalMods.push_back(&cv::mod_strict_tracking);
-    if(score.mods.flags & Replay::ModFlags::MirrorHorizontal)
+    if(eq(score.mods.flags, MirrorHorizontal))
         this->enabledExperimentalMods.push_back(&cv::playfield_mirror_horizontal);
-    if(score.mods.flags & Replay::ModFlags::MirrorVertical)
+    if(eq(score.mods.flags, MirrorVertical))
         this->enabledExperimentalMods.push_back(&cv::playfield_mirror_vertical);
-    if(score.mods.flags & Replay::ModFlags::Shirone) this->enabledExperimentalMods.push_back(&cv::mod_shirone);
-    if(score.mods.flags & Replay::ModFlags::ApproachDifferent)
+    if(eq(score.mods.flags, Shirone)) this->enabledExperimentalMods.push_back(&cv::mod_shirone);
+    if(eq(score.mods.flags, ApproachDifferent))
         this->enabledExperimentalMods.push_back(&cv::mod_approach_different);
 }
 

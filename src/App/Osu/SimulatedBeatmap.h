@@ -70,7 +70,7 @@ class SimulatedBeatmap : public BeatmapInterface {
     [[nodiscard]] bool isPaused() const override { return false; }
     [[nodiscard]] bool isPlaying() const override { return true; }
     [[nodiscard]] Replay::Mods getMods() const override { return this->mods; }
-    [[nodiscard]] i32 getModsLegacy() const override { return this->mods.to_legacy(); }
+    [[nodiscard]] u32 getModsLegacy() const override { return this->mods.to_legacy(); }
     [[nodiscard]] u32 getScoreV1DifficultyMultiplier() const override;
     [[nodiscard]] f32 getSpeedMultiplier() const override { return this->mods.speed; }
     [[nodiscard]] f32 getRawAR() const override;

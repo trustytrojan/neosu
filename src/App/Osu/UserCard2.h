@@ -8,7 +8,7 @@ struct UserInfo;
 
 class UserCard2 : public CBaseUIButton {
    public:
-    UserCard2(u32 user_id);
+    UserCard2(i32 user_id);
     ~UserCard2() override;
 
     void draw() override;

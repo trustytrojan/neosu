@@ -381,7 +381,7 @@ void HitObject::update(long curPos, f64  /*frame_time*/) {
             std::clamp<float>(1.0f - ((float)(fadeInEnd - curPos) / (float)(fadeInEnd - fadeInStart)), 0.0f, 1.0f);
         this->fAlphaWithoutHidden = this->fAlpha;
 
-        if(mods.flags & Replay::ModFlags::Hidden) {
+        if(ModMasks::eq(mods.flags, Replay::ModFlags::Hidden)) {
             // hidden hitobject body fadein
             const float fin_start_percent = cv::mod_hd_circle_fadein_start_percent.getFloat();
             const float fin_end_percent = cv::mod_hd_circle_fadein_end_percent.getFloat();
@@ -412,7 +412,7 @@ void HitObject::update(long curPos, f64  /*frame_time*/) {
 
         // hittable dim, see https://github.com/ppy/osu/pull/20572
         if(cv::hitobject_hittable_dim.getBool() &&
-           (!(this->bi->getMods().flags & Replay::ModFlags::Mafham) || !cv::mod_mafham_ignore_hittable_dim.getBool())) {
+           (!(ModMasks::eq(this->bi->getMods().flags, Replay::ModFlags::Mafham)) || !cv::mod_mafham_ignore_hittable_dim.getBool())) {
             const long hittableDimFadeStart = this->click_time - (long)GameRules::getHitWindowMiss();
 
             // yes, this means the un-dim animation cuts into the already clickable range

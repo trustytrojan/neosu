@@ -898,29 +898,31 @@ bool Osu::isInCriticalInteractiveSession() {
 void Osu::useMods(FinishedScore *score) { Replay::Mods::use(score->mods); }
 
 void Osu::updateMods() {
+    using namespace ModMasks;
     if(bancho->is_in_a_multi_room()) {
-        if(bancho->room.mods & (LegacyFlags::DoubleTime | LegacyFlags::Nightcore)) {
+        if(legacy_eq(bancho->room.mods, LegacyFlags::DoubleTime) ||
+           legacy_eq(bancho->room.mods, LegacyFlags::Nightcore)) {
             cv::speed_override.setValue(1.5f);
-        } else if(bancho->room.mods & (LegacyFlags::HalfTime)) {
+        } else if(legacy_eq(bancho->room.mods, (LegacyFlags::HalfTime))) {
             cv::speed_override.setValue(0.75f);
         } else {
             cv::speed_override.setValue(-1.f);
         }
 
-        cv::mod_nofail.setValue(bancho->room.mods & LegacyFlags::NoFail);
-        cv::mod_easy.setValue(bancho->room.mods & LegacyFlags::Easy);
-        cv::mod_touchdevice.setValue(bancho->room.mods & LegacyFlags::TouchDevice);
-        cv::mod_hidden.setValue(bancho->room.mods & LegacyFlags::Hidden);
-        cv::mod_hardrock.setValue(bancho->room.mods & LegacyFlags::HardRock);
-        cv::mod_suddendeath.setValue(bancho->room.mods & LegacyFlags::SuddenDeath);
-        cv::mod_relax.setValue(bancho->room.mods & LegacyFlags::Relax);
-        cv::mod_autoplay.setValue(bancho->room.mods & LegacyFlags::Autoplay);
-        cv::mod_spunout.setValue(bancho->room.mods & LegacyFlags::SpunOut);
-        cv::mod_autopilot.setValue(bancho->room.mods & LegacyFlags::Autopilot);
-        cv::mod_perfect.setValue(bancho->room.mods & LegacyFlags::Perfect);
-        cv::mod_target.setValue(bancho->room.mods & LegacyFlags::Target);
+        cv::mod_nofail.setValue(legacy_eq(bancho->room.mods, LegacyFlags::NoFail));
+        cv::mod_easy.setValue(legacy_eq(bancho->room.mods, LegacyFlags::Easy));
+        cv::mod_touchdevice.setValue(legacy_eq(bancho->room.mods, LegacyFlags::TouchDevice));
+        cv::mod_hidden.setValue(legacy_eq(bancho->room.mods, LegacyFlags::Hidden));
+        cv::mod_hardrock.setValue(legacy_eq(bancho->room.mods, LegacyFlags::HardRock));
+        cv::mod_suddendeath.setValue(legacy_eq(bancho->room.mods, LegacyFlags::SuddenDeath));
+        cv::mod_relax.setValue(legacy_eq(bancho->room.mods, LegacyFlags::Relax));
+        cv::mod_autoplay.setValue(legacy_eq(bancho->room.mods, LegacyFlags::Autoplay));
+        cv::mod_spunout.setValue(legacy_eq(bancho->room.mods, LegacyFlags::SpunOut));
+        cv::mod_autopilot.setValue(legacy_eq(bancho->room.mods, LegacyFlags::Autopilot));
+        cv::mod_perfect.setValue(legacy_eq(bancho->room.mods, LegacyFlags::Perfect));
+        cv::mod_target.setValue(legacy_eq(bancho->room.mods, LegacyFlags::Target));
         cv::mod_scorev2.setValue(bancho->room.win_condition == SCOREV2);
-        cv::mod_flashlight.setValue(bancho->room.mods & LegacyFlags::Flashlight);
+        cv::mod_flashlight.setValue(legacy_eq(bancho->room.mods, LegacyFlags::Flashlight));
         cv::mod_nightmare.setValue(false);
         cv::mod_actual_flashlight.setValue(false);
 
@@ -928,18 +930,18 @@ void Osu::updateMods() {
             for(int i = 0; i < 16; i++) {
                 if(bancho->room.slots[i].player_id != bancho->user_id) continue;
 
-                cv::mod_nofail.setValue(bancho->room.slots[i].mods & LegacyFlags::NoFail);
-                cv::mod_easy.setValue(bancho->room.slots[i].mods & LegacyFlags::Easy);
-                cv::mod_touchdevice.setValue(bancho->room.slots[i].mods & LegacyFlags::TouchDevice);
-                cv::mod_hidden.setValue(bancho->room.slots[i].mods & LegacyFlags::Hidden);
-                cv::mod_hardrock.setValue(bancho->room.slots[i].mods & LegacyFlags::HardRock);
-                cv::mod_suddendeath.setValue(bancho->room.slots[i].mods & LegacyFlags::SuddenDeath);
-                cv::mod_relax.setValue(bancho->room.slots[i].mods & LegacyFlags::Relax);
-                cv::mod_autoplay.setValue(bancho->room.slots[i].mods & LegacyFlags::Autoplay);
-                cv::mod_spunout.setValue(bancho->room.slots[i].mods & LegacyFlags::SpunOut);
-                cv::mod_autopilot.setValue(bancho->room.slots[i].mods & LegacyFlags::Autopilot);
-                cv::mod_perfect.setValue(bancho->room.slots[i].mods & LegacyFlags::Perfect);
-                cv::mod_target.setValue(bancho->room.slots[i].mods & LegacyFlags::Target);
+                cv::mod_nofail.setValue(legacy_eq(bancho->room.slots[i].mods, LegacyFlags::NoFail));
+                cv::mod_easy.setValue(legacy_eq(bancho->room.slots[i].mods, LegacyFlags::Easy));
+                cv::mod_touchdevice.setValue(legacy_eq(bancho->room.slots[i].mods, LegacyFlags::TouchDevice));
+                cv::mod_hidden.setValue(legacy_eq(bancho->room.slots[i].mods, LegacyFlags::Hidden));
+                cv::mod_hardrock.setValue(legacy_eq(bancho->room.slots[i].mods, LegacyFlags::HardRock));
+                cv::mod_suddendeath.setValue(legacy_eq(bancho->room.slots[i].mods, LegacyFlags::SuddenDeath));
+                cv::mod_relax.setValue(legacy_eq(bancho->room.slots[i].mods, LegacyFlags::Relax));
+                cv::mod_autoplay.setValue(legacy_eq(bancho->room.slots[i].mods, LegacyFlags::Autoplay));
+                cv::mod_spunout.setValue(legacy_eq(bancho->room.slots[i].mods, LegacyFlags::SpunOut));
+                cv::mod_autopilot.setValue(legacy_eq(bancho->room.slots[i].mods, LegacyFlags::Autopilot));
+                cv::mod_perfect.setValue(legacy_eq(bancho->room.slots[i].mods, LegacyFlags::Perfect));
+                cv::mod_target.setValue(legacy_eq(bancho->room.slots[i].mods, LegacyFlags::Target));
             }
         }
     }

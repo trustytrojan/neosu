@@ -48,13 +48,13 @@ struct Info {
     i32 score;
     int comboMax;
     bool perfect;
-    i32 mod_flags;
+    u32 mod_flags;
     UString life_bar_graph;
     i64 timestamp;
     std::vector<Frame> frames;
 };
 
-BEATMAP_VALUES getBeatmapValuesForModsLegacy(int modsLegacy, float legacyAR, float legacyCS, float legacyOD,
+BEATMAP_VALUES getBeatmapValuesForModsLegacy(u32 modsLegacy, float legacyAR, float legacyCS, float legacyOD,
                                              float legacyHP);
 
 Info from_bytes(u8* data, int s_data);

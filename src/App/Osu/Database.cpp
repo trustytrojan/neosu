@@ -424,8 +424,8 @@ Database::PlayerPPScores Database::getPlayerPPScores(const UString &playerName) 
         for(auto &score : this->scores[key]) {
             UString uName = UString(score.playerName.c_str());
 
-            auto uses_rx_or_ap =
-                (score.mods.flags & Replay::ModFlags::Relax) || (score.mods.flags & Replay::ModFlags::Autopilot);
+            auto uses_rx_or_ap = (ModMasks::eq(score.mods.flags, Replay::ModFlags::Relax) ||
+                                  (ModMasks::eq(score.mods.flags, Replay::ModFlags::Autopilot)));
             if(uses_rx_or_ap && !cv::user_include_relax_and_autopilot_for_stats.getBool()) continue;
 
             if(uName != playerName) continue;
@@ -1287,38 +1287,40 @@ void Database::loadScores() {
                 sc.mods.cs_overridenegative = db.read<f32>();
                 sc.mods.hp_override = db.read<f32>();
                 sc.mods.od_override = db.read<f32>();
-                if(sc.mods.flags & Replay::ModFlags::Autopilot) {
+                using namespace ModMasks;
+                using namespace Replay::ModFlags;
+                if(eq(sc.mods.flags, Autopilot)) {
                     sc.mods.autopilot_lenience = db.read<f32>();
                 }
-                if(sc.mods.flags & Replay::ModFlags::Timewarp) {
+                if(eq(sc.mods.flags, Timewarp)) {
                     sc.mods.timewarp_multiplier = db.read<f32>();
                 }
-                if(sc.mods.flags & Replay::ModFlags::Minimize) {
+                if(eq(sc.mods.flags, Minimize)) {
                     sc.mods.minimize_multiplier = db.read<f32>();
                 }
-                if(sc.mods.flags & Replay::ModFlags::ARTimewarp) {
+                if(eq(sc.mods.flags, ARTimewarp)) {
                     sc.mods.artimewarp_multiplier = db.read<f32>();
                 }
-                if(sc.mods.flags & Replay::ModFlags::ARWobble) {
+                if(eq(sc.mods.flags, ARWobble)) {
                     sc.mods.arwobble_strength = db.read<f32>();
                     sc.mods.arwobble_interval = db.read<f32>();
                 }
-                if(sc.mods.flags & (Replay::ModFlags::Wobble1 | Replay::ModFlags::Wobble2)) {
+                if(eq(sc.mods.flags, Wobble1) || eq(sc.mods.flags, Wobble2)) {
                     sc.mods.wobble_strength = db.read<f32>();
                     sc.mods.wobble_frequency = db.read<f32>();
                     sc.mods.wobble_rotation_speed = db.read<f32>();
                 }
-                if(sc.mods.flags & (Replay::ModFlags::Jigsaw1 | Replay::ModFlags::Jigsaw2)) {
+                if(eq(sc.mods.flags, Jigsaw1) || eq(sc.mods.flags, Jigsaw2)) {
                     sc.mods.jigsaw_followcircle_radius_factor = db.read<f32>();
                 }
-                if(sc.mods.flags & Replay::ModFlags::Shirone) {
+                if(eq(sc.mods.flags, Shirone)) {
                     sc.mods.shirone_combo = db.read<f32>();
                 }
 
                 sc.score = db.read<u64>();
                 sc.spinner_bonus = db.read<u64>();
                 sc.unixTimestamp = db.read<u64>();
-                sc.player_id = db.read<u32>();
+                sc.player_id = db.read<i32>();
                 sc.playerName = db.read_string();
                 sc.grade = (FinishedScore::Grade)db.read<u8>();
 
@@ -1484,11 +1486,9 @@ u32 Database::importOldMcNeosuScores() {
                         if(mod == "osu_mod_strict_tracking") sc.mods.flags |= Replay::ModFlags::StrictTracking;
                         if(mod == "osu_playfield_mirror_horizontal")
                             sc.mods.flags |= Replay::ModFlags::MirrorHorizontal;
-                        if(mod == "osu_playfield_mirror_vertical")
-                            sc.mods.flags |= Replay::ModFlags::MirrorVertical;
+                        if(mod == "osu_playfield_mirror_vertical") sc.mods.flags |= Replay::ModFlags::MirrorVertical;
                         if(mod == "osu_mod_shirone") sc.mods.flags |= Replay::ModFlags::Shirone;
-                        if(mod == "osu_mod_approach_different")
-                            sc.mods.flags |= Replay::ModFlags::ApproachDifferent;
+                        if(mod == "osu_mod_approach_different") sc.mods.flags |= Replay::ModFlags::ApproachDifferent;
                     }
 
                     sc.beatmap_hash = md5hash;
@@ -1548,7 +1548,8 @@ u32 Database::importOldMcNeosuScores() {
                             db.skip_bytes(bytesToSkipUntilNextScore);
                             db.skip_string();  // experimentalMods
                             if(cv::debug.getBool()) {
-                                debugLogF("skipped score {} (already loaded from neosu_scores.db)\n", md5hash.hash.data());
+                                debugLogF("skipped score {} (already loaded from neosu_scores.db)\n",
+                                          md5hash.hash.data());
                             }
                             continue;
                         }
@@ -1565,7 +1566,7 @@ u32 Database::importOldMcNeosuScores() {
 
                         const auto score = db.read<int64_t>();
                         const auto maxCombo = db.read<uint16_t>();
-                        const auto mods = Replay::Mods::from_legacy(db.read<int32_t>());
+                        const auto mods = Replay::Mods::from_legacy(db.read<uint32_t>());
 
                         // custom
                         const auto numSliderBreaks = db.read<uint16_t>();
@@ -1790,7 +1791,7 @@ u32 Database::importPeppyScores() {
                 sc.bancho_score_id = 0;
             }
 
-            if(sc.mods.flags & Replay::ModFlags::Target) {
+            if(ModMasks::eq(sc.mods.flags, Replay::ModFlags::Target)) {
                 db.skip<f64>();  // total accuracy
             }
 
@@ -1851,38 +1852,40 @@ void Database::saveScores() {
             db.write<f32>(score.mods.cs_overridenegative);
             db.write<f32>(score.mods.hp_override);
             db.write<f32>(score.mods.od_override);
-            if(score.mods.flags & Replay::ModFlags::Autopilot) {
+            using namespace ModMasks;
+            using namespace Replay::ModFlags;
+            if(eq(score.mods.flags, Autopilot)) {
                 db.write<f32>(score.mods.autopilot_lenience);
             }
-            if(score.mods.flags & Replay::ModFlags::Timewarp) {
+            if(eq(score.mods.flags, Timewarp)) {
                 db.write<f32>(score.mods.timewarp_multiplier);
             }
-            if(score.mods.flags & Replay::ModFlags::Minimize) {
+            if(eq(score.mods.flags, Minimize)) {
                 db.write<f32>(score.mods.minimize_multiplier);
             }
-            if(score.mods.flags & Replay::ModFlags::ARTimewarp) {
+            if(eq(score.mods.flags, ARTimewarp)) {
                 db.write<f32>(score.mods.artimewarp_multiplier);
             }
-            if(score.mods.flags & Replay::ModFlags::ARWobble) {
+            if(eq(score.mods.flags, ARWobble)) {
                 db.write<f32>(score.mods.arwobble_strength);
                 db.write<f32>(score.mods.arwobble_interval);
             }
-            if(score.mods.flags & (Replay::ModFlags::Wobble1 | Replay::ModFlags::Wobble2)) {
+            if(eq(score.mods.flags, Wobble1) || eq(score.mods.flags, Wobble2)) {
                 db.write<f32>(score.mods.wobble_strength);
                 db.write<f32>(score.mods.wobble_frequency);
                 db.write<f32>(score.mods.wobble_rotation_speed);
             }
-            if(score.mods.flags & (Replay::ModFlags::Jigsaw1 | Replay::ModFlags::Jigsaw2)) {
+            if(eq(score.mods.flags, Jigsaw1) || eq(score.mods.flags, Jigsaw2)) {
                 db.write<f32>(score.mods.jigsaw_followcircle_radius_factor);
             }
-            if(score.mods.flags & Replay::ModFlags::Shirone) {
+            if(eq(score.mods.flags, Shirone)) {
                 db.write<f32>(score.mods.shirone_combo);
             }
 
             db.write<u64>(score.score);
             db.write<u64>(score.spinner_bonus);
             db.write<u64>(score.unixTimestamp);
-            db.write<u32>(score.player_id);
+            db.write<i32>(score.player_id);
             db.write_string(score.playerName);
             db.write<u8>((u8)score.grade);
 

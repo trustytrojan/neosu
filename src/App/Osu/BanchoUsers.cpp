@@ -24,13 +24,13 @@ void request_presence(UserInfo* info) {
 }
 }
 
-std::unordered_map<u32, UserInfo*> online_users;
-std::vector<u32> friends;
-std::vector<u32> stats_requests;
+std::unordered_map<i32, UserInfo*> online_users;
+std::vector<i32> friends;
+std::vector<i32> stats_requests;
 
 
 void request_presence_batch() {
-    std::vector<u32> actual_requests;
+    std::vector<i32> actual_requests;
     for(auto req : presence_requests) {
         if(!req->has_presence) {
             actual_requests.push_back(req->user_id);
@@ -44,12 +44,12 @@ void request_presence_batch() {
     packet.id = USER_PRESENCE_REQUEST;
     BANCHO::Proto::write<u16>(&packet, actual_requests.size());
     for(auto user_id : actual_requests) {
-        BANCHO::Proto::write<u32>(&packet, user_id);
+        BANCHO::Proto::write<i32>(&packet, user_id);
     }
     BANCHO::Net::send_packet(packet);
 }
 
-void logout_user(u32 user_id) {
+void logout_user(i32 user_id) {
     for(auto it = online_users.begin(); it != online_users.end(); it++) {
         if(it->first == user_id) {
             debugLog("%s has disconnected.\n", it->second->name.toUtf8());
@@ -102,7 +102,7 @@ UserInfo* find_user_starting_with(UString prefix, const UString& last_match) {
     }
 }
 
-UserInfo* try_get_user_info(u32 user_id, bool wants_presence) {
+UserInfo* try_get_user_info(i32 user_id, bool wants_presence) {
     auto it = online_users.find(user_id);
     if(it != online_users.end()) {
         if(wants_presence) {
@@ -115,7 +115,7 @@ UserInfo* try_get_user_info(u32 user_id, bool wants_presence) {
     return NULL;
 }
 
-UserInfo* get_user_info(u32 user_id, bool wants_presence) {
+UserInfo* get_user_info(i32 user_id, bool wants_presence) {
     auto info = try_get_user_info(user_id, wants_presence);
     if(!info) {
         info = new UserInfo();

@@ -256,7 +256,7 @@ void Bancho::handle_packet(Packet *packet) {
         UString sender = proto::read_string(packet);
         UString text = proto::read_string(packet);
         UString recipient = proto::read_string(packet);
-        i32 sender_id = proto::read<u32>(packet);
+        i32 sender_id = proto::read<i32>(packet);
 
         auto msg = ChatMessage{
             .tms = time(NULL),
@@ -269,7 +269,7 @@ void Bancho::handle_packet(Packet *packet) {
         // (nothing to do)
     } else if(packet->id == USER_STATS) {
         i32 raw_id = proto::read<i32>(packet);
-        u32 stats_user_id = abs(raw_id);  // IRC clients are sent with negative IDs, hence the abs()
+        i32 stats_user_id = abs(raw_id);  // IRC clients are sent with negative IDs, hence the abs()
         u8 action = proto::read<u8>(packet);
 
         UserInfo *user = BANCHO::User::get_user_info(stats_user_id);
@@ -280,12 +280,12 @@ void Bancho::handle_packet(Packet *packet) {
         user->map_md5 = proto::read_hash(packet);
         user->mods = proto::read<u32>(packet);
         user->mode = (GameMode)proto::read<u8>(packet);
-        user->map_id = proto::read<u32>(packet);
-        user->ranked_score = proto::read<u64>(packet);
+        user->map_id = proto::read<i32>(packet);
+        user->ranked_score = proto::read<i64>(packet);
         user->accuracy = proto::read<f32>(packet);
-        user->plays = proto::read<u32>(packet);
-        user->total_score = proto::read<u64>(packet);
-        user->global_rank = proto::read<u32>(packet);
+        user->plays = proto::read<i32>(packet);
+        user->total_score = proto::read<i64>(packet);
+        user->global_rank = proto::read<i32>(packet);
         user->pp = proto::read<u16>(packet);
 
         if(stats_user_id == bancho->user_id) {
@@ -297,7 +297,7 @@ void Bancho::handle_packet(Packet *packet) {
 
         osu->chat->updateUserList();
     } else if(packet->id == USER_LOGOUT) {
-        i32 logged_out_id = proto::read<u32>(packet);
+        i32 logged_out_id = proto::read<i32>(packet);
         proto::read<u8>(packet);
         if(logged_out_id == bancho->user_id) {
             debugLog("Logged out.\n");
@@ -375,30 +375,30 @@ void Bancho::handle_packet(Packet *packet) {
             (void)sequence;  // don't know how to use this
         }
     } else if(packet->id == SPECTATOR_JOINED) {
-        i32 spectator_id = proto::read<u32>(packet);
+        i32 spectator_id = proto::read<i32>(packet);
         if(std::find(bancho->spectators.begin(), bancho->spectators.end(), spectator_id) == bancho->spectators.end()) {
             debugLog("Spectator joined: user id %d\n", spectator_id);
             bancho->spectators.push_back(spectator_id);
         }
     } else if(packet->id == SPECTATOR_LEFT) {
-        i32 spectator_id = proto::read<u32>(packet);
+        i32 spectator_id = proto::read<i32>(packet);
         auto it = std::find(bancho->spectators.begin(), bancho->spectators.end(), spectator_id);
         if(it != bancho->spectators.end()) {
             debugLog("Spectator left: user id %d\n", spectator_id);
             bancho->spectators.erase(it);
         }
     } else if(packet->id == SPECTATOR_CANT_SPECTATE) {
-        i32 spectator_id = proto::read<u32>(packet);
+        i32 spectator_id = proto::read<i32>(packet);
         debugLog("Spectator can't spectate: user id %d\n", spectator_id);
     } else if(packet->id == FELLOW_SPECTATOR_JOINED) {
-        i32 spectator_id = proto::read<u32>(packet);
+        i32 spectator_id = proto::read<i32>(packet);
         if(std::find(bancho->fellow_spectators.begin(), bancho->fellow_spectators.end(), spectator_id) ==
            bancho->fellow_spectators.end()) {
             debugLog("Fellow spectator joined: user id %d\n", spectator_id);
             bancho->fellow_spectators.push_back(spectator_id);
         }
     } else if(packet->id == FELLOW_SPECTATOR_LEFT) {
-        i32 spectator_id = proto::read<u32>(packet);
+        i32 spectator_id = proto::read<i32>(packet);
         auto it = std::find(bancho->fellow_spectators.begin(), bancho->fellow_spectators.end(), spectator_id);
         if(it != bancho->fellow_spectators.end()) {
             debugLog("Fellow spectator left: user id %d\n", spectator_id);
@@ -420,7 +420,7 @@ void Bancho::handle_packet(Packet *packet) {
         auto room = new Room(packet);
         osu->lobby->addRoom(room);
     } else if(packet->id == ROOM_CLOSED) {
-        i32 room_id = proto::read<u32>(packet);
+        i32 room_id = proto::read<i32>(packet);
         osu->lobby->removeRoom(room_id);
     } else if(packet->id == ROOM_JOIN_SUCCESS) {
         // Sanity, in case some trolley admins do funny business
@@ -447,7 +447,7 @@ void Bancho::handle_packet(Packet *packet) {
     } else if(packet->id == MATCH_ALL_PLAYERS_LOADED) {
         osu->room->on_all_players_loaded();
     } else if(packet->id == MATCH_PLAYER_FAILED) {
-        i32 slot_id = proto::read<u32>(packet);
+        i32 slot_id = proto::read<i32>(packet);
         osu->room->on_player_failed(slot_id);
     } else if(packet->id == MATCH_FINISHED) {
         osu->room->on_match_finished();
@@ -466,7 +466,7 @@ void Bancho::handle_packet(Packet *packet) {
     } else if(packet->id == CHANNEL_INFO) {
         UString channel_name = proto::read_string(packet);
         UString channel_topic = proto::read_string(packet);
-        i32 nb_members = proto::read<u32>(packet);
+        i32 nb_members = proto::read<i32>(packet);
         update_channel(channel_name, channel_topic, nb_members);
     } else if(packet->id == LEFT_CHANNEL) {
         UString name = proto::read_string(packet);
@@ -474,7 +474,7 @@ void Bancho::handle_packet(Packet *packet) {
     } else if(packet->id == CHANNEL_AUTO_JOIN) {
         UString channel_name = proto::read_string(packet);
         UString channel_topic = proto::read_string(packet);
-        i32 nb_members = proto::read<u32>(packet);
+        i32 nb_members = proto::read<i32>(packet);
         update_channel(channel_name, channel_topic, nb_members);
     } else if(packet->id == PRIVILEGES) {
         proto::read<u32>(packet);
@@ -483,12 +483,12 @@ void Bancho::handle_packet(Packet *packet) {
         BANCHO::User::friends.clear();
 
         u16 nb_friends = proto::read<u16>(packet);
-        for(int i = 0; i < nb_friends; i++) {
-            u32 friend_id = proto::read<u32>(packet);
+        for(u16 i = 0; i < nb_friends; i++) {
+            i32 friend_id = proto::read<i32>(packet);
             BANCHO::User::friends.push_back(friend_id);
         }
     } else if(packet->id == PROTOCOL_VERSION) {
-        int protocol_version = proto::read<u32>(packet);
+        int protocol_version = proto::read<i32>(packet);
         if(protocol_version != 19) {
             osu->getNotificationOverlay()->addToast("This server may use an unsupported protocol version.");
         }
@@ -499,11 +499,11 @@ void Bancho::handle_packet(Packet *packet) {
             bancho->server_icon_url = urls[0];
         }
     } else if(packet->id == MATCH_PLAYER_SKIPPED) {
-        i32 user_id = proto::read<u32>(packet);
+        i32 user_id = proto::read<i32>(packet);
         osu->room->on_player_skip(user_id);
     } else if(packet->id == USER_PRESENCE) {
         i32 raw_id = proto::read<i32>(packet);
-        u32 presence_user_id = abs(raw_id);  // IRC clients are sent with negative IDs, hence the abs()
+        i32 presence_user_id = abs(raw_id);  // IRC clients are sent with negative IDs, hence the abs()
         UString presence_username = proto::read_string(packet);
 
         UserInfo *user = BANCHO::User::get_user_info(presence_user_id);
@@ -515,19 +515,19 @@ void Bancho::handle_packet(Packet *packet) {
         user->privileges = proto::read<u8>(packet);
         user->longitude = proto::read<f32>(packet);
         user->latitude = proto::read<f32>(packet);
-        user->global_rank = proto::read<u32>(packet);
+        user->global_rank = proto::read<i32>(packet);
 
         osu->chat->updateUserList();
     } else if(packet->id == USER_PRESENCE_SINGLE) {
-        BANCHO::User::get_user_info(proto::read<u32>(packet));  // add to online_users list
+        BANCHO::User::get_user_info(proto::read<i32>(packet));  // add to online_users list
     } else if(packet->id == USER_PRESENCE_BUNDLE) {
         u16 nb_users = proto::read<u16>(packet);
         for(u16 i = 0; i < nb_users; i++) {
-            BANCHO::User::get_user_info(proto::read<u32>(packet));  // add to online_users list
+            BANCHO::User::get_user_info(proto::read<i32>(packet));  // add to online_users list
         }
     } else if(packet->id == RESTART) {
         // XXX: wait 'ms' milliseconds before reconnecting
-        i32 ms = proto::read<u32>(packet);
+        i32 ms = proto::read<i32>(packet);
         (void)ms;
 
         // Some servers send "restart" packets when password is incorrect
@@ -540,7 +540,7 @@ void Bancho::handle_packet(Packet *packet) {
         UString text = proto::read_string(packet);
         UString recipient = proto::read_string(packet);
         (void)recipient;
-        i32 sender_id = proto::read<u32>(packet);
+        i32 sender_id = proto::read<i32>(packet);
         auto msg = ChatMessage{
             .tms = time(NULL),
             .author_id = sender_id,
@@ -557,11 +557,11 @@ void Bancho::handle_packet(Packet *packet) {
         debugLog("Room changed password to %s\n", new_password.toUtf8());
         bancho->room.password = new_password;
     } else if(packet->id == SILENCE_END) {
-        i32 delta = proto::read<u32>(packet);
+        i32 delta = proto::read<i32>(packet);
         debugLog("Silence ends in %d seconds.\n", delta);
         // XXX: Prevent user from sending messages while silenced
     } else if(packet->id == USER_SILENCED) {
-        i32 user_id = proto::read<u32>(packet);
+        i32 user_id = proto::read<i32>(packet);
         debugLog("User #%d silenced.\n", user_id);
     } else if(packet->id == USER_DM_BLOCKED) {
         proto::read_string(packet);

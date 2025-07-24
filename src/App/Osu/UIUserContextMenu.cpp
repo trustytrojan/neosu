@@ -1,5 +1,7 @@
 #include "UIUserContextMenu.h"
 
+#include <algorithm>
+
 #include "Bancho.h"
 #include "BanchoNetworking.h"
 #include "BanchoUsers.h"
@@ -27,7 +29,7 @@ void UIUserContextMenuScreen::stealFocus() {
     this->close();
 }
 
-void UIUserContextMenuScreen::open(u32 user_id) {
+void UIUserContextMenuScreen::open(i32 user_id) {
     if(!bancho->is_online()) return;
 
     this->close();
@@ -117,16 +119,16 @@ void UIUserContextMenuScreen::on_action(const UString&  /*text*/, int user_actio
     } else if(user_action == UA_ADD_FRIEND) {
         Packet packet;
         packet.id = FRIEND_ADD;
-        BANCHO::Proto::write<u32>(&packet, this->user_id);
+        BANCHO::Proto::write<i32>(&packet, this->user_id);
         BANCHO::Net::send_packet(packet);
         BANCHO::User::friends.push_back(this->user_id);
     } else if(user_action == UA_REMOVE_FRIEND) {
         Packet packet;
         packet.id = FRIEND_REMOVE;
-        BANCHO::Proto::write<u32>(&packet, this->user_id);
+        BANCHO::Proto::write<i32>(&packet, this->user_id);
         BANCHO::Net::send_packet(packet);
 
-        auto it = std::find(BANCHO::User::friends.begin(), BANCHO::User::friends.end(), this->user_id);
+        auto it = std::ranges::find(BANCHO::User::friends, this->user_id);
         if(it != BANCHO::User::friends.end()) {
             BANCHO::User::friends.erase(it);
         }
@@ -141,7 +143,7 @@ void UIUserContextMenuScreen::on_action(const UString&  /*text*/, int user_actio
     this->menu->setVisible(false);
 }
 
-UIUserLabel::UIUserLabel(u32 user_id, const UString& username) : CBaseUILabel() {
+UIUserLabel::UIUserLabel(i32 user_id, const UString& username) : CBaseUILabel() {
     this->user_id = user_id;
     this->setText(username);
     this->setDrawFrame(false);

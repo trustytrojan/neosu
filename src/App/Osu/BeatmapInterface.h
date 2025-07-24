@@ -29,7 +29,7 @@ class BeatmapInterface {
     [[nodiscard]] virtual u32 getScoreV1DifficultyMultiplier() const = 0;
 
     [[nodiscard]] virtual Replay::Mods getMods() const = 0;
-    [[nodiscard]] virtual i32 getModsLegacy() const = 0;
+    [[nodiscard]] virtual u32 getModsLegacy() const = 0;
     [[nodiscard]] virtual f32 getSpeedMultiplier() const = 0;
     [[nodiscard]] virtual f32 getRawAR() const = 0;
     [[nodiscard]] virtual f32 getRawOD() const = 0;
