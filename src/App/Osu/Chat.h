@@ -25,7 +25,7 @@ struct ChatChannel {
     UIButton *btn;
     UString name;
     std::vector<ChatMessage> messages;
-    float y_total;
+    float y_total{.0f};
     bool read = true;
 
     void add_message(ChatMessage msg);

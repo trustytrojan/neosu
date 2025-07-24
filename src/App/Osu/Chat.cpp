@@ -30,6 +30,7 @@
 #include "SongBrowser/ScoreButton.h"
 #include "SongBrowser/SongBrowser.h"
 #include "SoundEngine.h"
+#include "SString.h"
 #include "SpectatorScreen.h"
 #include "UIButton.h"
 #include "UIUserContextMenu.h"
@@ -129,10 +130,10 @@ void ChatChannel::add_message(ChatMessage msg) {
     std::wsmatch match;
     std::vector<CBaseUILabel *> temp_text_fragments;
     std::wstring::const_iterator search_start = msg_text.cbegin();
-    int text_idx = 0;
+    sSz text_idx = 0;
     while(std::regex_search(search_start, msg_text.cend(), match, url_regex)) {
-        int match_pos;
-        int match_len;
+        sSz match_pos;
+        sSz match_len;
         UString link_url;
         UString link_label;
         if(match[7].matched) {
@@ -150,10 +151,10 @@ void ChatChannel::add_message(ChatMessage msg) {
 
             // Normalize invite links to osump://
             UString link_protocol = match.str(5).c_str();
-            if(link_protocol == UString("osu")) {
+            if(link_protocol == "osu") {
                 // osu:// -> osump://
                 link_url.insert(2, "mp");
-            } else if(link_protocol == UString("http://osump")) {
+            } else if(link_protocol == "http://osump") {
                 // http://osump:// -> osump://
                 link_url.erase(0, 7);
             }
@@ -167,7 +168,7 @@ void ChatChannel::add_message(ChatMessage msg) {
             link_label.append(match.str(2).c_str());
         }
 
-        int search_idx = search_start - msg_text.cbegin();
+        sSz search_idx = search_start - msg_text.cbegin();
         auto url_start = search_idx + match_pos;
         auto preceding_text = msg.text.substr(text_idx, url_start - text_idx);
         if(preceding_text.length() > 0) {
@@ -372,23 +373,23 @@ void Chat::mouse_update(bool *propagate_clicks) {
 }
 
 void Chat::handle_command(const UString &msg) {
-    if(msg == UString("/clear")) {
+    if(msg == "/clear") {
         this->selected_channel->messages.clear();
         this->updateLayout(osu->getScreenSize());
         return;
     }
 
-    if(msg == UString("/close") || msg == UString("/p") || msg == UString("/part")) {
+    if(msg == "/close" || msg == "/p" || msg == "/part") {
         this->leave(this->selected_channel->name);
         return;
     }
 
-    if(msg == UString("/help") || msg == UString("/keys")) {
+    if(msg == "/help" || msg == "/keys") {
         env->openURLInDefaultBrowser("https://osu.ppy.sh/wiki/en/Client/Interface/Chat_console");
         return;
     }
 
-    if(msg == UString("/np")) {
+    if(msg == "/np") {
         auto diff = osu->getSelectedBeatmap()->getSelectedDifficulty2();
         if(diff == NULL) {
             this->addSystemMessage("You are not listening to anything.");
@@ -455,7 +456,7 @@ void Chat::handle_command(const UString &msg) {
         return;
     }
 
-    if(msg == UString("/away")) {
+    if(msg == "/away") {
         this->away_msg = "";
         this->addSystemMessage("Away message removed.");
         return;
@@ -770,7 +771,7 @@ void Chat::addChannel(const UString &channel_name, bool switch_to) {
 
     if(this->selected_channel == NULL && this->channels.size() == 1) {
         this->switchToChannel(chan);
-    } else if(channel_name == UString("#multiplayer") || channel_name == UString("#lobby")) {
+    } else if(channel_name == "#multiplayer" || channel_name == "#lobby") {
         this->switchToChannel(chan);
     } else if(switch_to) {
         this->switchToChannel(chan);
@@ -873,7 +874,7 @@ void Chat::updateLayout(Vector2 newResolution) {
 
     // In the lobby and in multi rooms don't take the full horizontal width to allow for cleaner UI designs.
     if(this->isSmallChat()) {
-        newResolution.x = round(newResolution.x * 0.6);
+        newResolution.x = round(newResolution.x * 0.6f);
     }
 
     this->setSize(newResolution);
@@ -988,31 +989,7 @@ void Chat::updateUserList() {
             sorted_users.push_back(pair.second);
         }
     }
-    std::sort(sorted_users.begin(), sorted_users.end(), [](UserInfo *ua, UserInfo *ub) {
-        auto a = ua->name;
-        auto b = ub->name;
-
-        int i = 0;
-        int j = 0;
-        while(i < a.lengthUtf8() && j < b.lengthUtf8()) {
-            if(!isalnum((u8)a[i])) {
-                i++;
-                continue;
-            }
-            if(!isalnum((u8)b[j])) {
-                j++;
-                continue;
-            }
-            char la = tolower(a[i]);
-            char lb = tolower(b[j]);
-            if(la != lb) return la < lb;
-
-            i++;
-            j++;
-        }
-
-        return false;
-    });
+    std::ranges::sort(sorted_users, SString::alnum_comp, [](const UserInfo *ui) { return ui->name.toUtf8(); });
 
     // Intentionally not calling this->user_list->clear(), because that would affect scroll position/animation
     this->user_list->getContainer()->clear();
@@ -1052,8 +1029,8 @@ void Chat::join(const UString &channel_name) {
 
 void Chat::leave(const UString &channel_name) {
     bool send_leave_packet = channel_name[0] == '#';
-    if(channel_name == UString("#lobby")) send_leave_packet = false;
-    if(channel_name == UString("#multiplayer")) send_leave_packet = false;
+    if(channel_name == "#lobby") send_leave_packet = false;
+    if(channel_name == "#multiplayer") send_leave_packet = false;
 
     if(send_leave_packet) {
         Packet packet;

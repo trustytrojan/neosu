@@ -22,6 +22,28 @@ static inline char* strtok_x(char d, char** str) {
     return old;
 }
 
+// alphanumeric string comparator that ignores special characters at the start of strings
+static constexpr bool alnum_comp(const std::string& a, const std::string& b) {
+    int i = 0;
+    int j = 0;
+    while(i < a.length() && j < b.length()) {
+        if(!isalnum((uint8_t)a[i])) {
+            i++;
+            continue;
+        }
+        if(!isalnum((uint8_t)b[j])) {
+            j++;
+            continue;
+        }
+        auto la = tolower(a[i]);
+        auto lb = tolower(b[j]);
+        if(la != lb) return la < lb;
+        i++;
+        j++;
+    }
+    return false;
+}
+
 // std string splitting, for if we don't want to create UStrings everywhere (slow and heavy)
 static constexpr forceinline std::vector<std::string> split(const std::string& s, const std::string& d) {
     std::vector<std::string> r;

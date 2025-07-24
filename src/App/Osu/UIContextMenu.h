@@ -14,7 +14,7 @@ class UIContextMenu : public CBaseUIScrollView {
     static void clampToRightScreenEdge(UIContextMenu *menu);
 
    public:
-    UIContextMenu(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, const UString& name = "",
+    UIContextMenu(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, const UString &name = "",
                   CBaseUIScrollView *parent = NULL);
 
     void draw() override;
@@ -25,11 +25,11 @@ class UIContextMenu : public CBaseUIScrollView {
     void onChar(KeyboardEvent &e) override;
 
     using ButtonClickCallback = SA::delegate<void(const UString &, int)>;
-    void setClickCallback(const ButtonClickCallback& clickCallback) { this->clickCallback = clickCallback; }
+    void setClickCallback(const ButtonClickCallback &clickCallback) { this->clickCallback = clickCallback; }
 
     void begin(int minWidth = 0, bool bigStyle = false);
-    UIContextMenuButton *addButton(const UString& text, int id = -1);
-    UIContextMenuTextbox *addTextbox(const UString& text, int id = -1);
+    UIContextMenuButton *addButton(const UString &text, int id = -1);
+    UIContextMenuTextbox *addTextbox(const UString &text, int id = -1);
 
     void end(bool invertAnimation, bool clampUnderflowAndOverflowAndEnableScrollingIfNecessary);
 
@@ -78,7 +78,7 @@ class UIContextMenuButton : public CBaseUIButton {
 
     [[nodiscard]] inline int getID() const { return this->iID; }
 
-    void setTooltipText(const UString& text);
+    void setTooltipText(const UString &text);
 
    private:
     int iID;

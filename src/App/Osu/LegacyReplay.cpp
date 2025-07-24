@@ -21,10 +21,11 @@
 #include "SString.h"
 
 namespace proto = BANCHO::Proto;
+namespace LegacyReplay {
 
-LegacyReplay::BEATMAP_VALUES LegacyReplay::getBeatmapValuesForModsLegacy(u32 modsLegacy, float legacyAR, float legacyCS,
-                                                                         float legacyOD, float legacyHP) {
-    LegacyReplay::BEATMAP_VALUES v;
+BEATMAP_VALUES getBeatmapValuesForModsLegacy(u32 modsLegacy, float legacyAR, float legacyCS, float legacyOD,
+                                             float legacyHP) {
+    BEATMAP_VALUES v;
 
     // HACKHACK: code duplication, see Osu::getDifficultyMultiplier()
     v.difficultyMultiplier = 1.0f;
@@ -49,8 +50,8 @@ LegacyReplay::BEATMAP_VALUES LegacyReplay::getBeatmapValuesForModsLegacy(u32 mod
     return v;
 }
 
-std::vector<LegacyReplay::Frame> LegacyReplay::get_frames(u8* replay_data, i32 replay_size) {
-    std::vector<LegacyReplay::Frame> replay_frames;
+std::vector<Frame> get_frames(u8* replay_data, i32 replay_size) {
+    std::vector<Frame> replay_frames;
     if(replay_size <= 0) return replay_frames;
 
     lzma_stream strm = LZMA_STREAM_INIT;
@@ -82,7 +83,7 @@ std::vector<LegacyReplay::Frame> LegacyReplay::get_frames(u8* replay_data, i32 r
     {
         char* line = (char*)output.memory;
         while(*line) {
-            LegacyReplay::Frame frame;
+            Frame frame;
 
             char* ms = SString::strtok_x('|', &line);
             frame.milliseconds_since_last_frame = strtoul(ms, NULL, 10);
@@ -110,8 +111,7 @@ end:
     return replay_frames;
 }
 
-void LegacyReplay::compress_frames(const std::vector<LegacyReplay::Frame>& frames, u8** compressed,
-                                   size_t* s_compressed) {
+void compress_frames(const std::vector<Frame>& frames, u8** compressed, size_t* s_compressed) {
     lzma_stream stream = LZMA_STREAM_INIT;
     lzma_options_lzma options;
     lzma_lzma_preset(&options, LZMA_PRESET_DEFAULT);
@@ -160,8 +160,8 @@ void LegacyReplay::compress_frames(const std::vector<LegacyReplay::Frame>& frame
     lzma_end(&stream);
 }
 
-LegacyReplay::Info LegacyReplay::from_bytes(u8* data, int s_data) {
-    LegacyReplay::Info info;
+Info from_bytes(u8* data, int s_data) {
+    Info info;
 
     Packet replay;
     replay.memory = data;
@@ -194,13 +194,13 @@ LegacyReplay::Info LegacyReplay::from_bytes(u8* data, int s_data) {
     if(replay_size <= 0) return info;
     auto replay_data = new u8[replay_size];
     proto::read_bytes(&replay, replay_data, replay_size);
-    info.frames = LegacyReplay::get_frames(replay_data, replay_size);
+    info.frames = get_frames(replay_data, replay_size);
     delete[] replay_data;
 
     return info;
 }
 
-bool LegacyReplay::load_from_disk(FinishedScore* score, bool update_db) {
+bool load_from_disk(FinishedScore* score, bool update_db) {
     if(score->peppy_replay_tms > 0) {
         auto osu_folder = cv::osu_folder.getString();
         auto path = UString::format("%s/Data/r/%s-%llu.osr", osu_folder, score->beatmap_hash.hash.data(),
@@ -216,7 +216,7 @@ bool LegacyReplay::load_from_disk(FinishedScore* score, bool update_db) {
         u8* full_replay = new u8[s_full_replay];
         fread(full_replay, s_full_replay, 1, replay_file);
         fclose(replay_file);
-        auto info = LegacyReplay::from_bytes(full_replay, s_full_replay);
+        auto info = from_bytes(full_replay, s_full_replay);
         score->replay = info.frames;
         delete[] full_replay;
     } else {
@@ -233,7 +233,7 @@ bool LegacyReplay::load_from_disk(FinishedScore* score, bool update_db) {
         u8* compressed_replay = new u8[s_compressed_replay];
         fread(compressed_replay, s_compressed_replay, 1, replay_file);
         fclose(replay_file);
-        score->replay = LegacyReplay::get_frames(compressed_replay, s_compressed_replay);
+        score->replay = get_frames(compressed_replay, s_compressed_replay);
         delete[] compressed_replay;
     }
 
@@ -253,7 +253,7 @@ bool LegacyReplay::load_from_disk(FinishedScore* score, bool update_db) {
     return true;
 }
 
-void LegacyReplay::load_and_watch(FinishedScore score) {
+void load_and_watch(FinishedScore score) {
     // Check if replay is loaded
     if(score.replay.empty()) {
         if(!load_from_disk(&score, true)) {
@@ -298,3 +298,5 @@ void LegacyReplay::load_and_watch(FinishedScore score) {
         osu->getSelectedBeatmap()->watch(score, 0.f);
     }
 }
+
+}  // namespace LegacyReplay

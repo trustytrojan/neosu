@@ -44,16 +44,19 @@ void UIContextMenuButton::onMouseInside() {
     }
 }
 
-void UIContextMenuButton::onMouseDownInside(bool  /*left*/, bool  /*right*/) { soundEngine->play(osu->getSkin()->clickButton); }
+void UIContextMenuButton::onMouseDownInside(bool /*left*/, bool /*right*/) {
+    soundEngine->play(osu->getSkin()->clickButton);
+}
 
-void UIContextMenuButton::setTooltipText(const UString& text) { this->tooltipTextLines = text.split("\n"); }
+void UIContextMenuButton::setTooltipText(const UString &text) { this->tooltipTextLines = text.split("\n"); }
 
 UIContextMenuTextbox::UIContextMenuTextbox(float xPos, float yPos, float xSize, float ySize, UString name, int id)
     : CBaseUITextbox(xPos, yPos, xSize, ySize, std::move(name)) {
     this->iID = id;
 }
 
-UIContextMenu::UIContextMenu(float xPos, float yPos, float xSize, float ySize, const UString& name, CBaseUIScrollView *parent)
+UIContextMenu::UIContextMenu(float xPos, float yPos, float xSize, float ySize, const UString &name,
+                             CBaseUIScrollView *parent)
     : CBaseUIScrollView(xPos, yPos, xSize, ySize, name) {
     this->parent = parent;
 
@@ -182,7 +185,7 @@ void UIContextMenu::begin(int minWidth, bool bigStyle) {
     this->containedTextbox = NULL;
 }
 
-UIContextMenuButton *UIContextMenu::addButton(const UString& text, int id) {
+UIContextMenuButton *UIContextMenu::addButton(const UString &text, int id) {
     const int buttonHeight = 30 * Osu::getUIScale() * (this->bBigStyle ? 1.27f : 1.0f);
     const int margin = 9 * Osu::getUIScale();
 
@@ -210,7 +213,7 @@ UIContextMenuButton *UIContextMenu::addButton(const UString& text, int id) {
     return button;
 }
 
-UIContextMenuTextbox *UIContextMenu::addTextbox(const UString& text, int id) {
+UIContextMenuTextbox *UIContextMenu::addTextbox(const UString &text, int id) {
     const int buttonHeight = 30 * Osu::getUIScale() * (this->bBigStyle ? 1.27f : 1.0f);
     const int margin = 9 * Osu::getUIScale();
 
@@ -289,7 +292,7 @@ void UIContextMenu::setVisible2(bool visible2) {
     if(this->parent != NULL) this->parent->setScrollSizeToContent();  // and update parent scroll size
 }
 
-void UIContextMenu::onMouseDownOutside(bool  /*left*/, bool  /*right*/) { this->setVisible2(false); }
+void UIContextMenu::onMouseDownOutside(bool /*left*/, bool /*right*/) { this->setVisible2(false); }
 
 void UIContextMenu::onClick(CBaseUIButton *button) {
     this->setVisible2(false);

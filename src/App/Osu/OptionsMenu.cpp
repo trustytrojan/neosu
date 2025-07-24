@@ -2376,28 +2376,7 @@ void OptionsMenu::onSkinSelect() {
 
     if(cv::sort_skins_cleaned.getBool()) {
         // Sort skins only by alphanum characters, ignore the others
-        std::ranges::sort(skinFolders, [](const std::string &a, const std::string &b) {
-            int i = 0;
-            int j = 0;
-            while(i < a.length() && j < b.length()) {
-                if(!isalnum((u8)a[i])) {
-                    i++;
-                    continue;
-                }
-                if(!isalnum((u8)b[j])) {
-                    j++;
-                    continue;
-                }
-                char la = tolower(a[i]);
-                char lb = tolower(b[j]);
-                if(la != lb) return la < lb;
-
-                i++;
-                j++;
-            }
-
-            return false;
-        });
+        std::ranges::sort(skinFolders, SString::alnum_comp);
     } else {
         // more stable-like sorting (i.e. "-     Cookiezi" comes before "Cookiezi")
         std::ranges::stable_sort(skinFolders, [](const std::string &a, const std::string &b) {
