@@ -101,13 +101,13 @@ class DatabaseLoader : public Resource {
 
    protected:
     void init() override {
+        this->bReady = true;
         if(this->bNeedRawLoad) {
             this->db->scheduleLoadRaw();
         } else {
             MapCalcThread::start_calc(this->db->maps_to_recalc);
             VolNormalization::start_calc(this->db->loudness_to_calc);
         }
-        this->bReady = true;
         sct_calc(this->db->scores_to_convert);
 
         delete this;  // commit sudoku
@@ -127,6 +127,7 @@ class DatabaseLoader : public Resource {
         this->db->beatmapsets.clear();  // TODO @kiwec: this just leaks memory?
         if(env->fileExists(fmt::format("{}" PREF_PATHSEP "osu!.db", cv::osu_folder.getString())) &&
            cv::database_enabled.getBool()) {
+            this->bNeedRawLoad = false;
             this->db->loadDB();
         } else {
             this->bNeedRawLoad = true;
@@ -222,7 +223,7 @@ void Database::update() {
                 this->importTimer->update();
 
                 debugLogF("Refresh finished, added {} beatmaps in {:f} seconds.\n", this->beatmapsets.size(),
-                         this->importTimer->getElapsedTime());
+                          this->importTimer->getElapsedTime());
 
                 // TODO: does this even work for raw loads?
                 load_collections();

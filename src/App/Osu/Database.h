@@ -157,8 +157,8 @@ class Database {
     std::vector<SCORE_SORTING_METHOD> scoreSortingMethods;
 
     // raw load
-    bool bRawBeatmapLoadScheduled;
-    int iCurRawBeatmapLoadIndex;
+    bool bRawBeatmapLoadScheduled{false};
+    int iCurRawBeatmapLoadIndex{0};
     std::string sRawBeatmapLoadOsuSongFolder;
     std::vector<std::string> rawBeatmapFolders;
     std::vector<std::string> rawLoadBeatmapFolders;
