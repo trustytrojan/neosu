@@ -2501,7 +2501,7 @@ void OptionsMenu::onResolutionSelect() {
     std::string curLine;
     while(std::getline(customres, curLine)) {
         const char *curLineChar = curLine.c_str();
-        if(curLine.find("//") == std::string::npos)  // ignore comments
+        if(!curLine.starts_with("//"))  // ignore comments
         {
             int width = 0;
             int height = 0;

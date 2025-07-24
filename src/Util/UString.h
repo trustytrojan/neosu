@@ -104,11 +104,11 @@ class UString {
     [[nodiscard]] constexpr bool startsWith(wchar_t ch) const noexcept {
         return !this->sUnicode.empty() && this->sUnicode.front() == ch;
     }
-    [[nodiscard]] constexpr bool startsWith(const UString &suffix) const noexcept {
-        int suffixLen = suffix.length();
+    [[nodiscard]] constexpr bool startsWith(const UString &prefix) const noexcept {
+        int prefixLen = prefix.length();
         int thisLen = length();
-        return suffixLen <= thisLen &&
-               std::equal(suffix.sUnicode.begin(), suffix.sUnicode.end(), this->sUnicode.begin());
+        return prefixLen <= thisLen &&
+               std::equal(prefix.sUnicode.begin(), prefix.sUnicode.end(), this->sUnicode.begin());
     }
 
     // search functions

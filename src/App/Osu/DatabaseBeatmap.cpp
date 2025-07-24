@@ -173,9 +173,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
             curLine = file.readLine();
 
             const char *curLineChar = curLine.c_str();
-            const int commentIndex = curLine.find("//");
-            if(std::cmp_equal(commentIndex, std::string::npos) ||
-               commentIndex != 0)  // ignore comments, but only if at the beginning of a line (e.g. allow
+            if(!curLine.starts_with("//"))  // ignore comments, but only if at the beginning of a line (e.g. allow
                                    // Artist:DJ'TEKINA//SOMETHING)
             {
                 if(curLine.find("[General]") != std::string::npos)
@@ -954,7 +952,7 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
 
         // ignore comments, but only if at the beginning of
         // a line (e.g. allow Artist:DJ'TEKINA//SOMETHING)
-        if(curLine.find("//") == 0) continue;
+        if(curLine.starts_with("//")) continue;
 
         const char *curLineChar = curLine.c_str();
         if(curLine.find("[General]") != std::string::npos)
@@ -1050,7 +1048,7 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
             {
                 memset(stringBuffer, '\0', 1024);
                 int type, startTime;
-                if(sscanf(curLineChar, " %i , %i , \"%1023[^\"]\"", &type, &startTime, stringBuffer) == 3) {
+                if(sscanf(curLineChar, R"( %i , %i , "%1023[^"]")", &type, &startTime, stringBuffer) == 3) {
                     if(type == 0) {
                         this->sBackgroundImageFileName = stringBuffer;
                         this->sFullBackgroundImageFilePath = this->sFolder;
@@ -1434,10 +1432,7 @@ void DatabaseBeatmapBackgroundImagePathLoader::initAsync() {
     char stringBuffer[1024];
     while(file.canRead()) {
         std::string curLine = file.readLine();
-        const int commentIndex = curLine.find("//");
-        if(commentIndex == std::string::npos ||
-           commentIndex !=
-               0)  // ignore comments, but only if at the beginning of a line (e.g. allow Artist:DJ'TEKINA//SOMETHING)
+        if(!curLine.starts_with("//"))  // ignore comments, but only if at the beginning of a line (e.g. allow Artist:DJ'TEKINA//SOMETHING)
         {
             if(curLine.find("[Events]") != std::string::npos)
                 curBlock = 1;
@@ -1453,7 +1448,7 @@ void DatabaseBeatmapBackgroundImagePathLoader::initAsync() {
                 {
                     memset(stringBuffer, '\0', 1024);
                     int type, startTime;
-                    if(sscanf(curLine.c_str(), " %i , %i , \"%1023[^\"]\"", &type, &startTime, stringBuffer) == 3) {
+                    if(sscanf(curLine.c_str(), R"( %i , %i , "%1023[^"]")", &type, &startTime, stringBuffer) == 3) {
                         if(type == 0) this->sLoadedBackgroundImageFileName = stringBuffer;
                     }
                 } break;

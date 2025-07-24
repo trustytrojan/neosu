@@ -1169,7 +1169,7 @@ bool Skin::parseSkinINI(std::string filepath) {
                 std::string curLine(curLineChar);
                 nonEmptyLineCounter++;
 
-                if(curLine.find("//") > 2)  // ignore comments // TODO: this is incorrect, but it works well enough
+                if(!curLine.starts_with("//"))  // ignore comments // TODO: this is incorrect, but it works well enough
                 {
                     if(curLine.find("[General]") != std::string::npos)
                         curBlock = 0;
