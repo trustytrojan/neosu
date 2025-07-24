@@ -68,27 +68,23 @@ extern "C" {
 namespace BassManager {
 namespace BassFuncs {
 // imported enums/defines
-using QWORD = bass_EXTERN::QWORD;
-#ifdef MCENGINE_PLATFORM_WINDOWS
-using DWORD = DWORD;
-using WORD = WORD;
-using BYTE = BYTE;
-using BOOL = BOOL;
-#else
-using DWORD = bass_EXTERN::DWORD;
-using WORD = bass_EXTERN::WORD;
-using BYTE = bass_EXTERN::BYTE;
-using BOOL = bass_EXTERN::BOOL;
+using bass_EXTERN::QWORD;
+#ifndef MCENGINE_PLATFORM_WINDOWS
+using bass_EXTERN::DWORD;
+using bass_EXTERN::WORD;
+using bass_EXTERN::BYTE;
+using bass_EXTERN::BOOL;
 #endif
 
-using HSYNC = bass_EXTERN::HSYNC;
-using HSTREAM = bass_EXTERN::HSTREAM;
-using HCHANNEL = bass_EXTERN::HCHANNEL;
-using HSAMPLE = bass_EXTERN::HSAMPLE;
-using HPLUGIN = bass_EXTERN::HPLUGIN;
-using BASS_DEVICEINFO = bass_EXTERN::BASS_DEVICEINFO;
-using BASS_INFO = bass_EXTERN::BASS_INFO;
-using BASS_3DVECTOR = bass_EXTERN::BASS_3DVECTOR;
+using bass_EXTERN::SYNCPROC;
+using bass_EXTERN::HSYNC;
+using bass_EXTERN::HSTREAM;
+using bass_EXTERN::HCHANNEL;
+using bass_EXTERN::HSAMPLE;
+using bass_EXTERN::HPLUGIN;
+using bass_EXTERN::BASS_DEVICEINFO;
+using bass_EXTERN::BASS_INFO;
+using bass_EXTERN::BASS_3DVECTOR;
 
 // bassfx enums
 using bass_EXTERN::BASS_ATTRIB_TEMPO_OPTION_AA_FILTER_LENGTH;
@@ -221,7 +217,7 @@ using WASAPIPROC = bass_EXTERN::WASAPIPROC;
 	std::string getFailedLoad();
 
 	std::string printBassError(const std::string &context, int code);
-    UString getErrorUString();
+    UString getErrorUString(int code = (-0x7fffffff - 1));
 //clang-format on
 }; // namespace BassManager
 

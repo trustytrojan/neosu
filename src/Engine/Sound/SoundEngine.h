@@ -30,6 +30,7 @@ class SoundEngine {
    protected:
     struct OUTPUT_DEVICE {
         int id{-1};
+        bool isInit{false};
         bool enabled{true};
         bool isDefault{false};
         UString name{"Default"};

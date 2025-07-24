@@ -45,6 +45,19 @@ class BassSoundEngine final : public SoundEngine {
     bool isWASAPI() { return this->currentOutputDevice.driver == OutputDriver::BASS_WASAPI; }
     bool init_bass_mixer(const OUTPUT_DEVICE &device);
 
+    void shutdown_lite(bool force = false); // don't free "No Sound" for changing output device
+
+    void free_if_init(OUTPUT_DEVICE &device);
+
+    OUTPUT_DEVICE no_sound_device{
+        .id = 0,
+        .isInit = false,
+        .enabled = true,
+        .isDefault = true,
+        .name = "No sound",
+        .driver = OutputDriver::NONE,
+    };
+
     double ready_since{-1.0};
     SOUNDHANDLE g_bassOutputMixer = 0;
 };

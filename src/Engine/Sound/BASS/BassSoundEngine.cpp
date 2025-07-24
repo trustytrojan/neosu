@@ -66,13 +66,8 @@ BassSoundEngine::BassSoundEngine() : SoundEngine() {
 
     // if set to 1, increases sample playback latency by 10 ms
     BASS_SetConfig(BASS_CONFIG_VISTA_TRUEPOS, 0);
-    this->currentOutputDevice = {
-        .id = 0,
-        .enabled = true,
-        .isDefault = true,
-        .name = "No sound",
-        .driver = OutputDriver::NONE,
-    };
+
+    this->currentOutputDevice = this->no_sound_device;
 }
 
 BassSoundEngine::~BassSoundEngine() { BassManager::cleanup(); }
@@ -208,12 +203,15 @@ bool BassSoundEngine::init_bass_mixer(const SoundEngine::OUTPUT_DEVICE &device) 
     if(!BASS_Init(0, freq, bass_flags | BASS_DEVICE_SOFTWARE, NULL, NULL)) {
         auto code = BASS_ErrorGetCode();
         if(code != BASS_ERROR_ALREADY) {
+            this->no_sound_device.isInit = false;
             this->ready_since = -1.0;
             debugLog("BASS_Init(0) failed.\n");
             osu->getNotificationOverlay()->addToast(BassManager::getErrorUString());
             return false;
         }
     }
+
+    this->no_sound_device.isInit = true;
 
     if(device.driver == OutputDriver::BASS) {
         if(!BASS_Init(device.id, freq, bass_flags | BASS_DEVICE_SOFTWARE, NULL, NULL)) {
@@ -245,9 +243,18 @@ bool BassSoundEngine::init_bass_mixer(const SoundEngine::OUTPUT_DEVICE &device) 
 }
 
 bool BassSoundEngine::initializeOutputDevice(const SoundEngine::OUTPUT_DEVICE &device) {
+    // intelligent design (need to mark device as "initialized" at certain points so that free_if_init frees it)
+    static const auto mark_device_init = [&](const SoundEngine::OUTPUT_DEVICE &dev) -> void {
+        const_cast<SoundEngine::OUTPUT_DEVICE *>(&dev)->isInit = true;
+    };
+    static const auto deinit_device_ret = [&](const SoundEngine::OUTPUT_DEVICE &dev) -> bool {
+        this->free_if_init(*const_cast<SoundEngine::OUTPUT_DEVICE *>(&dev));
+        return false;
+    };
+
     debugLog("BassSoundEngine: initializeOutputDevice( %s ) ...\n", device.name.toUtf8());
 
-    this->shutdown();
+    this->shutdown_lite();
 
     // We compensate for latency via BASS_ATTRIB_MIXER_LATENCY
     cv::universal_offset_hardcoded.setValue(0.f);
@@ -262,6 +269,7 @@ bool BassSoundEngine::initializeOutputDevice(const SoundEngine::OUTPUT_DEVICE &d
             osu->optionsMenu->scheduleLayoutUpdate();
         }
 
+        this->currentOutputDevice.isInit = true;
         return true;
     }
 
@@ -293,8 +301,9 @@ bool BassSoundEngine::initializeOutputDevice(const SoundEngine::OUTPUT_DEVICE &d
     // On other drivers, we'd rather get the sound card's frequency first
     if(device.driver == OutputDriver::BASS) {
         if(!this->init_bass_mixer(device)) {
-            return false;
+            return deinit_device_ret(device);
         }
+        mark_device_init(device);
     }
 
 #ifdef _WIN32
@@ -303,8 +312,10 @@ bool BassSoundEngine::initializeOutputDevice(const SoundEngine::OUTPUT_DEVICE &d
             ready_since = -1.0;
             debugLog("BASS_ASIO_Init() failed.\n");
             osu->getNotificationOverlay()->addToast(BassManager::getErrorUString());
-            return false;
+            return deinit_device_ret(device);
         }
+
+        mark_device_init(device);
 
         double sample_rate = BASS_ASIO_GetRate();
         if(sample_rate == 0.0) {
@@ -314,7 +325,7 @@ bool BassSoundEngine::initializeOutputDevice(const SoundEngine::OUTPUT_DEVICE &d
             cv::snd_freq.setValue(sample_rate);
         }
         if(!init_bass_mixer(device)) {
-            return false;
+            return deinit_device_ret(device);
         }
 
         BASS_ASIO_INFO info{};
@@ -332,14 +343,14 @@ bool BassSoundEngine::initializeOutputDevice(const SoundEngine::OUTPUT_DEVICE &d
             ready_since = -1.0;
             debugLog("BASS_ASIO_ChannelEnableBASS() failed.\n");
             osu->getNotificationOverlay()->addToast(BassManager::getErrorUString());
-            return false;
+            return deinit_device_ret(device);
         }
 
         if(!BASS_ASIO_Start(bufsize, 0)) {
             ready_since = -1.0;
             debugLog("BASS_ASIO_Start() failed.\n");
             osu->getNotificationOverlay()->addToast(BassManager::getErrorUString());
-            return false;
+            return deinit_device_ret(device);
         }
 
         double wanted_latency = 1000.0 * cv::asio_buffer_size.getFloat() / sample_rate;
@@ -358,12 +369,14 @@ bool BassSoundEngine::initializeOutputDevice(const SoundEngine::OUTPUT_DEVICE &d
         BASS_WASAPI_DEVICEINFO info;
         if(!BASS_WASAPI_GetDeviceInfo(device.id, &info)) {
             debugLog("WASAPI: Failed to get device info\n");
-            return false;
+            return deinit_device_ret(device);
         }
         cv::snd_freq.setValue(info.mixfreq);
         if(!init_bass_mixer(device)) {
-            return false;
+            return deinit_device_ret(device);
         }
+
+        mark_device_init(device);
 
         // BASS_MIXER_NONSTOP prevents some sound cards from going to sleep when there is no output
         auto flags = BASS_MIXER_NONSTOP;
@@ -392,14 +405,14 @@ bool BassSoundEngine::initializeOutputDevice(const SoundEngine::OUTPUT_DEVICE &d
             ready_since = -1.0;
             debugLog("BASS_WASAPI_Init() failed.\n");
             osu->getNotificationOverlay()->addToast(BassManager::getErrorUString());
-            return false;
+            return deinit_device_ret(device);
         }
 
         if(!BASS_WASAPI_Start()) {
             ready_since = -1.0;
             debugLog("BASS_WASAPI_Start() failed.\n");
             osu->getNotificationOverlay()->addToast(BassManager::getErrorUString());
-            return false;
+            return deinit_device_ret(device);
         }
 
         BASS_ChannelSetAttribute(g_bassOutputMixer, BASS_ATTRIB_MIXER_LATENCY,
@@ -416,31 +429,28 @@ bool BassSoundEngine::initializeOutputDevice(const SoundEngine::OUTPUT_DEVICE &d
         osu->optionsMenu->scheduleLayoutUpdate();
     }
 
+    this->currentOutputDevice.isInit = true;
+
     return true;
 }
 
 void BassSoundEngine::restart() { this->setOutputDevice(this->currentOutputDevice); }
 
-void BassSoundEngine::shutdown() {
+void BassSoundEngine::shutdown_lite(bool force) {
     VolNormalization::abort();
 
-    if(this->currentOutputDevice.driver == OutputDriver::BASS) {
-        BASS_SetDevice(this->currentOutputDevice.id);
-        BASS_Free();
-        BASS_SetDevice(0);
+    if(force || !(this->currentOutputDevice.id == 0 && this->currentOutputDevice.driver == OutputDriver::NONE)) {
+        this->free_if_init(this->currentOutputDevice);
     }
-
-#ifdef _WIN32
-    if(this->currentOutputDevice.driver == OutputDriver::BASS_ASIO) {
-        BASS_ASIO_Free();
-    } else if(this->currentOutputDevice.driver == OutputDriver::BASS_WASAPI) {
-        BASS_WASAPI_Free();
-    }
-#endif
 
     this->ready_since = -1.0;
     this->g_bassOutputMixer = 0;
-    BASS_Free();  // free "No sound" device
+}
+
+void BassSoundEngine::shutdown() {
+    this->shutdown_lite(true);
+
+    this->free_if_init(this->no_sound_device);
 }
 
 bool BassSoundEngine::play(Sound *snd, float pan, float pitch) {
@@ -564,13 +574,7 @@ void BassSoundEngine::setOutputDevice(const SoundEngine::OUTPUT_DEVICE &device) 
     if(!this->initializeOutputDevice(device)) {
         if((device.id == previous.id && device.driver == previous.driver) || !this->initializeOutputDevice(previous)) {
             // We failed to reinitialize the device, don't start an infinite loop, just give up
-            this->currentOutputDevice = {
-                .id = 0,
-                .enabled = true,
-                .isDefault = true,
-                .name = "No sound",
-                .driver = OutputDriver::NONE,
-            };
+            this->currentOutputDevice = this->no_sound_device;
         }
     }
 
@@ -636,6 +640,48 @@ void BassSoundEngine::onParamChanged(float oldValue, float newValue) {
     const int newValueMS = static_cast<int>(std::round(newValue * 1000.0f));
 
     if(oldValueMS != newValueMS) this->restart();
+}
+
+void BassSoundEngine::free_if_init(OUTPUT_DEVICE &device) {
+    if(!device.isInit &&
+       (device.driver == OutputDriver::BASS || (device.id == 0 && device.driver == OutputDriver::NONE))) {
+        return;  // nothing to do
+    }
+    device.isInit = false;
+
+    static auto wait_until_freed = [&](bool success) -> void {
+        if(!success) {
+            int tries = 0;
+            while(BASS_ErrorGetCode() == BASS_ERROR_BUSY && ++tries < 5) {
+                Timing::sleepMS(50);
+                BASS_Free();
+            }
+        }
+        return;
+    };
+
+    if(device.driver == OutputDriver::BASS) {
+        if(BASS_SetDevice(device.id)) {
+            wait_until_freed(BASS_Free());
+        }
+
+        if(!BASS_SetDevice(0)) {  // switch back to "No Sound"
+            this->no_sound_device.isInit = false;
+        }
+
+#ifdef MCENGINE_PLATFORM_WINDOWS
+    } else if(device.driver == OutputDriver::BASS_ASIO) {
+        BASS_ASIO_Free();
+    } else if(device.driver == OutputDriver::BASS_WASAPI) {
+        BASS_WASAPI_Free();
+#endif
+    } else if(device.id == 0 && device.driver == OutputDriver::NONE) {  // "No Sound" device
+        if(BASS_SetDevice(0)) {
+            wait_until_freed(BASS_Free());
+        } else {
+            this->no_sound_device.isInit = false;
+        }
+    }
 }
 
 #endif
