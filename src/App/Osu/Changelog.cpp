@@ -34,11 +34,21 @@ Changelog::Changelog() : ScreenBackable() {
         R"(  - Latency should be much lower than regular BASS)",
         R"(  - BASS will remain as default for the foreseeable future, but testing is highly encouraged)",
         R"(  - No exclusive mode support or loudness normalization yet)",
-        R"(- Added support for parsing McOsu "scores.db" databases for local scores)",
+        R"(- Added support for parsing McOsu "scores.db" databases for local scores, just put the scores.db in the same folder as neosu)",
+        R"(- Added initial support for loading beatmaps without an osu!.db (raw loading))",
+        R"(  - Used either when an osu!.db doesn't exist in the selected osu! folder, or when the "osu_database_enabled" ConVar is set to 0)",
+        R"(  - The osu folder should be set somewhere that contains "Skins/" and "Songs/" as subfolders)",
         R"(- Added "Max Queued Frames" slider to options menu (and associated renderer logic), for lower input lag)",
         R"(- Crop screenshots to the internal/letterboxed osu! resolution, instead of keeping the black borders)",
         R"(- Added "Sort Skins Alphabetically" option, for sorting skins in a different order (ignoring prefixes))",
         R"(- Added support for filtering by "creator=" in the song browser)",
+        R"(- Implemented support for canceling login attempts by right clicking loading button)",
+        R"(  - Login request timeouts should usually be detected and automatically canceled, but this may not always be possible)",
+        R"(- Stop storing passwords as plaintext)",
+        R"(- Optimized song browser initial load time)",
+        R"(- Optimized ingame HUD rendering performance)",
+        R"(- Fixed networking-related crashes)",
+        R"(- Fixed many memory leaks and reduced memory usage)",
     };
     changelogs.push_back(v39_00);
 
