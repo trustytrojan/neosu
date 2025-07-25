@@ -47,8 +47,7 @@ bool McFont::s_sharedFallbacksInitialized = false;
 
 McFont::McFont(const UString &filepath, int fontSize, bool antialiasing, int fontDPI)
     : Resource(filepath.toUtf8()),
-      vao((Env::cfg(REND::GLES32) ? Graphics::PRIMITIVE::PRIMITIVE_TRIANGLES
-                                                : Graphics::PRIMITIVE::PRIMITIVE_QUADS),
+      vao((Env::cfg(REND::GLES32) ? Graphics::PRIMITIVE::PRIMITIVE_TRIANGLES : Graphics::PRIMITIVE::PRIMITIVE_QUADS),
           Graphics::USAGE_TYPE::USAGE_DYNAMIC) {
     std::vector<wchar_t> characters;
     characters.reserve(96);  // reserve space for basic ASCII, load the rest as needed
@@ -61,8 +60,7 @@ McFont::McFont(const UString &filepath, int fontSize, bool antialiasing, int fon
 McFont::McFont(const UString &filepath, const std::vector<wchar_t> &characters, int fontSize, bool antialiasing,
                int fontDPI)
     : Resource(filepath.toUtf8()),
-      vao((Env::cfg(REND::GLES32) ? Graphics::PRIMITIVE::PRIMITIVE_TRIANGLES
-                                                : Graphics::PRIMITIVE::PRIMITIVE_QUADS),
+      vao((Env::cfg(REND::GLES32) ? Graphics::PRIMITIVE::PRIMITIVE_TRIANGLES : Graphics::PRIMITIVE::PRIMITIVE_QUADS),
           Graphics::USAGE_TYPE::USAGE_DYNAMIC) {
     constructor(characters, fontSize, antialiasing, fontDPI);
 }
@@ -320,7 +318,8 @@ void McFont::discoverSystemFallbacks() {
 bool McFont::loadFallbackFont(const UString &fontPath, bool isSystemFont) {
     FT_Face face{};
     if(FT_New_Face(s_sharedFtLibrary, fontPath.toUtf8(), 0, &face)) {
-        if(cv::r_debug_font_unicode.getBool()) debugLogF("Font Warning: Failed to load fallback font: {:s}\n", fontPath);
+        if(cv::r_debug_font_unicode.getBool())
+            debugLogF("Font Warning: Failed to load fallback font: {:s}\n", fontPath);
         return false;
     }
 
@@ -611,6 +610,7 @@ void McFont::drawString(const UString &text) {
     this->vao.empty();
 
     const size_t totalVerts = text.length() * VERTS_PER_VAO;
+    this->vao.reserve(totalVerts);
     this->vertices.resize(totalVerts);
     this->texcoords.resize(totalVerts);
 
@@ -661,6 +661,7 @@ void McFont::flushBatch() {
     this->vertices.resize(this->batchQueue.totalVerts);
     this->texcoords.resize(this->batchQueue.totalVerts);
     this->vao.empty();
+    this->vao.reserve(this->batchQueue.totalVerts);
 
     size_t currentVertex = 0;
     for(size_t i = 0; i < this->batchQueue.usedEntries; i++) {

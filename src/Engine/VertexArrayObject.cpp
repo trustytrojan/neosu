@@ -2,8 +2,6 @@
 
 #include "Engine.h"
 
-
-
 VertexArrayObject::VertexArrayObject(Graphics::PRIMITIVE primitive, Graphics::USAGE_TYPE usage, bool keepInSystemMemory)
     : Resource() {
     this->primitive = primitive;
@@ -146,10 +144,15 @@ void VertexArrayObject::setDrawPercent(float fromPercent, float toPercent, int n
     this->iDrawPercentNearestMultiple = nearestMultiple;
 }
 
+void VertexArrayObject::reserve(size_t vertexCount, unsigned int textureUnit) {
+    this->vertices.reserve(vertexCount);
+    this->updateTexcoordArraySize(textureUnit);
+    this->texcoords[textureUnit].reserve(vertexCount);
+}
+
 void VertexArrayObject::updateTexcoordArraySize(unsigned int textureUnit) {
-    while(this->texcoords.size() < (textureUnit + 1)) {
-        std::vector<Vector2> emptyVector;
-        this->texcoords.push_back(emptyVector);
+    if(this->texcoords.size() <= textureUnit) {
+        this->texcoords.resize(textureUnit + 1);
     }
 }
 

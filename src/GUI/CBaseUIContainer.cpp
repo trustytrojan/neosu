@@ -4,8 +4,6 @@
 
 #include "Engine.h"
 
-
-
 CBaseUIContainer::CBaseUIContainer(float Xpos, float Ypos, float Xsize, float Ysize, UString name)
     : CBaseUIElement(Xpos, Ypos, Xsize, Ysize, std::move(name)) {}
 
@@ -84,7 +82,8 @@ CBaseUIContainer *CBaseUIContainer::insertBaseUIElementBack(CBaseUIElement *elem
     element->setPos(this->vPos + element->getRelPos());
     for(size_t i = 0; i < this->vElements.size(); i++) {
         if(this->vElements[i] == index) {
-            this->vElements.insert(this->vElements.begin() + std::clamp<int>(i + 1, 0, this->vElements.size()), element);
+            this->vElements.insert(this->vElements.begin() + std::clamp<int>(i + 1, 0, this->vElements.size()),
+                                   element);
             return this;
         }
     }
@@ -121,7 +120,8 @@ CBaseUIContainer *CBaseUIContainer::deleteBaseUIElement(CBaseUIElement *element)
     return this;
 }
 
-CBaseUIElement *CBaseUIContainer::getBaseUIElement(const UString& name) {
+CBaseUIElement *CBaseUIContainer::getBaseUIElement(const UString &name) {
+    MC_UNROLL
     for(size_t i = 0; i < this->vElements.size(); i++) {
         if(this->vElements[i]->getName() == name) return this->vElements[i];
     }
@@ -132,6 +132,7 @@ CBaseUIElement *CBaseUIContainer::getBaseUIElement(const UString& name) {
 void CBaseUIContainer::draw() {
     if(!this->bVisible) return;
 
+    MC_UNROLL
     for(size_t i = 0; i < this->vElements.size(); i++) {
         this->vElements[i]->draw();
     }
@@ -163,12 +164,14 @@ void CBaseUIContainer::mouse_update(bool *propagate_clicks) {
     if(!this->bVisible) return;
     CBaseUIElement::mouse_update(propagate_clicks);
 
+    MC_UNROLL
     for(size_t i = 0; i < this->vElements.size(); i++) {
         this->vElements[i]->mouse_update(propagate_clicks);
     }
 }
 
 void CBaseUIContainer::update_pos() {
+    MC_UNROLL
     for(size_t i = 0; i < this->vElements.size(); i++) {
         this->vElements[i]->setPos(this->vPos + this->vElements[i]->getRelPos());
     }
@@ -209,7 +212,7 @@ void CBaseUIContainer::onDisabled() {
     }
 }
 
-void CBaseUIContainer::onMouseDownOutside(bool  /*left*/, bool  /*right*/) { this->onFocusStolen(); }
+void CBaseUIContainer::onMouseDownOutside(bool /*left*/, bool /*right*/) { this->onFocusStolen(); }
 
 bool CBaseUIContainer::isBusy() {
     if(!this->bVisible) return false;

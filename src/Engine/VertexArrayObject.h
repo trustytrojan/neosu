@@ -43,6 +43,9 @@ class VertexArrayObject : public Resource {
     void setDrawRange(int fromIndex, int toIndex);
     void setDrawPercent(float fromPercent = 0.0f, float toPercent = 1.0f, int nearestMultiple = 0);  // DEPRECATED
 
+    // optimization: pre-allocate space to avoid reallocations during batch operations
+    void reserve(size_t vertexCount, unsigned int textureUnit = 0);
+
     [[nodiscard]] inline Graphics::PRIMITIVE getPrimitive() const { return this->primitive; }
     [[nodiscard]] inline Graphics::USAGE_TYPE getUsage() const { return this->usage; }
 
