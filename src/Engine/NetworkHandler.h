@@ -9,13 +9,18 @@
 #include <functional>
 #include <map>
 
-#include <curl/curl.h>
-
 struct Bancho;
 class McThread;
 
 // forward declare for async requests
 struct NetworkRequest;
+
+// forward defs
+typedef struct curl_mime curl_mime;
+typedef void CURLM;
+typedef void CURL;
+
+typedef int64_t curl_off_t;
 
 class NetworkHandler {
    public:

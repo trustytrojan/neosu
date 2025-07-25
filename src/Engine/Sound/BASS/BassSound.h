@@ -1,9 +1,11 @@
 #pragma once
 
+
 #include "Sound.h"
 #ifdef MCENGINE_FEATURE_BASS
 #include "BassManager.h"
 
+#include <vector>
 class BassSoundEngine;
 
 class BassSound final : public Sound {

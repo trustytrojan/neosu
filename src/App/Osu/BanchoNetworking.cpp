@@ -1,10 +1,8 @@
 #include "BanchoNetworking.h"
 
-#include <time.h>
+#include <ctime>
 
-#include <algorithm>
 #include <mutex>
-#include <thread>
 
 #ifndef _MSC_VER
 #include <unistd.h>
@@ -17,7 +15,6 @@
 #include "BanchoProtocol.h"
 #include "BanchoUsers.h"
 #include "Beatmap.h"
-#include "CBaseUICheckbox.h"
 #include "Chat.h"
 #include "ConVar.h"
 #include "Database.h"
@@ -30,8 +27,9 @@
 #include "ResourceManager.h"
 #include "RoomScreen.h"
 #include "SongBrowser/SongBrowser.h"
-#include "UIAvatar.h"
 #include "UIButton.h"
+
+#include <curl/curl.h>
 
 // Bancho protocol
 namespace proto = BANCHO::Proto;

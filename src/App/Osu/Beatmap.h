@@ -1,13 +1,9 @@
 #pragma once
-#include <future>
 
 #include "BeatmapInterface.h"
 #include "DatabaseBeatmap.h"
 #include "DifficultyCalculator.h"
 #include "LegacyReplay.h"
-#include "Timing.h"
-#include "UString.h"
-#include "cbase.h"
 #include "score.h"
 #include "uwu.h"
 
@@ -17,6 +13,8 @@ class Skin;
 class HitObject;
 class DatabaseBeatmap;
 class SimulatedBeatmap;
+struct LiveReplayFrame;
+struct ScoreFrame;
 
 struct Click {
     long click_time;

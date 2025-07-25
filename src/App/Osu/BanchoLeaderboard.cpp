@@ -1,10 +1,5 @@
 #include "BanchoLeaderboard.h"
 
-#include <cstdlib>
-#include <cstring>
-
-#include <vector>
-
 #include "Bancho.h"
 #include "BanchoNetworking.h"
 #include "BanchoUsers.h"
@@ -13,6 +8,12 @@
 #include "ModSelector.h"
 #include "SString.h"
 #include "SongBrowser/SongBrowser.h"
+
+#include <cstdlib>
+#include <cstring>
+#include <vector>
+
+#include <curl/curl.h>
 
 namespace {  // static namespace
 FinishedScore parse_score(char *score_line) {

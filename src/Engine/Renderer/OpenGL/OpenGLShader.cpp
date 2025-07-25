@@ -17,6 +17,8 @@
 
 #include "OpenGLLegacyInterface.h"
 
+#include <fstream>
+
 OpenGLShader::OpenGLShader(std::string vertexShader, std::string fragmentShader, bool source) : Shader() {
     this->sVsh = std::move(vertexShader);
     this->sFsh = std::move(fragmentShader);

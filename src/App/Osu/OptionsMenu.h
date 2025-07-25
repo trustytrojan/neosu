@@ -2,6 +2,8 @@
 #include "NotificationOverlay.h"
 #include "ScreenBackable.h"
 
+#include <atomic>
+
 class UIButton;
 class UISlider;
 class UIContextMenu;

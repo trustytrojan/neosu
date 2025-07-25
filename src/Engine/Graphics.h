@@ -20,6 +20,18 @@ class Shader;
 class RenderTarget;
 class VertexArrayObject;
 
+enum class AnchorPoint : uint8_t {
+    CENTER,        // Default - image centered on x,y
+    TOP_LEFT,      // x,y at top left corner
+    TOP_RIGHT,     // x,y at top right corner
+    BOTTOM_LEFT,   // x,y at bottom left corner
+    BOTTOM_RIGHT,  // x,y at bottom right corner
+    TOP,           // x,y at top center
+    BOTTOM,        // x,y at bottom center
+    LEFT,          // x,y at middle left
+    RIGHT          // x,y at middle right
+};
+
 class Graphics {
    public:
     enum class PRIMITIVE : uint8_t {

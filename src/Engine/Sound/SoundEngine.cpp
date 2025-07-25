@@ -3,6 +3,7 @@
 #include "SoundEngine.h"
 
 #include "Engine.h"
+#include "ConVar.h"
 
 SoundEngine *SoundEngine::createSoundEngine(SndEngineType type) {
 #if !defined(MCENGINE_FEATURE_BASS) && !defined(MCENGINE_FEATURE_SOLOUD)

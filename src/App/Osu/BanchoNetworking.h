@@ -1,7 +1,4 @@
 #pragma once
-#include <curl/curl.h>
-
-#include <string>
 
 #include "BanchoProtocol.h"
 
@@ -18,6 +15,9 @@
 // NOTE: Full version can be something like "b20200201.2cuttingedge"
 #define OSU_VERSION "b20250702.1"
 #define OSU_VERSION_DATEONLY 20250702
+
+// forward def
+typedef struct curl_mime curl_mime;
 
 enum APIRequestType : uint8_t {
     GET_BEATMAPSET_INFO,

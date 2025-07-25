@@ -1,8 +1,10 @@
 #pragma once
+
 #include <utility>
 
 #include "KeyboardListener.h"
 #include "cbase.h"
+#include <bitset>
 
 // Guidelines for avoiding hair pulling:
 // - Don't use m_vmSize
@@ -196,6 +198,9 @@ class CBaseUIElement : public KeyboardListener {
     const char *disabled_reason = NULL;
 
    private:
-    uint8_t mouseInsideCheck{0};
-    uint8_t mouseUpCheck{0};
+    std::bitset<2> mouseInsideCheck{0};
+    std::bitset<2> mouseUpCheck{0};
+
+    static constexpr const float ABS_EPSILON{1e-4};
+    static constexpr const float REL_EPSILON{1e-8};
 };

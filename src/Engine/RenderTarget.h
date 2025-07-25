@@ -1,5 +1,6 @@
 #pragma once
 #include "Resource.h"
+#include "Graphics.h"
 
 class ConVar;
 

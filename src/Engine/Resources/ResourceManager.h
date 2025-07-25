@@ -9,9 +9,7 @@
 #ifndef RESOURCEMANAGER_H
 #define RESOURCEMANAGER_H
 
-#include <stack>
-#include <unordered_map>
-
+#include "ConVar.h"
 #include "Engine.h"
 #include "Font.h"
 #include "Image.h"
@@ -21,7 +19,9 @@
 #include "TextureAtlas.h"
 #include "VertexArrayObject.h"
 
-class ConVar;
+#include <stack>
+#include <unordered_map>
+
 class Sound;
 class TextureAtlas;
 class AsyncResourceLoader;

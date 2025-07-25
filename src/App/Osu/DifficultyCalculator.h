@@ -1,11 +1,16 @@
 #pragma once
-#include "cbase.h"
+
+#include "types.h"
+#include "Vectors.h"
+
+#include <atomic>
+#include <vector>
 
 class Beatmap;
 
 class SliderCurve;
-
 class ConVar;
+
 
 struct pp_info {
     f64 total_stars = 0.0;

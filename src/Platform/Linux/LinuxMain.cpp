@@ -180,12 +180,15 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdl
         // handle window message queue
         {
             VPROF_BUDGET("Events", VPROF_BUDGETGROUP_WNDPROC);
-            /* From SDL_dialog.h:
-             * On Linux, dialogs may require XDG Portals, which requires DBus, which
-             * requires an event-handling loop. Apps that do not use SDL to handle events
-             * should add a call to SDL_PumpEvents in their main loop.
-             */
-            SDL_PumpEvents();
+
+            if(Environment::s_sdl_dialog_opened > 0) {
+                /* From SDL_dialog.h:
+                 * On Linux, dialogs may require XDG Portals, which requires DBus, which
+                 * requires an event-handling loop. Apps that do not use SDL to handle events
+                 * should add a call to SDL_PumpEvents in their main loop.
+                 */
+                SDL_PumpEvents();
+            }
 
             while(XPending(this->dpy)) {
                 XNextEvent(this->dpy, &this->xev);

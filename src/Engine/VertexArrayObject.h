@@ -9,6 +9,7 @@
 #define VERTEXARRAYOBJECT_H
 
 #include "Resource.h"
+#include "Graphics.h"
 
 class VertexArrayObject : public Resource {
    public:

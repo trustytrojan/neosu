@@ -9,11 +9,18 @@
 #ifndef RESOURCE_H
 #define RESOURCE_H
 
-#include "cbase.h"
+#include "BaseEnvironment.h"
+
+#include <atomic>
+#include <string>
 
 class TextureAtlas;
 class Sound;
 class McFont;
+class Image;
+class Shader;
+class VertexArrayObject;
+class RenderTarget;
 
 class Resource
 {

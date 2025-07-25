@@ -1,8 +1,5 @@
 // cross-platform entry point
 
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_main.h>
-
 #include <filesystem>
 
 #include "BaseEnvironment.h"
@@ -12,6 +9,20 @@
 
 #include "LinuxMain.h"
 #include "WindowsMain.h"
+
+#if defined(__SSE__) || (defined(_M_IX86_FP) && (_M_IX86_FP > 0))
+#ifdef _MSC_VER
+#include <intrin.h>
+#else
+#include <xmmintrin.h>
+#endif
+#define SET_FPU_DAZ_FTZ _mm_setcsr(_mm_getcsr() | 0x8040);
+#else
+#define SET_FPU_DAZ_FTZ
+#endif
+
+// this redefines main() if necessary for the target platform
+#include <SDL3/SDL_main.h>
 
 int Main::ret = 1;
 EnvironmentImpl *baseEnv = nullptr;
@@ -44,6 +55,9 @@ void setcwdexe(const std::string &exePathStr) noexcept {
 }  // namespace
 
 int main(int argc, char *argv[]) {
+    // improve floating point perf in case this isn't already enabled by the compiler
+    SET_FPU_DAZ_FTZ
+
     // set the current working directory to the executable directory, so that relative paths
     // work as expected
     // this also sets and caches the path in getPathToSelf, so this must be called here

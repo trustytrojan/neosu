@@ -3,6 +3,7 @@
 #include "Bancho.h"
 #include "Thread.h"
 #include "SString.h"
+#include "ConVar.h"
 
 #include "curl_blob.h"
 #include <curl/curl.h>

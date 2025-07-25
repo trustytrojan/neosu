@@ -9,10 +9,11 @@
 
 #if defined(MCENGINE_FEATURE_BASS)
 
-#include <SDL3/SDL_loadso.h>
-
+#include "ConVar.h"
 #include "Engine.h"
 #include "File.h"
+
+#include <SDL3/SDL_loadso.h>
 
 namespace BassManager {
 namespace BassFuncs {

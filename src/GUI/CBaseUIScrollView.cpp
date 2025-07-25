@@ -10,9 +10,7 @@
 #include "Mouse.h"
 #include "ResourceManager.h"
 
-
-
-CBaseUIScrollView::CBaseUIScrollView(float xPos, float yPos, float xSize, float ySize, const UString& name)
+CBaseUIScrollView::CBaseUIScrollView(float xPos, float yPos, float xSize, float ySize, const UString &name)
     : CBaseUIElement(xPos, yPos, xSize, ySize, name) {
     this->grabs_clicks = true;
 
@@ -149,12 +147,16 @@ void CBaseUIScrollView::mouse_update(bool *propagate_clicks) {
     const bool wasContainerBusyBeforeUpdate = this->container->isBusy();
     if(this->bBusy) {
         const Vector2 deltaToAdd = (mouse->getPos() - this->vMouseBackup2);
-        // debugLog("+ (%f, %f)\n", deltaToAdd.x, deltaToAdd.y);
 
-        anim->moveQuadOut(&this->vKineticAverage.x, deltaToAdd.x, cv::ui_scrollview_kinetic_approach_time.getFloat(),
-                          true);
-        anim->moveQuadOut(&this->vKineticAverage.y, deltaToAdd.y, cv::ui_scrollview_kinetic_approach_time.getFloat(),
-                          true);
+        // only create kinetic averaging animations if there's meaningful movement
+        if(std::abs(deltaToAdd.x) > KINETIC_EPSILON) {
+            anim->moveQuadOut(&this->vKineticAverage.x, deltaToAdd.x,
+                              cv::ui_scrollview_kinetic_approach_time.getFloat(), true);
+        }
+        if(std::abs(deltaToAdd.y) > KINETIC_EPSILON) {
+            anim->moveQuadOut(&this->vKineticAverage.y, deltaToAdd.y,
+                              cv::ui_scrollview_kinetic_approach_time.getFloat(), true);
+        }
 
         this->vMouseBackup2 = mouse->getPos();
     }
@@ -275,8 +277,8 @@ void CBaseUIScrollView::mouse_update(bool *propagate_clicks) {
                                       (this->vScrollSize.y > this->vSize.y ? this->vSize.y : 0),
                                   0.05f, 0.0f, true);
                 anim->moveQuadOut(&this->vScrollPos.y, this->vVelocity.y, 0.2f, 0.0f, true);
-            } else if(std::round(this->vVelocity.y) != 0 &&
-                      std::round(this->vScrollPos.y) != std::round(this->vVelocity.y))  // kinetic scrolling
+            } else if(std::abs(this->vVelocity.y) > KINETIC_EPSILON &&
+                      std::abs(this->vScrollPos.y - this->vVelocity.y) > KINETIC_EPSILON)  // kinetic scrolling
                 anim->moveQuadOut(&this->vScrollPos.y, this->vVelocity.y, 0.35f, 0.0f, true);
         }
 
@@ -294,8 +296,8 @@ void CBaseUIScrollView::mouse_update(bool *propagate_clicks) {
                                       (this->vScrollSize.x > this->vSize.x ? this->vSize.x : 0),
                                   0.05f, 0.0f, true);
                 anim->moveQuadOut(&this->vScrollPos.x, this->vVelocity.x, 0.2f, 0.0f, true);
-            } else if(std::round(this->vVelocity.x) != 0 &&
-                      std::round(this->vScrollPos.x) != std::round(this->vVelocity.x))  // kinetic scrolling
+            } else if(std::abs(this->vVelocity.x) > KINETIC_EPSILON &&
+                      std::abs(this->vScrollPos.x - this->vVelocity.x) > KINETIC_EPSILON)  // kinetic scrolling
                 anim->moveQuadOut(&this->vScrollPos.x, this->vVelocity.x, 0.35f, 0.0f, true);
         }
     }
@@ -480,7 +482,7 @@ void CBaseUIScrollView::scrollToXInt(int scrollPosX, bool animated, bool slow) {
     }
 }
 
-void CBaseUIScrollView::scrollToElement(CBaseUIElement *element, int  /*xOffset*/, int yOffset, bool animated) {
+void CBaseUIScrollView::scrollToElement(CBaseUIElement *element, int /*xOffset*/, int yOffset, bool animated) {
     const std::vector<CBaseUIElement *> &elements = this->container->getElements();
     for(size_t i = 0; i < elements.size(); i++) {
         if(elements[i] == element) {
@@ -602,16 +604,16 @@ void CBaseUIScrollView::scrollToBottom() { this->scrollToY(-this->vScrollSize.y)
 
 void CBaseUIScrollView::scrollToTop() { this->scrollToY(0); }
 
-void CBaseUIScrollView::onMouseDownOutside(bool  /*left*/, bool  /*right*/) { this->container->stealFocus(); }
+void CBaseUIScrollView::onMouseDownOutside(bool /*left*/, bool /*right*/) { this->container->stealFocus(); }
 
-void CBaseUIScrollView::onMouseDownInside(bool  /*left*/, bool  /*right*/) {
+void CBaseUIScrollView::onMouseDownInside(bool /*left*/, bool /*right*/) {
     this->bBusy = true;
     this->vMouseBackup2 = mouse->getPos();  // to avoid spastic movement at scroll start
 }
 
-void CBaseUIScrollView::onMouseUpInside(bool  /*left*/, bool  /*right*/) { this->bBusy = false; }
+void CBaseUIScrollView::onMouseUpInside(bool /*left*/, bool /*right*/) { this->bBusy = false; }
 
-void CBaseUIScrollView::onMouseUpOutside(bool  /*left*/, bool  /*right*/) { this->bBusy = false; }
+void CBaseUIScrollView::onMouseUpOutside(bool /*left*/, bool /*right*/) { this->bBusy = false; }
 
 void CBaseUIScrollView::onFocusStolen() {
     this->bActive = false;

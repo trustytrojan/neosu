@@ -1,6 +1,7 @@
 #pragma once
+#include "config.h"
 
-#ifdef __linux__
+#ifdef MCENGINE_PLATFORM_LINUX
 
 #include <X11/X.h>
 #include <X11/Xlib.h>
@@ -140,4 +141,6 @@ class LinuxEnvironment : public Environment {
 
 using EnvironmentImpl = LinuxEnvironment;
 
+#else
+class LinuxEnvironment {};
 #endif

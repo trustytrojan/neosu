@@ -1,12 +1,12 @@
 #pragma once
-#include <mutex>
 
-#include "BanchoProtocol.h"  // Packet
 #include "LegacyReplay.h"
 #include "Overrides.h"
 #include "UString.h"
-#include "cbase.h"
 #include "score.h"
+
+#include <mutex>
+#include <atomic>
 
 namespace Timing {
 class Timer;

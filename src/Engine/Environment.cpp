@@ -274,6 +274,9 @@ void Environment::showMessageErrorFatal(const UString &title, const UString &mes
     showMessageError(title, message);
 }
 
+// used to signal main loop that SDL_PumpEvents should be called
+int Environment::s_sdl_dialog_opened = 0;
+
 void Environment::openFileWindow(FileDialogCallback callback, const char *filetypefilters, const UString & /*title*/,
                                  const UString &initialpath) {
     // convert filetypefilters (Windows-style)
@@ -305,6 +308,7 @@ void Environment::openFileWindow(FileDialogCallback callback, const char *filety
     auto *callbackData = new FileDialogCallbackData{std::move(callback)};
 
     // show it
+    s_sdl_dialog_opened++;
     SDL_ShowOpenFileDialog(sdlFileDialogCallback, callbackData, nullptr,
                            sdlFilters.empty() ? nullptr : sdlFilters.data(), static_cast<int>(sdlFilters.size()),
                            initialpath.length() > 0 ? initialpath.toUtf8() : nullptr, false);
@@ -315,6 +319,7 @@ void Environment::openFolderWindow(FileDialogCallback callback, const UString &i
     auto *callbackData = new FileDialogCallbackData{std::move(callback)};
 
     // show it
+    s_sdl_dialog_opened++;
     SDL_ShowOpenFolderDialog(sdlFileDialogCallback, callbackData, nullptr,
                              initialpath.length() > 0 ? initialpath.toUtf8() : nullptr, false);
 }
@@ -325,7 +330,10 @@ void Environment::openFolderWindow(FileDialogCallback callback, const UString &i
 // for open{File,Folder}Window
 void Environment::sdlFileDialogCallback(void *userdata, const char *const *filelist, int /*filter*/) {
     auto *callbackData = static_cast<FileDialogCallbackData *>(userdata);
-    if(!callbackData) return;
+    if(!callbackData) {
+        s_sdl_dialog_opened--;
+        return;
+    }
 
     std::vector<UString> results;
 
@@ -340,6 +348,7 @@ void Environment::sdlFileDialogCallback(void *userdata, const char *const *filel
 
     // data is no longer needed
     delete callbackData;
+    s_sdl_dialog_opened--;
 }
 
 // for getting files in folder/ folders in folder

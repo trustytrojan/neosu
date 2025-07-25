@@ -15,6 +15,8 @@
 #include "SoundEngine.h"
 #include "SpectatorScreen.h"
 
+#include <unordered_set>
+
 static std::vector<ConVar *> &_getGlobalConVarArray() {
     static std::vector<ConVar *> g_vConVars;  // (singleton)
     return g_vConVars;

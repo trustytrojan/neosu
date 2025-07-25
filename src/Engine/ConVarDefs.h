@@ -77,6 +77,7 @@ extern void disconnect();
 #define CONVAR(name, ...) ConVar _CV(name)(__VA_ARGS__)
 #define CFUNC(func) SA::delegate<decltype(func)>::template create<func>()
 #include "KeyboardKeys.h"
+#include "BanchoNetworking.h" // defines some things we need like OSU_VERSION_DATEONLY
 #else
 #define CONVAR(name, ...) extern ConVar _CV(name)
 #define CFUNC(func)

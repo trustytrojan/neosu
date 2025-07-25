@@ -1,9 +1,5 @@
 #include "Database.h"
 
-#include <algorithm>
-#include <cstring>
-#include <utility>
-
 #include "SString.h"
 #include "MD5Hash.h"
 #include "ByteBufferedFile.h"
@@ -24,6 +20,12 @@
 #include "SongBrowser/SongBrowser.h"
 #include "Timing.h"
 #include "score.h"
+
+#include <unordered_set>
+
+#include <algorithm>
+#include <cstring>
+#include <utility>
 
 Database *db = NULL;
 

@@ -1,10 +1,10 @@
 #pragma once
-#include "ConVar.h"
+
+#include "UString.h"
 #include "Cursors.h"
 #include "Graphics.h"
 #include "KeyboardEvent.h"
 #include "Rect.h"
-#include "cbase.h"
 
 #ifdef MCENGINE_PLATFORM_WINDOWS  // temp, for isatty
 #include <io.h>
@@ -13,12 +13,24 @@
 #endif
 
 #include <filesystem>
+#include <unordered_map>
+#include <functional>
 
 class Environment;
 
 extern Environment *env;
 
+class LinuxMain;
+class LinuxEnvironment;
+class WinEnvironment;
+class WindowsMain;
+
 class Environment {
+    friend class LinuxEnvironment;
+    friend class LinuxMain;
+    friend class WinEnvironment;
+    friend class WindowsMain;
+
    public:
     Environment(const std::vector<UString> &argCmdline,
                 const std::unordered_map<UString, std::optional<UString>> &argMap);
@@ -153,6 +165,7 @@ class Environment {
         FileDialogCallback callback;
     };
     static void sdlFileDialogCallback(void *userdata, const char *const *filelist, int filter);
+    static int s_sdl_dialog_opened;
 
     // for getting files in folder/ folders in folder
     static std::vector<std::string> enumerateDirectory(const std::string &pathToEnum,

@@ -4,26 +4,6 @@
 
 #include "BaseEnvironment.h"
 
-// STD INCLUDES
-
-#include <math.h>
-#include <stdarg.h>
-#include <stdint.h>
-#include <stdlib.h>
-
-#include <algorithm>
-#include <atomic>
-#include <fstream>
-#include <functional>
-#include <iostream>
-#include <limits>
-#include <memory>
-#include <stack>
-#include <string>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
-
 #include "types.h"
 
 // ENGINE INCLUDES

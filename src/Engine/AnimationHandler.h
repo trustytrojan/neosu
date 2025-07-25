@@ -54,7 +54,7 @@ class AnimationHandler {
     }
 
     // DEPRECATED:
-    void moveSmoothEnd(float *base, float target, float duration, int smoothFactor = 20, float delay = 0.0f);
+    void moveSmoothEnd(float *base, float target, float duration, float smoothFactor = 20.f, float delay = 0.0f);
 
     void deleteExistingAnimation(float *base);
 
@@ -94,6 +94,8 @@ class AnimationHandler {
     void overrideExistingAnimation(float *base);
 
     std::vector<Animation> vAnimations;
+
+    static constexpr const float ANIM_EPSILON{1e-6f};
 };
 
 extern AnimationHandler *anim;

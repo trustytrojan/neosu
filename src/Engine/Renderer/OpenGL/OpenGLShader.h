@@ -13,6 +13,8 @@
 
 #ifdef MCENGINE_FEATURE_OPENGL
 
+#include <unordered_map>
+
 class OpenGLShader final : public Shader {
    public:
     OpenGLShader(std::string vertexShader, std::string fragmentShader, bool source);

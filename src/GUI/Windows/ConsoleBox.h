@@ -1,7 +1,9 @@
 #pragma once
-#include <mutex>
 
 #include "CBaseUIElement.h"
+
+#include <atomic>
+#include <mutex>
 
 class CBaseUITextbox;
 class CBaseUIButton;

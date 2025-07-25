@@ -1,13 +1,9 @@
 #include "Beatmap.h"
 
-#include <string.h>
-
+#include <cstring>
 #include <algorithm>
-#include <cctype>
 #include <chrono>
-#include <future>
 #include <limits>
-#include <sstream>
 
 #include "AnimationHandler.h"
 #include "BackgroundImageHandler.h"
@@ -24,11 +20,9 @@
 #include "DatabaseBeatmap.h"
 #include "DifficultyCalculator.h"
 #include "Engine.h"
-#include "Environment.h"
 #include "GameRules.h"
 #include "HUD.h"
 #include "HitObject.h"
-#include "KeyBindings.h"
 #include "Keyboard.h"
 #include "LegacyReplay.h"
 #include "MainMenu.h"

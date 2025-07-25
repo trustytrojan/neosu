@@ -10,8 +10,11 @@
 #define FONT_H
 
 #include "Resource.h"
+#include "UString.h"
 #include "VertexArrayObject.h"
 
+#include <memory>
+#include <unordered_map>
 typedef struct FT_Bitmap_ FT_Bitmap;
 typedef struct FT_FaceRec_ *FT_Face;
 typedef struct FT_LibraryRec_ *FT_Library;

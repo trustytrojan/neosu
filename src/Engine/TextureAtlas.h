@@ -10,6 +10,9 @@
 #define TEXTUREATLAS_H
 
 #include "Resource.h"
+#include <vector>
+
+struct Color;
 
 class Image;
 

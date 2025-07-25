@@ -1,9 +1,5 @@
 #include "Chat.h"
 
-#include <algorithm>
-#include <regex>
-#include <utility>
-
 #include "AnimationHandler.h"
 #include "Bancho.h"
 #include "BanchoNetworking.h"
@@ -35,6 +31,12 @@
 #include "UIButton.h"
 #include "UIUserContextMenu.h"
 #include "UserCard2.h"
+
+#include <algorithm>
+#include <regex>
+#include <utility>
+
+#include <curl/curl.h>
 
 namespace proto = BANCHO::Proto;
 

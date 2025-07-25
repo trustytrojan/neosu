@@ -10,6 +10,7 @@
 #include <string>
 
 #include "Bancho.h"
+#include "BanchoNetworking.h"
 #include "BanchoProtocol.h"
 #include "Beatmap.h"
 #include "Database.h"

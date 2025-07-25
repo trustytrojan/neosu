@@ -1,6 +1,6 @@
 #pragma once
 #include "App.h"
-#include "BanchoNetworking.h"
+#include "ConVar.h"
 #include "ModSelector.h"
 #include "MouseListener.h"
 #include "Replay.h"

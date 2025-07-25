@@ -1,10 +1,5 @@
 #include "BaseEnvironment.h"
 
-#ifndef LZMA_API_STATIC
-#define LZMA_API_STATIC
-#endif
-#include <lzma.h>
-
 #include "Bancho.h"
 #include "BanchoAes.h"
 #include "BanchoNetworking.h"
@@ -12,6 +7,13 @@
 #include "DatabaseBeatmap.h"
 #include "Engine.h"
 #include "crypto.h"
+
+#include <cstdlib>
+#include <cstring>
+
+#include <vector>
+
+#include <curl/curl.h>
 
 namespace BANCHO::Net {
 void submit_score(FinishedScore score) {
@@ -92,7 +94,7 @@ void submit_score(FinishedScore score) {
         auto iv_b64 = crypto::baseconv::encode64(iv, sizeof(iv));
         part = curl_mime_addpart(request.mime);
         curl_mime_name(part, "iv");
-        curl_mime_data(part, (const char*)iv_b64.data(), CURL_ZERO_TERMINATED);
+        curl_mime_data(part, (const char *)iv_b64.data(), CURL_ZERO_TERMINATED);
     }
     {
         size_t s_client_hashes_encrypted = 0;
@@ -101,7 +103,7 @@ void submit_score(FinishedScore score) {
         auto client_hashes_b64 = crypto::baseconv::encode64(client_hashes_encrypted, s_client_hashes_encrypted);
         part = curl_mime_addpart(request.mime);
         curl_mime_name(part, "s");
-        curl_mime_data(part, (const char*)client_hashes_b64.data(), CURL_ZERO_TERMINATED);
+        curl_mime_data(part, (const char *)client_hashes_b64.data(), CURL_ZERO_TERMINATED);
     }
     {
         UString score_data;
@@ -146,7 +148,7 @@ void submit_score(FinishedScore score) {
 
         part = curl_mime_addpart(request.mime);
         curl_mime_name(part, "score");
-        curl_mime_data(part, (const char*)score_data_b64.data(), CURL_ZERO_TERMINATED);
+        curl_mime_data(part, (const char *)score_data_b64.data(), CURL_ZERO_TERMINATED);
     }
     {
         size_t s_compressed_data = 0;
@@ -172,4 +174,4 @@ err:
     curl_mime_free(request.mime);
     curl_easy_cleanup(curl);
 }
-}  // namespace BANCHO::Submission
+}  // namespace BANCHO::Net

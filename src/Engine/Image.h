@@ -9,6 +9,7 @@
 #ifndef IMAGE_H
 #define IMAGE_H
 
+#include "Graphics.h"
 #include "Resource.h"
 
 class Image : public Resource {

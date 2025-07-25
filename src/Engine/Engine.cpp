@@ -1,8 +1,6 @@
 #include "Engine.h"
 
-#include <stdio.h>
-
-#include <mutex>
+#include <cstdio>
 
 #include "AnimationHandler.h"
 #include "CBaseUIContainer.h"
