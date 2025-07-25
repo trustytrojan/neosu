@@ -67,6 +67,7 @@ Engine::Engine(i32 argc, char **argv) {
     this->bResolutionChange = false;
     this->vScreenSize = env->getWindowSize();
     this->vNewScreenSize = this->vScreenSize;
+    this->screenRect = {Vector2{}, this->vScreenSize};
 
     debugLogF("Engine: ScreenSize = ({}x{})\n", (int)this->vScreenSize.x, (int)this->vScreenSize.y);
 
@@ -428,6 +429,8 @@ void Engine::onResolutionChange(Vector2 newResolution) {
         this->bIsMinimized = true;
         newResolution = Vector2(2, 2);
     }
+
+    this->screenRect = {Vector2{}, newResolution};
 
     // to avoid double resolutionChange
     this->bResolutionChange = false;

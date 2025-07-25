@@ -1265,7 +1265,7 @@ f64 DifficultyCalculator::DiffObject::get_doubletapness(const DifficultyCalculat
     if(next != NULL) {
         f64 cur_delta = std::max(1.0, this->delta_time);
         f64 next_delta = std::max(1, next->ho->time - this->ho->time);  // next delta time isn't initialized yet
-        f64 delta_diff = abs(next_delta - cur_delta);
+        f64 delta_diff = std::abs(next_delta - cur_delta);
         f64 speedRatio = cur_delta / std::max(cur_delta, delta_diff);
         f64 windowRatio = pow(std::min(1.0, cur_delta / hitWindow300), 2.0);
 

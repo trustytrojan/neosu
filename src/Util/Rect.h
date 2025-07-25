@@ -6,41 +6,54 @@ class McRect {
     McRect(float x = 0, float y = 0, float width = 0, float height = 0, bool isCentered = false);
     McRect(const Vector2 &pos, const Vector2 &size, bool isCentered = false);
 
-    void set(float x, float y, float width, float height, bool isCentered = false);
-    void set(const Vector2 &pos, const Vector2 &size, bool isCentered = false);
-
     [[nodiscard]] inline bool contains(const Vector2 &point) const {
-        return (point.x >= this->vMin.x && point.x <= this->vMax.x && point.y >= this->vMin.y && point.y <= this->vMax.y);
+        Vector2 max = this->vMin + this->vSize;
+        return glm::all(glm::greaterThanEqual(static_cast<const glm::vec2 &>(point),
+                                              static_cast<const glm::vec2 &>(this->vMin))) &&
+               glm::all(glm::lessThanEqual(static_cast<const glm::vec2 &>(point), static_cast<const glm::vec2 &>(max)));
     }
 
     [[nodiscard]] McRect intersect(const McRect &rect) const;
     [[nodiscard]] bool intersects(const McRect &rect) const;
     [[nodiscard]] McRect Union(const McRect &rect) const;
 
-    [[nodiscard]] inline Vector2 getPos() const { return this->vMin; }
-    [[nodiscard]] inline Vector2 getSize() const { return this->vMax - this->vMin; }
-    [[nodiscard]] inline Vector2 getCenter() const { return (this->vMin + this->vMax) * 0.5f; }
-    [[nodiscard]] inline Vector2 getMin() const { return this->vMin; }
-    [[nodiscard]] inline Vector2 getMax() const { return this->vMax; }
+    [[nodiscard]] inline Vector2 getCenter() const { return this->vMin + this->vSize * 0.5f; }
+    [[nodiscard]] inline Vector2 getMax() const { return this->vMin + this->vSize; }
 
-    [[nodiscard]] inline float getX() const { return this->vMin.x; }
-    [[nodiscard]] inline float getY() const { return this->vMin.y; }
-    [[nodiscard]] inline float getWidth() const { return this->vMax.x - this->vMin.x; }
-    [[nodiscard]] inline float getHeight() const { return this->vMax.y - this->vMin.y; }
+    // get
+    [[nodiscard]] constexpr const Vector2 &getPos() const { return this->vMin; }
+    [[nodiscard]] constexpr const Vector2 &getMin() const { return this->vMin; }
+    [[nodiscard]] constexpr const Vector2 &getSize() const { return this->vSize; }
 
-    [[nodiscard]] inline float getMinX() const { return this->vMin.x; }
-    [[nodiscard]] inline float getMinY() const { return this->vMin.y; }
-    [[nodiscard]] inline float getMaxX() const { return this->vMax.x; }
-    [[nodiscard]] inline float getMaxY() const { return this->vMax.y; }
+    [[nodiscard]] constexpr const float &getX() const { return this->vMin.x; }
+    [[nodiscard]] constexpr const float &getY() const { return this->vMin.y; }
+    [[nodiscard]] constexpr const float &getMinX() const { return this->vMin.x; }
+    [[nodiscard]] constexpr const float &getMinY() const { return this->vMin.y; }
 
+    [[nodiscard]] inline float getMaxX() const { return this->vMin.x + this->vSize.x; }
+    [[nodiscard]] inline float getMaxY() const { return this->vMin.y + this->vSize.y; }
+
+    [[nodiscard]] constexpr const float &getWidth() const { return this->vSize.x; }
+    [[nodiscard]] constexpr const float &getHeight() const { return this->vSize.y; }
+
+    // set
     inline void setMin(const Vector2 &min) { this->vMin = min; }
-    inline void setMax(const Vector2 &max) { this->vMax = max; }
-    inline void setMaxX(float maxx) { this->vMax.x = maxx; }
-    inline void setMaxY(float maxy) { this->vMax.y = maxy; }
+    inline void setMax(const Vector2 &max) { this->vSize = max - this->vMin; }
     inline void setMinX(float minx) { this->vMin.x = minx; }
     inline void setMinY(float miny) { this->vMin.y = miny; }
+    inline void setMaxX(float maxx) { this->vSize.x = maxx - this->vMin.x; }
+    inline void setMaxY(float maxy) { this->vSize.y = maxy - this->vMin.y; }
+    inline void setPos(const Vector2 &pos) { this->vMin = pos; }
+    inline void setPosX(float posx) { this->vMin.x = posx; }
+    inline void setPosY(float posy) { this->vMin.y = posy; }
+    inline void setSize(const Vector2 &size) { this->vSize = size; }
+    inline void setWidth(float width) { this->vSize.x = width; }
+    inline void setHeight(float height) { this->vSize.y = height; }
 
    private:
+    void set(float x, float y, float width, float height, bool isCentered = false);
+    void set(const Vector2 &pos, const Vector2 &size, bool isCentered = false);
+
     Vector2 vMin;
-    Vector2 vMax;
+    Vector2 vSize;
 };

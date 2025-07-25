@@ -80,6 +80,7 @@ class Engine {
 
     // screen
     void requestResolutionChange(Vector2 newResolution);
+    [[nodiscard]] constexpr McRect getScreenRect() const { return this->screenRect; }
     [[nodiscard]] constexpr Vector2 getScreenSize() const { return this->vScreenSize; }
     [[nodiscard]] constexpr int getScreenWidth() const { return (int)this->vScreenSize.x; }
     [[nodiscard]] constexpr int getScreenHeight() const { return (int)this->vScreenSize.y; }
@@ -115,6 +116,7 @@ class Engine {
     double dFrameTime;
 
     // primary screen
+    McRect screenRect;
     Vector2 vScreenSize;
     Vector2 vNewScreenSize;
     bool bResolutionChange;

@@ -494,16 +494,16 @@ void CBaseUIScrollView::scrollToElement(CBaseUIElement *element, int /*xOffset*/
 
 void CBaseUIScrollView::updateClipping() {
     const std::vector<CBaseUIElement *> &elements = this->container->getElements();
-    const McRect me = McRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
+    const McRect &me{this->getRect()};
 
     for(size_t i = 0; i < elements.size(); i++) {
         CBaseUIElement *e = elements[i];
 
-        const McRect elementBounds = McRect(e->getPos().x, e->getPos().y, e->getSize().x, e->getSize().y);
-        if(me.intersects(elementBounds)) {
+        if(me.intersects(e->getRect())) {
             if(!e->isVisible()) e->setVisible(true);
-        } else if(e->isVisible())
+        } else if(e->isVisible()) {
             e->setVisible(false);
+        }
     }
 }
 

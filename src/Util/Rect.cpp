@@ -4,7 +4,9 @@ McRect::McRect(float x, float y, float width, float height, bool isCentered) {
     this->set(x, y, width, height, isCentered);
 }
 
-McRect::McRect(const Vector2 &pos, const Vector2 &size, bool isCentered) { this->set(pos, size, isCentered); }
+McRect::McRect(const Vector2 &pos, const Vector2 &size, bool isCentered) { 
+    this->set(pos, size, isCentered); 
+}
 
 void McRect::set(float x, float y, float width, float height, bool isCentered) {
     this->set(Vector2(x, y), Vector2(width, height), isCentered);
@@ -13,26 +15,30 @@ void McRect::set(float x, float y, float width, float height, bool isCentered) {
 void McRect::set(const Vector2 &pos, const Vector2 &size, bool isCentered) {
     if(isCentered) {
         Vector2 halfSize = size * 0.5f;
-        vMin = pos - halfSize;
-        vMax = pos + halfSize;
+        this->vMin = pos - halfSize;
     } else {
-        vMin = pos;
-        vMax = pos + size;
+        this->vMin = pos;
     }
+    this->vSize = size;
 }
 
 McRect McRect::intersect(const McRect &rect) const {
     McRect intersection;
+    
+    Vector2 thisMax = this->vMin + this->vSize;
+    Vector2 rectMax = rect.vMin + rect.vSize;
 
-    intersection.vMin.x = std::max(this->vMin.x, rect.vMin.x);
-    intersection.vMin.y = std::max(this->vMin.y, rect.vMin.y);
-    intersection.vMax.x = std::min(this->vMax.x, rect.vMax.x);
-    intersection.vMax.y = std::min(this->vMax.y, rect.vMax.y);
+    intersection.vMin = glm::max(static_cast<const glm::vec2 &>(this->vMin), 
+                                static_cast<const glm::vec2 &>(rect.vMin));
+    Vector2 intersectMax = glm::min(static_cast<const glm::vec2 &>(thisMax), 
+                                   static_cast<const glm::vec2 &>(rectMax));
 
-    // if the rects don't intersect, reset to null rect
-    if(intersection.vMin.x > intersection.vMax.x || intersection.vMin.y > intersection.vMax.y) {
+    if(glm::any(glm::greaterThan(static_cast<const glm::vec2 &>(intersection.vMin),
+                                 static_cast<const glm::vec2 &>(intersectMax)))) {
         intersection.vMin.zero();
-        intersection.vMax.zero();
+        intersection.vSize.zero();
+    } else {
+        intersection.vSize = intersectMax - intersection.vMin;
     }
 
     return intersection;
@@ -40,21 +46,28 @@ McRect McRect::intersect(const McRect &rect) const {
 
 McRect McRect::Union(const McRect &rect) const {
     McRect result;
+    
+    Vector2 thisMax = this->vMin + this->vSize;
+    Vector2 rectMax = rect.vMin + rect.vSize;
 
-    // use vector component-wise min/max operations
-    result.vMin.x = std::min(this->vMin.x, rect.vMin.x);
-    result.vMin.y = std::min(this->vMin.y, rect.vMin.y);
-    result.vMax.x = std::max(this->vMax.x, rect.vMax.x);
-    result.vMax.y = std::max(this->vMax.y, rect.vMax.y);
+    result.vMin = glm::min(static_cast<const glm::vec2 &>(this->vMin), 
+                          static_cast<const glm::vec2 &>(rect.vMin));
+    Vector2 resultMax = glm::max(static_cast<const glm::vec2 &>(thisMax), 
+                                static_cast<const glm::vec2 &>(rectMax));
+    result.vSize = resultMax - result.vMin;
 
     return result;
 }
 
 bool McRect::intersects(const McRect &rect) const {
-    const float minx = std::max(this->vMin.x, rect.vMin.x);
-    const float miny = std::max(this->vMin.y, rect.vMin.y);
-    const float maxx = std::min(this->vMax.x, rect.vMax.x);
-    const float maxy = std::min(this->vMax.y, rect.vMax.y);
+    Vector2 thisMax = this->vMin + this->vSize;
+    Vector2 rectMax = rect.vMin + rect.vSize;
+    
+    Vector2 intersectMin = glm::max(static_cast<const glm::vec2 &>(this->vMin), 
+                                   static_cast<const glm::vec2 &>(rect.vMin));
+    Vector2 intersectMax = glm::min(static_cast<const glm::vec2 &>(thisMax), 
+                                   static_cast<const glm::vec2 &>(rectMax));
 
-    return (minx < maxx && miny < maxy);
+    return glm::all(glm::lessThan(static_cast<const glm::vec2 &>(intersectMin), 
+                                  static_cast<const glm::vec2 &>(intersectMax)));
 }

@@ -6,10 +6,8 @@
 #include "TooltipOverlay.h"
 
 bool CBaseUIElement::isVisibleOnScreen() {
-    if(!this->isVisible()) return false;
-    const McRect visrect{{0, 0}, engine->getScreenSize()};
-    const Vector2 &visrectCenter = visrect.getCenter();
-    const Vector2 elemPosNudgedIn{Vector2{this->vPos.x, this->vPos.y}.nudge(visrectCenter, -5.0f)};
+    const McRect &visrect{engine->getScreenRect()};
+    const Vector2 elemPosNudgedIn{Vector2{this->vPos}.nudge(visrect.getCenter(), -5.0f)};
     return visrect.contains(elemPosNudgedIn);
 }
 
@@ -21,8 +19,7 @@ void CBaseUIElement::stealFocus() {
 
 void CBaseUIElement::mouse_update(bool *propagate_clicks) {
     // check if mouse is inside element
-    McRect temp = McRect(this->vPos.x + 1, this->vPos.y + 1, this->vSize.x - 1, this->vSize.y - 1);
-    if(temp.contains(mouse->getPos())) {
+    if(this->getRect().contains(mouse->getPos())) {
         if(!this->bMouseInside) {
             this->bMouseInside = true;
             if(this->bVisible && this->bEnabled) this->onMouseInside();
