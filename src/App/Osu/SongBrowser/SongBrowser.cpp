@@ -527,10 +527,13 @@ SongBrowser::~SongBrowser() {
     this->scoreButtonCache.clear();
 
     SAFE_DELETE(this->localBestButton);
+    SAFE_DELETE(this->localBestLabel);
+    SAFE_DELETE(this->localBestContainer);
     SAFE_DELETE(this->scoreBrowserScoresStillLoadingElement);
     SAFE_DELETE(this->scoreBrowserNoRecordsYetElement);
 
     SAFE_DELETE(this->beatmap);
+    SAFE_DELETE(this->contextMenu);
     SAFE_DELETE(this->search);
     SAFE_DELETE(this->topbarLeft);
     SAFE_DELETE(this->topbarRight);
@@ -897,7 +900,7 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
 
     // refresh logic (blocks every other call in the update() function below it!)
     if(this->bBeatmapRefreshScheduled) {
-        db->update(); // raw load logic
+        db->update();  // raw load logic
         // check if we are finished loading
         if(db->isFinished()) {
             this->bBeatmapRefreshScheduled = false;
