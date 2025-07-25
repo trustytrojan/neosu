@@ -489,7 +489,7 @@ CONVAR(fps_max_yield, "fps_max_yield", false, FCVAR_BANCHO_COMPATIBLE,
        "always release rest of timeslice once per frame (call scheduler via sleep(0))");
 CONVAR(fps_unlimited, "fps_unlimited", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(
-    fps_unlimited_yield, "fps_unlimited_yield", false, FCVAR_BANCHO_COMPATIBLE,
+    fps_unlimited_yield, "fps_unlimited_yield", true, FCVAR_BANCHO_COMPATIBLE,
     "always release rest of timeslice once per frame (call scheduler via sleep(0)), even if unlimited fps are enabled");
 CONVAR(fullscreen_windowed_borderless, "fullscreen_windowed_borderless", false, FCVAR_BANCHO_COMPATIBLE,
        [](float newValue) -> void {

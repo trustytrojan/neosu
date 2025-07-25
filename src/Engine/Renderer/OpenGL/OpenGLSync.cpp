@@ -12,9 +12,18 @@
 #include "ConVar.h"
 #include "Engine.h"
 
+void OpenGLSync::onFramecountNumChanged(float newValue) {
+    int newInt = static_cast<int>(newValue);
+    if(newInt > 0) {
+        this->setMaxFramesInFlight(newInt);
+    } else {
+        cv::r_sync_max_frames.setValue(this->iMaxFramesInFlight, false);
+    }
+}
+
 OpenGLSync::OpenGLSync() {
     this->iSyncFrameCount = 0;
-    this->bEnabled = false;
+    this->bEnabled = this->bAvailable = false;
     this->iMaxFramesInFlight = cv::r_sync_max_frames.getVal<int>();
 
     cv::r_sync_max_frames.setCallback(SA::MakeDelegate<&OpenGLSync::onFramecountNumChanged>(this));
@@ -24,7 +33,7 @@ OpenGLSync::OpenGLSync() {
 OpenGLSync::~OpenGLSync() {
     if(this->bAvailable) {
         while(!this->frameSyncQueue.empty()) {
-            deleteSyncObject(this->frameSyncQueue.front().syncObject);
+            this->deleteSyncObject(this->frameSyncQueue.front().syncObject);
             this->frameSyncQueue.pop_front();
         }
     }
@@ -41,7 +50,10 @@ bool OpenGLSync::init() {
 }
 
 void OpenGLSync::begin() {
-    if(this->bEnabled) manageFrameSyncQueue();  // this will block and wait if we have too many frames in flight already
+    if(this->bEnabled) {
+        // this will block and wait if we have too many frames in flight already
+        this->manageFrameSyncQueue();
+    }
 }
 
 void OpenGLSync::end() {
@@ -83,7 +95,7 @@ void OpenGLSync::manageFrameSyncQueue(bool forceWait) {
     if(signaled == GL_SIGNALED) {
         if(debug) debugLogF("Frame {:d} already completed (no wait needed)\n", oldestSync.frameNumber);
 
-        deleteSyncObject(oldestSync.syncObject);
+        this->deleteSyncObject(oldestSync.syncObject);
         this->frameSyncQueue.pop_front();
 
         // check if more frames are done
@@ -110,7 +122,7 @@ void OpenGLSync::manageFrameSyncQueue(bool forceWait) {
             debugLogF("Waiting for frame {:d} to complete (frames in flight: {:d}/{:d})\n", oldestSync.frameNumber,
                       this->frameSyncQueue.size(), this->iMaxFramesInFlight);
 
-        SYNC_RESULT result = waitForSyncObject(oldestSync.syncObject, cv::r_sync_timeout.getInt());
+        SYNC_RESULT result = this->waitForSyncObject(oldestSync.syncObject, cv::r_sync_timeout.getInt());
 
         if(debug) {
             switch(result) {
@@ -135,7 +147,7 @@ void OpenGLSync::manageFrameSyncQueue(bool forceWait) {
 
         // always remove the sync object we waited for, even if it timed out (don't get stuck if the GPU falls far
         // behind)
-        deleteSyncObject(oldestSync.syncObject);
+        this->deleteSyncObject(oldestSync.syncObject);
         this->frameSyncQueue.pop_front();
 
         // check if other frames are done too
@@ -148,9 +160,11 @@ void OpenGLSync::manageFrameSyncQueue(bool forceWait) {
                 glGetSynciv(sync, GL_SYNC_STATUS, sizeof(GLint), NULL, &signaled);
 
                 if(signaled == GL_SIGNALED) {
-                    if(debug) debugLogF("Frame {:d} also completed\n", nextSync.frameNumber);
+                    if(debug) {
+                        debugLogF("Frame {:d} also completed\n", nextSync.frameNumber);
+                    }
 
-                    deleteSyncObject(nextSync.syncObject);
+                    this->deleteSyncObject(nextSync.syncObject);
                     this->frameSyncQueue.pop_front();
                 } else {
                     break;
@@ -190,7 +204,9 @@ OpenGLSync::SYNC_RESULT OpenGLSync::waitForSyncObject(GLsync syncObject, uint64_
 }
 
 void OpenGLSync::deleteSyncObject(GLsync syncObject) {
-    if(syncObject) glDeleteSync(syncObject);
+    if(syncObject) {
+        glDeleteSync(syncObject);
+    }
 }
 
 void OpenGLSync::setMaxFramesInFlight(int maxFrames) {
@@ -201,7 +217,7 @@ void OpenGLSync::setMaxFramesInFlight(int maxFrames) {
         if(cv::r_sync_debug.getBool())
             debugLogF("Max frames reduced to {:d}, waiting for excess frames\n", this->iMaxFramesInFlight);
         // wait
-        manageFrameSyncQueue(true);
+        this->manageFrameSyncQueue(true);
     }
 }
 
