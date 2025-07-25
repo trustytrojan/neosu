@@ -3,7 +3,7 @@
 #include "InputDevice.h"
 #include "MouseListener.h"
 
-class Mouse : public InputDevice {
+class Mouse final : public InputDevice {
    public:
     Mouse();
     ~Mouse() override { ; }
@@ -22,12 +22,7 @@ class Mouse : public InputDevice {
 
     void onWheelVertical(int delta);
     void onWheelHorizontal(int delta);
-
-    void onLeftChange(bool leftDown);
-    void onMiddleChange(bool middleDown);
-    void onRightChange(bool rightDown);
-    void onButton4Change(bool button4down);
-    void onButton5Change(bool button5down);
+    void onButtonChange(ButtonIndex button, bool down);
 
     void setPos(Vector2d pos);
     void setCursorType(CURSORTYPE cursorType);
@@ -41,11 +36,21 @@ class Mouse : public InputDevice {
     [[nodiscard]] inline Vector2d getRawDelta() const { return this->vRawDelta; }
     [[nodiscard]] inline Vector2d getOffset() const { return this->vOffset; }
 
-    [[nodiscard]] inline bool isLeftDown() const { return this->bMouseLeftDown; }
-    [[nodiscard]] inline bool isMiddleDown() const { return this->bMouseMiddleDown; }
-    [[nodiscard]] inline bool isRightDown() const { return this->bMouseRightDown; }
-    [[nodiscard]] inline bool isButton4Down() const { return this->bMouse4Down; }
-    [[nodiscard]] inline bool isButton5Down() const { return this->bMouse5Down; }
+    [[nodiscard]] inline bool isLeftDown() const {
+        return bMouseButtonDownArray[static_cast<size_t>(ButtonIndex::BUTTON_LEFT)];
+    }
+    [[nodiscard]] inline bool isMiddleDown() const {
+        return bMouseButtonDownArray[static_cast<size_t>(ButtonIndex::BUTTON_MIDDLE)];
+    }
+    [[nodiscard]] inline bool isRightDown() const {
+        return bMouseButtonDownArray[static_cast<size_t>(ButtonIndex::BUTTON_RIGHT)];
+    }
+    [[nodiscard]] inline bool isButton4Down() const {
+        return bMouseButtonDownArray[static_cast<size_t>(ButtonIndex::BUTTON_X1)];
+    }
+    [[nodiscard]] inline bool isButton5Down() const {
+        return bMouseButtonDownArray[static_cast<size_t>(ButtonIndex::BUTTON_X2)];
+    }
 
     bool isCursorVisible();
 
@@ -53,8 +58,6 @@ class Mouse : public InputDevice {
     [[nodiscard]] inline int getWheelDeltaHorizontal() const { return this->iWheelDeltaHorizontal; }
 
    private:
-    void setPosXY(double x, double y);  // shit hack
-
     Vector2d vPos;
     Vector2d vPosWithoutOffset;
     Vector2d vPrevOsMousePos;
@@ -65,11 +68,8 @@ class Mouse : public InputDevice {
     Vector2d vRawDeltaAbsolute;
     Vector2d vRawDeltaAbsoluteActual;
 
-    bool bMouseLeftDown;
-    bool bMouseMiddleDown;
-    bool bMouseRightDown;
-    bool bMouse4Down;
-    bool bMouse5Down;
+    // button state (using our internal button index)
+    std::array<bool, static_cast<size_t>(ButtonIndex::BUTTON_COUNT)> bMouseButtonDownArray{};
 
     int iWheelDeltaVertical;
     int iWheelDeltaHorizontal;
@@ -86,11 +86,4 @@ class Mouse : public InputDevice {
     Vector2d vOffset;
     Vector2d vScale;
     McRect desktopRect;
-
-    struct FAKELAG_PACKET {
-        float time;
-        Vector2 pos;
-    };
-    std::vector<FAKELAG_PACKET> fakelagBuffer;
-    Vector2 vFakeLagPos;
 };

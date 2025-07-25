@@ -35,6 +35,7 @@ typedef uint64_t QWORD;
 #include "ConVar.h"
 #include "Engine.h"
 #include "Mouse.h"
+#include "Keyboard.h"
 #include "Profiler.h"
 #include "Timing.h"
 #include "WinEnvironment.h"
@@ -322,7 +323,7 @@ Main *mainloopPtrHack = nullptr;  // FIXME: why is the handle_cmdline_args shit 
 
 bool WindowsMain::bSupportsPerMonitorDpiAwareness = false;
 
-WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> & argCmdline,
+WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> &argCmdline,
                          const std::unordered_map<UString, std::optional<UString>> &argMap) {
     mainloopPtrHack = this;
     // @spec: TEST THIS?
@@ -755,8 +756,8 @@ LRESULT CALLBACK WindowsMain::realWndProc(HWND hwnd, UINT msg, WPARAM wParam, LP
         // OnKeyDown
         case WM_SYSKEYDOWN:
         case WM_KEYDOWN:
-            if(engine != NULL) {
-                engine->onKeyboardKeyDown(mapLeftRightKeys(wParam, lParam));
+            if(keyboard != NULL) {
+                keyboard->onKeyDown(mapLeftRightKeys(wParam, lParam));
                 return 0;
             }
             break;
@@ -764,90 +765,90 @@ LRESULT CALLBACK WindowsMain::realWndProc(HWND hwnd, UINT msg, WPARAM wParam, LP
         // OnKeyUp
         case WM_SYSKEYUP:
         case WM_KEYUP:
-            if(engine != NULL) {
-                engine->onKeyboardKeyUp(mapLeftRightKeys(wParam, lParam));
+            if(keyboard != NULL) {
+                keyboard->onKeyUp(mapLeftRightKeys(wParam, lParam));
                 return 0;
             }
             break;
 
         // OnCharDown
         case WM_CHAR:
-            if(engine != NULL) {
-                engine->onKeyboardChar(wParam);
+            if(keyboard != NULL) {
+                keyboard->onChar(wParam);
                 return 0;
             }
             break;
 
         // left mouse button, inject as keyboard key as well
         case WM_LBUTTONDOWN:
-            if(engine != NULL && mouse != NULL) {
-                mouse->onLeftChange(true);
-                engine->onKeyboardKeyDown(VK_LBUTTON);
+            if(keyboard != NULL && mouse != NULL) {
+                mouse->onButtonChange(ButtonIndex::BUTTON_LEFT, true);
+                keyboard->onKeyDown(VK_LBUTTON);
             }
             SetCapture(hwnd);
             break;
         case WM_LBUTTONUP:
-            if(engine != NULL && mouse != NULL) {
-                mouse->onLeftChange(false);
-                engine->onKeyboardKeyUp(VK_LBUTTON);
+            if(keyboard != NULL && mouse != NULL) {
+                mouse->onButtonChange(ButtonIndex::BUTTON_LEFT, false);
+                keyboard->onKeyUp(VK_LBUTTON);
             }
             ReleaseCapture();
             break;
 
         // middle mouse button, inject as keyboard key as well
         case WM_MBUTTONDOWN:
-            if(engine != NULL && mouse != NULL) {
-                mouse->onMiddleChange(true);
-                engine->onKeyboardKeyDown(VK_MBUTTON);
+            if(keyboard != NULL && mouse != NULL) {
+                mouse->onButtonChange(ButtonIndex::BUTTON_MIDDLE, true);
+                keyboard->onKeyDown(VK_MBUTTON);
             }
             SetCapture(hwnd);
             break;
         case WM_MBUTTONUP:
-            if(engine != NULL && mouse != NULL) {
-                mouse->onMiddleChange(false);
-                engine->onKeyboardKeyUp(VK_MBUTTON);
+            if(keyboard != NULL && mouse != NULL) {
+                mouse->onButtonChange(ButtonIndex::BUTTON_MIDDLE, false);
+                keyboard->onKeyUp(VK_MBUTTON);
             }
             ReleaseCapture();
             break;
 
         // right mouse button, inject as keyboard key as well
         case WM_RBUTTONDOWN:
-            if(engine != NULL && mouse != NULL) {
-                mouse->onRightChange(true);
-                engine->onKeyboardKeyDown(VK_RBUTTON);
+            if(keyboard != NULL && mouse != NULL) {
+                mouse->onButtonChange(ButtonIndex::BUTTON_RIGHT, true);
+                keyboard->onKeyDown(VK_RBUTTON);
             }
             SetCapture(hwnd);
             break;
         case WM_RBUTTONUP:
-            if(engine != NULL && mouse != NULL) {
-                mouse->onRightChange(false);
-                engine->onKeyboardKeyUp(VK_RBUTTON);
+            if(keyboard != NULL && mouse != NULL) {
+                mouse->onButtonChange(ButtonIndex::BUTTON_RIGHT, false);
+                keyboard->onKeyUp(VK_RBUTTON);
             }
             ReleaseCapture();
             break;
 
         // mouse sidebuttons (4 and 5), inject them as keyboard keys as well
         case WM_XBUTTONDOWN:
-            if(engine != NULL && mouse != NULL) {
+            if(keyboard != NULL && mouse != NULL) {
                 const DWORD fwButton = GET_XBUTTON_WPARAM(wParam);
                 if(fwButton == XBUTTON1) {
-                    mouse->onButton4Change(true);
-                    engine->onKeyboardKeyDown(VK_XBUTTON1);
+                    mouse->onButtonChange(ButtonIndex::BUTTON_X1, true);
+                    keyboard->onKeyDown(VK_XBUTTON1);
                 } else if(fwButton == XBUTTON2) {
-                    mouse->onButton5Change(true);
-                    engine->onKeyboardKeyDown(VK_XBUTTON2);
+                    mouse->onButtonChange(ButtonIndex::BUTTON_X2, true);
+                    keyboard->onKeyDown(VK_XBUTTON2);
                 }
             }
             return TRUE;
         case WM_XBUTTONUP:
-            if(engine != NULL && mouse != NULL) {
+            if(keyboard != NULL && mouse != NULL) {
                 const DWORD fwButton = GET_XBUTTON_WPARAM(wParam);
                 if(fwButton == XBUTTON1) {
-                    mouse->onButton4Change(false);
-                    engine->onKeyboardKeyUp(VK_XBUTTON1);
+                    mouse->onButtonChange(ButtonIndex::BUTTON_X1, false);
+                    keyboard->onKeyUp(VK_XBUTTON1);
                 } else if(fwButton == XBUTTON2) {
-                    mouse->onButton5Change(false);
-                    engine->onKeyboardKeyUp(VK_XBUTTON2);
+                    mouse->onButtonChange(ButtonIndex::BUTTON_X2, false);
+                    keyboard->onKeyUp(VK_XBUTTON2);
                 }
             }
             return TRUE;

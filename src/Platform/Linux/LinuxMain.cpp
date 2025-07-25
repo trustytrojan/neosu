@@ -14,6 +14,7 @@
 #include "Timing.h"
 #include "FPSLimiter.h"
 
+#include "Keyboard.h"
 #include "KeyboardKeys.h"
 
 #define XLIB_ILLEGAL_ACCESS
@@ -313,14 +314,14 @@ void LinuxMain::WndProc() {
             // always use shifted keysym for consistency, needs to be same as in KeyRelease
             unsigned long keysym = XLookupKeysym(ke, 1);
 
-            if(engine != NULL) {
+            if(keyboard != NULL) {
                 // check if this physical key is already pressed (prevents stuck keys)
                 if(this->pressedKeycodes.find(ke->keycode) == this->pressedKeycodes.end()) {
                     this->pressedKeycodes.insert(ke->keycode);
 
                     // normalize shifted/unshifted keysym
                     KEYCODE normalizedKey = normalizeKeysym(keysym);
-                    engine->onKeyboardKeyDown(normalizedKey);
+                    keyboard->onKeyDown(normalizedKey);
                 }
             }
 
@@ -334,7 +335,9 @@ void LinuxMain::WndProc() {
 
             if(length > 0) {
                 buf[buffSize - 1] = 0;
-                if(engine != NULL) engine->onKeyboardChar(buf[0]);
+                if(keyboard != NULL) {
+                    keyboard->onChar(buf[0]);
+                }
             }
         } break;
 
@@ -343,7 +346,7 @@ void LinuxMain::WndProc() {
             // always use shifted keysym for consistency, needs to be same as in KeyPress
             unsigned long keysym = XLookupKeysym(ke, 1);
 
-            if(engine != NULL) {
+            if(keyboard != NULL) {
                 // LINUX: fuck X11 key repeats with release events inbetween
                 if(XEventsQueued(this->dpy, QueuedAfterReading)) {
                     XEvent nextEvent;
@@ -359,7 +362,7 @@ void LinuxMain::WndProc() {
 
                     // normalize shifted/unshifted keysym
                     KEYCODE normalizedKey = normalizeKeysym(keysym);
-                    engine->onKeyboardKeyUp(normalizedKey);
+                    keyboard->onKeyUp(normalizedKey);
                 }
             }
         } break;

@@ -184,7 +184,8 @@ MainMenu::MainMenu() : OsuScreen() {
                 // debugLogF("versionFile version: {} our version: {}{}\n", version, cv::version.getFloat(),
                 //           buildstamp > 0.0f ? fmt::format(" build timestamp: {}", buildstamp) : "");
                 if constexpr(Env::cfg(STREAM::EDGE)) {
-                    if(version < cv::version.getFloat() || (buildstamp > 0 && buildstamp < cv::build_timestamp.getFloat())) {
+                    if(version < cv::version.getFloat() ||
+                       (buildstamp > 0 && buildstamp < cv::build_timestamp.getFloat())) {
                         this->bDrawVersionNotificationArrow = true;
                     }
                 } else {
@@ -1099,21 +1100,21 @@ void MainMenu::onKeyDown(KeyboardEvent &e) {
     }
 }
 
-void MainMenu::onMiddleChange(bool down) {
-    if(!this->bVisible) return;
+void MainMenu::onButtonChange(ButtonIndex button, bool down) {
+    using enum ButtonIndex;
+    if(!this->bVisible || button != BUTTON_MIDDLE ||
+       !(down && !anim->isAnimating(&this->fMainMenuAnim) && !this->bMenuElementsVisible))
+        return;
 
-    // debug anims
-    if(down && !anim->isAnimating(&this->fMainMenuAnim) && !this->bMenuElementsVisible) {
-        if(keyboard->isShiftDown()) {
-            this->bMainMenuAnimFriend = true;
-            this->bMainMenuAnimFriendScheduled = true;
-            this->bMainMenuAnimFadeToFriendForNextAnim = true;
-        }
-
-        this->animMainButton();
-        this->fMainMenuAnimDuration = 15.0f;
-        this->fMainMenuAnimTime = engine->getTime() + this->fMainMenuAnimDuration;
+    if(keyboard->isShiftDown()) {
+        this->bMainMenuAnimFriend = true;
+        this->bMainMenuAnimFriendScheduled = true;
+        this->bMainMenuAnimFadeToFriendForNextAnim = true;
     }
+
+    animMainButton();
+    this->fMainMenuAnimDuration = 15.0f;
+    this->fMainMenuAnimTime = engine->getTime() + this->fMainMenuAnimDuration;
 }
 
 void MainMenu::onResolutionChange(Vector2 /*newResolution*/) {

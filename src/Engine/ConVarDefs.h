@@ -818,8 +818,6 @@ CONVAR(mod_wobble_rotation_speed, "osu_mod_wobble_rotation_speed", 1.0f, FCVAR_B
 CONVAR(mod_wobble_strength, "osu_mod_wobble_strength", 25.0f, FCVAR_BANCHO_COMPATIBLE | FCVAR_GAMEPLAY);
 CONVAR(monitor, "monitor", 0, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "monitor/display device to switch to, 0 = primary monitor", CFUNC(_monitor));
-CONVAR(mouse_fakelag, "mouse_fakelag", 0.000f, FCVAR_BANCHO_COMPATIBLE,
-       "delay all mouse movement by this many seconds (e.g. 0.1 = 100 ms delay)");
 CONVAR(mouse_raw_input, "mouse_raw_input", Env::cfg(OS::WINDOWS) ? false : true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(mouse_raw_input_absolute_to_window, "mouse_raw_input_absolute_to_window", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(mouse_sensitivity, "mouse_sensitivity", 1.0f, FCVAR_BANCHO_COMPATIBLE);

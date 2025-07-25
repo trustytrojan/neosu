@@ -238,8 +238,9 @@ void Engine::loadApp() {
         this->visualProfiler = new VisualProfiler();
         this->guiContainer->addBaseUIElement(this->visualProfiler);
 
-        // (engine gui comes first)
+        // (engine hardcoded hotkeys come first, then engine gui)
         keyboard->addListener(this->guiContainer, true);
+        keyboard->addListener(this, true);
     }
 
     debugLog("\nEngine: Loading app ...\n");
@@ -319,8 +320,8 @@ void Engine::onUpdate() {
 
     // update miscellaneous engine subsystems
     {
-        for(size_t i = 0; i < this->inputDevices.size(); i++) {
-            this->inputDevices[i]->update();
+        for(auto & inputDevice : this->inputDevices) {
+            inputDevice->update();
         }
 
         {
@@ -459,45 +460,42 @@ void Engine::onShutdown() {
     env->shutdown();
 }
 
-void Engine::onKeyboardKeyDown(KEYCODE keyCode) {
-    // hardcoded engine hotkeys
-    {
-        // handle ALT+F4 quit
-        if(keyboard->isAltDown() && keyCode == KEY_F4) {
-            this->shutdown();
-            return;
-        }
-
-        // handle ALT+ENTER fullscreen toggle
-        if(keyboard->isAltDown() && (keyCode == KEY_ENTER || keyCode == KEY_NUMPAD_ENTER)) {
-            this->toggleFullscreen();
-            return;
-        }
-
-        // handle CTRL+F11 profiler toggle
-        if(keyboard->isControlDown() && keyCode == KEY_F11) {
-            cv::vprof.setValue(cv::vprof.getBool() ? 0.0f : 1.0f);
-            return;
-        }
-
-        // handle profiler display mode change
-        if(keyboard->isControlDown() && keyCode == KEY_TAB) {
-            if(cv::vprof.getBool()) {
-                if(keyboard->isShiftDown())
-                    this->visualProfiler->decrementInfoBladeDisplayMode();
-                else
-                    this->visualProfiler->incrementInfoBladeDisplayMode();
-                return;
-            }
-        }
+// hardcoded engine hotkeys
+void Engine::onKeyDown(KeyboardEvent &e) {
+    auto keyCode = e.getKeyCode();
+    // handle ALT+F4 quit
+    if(keyboard->isAltDown() && keyCode == KEY_F4) {
+        this->shutdown();
+        e.consume();
+        return;
     }
 
-    keyboard->onKeyDown(keyCode);
+    // handle ALT+ENTER fullscreen toggle
+    if(keyboard->isAltDown() && (keyCode == KEY_ENTER || keyCode == KEY_NUMPAD_ENTER)) {
+        this->toggleFullscreen();
+        e.consume();
+        return;
+    }
+
+    // handle CTRL+F11 profiler toggle
+    if(keyboard->isControlDown() && keyCode == KEY_F11) {
+        cv::vprof.setValue(cv::vprof.getBool() ? 0.0f : 1.0f);
+        e.consume();
+        return;
+    }
+
+    // handle profiler display mode change
+    if(keyboard->isControlDown() && keyCode == KEY_TAB) {
+        if(cv::vprof.getBool()) {
+            if(keyboard->isShiftDown())
+                this->visualProfiler->decrementInfoBladeDisplayMode();
+            else
+                this->visualProfiler->incrementInfoBladeDisplayMode();
+            e.consume();
+            return;
+        }
+    }
 }
-
-void Engine::onKeyboardKeyUp(KEYCODE keyCode) { keyboard->onKeyUp(keyCode); }
-
-void Engine::onKeyboardChar(KEYCODE charCode) { keyboard->onChar(charCode); }
 
 void Engine::shutdown() { this->onShutdown(); }
 

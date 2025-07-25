@@ -3,6 +3,7 @@
 #include "LinuxMain.h"
 #include "XI2Handler.h"
 
+#include "Keyboard.h"
 #include "Engine.h"
 #include "Mouse.h"
 
@@ -139,13 +140,9 @@ void handleGenericEvent(Display *dpy, XEvent &xev) {
 
                 switch(event->detail) {
                     case 1:  // left button
-                        mouse->onLeftChange(pressed);
-                        break;
                     case 2:  // middle button
-                        mouse->onMiddleChange(pressed);
-                        break;
                     case 3:  // right button
-                        mouse->onRightChange(pressed);
+                        mouse->onButtonChange(static_cast<ButtonIndex>(event->detail), pressed);
                         break;
                     case 4:  // wheel up
                         if(pressed) mouse->onWheelVertical(120);
@@ -160,21 +157,21 @@ void handleGenericEvent(Display *dpy, XEvent &xev) {
                         if(pressed) mouse->onWheelHorizontal(120);
                         break;
                     case 8:  // mouse 4 (back)
-                        if(engine != nullptr) {
+                        if(keyboard != nullptr) {
                             if(pressed)
-                                engine->onKeyboardKeyDown(XK_Pointer_Button4);
+                                keyboard->onKeyDown(XK_Pointer_Button4);
                             else
-                                engine->onKeyboardKeyUp(XK_Pointer_Button4);
+                                keyboard->onKeyUp(XK_Pointer_Button4);
                         }
                         break;
                     case 9:  // mouse 5 (forwards)
                         // NOTE: abusing "dead vowels for universal
                         // syllable entry", no idea what this key does
-                        if(engine != nullptr) {
+                        if(keyboard != nullptr) {
                             if(pressed)
-                                engine->onKeyboardKeyDown(XK_Pointer_Button5);
+                                keyboard->onKeyDown(XK_Pointer_Button5);
                             else
-                                engine->onKeyboardKeyUp(XK_Pointer_Button5);
+                                keyboard->onKeyUp(XK_Pointer_Button5);
                         }
                         break;
                 }
@@ -237,12 +234,12 @@ void handleGenericEvent(Display *dpy, XEvent &xev) {
             // case XI_KeyRelease: {
             //     auto *event = static_cast<XIDeviceEvent *>(xev.xcookie.data);
 
-            //     if(engine != nullptr) {
+            //     if(keyboard != nullptr) {
             //         bool pressed = (xev.xcookie.evtype == XI_KeyPress);
             //         if(pressed) {
-            //             engine->onKeyboardKeyDown(event->detail);
+            //             keyboard->onKeyDown(event->detail);
             //         } else {
-            //             engine->onKeyboardKeyUp(event->detail);
+            //             keyboard->onKeyUp(event->detail);
             //         }
             //     }
             //     break;

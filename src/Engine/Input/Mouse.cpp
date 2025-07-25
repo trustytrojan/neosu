@@ -6,12 +6,6 @@
 #include "ResourceManager.h"
 
 Mouse::Mouse() : InputDevice() {
-    this->bMouseLeftDown = false;
-    this->bMouseMiddleDown = false;
-    this->bMouseRightDown = false;
-    this->bMouse4Down = false;
-    this->bMouse5Down = false;
-
     this->iWheelDeltaVertical = 0;
     this->iWheelDeltaHorizontal = 0;
     this->iWheelDeltaVerticalActual = 0;
@@ -114,8 +108,7 @@ void Mouse::update() {
     const float sens = cv::mouse_sensitivity.getFloat();
     const bool isRaw = cv::mouse_raw_input.getBool();
 
-    const McRect windowRect{0, 0, static_cast<float>(engine->getScreenWidth()),
-                            static_cast<float>(engine->getScreenHeight())};
+    const McRect &windowRect{engine->getScreenRect()};
     const bool osCursorVisible = env->isCursorVisible() || !env->isCursorInWindow() || !engine->hasFocus();
     const bool sensitivityAdjustmentNeeded = sens < 0.999f || sens > 1.001f;
 
@@ -131,7 +124,7 @@ void Mouse::update() {
             // NOTE: these range values work on windows only!
             // TODO: standardize the input values before they even reach the engine, this should not be in here
             double rawRangeX = 65536;  // absolute coord range, but what if I want to have a tablet that's more
-                                      // accurate than 1/65536-th? >:(
+                                       // accurate than 1/65536-th? >:(
             double rawRangeY = 65536;
 
             // if enabled, uses the screen resolution as the coord range, instead of 65536
@@ -276,31 +269,6 @@ void Mouse::onPosChange(Vector2d pos) {
     this->vPosWithoutOffset = pos;
 
     this->vActualPos = this->vPos;
-
-    this->setPosXY(this->vPos.x, this->vPos.y);
-}
-
-void Mouse::setPosXY(double x, double y) {
-    if(cv::mouse_fakelag.getFloat() > 0.0f) {
-        FAKELAG_PACKET p;
-        p.time = engine->getTime() + cv::mouse_fakelag.getFloat();
-        p.pos = Vector2d(x, y);
-        this->fakelagBuffer.push_back(p);
-
-        float engineTime = engine->getTime();
-        for(size_t i = 0; i < this->fakelagBuffer.size(); i++) {
-            if(engineTime >= this->fakelagBuffer[i].time) {
-                this->vFakeLagPos = this->fakelagBuffer[i].pos;
-
-                this->fakelagBuffer.erase(this->fakelagBuffer.begin() + i);
-                i--;
-            }
-        }
-        this->vPos = this->vFakeLagPos;
-    } else {
-        this->vPos.x = x;
-        this->vPos.y = y;
-    }
 }
 
 void Mouse::onRawMove(double xDelta, double yDelta, bool absolute, bool virtualDesktop) {
@@ -319,63 +287,35 @@ void Mouse::onRawMove(double xDelta, double yDelta, bool absolute, bool virtualD
 void Mouse::onWheelVertical(int delta) {
     this->iWheelDeltaVerticalActual += delta;
 
-    for(size_t i = 0; i < this->listeners.size(); i++) {
-        this->listeners[i]->onWheelVertical(delta);
+    for(auto &listener : this->listeners) {
+        listener->onWheelVertical(delta);
     }
 }
 
 void Mouse::onWheelHorizontal(int delta) {
     this->iWheelDeltaHorizontalActual += delta;
 
-    for(size_t i = 0; i < this->listeners.size(); i++) {
-        this->listeners[i]->onWheelHorizontal(delta);
+    for(auto &listener : this->listeners) {
+        listener->onWheelHorizontal(delta);
     }
 }
 
-void Mouse::onLeftChange(bool leftDown) {
-    this->bMouseLeftDown = leftDown;
+void Mouse::onButtonChange(ButtonIndex button, bool down) {
+    using enum ButtonIndex;
+    if(button == BUTTON_NONE || button >= BUTTON_COUNT) return;
 
-    for(size_t i = 0; i < this->listeners.size(); i++) {
-        this->listeners[i]->onLeftChange(this->bMouseLeftDown);
-    }
-}
+    this->bMouseButtonDownArray[static_cast<size_t>(button)] = down;
 
-void Mouse::onMiddleChange(bool middleDown) {
-    this->bMouseMiddleDown = middleDown;
-
-    for(size_t i = 0; i < this->listeners.size(); i++) {
-        this->listeners[i]->onMiddleChange(this->bMouseMiddleDown);
-    }
-}
-
-void Mouse::onRightChange(bool rightDown) {
-    this->bMouseRightDown = rightDown;
-
-    for(size_t i = 0; i < this->listeners.size(); i++) {
-        this->listeners[i]->onRightChange(this->bMouseRightDown);
-    }
-}
-
-void Mouse::onButton4Change(bool button4down) {
-    this->bMouse4Down = button4down;
-
-    for(size_t i = 0; i < this->listeners.size(); i++) {
-        this->listeners[i]->onButton4Change(this->bMouse4Down);
-    }
-}
-
-void Mouse::onButton5Change(bool button5down) {
-    this->bMouse5Down = button5down;
-
-    for(size_t i = 0; i < this->listeners.size(); i++) {
-        this->listeners[i]->onButton5Change(this->bMouse5Down);
+    // notify listeners
+    for(auto &listener : this->listeners) {
+        listener->onButtonChange(button, down);
     }
 }
 
 void Mouse::setPos(Vector2d newPos) {
     this->bSetPosWasCalledLastFrame = true;
 
-    this->setPosXY(newPos.x, newPos.y);
+    this->vPos = newPos;
     env->setMousePos(this->vPos.x, this->vPos.y);
 
     this->vPrevOsMousePos = this->vPos;

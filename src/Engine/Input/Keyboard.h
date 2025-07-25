@@ -13,7 +13,7 @@
 #include "KeyboardKeys.h"
 #include "KeyboardListener.h"
 
-class Keyboard : public InputDevice {
+class Keyboard final : public InputDevice {
    public:
     Keyboard();
     ~Keyboard() override { ; }

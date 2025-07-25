@@ -58,12 +58,7 @@ class MainMenu : public OsuScreen, public MouseListener {
 
     void onKeyDown(KeyboardEvent &e) override;
 
-    void onLeftChange(bool down) override { (void)down; }
-    void onMiddleChange(bool down) override;
-    void onRightChange(bool down) override { (void)down; }
-
-    void onWheelVertical(int delta) override { (void)delta; }
-    void onWheelHorizontal(int delta) override { (void)delta; }
+    void onButtonChange(ButtonIndex button, bool down) override;
 
     void onResolutionChange(Vector2 newResolution) override;
 

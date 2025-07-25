@@ -64,12 +64,7 @@ class Osu : public App, public MouseListener {
     void onChar(KeyboardEvent &e) override;
     void stealFocus() override;
 
-    void onLeftChange(bool down) override;
-    void onMiddleChange(bool down) override { (void)down; }
-    void onRightChange(bool down) override;
-
-    void onWheelVertical(int delta) override { (void)delta; }
-    void onWheelHorizontal(int delta) override { (void)delta; }
+	void onButtonChange(ButtonIndex button, bool down) override;
 
     void onResolutionChanged(Vector2 newResolution) override;
     void onDPIChanged() override;

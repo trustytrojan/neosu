@@ -8,18 +8,25 @@
 #ifndef MOUSELISTENER_H
 #define MOUSELISTENER_H
 
+enum class ButtonIndex : unsigned char
+{
+	BUTTON_NONE = 0,
+	BUTTON_LEFT = 1,
+	BUTTON_MIDDLE = 2,
+	BUTTON_RIGHT = 3,
+	BUTTON_X1 = 4,
+	BUTTON_X2 = 5,
+	BUTTON_COUNT = 6
+};
+
 class MouseListener {
    public:
     virtual ~MouseListener() { ; }
 
-    virtual void onLeftChange(bool down) { (void)down; }
-    virtual void onMiddleChange(bool down) { (void)down; }
-    virtual void onRightChange(bool down) { (void)down; }
-    virtual void onButton4Change(bool down) { (void)down; }
-    virtual void onButton5Change(bool down) { (void)down; }
+	virtual void onButtonChange(ButtonIndex /*button*/, bool /*down*/) { ; }
 
-    virtual void onWheelVertical(int delta) { (void)delta; }
-    virtual void onWheelHorizontal(int delta) { (void)delta; }
+	virtual void onWheelVertical(int /*delta*/) { ; }
+	virtual void onWheelHorizontal(int /*delta*/) { ; }
 };
 
 #endif

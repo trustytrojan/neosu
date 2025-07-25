@@ -418,7 +418,7 @@ Osu::~Osu() {
 
     SAFE_DELETE(this->windowManager);
 
-    for(auto & screen : this->screens) {
+    for(auto &screen : this->screens) {
         SAFE_DELETE(screen);
     }
 
@@ -1367,34 +1367,42 @@ void Osu::stealFocus() {
 }
 
 void Osu::onChar(KeyboardEvent &e) {
-    for(int i = 0; i < this->screens.size(); i++) {
+    for(auto &screen : this->screens) {
         if(e.isConsumed()) break;
 
-        this->screens[i]->onChar(e);
+        screen->onChar(e);
     }
 }
 
-void Osu::onLeftChange(bool down) {
-    if(this->isInPlayMode() && !this->getSelectedBeatmap()->isPaused() && cv::disable_mousebuttons.getBool()) return;
+void Osu::onButtonChange(ButtonIndex button, bool down) {
+    using enum ButtonIndex;
+    if((button != BUTTON_LEFT && button != BUTTON_RIGHT) ||
+       (this->isInPlayMode() && !this->getSelectedBeatmap()->isPaused() && cv::disable_mousebuttons.getBool()))
+        return;
 
-    if(!this->bMouseKey1Down && down) {
-        this->bMouseKey1Down = true;
-        this->onKey1Change(true, true);
-    } else if(this->bMouseKey1Down) {
-        this->bMouseKey1Down = false;
-        this->onKey1Change(false, true);
-    }
-}
-
-void Osu::onRightChange(bool down) {
-    if(this->isInPlayMode() && !this->getSelectedBeatmap()->isPaused() && cv::disable_mousebuttons.getBool()) return;
-
-    if(!this->bMouseKey2Down && down) {
-        this->bMouseKey2Down = true;
-        this->onKey2Change(true, true);
-    } else if(this->bMouseKey2Down) {
-        this->bMouseKey2Down = false;
-        this->onKey2Change(false, true);
+    switch(button) {
+        case BUTTON_LEFT: {
+            if(!this->bMouseKey1Down && down) {
+                this->bMouseKey1Down = true;
+                this->onKey1Change(true, true);
+            } else if(this->bMouseKey1Down) {
+                this->bMouseKey1Down = false;
+                this->onKey1Change(false, true);
+            }
+            break;
+        }
+        case BUTTON_RIGHT: {
+            if(!this->bMouseKey2Down && down) {
+                this->bMouseKey2Down = true;
+                this->onKey2Change(true, true);
+            } else if(this->bMouseKey2Down) {
+                this->bMouseKey2Down = false;
+                this->onKey2Change(false, true);
+            }
+            break;
+        }
+        default:
+            break;
     }
 }
 

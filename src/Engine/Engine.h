@@ -1,6 +1,7 @@
 #pragma once
 #include <source_location>
 
+#include "KeyboardListener.h"
 #include "Timing.h"
 #include "cbase.h"
 #include "fmt/color.h"
@@ -30,7 +31,7 @@ class Console;
 #define debugLog(...) Engine::ContextLogger::logPrintf(__FUNCTION__, __VA_ARGS__)  // deprecated
 #endif
 
-class Engine {
+class Engine final : public KeyboardListener {
    public:
     Engine(i32 argc, char **argv);
     ~Engine();
@@ -53,9 +54,9 @@ class Engine {
     void onShutdown();
 
     // primary keyboard messages
-    void onKeyboardKeyDown(KEYCODE keyCode);
-    void onKeyboardKeyUp(KEYCODE keyCode);
-    void onKeyboardChar(KEYCODE charCode);
+    void onKeyDown(KeyboardEvent &e) override;
+    void onKeyUp(KeyboardEvent &) override { ; }
+    void onChar(KeyboardEvent &) override { ; }
 
     // convenience functions (passthroughs)
     void shutdown();

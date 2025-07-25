@@ -528,7 +528,8 @@ SongBrowser::~SongBrowser() {
 
     SAFE_DELETE(this->localBestButton);
     SAFE_DELETE(this->localBestLabel);
-    // SAFE_DELETE(this->localBestContainer); // FIXME: this is leaked but idk how to free it without crashing on exit :D
+    // SAFE_DELETE(this->localBestContainer); // FIXME: this is leaked but idk how to free it without crashing on exit
+    // :D
     SAFE_DELETE(this->scoreBrowserScoresStillLoadingElement);
     SAFE_DELETE(this->scoreBrowserNoRecordsYetElement);
 
@@ -1404,8 +1405,8 @@ CBaseUIContainer *SongBrowser::setVisible(bool visible) {
         // HACKHACK: workaround for BaseUI framework deficiency (missing mouse events. if a mouse button is being held,
         // and then suddenly a BaseUIElement gets put under it and set visible, and then the mouse button is released,
         // that "incorrectly" fires onMouseUpInside/onClicked/etc.)
-        mouse->onLeftChange(false);
-        mouse->onRightChange(false);
+        mouse->onButtonChange(ButtonIndex::BUTTON_LEFT, false);
+        mouse->onButtonChange(ButtonIndex::BUTTON_RIGHT, false);
 
         if(this->beatmap != NULL) {
             // For multiplayer: if the host exits song selection without selecting a song, we want to be able to revert

@@ -68,9 +68,11 @@ void Keyboard::onKeyDown(KEYCODE keyCode) {
 
     KeyboardEvent e(keyCode);
 
-    for(size_t i = 0; i < this->listeners.size(); i++) {
-        this->listeners[i]->onKeyDown(e);
-        if(e.isConsumed()) break;
+    for(auto &listener : this->listeners) {
+        listener->onKeyDown(e);
+        if(e.isConsumed()) {
+            break;
+        }
     }
 }
 
@@ -98,17 +100,21 @@ void Keyboard::onKeyUp(KEYCODE keyCode) {
 
     KeyboardEvent e(keyCode);
 
-    for(size_t i = 0; i < this->listeners.size(); i++) {
-        this->listeners[i]->onKeyUp(e);
-        if(e.isConsumed()) break;
+    for(auto &listener : this->listeners) {
+        listener->onKeyUp(e);
+        if(e.isConsumed()) {
+            break;
+        }
     }
 }
 
 void Keyboard::onChar(KEYCODE charCode) {
     KeyboardEvent e(charCode);
 
-    for(size_t i = 0; i < this->listeners.size(); i++) {
-        this->listeners[i]->onChar(e);
-        if(e.isConsumed()) break;
+    for(auto &listener : this->listeners) {
+        listener->onChar(e);
+        if(e.isConsumed()) {
+            break;
+        }
     }
 }
