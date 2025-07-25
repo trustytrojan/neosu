@@ -871,7 +871,7 @@ void ModSelector::updateLayout() {
         const float modGridMaxY = start.y + size.y * this->iGridHeight +
                                   offset.y * (this->iGridHeight - 1);  // exact bottom of the mod buttons
 
-        this->nonVanillaWarning->setVisible(!convar->isVanilla() && bancho->submit_scores());
+        this->nonVanillaWarning->setVisible(!convar->isVanilla() && bancho->can_submit_scores());
         this->nonVanillaWarning->setSizeToContent();
         this->nonVanillaWarning->setSize(Vector2(osu->getScreenWidth(), 20 * uiScale));
         this->nonVanillaWarning->setPos(

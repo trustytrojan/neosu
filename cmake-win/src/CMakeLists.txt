@@ -196,7 +196,6 @@ target_link_libraries(neosu PRIVATE
     discord_game_sdk.dll.lib
     ${DEPS_INSTALL_DIR}/lib/bz2_static.lib # cool awesome
     ${LIBARCHIVE_STATIC_LIBRARIES}
-    wbemuuid
     comctl32
 )
 

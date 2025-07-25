@@ -94,7 +94,7 @@ void ConVar::exec() {
 
         auto mod_selector = osu->modSelector;
         if(mod_selector && mod_selector->nonVanillaWarning) {
-            mod_selector->nonVanillaWarning->setVisible(!is_vanilla && bancho->submit_scores());
+            mod_selector->nonVanillaWarning->setVisible(!is_vanilla && bancho->can_submit_scores());
         }
     }
 

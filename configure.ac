@@ -447,13 +447,25 @@ AC_CHECK_TOOL([STRIP], [strip], [strip])
 
 AC_CHECK_PROG([CCACHE], [ccache], [ccache])
 
+# we already set $CC and $CXX to absolute paths in the build/$arch-pc-linux-gnu-{$CC,$CXX} wrappers
+# for linux, so AC_PATH_PROG doesn't work for that (and isn't needed anyways)
+# this is done mostly for mingw targets so that configure --host=x86_64-w64-mingw32 --enable-clang
+# saves the full path to the llvm-mingw compiler, in case $PATH changes for future compiles
+AS_IF([test "$host_os" = "linux-gnu"],[
+    AS_VAR_SET([CC_REAL], [$CC])
+    AS_VAR_SET([CXX_REAL], [$CXX])
+],[
+    AC_PATH_PROG([CC_REAL], [$CC])
+    AC_PATH_PROG([CXX_REAL], [$CXX])
+])
+
 install -Dm755 /dev/stdin $PWD/build/cc <<EOF
 #!/usr/bin/env sh
-$CCACHE $CC "\$@"
+$CCACHE $CC_REAL "\$@"
 EOF
 install -Dm755 /dev/stdin $PWD/build/cxx <<EOF
 #!/usr/bin/env sh
-$CCACHE $CXX "\$@"
+$CCACHE $CXX_REAL "\$@"
 EOF
 
 export CC="$PWD/build/cc"
@@ -742,7 +754,7 @@ AS_IF([test "$SYSNAME" = "linux"], [
         PKG_CHECK_AUTO([CURL], [libcurl >= $CURL_MIN_VERSION], [have_curl=yes], [have_curl=no])
     ])
 ], [
-    AC_SUBST([EXTRA_WIN_LIBS], [["-lopengl32 -lwbemuuid -lcomctl32"]])
+    AC_SUBST([EXTRA_WIN_LIBS], [["-lopengl32 -lcomctl32"]])
     have_blkid="not required"
     have_curl="no"
 ])

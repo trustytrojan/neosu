@@ -66,5 +66,14 @@ doit() {
 		cmake --install "$BUILD_DIR/neosu" --config "$BUILD_TYPE"
 }
 
-doit
-$WINESERVER -k
+trap exit_cleanup EXIT
+
+doit || true
+
+exit_cleanup() {
+	$WINESERVER -k9
+	# why do these just stay alive forever as zombies
+	for pid in $(pgrep -wf 'cl.exe'); do kill -SIGKILL "$pid"; done
+}
+
+exit_cleanup

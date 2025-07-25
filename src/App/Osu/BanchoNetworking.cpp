@@ -459,7 +459,7 @@ void update_networking() {
     if(try_logging_in) {
         try_logging_in = false;
         if(bancho->user_id <= 0) {
-            Packet login = Bancho::build_login_packet();
+            Packet login = bancho->build_login_packet();
             send_bancho_packet_async(login);
         }
     } else if(should_ping && outgoing.pos == 0) {
@@ -503,7 +503,7 @@ void receive_bancho_packets() {
     while(!incoming_queue.empty()) {
         Packet incoming = incoming_queue.front();
         incoming_queue.erase(incoming_queue.begin());
-        Bancho::handle_packet(&incoming);
+        bancho->handle_packet(&incoming);
         free(incoming.memory);
     }
 

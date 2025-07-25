@@ -3550,7 +3550,7 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
     if(!isCheated) {
         RichPresence::onPlayEnd(quit);
 
-        if(bancho->submit_scores() && !isZero && this->vanilla) {
+        if(bancho->can_submit_scores() && !isZero && this->vanilla) {
             score.server = bancho->endpoint.toUtf8();
             BANCHO::Net::submit_score(score);
             // XXX: Save bancho_score_id after getting submission result

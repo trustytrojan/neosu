@@ -72,7 +72,7 @@ void submit_score(FinishedScore score) {
         curl_mime_data(part, score.beatmap_hash.hash.data(), CURL_ZERO_TERMINATED);
     }
     {
-        auto unique_ids = UString::format("%s|%s", bancho->install_id.toUtf8(), bancho->disk_uuid.toUtf8());
+        auto unique_ids = UString::format("%s|%s", bancho->get_install_id().toUtf8(), bancho->get_disk_uuid().toUtf8());
         part = curl_mime_addpart(request.mime);
         curl_mime_name(part, "c1");
         curl_mime_data(part, unique_ids.toUtf8(), unique_ids.lengthUtf8());

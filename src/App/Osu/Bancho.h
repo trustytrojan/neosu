@@ -1,13 +1,10 @@
 #pragma once
 
-#include <atomic>
-#include <memory>
-#include <mutex>
-#include <unordered_map>
-
 #include "templates.h"
 #include "BanchoProtocol.h"
 #include "UString.h"
+
+#include <unordered_map>
 
 class Image;
 
@@ -25,6 +22,9 @@ struct Bancho {
     Bancho &operator=(Bancho &&) = delete;
     Bancho(const Bancho &) = delete;
     Bancho(Bancho &&) = delete;
+
+    // static convenience
+    static MD5Hash md5(u8 *msg, size_t msg_len);
 
     UString neosu_version;
 
@@ -45,26 +45,12 @@ struct Bancho {
     Image *server_icon{nullptr};
 
     ServerPolicy score_submission_policy{ServerPolicy::NO_PREFERENCE};
-    bool submit_scores();
 
     UString user_agent;
     UString client_hashes;
-    UString disk_uuid;
-    UString install_id;
 
     bool match_started{false};
     Slot last_scores[16];
-
-    [[nodiscard]] inline bool is_online() const { return this->user_id > 0; }
-
-    // Room ID can be 0 on private servers! So we check if the room has players instead.
-    [[nodiscard]] inline bool is_in_a_multi_room() const {
-        return this->room.nb_players > 0;
-    }
-
-    [[nodiscard]] inline bool is_playing_a_multi_map() const {
-        return this->match_started;
-    }
 
     struct Channel {
         UString name;
@@ -72,11 +58,36 @@ struct Bancho {
         u32 nb_members;
     };
 
-    // static helpers
-    static MD5Hash md5(u8 *msg, size_t msg_len);
-    static void handle_packet(Packet *packet);
-    static Packet build_login_packet();
-    static std::unordered_map<std::string, Bancho::Channel *> chat_channels;
+    std::unordered_map<std::string, Bancho::Channel *> chat_channels;
+
+    // utils
+    void handle_packet(Packet *packet);
+    Packet build_login_packet();
+
+    // cached uuid
+    [[nodiscard]] const UString &get_disk_uuid() const;
+
+    // cached install id (currently unimplemented, just returns disk uuid)
+    [[nodiscard]] inline const UString &get_install_id() const { return this->get_disk_uuid(); }
+
+    // Room ID can be 0 on private servers! So we check if the room has players instead.
+    [[nodiscard]] inline bool is_in_a_multi_room() const { return this->room.nb_players > 0; }
+    [[nodiscard]] inline bool is_playing_a_multi_map() const { return this->match_started; }
+    [[nodiscard]] inline bool is_online() const { return this->user_id > 0; }
+    [[nodiscard]] bool can_submit_scores() const;
+
+   private:
+    // internal helpers
+    void update_channel(const UString &name, const UString &topic, i32 nb_members);
+
+    [[nodiscard]] UString get_disk_uuid_win32() const;
+    [[nodiscard]] UString get_disk_uuid_blkid() const;
+
+    bool print_new_channels{true};
+
+    // cached on first get
+    mutable UString disk_uuid;
+    // mutable UString install_id; // TODO?
 };
 
 // initialized by NetworkHandler

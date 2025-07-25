@@ -782,6 +782,8 @@ ENABLE_DEBUG
 RANLIB
 AR
 LD
+CXX_REAL
+CC_REAL
 CCACHE
 am__fastdepCXX_FALSE
 am__fastdepCXX_TRUE
@@ -8029,13 +8031,121 @@ fi
 
 
 
+# we already set $CC and $CXX to absolute paths in the build/$arch-pc-linux-gnu-{$CC,$CXX} wrappers
+# for linux, so AC_PATH_PROG doesn't work for that (and isn't needed anyways)
+# this is done mostly for mingw targets so that configure --host=x86_64-w64-mingw32 --enable-clang
+# saves the full path to the llvm-mingw compiler, in case $PATH changes for future compiles
+if test "$host_os" = "linux-gnu"
+then :
+
+    CC_REAL=$CC
+    CXX_REAL=$CXX
+
+else case e in #(
+  e)
+    # Extract the first word of "$CC", so it can be a program name with args.
+set dummy $CC; ac_word=$2
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+printf %s "checking for $ac_word... " >&6; }
+if test ${ac_cv_path_CC_REAL+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) case $CC_REAL in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_CC_REAL="$CC_REAL" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  case $as_dir in #(((
+    '') as_dir=./ ;;
+    */) ;;
+    *) as_dir=$as_dir/ ;;
+  esac
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir$ac_word$ac_exec_ext"; then
+    ac_cv_path_CC_REAL="$as_dir$ac_word$ac_exec_ext"
+    printf "%s\n" "$as_me:${as_lineno-$LINENO}: found $as_dir$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac ;;
+esac
+fi
+CC_REAL=$ac_cv_path_CC_REAL
+if test -n "$CC_REAL"; then
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $CC_REAL" >&5
+printf "%s\n" "$CC_REAL" >&6; }
+else
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+fi
+
+
+    # Extract the first word of "$CXX", so it can be a program name with args.
+set dummy $CXX; ac_word=$2
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+printf %s "checking for $ac_word... " >&6; }
+if test ${ac_cv_path_CXX_REAL+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) case $CXX_REAL in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_CXX_REAL="$CXX_REAL" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  case $as_dir in #(((
+    '') as_dir=./ ;;
+    */) ;;
+    *) as_dir=$as_dir/ ;;
+  esac
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir$ac_word$ac_exec_ext"; then
+    ac_cv_path_CXX_REAL="$as_dir$ac_word$ac_exec_ext"
+    printf "%s\n" "$as_me:${as_lineno-$LINENO}: found $as_dir$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac ;;
+esac
+fi
+CXX_REAL=$ac_cv_path_CXX_REAL
+if test -n "$CXX_REAL"; then
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $CXX_REAL" >&5
+printf "%s\n" "$CXX_REAL" >&6; }
+else
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+fi
+
+
+ ;;
+esac
+fi
+
 install -Dm755 /dev/stdin $PWD/build/cc <<EOF
 #!/usr/bin/env sh
-$CCACHE $CC "\$@"
+$CCACHE $CC_REAL "\$@"
 EOF
 install -Dm755 /dev/stdin $PWD/build/cxx <<EOF
 #!/usr/bin/env sh
-$CCACHE $CXX "\$@"
+$CCACHE $CXX_REAL "\$@"
 EOF
 
 export CC="$PWD/build/cc"
@@ -10994,7 +11104,7 @@ fi
 
 else case e in #(
   e)
-    EXTRA_WIN_LIBS="-lopengl32 -lwbemuuid -lcomctl32"
+    EXTRA_WIN_LIBS="-lopengl32 -lcomctl32"
 
     have_blkid="not required"
     have_curl="no"

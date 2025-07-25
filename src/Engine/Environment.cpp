@@ -34,6 +34,7 @@ void Environment::setFullscreenWindowedBorderless(bool fullscreenWindowedBorderl
     }
 }
 
+// cached on startup from main.cpp with argv[0] passed, after that argv0 can be null
 const std::string &Environment::getPathToSelf(const char *argv0) {
     static std::string pathStr{};
     if(!pathStr.empty()) return pathStr;

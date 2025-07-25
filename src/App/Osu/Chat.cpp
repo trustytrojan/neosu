@@ -1068,10 +1068,10 @@ void Chat::onDisconnect() {
     }
     this->channels.clear();
 
-    for(const auto &chan : Bancho::chat_channels) {
+    for(const auto &chan : bancho->chat_channels) {
         delete chan.second;
     }
-    Bancho::chat_channels.clear();
+    bancho->chat_channels.clear();
 
     this->selected_channel = NULL;
     this->updateLayout(osu->getScreenSize());
