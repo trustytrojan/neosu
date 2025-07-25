@@ -70,26 +70,26 @@ set(DISCORDSDK_HASH "SHA512=4c8f72c7bdf92bc969fb86b96ea0d835e01b9bab1a2cc27ae00b
 # BASS BINARIES
 set(BASS_VERSION "20250721")
 
-set(BASS_URL "https://web.archive.org/web/20250603164509/https://www.un4seen.com/stuff/bass.zip")
+set(BASS_URL "https://archive.org/download/BASS-libs-${BASS_VERSION}/bass.zip")
 set(BASS_HASH "SHA512=d0fa29a34fa55e704a24162b23979d9ab8b75b89c11fe63d2bb71302786f8127df8017202c868e5e8b7efc8472c5144ab3a7b0591fe4b4dbc495224a7c5c9071")
 
-set(BASSFX_URL "https://web.archive.org/web/20250721204937/https://www.un4seen.com/stuff/bass_fx.zip")
+set(BASSFX_URL "https://archive.org/download/BASS-libs-${BASS_VERSION}/bass_fx.zip")
 set(BASSFX_HASH "SHA512=561572d0f6d5f108dfa11d786c664923bdb9aebc4d49a78a66f5826bcdfe102254c0308000a00cb79b6eb007938845f8625ea0ed3c4f9ff72806a48562ddd800")
 
-set(BASSMIX_URL "https://web.archive.org/web/20250603164713/https://www.un4seen.com/stuff/bassmix.zip")
+set(BASSMIX_URL "https://archive.org/download/BASS-libs-${BASS_VERSION}/bassmix.zip")
 set(BASSMIX_HASH "SHA512=e7139b71f53b30bd27f2991006781f69a5e0e415996fcd41a7122908b0245cc6e1efb82b66409b80dc4d7cb4eb0d6d445cf3eaff52fe6f7c43bbd9872ea7949b")
 
-set(BASSWASAPI_URL "https://web.archive.org/web/20250603164749/https://www.un4seen.com/stuff/basswasapi.zip")
+set(BASSWASAPI_URL "https://archive.org/download/BASS-libs-${BASS_VERSION}/basswasapi.zip")
 set(BASSWASAPI_HASH "SHA512=f5c68062936ccf60383c5dbea3dc4b9bcf52884fb745d0564bd6592e88a7336e16e5d9a63ea28177385641790d53eaa5d9edfe112e768dcfb68b82af65affddc")
 
-set(BASSWASAPI_HEADER_URL "https://web.archive.org/web/20240501180448/http://www.un4seen.com/files/basswasapi24.zip")
+set(BASSWASAPI_HEADER_URL "https://archive.org/download/BASS-libs-${BASS_VERSION}/basswasapi24-header.zip")
 set(BASSWASAPI_HEADER_HASH "SHA512=de54b3961491ea832a0069af75dc1d57209b7805699d955b384bf9671a4da3615ba3ea217c596fa41616d2df4a8b2ea0f8f9d9c4e2453221541aacb0cc30dc6c")
 
-set(BASSASIO_URL "https://web.archive.org/web/20250603164955/https://www.un4seen.com/stuff/bassasio.zip")
+set(BASSASIO_URL "https://archive.org/download/BASS-libs-${BASS_VERSION}/bassasio.zip")
 set(BASSASIO_HASH "SHA512=9542469b352d6a6bfd3a3292a09642639c0583963b714a780699ab0e5fa7cbf36e3c9ae8081195d6fef7daad88133cf10d0a568724edca5e8374473128da738a")
 
-set(BASSLOUD_URL "https://web.archive.org/web/20250102132034/https://www.un4seen.com/files/bassloud24.zip")
+set(BASSLOUD_URL "https://archive.org/download/BASS-libs-${BASS_VERSION}/bassloud.zip")
 set(BASSLOUD_HASH "SHA512=8607d5d9fd07f6886ab4984cf68f6e9463b027a5766ae572e6d99f9298fafd08cc8ac4ece0c4ca4e47a532a76448d75443c9fa7ea7f1d7b84579487022cec493")
 
-set(BASSFLAC_URL "https://web.archive.org/web/20250102150048/https://www.un4seen.com/files/bassflac24.zip")
+set(BASSFLAC_URL "https://archive.org/download/BASS-libs-${BASS_VERSION}/bassflac24.zip")
 set(BASSFLAC_HASH "SHA512=1d912dcd342cf0ef873e743a305b5fc5f06a60c7446ff6f6e7e5f313124475526bb01c69718c401158b9803fb9935d2dd4d7f7ac1b2646f7ba4e769ef0455b29")
