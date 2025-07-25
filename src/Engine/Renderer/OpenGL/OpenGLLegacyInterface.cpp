@@ -48,6 +48,9 @@ void OpenGLLegacyInterface::init() {
     }
     debugLogF("OpenGL Version: {}\n", reinterpret_cast<const char *>(glGetString(GL_VERSION)));
 
+    // init the synchronization object after we can check the gl version being used
+    this->syncobj->init();
+
     // enable
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);

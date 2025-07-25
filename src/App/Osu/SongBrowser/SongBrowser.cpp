@@ -528,7 +528,7 @@ SongBrowser::~SongBrowser() {
 
     SAFE_DELETE(this->localBestButton);
     SAFE_DELETE(this->localBestLabel);
-    SAFE_DELETE(this->localBestContainer);
+    // SAFE_DELETE(this->localBestContainer); // FIXME: this is leaked but idk how to free it without crashing on exit :D
     SAFE_DELETE(this->scoreBrowserScoresStillLoadingElement);
     SAFE_DELETE(this->scoreBrowserNoRecordsYetElement);
 

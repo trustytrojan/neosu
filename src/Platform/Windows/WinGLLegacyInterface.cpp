@@ -1,5 +1,6 @@
 #ifdef _WIN32
 
+#include "WindowsMain.h"
 #include "WinGLLegacyInterface.h"
 
 #ifdef MCENGINE_FEATURE_OPENGL
@@ -35,54 +36,14 @@ PIXELFORMATDESCRIPTOR getPixelFormatDescriptor() {
     return pfd;
 }
 
-//**************************************//
-//	check if an extension is supported  //
-//**************************************//
-
-bool wglIsExtensionSupported(const char *extension) {
-    const size_t extlen = strlen(extension);
-    const char *supported = NULL;
-
-    // try to use wglGetExtensionStringARB on current DC, if possible
-    PROC wglGetExtString = wglGetProcAddress("wglGetExtensionsStringARB");
-
-    if(wglGetExtString) supported = ((char *(__stdcall *)(HDC))wglGetExtString)(wglGetCurrentDC());
-
-    // if that failed, try standard opengl extensions string
-    if(supported == NULL) supported = (char *)glGetString(GL_EXTENSIONS);
-
-    // if that failed too, must be no extensions supported
-    if(supported == NULL) return false;
-
-    // begin examination at start of string, increment by 1 on false match
-    for(const char *p = supported;; p++) {
-        // advance p up to the next possible match
-        p = strstr(p, extension);
-
-        if(p == NULL) return false;  // no Match
-
-        // make sure that match is at the start of the string, or that the previous char is a space, or else we could
-        // accidentally match "wglFunkywglExtension" with "wglExtension" also, make sure that the following character is
-        // space or NULL, or else "wglExtensionTwo" might match "wglExtension"
-        if((p == supported || p[-1] == ' ') && (p[extlen] == '\0' || p[extlen] == ' ')) return true;  // match
-    }
-
-    return false;
-}
-
 //************************************//
 //	handle enabling of multisampling  //
 //************************************//
+// NOTE: this is entirely unused, currently?
 
 bool initWinGLMultisample(HDC hDC, HINSTANCE /*hInstance*/, HWND /*hWnd*/, int factor) {
     // check if the multisampling extension is available
-    if(!wglIsExtensionSupported("WGL_ARB_multisample")) return false;
-
-    // get our pixel format
-    PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB =
-        (PFNWGLCHOOSEPIXELFORMATARBPROC)wglGetProcAddress("wglChoosePixelFormatARB");
-
-    if(!wglChoosePixelFormatARB) return false;  // not supported extension
+    if(!GLAD_WGL_ARB_multisample || !wglChoosePixelFormatARB) return false;
 
     int pixelFormat;
     bool valid;
@@ -203,12 +164,19 @@ WinGLLegacyInterface::WinGLLegacyInterface(HWND new_hwnd) : OpenGLLegacyInterfac
         engine->showMessageErrorFatal("OpenGL Error", "Couldn't wglCreateContext()!\nThe engine will quit now.");
         engine->shutdown();
     }
+
+    if(!gladLoadWGL(this->hdc)) {
+        printf("FATAL ERROR: Couldn't resolve WGL functions (gladLoadWGL() failed)!\n\n");
+        engine->showMessageErrorFatal("Fatal Engine Error", "Couldn't resolve WGL functions (gladLoadWGL() failed)");
+        exit(0);
+    }
 }
 
 WinGLLegacyInterface::~WinGLLegacyInterface() {
     if(this->hdc != NULL) wglMakeCurrent(this->hdc, NULL);  // deselect gl
     if(this->hglrc != NULL) wglDeleteContext(this->hglrc);  // delete gl
     if(this->hdc != NULL) DeleteDC(this->hdc);              // delete hdc
+    gladUnloadWGL();                                        // unload wgl
 }
 
 void WinGLLegacyInterface::endScene() {
@@ -217,27 +185,17 @@ void WinGLLegacyInterface::endScene() {
 }
 
 void WinGLLegacyInterface::setVSync(bool vsync) {
-    typedef BOOL(__stdcall * PFNWGLSWAPINTERVALPROC)(int);
-    PFNWGLSWAPINTERVALPROC wglSwapIntervalEXT = 0;
-
-    const char *extensions = (char *)glGetString(GL_EXTENSIONS);
-    if(extensions == NULL || strstr(extensions, "WGL_EXT_swap_control") == 0) {
-        debugLog("OpenGL: Can't set VSync, WGL_EXT_swap_control not supported!\n");
-        return;
-    } else {
-        wglSwapIntervalEXT = (PFNWGLSWAPINTERVALPROC)wglGetProcAddress("wglSwapIntervalEXT");
-        if(wglSwapIntervalEXT)
-            wglSwapIntervalEXT((int)vsync);
-        else
-            debugLog("OpenGL: Can't set VSync, wglSwapIntervalEXT not supported!\n");
-    }
+    if(wglSwapIntervalEXT)
+        wglSwapIntervalEXT((int)vsync);
+    else
+        debugLog("OpenGL: Can't set VSync, wglSwapIntervalEXT not supported!\n");
 }
 
 bool WinGLLegacyInterface::checkGLHardwareAcceleration() {
-    HDC hdc = GetDC(((WinEnvironment *)env)->getHwnd());
+    HDC hdc = GetDC(baseEnv->getHwnd());
     PIXELFORMATDESCRIPTOR pfd = getPixelFormatDescriptor();
     int pixelFormat = ChoosePixelFormat(hdc, &pfd);
-    ReleaseDC(((WinEnvironment *)env)->getHwnd(), hdc);
+    ReleaseDC(baseEnv->getHwnd(), hdc);
     return pixelFormat;
 }
 

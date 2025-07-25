@@ -22,6 +22,8 @@ public:
 	OpenGLSync();
 	~OpenGLSync();
 
+	bool init(); // call once after OpenGL is loaded
+
 	void begin(); // call at the beginning of beginScene()
 	void end();   // call in endScene()
 
@@ -55,10 +57,10 @@ private:
 	bool bAvailable;                           // if the opengl feature is even available at all
 
 	// callbacks
-	inline void onSyncBehaviorChanged(const UString & /*oldValue*/, const UString &newValue) { this->bEnabled = this->bAvailable && !!newValue.toInt(); }
-	inline void onFramecountNumChanged(const UString & /*oldValue*/, const UString &newValue)
+	inline void onSyncBehaviorChanged(const float newValue) { this->bEnabled = (this->init() && !!static_cast<int>(newValue)); }
+	inline void onFramecountNumChanged(const float newValue)
 	{
-		this->iMaxFramesInFlight = newValue.to<unsigned int>();
+		this->iMaxFramesInFlight = !!static_cast<int>(newValue);
 		if (this->iMaxFramesInFlight > 0)
 			setMaxFramesInFlight(this->iMaxFramesInFlight);
 	}
