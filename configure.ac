@@ -709,7 +709,7 @@ AS_IF([test "$renderer" != "dx11"], [
 ])
 
 SDL3_MIN_VERSION=3.4.0 # needs SDL_SetRelativeMouseTransform, not in any current (3.2.x) releases
-SDL3_BUILD_VERSION=e5d57d8ad6e6081675545463a912c9d305847dea # git
+SDL3_BUILD_VERSION=c8e2d13173d6ddbaf18316a376f40cdca42e4679 # git
 FREETYPE2_MIN_VERSION=2.10.0
 FREETYPE2_BUILD_VERSION=2.13.3
 LIBJPEG_MIN_VERSION=3.0.0
