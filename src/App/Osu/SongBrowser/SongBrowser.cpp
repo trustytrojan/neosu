@@ -1046,9 +1046,10 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
         }
 
         if(this->bSongBrowserRightClickScrolling) {
-            this->carousel->scrollToY(
+            const int scrollingTo =
                 -((mouse->getPos().y - 2 - this->carousel->getPos().y) / this->carousel->getSize().y) *
-                this->carousel->getScrollSize().y);
+                (this->carousel->getScrollSize().y /* HACK: WTF? */ * 1.1);
+            this->carousel->scrollToY(scrollingTo);
         }
     }
 

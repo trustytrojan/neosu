@@ -1,5 +1,7 @@
 #include "DifficultyCalculator.h"
 
+#include <algorithm>
+
 #include "Beatmap.h"
 #include "ConVar.h"
 #include "Engine.h"
@@ -773,7 +775,7 @@ double DifficultyCalculator::DiffObject::calculate_difficulty(const Skills::Skil
         while(cur.ho->time > interval_end) {
             if(incremental) {
                 highestStrainsRef->insert(
-                    std::upper_bound(highestStrainsRef->begin(), highestStrainsRef->end(), max_strain), max_strain);
+                    std::ranges::upper_bound(*highestStrainsRef, max_strain), max_strain);
             } else {
                 highestStrainsRef->push_back(max_strain);
             }
@@ -802,7 +804,7 @@ double DifficultyCalculator::DiffObject::calculate_difficulty(const Skills::Skil
         incremental->max_strain = max_strain;
         highestStrains.reserve(incremental->highest_strains.size() + 1);  // required so insert call doesn't reallocate
         highestStrains = incremental->highest_strains;
-        highestStrains.insert(std::upper_bound(highestStrains.begin(), highestStrains.end(), max_strain), max_strain);
+        highestStrains.insert(std::ranges::upper_bound(highestStrains, max_strain), max_strain);
     } else {
         highestStrains.push_back(max_strain);
     }
