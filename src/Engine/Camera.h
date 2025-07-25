@@ -5,11 +5,12 @@
 // $NoKeywords: $cam
 //===============================================================================//
 
+#pragma once
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include "Quaternion.h"
 #include "cbase.h"
+#include "Quaternion.h"
 
 class Camera {
    public:
@@ -84,9 +85,9 @@ class Camera {
     [[nodiscard]] inline Quaternion getRotation() const { return this->rotation; }
 
     [[nodiscard]] Vector3 getProjectedVector(Vector3 point, float screenWidth, float screenHeight, float zn = 0.1f,
-                               float zf = 1.0f) const;
+                                             float zf = 1.0f) const;
     [[nodiscard]] Vector3 getUnProjectedVector(Vector2 point, float screenWidth, float screenHeight, float zn = 0.1f,
-                                 float zf = 1.0f) const;
+                                               float zf = 1.0f) const;
 
     [[nodiscard]] bool isPointVisibleFrustum(Vector3 point) const;  // within our viewing frustum
     [[nodiscard]] bool isPointVisiblePlane(Vector3 point) const;    // just in front of the camera plane

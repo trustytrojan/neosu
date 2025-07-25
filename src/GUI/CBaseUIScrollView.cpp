@@ -147,16 +147,12 @@ void CBaseUIScrollView::mouse_update(bool *propagate_clicks) {
     const bool wasContainerBusyBeforeUpdate = this->container->isBusy();
     if(this->bBusy) {
         const Vector2 deltaToAdd = (mouse->getPos() - this->vMouseBackup2);
+        // debugLog("+ (%f, %f)\n", deltaToAdd.x, deltaToAdd.y);
 
-        // only create kinetic averaging animations if there's meaningful movement
-        if(std::abs(deltaToAdd.x) > KINETIC_EPSILON) {
-            anim->moveQuadOut(&this->vKineticAverage.x, deltaToAdd.x,
-                              cv::ui_scrollview_kinetic_approach_time.getFloat(), true);
-        }
-        if(std::abs(deltaToAdd.y) > KINETIC_EPSILON) {
-            anim->moveQuadOut(&this->vKineticAverage.y, deltaToAdd.y,
-                              cv::ui_scrollview_kinetic_approach_time.getFloat(), true);
-        }
+        anim->moveQuadOut(&this->vKineticAverage.x, deltaToAdd.x, cv::ui_scrollview_kinetic_approach_time.getFloat(),
+                          true);
+        anim->moveQuadOut(&this->vKineticAverage.y, deltaToAdd.y, cv::ui_scrollview_kinetic_approach_time.getFloat(),
+                          true);
 
         this->vMouseBackup2 = mouse->getPos();
     }
@@ -277,8 +273,8 @@ void CBaseUIScrollView::mouse_update(bool *propagate_clicks) {
                                       (this->vScrollSize.y > this->vSize.y ? this->vSize.y : 0),
                                   0.05f, 0.0f, true);
                 anim->moveQuadOut(&this->vScrollPos.y, this->vVelocity.y, 0.2f, 0.0f, true);
-            } else if(std::abs(this->vVelocity.y) > KINETIC_EPSILON &&
-                      std::abs(this->vScrollPos.y - this->vVelocity.y) > KINETIC_EPSILON)  // kinetic scrolling
+            } else if(std::round(this->vVelocity.y) != 0 &&
+                      std::round(this->vScrollPos.y) != std::round(this->vVelocity.y))  // kinetic scrolling
                 anim->moveQuadOut(&this->vScrollPos.y, this->vVelocity.y, 0.35f, 0.0f, true);
         }
 
@@ -296,8 +292,8 @@ void CBaseUIScrollView::mouse_update(bool *propagate_clicks) {
                                       (this->vScrollSize.x > this->vSize.x ? this->vSize.x : 0),
                                   0.05f, 0.0f, true);
                 anim->moveQuadOut(&this->vScrollPos.x, this->vVelocity.x, 0.2f, 0.0f, true);
-            } else if(std::abs(this->vVelocity.x) > KINETIC_EPSILON &&
-                      std::abs(this->vScrollPos.x - this->vVelocity.x) > KINETIC_EPSILON)  // kinetic scrolling
+            } else if(std::round(this->vVelocity.x) != 0 &&
+                      std::round(this->vScrollPos.x) != std::round(this->vVelocity.x))  // kinetic scrolling
                 anim->moveQuadOut(&this->vScrollPos.x, this->vVelocity.x, 0.35f, 0.0f, true);
         }
     }

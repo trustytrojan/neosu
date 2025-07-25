@@ -7,113 +7,88 @@
 
 #include "Camera.h"
 
+#include "ConVar.h"
 #include "Engine.h"
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/euler_angles.hpp>
 
 Matrix4 Camera::buildMatrixOrtho2D(float left, float right, float bottom, float top, float zn, float zf) {
-    const float invX = 1.0f / (right - left);
-    const float invY = 1.0f / (top - bottom);
-    const float invZ = 1.0f / (zf - zn);
-
-    return Matrix4((2.0f * invX), 0, 0, (-(right + left) * invX), 0, (2.0 * invY), 0, (-(top + bottom) * invY), 0, 0,
-                   (-2.0f * invZ), (-(zf + zn) * invZ), 0, 0, 0, 1)
-        .transpose();
+    return buildMatrixOrtho2DGLLH(left, right, bottom, top, zn, zf);
 }
 
 Matrix4 Camera::buildMatrixOrtho2DGLLH(float left, float right, float bottom, float top, float zn, float zf) {
-    const float invX = 1.0f / (right - left);
-    const float invY = 1.0f / (top - bottom);
-    const float invZ = 1.0f / (zf - zn);
-
-    return Matrix4((2.0f * invX), 0, 0, (-(right + left) * invX), 0, (2.0 * invY), 0, (-(top + bottom) * invY), 0, 0,
-                   (-2.0f * invZ), (-(zf + zn) * invZ), 0, 0, 0, 1)
-        .transpose();
+    Matrix4 result;
+    glm::mat4 glmMatrix = glm::ortho(left, right, bottom, top, zn, zf);
+    result = Matrix4(&glmMatrix[0][0]);
+    return result;
 }
 
 Matrix4 Camera::buildMatrixOrtho2DDXLH(float left, float right, float bottom, float top, float zn, float zf) {
-    return Matrix4(2.0f / (right - left), 0, 0, (left + right) / (left - right), 0, 2.0f / (top - bottom), 0,
-                   (top + bottom) / (bottom - top), 0, 0, 1.0f / (zf - zn), zn / (zn - zf), 0, 0, 0, 1)
-        .transpose();
+    Matrix4 result;
+    glm::mat4 glmMatrix = glm::orthoLH_ZO(left, right, bottom, top, zn, zf);
+    result = Matrix4(&glmMatrix[0][0]);
+    return result;
 }
 
 Matrix4 Camera::buildMatrixLookAt(Vector3 eye, Vector3 target, Vector3 up) {
-    const Vector3 zAxis = (eye - target).normalize();
-    const Vector3 xAxis = up.cross(zAxis).normalize();
-    const Vector3 yAxis = zAxis.cross(xAxis);
-
-    return Matrix4(xAxis.x, xAxis.y, xAxis.z, -xAxis.dot(eye), yAxis.x, yAxis.y, yAxis.z, -yAxis.dot(eye), zAxis.x,
-                   zAxis.y, zAxis.z, -zAxis.dot(eye), 0, 0, 0, 1)
-        .transpose();
+    Matrix4 result;
+    glm::mat4 glmMatrix = glm::lookAt(glm::vec3(eye.x, eye.y, eye.z), glm::vec3(target.x, target.y, target.z),
+                                      glm::vec3(up.x, up.y, up.z));
+    result = Matrix4(&glmMatrix[0][0]);
+    return result;
 }
 
 Matrix4 Camera::buildMatrixLookAtLH(Vector3 eye, Vector3 target, Vector3 up) {
-    const Vector3 zAxis = (target - eye).normalize();
-    const Vector3 xAxis = up.cross(zAxis).normalize();
-    const Vector3 yAxis = zAxis.cross(xAxis);
-
-    return Matrix4(xAxis.x, xAxis.y, xAxis.z, -xAxis.dot(eye), yAxis.x, yAxis.y, yAxis.z, -yAxis.dot(eye), zAxis.x,
-                   zAxis.y, zAxis.z, -zAxis.dot(eye), 0, 0, 0, 1)
-        .transpose();
+    Matrix4 result;
+    glm::mat4 glmMatrix = glm::lookAtLH(glm::vec3(eye.x, eye.y, eye.z), glm::vec3(target.x, target.y, target.z),
+                                        glm::vec3(up.x, up.y, up.z));
+    result = Matrix4(&glmMatrix[0][0]);
+    return result;
 }
 
 Matrix4 Camera::buildMatrixPerspectiveFov(float fovRad, float aspect, float zn, float zf) {
-    const float f = 1.0f / std::tan(fovRad / 2.0f);
-
-    const float q = (zf + zn) / (zn - zf);
-    const float qn = (2 * zf * zn) / (zn - zf);
-
-    return Matrix4(f / aspect, 0, 0, 0, 0, f, 0, 0, 0, 0, q, qn, 0, 0, -1, 0).transpose();
+    return buildMatrixPerspectiveFovVertical(fovRad, aspect, zn, zf);
 }
 
 Matrix4 Camera::buildMatrixPerspectiveFovVertical(float fovRad, float aspectRatioWidthToHeight, float zn, float zf) {
-    const float f = 1.0f / std::tan(fovRad / 2.0f);
-
-    const float q = (zf + zn) / (zn - zf);
-    const float qn = (2 * zf * zn) / (zn - zf);
-
-    return Matrix4(f / aspectRatioWidthToHeight, 0, 0, 0, 0, f, 0, 0, 0, 0, q, qn, 0, 0, -1, 0).transpose();
+    Matrix4 result;
+    glm::mat4 glmMatrix = glm::perspective(fovRad, aspectRatioWidthToHeight, zn, zf);
+    result = Matrix4(&glmMatrix[0][0]);
+    return result;
 }
 
 Matrix4 Camera::buildMatrixPerspectiveFovVerticalDXLH(float fovRad, float aspectRatioWidthToHeight, float zn,
                                                       float zf) {
-    const float f = 1.0f / std::tan(fovRad / 2.0f);
-
-    return Matrix4(f / aspectRatioWidthToHeight, 0, 0, 0, 0, f, 0, 0, 0, 0, zf / (zf - zn), -zn * zf / (zf - zn), 0, 0,
-                   1, 0)
-        .transpose();
+    Matrix4 result;
+    glm::mat4 glmMatrix = glm::perspectiveLH_ZO(fovRad, aspectRatioWidthToHeight, zn, zf);
+    result = Matrix4(&glmMatrix[0][0]);
+    return result;
 }
 
 Matrix4 Camera::buildMatrixPerspectiveFovHorizontal(float fovRad, float aspectRatioHeightToWidth, float zn, float zf) {
-    const float f = 1.0f / std::tan(fovRad / 2.0f);
-
-    const float q = (zf + zn) / (zn - zf);
-    const float qn = (2 * zf * zn) / (zn - zf);
-
-    return Matrix4(f, 0, 0, 0, 0, f / aspectRatioHeightToWidth, 0, 0, 0, 0, q, qn, 0, 0, -1, 0).transpose();
+    float verticalFov = 2.0f * glm::atan(glm::tan(fovRad * 0.5f) * aspectRatioHeightToWidth);
+    return buildMatrixPerspectiveFovVertical(verticalFov, 1.0f / aspectRatioHeightToWidth, zn, zf);
 }
 
 Matrix4 Camera::buildMatrixPerspectiveFovHorizontalDXLH(float fovRad, float aspectRatioHeightToWidth, float zn,
                                                         float zf) {
-    const float f = 1.0f / std::tan(fovRad / 2.0f);
-
-    return Matrix4(f, 0, 0, 0, 0, f / aspectRatioHeightToWidth, 0, 0, 0, 0, zf / (zf - zn), -zn * zf / (zf - zn), 0, 0,
-                   1, 0)
-        .transpose();
+    float verticalFov = 2.0f * glm::atan(glm::tan(fovRad * 0.5f) * aspectRatioHeightToWidth);
+    return buildMatrixPerspectiveFovVerticalDXLH(verticalFov, 1.0f / aspectRatioHeightToWidth, zn, zf);
 }
 
 static Vector3 Vector3TransformCoord(const Vector3 &in, const Matrix4 &mat) {
-    // return mat * in; // wtf?
+    glm::vec4 homogeneous(in.x, in.y, in.z, 1.0f);
+    const glm::mat4 &glmMat = mat.getGLM();
+    glm::vec4 result = glmMat * homogeneous;
 
-    Vector3 out;
-
-    const float norm = mat[3] * in.x + mat[7] * in.y + mat[11] * in.z + mat[15];
-
-    if(norm) {
-        out.x = (mat[0] * in.x + mat[4] * in.y + mat[8] * in.z + mat[12]) / norm;
-        out.y = (mat[1] * in.x + mat[5] * in.y + mat[9] * in.z + mat[13]) / norm;
-        out.z = (mat[2] * in.x + mat[6] * in.y + mat[10] * in.z + mat[14]) / norm;
+    // perspective divide
+    if(result.w != 0.0f) {
+        result.x /= result.w;
+        result.y /= result.w;
+        result.z /= result.w;
     }
 
-    return out;
+    return {result.x, result.y, result.z};
 }
 
 //*************************//
@@ -182,16 +157,14 @@ void Camera::updateVectors() {
     this->updateViewFrustum();
 }
 
+// using view matrix from camera position
 void Camera::updateViewFrustum() {
-    // TODO: this function is broken due to matrix changes, refactor
+    Matrix4 viewMatrix = this->buildMatrixLookAt(this->vPos, this->vPos + this->vViewDir, this->vViewUp);
+    Matrix4 projectionMatrix = this->buildMatrixPerspectiveFov(
+        this->fFov, (float)engine->getScreenWidth() / (float)engine->getScreenHeight(), 0.1f, 100.0f);
+    Matrix4 viewProj = projectionMatrix * viewMatrix;
 
-    const Matrix4 viewMatrix = this->rotation.getMatrix();
-
-    const Matrix4 projectionMatrix = buildMatrixPerspectiveFov(
-        this->fFov, (float)engine->getScreenWidth() / (float)engine->getScreenHeight(), 0.0f, 1.0f);
-
-    const Matrix4 viewProj = (viewMatrix * projectionMatrix);
-
+    // extract frustum planes from view-projection matrix
     // left plane
     this->viewFrustum[0].a = viewProj[3] + viewProj[0];
     this->viewFrustum[0].b = viewProj[7] + viewProj[4];
@@ -217,20 +190,21 @@ void Camera::updateViewFrustum() {
     this->viewFrustum[3].d = viewProj[15] + viewProj[13];
 
     // normalize planes
-    for(int i = 0; i < 4; i++) {
-        const float norm = std::sqrt(this->viewFrustum[i].a * this->viewFrustum[i].a +
-                                     this->viewFrustum[i].b * this->viewFrustum[i].b +
-                                     this->viewFrustum[i].c * this->viewFrustum[i].c);
-        if(norm) {
-            this->viewFrustum[i].a = this->viewFrustum[i].a / norm;
-            this->viewFrustum[i].b = this->viewFrustum[i].b / norm;
-            this->viewFrustum[i].c = this->viewFrustum[i].c / norm;
-            this->viewFrustum[i].d = this->viewFrustum[i].d / norm;
+    for(auto &i : this->viewFrustum) {
+        glm::vec3 normal(i.a, i.b, i.c);
+        float length = glm::length(normal);
+
+        if(length > 0.0f) {
+            normal = glm::normalize(normal);
+            i.a = normal.x;
+            i.b = normal.y;
+            i.c = normal.z;
+            i.d = i.d / length;
         } else {
-            this->viewFrustum[i].a = 0.0f;
-            this->viewFrustum[i].b = 0.0f;
-            this->viewFrustum[i].c = 0.0f;
-            this->viewFrustum[i].d = 0.0f;
+            i.a = 0.0f;
+            i.b = 0.0f;
+            i.c = 0.0f;
+            i.d = 0.0f;
         }
     }
 }
@@ -238,10 +212,10 @@ void Camera::updateViewFrustum() {
 void Camera::rotateX(float pitchDeg) {
     this->fPitch += pitchDeg;
 
-    if(this->fPitch > 89.8f)
-        this->fPitch = 89.8f;
-    else if(this->fPitch < -89.8f)
-        this->fPitch = -89.8f;
+    if(this->fPitch > 89.0f)
+        this->fPitch = 89.0f;
+    else if(this->fPitch < -89.0f)
+        this->fPitch = -89.0f;
 
     this->updateVectors();
 }
@@ -267,11 +241,12 @@ void Camera::lookAt(Vector3 eye, Vector3 target) {
     // https://stackoverflow.com/questions/1996957/conversion-euler-to-matrix-and-matrix-to-euler
     // https://gamedev.stackexchange.com/questions/50963/how-to-extract-euler-angles-from-transformation-matrix
 
-    Matrix4 lookAtMatrix = buildMatrixLookAt(eye, target, this->vYAxis);
+    Matrix4 lookAtMatrix = this->buildMatrixLookAt(eye, target, this->vYAxis);
 
-    float yaw = std::atan2(-lookAtMatrix[8], lookAtMatrix[0]);
-    float pitch = std::asin(-lookAtMatrix[6]);
-    /// float roll = std::atan2(lookAtMatrix[4], lookAtMatrix[5]);
+    // extract Euler angles from the matrix (NOTE: glm::extractEulerAngleYXZ works differently for some reason?)
+    const float yaw = glm::atan2(-lookAtMatrix[8], lookAtMatrix[0]);
+    const float pitch = glm::asin(-lookAtMatrix[6]);
+    /// float roll = glm::atan2(lookAtMatrix[4], lookAtMatrix[5]);
 
     this->fYaw = 180.0f + glm::degrees(yaw);
     this->fPitch = glm::degrees(pitch);
@@ -331,59 +306,56 @@ Vector3 Camera::getNextPosition(Vector3 velocity) const {
 }
 
 Vector3 Camera::getProjectedVector(Vector3 point, float screenWidth, float screenHeight, float zn, float zf) const {
-    // TODO: fix this shit
-
-    // build matrices
-    const Matrix4 worldMatrix = Matrix4().translate(-this->vPos);
-    const Matrix4 viewMatrix = this->rotation.getMatrix();
-    const Matrix4 projectionMatrix = buildMatrixPerspectiveFov(this->fFov, screenWidth / screenHeight, zn, zf);
+    Matrix4 viewMatrix = this->buildMatrixLookAt(this->vPos, this->vPos + this->vViewDir, this->vViewUp);
+    Matrix4 projectionMatrix = this->buildMatrixPerspectiveFov(this->fFov, screenWidth / screenHeight, zn, zf);
 
     // complete matrix
-    Matrix4 worldViewProj = (worldMatrix * viewMatrix * projectionMatrix);
+    Matrix4 viewProj = projectionMatrix * viewMatrix;
 
     // transform 3d point to 2d
-    point = Vector3TransformCoord(point, worldViewProj);
+    Vector3 result = Vector3TransformCoord(point, viewProj);
 
     // convert projected screen coordinates to real screen coordinates
-    point.x = screenWidth * ((point.x + 1.0f) / 2.0f);
-    point.y = screenHeight * ((point.y + 1.0f) / 2.0f);
-    point.z = zn + point.z * (zf - zn);
+    result.x = screenWidth * ((result.x + 1.0f) / 2.0f);
+    result.y = screenHeight * ((1.0f - result.y) / 2.0f);  // flip Y for screen coordinates
+    result.z = zn + result.z * (zf - zn);
 
-    return point;
+    return result;
 }
 
 Vector3 Camera::getUnProjectedVector(Vector2 point, float screenWidth, float screenHeight, float zn, float zf) const {
-    Matrix4 projectionMatrix = buildMatrixPerspectiveFov(this->fFov, screenWidth / screenHeight, zn, zf);
+    Matrix4 projectionMatrix = this->buildMatrixPerspectiveFov(this->fFov, screenWidth / screenHeight, zn, zf);
+    Matrix4 viewMatrix = this->buildMatrixLookAt(this->vPos, this->vPos + this->vViewDir, this->vViewUp);
 
     // transform pick position from screen space into 3d space
-    Vector4 v;
-    v.x = ((2.0f * point.x) / screenWidth) - 1.0f;
-    v.y = ((2.0f * point.y) / screenHeight) - 1.0f;
-    v.z = (0.0f - zn) / (zf - zn);  // this is very important
-    v.w = 1.0f;
+    glm::vec4 viewport(0, 0, screenWidth, screenHeight);
+    glm::mat4 glmModel(1.0f);  // identity model matrix
+    const glm::mat4 &glmView = viewMatrix.getGLM();
+    const glm::mat4 &glmProj = projectionMatrix.getGLM();
 
-    const Matrix4 inverseProjectionMatrix = projectionMatrix.invert();
-    const Matrix4 inverseViewMatrix = this->rotation.getMatrix().invert();
+    // combine model and view matrices (required by glm::unProject)
+    glm::mat4 modelView = glmView * glmModel;
 
-    v = inverseViewMatrix * inverseProjectionMatrix * v;
+    glm::vec3 unprojected = glm::unProject(glm::vec3(point.x, screenHeight - point.y, 0.0f),  // flip Y for OpenGL
+                                           modelView, glmProj, viewport);
 
-    return this->vPos - Vector3(v.x, v.y, v.z);
+    return {unprojected.x, unprojected.y, unprojected.z};
 }
 
 bool Camera::isPointVisibleFrustum(Vector3 point) const {
-    float epsilon = 0.01f;
+    const float epsilon = 0.01f;
 
     // left
-    float d11 = planeDotCoord(this->viewFrustum[0], point);
+    float d11 = this->planeDotCoord(this->viewFrustum[0], point);
 
     // right
-    float d21 = planeDotCoord(this->viewFrustum[1], point);
+    float d21 = this->planeDotCoord(this->viewFrustum[1], point);
 
     // top
-    float d31 = planeDotCoord(this->viewFrustum[2], point);
+    float d31 = this->planeDotCoord(this->viewFrustum[2], point);
 
     // bottom
-    float d41 = planeDotCoord(this->viewFrustum[3], point);
+    float d41 = this->planeDotCoord(this->viewFrustum[3], point);
 
     if((d11 < epsilon) || (d21 < epsilon) || (d31 < epsilon) || (d41 < epsilon)) return false;
 
@@ -391,9 +363,9 @@ bool Camera::isPointVisibleFrustum(Vector3 point) const {
 }
 
 bool Camera::isPointVisiblePlane(Vector3 point) const {
-    float epsilon = 0.0f;
+    constexpr float epsilon = 0.0f;  // ?
 
-    if(!(planeDotCoord(this->vViewDir, this->vPos, point) < epsilon)) return true;
+    if(!(this->planeDotCoord(this->vViewDir, this->vPos, point) < epsilon)) return true;
 
     return false;
 }

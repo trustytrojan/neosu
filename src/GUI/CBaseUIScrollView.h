@@ -173,6 +173,4 @@ class CBaseUIScrollView : public CBaseUIElement {
 
     bool bScrollResistanceCheck;
     int iScrollResistance;
-
-    static constexpr const float KINETIC_EPSILON{1e-3f};
 };
