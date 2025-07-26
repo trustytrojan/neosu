@@ -47,6 +47,7 @@ LinuxGLLegacyInterface::~LinuxGLLegacyInterface() {
 
 void LinuxGLLegacyInterface::endScene() {
     OpenGLLegacyInterface::endScene();
+    glFlush();
     glXSwapBuffers(this->display, this->window);
 }
 

@@ -1,5 +1,4 @@
 #pragma once
-#include "App.h"
 #include "ConVar.h"
 #include "ModSelector.h"
 #include "MouseListener.h"
@@ -37,7 +36,7 @@ class Image;
 class McFont;
 class RenderTarget;
 
-class Osu final : public App, public MouseListener {
+class Osu final : public MouseListener, public KeyboardListener {
    public:
     static constexpr const Vector2 osuBaseResolution{640.0f, 480.0f};
 
@@ -53,24 +52,30 @@ class Osu final : public App, public MouseListener {
     Osu();
     ~Osu() override;
 
-    void draw() override;
-    void update() override;
-	bool isInCriticalInteractiveSession() override;
+    Osu &operator=(const Osu &) = delete;
+    Osu &operator=(Osu &&) = delete;
+    Osu(const Osu &) = delete;
+    Osu(Osu &&) = delete;
+
+    void draw();
+    void update();
+    bool isInCriticalInteractiveSession();
 
     void onKeyDown(KeyboardEvent &e) override;
     void onKeyUp(KeyboardEvent &e) override;
     void onChar(KeyboardEvent &e) override;
-    void stealFocus() override;
+    void stealFocus();
 
-	void onButtonChange(ButtonIndex button, bool down) override;
+    void onButtonChange(ButtonIndex button, bool down) override;
 
-    void onResolutionChanged(Vector2 newResolution) override;
-    void onDPIChanged() override;
+    void onResolutionChanged(Vector2 newResolution);
+    void onDPIChanged();
 
-    void onFocusGained() override;
-    void onFocusLost() override;
-    void onMinimized() override;
-    bool onShutdown() override;
+    void onFocusGained();
+    void onFocusLost();
+    inline void onRestored() { ; }
+    void onMinimized();
+    bool onShutdown();
 
     void onPlayEnd(FinishedScore score, bool quit = true, bool aborted = false);
 
@@ -92,7 +97,9 @@ class Osu final : public App, public MouseListener {
 
     [[nodiscard]] inline OptionsMenu *getOptionsMenu() const { return this->optionsMenu; }
     [[nodiscard]] inline SongBrowser *getSongBrowser() const { return this->songBrowser2; }
-    [[nodiscard]] inline BackgroundImageHandler *getBackgroundImageHandler() const { return this->backgroundImageHandler; }
+    [[nodiscard]] inline BackgroundImageHandler *getBackgroundImageHandler() const {
+        return this->backgroundImageHandler;
+    }
     [[nodiscard]] inline Skin *getSkin() const { return this->skin; }
     [[nodiscard]] inline HUD *getHUD() const { return this->hud; }
     [[nodiscard]] inline NotificationOverlay *getNotificationOverlay() const { return this->notificationOverlay; }
@@ -134,7 +141,9 @@ class Osu final : public App, public MouseListener {
     [[nodiscard]] inline bool getModSD() const { return cv::mod_suddendeath.getBool(); }
     [[nodiscard]] inline bool getModSS() const { return cv::mod_perfect.getBool(); }
     [[nodiscard]] inline bool getModNightmare() const { return cv::mod_nightmare.getBool(); }
-    [[nodiscard]] inline bool getModTD() const { return cv::mod_touchdevice.getBool() || cv::mod_touchdevice_always.getBool(); }
+    [[nodiscard]] inline bool getModTD() const {
+        return cv::mod_touchdevice.getBool() || cv::mod_touchdevice_always.getBool();
+    }
 
     [[nodiscard]] inline std::vector<ConVar *> getExperimentalMods() const { return this->experimentalMods; }
 
@@ -168,8 +177,8 @@ class Osu final : public App, public MouseListener {
     void fireResolutionChanged();
 
     // callbacks
-    void onWindowedResolutionChanged(const UString& oldValue, const UString& args);
-    void onInternalResolutionChanged(const UString& oldValue, const UString& args);
+    void onWindowedResolutionChanged(const UString &oldValue, const UString &args);
+    void onInternalResolutionChanged(const UString &oldValue, const UString &args);
     void onSensitivityChange(const UString &oldValue, const UString &newValue);
     void onRawInputChange(const UString &oldValue, const UString &newValue);
 
@@ -200,7 +209,7 @@ class Osu final : public App, public MouseListener {
 
     void onLetterboxingOffsetChange();
 
-    void onUserCardChange(const UString& new_username);
+    void onUserCardChange(const UString &new_username);
 
     void setupSoloud();
 

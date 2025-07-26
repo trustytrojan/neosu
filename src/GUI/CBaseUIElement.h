@@ -48,7 +48,17 @@ class CBaseUIElement : public KeyboardListener {
 
     virtual bool isActive() { return this->bActive || this->isBusy(); }
     virtual bool isVisible() { return this->bVisible; }
-    bool isVisibleOnScreen();  // x,y within engine rectangle
+
+    // engine rectangle contains rect
+    static bool isVisibleOnScreen(const McRect &rect);
+    [[nodiscard]] static constexpr forceinline bool isVisibleOnScreen(CBaseUIElement *elem) {
+        return CBaseUIElement::isVisibleOnScreen(elem->getRect());
+    }
+
+    [[nodiscard]] constexpr forceinline bool isVisibleOnScreen() const {
+        return CBaseUIElement::isVisibleOnScreen(this->getRect());
+    }
+
     virtual bool isEnabled() { return this->bEnabled; }
     virtual bool isBusy() { return this->bBusy && this->isVisible(); }
     virtual bool isMouseInside() { return this->bMouseInside && this->isVisible(); }

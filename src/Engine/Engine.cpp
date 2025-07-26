@@ -249,7 +249,7 @@ void Engine::loadApp() {
         //	Load App here  //
         //*****************//
 
-        app = std::make_unique<Osu>();
+        app = std::make_unique<App>();
         runtime_assert(app.get(), "App failed to initialize!");
         // start listening to the default keyboard input
         keyboard->addListener(app.get());

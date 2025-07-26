@@ -3,11 +3,10 @@
 
 #include "KeyboardListener.h"
 #include "Timing.h"
-#include "cbase.h"
+#include "App.h"
 #include "fmt/color.h"
 #include "fmt/printf.h"
 
-class App;
 class Mouse;
 class ConVar;
 class Keyboard;

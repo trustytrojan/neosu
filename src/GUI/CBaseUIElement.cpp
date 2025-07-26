@@ -5,10 +5,8 @@
 #include "Osu.h"
 #include "TooltipOverlay.h"
 
-bool CBaseUIElement::isVisibleOnScreen() {
-    const McRect &visrect{engine->getScreenRect()};
-    const Vector2 elemPosNudgedIn{Vector2{this->vPos}.nudge(visrect.getCenter(), -5.0f)};
-    return visrect.contains(elemPosNudgedIn);
+bool CBaseUIElement::isVisibleOnScreen(const McRect &rect) {
+    return engine->getScreenRect().intersects(rect);
 }
 
 void CBaseUIElement::stealFocus() {

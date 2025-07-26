@@ -3,8 +3,13 @@
 
 class McRect {
    public:
-    McRect(float x = 0, float y = 0, float width = 0, float height = 0, bool isCentered = false);
-    McRect(const Vector2 &pos, const Vector2 &size, bool isCentered = false);
+    constexpr McRect(float x = 0, float y = 0, float width = 0, float height = 0, bool isCentered = false) {
+        this->set(x, y, width, height, isCentered);
+    }
+
+    constexpr McRect(const Vector2 &pos, const Vector2 &size, bool isCentered = false) {
+        this->set(pos, size, isCentered);
+    }
 
     [[nodiscard]] inline bool contains(const Vector2 &point) const {
         Vector2 max = this->vMin + this->vSize;
@@ -51,8 +56,19 @@ class McRect {
     inline void setHeight(float height) { this->vSize.y = height; }
 
    private:
-    void set(float x, float y, float width, float height, bool isCentered = false);
-    void set(const Vector2 &pos, const Vector2 &size, bool isCentered = false);
+    constexpr void set(float x, float y, float width, float height, bool isCentered = false) {
+        this->set(Vector2(x, y), Vector2(width, height), isCentered);
+    }
+
+    constexpr void set(const Vector2 &pos, const Vector2 &size, bool isCentered = false) {
+        if(isCentered) {
+            Vector2 halfSize = size * 0.5f;
+            this->vMin = pos - halfSize;
+        } else {
+            this->vMin = pos;
+        }
+        this->vSize = size;
+    }
 
     Vector2 vMin;
     Vector2 vSize;

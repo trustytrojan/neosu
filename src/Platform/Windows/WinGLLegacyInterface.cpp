@@ -181,6 +181,7 @@ WinGLLegacyInterface::~WinGLLegacyInterface() {
 
 void WinGLLegacyInterface::endScene() {
     OpenGLLegacyInterface::endScene();
+    glFlush();
     SwapBuffers(this->hdc);
 }
 
