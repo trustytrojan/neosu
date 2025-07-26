@@ -134,7 +134,10 @@ void CBaseUIContainer::draw() {
 
     MC_UNROLL
     for(size_t i = 0; i < this->vElements.size(); i++) {
-        this->vElements[i]->draw();
+        const auto &e = this->vElements[i];
+        if(e->isVisible() && e->isVisibleOnScreen()) {
+            e->draw();
+        }
     }
 }
 
@@ -166,47 +169,58 @@ void CBaseUIContainer::mouse_update(bool *propagate_clicks) {
 
     MC_UNROLL
     for(size_t i = 0; i < this->vElements.size(); i++) {
-        this->vElements[i]->mouse_update(propagate_clicks);
+        const auto &e = this->vElements[i];
+        if(e->isVisible() && e->isVisibleOnScreen()) {
+            e->mouse_update(propagate_clicks);
+        }
     }
 }
 
 void CBaseUIContainer::update_pos() {
+    const auto &thisPos = this->vPos;
     MC_UNROLL
     for(size_t i = 0; i < this->vElements.size(); i++) {
-        this->vElements[i]->setPos(this->vPos + this->vElements[i]->getRelPos());
+        const auto &e = this->vElements[i];
+        e->setPos(thisPos + e->getRelPos());
     }
 }
 
 void CBaseUIContainer::onKeyUp(KeyboardEvent &e) {
+    MC_UNROLL
     for(size_t i = 0; i < this->vElements.size(); i++) {
         if(this->vElements[i]->isVisible()) this->vElements[i]->onKeyUp(e);
     }
 }
 void CBaseUIContainer::onKeyDown(KeyboardEvent &e) {
+    MC_UNROLL
     for(size_t i = 0; i < this->vElements.size(); i++) {
         if(this->vElements[i]->isVisible()) this->vElements[i]->onKeyDown(e);
     }
 }
 
 void CBaseUIContainer::onChar(KeyboardEvent &e) {
+    MC_UNROLL
     for(size_t i = 0; i < this->vElements.size(); i++) {
         if(this->vElements[i]->isVisible()) this->vElements[i]->onChar(e);
     }
 }
 
 void CBaseUIContainer::onFocusStolen() {
+    MC_UNROLL
     for(size_t i = 0; i < this->vElements.size(); i++) {
         this->vElements[i]->stealFocus();
     }
 }
 
 void CBaseUIContainer::onEnabled() {
+    MC_UNROLL
     for(size_t i = 0; i < this->vElements.size(); i++) {
         this->vElements[i]->setEnabled(true);
     }
 }
 
 void CBaseUIContainer::onDisabled() {
+    MC_UNROLL
     for(size_t i = 0; i < this->vElements.size(); i++) {
         this->vElements[i]->setEnabled(false);
     }
@@ -216,7 +230,7 @@ void CBaseUIContainer::onMouseDownOutside(bool /*left*/, bool /*right*/) { this-
 
 bool CBaseUIContainer::isBusy() {
     if(!this->bVisible) return false;
-
+    MC_UNROLL
     for(size_t i = 0; i < this->vElements.size(); i++) {
         if(this->vElements[i]->isBusy()) return true;
     }
@@ -226,7 +240,7 @@ bool CBaseUIContainer::isBusy() {
 
 bool CBaseUIContainer::isActive() {
     if(!this->bVisible) return false;
-
+    MC_UNROLL
     for(size_t i = 0; i < this->vElements.size(); i++) {
         if(this->vElements[i]->isActive()) return true;
     }

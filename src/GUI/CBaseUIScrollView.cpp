@@ -495,8 +495,11 @@ void CBaseUIScrollView::updateClipping() {
     for(size_t i = 0; i < elements.size(); i++) {
         CBaseUIElement *e = elements[i];
 
-        if(me.intersects(e->getRect())) {
-            if(!e->isVisible()) e->setVisible(true);
+        const McRect &eRect = e->getRect();  // heh
+        if(CBaseUIElement::isVisibleOnScreen(eRect) && me.intersects(eRect)) {
+            if(!e->isVisible()) {
+                e->setVisible(true);
+            }
         } else if(e->isVisible()) {
             e->setVisible(false);
         }
