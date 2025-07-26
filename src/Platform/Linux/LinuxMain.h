@@ -7,7 +7,7 @@
 
 class Engine;
 
-class LinuxMain {
+class LinuxMain final {
    public:
     LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdline,
               const std::unordered_map<UString, std::optional<UString>> &argMap);

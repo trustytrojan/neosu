@@ -41,7 +41,7 @@ bool sort_by_difficulty(const SongButton *a, const SongButton *b);
 bool sort_by_length(const SongButton *a, const SongButton *b);
 bool sort_by_title(const SongButton *a, const SongButton *b);
 
-class SongBrowser : public ScreenBackable {
+class SongBrowser final : public ScreenBackable {
    public:
     static void drawSelectedBeatmapBackgroundImage(float alpha = 1.0f);
 

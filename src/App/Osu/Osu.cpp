@@ -74,7 +74,6 @@ extern Main *mainloopPtrHack;
 Osu *osu = NULL;
 
 Vector2 Osu::g_vInternalResolution;
-Vector2 Osu::osuBaseResolution = Vector2(640.0f, 480.0f);
 
 Shader *actual_flashlight_shader = NULL;
 Shader *flashlight_shader = NULL;

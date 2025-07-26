@@ -22,9 +22,9 @@ class Keyboard final : public InputDevice {
     void removeListener(KeyboardListener *keyboardListener);
     void reset();
 
-    virtual void onKeyDown(KEYCODE keyCode);
-    virtual void onKeyUp(KEYCODE keyCode);
-    virtual void onChar(KEYCODE charCode);
+    void onKeyDown(KEYCODE keyCode);
+    void onKeyUp(KEYCODE keyCode);
+    void onChar(KEYCODE charCode);
 
     [[nodiscard]] inline bool isControlDown() const { return this->bControlDown; }
     [[nodiscard]] inline bool isAltDown() const { return this->bAltDown; }

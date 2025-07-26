@@ -5,7 +5,7 @@
 #include "Environment.h"
 #include "cbase.h"
 
-class WinEnvironment : public Environment {
+class WinEnvironment final : public Environment {
    public:
     static long getWindowStyleWindowed();
 

@@ -37,11 +37,9 @@ class Image;
 class McFont;
 class RenderTarget;
 
-class Osu : public App, public MouseListener {
+class Osu final : public App, public MouseListener {
    public:
-    static bool autoUpdater;
-
-    static Vector2 osuBaseResolution;
+    static constexpr const Vector2 osuBaseResolution{640.0f, 480.0f};
 
     static float getImageScaleToFitResolution(Image *img, Vector2 resolution);
     static float getImageScaleToFitResolution(Vector2 size, Vector2 resolution);

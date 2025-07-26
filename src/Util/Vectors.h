@@ -29,9 +29,9 @@ struct Vector2 : public glm::vec2 {
     using glm::vec2::operator[];
 
     // ctors
-    Vector2() : glm::vec2(0.0f, 0.0f) {}
-    Vector2(float x, float y) : glm::vec2(x, y) {}
-    Vector2(const glm::vec2 &other) : glm::vec2(other) {}
+    constexpr Vector2() : glm::vec2(0.0f, 0.0f) {}
+    constexpr Vector2(float x, float y) : glm::vec2(x, y) {}
+    constexpr Vector2(const glm::vec2 &other) : glm::vec2(other) {}
 
     // utils functions
     void zero() { *this = glm::vec2(0.0f); }
@@ -122,9 +122,9 @@ struct Vector2d : public glm::dvec2 {
     using glm::dvec2::operator[];
 
     // ctors
-    Vector2d() : glm::dvec2(0.0, 0.0) {}
-    Vector2d(double x, double y) : glm::dvec2(x, y) {}
-    Vector2d(const glm::dvec2 &other) : glm::dvec2(other) {}
+    constexpr Vector2d() : glm::dvec2(0.0, 0.0) {}
+    constexpr Vector2d(double x, double y) : glm::dvec2(x, y) {}
+    constexpr Vector2d(const glm::dvec2 &other) : glm::dvec2(other) {}
 
     // utils functions
     void zero() { *this = glm::dvec2(0.0); }
@@ -215,9 +215,9 @@ struct Vector3 : public glm::vec3 {
     using glm::vec3::operator[];
 
     // ctors
-    Vector3() : glm::vec3(0.0f, 0.0f, 0.0f) {}
-    Vector3(float x, float y, float z) : glm::vec3(x, y, z) {}
-    Vector3(const glm::vec3 &other) : glm::vec3(other) {}
+    constexpr Vector3() : glm::vec3(0.0f, 0.0f, 0.0f) {}
+    constexpr Vector3(float x, float y, float z) : glm::vec3(x, y, z) {}
+    constexpr Vector3(const glm::vec3 &other) : glm::vec3(other) {}
 
     // utils functions
     void zero() { *this = glm::vec3(0.0f); }
@@ -323,9 +323,9 @@ struct Vector4 : public glm::vec4 {
     using glm::vec4::operator[];
 
     // ctors
-    Vector4() : glm::vec4(0.0f, 0.0f, 0.0f, 0.0f) {}
-    Vector4(float x, float y, float z, float w) : glm::vec4(x, y, z, w) {}
-    Vector4(const glm::vec4 &other) : glm::vec4(other) {}
+    constexpr Vector4() : glm::vec4(0.0f, 0.0f, 0.0f, 0.0f) {}
+    constexpr Vector4(float x, float y, float z, float w) : glm::vec4(x, y, z, w) {}
+    constexpr Vector4(const glm::vec4 &other) : glm::vec4(other) {}
 
     // utils functions - cast to base type when calling GLM functions
     void set(float x, float y, float z, float w) { *this = glm::vec4(x, y, z, w); }

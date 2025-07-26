@@ -9,7 +9,7 @@
 
 #include "Environment.h"
 
-class LinuxEnvironment : public Environment {
+class LinuxEnvironment final : public Environment {
    public:
     LinuxEnvironment(Display *display, Window window, const std::vector<UString> &argCmdline,
                      const std::unordered_map<UString, std::optional<UString>> &argMap);
