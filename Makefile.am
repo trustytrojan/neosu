@@ -51,7 +51,7 @@ $(DEPS_CACHE)/libpng-$(LIBPNG_VERSION).source:
 # always needed (if not on host)
 $(DEPS_CACHE)/bzip2-$(BZIP2_VERSION).source:
 	$(MKDIR_P) $(DEPS_CACHE)
-	$(WGET) -qO $(DEPS_CACHE)/bzip2-$(BZIP2_VERSION).tar.gz "https://sourceware.org/pub/bzip2/bzip2-$(BZIP2_VERSION).tar.gz" && \
+	$(WGET) -qO $(DEPS_CACHE)/bzip2-$(BZIP2_VERSION).tar.gz "https://github.com/libarchive/bzip2/archive/refs/tags/bzip2-$(BZIP2_VERSION).tar.gz" && \
 	touch $@
 
 # always needed (if not on host)
