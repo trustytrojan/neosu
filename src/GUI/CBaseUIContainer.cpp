@@ -135,7 +135,7 @@ void CBaseUIContainer::draw() {
     MC_UNROLL
     for(size_t i = 0; i < this->vElements.size(); i++) {
         const auto &e = this->vElements[i];
-        if(e->isVisible() && e->isVisibleOnScreen()) {
+        if(e->isVisible()) {
             e->draw();
         }
     }
@@ -170,7 +170,7 @@ void CBaseUIContainer::mouse_update(bool *propagate_clicks) {
     MC_UNROLL
     for(size_t i = 0; i < this->vElements.size(); i++) {
         const auto &e = this->vElements[i];
-        if(e->isVisible() && e->isVisibleOnScreen()) {
+        if(e->isVisible() || e->isVisibleOnScreen()) {
             e->mouse_update(propagate_clicks);
         }
     }

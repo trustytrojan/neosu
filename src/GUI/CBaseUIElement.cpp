@@ -16,7 +16,6 @@ void CBaseUIElement::stealFocus() {
 }
 
 void CBaseUIElement::mouse_update(bool *propagate_clicks) {
-    if(!this->isVisibleOnScreen()) return;
     // check if mouse is inside element
     if(this->getRect().contains(mouse->getPos())) {
         if(!this->bMouseInside) {
