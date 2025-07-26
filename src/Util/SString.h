@@ -81,26 +81,4 @@ static constexpr forceinline std::string lower(const std::string& str) {
     return lstr;
 }
 
-// for comparators
-static constexpr forceinline bool less_than_ncase(const std::string& lhs, const std::string& rhs) {
-    if(lhs.empty() || rhs.empty()) return lhs.empty() < rhs.empty();
-
-    const auto lhsLen = lhs.length();
-    const auto rhsLen = rhs.length();
-    const auto minLen = (std::min)(lhsLen, rhsLen);
-
-    const auto lowerLhs = lower(lhs);
-    const auto lowerRhs = lower(rhs);
-
-    for(size_t i = 0; i < minLen; ++i) {
-        const auto lhsChar = lowerLhs[i];
-        const auto rhsChar = lowerRhs[i];
-
-        if(lhsChar != rhsChar) return lhsChar < rhsChar;
-    }
-
-    // if all compared characters are equal, shorter string is less
-    return lhsLen < rhsLen;
-}
-
 }  // namespace SString

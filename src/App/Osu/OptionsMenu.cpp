@@ -134,7 +134,7 @@ class OptionsMenuSkinPreviewElement : public CBaseUIElement {
         }
     }
 
-    void onMouseUpInside(bool  /*left*/, bool  /*right*/) override {
+    void onMouseUpInside(bool /*left*/, bool /*right*/) override {
         this->iMode++;
         this->iMode = this->iMode % 3;
     }
@@ -731,7 +731,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
 
     this->addSubSection("Volume");
 
-    if (Env::cfg(AUD::BASS) && soundEngine->getTypeId() == SoundEngine::BASS) {
+    if(Env::cfg(AUD::BASS) && soundEngine->getTypeId() == SoundEngine::BASS) {
         this->addCheckbox("Normalize loudness across songs", &cv::normalize_loudness)
             ->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onLoudnessNormalizationToggle>(this));
     }
@@ -1236,7 +1236,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->passwordTextbox->is_password = true;
     this->elements.back().render_condition = RenderCondition::PASSWORD_AUTH;
     this->logInButton = this->addButton("Log in");
-    this->logInButton->setHandleRightMouse(true); // for canceling logins
+    this->logInButton->setHandleRightMouse(true);  // for canceling logins
     this->logInButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onLogInClicked>(this));
     this->logInButton->setColor(0xff00ff00);
     this->logInButton->setTextColor(0xffffffff);
@@ -2379,9 +2379,9 @@ void OptionsMenu::onSkinSelect() {
         std::ranges::sort(skinFolders, SString::alnum_comp);
     } else {
         // more stable-like sorting (i.e. "-     Cookiezi" comes before "Cookiezi")
-        std::ranges::stable_sort(skinFolders, [](const std::string &a, const std::string &b) {
-            return strcasecmp(a.c_str(), b.c_str()) < 0;
-        });
+        std::ranges::sort(
+            skinFolders, [](const char *s1, const char *s2) { return strcasecmp(s1, s2) < 0; },
+            [](const std::string &str) -> const char * { return str.c_str(); });
     }
 
     if(skinFolders.size() > 0) {

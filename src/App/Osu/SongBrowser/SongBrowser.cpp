@@ -228,7 +228,7 @@ bool sort_by_artist(SongButton const *a, SongButton const *b) {
     const auto &artistA{aPtr->getArtist()};
     const auto &artistB{bPtr->getArtist()};
 
-    return SString::less_than_ncase(artistA, artistB);
+    return strcasecmp(artistA.c_str(), artistB.c_str()) < 0;
 }
 
 bool sort_by_bpm(SongButton const *a, SongButton const *b) {
@@ -248,7 +248,7 @@ bool sort_by_creator(SongButton const *a, SongButton const *b) {
     const auto &creatorA{aPtr->getCreator()};
     const auto &creatorB{bPtr->getCreator()};
 
-    return SString::less_than_ncase(creatorA, creatorB);
+    return strcasecmp(creatorA.c_str(), creatorB.c_str()) < 0;
 }
 
 bool sort_by_date_added(SongButton const *a, SongButton const *b) {
@@ -295,7 +295,7 @@ bool sort_by_title(SongButton const *a, SongButton const *b) {
     const auto &titleA{aPtr->getTitle()};
     const auto &titleB{bPtr->getTitle()};
 
-    return SString::less_than_ncase(titleA, titleB);
+    return strcasecmp(titleA.c_str(), titleB.c_str()) < 0;
 }
 
 namespace {  // static namespace
@@ -3145,8 +3145,9 @@ void SongBrowser::rebuildAfterGroupOrSortChange(GROUP group, SORTING_COMPARATOR 
             if(previousGroup != group || sortComp != nullptr) {
                 // collections are always sorted alphabetically
                 if(group == GROUP::GROUP_COLLECTIONS) {
-                    std::ranges::sort(*groupButtons, SString::less_than_ncase,
-                                      [](const CollectionButton *btn) { return btn->getCollectionName(); });
+                    std::ranges::sort(
+                        *groupButtons, [](const char *b1, const char *b2) -> bool { return strcasecmp(b1, b2) < 0; },
+                        [](const CollectionButton *btn) -> const char * { return btn->getCollectionName().c_str(); });
                 }
 
                 // sort children only if needed (defer until group is active)
