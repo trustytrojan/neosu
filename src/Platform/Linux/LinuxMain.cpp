@@ -125,12 +125,31 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdl
     XChangeProperty(this->dpy, this->clientWindow, _net_wm_bypass_compositor, XA_CARDINAL, 32, PropModeReplace,
                     &shouldBypassCompositor, 1);
 
+    // why are there 4 different properties to set for the title...
+    XTextProperty wm_name_prop;
+    char *title = (char *)WINDOW_TITLE;
+    int rc = XStringListToTextProperty(&title, 1, &wm_name_prop);
+    if(rc) {
+        // one...
+        XSetWMName(this->dpy, this->clientWindow, &wm_name_prop);
+    }
+
+    XClassHint *wm_class_hint = XAllocClassHint();
+    if(wm_class_hint) {
+        wm_class_hint->res_class = (char *)WINDOW_TITLE;  // two...
+        wm_class_hint->res_name = (char *)WINDOW_TITLE;   // three...
+        XSetClassHint(this->dpy, this->clientWindow, wm_class_hint);
+        XFree(wm_class_hint);
+    }
+
     // make window visible & set title
     XMapWindow(this->dpy, this->clientWindow);
-    XStoreName(this->dpy, this->clientWindow, WINDOW_TITLE);
+    XStoreName(this->dpy, this->clientWindow, WINDOW_TITLE);  // four.
 
     // after the window is visible, center it again (if the window manager ignored the position of the window in
     // XCreateWindow(), because fuck you)
+    // debugLogF("moving to {} {}\n",  defaultScreen->width / 2 - WINDOW_WIDTH / 2,
+    //             defaultScreen->height / 2 - WINDOW_HEIGHT / 2);
     XMoveWindow(this->dpy, this->clientWindow, defaultScreen->width / 2 - WINDOW_WIDTH / 2,
                 defaultScreen->height / 2 - WINDOW_HEIGHT / 2);
 
@@ -272,7 +291,17 @@ void LinuxMain::WndProc() {
 
         case ConfigureNotify:
             if(engine != NULL) {
-                engine->requestResolutionChange(Vector2(this->xev.xconfigure.width, this->xev.xconfigure.height));
+                const Vector2 size{this->xev.xconfigure.width, this->xev.xconfigure.height};
+                if(size != Vector2{0}) { // ignore 0,0 size
+                    engine->requestResolutionChange(size);
+                }
+            }
+            break;
+
+        case Expose:
+        case MapNotify:
+            if(engine != NULL && engine->isMinimized()) {
+                engine->onRestored();
             }
             break;
 
@@ -373,6 +402,9 @@ void LinuxMain::WndProc() {
             break;
 
         default:
+            if(cv::debug_env.getBool()) {
+                debugLogF("unhandled X11 event type: {}\n", this->xev.type);
+            }
             break;
     }
 }

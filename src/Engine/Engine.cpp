@@ -320,7 +320,7 @@ void Engine::onUpdate() {
 
     // update miscellaneous engine subsystems
     {
-        for(auto & inputDevice : this->inputDevices) {
+        for(auto &inputDevice : this->inputDevices) {
             inputDevice->update();
         }
 
