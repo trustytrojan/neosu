@@ -257,7 +257,7 @@ void ChatChannel::add_message(ChatMessage msg) {
 }
 
 void ChatChannel::updateLayout(Vector2 pos, Vector2 size) {
-    this->ui->clear();
+    this->ui->freeElements();
     this->ui->setPos(pos);
     this->ui->setSize(size);
     this->y_total = 7;
@@ -994,7 +994,7 @@ void Chat::updateUserList() {
     std::ranges::sort(sorted_users, SString::alnum_comp, [](const UserInfo *ui) { return ui->name.toUtf8(); });
 
     // Intentionally not calling this->user_list->clear(), because that would affect scroll position/animation
-    this->user_list->getContainer()->clear();
+    this->user_list->getContainer()->freeElements();
 
     for(auto user : sorted_users) {
         if(total_x + card_size.x + MARGIN > size.x) {

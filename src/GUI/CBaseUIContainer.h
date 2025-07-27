@@ -6,8 +6,8 @@ class CBaseUIContainer : public CBaseUIElement {
     CBaseUIContainer(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, UString name = "");
     ~CBaseUIContainer() override;
 
-    void clear();
-    void empty();
+    void freeElements();
+    void invalidate();
 
     void draw_debug();
     void draw() override;

@@ -527,7 +527,7 @@ void VSMusicBrowser::updateDrives() {
     }
     COLUMN &driveColumn = this->columns[0];
 
-    driveColumn.view->clear();
+    driveColumn.view->freeElements();
 
     const float dpiScale = env->getDPIScale();
     const int border = 20 * dpiScale;

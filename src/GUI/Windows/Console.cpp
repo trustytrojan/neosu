@@ -20,7 +20,7 @@ std::mutex g_consoleLogMutex;
 
 Console::Console() : CBaseUIWindow(350, 100, 620, 550, "Console") {
     // convar bindings
-    cv::cmd::clear.setCallback(SA::MakeDelegate<&Console::clear>(this));
+    cv::cmd::clear.setCallback(SA::MakeDelegate<&Console::freeElements>(this));
 
     // resources
     this->logFont = resourceManager->getFont("FONT_CONSOLE");
@@ -244,7 +244,7 @@ void Console::log(UString text, Color textColor) {
     this->log_view->scrollToBottom();
 }
 
-void Console::clear() { this->log_view->clear(); }
+void Console::freeElements() { this->log_view->freeElements(); }
 
 void Console::onResized() {
     CBaseUIWindow::onResized();

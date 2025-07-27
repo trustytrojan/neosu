@@ -166,7 +166,7 @@ CBaseUIContainer* Lobby::setVisible(bool visible) {
 void Lobby::updateLayout(Vector2 newResolution) {
     this->setSize(newResolution);
 
-    this->list->clear();
+    this->list->freeElements();
     this->list->setPos(round(newResolution.x * 0.6), 0);
     this->list->setSize(round(newResolution.x * 0.4), newResolution.y);
 

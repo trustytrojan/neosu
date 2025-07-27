@@ -132,6 +132,7 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdl
     if(rc) {
         // one...
         XSetWMName(this->dpy, this->clientWindow, &wm_name_prop);
+        XFree(wm_name_prop.value); // insanity
     }
 
     XClassHint *wm_class_hint = XAllocClassHint();

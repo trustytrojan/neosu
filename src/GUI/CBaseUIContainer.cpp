@@ -7,16 +7,18 @@
 CBaseUIContainer::CBaseUIContainer(float Xpos, float Ypos, float Xsize, float Ysize, UString name)
     : CBaseUIElement(Xpos, Ypos, Xsize, Ysize, std::move(name)) {}
 
-CBaseUIContainer::~CBaseUIContainer() { this->clear(); }
+CBaseUIContainer::~CBaseUIContainer() { this->freeElements(); }
 
-void CBaseUIContainer::clear() {
+// free memory from children
+void CBaseUIContainer::freeElements() {
     for(size_t i = 0; i < this->vElements.size(); i++) {
         delete this->vElements[i];
     }
-    this->vElements = std::vector<CBaseUIElement *>();
+    this->vElements.clear();
 }
 
-void CBaseUIContainer::empty() { this->vElements = std::vector<CBaseUIElement *>(); }
+// invalidate children without freeing memory
+void CBaseUIContainer::invalidate() { this->vElements.clear(); }
 
 CBaseUIContainer *CBaseUIContainer::addBaseUIElement(CBaseUIElement *element, float xPos, float yPos) {
     if(element == NULL) return this;
@@ -169,10 +171,7 @@ void CBaseUIContainer::mouse_update(bool *propagate_clicks) {
 
     MC_UNROLL
     for(size_t i = 0; i < this->vElements.size(); i++) {
-        const auto &e = this->vElements[i];
-        if(e->isVisible() || e->isVisibleOnScreen()) {
-            e->mouse_update(propagate_clicks);
-        }
+        this->vElements[i]->mouse_update(propagate_clicks);
     }
 }
 

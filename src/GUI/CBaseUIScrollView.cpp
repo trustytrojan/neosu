@@ -48,12 +48,12 @@ CBaseUIScrollView::CBaseUIScrollView(float xPos, float yPos, float xSize, float 
 }
 
 CBaseUIScrollView::~CBaseUIScrollView() {
-    this->clear();
+    this->freeElements();
     SAFE_DELETE(this->container);
 }
 
-void CBaseUIScrollView::clear() {
-    this->container->clear();
+void CBaseUIScrollView::freeElements() {
+    this->container->freeElements();
 
     anim->deleteExistingAnimation(&this->vKineticAverage.x);
     anim->deleteExistingAnimation(&this->vKineticAverage.y);

@@ -587,7 +587,7 @@ void ConsoleBox::addSuggestion(const UString &text, const UString &helpText, con
 
 void ConsoleBox::clearSuggestions() {
     this->iSuggestionCount = 0;
-    this->suggestion->getContainer()->clear();
+    this->suggestion->getContainer()->freeElements();
     this->vSuggestionButtons = std::vector<CBaseUIButton *>();
     this->suggestion->setVisible(false);
 }

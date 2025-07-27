@@ -177,10 +177,10 @@ void UIContextMenu::begin(int minWidth, bool bigStyle) {
         this->selfDeletionCrashWorkaroundScheduledElementDeleteHack.insert(
             this->selfDeletionCrashWorkaroundScheduledElementDeleteHack.end(), oldElementsWeCanNotDeleteYet.begin(),
             oldElementsWeCanNotDeleteYet.end());
-        this->getContainer()->empty();  // ensure nothing is deleted yet
+        this->getContainer()->invalidate();  // ensure nothing is deleted yet
     }
 
-    this->clear();
+    this->freeElements();
 
     this->containedTextbox = NULL;
 }

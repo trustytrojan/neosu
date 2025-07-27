@@ -490,7 +490,7 @@ SongBrowser::~SongBrowser() {
 
     resourceManager->destroyResource(this->backgroundSearchMatcher);
 
-    this->carousel->getContainer()->empty();
+    this->carousel->getContainer()->invalidate();
 
     for(auto &songButton : this->songButtons) {
         delete songButton;
@@ -520,7 +520,7 @@ SongBrowser::~SongBrowser() {
         delete titleCollectionButton;
     }
 
-    this->scoreBrowser->getContainer()->empty();
+    this->scoreBrowser->getContainer()->invalidate();
     for(ScoreButton *button : this->scoreButtonCache) {
         SAFE_DELETE(button);
     }
@@ -543,7 +543,7 @@ SongBrowser::~SongBrowser() {
     SAFE_DELETE(db);
 
     // Memory leak on shutdown, maybe
-    this->empty();
+    this->invalidate();
 }
 
 void SongBrowser::draw() {
@@ -1623,7 +1623,7 @@ void SongBrowser::refreshBeatmaps() {
     this->selectionPreviousCollectionButton = NULL;
 
     // delete local database and UI
-    this->carousel->getContainer()->empty();
+    this->carousel->getContainer()->invalidate();
 
     for(auto &songButton : this->songButtons) {
         delete songButton;
@@ -1907,7 +1907,7 @@ void SongBrowser::scrollToSongButton(Button *songButton, bool alignOnTop) {
 }
 
 void SongBrowser::rebuildSongButtons() {
-    this->carousel->getContainer()->empty();
+    this->carousel->getContainer()->invalidate();
 
     // NOTE: currently supports 3 depth layers (collection > beatmap > diffs)
     for(auto &visibleSongButton : this->visibleSongButtons) {
@@ -2481,8 +2481,8 @@ void SongBrowser::rebuildScoreButtons() {
     // XXX: When online, it would be nice to scroll to the current user's highscore
 
     // reset
-    this->scoreBrowser->getContainer()->empty();
-    this->localBestContainer->empty();
+    this->scoreBrowser->getContainer()->invalidate();
+    this->localBestContainer->invalidate();
     this->localBestContainer->setVisible(false);
 
     const bool validBeatmap = (this->beatmap != NULL && this->beatmap->getSelectedDifficulty2() != NULL);
@@ -2849,7 +2849,7 @@ void SongBrowser::onSearchUpdate() {
         this->checkHandleKillBackgroundSearchMatcher();
 
         // reset container and visible buttons list
-        this->carousel->getContainer()->empty();
+        this->carousel->getContainer()->invalidate();
         this->visibleSongButtons.clear();
 
         // reset all search flags
@@ -2877,7 +2877,7 @@ void SongBrowser::onSearchUpdate() {
 void SongBrowser::rebuildSongButtonsAndVisibleSongButtonsWithSearchMatchSupport(bool scrollToTop,
                                                                                 bool doRebuildSongButtons) {
     // reset container and visible buttons list
-    this->carousel->getContainer()->empty();
+    this->carousel->getContainer()->invalidate();
     this->visibleSongButtons.clear();
 
     // use flagged search matches to rebuild visible song buttons
@@ -3542,7 +3542,7 @@ void SongBrowser::recreateCollectionsButtons() {
 
         // sanity
         if(this->group == GROUP::GROUP_COLLECTIONS) {
-            this->carousel->getContainer()->empty();
+            this->carousel->getContainer()->invalidate();
             this->visibleSongButtons.clear();
         }
     }

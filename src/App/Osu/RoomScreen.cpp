@@ -185,7 +185,7 @@ RoomScreen::RoomScreen() : OsuScreen() {
 }
 
 RoomScreen::~RoomScreen() {
-    this->settings->getContainer()->empty();
+    this->settings->getContainer()->invalidate();
     SAFE_DELETE(this->room_name);
     SAFE_DELETE(this->change_password_btn);
     SAFE_DELETE(this->host);
@@ -325,7 +325,7 @@ void RoomScreen::updateSettingsLayout(Vector2 newResolution) {
     const bool is_host = bancho->room.is_host();
     int settings_y = 10;
 
-    this->settings->getContainer()->empty();
+    this->settings->getContainer()->invalidate();
     this->settings->setPos(round(newResolution.x * 0.6), 0);
     this->settings->setSize(round(newResolution.x * 0.4), newResolution.y);
 
@@ -441,7 +441,7 @@ void RoomScreen::updateLayout(Vector2 newResolution) {
 
     // XXX: Display detailed user presence
     this->slotlist->setSize(newResolution.x * 0.6 - 200, newResolution.y * 0.6 - 110);
-    this->slotlist->clear();
+    this->slotlist->freeElements();
     int y_total = 10;
     for(int i = 0; i < 16; i++) {
         if(bancho->room.slots[i].has_player()) {

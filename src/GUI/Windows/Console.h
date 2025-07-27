@@ -19,7 +19,7 @@ class Console : public CBaseUIWindow {
     void mouse_update(bool *propagate_clicks) override;
 
     void log(UString text, Color textColor = 0xffffffff);
-    void clear();
+    void freeElements();
 
     // events
     void onResized() override;
