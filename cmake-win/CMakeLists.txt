@@ -60,8 +60,8 @@ set(PKG_CONFIG_ARGN "--msvc-syntax")
 # Strip default cmake exception handling flags
 string(REGEX REPLACE "/EH[^ ]*" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
-set(COMMON_C_FLAGS "/utf-8" "/D_HAS_EXCEPTIONS=0")
-set(COMMON_CXX_FLAGS "/utf-8" "/Zc:preprocessor" "/GR" "/D_HAS_EXCEPTIONS=0" "/DSOLOUD_NO_ASSERTS")
+set(COMMON_C_FLAGS "/utf-8" "/D_HAS_EXCEPTIONS=0" "/D_UNICODE" "/DUNICODE")
+set(COMMON_CXX_FLAGS "/utf-8" "/Zc:preprocessor" "/GR" "/D_HAS_EXCEPTIONS=0" "/DSOLOUD_NO_ASSERTS" "/D_UNICODE" "/DUNICODE")
 set(DEBUG_FLAGS "/Zi" "/Od" "/RTC1")
 set(RELEASE_FLAGS "/O2" "/Oi" "/Oy" "/Gw" "/GL" "/GS-" "/Gy")
 

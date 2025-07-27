@@ -28,7 +28,7 @@ class ByteBufferedFile {
    public:
     class Reader {
        public:
-        Reader(const std::filesystem::path &path);
+        Reader(const UString &uPath);
         ~Reader() = default;
 
         Reader &operator=(const Reader &) = delete;
@@ -196,7 +196,7 @@ class ByteBufferedFile {
 
     class Writer {
        public:
-        Writer(const std::filesystem::path &path);
+        Writer(const UString &uPath);
         ~Writer();
 
         Writer &operator=(const Writer &) = delete;
@@ -231,5 +231,5 @@ class ByteBufferedFile {
         std::string last_error;
     };
 
-    static void copy(const std::filesystem::path &from_path, const std::filesystem::path &to_path);
+    static void copy(const UString &from_uPath, const UString &to_uPath);
 };

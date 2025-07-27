@@ -46,7 +46,10 @@ const std::string &Environment::getPathToSelf(const char *argv0) {
     if constexpr(Env::cfg(OS::LINUX))
         exe_path = fs::canonical("/proc/self/exe", ec);
     else
-        exe_path = fs::canonical(fs::path(argv0), ec);
+    {
+        UString uPath{argv0};
+        exe_path = fs::canonical(fs::path(uPath.plat_str()), ec);
+    }
 
     if(!ec && !exe_path.empty())  // canonical path found
     {

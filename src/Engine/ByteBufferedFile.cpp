@@ -3,7 +3,8 @@
 #include "Engine.h"
 #include <system_error>
 
-ByteBufferedFile::Reader::Reader(const std::filesystem::path& path) : buffer(READ_BUFFER_SIZE) {
+ByteBufferedFile::Reader::Reader(const UString &uPath) : buffer(READ_BUFFER_SIZE) {
+    auto path = std::filesystem::path(uPath.plat_str());
     this->file.open(path, std::ios::binary);
     if(!this->file.is_open()) {
         this->set_error("Failed to open file for reading: " + std::generic_category().message(errno));
@@ -120,7 +121,8 @@ void ByteBufferedFile::Reader::skip_string() {
     this->skip_bytes(len);
 }
 
-ByteBufferedFile::Writer::Writer(const std::filesystem::path& path) : buffer(WRITE_BUFFER_SIZE) {
+ByteBufferedFile::Writer::Writer(const UString &uPath) : buffer(WRITE_BUFFER_SIZE) {
+    auto path = std::filesystem::path(uPath.plat_str());
     this->file_path = path;
     this->tmp_file_path = this->file_path;
     this->tmp_file_path += ".tmp";
@@ -243,9 +245,9 @@ void ByteBufferedFile::Writer::write_uleb128(u32 num) {
     }
 }
 
-void ByteBufferedFile::copy(const std::filesystem::path& from_path, const std::filesystem::path& to_path) {
-    Reader from(from_path);
-    Writer to(to_path);
+void ByteBufferedFile::copy(const UString &from_uPath, const UString &to_uPath) {
+    Reader from(from_uPath);
+    Writer to(to_uPath);
 
     if(!from.good()) {
         debugLogF("Failed to open source file for copying: {:s}\n", from.error().data());

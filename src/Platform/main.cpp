@@ -41,7 +41,9 @@ void setcwdexe(const std::string &exePathStr) noexcept {
 
     bool failed = true;
     std::error_code ec;
-    fs::path exe_path{exePathStr};
+
+    UString uPath{exePathStr.c_str()};
+    fs::path exe_path{uPath.plat_str()};
 
     if(!exe_path.empty() && exe_path.has_parent_path()) {
         fs::current_path(exe_path.parent_path(), ec);

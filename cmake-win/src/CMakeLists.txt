@@ -147,6 +147,8 @@ target_compile_options(neosu PRIVATE
     "/Zc:preprocessor"
     "/GR"
     "/MP"  # multi-processor compilation
+    "/D_UNICODE"
+    "/DUNICODE"
     $<$<CONFIG:Debug>:/Zi;/Od;/RTC1>
     $<$<CONFIG:Release>:/O2;/Oi;/Oy;/Gw;/GL;/GS-;/Gy>
     ${BZIP2_STATIC_CFLAGS}
@@ -160,14 +162,16 @@ target_compile_definitions(neosu PRIVATE
     _HAS_EXCEPTIONS=0
     ST_NO_EXCEPTION_HANDLING=1
     SOLOUD_NO_ASSERTS=1
+    _UNICODE
+    UNICODE
     $<$<CONFIG:Release>:NDEBUG>
     $<$<CONFIG:Debug>:_DEBUG>
 )
 
 # Link options
 target_link_options(neosu PRIVATE
-    $<$<CONFIG:Debug>:/DEBUG:FULL;/SUBSYSTEM:CONSOLE;/PROFILE>
-    $<$<CONFIG:Release>:/SUBSYSTEM:WINDOWS;/LTCG;/OPT:REF;/OPT:ICF>
+    $<$<CONFIG:Debug>:/DEBUG:FULL;/SUBSYSTEM:CONSOLE;/ENTRY:wmainCRTStartup;/PROFILE>
+    $<$<CONFIG:Release>:/SUBSYSTEM:WINDOWS;/ENTRY:wWinMainCRTStartup;/LTCG;/OPT:REF;/OPT:ICF>
     ${LIBARCHIVE_STATIC_LDFLAGS}
 )
 
