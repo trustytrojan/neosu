@@ -42,6 +42,7 @@ Changelog::Changelog() : ScreenBackable() {
         R"(- Crop screenshots to the internal/letterboxed osu! resolution, instead of keeping the black borders)",
         R"(- Added "Sort Skins Alphabetically" option, for sorting skins in a different order (ignoring prefixes))",
         R"(- Added support for filtering by "creator=" in the song browser)",
+        R"(- Re-added support for FPoSu in multiplayer matches)",
         R"(- Implemented support for canceling login attempts by right clicking loading button)",
         R"(  - Login request timeouts should usually be detected and automatically canceled, but this may not always be possible)",
         R"(- Stop storing passwords as plaintext)",

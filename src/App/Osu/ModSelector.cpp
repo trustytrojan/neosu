@@ -1152,7 +1152,7 @@ void ModSelector::resetModsUserInitiated() {
 }
 
 void ModSelector::resetMods() {
-    cv::mod_fposu.setValue(false);
+    // cv::mod_fposu.setValue(false);  // intentionally commented out so people can play it in multi
 
     for(int i = 0; i < this->overrideSliders.size(); i++) {
         if(this->overrideSliders[i].lock != NULL) this->overrideSliders[i].lock->setChecked(false);
