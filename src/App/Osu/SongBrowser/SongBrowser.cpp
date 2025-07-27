@@ -2036,10 +2036,10 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
     // array does matter, because find() is used to detect their presence (and '=' would then break '<=' etc.)
     enum operatorId : uint8_t { EQ, LT, GT, LE, GE, NE };
     static constexpr auto operators = std::array{
-        std::pair<std::string, operatorId>("<=", LE), std::pair<std::string, operatorId>(">=", GE),
-        std::pair<std::string, operatorId>("<", LT),  std::pair<std::string, operatorId>(">", GT),
-        std::pair<std::string, operatorId>("!=", NE), std::pair<std::string, operatorId>("==", EQ),
-        std::pair<std::string, operatorId>("=", EQ),
+        std::pair<std::string_view, operatorId>("<=", LE), std::pair<std::string_view, operatorId>(">=", GE),
+        std::pair<std::string_view, operatorId>("<", LT),  std::pair<std::string_view, operatorId>(">", GT),
+        std::pair<std::string_view, operatorId>("!=", NE), std::pair<std::string_view, operatorId>("==", EQ),
+        std::pair<std::string_view, operatorId>("=", EQ),
     };
 
     enum keywordId : uint8_t {
@@ -2059,27 +2059,27 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
         STARS,
         CREATOR
     };
-    static constexpr auto keywords = std::array{std::pair<std::string, keywordId>("ar", AR),
-                                                std::pair<std::string, keywordId>("cs", CS),
-                                                std::pair<std::string, keywordId>("od", OD),
-                                                std::pair<std::string, keywordId>("hp", HP),
-                                                std::pair<std::string, keywordId>("bpm", BPM),
-                                                std::pair<std::string, keywordId>("opm", OPM),
-                                                std::pair<std::string, keywordId>("cpm", CPM),
-                                                std::pair<std::string, keywordId>("spm", SPM),
-                                                std::pair<std::string, keywordId>("object", OBJECTS),
-                                                std::pair<std::string, keywordId>("objects", OBJECTS),
-                                                std::pair<std::string, keywordId>("circle", CIRCLES),
-                                                std::pair<std::string, keywordId>("circles", CIRCLES),
-                                                std::pair<std::string, keywordId>("slider", SLIDERS),
-                                                std::pair<std::string, keywordId>("sliders", SLIDERS),
-                                                std::pair<std::string, keywordId>("spinner", SPINNERS),
-                                                std::pair<std::string, keywordId>("spinners", SPINNERS),
-                                                std::pair<std::string, keywordId>("length", LENGTH),
-                                                std::pair<std::string, keywordId>("len", LENGTH),
-                                                std::pair<std::string, keywordId>("stars", STARS),
-                                                std::pair<std::string, keywordId>("star", STARS),
-                                                std::pair<std::string, keywordId>("creator", CREATOR)};
+    static constexpr auto keywords = std::array{std::pair<std::string_view, keywordId>("ar", AR),
+                                                std::pair<std::string_view, keywordId>("cs", CS),
+                                                std::pair<std::string_view, keywordId>("od", OD),
+                                                std::pair<std::string_view, keywordId>("hp", HP),
+                                                std::pair<std::string_view, keywordId>("bpm", BPM),
+                                                std::pair<std::string_view, keywordId>("opm", OPM),
+                                                std::pair<std::string_view, keywordId>("cpm", CPM),
+                                                std::pair<std::string_view, keywordId>("spm", SPM),
+                                                std::pair<std::string_view, keywordId>("object", OBJECTS),
+                                                std::pair<std::string_view, keywordId>("objects", OBJECTS),
+                                                std::pair<std::string_view, keywordId>("circle", CIRCLES),
+                                                std::pair<std::string_view, keywordId>("circles", CIRCLES),
+                                                std::pair<std::string_view, keywordId>("slider", SLIDERS),
+                                                std::pair<std::string_view, keywordId>("sliders", SLIDERS),
+                                                std::pair<std::string_view, keywordId>("spinner", SPINNERS),
+                                                std::pair<std::string_view, keywordId>("spinners", SPINNERS),
+                                                std::pair<std::string_view, keywordId>("length", LENGTH),
+                                                std::pair<std::string_view, keywordId>("len", LENGTH),
+                                                std::pair<std::string_view, keywordId>("stars", STARS),
+                                                std::pair<std::string_view, keywordId>("star", STARS),
+                                                std::pair<std::string_view, keywordId>("creator", CREATOR)};
 
     // split search string into tokens
     // parse over all difficulties

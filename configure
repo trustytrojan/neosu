@@ -6551,7 +6551,7 @@ else case e in #(
 esac
 fi
 
-    if test -z "$LLVMMINGW" && test -n "$enable_clang"
+    if test -z "$LLVMMINGW" && test "x$enable_clang" = "xyes"
 then :
 
         LDFLAGS="$LDFLAGS"

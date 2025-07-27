@@ -286,7 +286,7 @@ AS_IF([test "x$enable_asan" = "xyes" || test "x$enable_tsan" = "xyes"], [
         CFLAGS="$CFLAGS -fsanitize=undefined,thread"
     ])
 
-    AS_IF([test -z "$LLVMMINGW" && test -n "$enable_clang"],[
+    AS_IF([test -z "$LLVMMINGW" && test "x$enable_clang" = "xyes"],[
         LDFLAGS="$LDFLAGS"
         CFLAGS="$CFLAGS -fsanitize-address-use-after-scope -fsanitize-address-use-after-return=always"
         CXXFLAGS="$CXXFLAGS -fsanitize-address-use-after-scope -fsanitize-address-use-after-return=always"

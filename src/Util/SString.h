@@ -45,7 +45,7 @@ static constexpr bool alnum_comp(const std::string& a, const std::string& b) {
 }
 
 // std string splitting, for if we don't want to create UStrings everywhere (slow and heavy)
-static constexpr forceinline std::vector<std::string> split(const std::string& s, const std::string& d) {
+static constexpr forceinline std::vector<std::string> split(const std::string& s, const std::string_view& d) {
     std::vector<std::string> r;
     size_t i = 0, j = 0;
     while((j = s.find(d, i)) != s.npos) r.emplace_back(s, i, j - i), i = j + d.size();

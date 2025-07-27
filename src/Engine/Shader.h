@@ -1,7 +1,7 @@
 #pragma once
 #include "Resource.h"
 
-class Matrix4;
+struct Matrix4;
 
 class Shader : public Resource {
    public:

@@ -102,9 +102,9 @@ void SongButton::drawBeatmapBackgroundThumbnail(Image *image) {
         if(image == NULL || !image->isReady())
             this->fThumbnailFadeInTime = engine->getTime();
         else if(this->fThumbnailFadeInTime > 0.0f && engine->getTime() > this->fThumbnailFadeInTime) {
-            alpha = std::clamp<float>(
-                (engine->getTime() - this->fThumbnailFadeInTime) / cv::songbrowser_thumbnail_fade_in_duration.getFloat(),
-                0.0f, 1.0f);
+            alpha = std::clamp<float>((engine->getTime() - this->fThumbnailFadeInTime) /
+                                          cv::songbrowser_thumbnail_fade_in_duration.getFloat(),
+                                      0.0f, 1.0f);
             alpha = 1.0f - (1.0f - alpha) * (1.0f - alpha);
         }
     }
@@ -129,7 +129,9 @@ void SongButton::drawBeatmapBackgroundThumbnail(Image *image) {
         g->scale(beatmapBackgroundScale, beatmapBackgroundScale);
         g->translate(pos.x + (int)centerOffset.x, pos.y + (int)centerOffset.y);
         g->pushClipRect(clipRect);
-        { g->drawImage(image); }
+        {
+            g->drawImage(image);
+        }
         g->popClipRect();
     }
     g->popTransform();
@@ -295,7 +297,7 @@ void SongButton::triggerContextMenu(Vector2 pos) {
     }
 }
 
-void SongButton::onContextMenu(const UString& text, int id) {
+void SongButton::onContextMenu(const UString &text, int id) {
     if(id == 1 || id == 2) {
         // 1 = add map to collection
         // 2 = add set to collection
@@ -351,7 +353,7 @@ void SongButton::onContextMenu(const UString& text, int id) {
     }
 }
 
-void SongButton::onAddToCollectionConfirmed(const UString& text, int id) {
+void SongButton::onAddToCollectionConfirmed(const UString &text, int id) {
     if(id == -2 || id == -4) {
         this->contextMenu->begin(0, true);
         {
@@ -379,8 +381,7 @@ void SongButton::onAddToCollectionConfirmed(const UString& text, int id) {
             label->setTextDarkColor(0xff000000);
         }
         this->contextMenu->end(false, false);
-        this->contextMenu->setClickCallback(
-            SA::MakeDelegate<&SongButton::onCreateNewCollectionConfirmed>(this));
+        this->contextMenu->setClickCallback(SA::MakeDelegate<&SongButton::onCreateNewCollectionConfirmed>(this));
         UIContextMenu::clampToRightScreenEdge(this->contextMenu);
         UIContextMenu::clampToBottomScreenEdge(this->contextMenu);
     } else {
@@ -389,7 +390,7 @@ void SongButton::onAddToCollectionConfirmed(const UString& text, int id) {
     }
 }
 
-void SongButton::onCreateNewCollectionConfirmed(const UString& text, int id) {
+void SongButton::onCreateNewCollectionConfirmed(const UString &text, int id) {
     if(id == -2 || id == -4) {
         // just forward it
         osu->getSongBrowser()->onSongButtonContextMenu(this, text, id);
