@@ -170,18 +170,18 @@ void OpenGLShader::setUniformMatrix4fv(const std::string_view &name, float *v) {
 }
 
 int OpenGLShader::getAttribLocation(const std::string_view &name) {
-    if(!this->bReady || name[name.size()] != '\0') return -1;
+    if(!this->bReady || name.empty()) return -1;
 
     return glGetAttribLocation(this->iProgram, name.data());
 }
 
 int OpenGLShader::getAndCacheUniformLocation(const std::string_view &name) {
-    if(!this->bReady) return -1;
+    if(!this->bReady || name.empty()) return -1;
 
     const auto cachedValue = this->uniformLocationCache.find(name);
     const bool cached = (cachedValue != this->uniformLocationCache.end());
 
-    const int id = (cached ? cachedValue->second : name[name.size()] == '\0' ? glGetUniformLocationARB(this->iProgram, name.data()) : -1);
+    const int id = (cached ? cachedValue->second : glGetUniformLocationARB(this->iProgram, name.data()));
     if(!cached && id != -1) this->uniformLocationCache[name] = id;
 
     return id;
