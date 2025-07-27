@@ -1,5 +1,6 @@
 #include "Lobby.h"
 
+#include <algorithm>
 #include <utility>
 
 #include "Bancho.h"
@@ -239,7 +240,7 @@ void Lobby::updateRoom(const Room& room) {
 void Lobby::removeRoom(u32 room_id) {
     for(auto room : this->rooms) {
         if(room->id == room_id) {
-            auto it = std::find(this->rooms.begin(), this->rooms.end(), room);
+            auto it = std::ranges::find(this->rooms, room);
             this->rooms.erase(it);
             delete room;
             break;

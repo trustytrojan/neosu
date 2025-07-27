@@ -15,6 +15,7 @@
 #include "SoundEngine.h"
 #include "SpectatorScreen.h"
 
+#include <algorithm>
 #include <unordered_set>
 
 static std::vector<ConVar *> &_getGlobalConVarArray() {
@@ -330,7 +331,7 @@ static void _find(const UString &args) {
         struct CONVAR_SORT_COMPARATOR {
             bool operator()(const ConVar *var1, const ConVar *var2) { return (var1->getName() < var2->getName()); }
         };
-        std::sort(matchingConVars.begin(), matchingConVars.end(), CONVAR_SORT_COMPARATOR());
+        std::ranges::sort(matchingConVars, CONVAR_SORT_COMPARATOR());
     }
 
     if(matchingConVars.size() < 1) {
@@ -407,7 +408,7 @@ static void _listcommands(void) {
         struct CONVAR_SORT_COMPARATOR {
             bool operator()(ConVar const *var1, ConVar const *var2) { return (var1->getName() < var2->getName()); }
         };
-        std::sort(convars.begin(), convars.end(), CONVAR_SORT_COMPARATOR());
+        std::ranges::sort(convars, CONVAR_SORT_COMPARATOR());
 
         for(size_t i = 0; i < convars.size(); i++) {
             if(convars[i]->isFlagSet(FCVAR_HIDDEN)) continue;
@@ -444,7 +445,7 @@ static void _dumpcommands(void) {
     struct CONVAR_SORT_COMPARATOR {
         bool operator()(ConVar const *var1, ConVar const *var2) { return (var1->getName() < var2->getName()); }
     };
-    std::sort(convars.begin(), convars.end(), CONVAR_SORT_COMPARATOR());
+    std::ranges::sort(convars, CONVAR_SORT_COMPARATOR());
 
     FILE *file = fopen("commands.htm", "w");
     if(file == NULL) {

@@ -1,5 +1,6 @@
 #include "VSMusicBrowser.h"
 
+#include <algorithm>
 #include <utility>
 
 #include "AnimationHandler.h"
@@ -430,8 +431,8 @@ void VSMusicBrowser::updateFolder(const std::string& baseFolder, size_t fromDept
         std::vector<std::string> files = env->getFilesInFolder(baseFolder);
 
         // sort both lists naturally
-        std::sort(folders.begin(), folders.end(), VSMusicBrowserNaturalSortStringComparator());
-        std::sort(files.begin(), files.end(), VSMusicBrowserNaturalSortStringComparator());
+        std::ranges::sort(folders, VSMusicBrowserNaturalSortStringComparator());
+        std::ranges::sort(files, VSMusicBrowserNaturalSortStringComparator());
 
         // first, add all folders
         int elementCounter = 0;

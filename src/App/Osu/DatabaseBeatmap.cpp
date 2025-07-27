@@ -1213,7 +1213,7 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
             if(cv::mod_strict_tracking.getBool() && cv::mod_strict_tracking_remove_slider_ticks.getBool())
                 s.ticks.clear();
 
-            if(cv::mod_reverse_sliders.getBool()) std::reverse(s.points.begin(), s.points.end());
+            if(cv::mod_reverse_sliders.getBool()) std::ranges::reverse(s.points);
 
             result.hitobjects.push_back(new Slider(s.type, s.repeat, s.pixelLength, s.points, s.hitSounds, s.ticks,
                                                    s.sliderTime, s.sliderTimeWithoutRepeats, s.time, s.sampleType,

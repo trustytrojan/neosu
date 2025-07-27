@@ -866,7 +866,7 @@ double DifficultyCalculator::DiffObject::calculate_difficulty(const Skills::Skil
     // NOTE: lazer does this from highest to lowest, but sorting it in reverse lets the reduced top section loop below
     // have a better average insertion time
     if(!incremental) {
-        std::sort(highestStrains.begin(), highestStrains.end());
+        std::ranges::sort(highestStrains);
     }
 
     // new implementation (https://github.com/ppy/osu/pull/13483/)
@@ -898,8 +898,7 @@ double DifficultyCalculator::DiffObject::calculate_difficulty(const Skills::Skil
                actualReducedSectionCount * sizeof(f64));
         highestStrains.erase(highestStrains.end() - actualReducedSectionCount, highestStrains.end());
         for(size_t i = 0; i < actualReducedSectionCount; i++) {
-            highestStrains.insert(std::upper_bound(highestStrains.begin(), highestStrains.end(), reducedSections[i]),
-                                  reducedSections[i]);
+            highestStrains.insert(std::ranges::upper_bound(highestStrains, reducedSections[i]), reducedSections[i]);
         }
 
         // weigh the top strains

@@ -1,5 +1,7 @@
 #include "HUD.h"
 
+#include <algorithm>
+
 #include "AnimationHandler.h"
 #include "Bancho.h"
 #include "BanchoUsers.h"
@@ -1313,7 +1315,7 @@ std::vector<SCORE_ENTRY> HUD::getCurrentScores() {
     }
 
     auto sorting_type = bancho->is_in_a_multi_room() ? bancho->room.win_condition : SCOREV1;
-    std::sort(scores.begin(), scores.end(), [sorting_type](const SCORE_ENTRY &a, const SCORE_ENTRY &b) {
+    std::ranges::sort(scores, [sorting_type](const SCORE_ENTRY &a, const SCORE_ENTRY &b) {
         if(sorting_type == ACCURACY) {
             return a.accuracy > b.accuracy;
         } else if(sorting_type == COMBO) {

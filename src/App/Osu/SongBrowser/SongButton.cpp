@@ -1,5 +1,6 @@
 #include "SongButton.h"
 
+#include <algorithm>
 #include <utility>
 
 #include "CollectionButton.h"
@@ -213,7 +214,7 @@ void SongButton::drawSubTitle(float deselectedAlpha, bool forceSelectedStyle) {
     g->popTransform();
 }
 
-void SongButton::sortChildren() { std::sort(this->children.begin(), this->children.end(), sort_by_difficulty); }
+void SongButton::sortChildren() { std::ranges::sort(this->children, sort_by_difficulty); }
 
 void SongButton::updateLayoutEx() {
     Button::updateLayoutEx();
@@ -323,7 +324,7 @@ void SongButton::onContextMenu(const UString &text, int id) {
                 bool can_add_to_collection = true;
 
                 if(id == 1) {
-                    auto it = std::find(collection->maps.begin(), collection->maps.end(), map_hash);
+                    auto it = std::ranges::find(collection->maps, map_hash);
                     if(it != collection->maps.end()) {
                         // Map already is present in the collection
                         can_add_to_collection = false;

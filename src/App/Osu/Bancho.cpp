@@ -269,7 +269,7 @@ void Bancho::handle_packet(Packet *packet) {
         }
     } else if(packet->id == FELLOW_SPECTATOR_LEFT) {
         i32 spectator_id = proto::read<i32>(packet);
-        auto it = std::find(this->fellow_spectators.begin(), this->fellow_spectators.end(), spectator_id);
+        auto it = std::ranges::find(this->fellow_spectators, spectator_id);
         if(it != this->fellow_spectators.end()) {
             debugLog("Fellow spectator left: user id %d\n", spectator_id);
             this->fellow_spectators.erase(it);

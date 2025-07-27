@@ -854,7 +854,7 @@ void Chat::removeChannel(const UString &channel_name) {
 
     if(chan == NULL) return;
 
-    auto it = std::find(this->channels.begin(), this->channels.end(), chan);
+    auto it = std::ranges::find(this->channels, chan);
     this->channels.erase(it);
     if(this->selected_channel == chan) {
         this->selected_channel = NULL;
@@ -905,8 +905,7 @@ void Chat::updateButtonLayout(Vector2 screen) {
     const float initial_x = 2;
     float total_x = initial_x;
 
-    std::sort(this->channels.begin(), this->channels.end(),
-              [](ChatChannel *a, ChatChannel *b) { return a->name < b->name; });
+    std::ranges::sort(this->channels, [](ChatChannel *a, ChatChannel *b) { return a->name < b->name; });
 
     // Look, I really tried. But for some reason setPos() doesn't work until we change
     // the screen resolution once. So I'll just compute absolute position manually.

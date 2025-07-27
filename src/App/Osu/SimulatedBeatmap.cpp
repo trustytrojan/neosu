@@ -1,5 +1,7 @@
 #include "SimulatedBeatmap.h"
 
+#include <algorithm>
+
 #include "Circle.h"
 #include "DatabaseBeatmap.h"
 #include "DifficultyCalculator.h"
@@ -137,8 +139,7 @@ bool SimulatedBeatmap::start() {
                 return (a->click_time + a->duration) < (b->click_time + b->duration);
         }
     };
-    std::sort(this->hitobjectsSortedByEndTime.begin(), this->hitobjectsSortedByEndTime.end(),
-              HitObjectSortComparator());
+    std::ranges::sort(this->hitobjectsSortedByEndTime, HitObjectSortComparator());
 
     // after the hitobjects have been loaded we can calculate the stacks
     this->calculateStacks();
