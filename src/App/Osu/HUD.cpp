@@ -304,9 +304,7 @@ void HUD::drawDummy() {
        (cv::draw_scoreboard_mp.getBool() && bancho->is_playing_a_multi_map())) {
         static std::vector<SCORE_ENTRY> scoreEntries;
         scoreEntries.clear();
-        {
-            scoreEntries.push_back(scoreEntry);
-        }
+        { scoreEntries.push_back(scoreEntry); }
     }
 
     this->drawSkip();
@@ -1767,7 +1765,7 @@ void HUD::drawProgressBar(float percent, bool waiting) {
 void HUD::drawStatistics(int misses, int sliderbreaks, int maxPossibleCombo, float liveStars, float totalStars, int bpm,
                          float ar, float cs, float od, float hp, int nps, int nd, int ur, float pp, float ppfc,
                          float hitWindow300, int hitdeltaMin, int hitdeltaMax) {
-    McFont *font = osu->getSubTitleFont();
+    McFont *font = osu->getTitleFont();
     const float offsetScale = Osu::getImageScale(Vector2(1.0f, 1.0f), 1.0f);
     const float scale = cv::hud_statistics_scale.getFloat() * cv::hud_scale.getFloat();
     const float yDelta = (font->getHeight() + 10) * cv::hud_statistics_spacing_scale.getFloat();
