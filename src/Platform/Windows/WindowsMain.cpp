@@ -487,11 +487,6 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> &arg
         }
     }
 
-    // create timers
-    Timer *deltaTimer = new Timer();
-    deltaTimer->start();
-    deltaTimer->update();
-
     // NOTE: it seems that focus events get lost between CreateWindow() above and ShowWindow() here
     // can be simulated by sleeping and alt-tab for testing.
     // seems to be a Windows bug? if you switch to the window after all of this, no activate or focus events will be
@@ -501,9 +496,16 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> &arg
     // make the window visible
     ShowWindow(hwnd, SW_SHOWNORMAL);
 
+    // create timers
+    Timer *deltaTimer = new Timer();
+
     // initialize engine
     baseEnv = new WinEnvironment(hwnd, hInstance, argCmdline, argMap);
     engine = new Engine(argc, argv);
+
+    deltaTimer->start();
+    deltaTimer->update();
+
     engine->loadApp();
 
     this->bHasFocus = this->bHasFocus && (GetForegroundWindow() == hwnd);  // HACKHACK: workaround (1), see above
@@ -512,8 +514,6 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> &arg
     if(this->bHasFocus) engine->onFocusGained();
 
     DragAcceptFiles(hwnd, TRUE);
-
-    deltaTimer->update();
 
     // main loop
     MSG msg;

@@ -25,8 +25,40 @@
 #define VPROF_BUDGETGROUP_DRAW "Draw"
 #define VPROF_BUDGETGROUP_DRAW_SWAPBUFFERS "SwapBuffers"
 
+#ifdef DETAILED_PROFILING
+#include <execution>
+
+#define DBGTIME(__amt__, ...)                                                   \
+    do {                                                                        \
+        static_assert((uint32_t)__amt__ > 0 && (uint32_t)__amt__ <= 4096);      \
+        static std::array<double, (uint32_t)__amt__> lasttms__{};               \
+        static uint32_t lti__ = 0;                                              \
+        static double overall_max__ = 0.0;                                      \
+        const double before__ = Timing::getTimeReal();                          \
+        do {                                                                    \
+            __VA_ARGS__;                                                        \
+        } while(false);                                                         \
+        const double after__ = Timing::getTimeReal();                           \
+        lasttms__[lti__ % (uint32_t)__amt__] = after__ - before__;              \
+        if(!(++lti__ % (uint32_t)__amt__)) {                                    \
+            lti__ = 0;                                                          \
+            auto current_max__ = std::ranges::max(lasttms__);                   \
+            if(current_max__ > overall_max__) overall_max__ = current_max__;    \
+            FMT_PRINT("\n\tTIME FOR: " #__VA_ARGS__ "\n\tmax overall: {:.8f}" \
+			         "\n\taverage: {:.4f} min: {:.4f} max: {:.4f}" \
+			         "\n\tpast " MC_STRINGIZE(__amt__) " times:" \
+			                                           "\n\t[ {:.4f} ]\n", \
+			         overall_max__, std::reduce(std::execution::unseq, lasttms__.begin(), lasttms__.end(), 0.0) / ((uint32_t)__amt__), std::ranges::min(lasttms__), \
+			         current_max__, fmt::join(lasttms__, ", ")); \
+        }                                                                       \
+    } while(false);
+#define VPROF_MAX_NUM_BUDGETGROUPS 128
+#define VPROF_MAX_NUM_NODES 128
+#else
+#define DBGTIME(...)
 #define VPROF_MAX_NUM_BUDGETGROUPS 32
 #define VPROF_MAX_NUM_NODES 32
+#endif
 
 class ProfilerNode {
     friend class ProfilerProfile;

@@ -51,11 +51,11 @@ class CBaseUIElement : public KeyboardListener {
 
     // engine rectangle contains rect
     static bool isVisibleOnScreen(const McRect &rect);
-    [[nodiscard]] static constexpr forceinline bool isVisibleOnScreen(CBaseUIElement *elem) {
+    [[nodiscard]] static forceinline bool isVisibleOnScreen(CBaseUIElement *elem) {
         return CBaseUIElement::isVisibleOnScreen(elem->getRect());
     }
 
-    [[nodiscard]] constexpr forceinline bool isVisibleOnScreen() const {
+    [[nodiscard]] forceinline bool isVisibleOnScreen() const {
         return CBaseUIElement::isVisibleOnScreen(this->getRect());
     }
 

@@ -5,17 +5,17 @@
 // $NoKeywords: $time $chrono
 //===============================================================================//
 
-#include "config.h"
-
 #pragma once
 #ifndef TIMER_H
 #define TIMER_H
 
+#include "BaseEnvironment.h"
+
 #include <SDL3/SDL_timer.h>
 
+#include <thread>
 #include <concepts>
 #include <cstdint>
-#include <thread>
 
 namespace Timing {
 // conversion constants
@@ -26,17 +26,11 @@ constexpr uint64_t US_PER_MS = 1'000;
 constexpr uint64_t MS_PER_SECOND = 1'000;
 
 namespace detail {
-#ifdef _MSC_VER
-__forceinline void yield_internal() noexcept
-#else
-[[gnu::always_inline]] inline void yield_internal() noexcept
-#endif
-{
-#ifdef MCENGINE_PLATFORM_WASM
-    SDL_Delay(0);
-#else
-    std::this_thread::yield();
-#endif
+forceinline void yield_internal() noexcept {
+    if constexpr(Env::cfg(OS::WASM))
+        SDL_Delay(0);
+    else
+        std::this_thread::yield();
 }
 
 template <uint64_t Ratio>
@@ -44,21 +38,21 @@ constexpr uint64_t convertTime(uint64_t ns) noexcept {
     return ns / Ratio;
 }
 
+inline INLINE_BODY void sleepPrecise(uint64_t ns) noexcept { SDL_DelayPrecise(ns); }
+
 }  // namespace detail
 
-inline uint64_t getTicksNS() noexcept { return SDL_GetTicksNS(); }
+inline INLINE_BODY uint64_t getTicksNS() noexcept { return SDL_GetTicksNS(); }
 
 constexpr uint64_t ticksNSToMS(uint64_t ns) noexcept { return detail::convertTime<NS_PER_MS>(ns); }
 
 inline uint64_t getTicksMS() noexcept { return ticksNSToMS(getTicksNS()); }
 
-inline void sleepPrecise(uint64_t ns) noexcept { SDL_DelayPrecise(ns); }
+inline void sleep(uint64_t us) noexcept { !!us ? detail::sleepPrecise(us * NS_PER_US) : detail::yield_internal(); }
 
-inline void sleep(uint64_t us) noexcept { !!us ? sleepPrecise(us * NS_PER_US) : detail::yield_internal(); }
+inline void sleepNS(uint64_t ns) noexcept { !!ns ? detail::sleepPrecise(ns) : detail::yield_internal(); }
 
-inline void sleepNS(uint64_t ns) noexcept { !!ns ? sleepPrecise(ns) : detail::yield_internal(); }
-
-inline void sleepMS(uint64_t ms) noexcept { !!ms ? sleepPrecise(ms * NS_PER_MS) : detail::yield_internal(); }
+inline void sleepMS(uint64_t ms) noexcept { !!ms ? detail::sleepPrecise(ms * NS_PER_MS) : detail::yield_internal(); }
 
 template <typename T = double>
     requires(std::floating_point<T>)

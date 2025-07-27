@@ -5,12 +5,11 @@
 #include "Osu.h"
 #include "TooltipOverlay.h"
 
-bool CBaseUIElement::isVisibleOnScreen(const McRect &rect) {
-    return engine->getScreenRect().intersects(rect);
-}
+bool CBaseUIElement::isVisibleOnScreen(const McRect &rect) { return engine->getScreenRect().intersects(rect); }
 
 void CBaseUIElement::stealFocus() {
-    this->mouseInsideCheck = static_cast<size_t>(this->bHandleLeftMouse | (this->bHandleRightMouse << 1));
+    this->mouseInsideCheck = static_cast<size_t>(static_cast<size_t>(this->bHandleLeftMouse) |
+                                                 (static_cast<size_t>((this->bHandleRightMouse) << 1)));
     this->bActive = false;
     this->onFocusStolen();
 }

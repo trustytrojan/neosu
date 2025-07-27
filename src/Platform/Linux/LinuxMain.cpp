@@ -183,15 +183,15 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdl
 
     // create timers
     auto *deltaTimer = new Timer();
-    deltaTimer->start();
-    deltaTimer->update();
 
     // initialize engine
     baseEnv = new LinuxEnvironment(this->dpy, this->clientWindow, argCmdline, argMap);
     engine = new Engine(argc, argv);
-    engine->loadApp();
 
+    deltaTimer->start();
     deltaTimer->update();
+
+    engine->loadApp();
 
     // main loop
     while(this->bRunning) {

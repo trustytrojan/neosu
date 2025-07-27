@@ -204,7 +204,15 @@ static constexpr auto OPTIMAL_UNROLL = 6;
 static constexpr auto OPTIMAL_UNROLL = 4;
 #endif
 
-#define MC_DO_PRAGMA(x) _Pragma(#x)
+// fmt::print seems to crash on windows with no console allocated (at least with mingw), just use printf to be safe in that case
+#if defined(_WIN32) && !defined(_DEBUG)
+#define FMT_PRINT(...) printf("%s", fmt::format(__VA_ARGS__).c_str())
+#else
+#define FMT_PRINT(...) fmt::print(__VA_ARGS__)
+#endif
+
+#define MC_STRINGIZE(x) #x
+#define MC_DO_PRAGMA(x) _Pragma(MC_STRINGIZE(x))
 #define MC_MESSAGE(msg) MC_DO_PRAGMA(message(msg))
 
 #if defined(__GNUC__) || defined(__clang__)
@@ -213,12 +221,12 @@ static constexpr auto OPTIMAL_UNROLL = 4;
 #define forceinline __attribute__((always_inline)) inline
 
 #ifdef __clang__
-#define MC_VECTORIZE_LOOP _Pragma("clang loop vectorize(enable)")
+#define MC_VECTORIZE_LOOP MC_DO_PRAGMA(clang loop vectorize(enable))
 #define MC_UNR_cnt(num) MC_DO_PRAGMA(clang loop unroll_count(num))
 #define NULL_PUSH
 #define NULL_POP
 #else
-#define MC_VECTORIZE_LOOP _Pragma("GCC ivdep")
+#define MC_VECTORIZE_LOOP MC_DO_PRAGMA(GCC ivdep)
 #define MC_UNR_cnt(num) MC_DO_PRAGMA(GCC unroll num)
 #define NULL_PUSH MC_DO_PRAGMA(GCC diagnostic ignored "-Wformat") MC_DO_PRAGMA(GCC diagnostic push)
 #define NULL_POP MC_DO_PRAGMA(GCC diagnostic pop)
@@ -234,6 +242,10 @@ static constexpr auto OPTIMAL_UNROLL = 4;
 #define ACCUMULATE(op, var) MC_UNR_cnt(OPTIMAL_UNROLL)
 #endif
 
+// force all functions in the function body to be inlined into it
+// different from "forceinline", because the function itself won't necessarily be inlined at all call sites
+#define INLINE_BODY __attribute__((flatten))
+
 #else
 
 #define likely(x) (x)
@@ -247,6 +259,7 @@ static constexpr auto OPTIMAL_UNROLL = 4;
 #define NULL_PUSH
 #define NULL_POP
 #define ACCUMULATE(op, var)
+#define INLINE_BODY
 #endif  // defined(__GNUC__) || defined(__clang__)
 
 #if !(defined(MCENGINE_PLATFORM_WINDOWS) || defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || \
