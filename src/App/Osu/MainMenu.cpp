@@ -210,6 +210,15 @@ MainMenu::MainMenu() : OsuScreen() {
 
                     osu->getOptionsMenu()->save();
                 }
+                if(version < 39.00) {
+                    if(!cv::mp_password.getString().empty()) {
+                        const char *plaintext_pw{cv::mp_password.getString().c_str()};
+                        const auto hash{Bancho::md5((u8 *)plaintext_pw, strlen(plaintext_pw))};
+                        cv::mp_password_md5.setValue(hash.hash.data());
+                        cv::mp_password.resetDefaults();
+                        osu->getOptionsMenu()->save();
+                    }
+                }
             } else {
                 this->bDrawVersionNotificationArrow = true;
             }

@@ -823,6 +823,10 @@ CONVAR(mouse_raw_input_absolute_to_window, "mouse_raw_input_absolute_to_window",
 CONVAR(mouse_sensitivity, "mouse_sensitivity", 1.0f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(mp_autologin, "mp_autologin", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
 CONVAR(mp_oauth_token, "mp_oauth_token", "", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_HIDDEN);
+
+// Plaintext password, unused since v39. Left for migrating to new cvar (see MainMenu.cpp).
+CONVAR(mp_password, "mp_password", "", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_HIDDEN | FCVAR_NOSAVE);
+
 CONVAR(mp_password_md5, "mp_password_md5", "", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_HIDDEN);
 CONVAR(mp_password_temporary, "mp_password_temporary", "",
        FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_HIDDEN | FCVAR_INTERNAL);
