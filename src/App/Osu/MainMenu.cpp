@@ -172,11 +172,12 @@ MainMenu::MainMenu() : OsuScreen() {
     {
         if(env->fileExists("version.txt")) {
             File versionFile("version.txt");
-            if(versionFile.canRead()) {
-                float version = std::stof(versionFile.readLine());
+            std::string linebuf{};
+            if(versionFile.canRead() && ((linebuf = versionFile.readLine()) != "")) {
+                float version = std::stof(linebuf);
                 float buildstamp = 0.0f;
-                if(versionFile.canRead()) {
-                    buildstamp = std::stof(versionFile.readLine());
+                if(versionFile.canRead() && ((linebuf = versionFile.readLine()) != "")) {
+                    buildstamp = std::stof(linebuf);
                     if(std::isfinite(buildstamp) && buildstamp < 30000000.0f && buildstamp > 25000000.0f) {
                         buildstamp = 0.0f;  // ignore bogus dates (before 2025 or after 2030)
                     }

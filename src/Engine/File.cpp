@@ -344,7 +344,9 @@ std::string File::readLine() {
     std::string line;
     if(std::getline(*this->ifstream, line)) {
         // handle CRLF line endings
-        if(!line.empty() && line.back() == '\r') line.pop_back();
+        if(!line.empty() && line.back() == '\r') {
+            line.pop_back();
+        }
 
         return {line.c_str()};
     }
