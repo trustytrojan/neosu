@@ -26,8 +26,15 @@ Changelog::Changelog() : ScreenBackable() {
 
     std::vector<CHANGELOG> changelogs;
 
+    CHANGELOG v39_10;
+    v39_10.title = NEOSU_VERSION " (" __DATE__ ")";
+    v39_10.changes = {
+        R"(- <placeholder>)",
+    };
+    changelogs.push_back(v39_10);
+
     CHANGELOG v39_00;
-    v39_00.title = NEOSU_VERSION " (" __DATE__ ")";
+    v39_00.title = "39.00 (2025-07-27)";
     v39_00.changes = {
         R"(- Added the SoLoud audio backend, as an alternative to BASS)",
         R"(  - Currently selectable by passing "-sound soloud" to the launch arguments, Windows builds have shortcuts provided to do so)",

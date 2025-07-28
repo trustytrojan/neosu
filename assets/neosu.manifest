@@ -3,7 +3,7 @@
   <assemblyIdentity
     type="win32"
     name="neosu"
-    version="39.0.0.0"
+    version="39.10.0.0"
     processorArchitecture="*"/>
   
   <description>cookie clicker with extra features</description>
