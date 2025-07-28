@@ -3,7 +3,6 @@
 
 class CBaseUIButton;
 class CBaseUIContainer;
-class CBaseUIBoxShadow;
 
 class RenderTarget;
 
@@ -167,5 +166,4 @@ class CBaseUIWindow : public CBaseUIElement {
 
     // test features
     // RenderTarget *rt;
-    // CBaseUIBoxShadow *shadow;
 };

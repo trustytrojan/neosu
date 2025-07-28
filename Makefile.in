@@ -279,7 +279,6 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/Engine/Sound/neosu-SoundEngine.$(OBJEXT) \
 	src/Engine/neosu-TextureAtlas.$(OBJEXT) \
 	src/Engine/neosu-VertexArrayObject.$(OBJEXT) \
-	src/GUI/neosu-CBaseUIBoxShadow.$(OBJEXT) \
 	src/GUI/neosu-CBaseUIButton.$(OBJEXT) \
 	src/GUI/neosu-CBaseUICheckbox.$(OBJEXT) \
 	src/GUI/neosu-CBaseUIContainer.$(OBJEXT) \
@@ -293,13 +292,8 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/GUI/neosu-CBaseUITextbox.$(OBJEXT) \
 	src/GUI/neosu-CBaseUIWindow.$(OBJEXT) \
 	src/GUI/neosu-CWindowManager.$(OBJEXT) \
-	src/GUI/neosu-GaussianBlurKernel.$(OBJEXT) \
 	src/GUI/Windows/neosu-Console.$(OBJEXT) \
 	src/GUI/Windows/neosu-ConsoleBox.$(OBJEXT) \
-	src/GUI/Windows/VinylScratcher/neosu-VSControlBar.$(OBJEXT) \
-	src/GUI/Windows/VinylScratcher/neosu-VSMusicBrowser.$(OBJEXT) \
-	src/GUI/Windows/VinylScratcher/neosu-VSTitleBar.$(OBJEXT) \
-	src/GUI/Windows/VinylScratcher/neosu-VinylScratcher.$(OBJEXT) \
 	src/GUI/Windows/neosu-VisualProfiler.$(OBJEXT) \
 	src/Platform/Linux/neosu-LinuxEnvironment.$(OBJEXT) \
 	src/Platform/Linux/neosu-LinuxGLLegacyInterface.$(OBJEXT) \
@@ -463,7 +457,6 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudFX.Po \
 	src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudSound.Po \
 	src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudSoundEngine.Po \
-	src/GUI/$(DEPDIR)/neosu-CBaseUIBoxShadow.Po \
 	src/GUI/$(DEPDIR)/neosu-CBaseUIButton.Po \
 	src/GUI/$(DEPDIR)/neosu-CBaseUICheckbox.Po \
 	src/GUI/$(DEPDIR)/neosu-CBaseUIContainer.Po \
@@ -477,14 +470,9 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/GUI/$(DEPDIR)/neosu-CBaseUITextbox.Po \
 	src/GUI/$(DEPDIR)/neosu-CBaseUIWindow.Po \
 	src/GUI/$(DEPDIR)/neosu-CWindowManager.Po \
-	src/GUI/$(DEPDIR)/neosu-GaussianBlurKernel.Po \
 	src/GUI/Windows/$(DEPDIR)/neosu-Console.Po \
 	src/GUI/Windows/$(DEPDIR)/neosu-ConsoleBox.Po \
 	src/GUI/Windows/$(DEPDIR)/neosu-VisualProfiler.Po \
-	src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSControlBar.Po \
-	src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSMusicBrowser.Po \
-	src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSTitleBar.Po \
-	src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VinylScratcher.Po \
 	src/Platform/$(DEPDIR)/neosu-main.Po \
 	src/Platform/Linux/$(DEPDIR)/neosu-LinuxEnvironment.Po \
 	src/Platform/Linux/$(DEPDIR)/neosu-LinuxGLLegacyInterface.Po \
@@ -960,7 +948,6 @@ neosu_SOURCES = \
 	src/Engine/Sound/SoundEngine.cpp \
 	src/Engine/TextureAtlas.cpp \
 	src/Engine/VertexArrayObject.cpp \
-	src/GUI/CBaseUIBoxShadow.cpp \
 	src/GUI/CBaseUIButton.cpp \
 	src/GUI/CBaseUICheckbox.cpp \
 	src/GUI/CBaseUIContainer.cpp \
@@ -974,13 +961,8 @@ neosu_SOURCES = \
 	src/GUI/CBaseUITextbox.cpp \
 	src/GUI/CBaseUIWindow.cpp \
 	src/GUI/CWindowManager.cpp \
-	src/GUI/GaussianBlurKernel.cpp \
 	src/GUI/Windows/Console.cpp \
 	src/GUI/Windows/ConsoleBox.cpp \
-	src/GUI/Windows/VinylScratcher/VSControlBar.cpp \
-	src/GUI/Windows/VinylScratcher/VSMusicBrowser.cpp \
-	src/GUI/Windows/VinylScratcher/VSTitleBar.cpp \
-	src/GUI/Windows/VinylScratcher/VinylScratcher.cpp \
 	src/GUI/Windows/VisualProfiler.cpp \
 	src/Platform/Linux/LinuxEnvironment.cpp \
 	src/Platform/Linux/LinuxGLLegacyInterface.cpp \
@@ -1671,8 +1653,6 @@ src/GUI/$(am__dirstamp):
 src/GUI/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) src/GUI/$(DEPDIR)
 	@: >>src/GUI/$(DEPDIR)/$(am__dirstamp)
-src/GUI/neosu-CBaseUIBoxShadow.$(OBJEXT): src/GUI/$(am__dirstamp) \
-	src/GUI/$(DEPDIR)/$(am__dirstamp)
 src/GUI/neosu-CBaseUIButton.$(OBJEXT): src/GUI/$(am__dirstamp) \
 	src/GUI/$(DEPDIR)/$(am__dirstamp)
 src/GUI/neosu-CBaseUICheckbox.$(OBJEXT): src/GUI/$(am__dirstamp) \
@@ -1699,8 +1679,6 @@ src/GUI/neosu-CBaseUIWindow.$(OBJEXT): src/GUI/$(am__dirstamp) \
 	src/GUI/$(DEPDIR)/$(am__dirstamp)
 src/GUI/neosu-CWindowManager.$(OBJEXT): src/GUI/$(am__dirstamp) \
 	src/GUI/$(DEPDIR)/$(am__dirstamp)
-src/GUI/neosu-GaussianBlurKernel.$(OBJEXT): src/GUI/$(am__dirstamp) \
-	src/GUI/$(DEPDIR)/$(am__dirstamp)
 src/GUI/Windows/$(am__dirstamp):
 	@$(MKDIR_P) src/GUI/Windows
 	@: >>src/GUI/Windows/$(am__dirstamp)
@@ -1713,24 +1691,6 @@ src/GUI/Windows/neosu-Console.$(OBJEXT):  \
 src/GUI/Windows/neosu-ConsoleBox.$(OBJEXT):  \
 	src/GUI/Windows/$(am__dirstamp) \
 	src/GUI/Windows/$(DEPDIR)/$(am__dirstamp)
-src/GUI/Windows/VinylScratcher/$(am__dirstamp):
-	@$(MKDIR_P) src/GUI/Windows/VinylScratcher
-	@: >>src/GUI/Windows/VinylScratcher/$(am__dirstamp)
-src/GUI/Windows/VinylScratcher/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) src/GUI/Windows/VinylScratcher/$(DEPDIR)
-	@: >>src/GUI/Windows/VinylScratcher/$(DEPDIR)/$(am__dirstamp)
-src/GUI/Windows/VinylScratcher/neosu-VSControlBar.$(OBJEXT):  \
-	src/GUI/Windows/VinylScratcher/$(am__dirstamp) \
-	src/GUI/Windows/VinylScratcher/$(DEPDIR)/$(am__dirstamp)
-src/GUI/Windows/VinylScratcher/neosu-VSMusicBrowser.$(OBJEXT):  \
-	src/GUI/Windows/VinylScratcher/$(am__dirstamp) \
-	src/GUI/Windows/VinylScratcher/$(DEPDIR)/$(am__dirstamp)
-src/GUI/Windows/VinylScratcher/neosu-VSTitleBar.$(OBJEXT):  \
-	src/GUI/Windows/VinylScratcher/$(am__dirstamp) \
-	src/GUI/Windows/VinylScratcher/$(DEPDIR)/$(am__dirstamp)
-src/GUI/Windows/VinylScratcher/neosu-VinylScratcher.$(OBJEXT):  \
-	src/GUI/Windows/VinylScratcher/$(am__dirstamp) \
-	src/GUI/Windows/VinylScratcher/$(DEPDIR)/$(am__dirstamp)
 src/GUI/Windows/neosu-VisualProfiler.$(OBJEXT):  \
 	src/GUI/Windows/$(am__dirstamp) \
 	src/GUI/Windows/$(DEPDIR)/$(am__dirstamp)
@@ -1812,7 +1772,6 @@ mostlyclean-compile:
 	-rm -f src/Engine/Sound/SoLoud/*.$(OBJEXT)
 	-rm -f src/GUI/*.$(OBJEXT)
 	-rm -f src/GUI/Windows/*.$(OBJEXT)
-	-rm -f src/GUI/Windows/VinylScratcher/*.$(OBJEXT)
 	-rm -f src/Platform/*.$(OBJEXT)
 	-rm -f src/Platform/Linux/*.$(OBJEXT)
 	-rm -f src/Platform/Windows/*.$(OBJEXT)
@@ -1953,7 +1912,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudFX.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudSound.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudSoundEngine.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/GUI/$(DEPDIR)/neosu-CBaseUIBoxShadow.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI/$(DEPDIR)/neosu-CBaseUIButton.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI/$(DEPDIR)/neosu-CBaseUICheckbox.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI/$(DEPDIR)/neosu-CBaseUIContainer.Po@am__quote@ # am--include-marker
@@ -1967,14 +1925,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI/$(DEPDIR)/neosu-CBaseUITextbox.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI/$(DEPDIR)/neosu-CBaseUIWindow.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI/$(DEPDIR)/neosu-CWindowManager.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/GUI/$(DEPDIR)/neosu-GaussianBlurKernel.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI/Windows/$(DEPDIR)/neosu-Console.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI/Windows/$(DEPDIR)/neosu-ConsoleBox.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI/Windows/$(DEPDIR)/neosu-VisualProfiler.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSControlBar.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSMusicBrowser.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSTitleBar.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VinylScratcher.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Platform/$(DEPDIR)/neosu-main.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Platform/Linux/$(DEPDIR)/neosu-LinuxEnvironment.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Platform/Linux/$(DEPDIR)/neosu-LinuxGLLegacyInterface.Po@am__quote@ # am--include-marker
@@ -3858,20 +3811,6 @@ src/Engine/neosu-VertexArrayObject.obj: src/Engine/VertexArrayObject.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/neosu-VertexArrayObject.obj `if test -f 'src/Engine/VertexArrayObject.cpp'; then $(CYGPATH_W) 'src/Engine/VertexArrayObject.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/VertexArrayObject.cpp'; fi`
 
-src/GUI/neosu-CBaseUIBoxShadow.o: src/GUI/CBaseUIBoxShadow.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/GUI/neosu-CBaseUIBoxShadow.o -MD -MP -MF src/GUI/$(DEPDIR)/neosu-CBaseUIBoxShadow.Tpo -c -o src/GUI/neosu-CBaseUIBoxShadow.o `test -f 'src/GUI/CBaseUIBoxShadow.cpp' || echo '$(srcdir)/'`src/GUI/CBaseUIBoxShadow.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/GUI/$(DEPDIR)/neosu-CBaseUIBoxShadow.Tpo src/GUI/$(DEPDIR)/neosu-CBaseUIBoxShadow.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/GUI/CBaseUIBoxShadow.cpp' object='src/GUI/neosu-CBaseUIBoxShadow.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/GUI/neosu-CBaseUIBoxShadow.o `test -f 'src/GUI/CBaseUIBoxShadow.cpp' || echo '$(srcdir)/'`src/GUI/CBaseUIBoxShadow.cpp
-
-src/GUI/neosu-CBaseUIBoxShadow.obj: src/GUI/CBaseUIBoxShadow.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/GUI/neosu-CBaseUIBoxShadow.obj -MD -MP -MF src/GUI/$(DEPDIR)/neosu-CBaseUIBoxShadow.Tpo -c -o src/GUI/neosu-CBaseUIBoxShadow.obj `if test -f 'src/GUI/CBaseUIBoxShadow.cpp'; then $(CYGPATH_W) 'src/GUI/CBaseUIBoxShadow.cpp'; else $(CYGPATH_W) '$(srcdir)/src/GUI/CBaseUIBoxShadow.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/GUI/$(DEPDIR)/neosu-CBaseUIBoxShadow.Tpo src/GUI/$(DEPDIR)/neosu-CBaseUIBoxShadow.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/GUI/CBaseUIBoxShadow.cpp' object='src/GUI/neosu-CBaseUIBoxShadow.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/GUI/neosu-CBaseUIBoxShadow.obj `if test -f 'src/GUI/CBaseUIBoxShadow.cpp'; then $(CYGPATH_W) 'src/GUI/CBaseUIBoxShadow.cpp'; else $(CYGPATH_W) '$(srcdir)/src/GUI/CBaseUIBoxShadow.cpp'; fi`
-
 src/GUI/neosu-CBaseUIButton.o: src/GUI/CBaseUIButton.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/GUI/neosu-CBaseUIButton.o -MD -MP -MF src/GUI/$(DEPDIR)/neosu-CBaseUIButton.Tpo -c -o src/GUI/neosu-CBaseUIButton.o `test -f 'src/GUI/CBaseUIButton.cpp' || echo '$(srcdir)/'`src/GUI/CBaseUIButton.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/GUI/$(DEPDIR)/neosu-CBaseUIButton.Tpo src/GUI/$(DEPDIR)/neosu-CBaseUIButton.Po
@@ -4054,20 +3993,6 @@ src/GUI/neosu-CWindowManager.obj: src/GUI/CWindowManager.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/GUI/neosu-CWindowManager.obj `if test -f 'src/GUI/CWindowManager.cpp'; then $(CYGPATH_W) 'src/GUI/CWindowManager.cpp'; else $(CYGPATH_W) '$(srcdir)/src/GUI/CWindowManager.cpp'; fi`
 
-src/GUI/neosu-GaussianBlurKernel.o: src/GUI/GaussianBlurKernel.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/GUI/neosu-GaussianBlurKernel.o -MD -MP -MF src/GUI/$(DEPDIR)/neosu-GaussianBlurKernel.Tpo -c -o src/GUI/neosu-GaussianBlurKernel.o `test -f 'src/GUI/GaussianBlurKernel.cpp' || echo '$(srcdir)/'`src/GUI/GaussianBlurKernel.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/GUI/$(DEPDIR)/neosu-GaussianBlurKernel.Tpo src/GUI/$(DEPDIR)/neosu-GaussianBlurKernel.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/GUI/GaussianBlurKernel.cpp' object='src/GUI/neosu-GaussianBlurKernel.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/GUI/neosu-GaussianBlurKernel.o `test -f 'src/GUI/GaussianBlurKernel.cpp' || echo '$(srcdir)/'`src/GUI/GaussianBlurKernel.cpp
-
-src/GUI/neosu-GaussianBlurKernel.obj: src/GUI/GaussianBlurKernel.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/GUI/neosu-GaussianBlurKernel.obj -MD -MP -MF src/GUI/$(DEPDIR)/neosu-GaussianBlurKernel.Tpo -c -o src/GUI/neosu-GaussianBlurKernel.obj `if test -f 'src/GUI/GaussianBlurKernel.cpp'; then $(CYGPATH_W) 'src/GUI/GaussianBlurKernel.cpp'; else $(CYGPATH_W) '$(srcdir)/src/GUI/GaussianBlurKernel.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/GUI/$(DEPDIR)/neosu-GaussianBlurKernel.Tpo src/GUI/$(DEPDIR)/neosu-GaussianBlurKernel.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/GUI/GaussianBlurKernel.cpp' object='src/GUI/neosu-GaussianBlurKernel.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/GUI/neosu-GaussianBlurKernel.obj `if test -f 'src/GUI/GaussianBlurKernel.cpp'; then $(CYGPATH_W) 'src/GUI/GaussianBlurKernel.cpp'; else $(CYGPATH_W) '$(srcdir)/src/GUI/GaussianBlurKernel.cpp'; fi`
-
 src/GUI/Windows/neosu-Console.o: src/GUI/Windows/Console.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/GUI/Windows/neosu-Console.o -MD -MP -MF src/GUI/Windows/$(DEPDIR)/neosu-Console.Tpo -c -o src/GUI/Windows/neosu-Console.o `test -f 'src/GUI/Windows/Console.cpp' || echo '$(srcdir)/'`src/GUI/Windows/Console.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/GUI/Windows/$(DEPDIR)/neosu-Console.Tpo src/GUI/Windows/$(DEPDIR)/neosu-Console.Po
@@ -4095,62 +4020,6 @@ src/GUI/Windows/neosu-ConsoleBox.obj: src/GUI/Windows/ConsoleBox.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/GUI/Windows/ConsoleBox.cpp' object='src/GUI/Windows/neosu-ConsoleBox.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/GUI/Windows/neosu-ConsoleBox.obj `if test -f 'src/GUI/Windows/ConsoleBox.cpp'; then $(CYGPATH_W) 'src/GUI/Windows/ConsoleBox.cpp'; else $(CYGPATH_W) '$(srcdir)/src/GUI/Windows/ConsoleBox.cpp'; fi`
-
-src/GUI/Windows/VinylScratcher/neosu-VSControlBar.o: src/GUI/Windows/VinylScratcher/VSControlBar.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/GUI/Windows/VinylScratcher/neosu-VSControlBar.o -MD -MP -MF src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSControlBar.Tpo -c -o src/GUI/Windows/VinylScratcher/neosu-VSControlBar.o `test -f 'src/GUI/Windows/VinylScratcher/VSControlBar.cpp' || echo '$(srcdir)/'`src/GUI/Windows/VinylScratcher/VSControlBar.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSControlBar.Tpo src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSControlBar.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/GUI/Windows/VinylScratcher/VSControlBar.cpp' object='src/GUI/Windows/VinylScratcher/neosu-VSControlBar.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/GUI/Windows/VinylScratcher/neosu-VSControlBar.o `test -f 'src/GUI/Windows/VinylScratcher/VSControlBar.cpp' || echo '$(srcdir)/'`src/GUI/Windows/VinylScratcher/VSControlBar.cpp
-
-src/GUI/Windows/VinylScratcher/neosu-VSControlBar.obj: src/GUI/Windows/VinylScratcher/VSControlBar.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/GUI/Windows/VinylScratcher/neosu-VSControlBar.obj -MD -MP -MF src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSControlBar.Tpo -c -o src/GUI/Windows/VinylScratcher/neosu-VSControlBar.obj `if test -f 'src/GUI/Windows/VinylScratcher/VSControlBar.cpp'; then $(CYGPATH_W) 'src/GUI/Windows/VinylScratcher/VSControlBar.cpp'; else $(CYGPATH_W) '$(srcdir)/src/GUI/Windows/VinylScratcher/VSControlBar.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSControlBar.Tpo src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSControlBar.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/GUI/Windows/VinylScratcher/VSControlBar.cpp' object='src/GUI/Windows/VinylScratcher/neosu-VSControlBar.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/GUI/Windows/VinylScratcher/neosu-VSControlBar.obj `if test -f 'src/GUI/Windows/VinylScratcher/VSControlBar.cpp'; then $(CYGPATH_W) 'src/GUI/Windows/VinylScratcher/VSControlBar.cpp'; else $(CYGPATH_W) '$(srcdir)/src/GUI/Windows/VinylScratcher/VSControlBar.cpp'; fi`
-
-src/GUI/Windows/VinylScratcher/neosu-VSMusicBrowser.o: src/GUI/Windows/VinylScratcher/VSMusicBrowser.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/GUI/Windows/VinylScratcher/neosu-VSMusicBrowser.o -MD -MP -MF src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSMusicBrowser.Tpo -c -o src/GUI/Windows/VinylScratcher/neosu-VSMusicBrowser.o `test -f 'src/GUI/Windows/VinylScratcher/VSMusicBrowser.cpp' || echo '$(srcdir)/'`src/GUI/Windows/VinylScratcher/VSMusicBrowser.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSMusicBrowser.Tpo src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSMusicBrowser.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/GUI/Windows/VinylScratcher/VSMusicBrowser.cpp' object='src/GUI/Windows/VinylScratcher/neosu-VSMusicBrowser.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/GUI/Windows/VinylScratcher/neosu-VSMusicBrowser.o `test -f 'src/GUI/Windows/VinylScratcher/VSMusicBrowser.cpp' || echo '$(srcdir)/'`src/GUI/Windows/VinylScratcher/VSMusicBrowser.cpp
-
-src/GUI/Windows/VinylScratcher/neosu-VSMusicBrowser.obj: src/GUI/Windows/VinylScratcher/VSMusicBrowser.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/GUI/Windows/VinylScratcher/neosu-VSMusicBrowser.obj -MD -MP -MF src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSMusicBrowser.Tpo -c -o src/GUI/Windows/VinylScratcher/neosu-VSMusicBrowser.obj `if test -f 'src/GUI/Windows/VinylScratcher/VSMusicBrowser.cpp'; then $(CYGPATH_W) 'src/GUI/Windows/VinylScratcher/VSMusicBrowser.cpp'; else $(CYGPATH_W) '$(srcdir)/src/GUI/Windows/VinylScratcher/VSMusicBrowser.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSMusicBrowser.Tpo src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSMusicBrowser.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/GUI/Windows/VinylScratcher/VSMusicBrowser.cpp' object='src/GUI/Windows/VinylScratcher/neosu-VSMusicBrowser.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/GUI/Windows/VinylScratcher/neosu-VSMusicBrowser.obj `if test -f 'src/GUI/Windows/VinylScratcher/VSMusicBrowser.cpp'; then $(CYGPATH_W) 'src/GUI/Windows/VinylScratcher/VSMusicBrowser.cpp'; else $(CYGPATH_W) '$(srcdir)/src/GUI/Windows/VinylScratcher/VSMusicBrowser.cpp'; fi`
-
-src/GUI/Windows/VinylScratcher/neosu-VSTitleBar.o: src/GUI/Windows/VinylScratcher/VSTitleBar.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/GUI/Windows/VinylScratcher/neosu-VSTitleBar.o -MD -MP -MF src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSTitleBar.Tpo -c -o src/GUI/Windows/VinylScratcher/neosu-VSTitleBar.o `test -f 'src/GUI/Windows/VinylScratcher/VSTitleBar.cpp' || echo '$(srcdir)/'`src/GUI/Windows/VinylScratcher/VSTitleBar.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSTitleBar.Tpo src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSTitleBar.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/GUI/Windows/VinylScratcher/VSTitleBar.cpp' object='src/GUI/Windows/VinylScratcher/neosu-VSTitleBar.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/GUI/Windows/VinylScratcher/neosu-VSTitleBar.o `test -f 'src/GUI/Windows/VinylScratcher/VSTitleBar.cpp' || echo '$(srcdir)/'`src/GUI/Windows/VinylScratcher/VSTitleBar.cpp
-
-src/GUI/Windows/VinylScratcher/neosu-VSTitleBar.obj: src/GUI/Windows/VinylScratcher/VSTitleBar.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/GUI/Windows/VinylScratcher/neosu-VSTitleBar.obj -MD -MP -MF src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSTitleBar.Tpo -c -o src/GUI/Windows/VinylScratcher/neosu-VSTitleBar.obj `if test -f 'src/GUI/Windows/VinylScratcher/VSTitleBar.cpp'; then $(CYGPATH_W) 'src/GUI/Windows/VinylScratcher/VSTitleBar.cpp'; else $(CYGPATH_W) '$(srcdir)/src/GUI/Windows/VinylScratcher/VSTitleBar.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSTitleBar.Tpo src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSTitleBar.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/GUI/Windows/VinylScratcher/VSTitleBar.cpp' object='src/GUI/Windows/VinylScratcher/neosu-VSTitleBar.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/GUI/Windows/VinylScratcher/neosu-VSTitleBar.obj `if test -f 'src/GUI/Windows/VinylScratcher/VSTitleBar.cpp'; then $(CYGPATH_W) 'src/GUI/Windows/VinylScratcher/VSTitleBar.cpp'; else $(CYGPATH_W) '$(srcdir)/src/GUI/Windows/VinylScratcher/VSTitleBar.cpp'; fi`
-
-src/GUI/Windows/VinylScratcher/neosu-VinylScratcher.o: src/GUI/Windows/VinylScratcher/VinylScratcher.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/GUI/Windows/VinylScratcher/neosu-VinylScratcher.o -MD -MP -MF src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VinylScratcher.Tpo -c -o src/GUI/Windows/VinylScratcher/neosu-VinylScratcher.o `test -f 'src/GUI/Windows/VinylScratcher/VinylScratcher.cpp' || echo '$(srcdir)/'`src/GUI/Windows/VinylScratcher/VinylScratcher.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VinylScratcher.Tpo src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VinylScratcher.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/GUI/Windows/VinylScratcher/VinylScratcher.cpp' object='src/GUI/Windows/VinylScratcher/neosu-VinylScratcher.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/GUI/Windows/VinylScratcher/neosu-VinylScratcher.o `test -f 'src/GUI/Windows/VinylScratcher/VinylScratcher.cpp' || echo '$(srcdir)/'`src/GUI/Windows/VinylScratcher/VinylScratcher.cpp
-
-src/GUI/Windows/VinylScratcher/neosu-VinylScratcher.obj: src/GUI/Windows/VinylScratcher/VinylScratcher.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/GUI/Windows/VinylScratcher/neosu-VinylScratcher.obj -MD -MP -MF src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VinylScratcher.Tpo -c -o src/GUI/Windows/VinylScratcher/neosu-VinylScratcher.obj `if test -f 'src/GUI/Windows/VinylScratcher/VinylScratcher.cpp'; then $(CYGPATH_W) 'src/GUI/Windows/VinylScratcher/VinylScratcher.cpp'; else $(CYGPATH_W) '$(srcdir)/src/GUI/Windows/VinylScratcher/VinylScratcher.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VinylScratcher.Tpo src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VinylScratcher.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/GUI/Windows/VinylScratcher/VinylScratcher.cpp' object='src/GUI/Windows/VinylScratcher/neosu-VinylScratcher.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/GUI/Windows/VinylScratcher/neosu-VinylScratcher.obj `if test -f 'src/GUI/Windows/VinylScratcher/VinylScratcher.cpp'; then $(CYGPATH_W) 'src/GUI/Windows/VinylScratcher/VinylScratcher.cpp'; else $(CYGPATH_W) '$(srcdir)/src/GUI/Windows/VinylScratcher/VinylScratcher.cpp'; fi`
 
 src/GUI/Windows/neosu-VisualProfiler.o: src/GUI/Windows/VisualProfiler.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/GUI/Windows/neosu-VisualProfiler.o -MD -MP -MF src/GUI/Windows/$(DEPDIR)/neosu-VisualProfiler.Tpo -c -o src/GUI/Windows/neosu-VisualProfiler.o `test -f 'src/GUI/Windows/VisualProfiler.cpp' || echo '$(srcdir)/'`src/GUI/Windows/VisualProfiler.cpp
@@ -4642,8 +4511,6 @@ distclean-generic:
 	-$(am__rm_f) src/GUI/$(am__dirstamp)
 	-$(am__rm_f) src/GUI/Windows/$(DEPDIR)/$(am__dirstamp)
 	-$(am__rm_f) src/GUI/Windows/$(am__dirstamp)
-	-$(am__rm_f) src/GUI/Windows/VinylScratcher/$(DEPDIR)/$(am__dirstamp)
-	-$(am__rm_f) src/GUI/Windows/VinylScratcher/$(am__dirstamp)
 	-$(am__rm_f) src/Platform/$(DEPDIR)/$(am__dirstamp)
 	-$(am__rm_f) src/Platform/$(am__dirstamp)
 	-$(am__rm_f) src/Platform/Linux/$(DEPDIR)/$(am__dirstamp)
@@ -4796,7 +4663,6 @@ distclean: distclean-am
 	-rm -f src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudFX.Po
 	-rm -f src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudSound.Po
 	-rm -f src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudSoundEngine.Po
-	-rm -f src/GUI/$(DEPDIR)/neosu-CBaseUIBoxShadow.Po
 	-rm -f src/GUI/$(DEPDIR)/neosu-CBaseUIButton.Po
 	-rm -f src/GUI/$(DEPDIR)/neosu-CBaseUICheckbox.Po
 	-rm -f src/GUI/$(DEPDIR)/neosu-CBaseUIContainer.Po
@@ -4810,14 +4676,9 @@ distclean: distclean-am
 	-rm -f src/GUI/$(DEPDIR)/neosu-CBaseUITextbox.Po
 	-rm -f src/GUI/$(DEPDIR)/neosu-CBaseUIWindow.Po
 	-rm -f src/GUI/$(DEPDIR)/neosu-CWindowManager.Po
-	-rm -f src/GUI/$(DEPDIR)/neosu-GaussianBlurKernel.Po
 	-rm -f src/GUI/Windows/$(DEPDIR)/neosu-Console.Po
 	-rm -f src/GUI/Windows/$(DEPDIR)/neosu-ConsoleBox.Po
 	-rm -f src/GUI/Windows/$(DEPDIR)/neosu-VisualProfiler.Po
-	-rm -f src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSControlBar.Po
-	-rm -f src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSMusicBrowser.Po
-	-rm -f src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSTitleBar.Po
-	-rm -f src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VinylScratcher.Po
 	-rm -f src/Platform/$(DEPDIR)/neosu-main.Po
 	-rm -f src/Platform/Linux/$(DEPDIR)/neosu-LinuxEnvironment.Po
 	-rm -f src/Platform/Linux/$(DEPDIR)/neosu-LinuxGLLegacyInterface.Po
@@ -5010,7 +4871,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudFX.Po
 	-rm -f src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudSound.Po
 	-rm -f src/Engine/Sound/SoLoud/$(DEPDIR)/neosu-SoLoudSoundEngine.Po
-	-rm -f src/GUI/$(DEPDIR)/neosu-CBaseUIBoxShadow.Po
 	-rm -f src/GUI/$(DEPDIR)/neosu-CBaseUIButton.Po
 	-rm -f src/GUI/$(DEPDIR)/neosu-CBaseUICheckbox.Po
 	-rm -f src/GUI/$(DEPDIR)/neosu-CBaseUIContainer.Po
@@ -5024,14 +4884,9 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/GUI/$(DEPDIR)/neosu-CBaseUITextbox.Po
 	-rm -f src/GUI/$(DEPDIR)/neosu-CBaseUIWindow.Po
 	-rm -f src/GUI/$(DEPDIR)/neosu-CWindowManager.Po
-	-rm -f src/GUI/$(DEPDIR)/neosu-GaussianBlurKernel.Po
 	-rm -f src/GUI/Windows/$(DEPDIR)/neosu-Console.Po
 	-rm -f src/GUI/Windows/$(DEPDIR)/neosu-ConsoleBox.Po
 	-rm -f src/GUI/Windows/$(DEPDIR)/neosu-VisualProfiler.Po
-	-rm -f src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSControlBar.Po
-	-rm -f src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSMusicBrowser.Po
-	-rm -f src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSTitleBar.Po
-	-rm -f src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VinylScratcher.Po
 	-rm -f src/Platform/$(DEPDIR)/neosu-main.Po
 	-rm -f src/Platform/Linux/$(DEPDIR)/neosu-LinuxEnvironment.Po
 	-rm -f src/Platform/Linux/$(DEPDIR)/neosu-LinuxGLLegacyInterface.Po

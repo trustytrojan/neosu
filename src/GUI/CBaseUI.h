@@ -8,7 +8,6 @@
 #ifndef GUI_CBASEUI_H_
 #define GUI_CBASEUI_H_
 
-#include "CBaseUIBoxShadow.h"
 #include "CBaseUIButton.h"
 #include "CBaseUICheckbox.h"
 #include "CBaseUIImage.h"
@@ -21,7 +20,6 @@
 #include "CBaseUIWindow.h"
 
 namespace UI {
-typedef CBaseUIBoxShadow BoxShadow;
 typedef CBaseUIButton Button;
 typedef CBaseUIImage Image;
 typedef CBaseUIImageButton ImageButton;

@@ -8,7 +8,6 @@
 class CBaseUITextbox;
 class CBaseUIButton;
 class CBaseUIScrollView;
-class CBaseUIBoxShadow;
 
 class ConsoleBoxTextbox;
 

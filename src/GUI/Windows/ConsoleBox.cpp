@@ -3,7 +3,6 @@
 #include <utility>
 
 #include "AnimationHandler.h"
-#include "CBaseUIBoxShadow.h"
 #include "CBaseUIButton.h"
 #include "CBaseUIContainer.h"
 #include "CBaseUIScrollView.h"

@@ -3,7 +3,6 @@
 #include <utility>
 
 #include "AnimationHandler.h"
-#include "CBaseUIBoxShadow.h"
 #include "CBaseUIButton.h"
 #include "CBaseUIContainer.h"
 #include "ConVar.h"
@@ -79,12 +78,6 @@ CBaseUIWindow::CBaseUIWindow(float xPos, float yPos, float xSize, float ySize, c
     this->bDrawFrame = true;
     this->bDrawBackground = true;
     this->bRoundedRectangle = false;
-
-    // test features
-    // m_rt = resourceManager->createRenderTarget(this->vPos.x, this->vPos.y, this->vSize.x+1,
-    // this->vSize.y+1); float shadowRadius = ui_window_shadow_radius.getInt();
-    /// m_shadow = new CBaseUIBoxShadow(0xff000000, shadowRadius, this->vPos.x-shadowRadius, this->vPos.y-shadowRadius,
-    /// m_vSize.x+shadowRadius*2, this->vSize.y+shadowRadius*2+4, "windowshadow");
 
     this->setTitle(name);
     this->setVisible(false);
