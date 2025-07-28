@@ -1,9 +1,9 @@
 # Dependencies configuration for neosu
 # This file contains version information, URLs, and hashes for all external dependencies
 
-set(SDL3_VERSION "277f91c3176c88193648760a651f8dd6407035dc")
+set(SDL3_VERSION "25cf1a569c390282eebe28b6cbe1c2878ba10599")
 set(SDL3_URL "https://github.com/libsdl-org/SDL/archive/${SDL3_VERSION}.tar.gz")
-set(SDL3_HASH "SHA512=454e21fb61fcedc99d93c52ba544fc319e836d98f8c9bfdc904209d99201394d7c5320e1330e912945e412fb5b067de9d639bf9920d33a1219ceb95020e1b8b3")
+set(SDL3_HASH "SHA512=52293c41be2243ba8b31b3381e7554c593e2c1e54dfdb6e24ddaaa8751abe777d56f6bd63df33b4708678c9d4cb68526c344a2b92e06a497c099bb75818770e5")
 
 set(FREETYPE2_VERSION "2.13.3")
 string(REPLACE "." "-" _freetype_ver_temp "${FREETYPE2_VERSION}")
@@ -11,13 +11,13 @@ set(FREETYPE2_URL "https://github.com/freetype/freetype/archive/refs/tags/VER-${
 set(FREETYPE2_HASH "SHA512=fccfaa15eb79a105981bf634df34ac9ddf1c53550ec0b334903a1b21f9f8bf5eb2b3f9476e554afa112a0fca58ec85ab212d674dfd853670efec876bacbe8a53")
 unset(_freetype_ver_temp)
 
-set(LIBJPEG_VERSION "3.1.0")
+set(LIBJPEG_VERSION "3.1.1")
 set(LIBJPEG_URL "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/${LIBJPEG_VERSION}/libjpeg-turbo-${LIBJPEG_VERSION}.tar.gz")
-set(LIBJPEG_HASH "SHA512=63231854529f59a95814cf2414fe384360a4ed96c572764fabc535c3770c559d26943e129c905a63d5949088fa79138b1ffdb175b817f2f4d36329a3cbb23ea7")
+set(LIBJPEG_HASH "SHA512=d08c8eb77281c1eee2c93ef9f2eefaf79a4b9adff5172ebcb20c845ccad8896a28fc3d622002cc8b28964ff860dca0a491d6b1b921aaa7aedccd21b909aad4cb")
 
-set(LIBPNG_VERSION "1.6.48")
+set(LIBPNG_VERSION "1.6.50")
 set(LIBPNG_URL "https://github.com/pnggroup/libpng/archive/refs/tags/v${LIBPNG_VERSION}.tar.gz")
-set(LIBPNG_HASH "SHA512=3a0006256abc6f23f5be1d67b201303ceaaa58ffa901f4659ad95f025b08f5e1c30d374cc251196a2ff1ee3ef4b37bd4d61c7779eabd86922d3bdd047264d9c1")
+set(LIBPNG_HASH "SHA512=34c806e0dda960b480ce2f5ea13e2e55a9540f07c51948be25d312b901c431bc814f730f9322a2e3b6f88d4104a0c49bde9e616762b342d07db44e2c7fd5f2dc")
 
 set(ZLIB_VERSION "2.2.4")
 set(ZLIB_URL "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/${ZLIB_VERSION}.tar.gz")
@@ -27,9 +27,9 @@ set(BZIP2_VERSION "1ea1ac188ad4b9cb662e3f8314673c63df95a589")
 set(BZIP2_URL "https://github.com/libarchive/bzip2/archive/${BZIP2_VERSION}.tar.gz")
 set(BZIP2_HASH "SHA512=a1aae1e884f85a225e2a1ddf610f11dda672bc242d4e8d0cda3534efb438b3a0306ec1d130eec378d46abb48f6875687d6b20dcc18a6037a4455f531c22d50f6")
 
-set(FMT_VERSION "553ec11ec06fbe0beebfbb45f9dc3c9eabd83d28")
+set(FMT_VERSION "93f03953af6b0268e1a29bb5b23d50f72b87a151")
 set(FMT_URL "https://github.com/fmtlib/fmt/archive/${FMT_VERSION}.tar.gz")
-set(FMT_HASH "SHA512=6ef962d1509395a5f0fedc645c2d1a48f748debec5f2a2be7004e4c5d99610471b0b133a9656d25f875b4fba676c3a5076347a46c900dd78bb8bc9d3279553a1")
+set(FMT_HASH "SHA512=fd72b657e3ccf8a570ae8bf5bafd4908d779dee89c971cfda9c7fb016e32f17cf6ce8083391d8624d1fed064ead5941cc2052a8643215729b922489273638599")
 
 set(GLM_VERSION "1.0.1")
 set(GLM_URL "https://github.com/g-truc/glm/archive/refs/tags/${GLM_VERSION}.tar.gz")
