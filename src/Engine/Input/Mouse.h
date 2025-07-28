@@ -25,34 +25,30 @@ class Mouse final : public InputDevice {
     void onButtonChange(ButtonIndex button, bool down);
 
     void setPos(Vector2d pos);
-    void setCursorType(CURSORTYPE cursorType);
-    void setCursorVisible(bool cursorVisible);
 
     void setOffset(Vector2d offset) { this->vOffset = offset; }
     void setScale(Vector2d scale) { this->vScale = scale; }
 
-    [[nodiscard]] inline Vector2d getPos() const { return this->vPos; }
-    [[nodiscard]] inline Vector2d getDelta() const { return this->vDelta; }
-    [[nodiscard]] inline Vector2d getRawDelta() const { return this->vRawDelta; }
-    [[nodiscard]] inline Vector2d getOffset() const { return this->vOffset; }
+    [[nodiscard]] constexpr Vector2d getPos() const { return this->vPos; }
+    [[nodiscard]] constexpr Vector2d getDelta() const { return this->vDelta; }
+    [[nodiscard]] constexpr Vector2d getRawDelta() const { return this->vRawDelta; }
+    [[nodiscard]] constexpr Vector2d getOffset() const { return this->vOffset; }
 
-    [[nodiscard]] inline bool isLeftDown() const {
-        return bMouseButtonDownArray[static_cast<size_t>(ButtonIndex::BUTTON_LEFT)];
+    [[nodiscard]] constexpr bool isLeftDown() const {
+        return this->bMouseButtonDownArray[static_cast<size_t>(ButtonIndex::BUTTON_LEFT)];
     }
-    [[nodiscard]] inline bool isMiddleDown() const {
-        return bMouseButtonDownArray[static_cast<size_t>(ButtonIndex::BUTTON_MIDDLE)];
+    [[nodiscard]] constexpr bool isMiddleDown() const {
+        return this->bMouseButtonDownArray[static_cast<size_t>(ButtonIndex::BUTTON_MIDDLE)];
     }
-    [[nodiscard]] inline bool isRightDown() const {
-        return bMouseButtonDownArray[static_cast<size_t>(ButtonIndex::BUTTON_RIGHT)];
+    [[nodiscard]] constexpr bool isRightDown() const {
+        return this->bMouseButtonDownArray[static_cast<size_t>(ButtonIndex::BUTTON_RIGHT)];
     }
-    [[nodiscard]] inline bool isButton4Down() const {
-        return bMouseButtonDownArray[static_cast<size_t>(ButtonIndex::BUTTON_X1)];
+    [[nodiscard]] constexpr bool isButton4Down() const {
+        return this->bMouseButtonDownArray[static_cast<size_t>(ButtonIndex::BUTTON_X1)];
     }
-    [[nodiscard]] inline bool isButton5Down() const {
-        return bMouseButtonDownArray[static_cast<size_t>(ButtonIndex::BUTTON_X2)];
+    [[nodiscard]] constexpr bool isButton5Down() const {
+        return this->bMouseButtonDownArray[static_cast<size_t>(ButtonIndex::BUTTON_X2)];
     }
-
-    bool isCursorVisible();
 
     [[nodiscard]] inline int getWheelDeltaVertical() const { return this->iWheelDeltaVertical; }
     [[nodiscard]] inline int getWheelDeltaHorizontal() const { return this->iWheelDeltaHorizontal; }
@@ -71,19 +67,19 @@ class Mouse final : public InputDevice {
     // button state (using our internal button index)
     std::array<bool, static_cast<size_t>(ButtonIndex::BUTTON_COUNT)> bMouseButtonDownArray{};
 
-    int iWheelDeltaVertical;
-    int iWheelDeltaHorizontal;
-    int iWheelDeltaVerticalActual;
-    int iWheelDeltaHorizontalActual;
+    int iWheelDeltaVertical{0};
+    int iWheelDeltaHorizontal{0};
+    int iWheelDeltaVerticalActual{0};
+    int iWheelDeltaHorizontalActual{0};
 
     std::vector<MouseListener *> listeners;
 
     // custom
-    bool bSetPosWasCalledLastFrame;
-    bool bAbsolute;
-    bool bVirtualDesktop;
+    bool bSetPosWasCalledLastFrame{false};
+    bool bAbsolute{false};
+    bool bVirtualDesktop{false};
     Vector2d vActualPos;
-    Vector2d vOffset;
-    Vector2d vScale;
+    Vector2d vOffset{0, 0};
+    Vector2d vScale{1, 1};
     McRect desktopRect;
 };

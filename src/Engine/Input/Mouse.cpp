@@ -6,16 +6,6 @@
 #include "ResourceManager.h"
 
 Mouse::Mouse() : InputDevice() {
-    this->iWheelDeltaVertical = 0;
-    this->iWheelDeltaHorizontal = 0;
-    this->iWheelDeltaVerticalActual = 0;
-    this->iWheelDeltaHorizontalActual = 0;
-
-    this->bSetPosWasCalledLastFrame = false;
-    this->bAbsolute = false;
-    this->bVirtualDesktop = false;
-    this->vOffset = Vector2d(0, 0);
-    this->vScale = Vector2d(1, 1);
     this->vActualPos = this->vPosWithoutOffset = this->vPos = env->getMousePos();
     this->desktopRect = env->getDesktopRect();
 }
@@ -322,9 +312,3 @@ void Mouse::setPos(Vector2d newPos) {
     this->vPrevOsMousePos.x = this->vPrevOsMousePos.x;
     this->vPrevOsMousePos.y = this->vPrevOsMousePos.y;
 }
-
-void Mouse::setCursorType(CURSORTYPE cursorType) { env->setCursor(cursorType); }
-
-void Mouse::setCursorVisible(bool cursorVisible) { env->setCursorVisible(cursorVisible); }
-
-bool Mouse::isCursorVisible() { return env->isCursorVisible(); }

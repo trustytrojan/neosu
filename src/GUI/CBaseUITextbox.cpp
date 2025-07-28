@@ -158,7 +158,7 @@ void CBaseUITextbox::mouse_update(bool *propagate_clicks) {
 
     if((this->bMouseInside || (this->bBusy && (mleft || mright))) && (this->bActive || (!mleft && !mright)) &&
        this->bEnabled)
-        mouse->setCursorType(CURSORTYPE::CURSOR_TEXT);
+        env->setCursor(CURSORTYPE::CURSOR_TEXT);
 
     // update caret blinking
     {
