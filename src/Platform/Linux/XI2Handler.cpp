@@ -157,7 +157,8 @@ void handleGenericEvent(Display *dpy, XEvent &xev) {
                         if(pressed) mouse->onWheelHorizontal(120);
                         break;
                     case 8:  // mouse 4 (back)
-                        if(keyboard != nullptr) {
+                        if(keyboard != nullptr && mouse != nullptr) {
+                            mouse->onButtonChange(ButtonIndex::BUTTON_X1, pressed);
                             if(pressed)
                                 keyboard->onKeyDown(XK_Pointer_Button4);
                             else
@@ -167,7 +168,8 @@ void handleGenericEvent(Display *dpy, XEvent &xev) {
                     case 9:  // mouse 5 (forwards)
                         // NOTE: abusing "dead vowels for universal
                         // syllable entry", no idea what this key does
-                        if(keyboard != nullptr) {
+                        if(keyboard != nullptr && mouse != nullptr) {
+                            mouse->onButtonChange(ButtonIndex::BUTTON_X2, pressed);
                             if(pressed)
                                 keyboard->onKeyDown(XK_Pointer_Button5);
                             else
