@@ -34,9 +34,6 @@ class LinuxMain final {
     XIC ic{0};
     int xi2opcode{0};
 
-    // keycode tracking for stuck key prevention
-    std::unordered_set<unsigned int> pressedKeycodes;
-
     void WndProc();
     KEYCODE normalizeKeysym(KEYCODE keysym);
 };

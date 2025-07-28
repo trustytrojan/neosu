@@ -312,8 +312,6 @@ void LinuxMain::WndProc() {
 
         case FocusIn:
             this->bHasFocus = true;
-            // clear keys on focus in/out to prevent stuck keys
-            this->pressedKeycodes.clear();
             if(baseEnv != NULL) {
                 baseEnv->invalidateMousePos();  // force refresh on focus
             }
@@ -324,7 +322,6 @@ void LinuxMain::WndProc() {
 
         case FocusOut:
             this->bHasFocus = false;
-            this->pressedKeycodes.clear();
             if(baseEnv != NULL) {
                 baseEnv->invalidateMousePos();  // force refresh on unfocus
             }
@@ -345,19 +342,14 @@ void LinuxMain::WndProc() {
             unsigned long keysym = XLookupKeysym(ke, 1);
 
             if(keyboard != NULL) {
-                // check if this physical key is already pressed (prevents stuck keys)
-                if(this->pressedKeycodes.find(ke->keycode) == this->pressedKeycodes.end()) {
-                    this->pressedKeycodes.insert(ke->keycode);
-
-                    // normalize shifted/unshifted keysym
-                    KEYCODE normalizedKey = normalizeKeysym(keysym);
-                    keyboard->onKeyDown(normalizedKey);
-                }
+                // normalize shifted/unshifted keysym
+                KEYCODE normalizedKey = normalizeKeysym(keysym);
+                keyboard->onKeyDown(normalizedKey);
             }
 
             // handle character input separately (this should still use modified lookup)
             constexpr int buffSize = 20;
-            std::array<char, buffSize> buf{};
+            static std::array<char, buffSize> buf{};
             Status status = 0;
             KeySym textKeysym = 0;
             int length = Xutf8LookupString(this->ic, (XKeyPressedEvent *)&this->xev.xkey, buf.data(), buffSize,
@@ -386,14 +378,9 @@ void LinuxMain::WndProc() {
                         break;  // throw the event away
                 }
 
-                // only process if this physical key was actually pressed
-                if(this->pressedKeycodes.find(ke->keycode) != this->pressedKeycodes.end()) {
-                    this->pressedKeycodes.erase(ke->keycode);
-
-                    // normalize shifted/unshifted keysym
-                    KEYCODE normalizedKey = normalizeKeysym(keysym);
-                    keyboard->onKeyUp(normalizedKey);
-                }
+                // normalize shifted/unshifted keysym
+                KEYCODE normalizedKey = normalizeKeysym(keysym);
+                keyboard->onKeyUp(normalizedKey);
             }
         } break;
 
