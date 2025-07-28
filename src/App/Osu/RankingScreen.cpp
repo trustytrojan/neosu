@@ -257,8 +257,8 @@ void RankingScreen::draw() {
         const UString prefix = "+ ";
 
         float maxStringWidth = 0.0f;
-        for(int i = 0; i < this->enabledExperimentalMods.size(); i++) {
-            UString experimentalModName{this->enabledExperimentalMods[i]->getName()};
+        for(auto &enabledExperimentalMod : this->enabledExperimentalMods) {
+            UString experimentalModName{enabledExperimentalMod->getName()};
             experimentalModName.insert(0, prefix);
             const float width = experimentalModFont->getStringWidth(experimentalModName);
             if(width > maxStringWidth) maxStringWidth = width;
@@ -282,8 +282,8 @@ void RankingScreen::draw() {
         g->pushTransform();
         {
             g->translate((int)experimentalModPos.x, (int)experimentalModPos.y);
-            for(int i = 0; i < this->enabledExperimentalMods.size(); i++) {
-                UString experimentalModName{this->enabledExperimentalMods[i]->getName()};
+            for(auto &enabledExperimentalMod : this->enabledExperimentalMods) {
+                UString experimentalModName{enabledExperimentalMod->getName()};
                 experimentalModName.insert(0, prefix);
 
                 g->translate(1.5f, 1.5f);

@@ -87,8 +87,8 @@ void PauseMenu::draw() {
     }
 
     // draw buttons
-    for(int i = 0; i < this->buttons.size(); i++) {
-        this->buttons[i]->setAlpha(1.0f - (1.0f - this->fDimAnim) * (1.0f - this->fDimAnim) * (1.0f - this->fDimAnim));
+    for(auto &button : this->buttons) {
+        button->setAlpha(1.0f - (1.0f - this->fDimAnim) * (1.0f - this->fDimAnim) * (1.0f - this->fDimAnim));
     }
     OsuScreen::draw();
 
@@ -188,9 +188,9 @@ void PauseMenu::onKeyDown(KeyboardEvent &e) {
             fireButtonClick = true;
         }
         if(fireButtonClick) {
-            for(int i = 0; i < this->buttons.size(); i++) {
-                if(this->buttons[i]->isMouseInside()) {
-                    this->buttons[i]->click();
+            for(auto &button : this->buttons) {
+                if(button->isMouseInside()) {
+                    button->click();
                     break;
                 }
             }
@@ -203,23 +203,23 @@ void PauseMenu::onKeyDown(KeyboardEvent &e) {
             UIPauseMenuButton *nextSelectedButton = this->buttons[0];
 
             // get first visible button
-            for(int i = 0; i < this->buttons.size(); i++) {
-                if(!this->buttons[i]->isVisible()) continue;
+            for(auto &button : this->buttons) {
+                if(!button->isVisible()) continue;
 
-                nextSelectedButton = this->buttons[i];
+                nextSelectedButton = button;
                 break;
             }
 
             // next selection logic
             bool next = false;
-            for(int i = 0; i < this->buttons.size(); i++) {
-                if(!this->buttons[i]->isVisible()) continue;
+            for(auto &button : this->buttons) {
+                if(!button->isVisible()) continue;
 
                 if(next) {
-                    nextSelectedButton = this->buttons[i];
+                    nextSelectedButton = button;
                     break;
                 }
-                if(this->selectedButton == this->buttons[i]) next = true;
+                if(this->selectedButton == button) next = true;
             }
             this->selectedButton = nextSelectedButton;
             this->onSelectionChange();
@@ -289,17 +289,17 @@ void PauseMenu::updateLayout() {
 
     float maxWidth = 0.0f;
     float maxHeight = 0.0f;
-    for(int i = 0; i < this->buttons.size(); i++) {
-        Image *img = this->buttons[i]->getImage();
+    for(auto &button : this->buttons) {
+        Image *img = button->getImage();
         if(img == NULL) img = osu->getSkin()->getMissingTexture();
 
         const float scale = osu->getUIScale(256) / (411.0f * (osu->getSkin()->isPauseContinue2x() ? 2.0f : 1.0f));
 
-        this->buttons[i]->setBaseScale(scale, scale);
-        this->buttons[i]->setSize(img->getWidth() * scale, img->getHeight() * scale);
+        button->setBaseScale(scale, scale);
+        button->setSize(img->getWidth() * scale, img->getHeight() * scale);
 
-        if(this->buttons[i]->getSize().x > maxWidth) maxWidth = this->buttons[i]->getSize().x;
-        if(this->buttons[i]->getSize().y > maxHeight) maxHeight = this->buttons[i]->getSize().y;
+        if(button->getSize().x > maxWidth) maxWidth = button->getSize().x;
+        if(button->getSize().y > maxHeight) maxHeight = button->getSize().y;
     }
 
     for(int i = 0; i < this->buttons.size(); i++) {

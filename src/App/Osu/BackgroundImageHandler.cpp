@@ -8,9 +8,9 @@
 BackgroundImageHandler::BackgroundImageHandler() { this->bFrozen = false; }
 
 BackgroundImageHandler::~BackgroundImageHandler() {
-    for(size_t i = 0; i < this->cache.size(); i++) {
-        resourceManager->destroyResource(this->cache[i].backgroundImagePathLoader);
-        resourceManager->destroyResource(this->cache[i].image);
+    for(auto &i : this->cache) {
+        resourceManager->destroyResource(i.backgroundImagePathLoader);
+        resourceManager->destroyResource(i.image);
     }
     this->cache.clear();
 }
@@ -116,8 +116,8 @@ Image *BackgroundImageHandler::getLoadBackgroundImage(const DatabaseBeatmap *bea
 
     // 1) if the path or image is already loaded, return image ref immediately (which may still be NULL) and keep track
     // of when it was last requested
-    for(size_t i = 0; i < this->cache.size(); i++) {
-        ENTRY &entry = this->cache[i];
+    for(auto &i : this->cache) {
+        ENTRY &entry = i;
 
         if(entry.osuFilePath == beatmap->getFilePath()) {
             entry.wasUsedLastFrame = true;
@@ -127,13 +127,11 @@ Image *BackgroundImageHandler::getLoadBackgroundImage(const DatabaseBeatmap *bea
             // HACKHACK: to improve future loading speed, if we have already loaded the backgroundImageFileName, force
             // update the database backgroundImageFileName and fullBackgroundImageFilePath this is similar to how it
             // worked before the rework, but 100% safe(r) since we are not async
-            if(this->cache[i].image != NULL && this->cache[i].backgroundImageFileName.length() > 1 &&
+            if(i.image != NULL && i.backgroundImageFileName.length() > 1 &&
                beatmap->getBackgroundImageFileName().length() < 2) {
-                const_cast<DatabaseBeatmap *>(beatmap)->sBackgroundImageFileName =
-                    this->cache[i].backgroundImageFileName;
+                const_cast<DatabaseBeatmap *>(beatmap)->sBackgroundImageFileName = i.backgroundImageFileName;
                 const_cast<DatabaseBeatmap *>(beatmap)->sFullBackgroundImageFilePath = beatmap->getFolder();
-                const_cast<DatabaseBeatmap *>(beatmap)->sFullBackgroundImageFilePath.append(
-                    this->cache[i].backgroundImageFileName);
+                const_cast<DatabaseBeatmap *>(beatmap)->sFullBackgroundImageFilePath.append(i.backgroundImageFileName);
             }
 
             return entry.image;

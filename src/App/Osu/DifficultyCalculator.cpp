@@ -680,8 +680,8 @@ DifficultyCalculator::DiffObject::DiffObject(OsuDifficultyHitObject *base_object
     : objects(diff_objects) {
     this->ho = base_object;
 
-    for(int i = 0; i < Skills::NUM_SKILLS; i++) {
-        this->strains[i] = 0.0;
+    for(double &strain : this->strains) {
+        strain = 0.0;
     }
     this->raw_speed_strain = 0.0;
     this->rhythm = 0.0;
@@ -1100,9 +1100,9 @@ double DifficultyCalculator::DiffObject::spacing_weight2(const Skills::Skill dif
                         }
 
                         std::pair<RhythmIsland, int> *islandCount = nullptr;
-                        for(int i = 0; i < islandCounts.size(); i++) {
-                            if(islandCounts[i].first.equals(island, deltaDifferenceEpsilon)) {
-                                islandCount = &islandCounts[i];
+                        for(auto &i : islandCounts) {
+                            if(i.first.equals(island, deltaDifferenceEpsilon)) {
+                                islandCount = &i;
                                 break;
                             }
                         }

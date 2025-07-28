@@ -277,9 +277,9 @@ Osu::Osu() {
     this->fonts.push_back(this->fontIcons);
 
     float averageIconHeight = 0.0f;
-    for(int i = 0; i < Icons::icons.size(); i++) {
+    for(wchar_t icon : Icons::icons) {
         UString iconString;
-        iconString.insert(0, Icons::icons[i]);
+        iconString.insert(0, icon);
         const float height = this->fontIcons->getStringHeight(iconString.toUtf8());
         if(height > averageIconHeight) averageIconHeight = height;
     }
@@ -926,21 +926,21 @@ void Osu::updateMods() {
         cv::mod_actual_flashlight.setValue(false);
 
         if(bancho->room.freemods) {
-            for(int i = 0; i < 16; i++) {
-                if(bancho->room.slots[i].player_id != bancho->user_id) continue;
+            for(auto &slot : bancho->room.slots) {
+                if(slot.player_id != bancho->user_id) continue;
 
-                cv::mod_nofail.setValue(legacy_eq(bancho->room.slots[i].mods, LegacyFlags::NoFail));
-                cv::mod_easy.setValue(legacy_eq(bancho->room.slots[i].mods, LegacyFlags::Easy));
-                cv::mod_touchdevice.setValue(legacy_eq(bancho->room.slots[i].mods, LegacyFlags::TouchDevice));
-                cv::mod_hidden.setValue(legacy_eq(bancho->room.slots[i].mods, LegacyFlags::Hidden));
-                cv::mod_hardrock.setValue(legacy_eq(bancho->room.slots[i].mods, LegacyFlags::HardRock));
-                cv::mod_suddendeath.setValue(legacy_eq(bancho->room.slots[i].mods, LegacyFlags::SuddenDeath));
-                cv::mod_relax.setValue(legacy_eq(bancho->room.slots[i].mods, LegacyFlags::Relax));
-                cv::mod_autoplay.setValue(legacy_eq(bancho->room.slots[i].mods, LegacyFlags::Autoplay));
-                cv::mod_spunout.setValue(legacy_eq(bancho->room.slots[i].mods, LegacyFlags::SpunOut));
-                cv::mod_autopilot.setValue(legacy_eq(bancho->room.slots[i].mods, LegacyFlags::Autopilot));
-                cv::mod_perfect.setValue(legacy_eq(bancho->room.slots[i].mods, LegacyFlags::Perfect));
-                cv::mod_target.setValue(legacy_eq(bancho->room.slots[i].mods, LegacyFlags::Target));
+                cv::mod_nofail.setValue(legacy_eq(slot.mods, LegacyFlags::NoFail));
+                cv::mod_easy.setValue(legacy_eq(slot.mods, LegacyFlags::Easy));
+                cv::mod_touchdevice.setValue(legacy_eq(slot.mods, LegacyFlags::TouchDevice));
+                cv::mod_hidden.setValue(legacy_eq(slot.mods, LegacyFlags::Hidden));
+                cv::mod_hardrock.setValue(legacy_eq(slot.mods, LegacyFlags::HardRock));
+                cv::mod_suddendeath.setValue(legacy_eq(slot.mods, LegacyFlags::SuddenDeath));
+                cv::mod_relax.setValue(legacy_eq(slot.mods, LegacyFlags::Relax));
+                cv::mod_autoplay.setValue(legacy_eq(slot.mods, LegacyFlags::Autoplay));
+                cv::mod_spunout.setValue(legacy_eq(slot.mods, LegacyFlags::SpunOut));
+                cv::mod_autopilot.setValue(legacy_eq(slot.mods, LegacyFlags::Autopilot));
+                cv::mod_perfect.setValue(legacy_eq(slot.mods, LegacyFlags::Perfect));
+                cv::mod_target.setValue(legacy_eq(slot.mods, LegacyFlags::Target));
             }
         }
     }
@@ -1246,10 +1246,10 @@ void Osu::onKeyDown(KeyboardEvent &key) {
     }
 
     // forward to all subsystem, if not already consumed
-    for(int i = 0; i < this->screens.size(); i++) {
+    for(auto &screen : this->screens) {
         if(key.isConsumed()) break;
 
-        this->screens[i]->onKeyDown(key);
+        screen->onKeyDown(key);
     }
 
     // special handling, after subsystems, if still not consumed
@@ -1338,10 +1338,10 @@ void Osu::onKeyUp(KeyboardEvent &key) {
     }
 
     // forward to all subsystems, if not consumed
-    for(int i = 0; i < this->screens.size(); i++) {
+    for(auto &screen : this->screens) {
         if(key.isConsumed()) break;
 
-        this->screens[i]->onKeyUp(key);
+        screen->onKeyUp(key);
     }
 
     // misc hotkeys release
@@ -1630,8 +1630,8 @@ void Osu::onResolutionChanged(Vector2 newResolution) {
     cv::ui_scrollview_scrollbarwidth.setValue(15.0f * Osu::getUIScale());  // not happy with this as a convar
 
     // interfaces
-    for(int i = 0; i < this->screens.size(); i++) {
-        this->screens[i]->onResolutionChange(g_vInternalResolution);
+    for(auto &screen : this->screens) {
+        screen->onResolutionChange(g_vInternalResolution);
     }
 
     // rendertargets

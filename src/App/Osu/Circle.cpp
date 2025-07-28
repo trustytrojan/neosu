@@ -313,8 +313,8 @@ void Circle::drawHitCircleNumber(Skin *skin, float numberScale, float overlapSca
         g->translate(pos.x, pos.y);
         {
             float digitWidthCombined = 0.0f;
-            for(size_t i = 0; i < digits.size(); i++) {
-                digitWidthCombined += DigitWidth::getWidth(skin, digits[i]);
+            for(int digit : digits) {
+                digitWidthCombined += DigitWidth::getWidth(skin, digit);
             }
 
             const int digitOverlapCount = digits.size() - 1;

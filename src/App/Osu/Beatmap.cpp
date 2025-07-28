@@ -1264,8 +1264,8 @@ std::string Beatmap::getArtist() const {
 
 u32 Beatmap::getBreakDurationTotal() const {
     u32 breakDurationTotal = 0;
-    for(int i = 0; i < this->breaks.size(); i++) {
-        breakDurationTotal += (u32)(this->breaks[i].endTime - this->breaks[i].startTime);
+    for(auto i : this->breaks) {
+        breakDurationTotal += (u32)(i.endTime - i.startTime);
     }
 
     return breakDurationTotal;
@@ -1277,9 +1277,9 @@ DatabaseBeatmap::BREAK Beatmap::getBreakForTimeRange(i64 startMS, i64 positionMS
     curBreak.startTime = -1;
     curBreak.endTime = -1;
 
-    for(int i = 0; i < this->breaks.size(); i++) {
-        if(this->breaks[i].startTime >= startMS && this->breaks[i].endTime <= endMS) {
-            if(positionMS >= curBreak.startTime) curBreak = this->breaks[i];
+    for(auto i : this->breaks) {
+        if(i.startTime >= startMS && i.endTime <= endMS) {
+            if(positionMS >= curBreak.startTime) curBreak = i;
         }
     }
 
@@ -1543,8 +1543,8 @@ void Beatmap::unloadMusic() {
 
 void Beatmap::unloadObjects() {
     this->currentHitObject = NULL;
-    for(int i = 0; i < this->hitobjects.size(); i++) {
-        delete this->hitobjects[i];
+    for(auto &hitobject : this->hitobjects) {
+        delete hitobject;
     }
     this->hitobjects = std::vector<HitObject *>();
     this->hitobjectsSortedByEndTime = std::vector<HitObject *>();
@@ -1554,10 +1554,10 @@ void Beatmap::unloadObjects() {
 }
 
 void Beatmap::resetHitObjects(long curPos) {
-    for(int i = 0; i < this->hitobjects.size(); i++) {
-        this->hitobjects[i]->onReset(curPos);
-        this->hitobjects[i]->update(curPos, engine->getFrameTime());
-        this->hitobjects[i]->onReset(curPos);
+    for(auto &hitobject : this->hitobjects) {
+        hitobject->onReset(curPos);
+        hitobject->update(curPos, engine->getFrameTime());
+        hitobject->onReset(curPos);
     }
     osu->getHUD()->resetHitErrorBar();
 }
@@ -1750,9 +1750,9 @@ void Beatmap::draw() {
 
     // debug stuff
     if(cv::debug_hiterrorbar_misaims.getBool()) {
-        for(int i = 0; i < this->misaimObjects.size(); i++) {
+        for(auto &misaimObject : this->misaimObjects) {
             g->setColor(0xbb00ff00);
-            Vector2 pos = this->osuCoords2Pixels(this->misaimObjects[i]->getRawPosAt(0));
+            Vector2 pos = this->osuCoords2Pixels(misaimObject->getRawPosAt(0));
             g->fillRect(pos.x - 50, pos.y - 50, 100, 100);
         }
     }
@@ -1920,33 +1920,29 @@ void Beatmap::drawHitObjects() {
                 this->hitobjectsSortedByEndTime[i]->draw();
             }
         } else {
-            for(int i = 0; i < this->hitobjectsSortedByEndTime.size(); i++) {
+            for(auto &i : this->hitobjectsSortedByEndTime) {
                 // PVS optimization
                 if(usePVS) {
-                    if(this->hitobjectsSortedByEndTime[i]->isFinished() &&
-                       (curPos - pvs > this->hitobjectsSortedByEndTime[i]->click_time +
-                                           this->hitobjectsSortedByEndTime[i]->duration))  // past objects
+                    if(i->isFinished() && (curPos - pvs > i->click_time + i->duration))  // past objects
                         continue;
-                    if(this->hitobjectsSortedByEndTime[i]->click_time > curPos + pvs)  // future objects
+                    if(i->click_time > curPos + pvs)  // future objects
                         break;
                 }
 
-                this->hitobjectsSortedByEndTime[i]->draw();
+                i->draw();
             }
         }
-        for(int i = 0; i < this->hitobjectsSortedByEndTime.size(); i++) {
+        for(auto &i : this->hitobjectsSortedByEndTime) {
             // NOTE: to fix mayday simultaneous sliders with increasing endtime getting culled here, would have to
             // switch from m_hitobjectsSortedByEndTime to m_hitobjects PVS optimization
             if(usePVS) {
-                if(this->hitobjectsSortedByEndTime[i]->isFinished() &&
-                   (curPos - pvs > this->hitobjectsSortedByEndTime[i]->click_time +
-                                       this->hitobjectsSortedByEndTime[i]->duration))  // past objects
+                if(i->isFinished() && (curPos - pvs > i->click_time + i->duration))  // past objects
                     continue;
-                if(this->hitobjectsSortedByEndTime[i]->click_time > curPos + pvs)  // future objects
+                if(i->click_time > curPos + pvs)  // future objects
                     break;
             }
 
-            this->hitobjectsSortedByEndTime[i]->draw2();
+            i->draw2();
         }
     } else {
         const int mafhamRenderLiveSize = cv::mod_mafham_render_livesize.getInt();
@@ -2351,8 +2347,8 @@ void Beatmap::update2() {
                          // even started)
             curPos = -1;
 
-        for(int i = 0; i < this->hitobjects.size(); i++) {
-            this->hitobjects[i]->update(curPos, engine->getFrameTime());
+        for(auto &hitobject : this->hitobjects) {
+            hitobject->update(curPos, engine->getFrameTime());
         }
     }
 
@@ -2818,14 +2814,14 @@ void Beatmap::update2() {
             this->misaimObjects.clear();
             HitObject *lastUnfinishedHitObject = NULL;
             const long hitWindow50 = (long)this->getHitWindow50();
-            for(int i = 0; i < this->hitobjects.size(); i++)  // this shouldn't hurt performance too much, since no
-                                                              // expensive operations are happening within the loop
+            for(auto &hitobject : this->hitobjects)  // this shouldn't hurt performance too much, since no
+                                                     // expensive operations are happening within the loop
             {
-                if(!this->hitobjects[i]->isFinished()) {
-                    if(this->iCurMusicPosWithOffsets >= this->hitobjects[i]->click_time)
-                        lastUnfinishedHitObject = this->hitobjects[i];
-                    else if(std::abs(this->hitobjects[i]->click_time - this->iCurMusicPosWithOffsets) < hitWindow50)
-                        this->misaimObjects.push_back(this->hitobjects[i]);
+                if(!hitobject->isFinished()) {
+                    if(this->iCurMusicPosWithOffsets >= hitobject->click_time)
+                        lastUnfinishedHitObject = hitobject;
+                    else if(std::abs(hitobject->click_time - this->iCurMusicPosWithOffsets) < hitWindow50)
+                        this->misaimObjects.push_back(hitobject);
                     else
                         break;
                 }
@@ -2838,13 +2834,13 @@ void Beatmap::update2() {
             // handle misaim clicks sequentially (setting the misaim flag on the hitobjects to only allow 1 entry in the
             // hiterrorbar for misses per object) clicks don't have to be consumed here, as they are deleted below
             // anyway
-            for(int c = 0; c < this->clicks.size(); c++) {
-                for(int i = 0; i < this->misaimObjects.size(); i++) {
-                    if(this->misaimObjects[i]->hasMisAimed())  // only 1 slot per object!
+            for(auto &click : this->clicks) {
+                for(auto &misaimObject : this->misaimObjects) {
+                    if(misaimObject->hasMisAimed())  // only 1 slot per object!
                         continue;
 
-                    this->misaimObjects[i]->misAimed();
-                    const long delta = this->clicks[c].click_time - (long)this->misaimObjects[i]->click_time;
+                    misaimObject->misAimed();
+                    const long delta = click.click_time - (long)misaimObject->click_time;
                     osu->getHUD()->addHitError(delta, false, true);
 
                     break;  // the current click has been dealt with (and the hitobject has been misaimed)
@@ -3182,8 +3178,8 @@ void Beatmap::onModUpdate(bool rebuildSliderVertexBuffers, bool recomputeDrainRa
     }
     if(cv::mod_mafham.getBool() != this->bWasMafhamEnabled) {
         this->bWasMafhamEnabled = cv::mod_mafham.getBool();
-        for(int i = 0; i < this->hitobjects.size(); i++) {
-            this->hitobjects[i]->update(this->iCurMusicPosWithOffsets, engine->getFrameTime());
+        for(auto &hitobject : this->hitobjects) {
+            hitobject->update(this->iCurMusicPosWithOffsets, engine->getFrameTime());
         }
     }
 
@@ -3633,26 +3629,26 @@ void Beatmap::updateAutoCursorPos() {
                             long endTime = 0;
 
                             // middle clicks
-                            for(int c = 0; c < clicks.size(); c++) {
+                            for(const auto &click : clicks) {
                                 // get previous click
-                                if(clicks[c].time <= curMusicPos && clicks[c].time > biggestPrevious) {
-                                    biggestPrevious = clicks[c].time;
-                                    prevTime = clicks[c].time;
+                                if(click.time <= curMusicPos && click.time > biggestPrevious) {
+                                    biggestPrevious = click.time;
+                                    prevTime = click.time;
                                     prevPos = this->osuCoords2Pixels(o->getRawPosAt(prevTime));
                                 }
 
                                 // get next click
-                                if(clicks[c].time > curMusicPos && clicks[c].time < smallestNext) {
-                                    smallestNext = clicks[c].time;
-                                    nextTime = clicks[c].time;
+                                if(click.time > curMusicPos && click.time < smallestNext) {
+                                    smallestNext = click.time;
+                                    nextTime = click.time;
                                     nextPos = this->osuCoords2Pixels(o->getRawPosAt(nextTime));
                                 }
 
                                 // end hack
-                                if(!clicks[c].finished)
+                                if(!click.finished)
                                     allFinished = false;
-                                else if(clicks[c].time > endTime)
-                                    endTime = clicks[c].time;
+                                else if(click.time > endTime)
+                                    endTime = click.time;
                             }
 
                             // end
@@ -3804,8 +3800,8 @@ void Beatmap::updateSliderVertexBuffers() {
 
     debugLog("Beatmap::updateSliderVertexBuffers() for %i hitobjects ...\n", this->hitobjects.size());
 
-    for(int i = 0; i < this->hitobjects.size(); i++) {
-        Slider *sliderPointer = dynamic_cast<Slider *>(this->hitobjects[i]);
+    for(auto &hitobject : this->hitobjects) {
+        Slider *sliderPointer = dynamic_cast<Slider *>(hitobject);
         if(sliderPointer != NULL) sliderPointer->rebuildVertexBuffer();
     }
 }
@@ -3816,8 +3812,8 @@ void Beatmap::calculateStacks() {
     debugLog("Beatmap: Calculating stacks ...\n");
 
     // reset
-    for(int i = 0; i < this->hitobjects.size(); i++) {
-        this->hitobjects[i]->setStack(0);
+    for(auto &hitobject : this->hitobjects) {
+        hitobject->setStack(0);
     }
 
     const f32 STACK_LENIENCE = 3.0f;
@@ -3941,8 +3937,8 @@ void Beatmap::calculateStacks() {
 
     // update hitobject positions
     f32 stackOffset = this->fRawHitcircleDiameter * STACK_OFFSET;
-    for(int i = 0; i < this->hitobjects.size(); i++) {
-        if(this->hitobjects[i]->getStack() != 0) this->hitobjects[i]->updateStackPosition(stackOffset);
+    for(auto &hitobject : this->hitobjects) {
+        if(hitobject->getStack() != 0) hitobject->updateStackPosition(stackOffset);
     }
 }
 
@@ -4075,8 +4071,8 @@ void Beatmap::computeDrainRate() {
 
                         // ticks + repeats + repeat ticks
                         const std::vector<Slider::SLIDERCLICK> &clicks = sliderPointer->getClicks();
-                        for(int c = 0; c < clicks.size(); c++) {
-                            switch(clicks[c].type) {
+                        for(const auto &click : clicks) {
+                            switch(click.type) {
                                 case 0:  // repeat
                                     testPlayer.increaseHealth(LiveScore::getHealthIncrease(
                                         LiveScore::HIT::HIT_SLIDER30, HP, testPlayer.hpMultiplierNormal,

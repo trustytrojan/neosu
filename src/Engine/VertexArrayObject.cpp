@@ -33,8 +33,8 @@ void VertexArrayObject::destroy() {
 
 void VertexArrayObject::clear() {
     this->vertices = std::vector<Vector3>();
-    for(size_t i = 0; i < this->texcoords.size(); i++) {
-        this->texcoords[i] = std::vector<Vector2>();
+    for(auto& texcoord : this->texcoords) {
+        texcoord = std::vector<Vector2>();
     }
     this->texcoords = std::vector<std::vector<Vector2>>();
     this->normals = std::vector<Vector3>();
@@ -48,8 +48,8 @@ void VertexArrayObject::clear() {
 
 void VertexArrayObject::empty() {
     this->vertices.clear();
-    for(size_t i = 0; i < this->texcoords.size(); i++) {
-        this->texcoords[i].clear();
+    for(auto& texcoord : this->texcoords) {
+        texcoord.clear();
     }
     this->texcoords.clear();
     this->normals.clear();

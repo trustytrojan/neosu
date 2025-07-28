@@ -229,26 +229,26 @@ std::vector<ConVar *> ConVarHandler::getConVarByLetter(const ConVarString &lette
         const std::vector<ConVar *> &convars = this->getConVarArray();
 
         // first try matching exactly
-        for(size_t i = 0; i < convars.size(); i++) {
-            if(convars[i]->isFlagSet(FCVAR_HIDDEN)) continue;
+        for(auto convar : convars) {
+            if(convar->isFlagSet(FCVAR_HIDDEN)) continue;
 
-            if(convars[i]->getName().find(letters) != std::string::npos) {
-                if(letters.length() > 1) matchingConVarNames.insert(convars[i]->getName());
+            if(convar->getName().find(letters) != std::string::npos) {
+                if(letters.length() > 1) matchingConVarNames.insert(convar->getName());
 
-                matchingConVars.push_back(convars[i]);
+                matchingConVars.push_back(convar);
             }
         }
 
         // then try matching substrings
         if(letters.length() > 1) {
-            for(size_t i = 0; i < convars.size(); i++) {
-                if(convars[i]->isFlagSet(FCVAR_HIDDEN)) continue;
+            for(auto convar : convars) {
+                if(convar->isFlagSet(FCVAR_HIDDEN)) continue;
 
-                if(convars[i]->getName().find(letters) != std::string::npos) {
-                    const ConVarString &stdName = convars[i]->getName();
+                if(convar->getName().find(letters) != std::string::npos) {
+                    const ConVarString &stdName = convar->getName();
                     if(matchingConVarNames.find(stdName) == matchingConVarNames.end()) {
                         matchingConVarNames.insert(stdName);
-                        matchingConVars.push_back(convars[i]);
+                        matchingConVars.push_back(convar);
                     }
                 }
             }
@@ -320,11 +320,11 @@ static void _find(const UString &args) {
     const std::vector<ConVar *> &convars = convar->getConVarArray();
 
     std::vector<ConVar *> matchingConVars;
-    for(size_t i = 0; i < convars.size(); i++) {
-        if(convars[i]->isFlagSet(FCVAR_HIDDEN)) continue;
+    for(auto convar : convars) {
+        if(convar->isFlagSet(FCVAR_HIDDEN)) continue;
 
-        const ConVarString &name = convars[i]->getName();
-        if(name.find(args.toUtf8()) != std::string::npos) matchingConVars.push_back(convars[i]);
+        const ConVarString &name = convar->getName();
+        if(name.find(args.toUtf8()) != std::string::npos) matchingConVars.push_back(convar);
     }
 
     if(matchingConVars.size() > 0) {
@@ -346,8 +346,8 @@ static void _find(const UString &args) {
         thelog.append(" ]\n");
         Engine::logRaw("{:s}", thelog.toUtf8());
 
-        for(size_t i = 0; i < matchingConVars.size(); i++) {
-            Engine::logRaw("{:s}\n", matchingConVars[i]->getName());
+        for(auto &matchingConVar : matchingConVars) {
+            Engine::logRaw("{:s}\n", matchingConVar->getName());
         }
     }
     Engine::logRaw("----------------------------------------------\n");
@@ -410,10 +410,10 @@ static void _listcommands(void) {
         };
         std::ranges::sort(convars, CONVAR_SORT_COMPARATOR());
 
-        for(size_t i = 0; i < convars.size(); i++) {
-            if(convars[i]->isFlagSet(FCVAR_HIDDEN)) continue;
+        for(auto &convar : convars) {
+            if(convar->isFlagSet(FCVAR_HIDDEN)) continue;
 
-            ConVar *var = convars[i];
+            ConVar *var = convar;
 
             ConVarString tstring{var->getName()};
             {
@@ -453,8 +453,7 @@ static void _dumpcommands(void) {
         return;
     }
 
-    for(size_t i = 0; i < convars.size(); i++) {
-        ConVar *var = convars[i];
+    for(auto var : convars) {
         if(!var->hasValue()) continue;
         if(var->isFlagSet(FCVAR_HIDDEN)) continue;
         if(var->isFlagSet(FCVAR_PRIVATE)) continue;

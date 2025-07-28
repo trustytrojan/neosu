@@ -279,8 +279,8 @@ void Engine::onPaint() {
             if(this->guiContainer != NULL) this->guiContainer->draw();
 
             // debug input devices
-            for(size_t i = 0; i < this->inputDevices.size(); i++) {
-                this->inputDevices[i]->draw();
+            for(auto &inputDevice : this->inputDevices) {
+                inputDevice->draw();
             }
         }
 
@@ -346,8 +346,8 @@ void Engine::onUpdate() {
         // execute queued commands
         // TODO: this is shit
         if(Console::g_commandQueue.size() > 0) {
-            for(size_t i = 0; i < Console::g_commandQueue.size(); i++) {
-                Console::processCommand(Console::g_commandQueue[i]);
+            for(const auto &i : Console::g_commandQueue) {
+                Console::processCommand(i);
             }
             Console::g_commandQueue.clear();  // reset
         }
@@ -382,8 +382,8 @@ void Engine::onFocusLost() {
 
     if(cv::debug_engine.getBool()) debugLog("Engine: lost focus\n");
 
-    for(size_t i = 0; i < this->keyboards.size(); i++) {
-        this->keyboards[i]->reset();
+    for(auto &keyboard : this->keyboards) {
+        keyboard->reset();
     }
 
     if(app != NULL) app->onFocusLost();

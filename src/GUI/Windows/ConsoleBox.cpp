@@ -471,29 +471,29 @@ void ConsoleBox::onChar(KeyboardEvent &e) {
         this->clearSuggestions();
 
         std::vector<ConVar *> suggestions = convar->getConVarByLetter(this->textbox->getText().toUtf8());
-        for(size_t i = 0; i < suggestions.size(); i++) {
-            UString suggestionText{suggestions[i]->getName()};
+        for(auto &suggestion : suggestions) {
+            UString suggestionText{suggestion->getName()};
 
-            if(suggestions[i]->hasValue()) {
-                switch(suggestions[i]->getType()) {
+            if(suggestion->hasValue()) {
+                switch(suggestion->getType()) {
                     case ConVar::CONVAR_TYPE::CONVAR_TYPE_BOOL:
-                        suggestionText.append(UString::format(" %i", (int)suggestions[i]->getBool()));
+                        suggestionText.append(UString::format(" %i", (int)suggestion->getBool()));
                         // suggestionText.append(UString::format(" ( def. \"%i\" )",
                         // (int)(suggestions[i]->getDefaultFloat() > 0)));
                         break;
                     case ConVar::CONVAR_TYPE::CONVAR_TYPE_INT:
-                        suggestionText.append(UString::format(" %i", suggestions[i]->getInt()));
+                        suggestionText.append(UString::format(" %i", suggestion->getInt()));
                         // suggestionText.append(UString::format(" ( def. \"%i\" )",
                         // (int)suggestions[i]->getDefaultFloat()));
                         break;
                     case ConVar::CONVAR_TYPE::CONVAR_TYPE_FLOAT:
-                        suggestionText.append(UString::format(" %g", suggestions[i]->getFloat()));
+                        suggestionText.append(UString::format(" %g", suggestion->getFloat()));
                         // suggestionText.append(UString::format(" ( def. \"%g\" )",
                         // suggestions[i]->getDefaultFloat()));
                         break;
                     case ConVar::CONVAR_TYPE::CONVAR_TYPE_STRING:
                         suggestionText.append(" ");
-                        suggestionText.append(suggestions[i]->getString().c_str());
+                        suggestionText.append(suggestion->getString().c_str());
                         // suggestionText.append(" ( def. \"");
                         // suggestionText.append(suggestions[i]->getDefaultString());
                         // suggestionText.append("\" )");
@@ -501,7 +501,7 @@ void ConsoleBox::onChar(KeyboardEvent &e) {
                 }
             }
 
-            this->addSuggestion(suggestionText, suggestions[i]->getHelpstring().c_str(), suggestions[i]->getName().c_str());
+            this->addSuggestion(suggestionText, suggestion->getHelpstring().c_str(), suggestion->getName().c_str());
         }
         this->suggestion->setVisible(suggestions.size() > 0);
 

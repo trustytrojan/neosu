@@ -47,13 +47,13 @@ void CollectionButton::draw() {
     UString titleString = this->sCollectionName.c_str();
     int numChildren = 0;
     {
-        for(size_t c = 0; c < this->children.size(); c++) {
-            const auto &childrenChildren = this->children[c]->getChildren();
+        for(auto &c : this->children) {
+            const auto &childrenChildren = c->getChildren();
             if(childrenChildren.size() > 0) {
-                for(size_t cc = 0; cc < childrenChildren.size(); cc++) {
-                    if(childrenChildren[cc]->isSearchMatch()) numChildren++;
+                for(auto cc : childrenChildren) {
+                    if(cc->isSearchMatch()) numChildren++;
                 }
-            } else if(this->children[c]->isSearchMatch())
+            } else if(c->isSearchMatch())
                 numChildren++;
         }
     }

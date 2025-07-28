@@ -897,8 +897,8 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
 
     // hide the buttons if the closing animation finished
     if(!anim->isAnimating(&this->fCenterOffsetAnim) && this->fCenterOffsetAnim == 0.0f) {
-        for(int i = 0; i < this->menuElements.size(); i++) {
-            this->menuElements[i]->setVisible(false);
+        for(auto &menuElement : this->menuElements) {
+            menuElement->setVisible(false);
         }
     }
 
@@ -1299,9 +1299,9 @@ void MainMenu::setMenuElementsVisible(bool visible, bool animate) {
 
         this->fMainMenuButtonCloseTime = engine->getTime() + 6.0f;
 
-        for(int i = 0; i < this->menuElements.size(); i++) {
-            this->menuElements[i]->setVisible(true);
-            this->menuElements[i]->setEnabled(true);
+        for(auto &menuElement : this->menuElements) {
+            menuElement->setVisible(true);
+            menuElement->setEnabled(true);
         }
     } else {
         if(animate)
@@ -1316,8 +1316,8 @@ void MainMenu::setMenuElementsVisible(bool visible, bool animate) {
 
         this->fMainMenuButtonCloseTime = 0.0f;
 
-        for(int i = 0; i < this->menuElements.size(); i++) {
-            this->menuElements[i]->setEnabled(false);
+        for(auto &menuElement : this->menuElements) {
+            menuElement->setEnabled(false);
         }
     }
 }

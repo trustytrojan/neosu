@@ -394,10 +394,10 @@ void ModSelector::updateScoreMultiplierLabelText() {
 }
 
 void ModSelector::updateExperimentalButtons() {
-    for(int i = 0; i < this->experimentalMods.size(); i++) {
-        ConVar *cvar = this->experimentalMods[i].cvar;
+    for(auto &experimentalMod : this->experimentalMods) {
+        ConVar *cvar = experimentalMod.cvar;
         if(cvar != NULL) {
-            CBaseUICheckbox *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(this->experimentalMods[i].element);
+            CBaseUICheckbox *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(experimentalMod.element);
             if(checkboxPointer != NULL) {
                 if(cvar->getBool() != checkboxPointer->isChecked()) checkboxPointer->setChecked(cvar->getBool(), false);
             }
@@ -424,9 +424,7 @@ void ModSelector::draw() {
         // get mod button element bounds
         Vector2 modGridButtonsStart = Vector2(osu->getScreenWidth(), osu->getScreenHeight());
         Vector2 modGridButtonsSize = Vector2(0, osu->getScreenHeight());
-        for(int i = 0; i < this->modButtons.size(); i++) {
-            CBaseUIButton *button = this->modButtons[i];
-
+        for(auto button : this->modButtons) {
             if(button->getPos().x < modGridButtonsStart.x) modGridButtonsStart.x = button->getPos().x;
             if(button->getPos().y < modGridButtonsStart.y) modGridButtonsStart.y = button->getPos().y;
 
@@ -452,9 +450,9 @@ void ModSelector::draw() {
         // get override slider element bounds
         Vector2 overrideSlidersStart = Vector2(osu->getScreenWidth(), 0);
         Vector2 overrideSlidersSize;
-        for(int i = 0; i < this->overrideSliders.size(); i++) {
-            CBaseUIButton *desc = this->overrideSliders[i].desc;
-            CBaseUILabel *label = this->overrideSliders[i].label;
+        for(auto &overrideSlider : this->overrideSliders) {
+            CBaseUIButton *desc = overrideSlider.desc;
+            CBaseUILabel *label = overrideSlider.label;
 
             if(desc->getPos().x < overrideSlidersStart.x) overrideSlidersStart.x = desc->getPos().x;
 
@@ -468,9 +466,7 @@ void ModSelector::draw() {
         // get mod button element bounds
         Vector2 modGridButtonsStart = Vector2(osu->getScreenWidth(), osu->getScreenHeight());
         Vector2 modGridButtonsSize = Vector2(0, osu->getScreenHeight());
-        for(int i = 0; i < this->modButtons.size(); i++) {
-            CBaseUIButton *button = this->modButtons[i];
-
+        for(auto button : this->modButtons) {
             if(button->getPos().x < modGridButtonsStart.x) modGridButtonsStart.x = button->getPos().x;
             if(button->getPos().y < modGridButtonsStart.y) modGridButtonsStart.y = button->getPos().y;
 
@@ -565,9 +561,8 @@ void ModSelector::mouse_update(bool *propagate_clicks) {
     // HACKHACK: updating while invisible is stupid, but the only quick solution for still animating otherwise stuck
     // sliders while closed
     if(!this->bVisible) {
-        for(int i = 0; i < this->overrideSliders.size(); i++) {
-            if(this->overrideSliders[i].slider->hasChanged())
-                this->overrideSliders[i].slider->mouse_update(propagate_clicks);
+        for(auto &overrideSlider : this->overrideSliders) {
+            if(overrideSlider.slider->hasChanged()) overrideSlider.slider->mouse_update(propagate_clicks);
         }
         if(this->bScheduledHide) {
             if(this->fAnimation == 0.0f) {
@@ -590,8 +585,8 @@ void ModSelector::mouse_update(bool *propagate_clicks) {
 
         // override slider tooltips (ALT)
         if(this->bShowOverrideSliderALTHint) {
-            for(int i = 0; i < this->overrideSliders.size(); i++) {
-                if(this->overrideSliders[i].slider->isBusy()) {
+            for(auto &overrideSlider : this->overrideSliders) {
+                if(overrideSlider.slider->isBusy()) {
                     osu->getTooltipOverlay()->begin();
                     { osu->getTooltipOverlay()->addLine("Hold [ALT] to slide in 0.01 increments."); }
                     osu->getTooltipOverlay()->end();
@@ -603,8 +598,8 @@ void ModSelector::mouse_update(bool *propagate_clicks) {
 
         // handle experimental mods visibility
         bool experimentalModEnabled = false;
-        for(int i = 0; i < this->experimentalMods.size(); i++) {
-            CBaseUICheckbox *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(this->experimentalMods[i].element);
+        for(auto &experimentalMod : this->experimentalMods) {
+            CBaseUICheckbox *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(experimentalMod.element);
             if(checkboxPointer != NULL && checkboxPointer->isChecked()) {
                 experimentalModEnabled = true;
                 break;
@@ -719,8 +714,8 @@ CBaseUIContainer *ModSelector::setVisible(bool visible) {
         anim->moveQuadOut(&this->fAnimation, 1.0f, 0.1f, 0.0f, true);
 
         bool experimentalModEnabled = false;
-        for(int i = 0; i < this->experimentalMods.size(); i++) {
-            CBaseUICheckbox *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(this->experimentalMods[i].element);
+        for(auto &experimentalMod : this->experimentalMods) {
+            CBaseUICheckbox *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(experimentalMod.element);
             if(checkboxPointer != NULL && checkboxPointer->isChecked()) {
                 experimentalModEnabled = true;
                 break;
@@ -762,18 +757,18 @@ bool ModSelector::isMouseInScrollView() { return this->experimentalContainer->is
 
 bool ModSelector::isMouseInside() {
     bool isMouseInsideAnyModSelectorModButton = false;
-    for(size_t i = 0; i < this->modButtons.size(); i++) {
-        if(this->modButtons[i]->isMouseInside()) {
+    for(auto &modButton : this->modButtons) {
+        if(modButton->isMouseInside()) {
             isMouseInsideAnyModSelectorModButton = true;
             break;
         }
     }
 
     bool isMouseInsideAnyOverrideSliders = false;
-    for(size_t i = 0; i < this->overrideSliders.size(); i++) {
-        if((this->overrideSliders[i].lock != NULL && this->overrideSliders[i].lock->isMouseInside()) ||
-           this->overrideSliders[i].desc->isMouseInside() || this->overrideSliders[i].slider->isMouseInside() ||
-           this->overrideSliders[i].label->isMouseInside()) {
+    for(auto &overrideSlider : this->overrideSliders) {
+        if((overrideSlider.lock != NULL && overrideSlider.lock->isMouseInside()) ||
+           overrideSlider.desc->isMouseInside() || overrideSlider.slider->isMouseInside() ||
+           overrideSlider.label->isMouseInside()) {
             isMouseInsideAnyOverrideSliders = true;
             break;
         }
@@ -938,8 +933,8 @@ void ModSelector::updateLayout() {
         }
 
         // action buttons
-        for(int i = 0; i < this->actionButtons.size(); i++) {
-            this->actionButtons[i]->setVisible(false);
+        for(auto &actionButton : this->actionButtons) {
+            actionButton->setVisible(false);
         }
 
         // score multiplier info label
@@ -1129,8 +1124,8 @@ void ModSelector::resetModsUserInitiated() {
     }
 
     if(bancho->is_in_a_multi_room()) {
-        for(int i = 0; i < 16; i++) {
-            if(bancho->room.slots[i].player_id != bancho->user_id) continue;
+        for(auto &slot : bancho->room.slots) {
+            if(slot.player_id != bancho->user_id) continue;
 
             if(bancho->room.is_host()) {
                 bancho->room.mods = this->getModFlags();
@@ -1138,11 +1133,11 @@ void ModSelector::resetModsUserInitiated() {
                 this->enableModsFromFlags(bancho->room.mods);
             }
 
-            bancho->room.slots[i].mods = bancho->room.mods;
+            slot.mods = bancho->room.mods;
 
             Packet packet;
             packet.id = MATCH_CHANGE_MODS;
-            BANCHO::Proto::write<u32>(&packet, bancho->room.slots[i].mods);
+            BANCHO::Proto::write<u32>(&packet, slot.mods);
             BANCHO::Net::send_packet(packet);
 
             osu->room->updateLayout(osu->getScreenSize());
@@ -1154,25 +1149,25 @@ void ModSelector::resetModsUserInitiated() {
 void ModSelector::resetMods() {
     // cv::mod_fposu.setValue(false);  // intentionally commented out so people can play it in multi
 
-    for(int i = 0; i < this->overrideSliders.size(); i++) {
-        if(this->overrideSliders[i].lock != NULL) this->overrideSliders[i].lock->setChecked(false);
+    for(auto &overrideSlider : this->overrideSliders) {
+        if(overrideSlider.lock != NULL) overrideSlider.lock->setChecked(false);
     }
 
-    for(int i = 0; i < this->overrideSliders.size(); i++) {
+    for(auto &overrideSlider : this->overrideSliders) {
         // HACKHACK: force small delta to force an update (otherwise values could get stuck, e.g. for "Use Mods" context
         // menu) HACKHACK: only animate while visible to workaround "Use mods" bug (if custom speed multiplier already
         // set and then "Use mods" with different custom speed multiplier would reset to 1.0x because of anim)
-        this->overrideSliders[i].slider->setValue(this->overrideSliders[i].slider->getMin() + 0.0001f, this->bVisible);
-        this->overrideSliders[i].slider->setValue(this->overrideSliders[i].slider->getMin(), this->bVisible);
+        overrideSlider.slider->setValue(overrideSlider.slider->getMin() + 0.0001f, this->bVisible);
+        overrideSlider.slider->setValue(overrideSlider.slider->getMin(), this->bVisible);
     }
 
-    for(int i = 0; i < this->modButtons.size(); i++) {
-        this->modButtons[i]->resetState();
+    for(auto &modButton : this->modButtons) {
+        modButton->resetState();
     }
 
-    for(int i = 0; i < this->experimentalMods.size(); i++) {
-        ConVar *cvar = this->experimentalMods[i].cvar;
-        CBaseUICheckbox *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(this->experimentalMods[i].element);
+    for(auto &experimentalMod : this->experimentalMods) {
+        ConVar *cvar = experimentalMod.cvar;
+        CBaseUICheckbox *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(experimentalMod.element);
         if(checkboxPointer != NULL) {
             // HACKHACK: we update both just in case because if the mod selector was not yet visible after a convar
             // change (e.g. because of "Use mods") then the checkbox has not yet updated its internal state
@@ -1225,8 +1220,8 @@ void ModSelector::close() {
 }
 
 void ModSelector::onOverrideSliderChange(CBaseUISlider *slider) {
-    for(int i = 0; i < this->overrideSliders.size(); i++) {
-        if(this->overrideSliders[i].slider == slider) {
+    for(auto &overrideSlider : this->overrideSliders) {
+        if(overrideSlider.slider == slider) {
             float sliderValue = slider->getFloat() - 1.0f;
             const float rawSliderValue = slider->getFloat();
 
@@ -1238,11 +1233,11 @@ void ModSelector::onOverrideSliderChange(CBaseUISlider *slider) {
 
             if(sliderValue < 0.0f) {
                 sliderValue = -1.0f;
-                this->overrideSliders[i].label->setWidthToContent(0);
+                overrideSlider.label->setWidthToContent(0);
 
                 // HACKHACK: dirty
                 if(osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL) {
-                    if(this->overrideSliders[i].label->getName().find("BPM") != -1) {
+                    if(overrideSlider.label->getName().find("BPM") != -1) {
                         // reset AR and OD override sliders if the bpm slider was reset
                         if(!this->ARLock->isChecked()) this->ARSlider->setValue(0.0f, false);
                         if(!this->ODLock->isChecked()) this->ODSlider->setValue(0.0f, false);
@@ -1251,19 +1246,19 @@ void ModSelector::onOverrideSliderChange(CBaseUISlider *slider) {
 
                 // usability: auto disable lock if override slider is fully set to -1.0f (disabled)
                 if(rawSliderValue == 0.0f) {
-                    if(this->overrideSliders[i].lock != NULL && this->overrideSliders[i].lock->isChecked())
-                        this->overrideSliders[i].lock->setChecked(false);
+                    if(overrideSlider.lock != NULL && overrideSlider.lock->isChecked())
+                        overrideSlider.lock->setChecked(false);
                 }
             } else {
                 // AR/OD lock may not be used in conjunction with BPM
-                if(this->overrideSliders[i].label->getName().find("BPM") != -1) {
+                if(overrideSlider.label->getName().find("BPM") != -1) {
                     this->ARLock->setChecked(false);
                     this->ODLock->setChecked(false);
                 }
 
                 // HACKHACK: dirty
                 if(osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL) {
-                    if(this->overrideSliders[i].label->getName().find("BPM") != -1) {
+                    if(overrideSlider.label->getName().find("BPM") != -1) {
                         // HACKHACK: force BPM slider to have a min value of 0.05 instead of 0 (because that's the
                         // minimum for BASS) note that the BPM slider is just a 'fake' slider, it directly controls the
                         // speed slider to do its thing (thus it needs the same limits)
@@ -1273,7 +1268,7 @@ void ModSelector::onOverrideSliderChange(CBaseUISlider *slider) {
                         this->speedSlider->setValue(0.0f, false);
 
                         // force early update
-                        this->overrideSliders[i].cvar->setValue(sliderValue);
+                        overrideSlider.cvar->setValue(sliderValue);
 
                         // force change all other depending sliders
                         const float newAR = osu->getSelectedBeatmap()->getConstantApproachRateForSpeedMultiplier();
@@ -1287,11 +1282,11 @@ void ModSelector::onOverrideSliderChange(CBaseUISlider *slider) {
 
                 // HACKHACK: force speed slider to have a min value of 0.05 instead of 0 (because that's the minimum for
                 // BASS)
-                if(this->overrideSliders[i].desc->getText().find("Speed") != -1) sliderValue = std::max(sliderValue, 0.05f);
+                if(overrideSlider.desc->getText().find("Speed") != -1) sliderValue = std::max(sliderValue, 0.05f);
             }
 
             // update convar with final value (e.g. osu_ar_override, osu_speed_override, etc.)
-            this->overrideSliders[i].cvar->setValue(sliderValue);
+            overrideSlider.cvar->setValue(sliderValue);
 
             this->updateOverrideSliderLabels();
 
@@ -1303,13 +1298,13 @@ void ModSelector::onOverrideSliderChange(CBaseUISlider *slider) {
 }
 
 void ModSelector::onOverrideSliderLockChange(CBaseUICheckbox *checkbox) {
-    for(int i = 0; i < this->overrideSliders.size(); i++) {
-        if(this->overrideSliders[i].lock == checkbox) {
-            const bool locked = this->overrideSliders[i].lock->isChecked();
-            const bool wasLocked = this->overrideSliders[i].lockCvar->getBool();
+    for(auto &overrideSlider : this->overrideSliders) {
+        if(overrideSlider.lock == checkbox) {
+            const bool locked = overrideSlider.lock->isChecked();
+            const bool wasLocked = overrideSlider.lockCvar->getBool();
 
             // update convar with final value (e.g. osu_ar_override_lock, cv::od_override_lock)
-            this->overrideSliders[i].lockCvar->setValue(locked ? 1.0f : 0.0f);
+            overrideSlider.lockCvar->setValue(locked ? 1.0f : 0.0f);
 
             // usability: if we just got locked, and the override slider value is < 0.0f (disabled), then set override
             // to current value
@@ -1345,32 +1340,31 @@ void ModSelector::updateOverrideSliderLabels() {
     const Color activeColor = 0xffffffff;
     const Color inactiveLabelColor = 0xff1166ff;
 
-    for(int i = 0; i < this->overrideSliders.size(); i++) {
-        const float convarValue = this->overrideSliders[i].cvar->getFloat();
-        const bool isLocked = (this->overrideSliders[i].lock != NULL && this->overrideSliders[i].lock->isChecked());
+    for(auto &overrideSlider : this->overrideSliders) {
+        const float convarValue = overrideSlider.cvar->getFloat();
+        const bool isLocked = (overrideSlider.lock != NULL && overrideSlider.lock->isChecked());
 
         // update colors
         if(convarValue < 0.0f && !isLocked) {
-            this->overrideSliders[i].label->setTextColor(inactiveLabelColor);
-            this->overrideSliders[i].desc->setTextColor(inactiveColor);
-            this->overrideSliders[i].slider->setFrameColor(inactiveColor);
+            overrideSlider.label->setTextColor(inactiveLabelColor);
+            overrideSlider.desc->setTextColor(inactiveColor);
+            overrideSlider.slider->setFrameColor(inactiveColor);
         } else {
-            this->overrideSliders[i].label->setTextColor(activeColor);
-            this->overrideSliders[i].desc->setTextColor(activeColor);
-            this->overrideSliders[i].slider->setFrameColor(activeColor);
+            overrideSlider.label->setTextColor(activeColor);
+            overrideSlider.desc->setTextColor(activeColor);
+            overrideSlider.slider->setFrameColor(activeColor);
         }
 
-        this->overrideSliders[i].desc->setDrawFrame(isLocked);
+        overrideSlider.desc->setDrawFrame(isLocked);
 
         // update label text
-        this->overrideSliders[i].label->setText(
-            this->getOverrideSliderLabelText(this->overrideSliders[i], convarValue >= 0.0f));
-        this->overrideSliders[i].label->setWidthToContent(0);
+        overrideSlider.label->setText(this->getOverrideSliderLabelText(overrideSlider, convarValue >= 0.0f));
+        overrideSlider.label->setWidthToContent(0);
 
         // update lock checkbox
-        if(this->overrideSliders[i].lock != NULL && this->overrideSliders[i].lockCvar != NULL &&
-           this->overrideSliders[i].lock->isChecked() != this->overrideSliders[i].lockCvar->getBool())
-            this->overrideSliders[i].lock->setChecked(this->overrideSliders[i].lockCvar->getBool());
+        if(overrideSlider.lock != NULL && overrideSlider.lockCvar != NULL &&
+           overrideSlider.lock->isChecked() != overrideSlider.lockCvar->getBool())
+            overrideSlider.lock->setChecked(overrideSlider.lockCvar->getBool());
     }
 }
 
@@ -1483,9 +1477,9 @@ void ModSelector::enableAuto() {
 void ModSelector::toggleAuto() { this->modButtonAuto->click(); }
 
 void ModSelector::onCheckboxChange(CBaseUICheckbox *checkbox) {
-    for(int i = 0; i < this->experimentalMods.size(); i++) {
-        if(this->experimentalMods[i].element == checkbox) {
-            if(this->experimentalMods[i].cvar != NULL) this->experimentalMods[i].cvar->setValue(checkbox->isChecked());
+    for(auto &experimentalMod : this->experimentalMods) {
+        if(experimentalMod.element == checkbox) {
+            if(experimentalMod.cvar != NULL) experimentalMod.cvar->setValue(checkbox->isChecked());
 
             // force mod update
             {

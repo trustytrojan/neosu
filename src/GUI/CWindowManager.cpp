@@ -19,8 +19,8 @@ CWindowManager::CWindowManager() {
 }
 
 CWindowManager::~CWindowManager() {
-    for(size_t i = 0; i < this->windows.size(); i++) {
-        delete this->windows[i];
+    for(auto &window : this->windows) {
+        delete window;
     }
 }
 
@@ -54,8 +54,8 @@ void CWindowManager::mouse_update(bool *propagate_clicks) {
     if(!this->bVisible || this->windows.size() == 0) return;
 
     // update all windows, detect depth changes
-    for(size_t i = 0; i < this->windows.size(); i++) {
-        this->windows[i]->mouse_update(propagate_clicks);
+    for(auto &window : this->windows) {
+        window->mouse_update(propagate_clicks);
         if(!*propagate_clicks) break;
     }
     int topMouseWindowIndex = this->getTopMouseWindowIndex();
@@ -129,8 +129,8 @@ void CWindowManager::addWindow(CBaseUIWindow *window) {
 }
 
 void CWindowManager::onResolutionChange(Vector2 newResolution) {
-    for(size_t i = 0; i < this->windows.size(); i++) {
-        this->windows[i]->onResolutionChange(newResolution);
+    for(auto &window : this->windows) {
+        window->onResolutionChange(newResolution);
     }
 }
 
@@ -150,20 +150,20 @@ void CWindowManager::setFocus(CBaseUIWindow *window) {
 }
 
 void CWindowManager::openAll() {
-    for(size_t i = 0; i < this->windows.size(); i++) {
-        this->windows[i]->open();
+    for(auto &window : this->windows) {
+        window->open();
     }
 }
 
 void CWindowManager::closeAll() {
-    for(size_t i = 0; i < this->windows.size(); i++) {
-        this->windows[i]->close();
+    for(auto &window : this->windows) {
+        window->close();
     }
 }
 
 bool CWindowManager::isMouseInside() {
-    for(size_t i = 0; i < this->windows.size(); i++) {
-        if(this->windows[i]->isMouseInside()) return true;
+    for(auto &window : this->windows) {
+        if(window->isMouseInside()) return true;
     }
     return false;
 }
@@ -171,16 +171,16 @@ bool CWindowManager::isMouseInside() {
 bool CWindowManager::isVisible() {
     if(!this->bVisible) return false;
 
-    for(size_t i = 0; i < this->windows.size(); i++) {
-        if(this->windows[i]->isVisible()) return true;
+    for(auto &window : this->windows) {
+        if(window->isVisible()) return true;
     }
     return false;
 }
 
 bool CWindowManager::isActive() {
     if(!this->bVisible) return false;
-    for(size_t i = 0; i < this->windows.size(); i++) {
-        if(this->windows[i]->isActive() || this->windows[i]->isBusy())  // TODO: is this correct? (busy)
+    for(auto &window : this->windows) {
+        if(window->isActive() || window->isBusy())  // TODO: is this correct? (busy)
             return true;
     }
     return false;
@@ -189,32 +189,32 @@ bool CWindowManager::isActive() {
 void CWindowManager::onKeyDown(KeyboardEvent &e) {
     if(!this->bVisible) return;
 
-    for(size_t i = 0; i < this->windows.size(); i++) {
-        this->windows[i]->onKeyDown(e);
+    for(auto &window : this->windows) {
+        window->onKeyDown(e);
     }
 }
 
 void CWindowManager::onKeyUp(KeyboardEvent &e) {
     if(!this->bVisible) return;
 
-    for(size_t i = 0; i < this->windows.size(); i++) {
-        this->windows[i]->onKeyUp(e);
+    for(auto &window : this->windows) {
+        window->onKeyUp(e);
     }
 }
 
 void CWindowManager::onChar(KeyboardEvent &e) {
     if(!this->bVisible) return;
 
-    for(size_t i = 0; i < this->windows.size(); i++) {
-        this->windows[i]->onChar(e);
+    for(auto &window : this->windows) {
+        window->onChar(e);
     }
 }
 
 void CWindowManager::setEnabled(bool enabled) {
     this->bEnabled = enabled;
     if(!this->bEnabled) {
-        for(size_t i = 0; i < this->windows.size(); i++) {
-            this->windows[i]->setEnabled(false);
+        for(auto &window : this->windows) {
+            window->setEnabled(false);
         }
     } else
         this->windows[this->iCurrentEnabledWindow]->setEnabled(true);

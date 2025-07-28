@@ -26,8 +26,8 @@ void TooltipOverlay::draw() {
         const float alpha = this->fAnim * this->fAnim * this->fAnim;
 
         int width = 0;
-        for(int i = 0; i < this->lines.size(); i++) {
-            float lineWidth = font->getStringWidth(this->lines[i]);
+        for(const auto& line : this->lines) {
+            float lineWidth = font->getStringWidth(line);
             if(lineWidth > width) width = lineWidth;
         }
         const int height = font->getHeight() * this->lines.size() + lineSpacing * (this->lines.size() - 1) + 3 * dpiScale;
@@ -59,8 +59,8 @@ void TooltipOverlay::draw() {
         g->pushTransform();
         g->translate((int)(cursorPos.x + offset.x + margin),
                      (int)(cursorPos.y + offset.y + margin + font->getHeight()));
-        for(int i = 0; i < this->lines.size(); i++) {
-            g->drawString(font, this->lines[i]);
+        for(const auto& line : this->lines) {
+            g->drawString(font, line);
             g->translate(0, (int)(font->getHeight() + lineSpacing));
         }
         g->popTransform();

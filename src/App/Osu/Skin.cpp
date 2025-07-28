@@ -332,13 +332,13 @@ Skin::Skin(const UString &name, std::string filepath, bool isDefaultSkin) {
 }
 
 Skin::~Skin() {
-    for(int i = 0; i < this->resources.size(); i++) {
-        if(this->resources[i] != (Resource *)m_missingTexture) resourceManager->destroyResource(this->resources[i]);
+    for(auto &resource : this->resources) {
+        if(resource != (Resource *)m_missingTexture) resourceManager->destroyResource(resource);
     }
     this->resources.clear();
 
-    for(int i = 0; i < this->images.size(); i++) {
-        delete this->images[i];
+    for(auto &image : this->images) {
+        delete image;
     }
     this->images.clear();
 
@@ -361,20 +361,20 @@ void Skin::update() {
 
     const bool useEngineTimeForAnimations = !osu->isInPlayMode();
     const long curMusicPos = osu->getSelectedBeatmap()->getCurMusicPosWithOffsets();
-    for(int i = 0; i < this->images.size(); i++) {
-        this->images[i]->update(this->animationSpeedMultiplier, useEngineTimeForAnimations, curMusicPos);
+    for(auto &image : this->images) {
+        image->update(this->animationSpeedMultiplier, useEngineTimeForAnimations, curMusicPos);
     }
 }
 
 bool Skin::isReady() {
     if(this->bReady) return true;
 
-    for(int i = 0; i < this->resources.size(); i++) {
-        if(resourceManager->isLoadingResource(this->resources[i])) return false;
+    for(auto &resource : this->resources) {
+        if(resourceManager->isLoadingResource(resource)) return false;
     }
 
-    for(int i = 0; i < this->images.size(); i++) {
-        if(!this->images[i]->isReady()) return false;
+    for(auto &image : this->images) {
+        if(!image->isReady()) return false;
     }
 
     // (ready is set in update())
@@ -396,18 +396,18 @@ void Skin::load() {
                 skinFolder.append(cv::osu_folder_sub_skins.getString());
                 std::vector<std::string> skinFolders = env->getFoldersInFolder(skinFolder);
 
-                for(int i = 0; i < skinFolders.size(); i++) {
-                    if(skinFolders[i].compare(".") == 0 ||
-                       skinFolders[i].compare("..") == 0)  // is this universal in every file system? too lazy to check.
-                                                           // should probably fix this in the engine and not here
+                for(const auto &i : skinFolders) {
+                    if(i.compare(".") == 0 ||
+                       i.compare("..") == 0)  // is this universal in every file system? too lazy to check.
+                                              // should probably fix this in the engine and not here
                         continue;
 
                     std::string randomSkinFolder = skinFolder;
-                    randomSkinFolder.append(skinFolders[i]);
+                    randomSkinFolder.append(i);
                     randomSkinFolder.append("/");
 
                     this->filepathsForRandomSkin.push_back(randomSkinFolder);
-                    skinNames.push_back(skinFolders[i]);
+                    skinNames.push_back(i);
                 }
             }
 
@@ -1325,8 +1325,8 @@ void Skin::setSampleVolume(float volume, bool force) {
 
     this->iSampleVolume = (int)(newSampleVolume * 100.0f);
     /// debugLog("sample volume = %f\n", sampleVolume);
-    for(int i = 0; i < this->soundSamples.size(); i++) {
-        this->soundSamples[i].sound->setVolume(newSampleVolume * this->soundSamples[i].hardcodedVolumeMultiplier);
+    for(auto &soundSample : this->soundSamples) {
+        soundSample.sound->setVolume(newSampleVolume * soundSample.hardcodedVolumeMultiplier);
     }
 }
 
@@ -1630,9 +1630,9 @@ void Skin::checkLoadSound(Sound **addressOfPointer, const std::string &skinEleme
     auto try_load_sound = [=](const std::string &base_path, const std::string &filename,
                               const std::string &resource_name, bool loop) {
         const char *extensions[] = {".wav", ".mp3", ".ogg"};
-        for(int i = 0; i < 3; i++) {
+        for(auto &extension : extensions) {
             std::string fn = filename;
-            fn.append(extensions[i]);
+            fn.append(extension);
 
             std::string path = base_path;
             path.append(fn);

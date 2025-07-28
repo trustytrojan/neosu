@@ -39,10 +39,10 @@ Slider::Slider(char stype, int repeat, float pixelLength, std::vector<Vector2> p
     this->fSliderTimeWithoutRepeats = sliderTimeWithoutRepeats;
 
     // build raw ticks
-    for(int i = 0; i < ticks.size(); i++) {
+    for(float tick : ticks) {
         SLIDERTICK st;
         st.finished = false;
-        st.percent = ticks[i];
+        st.percent = tick;
         this->ticks.push_back(st);
     }
 
@@ -166,10 +166,10 @@ void Slider::draw() {
         tickColor = Colors::scale(tickColor, this->fHittableDimRGBColorMultiplierPercent);
         const float tickImageScale =
             (this->bm->fHitcircleDiameter / (16.0f * (skin->isSliderScorePoint2x() ? 2.0f : 1.0f))) * 0.125f;
-        for(int t = 0; t < this->ticks.size(); t++) {
-            if(this->ticks[t].finished || this->ticks[t].percent > sliderSnake) continue;
+        for(auto &tick : this->ticks) {
+            if(tick.finished || tick.percent > sliderSnake) continue;
 
-            Vector2 pos = this->bm->osuCoords2Pixels(this->curve->pointAt(this->ticks[t].percent));
+            Vector2 pos = this->bm->osuCoords2Pixels(this->curve->pointAt(tick.percent));
 
             g->setColor(tickColor);
             g->setAlpha(alpha);
@@ -188,15 +188,15 @@ void Slider::draw() {
             bool sliderRepeatStartCircleFinished = (this->iRepeat < 2);
             bool sliderRepeatEndCircleFinished = false;
             bool endCircleIsAtActualSliderEnd = true;
-            for(int i = 0; i < this->clicks.size(); i++) {
+            for(auto &click : this->clicks) {
                 // repeats
-                if(this->clicks[i].type == 0) {
-                    endCircleIsAtActualSliderEnd = this->clicks[i].sliderend;
+                if(click.type == 0) {
+                    endCircleIsAtActualSliderEnd = click.sliderend;
 
                     if(endCircleIsAtActualSliderEnd)
-                        sliderRepeatEndCircleFinished = this->clicks[i].finished;
+                        sliderRepeatEndCircleFinished = click.finished;
                     else
-                        sliderRepeatStartCircleFinished = this->clicks[i].finished;
+                        sliderRepeatStartCircleFinished = click.finished;
                 }
             }
 
@@ -398,9 +398,9 @@ void Slider::draw2(bool drawApproachCircle, bool drawOnlyApproachCircle) {
         if(this->points.size() > 1) {
             // HACKHACK: very dirty code
             bool sliderRepeatStartCircleFinished = this->iRepeat < 2;
-            for(int i = 0; i < this->clicks.size(); i++) {
-                if(this->clicks[i].type == 0) {
-                    if(!this->clicks[i].sliderend) sliderRepeatStartCircleFinished = this->clicks[i].finished;
+            for(auto &click : this->clicks) {
+                if(click.type == 0) {
+                    if(!click.sliderend) sliderRepeatStartCircleFinished = click.finished;
                 }
             }
 
@@ -544,8 +544,8 @@ void Slider::drawBody(float alpha, float from, float to) {
 
     if(osu->shouldFallBackToLegacySliderRenderer()) {
         std::vector<Vector2> screenPoints = this->curve->getPoints();
-        for(int p = 0; p < screenPoints.size(); p++) {
-            screenPoints[p] = this->bm->osuCoords2Pixels(screenPoints[p]);
+        for(auto &screenPoint : screenPoints) {
+            screenPoint = this->bm->osuCoords2Pixels(screenPoint);
         }
 
         // peppy sliders
@@ -797,17 +797,17 @@ void Slider::update(long curPos, f64 frame_time) {
         }
 
         // handle repeats and ticks
-        for(int i = 0; i < this->clicks.size(); i++) {
-            if(!this->clicks[i].finished && curPos >= this->clicks[i].time) {
-                this->clicks[i].finished = true;
-                this->clicks[i].successful = (this->isClickHeldSlider() && this->bCursorInside) ||
-                                             (this->bi->getModsLegacy() & LegacyFlags::Autoplay) ||
-                                             ((this->bi->getModsLegacy() & LegacyFlags::Relax) && this->bCursorInside);
+        for(auto &click : this->clicks) {
+            if(!click.finished && curPos >= click.time) {
+                click.finished = true;
+                click.successful = (this->isClickHeldSlider() && this->bCursorInside) ||
+                                   (this->bi->getModsLegacy() & LegacyFlags::Autoplay) ||
+                                   ((this->bi->getModsLegacy() & LegacyFlags::Relax) && this->bCursorInside);
 
-                if(this->clicks[i].type == 0) {
-                    this->onRepeatHit(this->clicks[i].successful, this->clicks[i].sliderend);
+                if(click.type == 0) {
+                    this->onRepeatHit(click.successful, click.sliderend);
                 } else {
-                    this->onTickHit(this->clicks[i].successful, this->clicks[i].tickIndex);
+                    this->onTickHit(click.successful, click.tickIndex);
                 }
             }
         }
@@ -852,8 +852,8 @@ void Slider::update(long curPos, f64 frame_time) {
                     if(this->startResult != LiveScore::HIT::HIT_MISS) numActualHits++;
                     if(this->endResult != LiveScore::HIT::HIT_MISS) numActualHits++;
 
-                    for(int i = 0; i < this->clicks.size(); i++) {
-                        if(this->clicks[i].successful) numActualHits++;
+                    for(auto &click : this->clicks) {
+                        if(click.successful) numActualHits++;
                     }
 
                     const float percent = numActualHits / numMaxPossibleHits;
@@ -970,15 +970,15 @@ void Slider::miss(long curPos) {
     if(!this->bEndFinished) {
         // repeats, ticks
         {
-            for(int i = 0; i < this->clicks.size(); i++) {
-                if(!this->clicks[i].finished) {
-                    this->clicks[i].finished = true;
-                    this->clicks[i].successful = false;
+            for(auto &click : this->clicks) {
+                if(!click.finished) {
+                    click.finished = true;
+                    click.successful = false;
 
-                    if(this->clicks[i].type == 0)
-                        this->onRepeatHit(this->clicks[i].successful, this->clicks[i].sliderend);
+                    if(click.type == 0)
+                        this->onRepeatHit(click.successful, click.sliderend);
                     else
-                        this->onTickHit(this->clicks[i].successful, this->clicks[i].tickIndex);
+                        this->onTickHit(click.successful, click.tickIndex);
                 }
             }
         }
@@ -1246,9 +1246,8 @@ void Slider::onTickHit(bool successful, int tickIndex) {
 
     // tick drawing visibility
     int numMissingTickClicks = 0;
-    for(int i = 0; i < this->clicks.size(); i++) {
-        if(this->clicks[i].type == 1 && this->clicks[i].tickIndex == tickIndex && !this->clicks[i].finished)
-            numMissingTickClicks++;
+    for(auto &click : this->clicks) {
+        if(click.type == 1 && click.tickIndex == tickIndex && !click.finished) numMissingTickClicks++;
     }
     if(numMissingTickClicks == 0) this->ticks[tickIndex].finished = true;
 
@@ -1336,21 +1335,20 @@ void Slider::onReset(long curPos) {
         this->fEndSliderBodyFadeAnimation = 1.0f;
     }
 
-    for(int i = 0; i < this->clicks.size(); i++) {
-        if(curPos > this->clicks[i].time) {
-            this->clicks[i].finished = true;
-            this->clicks[i].successful = true;
+    for(auto &click : this->clicks) {
+        if(curPos > click.time) {
+            click.finished = true;
+            click.successful = true;
         } else {
-            this->clicks[i].finished = false;
-            this->clicks[i].successful = false;
+            click.finished = false;
+            click.successful = false;
         }
     }
 
     for(int i = 0; i < this->ticks.size(); i++) {
         int numMissingTickClicks = 0;
-        for(int c = 0; c < this->clicks.size(); c++) {
-            if(this->clicks[c].type == 1 && this->clicks[c].tickIndex == i && !this->clicks[c].finished)
-                numMissingTickClicks++;
+        for(auto &click : this->clicks) {
+            if(click.type == 1 && click.tickIndex == i && !click.finished) numMissingTickClicks++;
         }
         this->ticks[i].finished = numMissingTickClicks == 0;
     }
@@ -1361,8 +1359,8 @@ void Slider::rebuildVertexBuffer(bool useRawCoords) {
     // this mesh needs to be scaled and translated appropriately since we are not 1:1 with the playfield
     std::vector<Vector2> osuCoordPoints = this->curve->getPoints();
     if(!useRawCoords) {
-        for(int p = 0; p < osuCoordPoints.size(); p++) {
-            osuCoordPoints[p] = this->bi->osuCoords2LegacyPixels(osuCoordPoints[p]);
+        for(auto &osuCoordPoint : osuCoordPoints) {
+            osuCoordPoint = this->bi->osuCoords2LegacyPixels(osuCoordPoint);
         }
     }
     SAFE_DELETE(this->vao);

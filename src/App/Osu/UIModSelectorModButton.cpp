@@ -86,8 +86,8 @@ void UIModSelectorModButton::mouse_update(bool *propagate_clicks) {
     // handle tooltips
     if(this->isMouseInside() && this->bAvailable && this->states.size() > 0 && !this->bFocusStolenDelay) {
         osu->getTooltipOverlay()->begin();
-        for(int i = 0; i < this->states[this->iState].tooltipTextLines.size(); i++) {
-            osu->getTooltipOverlay()->addLine(this->states[this->iState].tooltipTextLines[i]);
+        for(const auto &tooltipTextLine : this->states[this->iState].tooltipTextLines) {
+            osu->getTooltipOverlay()->addLine(tooltipTextLine);
         }
         osu->getTooltipOverlay()->end();
     }
@@ -129,10 +129,10 @@ void UIModSelectorModButton::onClicked(bool  /*left*/, bool  /*right*/) {
     }
 
     if(bancho->is_in_a_multi_room()) {
-        for(int i = 0; i < 16; i++) {
-            if(bancho->room.slots[i].player_id != bancho->user_id) continue;
+        for(auto &slot : bancho->room.slots) {
+            if(slot.player_id != bancho->user_id) continue;
 
-            bancho->room.slots[i].mods = this->osuModSelector->getModFlags();
+            slot.mods = this->osuModSelector->getModFlags();
             if(bancho->room.is_host()) {
                 bancho->room.mods = this->osuModSelector->getModFlags();
                 if(bancho->room.freemods) {
@@ -144,7 +144,7 @@ void UIModSelectorModButton::onClicked(bool  /*left*/, bool  /*right*/) {
             debugLog("Sending mod change to server.\n");
             Packet packet;
             packet.id = MATCH_CHANGE_MODS;
-            BANCHO::Proto::write<u32>(&packet, bancho->room.slots[i].mods);
+            BANCHO::Proto::write<u32>(&packet, slot.mods);
             BANCHO::Net::send_packet(packet);
 
             osu->room->on_room_updated(bancho->room);

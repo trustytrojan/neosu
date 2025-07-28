@@ -89,8 +89,8 @@ void Console::processCommand(std::string command, bool fromFile) {
     // handle multiple commands separated by semicolons
     if(command.find(';') != std::string::npos && command.find("echo") == std::string::npos) {
         const std::vector<std::string> commands = UString{command}.split<std::string>(";");
-        for(size_t i = 0; i < commands.size(); i++) {
-            processCommand(commands[i]);
+        for(const auto &command : commands) {
+            processCommand(command);
         }
 
         return;

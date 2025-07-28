@@ -270,8 +270,8 @@ void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject * /*hitObject*
         this->fHitErrorAvgCustomMin = (numCustomNegatives > 0 ? this->fHitErrorAvgCustomMin / (float)numCustomNegatives : 0.0f);
         this->fHitErrorAvgCustomMax = (numCustomPositives > 0 ? this->fHitErrorAvgCustomMax / (float)numCustomPositives : 0.0f);
 
-        for(int i = 0; i < this->hitdeltas.size(); i++) {
-            this->fUnstableRate += ((float)this->hitdeltas[i] - averageDelta) * ((float)this->hitdeltas[i] - averageDelta);
+        for(int hitdelta : this->hitdeltas) {
+            this->fUnstableRate += ((float)hitdelta - averageDelta) * ((float)hitdelta - averageDelta);
         }
         this->fUnstableRate /= (float)this->hitdeltas.size();
         this->fUnstableRate = std::sqrt(this->fUnstableRate) * 10;

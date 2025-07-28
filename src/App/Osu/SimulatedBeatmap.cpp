@@ -49,8 +49,8 @@ SimulatedBeatmap::SimulatedBeatmap(DatabaseBeatmap *diff2, Replay::Mods mods_) {
 }
 
 SimulatedBeatmap::~SimulatedBeatmap() {
-    for(int i = 0; i < this->hitobjects.size(); i++) {
-        delete this->hitobjects[i];
+    for(auto &hitobject : this->hitobjects) {
+        delete hitobject;
     }
 }
 
@@ -277,8 +277,8 @@ u32 SimulatedBeatmap::getLengthPlayable() const {
 
 u32 SimulatedBeatmap::getBreakDurationTotal() const {
     u32 breakDurationTotal = 0;
-    for(int i = 0; i < this->breaks.size(); i++) {
-        breakDurationTotal += (u32)(this->breaks[i].endTime - this->breaks[i].startTime);
+    for(auto i : this->breaks) {
+        breakDurationTotal += (u32)(i.endTime - i.startTime);
     }
 
     return breakDurationTotal;
@@ -290,9 +290,9 @@ DatabaseBeatmap::BREAK SimulatedBeatmap::getBreakForTimeRange(long startMS, long
     curBreak.startTime = -1;
     curBreak.endTime = -1;
 
-    for(int i = 0; i < this->breaks.size(); i++) {
-        if(this->breaks[i].startTime >= (int)startMS && this->breaks[i].endTime <= (int)endMS) {
-            if((int)positionMS >= curBreak.startTime) curBreak = this->breaks[i];
+    for(auto i : this->breaks) {
+        if(i.startTime >= (int)startMS && i.endTime <= (int)endMS) {
+            if((int)positionMS >= curBreak.startTime) curBreak = i;
         }
     }
 
@@ -817,9 +817,7 @@ void SimulatedBeatmap::updateAutoCursorPos() {
     bool haveCurPos = false;
 
     if((ModMasks::eq(this->mods.flags, Replay::ModFlags::Autopilot))) {
-        for(int i = 0; i < this->hitobjects.size(); i++) {
-            HitObject *o = this->hitobjects[i];
-
+        for(auto o : this->hitobjects) {
             // get previous object
             if(o->isFinished() ||
                (this->iCurMusicPos >
@@ -898,8 +896,8 @@ void SimulatedBeatmap::calculateStacks() {
     debugLog("Beatmap: Calculating stacks ...\n");
 
     // reset
-    for(int i = 0; i < this->hitobjects.size(); i++) {
-        this->hitobjects[i]->setStack(0);
+    for(auto &hitobject : this->hitobjects) {
+        hitobject->setStack(0);
     }
 
     const f32 STACK_LENIENCE = 3.0f;
@@ -1023,8 +1021,8 @@ void SimulatedBeatmap::calculateStacks() {
 
     // update hitobject positions
     f32 stackOffset = this->fRawHitcircleDiameter * STACK_OFFSET;
-    for(int i = 0; i < this->hitobjects.size(); i++) {
-        if(this->hitobjects[i]->getStack() != 0) this->hitobjects[i]->updateStackPosition(stackOffset);
+    for(auto &hitobject : this->hitobjects) {
+        if(hitobject->getStack() != 0) hitobject->updateStackPosition(stackOffset);
     }
 }
 
@@ -1157,8 +1155,8 @@ void SimulatedBeatmap::computeDrainRate() {
 
                         // ticks + repeats + repeat ticks
                         const std::vector<Slider::SLIDERCLICK> &clicks = sliderPointer->getClicks();
-                        for(int c = 0; c < clicks.size(); c++) {
-                            switch(clicks[c].type) {
+                        for(const auto &click : clicks) {
+                            switch(click.type) {
                                 case 0:  // repeat
                                     testPlayer.increaseHealth(LiveScore::getHealthIncrease(
                                         LiveScore::HIT::HIT_SLIDER30, HP, testPlayer.hpMultiplierNormal,

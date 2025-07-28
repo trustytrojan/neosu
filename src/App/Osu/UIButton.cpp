@@ -94,8 +94,8 @@ void UIButton::mouse_update(bool *propagate_clicks) {
     if(this->isMouseInside() && this->tooltipTextLines.size() > 0 && !this->bFocusStolenDelay) {
         osu->getTooltipOverlay()->begin();
         {
-            for(int i = 0; i < this->tooltipTextLines.size(); i++) {
-                osu->getTooltipOverlay()->addLine(this->tooltipTextLines[i]);
+            for(const auto &tooltipTextLine : this->tooltipTextLines) {
+                osu->getTooltipOverlay()->addLine(tooltipTextLine);
             }
         }
         osu->getTooltipOverlay()->end();

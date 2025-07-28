@@ -406,10 +406,10 @@ void RoomScreen::updateSettingsLayout(Vector2 newResolution) {
     // Ready button
     int nb_ready = 0;
     bool is_ready = false;
-    for(u8 i = 0; i < 16; i++) {
-        if(bancho->room.slots[i].has_player() && bancho->room.slots[i].is_ready()) {
+    for(auto &slot : bancho->room.slots) {
+        if(slot.has_player() && slot.is_ready()) {
             nb_ready++;
-            if(bancho->room.slots[i].player_id == bancho->user_id) {
+            if(slot.player_id == bancho->user_id) {
                 is_ready = true;
             }
         }
@@ -443,26 +443,26 @@ void RoomScreen::updateLayout(Vector2 newResolution) {
     this->slotlist->setSize(newResolution.x * 0.6 - 200, newResolution.y * 0.6 - 110);
     this->slotlist->freeElements();
     int y_total = 10;
-    for(int i = 0; i < 16; i++) {
-        if(bancho->room.slots[i].has_player()) {
-            auto user_info = BANCHO::User::get_user_info(bancho->room.slots[i].player_id, true);
+    for(auto &slot : bancho->room.slots) {
+        if(slot.has_player()) {
+            auto user_info = BANCHO::User::get_user_info(slot.player_id, true);
             auto username = user_info->name;
-            if(bancho->room.slots[i].is_player_playing()) {
+            if(slot.is_player_playing()) {
                 username = UString::format("[playing] %s", user_info->name.toUtf8());
             }
 
             const float SLOT_HEIGHT = 40.f;
-            auto avatar = new UIAvatar(bancho->room.slots[i].player_id, 10, y_total, SLOT_HEIGHT, SLOT_HEIGHT);
+            auto avatar = new UIAvatar(slot.player_id, 10, y_total, SLOT_HEIGHT, SLOT_HEIGHT);
             this->slotlist->getContainer()->addBaseUIElement(avatar);
 
-            auto user_box = new UIUserLabel(bancho->room.slots[i].player_id, username);
+            auto user_box = new UIUserLabel(slot.player_id, username);
             user_box->setFont(this->lfont);
             user_box->setPos(avatar->getRelPos().x + avatar->getSize().x + 10, y_total);
 
             auto color = 0xffffffff;
-            if(bancho->room.slots[i].is_ready()) {
+            if(slot.is_ready()) {
                 color = 0xff00ff00;
-            } else if(bancho->room.slots[i].no_map()) {
+            } else if(slot.no_map()) {
                 color = 0xffdd0000;
             }
             user_box->setTextColor(color);
@@ -470,7 +470,7 @@ void RoomScreen::updateLayout(Vector2 newResolution) {
             user_box->setSize(user_box->getSize().x, SLOT_HEIGHT);
             this->slotlist->getContainer()->addBaseUIElement(user_box);
 
-            auto user_mods = new UIModList(&bancho->room.slots[i].mods);
+            auto user_mods = new UIModList(&slot.mods);
             user_mods->setPos(user_box->getPos().x + user_box->getSize().x + 30, y_total);
             user_mods->setSize(350, SLOT_HEIGHT);
             this->slotlist->getContainer()->addBaseUIElement(user_mods);
@@ -558,9 +558,9 @@ void RoomScreen::on_map_change() {
 void RoomScreen::on_room_joined(Room room) {
     bancho->room = room;
     debugLog("Joined room #%d\nPlayers:\n", room.id);
-    for(int i = 0; i < 16; i++) {
-        if(room.slots[i].has_player()) {
-            auto user_info = BANCHO::User::get_user_info(room.slots[i].player_id, true);
+    for(auto &slot : room.slots) {
+        if(slot.has_player()) {
+            auto user_info = BANCHO::User::get_user_info(slot.player_id, true);
             debugLog("- %s\n", user_info->name.toUtf8());
         }
     }
@@ -614,9 +614,9 @@ void RoomScreen::on_room_updated(Room room) {
     bancho->room = room;
 
     Slot *player_slot = NULL;
-    for(int i = 0; i < 16; i++) {
-        if(bancho->room.slots[i].player_id == bancho->user_id) {
-            player_slot = &bancho->room.slots[i];
+    for(auto &slot : bancho->room.slots) {
+        if(slot.player_id == bancho->user_id) {
+            player_slot = &slot;
             break;
         }
     }
@@ -711,8 +711,8 @@ FinishedScore RoomScreen::get_approximate_score() {
     score.playerName = bancho->username.toUtf8();
     score.diff2 = osu->getSelectedBeatmap()->getSelectedDifficulty2();
 
-    for(int i = 0; i < 16; i++) {
-        auto slot = &bancho->room.slots[i];
+    for(auto &i : bancho->room.slots) {
+        auto slot = &i;
         if(slot->player_id != bancho->user_id) continue;
 
         score.mods = Replay::Mods::from_legacy(slot->mods);
@@ -752,9 +752,9 @@ void RoomScreen::on_match_finished() {
 void RoomScreen::on_all_players_skipped() { bancho->room.all_players_skipped = true; }
 
 void RoomScreen::on_player_skip(i32 user_id) {
-    for(int i = 0; i < 16; i++) {
-        if(bancho->room.slots[i].player_id == user_id) {
-            bancho->room.slots[i].skipped = true;
+    for(auto &slot : bancho->room.slots) {
+        if(slot.player_id == user_id) {
+            slot.skipped = true;
             break;
         }
     }
@@ -791,10 +791,10 @@ void RoomScreen::onReadyButtonClick() {
 
     int nb_ready = 0;
     bool is_ready = false;
-    for(u8 i = 0; i < 16; i++) {
-        if(bancho->room.slots[i].has_player() && bancho->room.slots[i].is_ready()) {
+    for(auto &slot : bancho->room.slots) {
+        if(slot.has_player() && slot.is_ready()) {
             nb_ready++;
-            if(bancho->room.slots[i].player_id == bancho->user_id) {
+            if(slot.player_id == bancho->user_id) {
                 is_ready = true;
             }
         }

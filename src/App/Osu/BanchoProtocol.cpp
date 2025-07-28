@@ -163,19 +163,19 @@ Room::Room(Packet *packet) {
     this->map_md5 = hash_str.toUtf8();
 
     this->nb_players = 0;
-    for(int i = 0; i < 16; i++) {
-        this->slots[i].status = read<u8>(packet);
+    for(auto &slot : this->slots) {
+        slot.status = read<u8>(packet);
     }
-    for(int i = 0; i < 16; i++) {
-        this->slots[i].team = read<u8>(packet);
+    for(auto &slot : this->slots) {
+        slot.team = read<u8>(packet);
     }
-    for(int s = 0; s < 16; s++) {
-        if(!this->slots[s].is_locked()) {
+    for(auto &slot : this->slots) {
+        if(!slot.is_locked()) {
             this->nb_open_slots++;
         }
 
-        if(this->slots[s].has_player()) {
-            this->slots[s].player_id = read<i32>(packet);
+        if(slot.has_player()) {
+            slot.player_id = read<i32>(packet);
             this->nb_players++;
         }
     }
@@ -186,8 +186,8 @@ Room::Room(Packet *packet) {
     this->team_type = read<u8>(packet);
     this->freemods = read<u8>(packet);
     if(this->freemods) {
-        for(int i = 0; i < 16; i++) {
-            this->slots[i].mods = read<u32>(packet);
+        for(auto &slot : this->slots) {
+            slot.mods = read<u32>(packet);
         }
     }
 
@@ -204,15 +204,15 @@ void Room::pack(Packet *packet) {
     write_string(packet, this->map_name.toUtf8());
     write<i32>(packet, this->map_id);
     write_string(packet, this->map_md5.hash.data());
-    for(int i = 0; i < 16; i++) {
-        write<u8>(packet, this->slots[i].status);
+    for(auto &slot : this->slots) {
+        write<u8>(packet, slot.status);
     }
-    for(int i = 0; i < 16; i++) {
-        write<u8>(packet, this->slots[i].team);
+    for(auto &slot : this->slots) {
+        write<u8>(packet, slot.team);
     }
-    for(int s = 0; s < 16; s++) {
-        if(this->slots[s].has_player()) {
-            write<i32>(packet, this->slots[s].player_id);
+    for(auto &slot : this->slots) {
+        if(slot.has_player()) {
+            write<i32>(packet, slot.player_id);
         }
     }
 
@@ -222,8 +222,8 @@ void Room::pack(Packet *packet) {
     write<u8>(packet, this->team_type);
     write<u8>(packet, this->freemods);
     if(this->freemods) {
-        for(int i = 0; i < 16; i++) {
-            write<u32>(packet, this->slots[i].mods);
+        for(auto &slot : this->slots) {
+            write<u32>(packet, slot.mods);
         }
     }
 

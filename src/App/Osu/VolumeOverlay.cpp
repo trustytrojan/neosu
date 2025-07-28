@@ -295,8 +295,8 @@ void VolumeOverlay::onEffectVolumeChange() {
     float volume = cv::volume_effects.getFloat();
 
     auto skin = osu->getSkin();
-    for(int i = 0; i < skin->sounds.size(); i++) {
-        skin->sounds[i]->setVolume(volume);
+    for(auto &sound : skin->sounds) {
+        sound->setVolume(volume);
     }
 
     skin->resetSampleVolume();

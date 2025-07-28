@@ -254,8 +254,8 @@ void Lobby::on_create_room_clicked() {
     bancho->room = Room();
     bancho->room.name = "New room";  // XXX: doesn't work
     bancho->room.host_id = bancho->user_id;
-    for(int i = 0; i < 16; i++) {
-        bancho->room.slots[i].status = 1;  // open slot
+    for(auto& slot : bancho->room.slots) {
+        slot.status = 1;  // open slot
     }
     bancho->room.slots[0].status = 4;  // not ready
     bancho->room.slots[0].player_id = bancho->user_id;

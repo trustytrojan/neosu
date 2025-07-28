@@ -45,13 +45,13 @@ VertexArrayObject *SliderRenderer::generateVAO(const std::vector<Vector2> &point
 
     const bool debugSquareVao = cv::slider_debug_draw_square_vao.getBool();
 
-    for(int i = 0; i < points.size(); i++) {
+    for(auto point : points) {
         // fuck oob sliders
         if(skipOOBPoints) {
-            if(points[i].x < -hitcircleDiameter - GameRules::OSU_COORD_WIDTH * 2 ||
-               points[i].x > osu->getScreenWidth() + hitcircleDiameter + GameRules::OSU_COORD_WIDTH * 2 ||
-               points[i].y < -hitcircleDiameter - GameRules::OSU_COORD_HEIGHT * 2 ||
-               points[i].y > osu->getScreenHeight() + hitcircleDiameter + GameRules::OSU_COORD_HEIGHT * 2)
+            if(point.x < -hitcircleDiameter - GameRules::OSU_COORD_WIDTH * 2 ||
+               point.x > osu->getScreenWidth() + hitcircleDiameter + GameRules::OSU_COORD_WIDTH * 2 ||
+               point.y < -hitcircleDiameter - GameRules::OSU_COORD_HEIGHT * 2 ||
+               point.y > osu->getScreenHeight() + hitcircleDiameter + GameRules::OSU_COORD_HEIGHT * 2)
                 continue;
         }
 
@@ -59,12 +59,11 @@ VertexArrayObject *SliderRenderer::generateVAO(const std::vector<Vector2> &point
             const std::vector<Vector3> &meshVertices = UNIT_CIRCLE_VAO_TRIANGLES->getVertices();
             const std::vector<std::vector<Vector2>> &meshTexCoords = UNIT_CIRCLE_VAO_TRIANGLES->getTexcoords();
             for(int v = 0; v < meshVertices.size(); v++) {
-                vao->addVertex(meshVertices[v] + Vector3(points[i].x, points[i].y, 0) + translation);
+                vao->addVertex(meshVertices[v] + Vector3(point.x, point.y, 0) + translation);
                 vao->addTexcoord(meshTexCoords[0][v]);
             }
         } else {
-            const Vector3 topLeft =
-                Vector3(points[i].x, points[i].y, 0) - xOffset / 2.0f - yOffset / 2.0f + translation;
+            const Vector3 topLeft = Vector3(point.x, point.y, 0) - xOffset / 2.0f - yOffset / 2.0f + translation;
             const Vector3 topRight = topLeft + xOffset;
             const Vector3 bottomLeft = topLeft + yOffset;
             const Vector3 bottomRight = bottomLeft + xOffset;

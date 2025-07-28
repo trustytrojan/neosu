@@ -176,9 +176,7 @@ void HUD::draw() {
 
             breaks.reserve(beatmapBreaks.size());
 
-            for(int i = 0; i < beatmapBreaks.size(); i++) {
-                const DatabaseBeatmap::BREAK &bk = beatmapBreaks[i];
-
+            for(auto bk : beatmapBreaks) {
                 // ignore breaks after last hitobject
                 if(/*bk.endTime <= (int)startTimePlayableMS ||*/ bk.startTime >=
                    (int)(startTimePlayableMS + lengthPlayableMS))
@@ -521,9 +519,9 @@ void HUD::drawCursorRipples() {
                      std::clamp<int>(cv::cursor_ripple_tint_b.getInt(), 0, 255)));
     osu->getSkin()->getCursorRipple()->bind();
     {
-        for(int i = 0; i < this->cursorRipples.size(); i++) {
-            const Vector2 &pos = this->cursorRipples[i].pos;
-            const float &time = this->cursorRipples[i].time;
+        for(auto &cursorRipple : this->cursorRipples) {
+            const Vector2 &pos = cursorRipple.pos;
+            const float &time = cursorRipple.time;
 
             const float animPercent = 1.0f - std::clamp<float>((time - engine->getTime()) / duration, 0.0f, 1.0f);
             const float fadePercent = 1.0f - std::clamp<float>((time - engine->getTime()) / fadeDuration, 0.0f, 1.0f);
@@ -769,8 +767,8 @@ void HUD::drawScoreNumber(unsigned long long number, float scale, bool drawLeadi
     // NOTE: just using the width here is incorrect, but it is the quickest solution instead of painstakingly
     // reverse-engineering how osu does it
     float lastWidth = osu->getSkin()->getScore0()->getWidth();
-    for(int i = 0; i < digits.size(); i++) {
-        switch(digits[i]) {
+    for(int digit : digits) {
+        switch(digit) {
             case 0:
                 g->translate(lastWidth * 0.5f * scale, 0);
                 g->drawImage(osu->getSkin()->getScore0());
@@ -846,8 +844,8 @@ void HUD::drawComboNumber(unsigned long long number, float scale, bool drawLeadi
     // NOTE: just using the width here is incorrect, but it is the quickest solution instead of painstakingly
     // reverse-engineering how osu does it
     float lastWidth = osu->getSkin()->getCombo0()->getWidth();
-    for(int i = 0; i < digits.size(); i++) {
-        switch(digits[i]) {
+    for(int digit : digits) {
+        switch(digit) {
             case 0:
                 g->translate(lastWidth * 0.5f * scale, 0);
                 g->drawImage(osu->getSkin()->getCombo0());
@@ -1220,8 +1218,8 @@ std::vector<SCORE_ENTRY> HUD::getCurrentScores() {
     if(!beatmap) return scores;
 
     if(bancho->is_in_a_multi_room()) {
-        for(int i = 0; i < 16; i++) {
-            auto slot = &bancho->room.slots[i];
+        for(auto &i : bancho->room.slots) {
+            auto slot = &i;
             if(!slot->is_player_playing() && !slot->has_finished_playing()) continue;
 
             if(slot->player_id == bancho->user_id) {
@@ -2071,11 +2069,10 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
     // breaks
     g->setColor(greyTransparent);
     g->setAlpha(galpha);
-    for(int i = 0; i < breaks.size(); i++) {
-        const int width = std::max(
-            (int)(osu->getScreenWidth() * std::clamp<float>(breaks[i].endPercent - breaks[i].startPercent, 0.0f, 1.0f)),
-            2);
-        g->fillRect(osu->getScreenWidth() * breaks[i].startPercent, cursorPos.y + 1, width, breakHeight);
+    for(auto i : breaks) {
+        const int width =
+            std::max((int)(osu->getScreenWidth() * std::clamp<float>(i.endPercent - i.startPercent, 0.0f, 1.0f)), 2);
+        g->fillRect(osu->getScreenWidth() * i.startPercent, cursorPos.y + 1, width, breakHeight);
     }
 
     // line

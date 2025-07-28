@@ -16,8 +16,8 @@ ProfilerProfile::ProfilerProfile(bool manualStartViaMain) : root("Root", VPROF_B
     this->curNode = &this->root;
 
     this->iNumGroups = 0;
-    for(size_t i = 0; i < VPROF_MAX_NUM_BUDGETGROUPS; i++) {
-        this->groups[i].name = NULL;
+    for(auto &group : this->groups) {
+        group.name = NULL;
     }
 
     this->iNumNodes = 0;

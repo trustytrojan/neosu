@@ -239,8 +239,8 @@ class Room {
 
     bool nb_ready() {
         u8 nb = 0;
-        for(int i = 0; i < 16; i++) {
-            if(this->slots[i].has_player() && this->slots[i].is_ready()) {
+        for(auto &slot : this->slots) {
+            if(slot.has_player() && slot.is_ready()) {
                 nb++;
             }
         }
@@ -248,8 +248,8 @@ class Room {
     }
 
     bool all_players_ready() {
-        for(int i = 0; i < 16; i++) {
-            if(this->slots[i].has_player() && !this->slots[i].is_ready()) {
+        for(auto &slot : this->slots) {
+            if(slot.has_player() && !slot.is_ready()) {
                 return false;
             }
         }

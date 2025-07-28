@@ -402,8 +402,8 @@ void ScoreButton::mouse_update(bool *propagate_clicks) {
             if(this->fIndexNumberAnim > 0.0f) {
                 osu->getTooltipOverlay()->begin();
                 {
-                    for(int i = 0; i < this->tooltipLines.size(); i++) {
-                        if(this->tooltipLines[i].length() > 0) osu->getTooltipOverlay()->addLine(this->tooltipLines[i]);
+                    for(const auto &tooltipLine : this->tooltipLines) {
+                        if(tooltipLine.length() > 0) osu->getTooltipOverlay()->addLine(tooltipLine);
                     }
                 }
                 osu->getTooltipOverlay()->end();

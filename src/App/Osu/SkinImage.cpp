@@ -214,9 +214,8 @@ bool SkinImage::loadImage(const std::string& skinElementName, bool ignoreDefault
 }
 
 SkinImage::~SkinImage() {
-    for(int i = 0; i < this->images.size(); i++) {
-        if(this->images[i].img != this->skin->getMissingTexture())
-            resourceManager->destroyResource(this->images[i].img);
+    for(auto& image : this->images) {
+        if(image.img != this->skin->getMissingTexture()) resourceManager->destroyResource(image.img);
     }
     this->images.clear();
 
@@ -390,8 +389,8 @@ float SkinImage::getResolutionScale() { return Osu::getImageScale(this->vBaseSiz
 bool SkinImage::isReady() {
     if(this->bReady) return true;
 
-    for(int i = 0; i < this->images.size(); i++) {
-        if(resourceManager->isLoadingResource(this->images[i].img)) return false;
+    for(auto& image : this->images) {
+        if(resourceManager->isLoadingResource(image.img)) return false;
     }
 
     this->bReady = true;

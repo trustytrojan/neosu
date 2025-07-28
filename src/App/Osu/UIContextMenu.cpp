@@ -29,8 +29,8 @@ void UIContextMenuButton::mouse_update(bool *propagate_clicks) {
     if(this->isMouseInside() && this->tooltipTextLines.size() > 0) {
         osu->getTooltipOverlay()->begin();
         {
-            for(int i = 0; i < this->tooltipTextLines.size(); i++) {
-                osu->getTooltipOverlay()->addLine(this->tooltipTextLines[i]);
+            for(const auto &tooltipTextLine : this->tooltipTextLines) {
+                osu->getTooltipOverlay()->addLine(tooltipTextLine);
             }
         }
         osu->getTooltipOverlay()->end();
@@ -116,8 +116,8 @@ void UIContextMenu::mouse_update(bool *propagate_clicks) {
     }
 
     if(this->selfDeletionCrashWorkaroundScheduledElementDeleteHack.size() > 0) {
-        for(size_t i = 0; i < this->selfDeletionCrashWorkaroundScheduledElementDeleteHack.size(); i++) {
-            delete this->selfDeletionCrashWorkaroundScheduledElementDeleteHack[i];
+        for(auto &i : this->selfDeletionCrashWorkaroundScheduledElementDeleteHack) {
+            delete i;
         }
 
         this->selfDeletionCrashWorkaroundScheduledElementDeleteHack.clear();
@@ -245,8 +245,8 @@ void UIContextMenu::end(bool invertAnimation, bool clampUnderflowAndOverflowAndE
     const int margin = 9 * Osu::getUIScale();
 
     const std::vector<CBaseUIElement *> &elements = this->getContainer()->getElements();
-    for(size_t i = 0; i < elements.size(); i++) {
-        (elements[i])->setSizeX(this->iWidthCounter - 2 * margin);
+    for(auto element : elements) {
+        element->setSizeX(this->iWidthCounter - 2 * margin);
     }
 
     // scrollview handling and edge cases

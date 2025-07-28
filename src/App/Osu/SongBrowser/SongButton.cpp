@@ -45,9 +45,9 @@ SongButton::SongButton(SongBrowser *songBrowser, CBaseUIScrollView *view, UICont
         const std::vector<DatabaseBeatmap *> &difficulties = this->databaseBeatmap->getDifficulties();
 
         // and add them
-        for(int i = 0; i < difficulties.size(); i++) {
+        for(auto difficultie : difficulties) {
             SongButton *songButton = new SongDifficultyButton(this->songBrowser, this->view, this->contextMenu, 0, 0, 0,
-                                                              0, "", difficulties[i], this);
+                                                              0, "", difficultie, this);
 
             this->children.push_back(songButton);
         }
@@ -57,8 +57,8 @@ SongButton::SongButton(SongBrowser *songBrowser, CBaseUIScrollView *view, UICont
 }
 
 SongButton::~SongButton() {
-    for(int i = 0; i < this->children.size(); i++) {
-        delete this->children[i];
+    for(auto &i : this->children) {
+        delete i;
     }
 }
 
@@ -243,8 +243,8 @@ void SongButton::onSelected(bool wasSelected, bool autoSelectBottomMostChild, bo
     this->sortChildren();
 
     // update grade on child
-    for(int c = 0; c < this->children.size(); c++) {
-        SongDifficultyButton *child = (SongDifficultyButton *)this->children[c];
+    for(auto &c : this->children) {
+        SongDifficultyButton *child = (SongDifficultyButton *)c;
         child->updateGrade();
     }
 

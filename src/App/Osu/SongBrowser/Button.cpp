@@ -270,8 +270,8 @@ void Button::onMouseInside() {
     // move the rest of the buttons away from hovered-over one
     const std::vector<CBaseUIElement *> &elements = this->view->getContainer()->getElements();
     bool foundCenter = false;
-    for(size_t i = 0; i < elements.size(); i++) {
-        Button *b = dynamic_cast<Button *>(elements[i]);
+    for(auto element : elements) {
+        Button *b = dynamic_cast<Button *>(element);
         if(b != NULL)  // sanity
         {
             if(b == this) {
@@ -293,8 +293,8 @@ void Button::onMouseOutside() {
     // together with the next element already getting onMouseInside!)
     if(this->moveAwayState == MOVE_AWAY_STATE::MOVE_CENTER) {
         const std::vector<CBaseUIElement *> &elements = this->view->getContainer()->getElements();
-        for(size_t i = 0; i < elements.size(); i++) {
-            Button *b = dynamic_cast<Button *>(elements[i]);
+        for(auto element : elements) {
+            Button *b = dynamic_cast<Button *>(element);
             if(b != NULL)  // sanity check
                 b->setMoveAwayState(MOVE_AWAY_STATE::MOVE_CENTER);
         }

@@ -131,8 +131,8 @@ void VisualProfiler::draw() {
                     textFont = this->fontConsole;
                     textScale = std::round(env->getDPIScale() + 0.255f);
 
-                    for(size_t i = 0; i < this->appTextLines.size(); i++) {
-                        addTextLine(this->appTextLines[i], textFont, this->textLines);
+                    for(const auto &appTextLine : this->appTextLines) {
+                        addTextLine(appTextLine, textFont, this->textLines);
                     }
 
                     if(this->appTextLines.size() < 1) addTextLine("(Empty)", textFont, this->textLines);
@@ -402,8 +402,8 @@ void VisualProfiler::mouse_update(bool *propagate_clicks) {
 
                 SPIKE &newSpike = this->spikes[0];
 
-                for(size_t i = 0; i < this->spikes.size(); i++) {
-                    if(this->spikes[i].timeLastFrame > newSpike.timeLastFrame) newSpike = this->spikes[i];
+                for(auto &spike : this->spikes) {
+                    if(spike.timeLastFrame > newSpike.timeLastFrame) newSpike = spike;
                 }
 
                 if(newSpike.id != this->spike.id) {

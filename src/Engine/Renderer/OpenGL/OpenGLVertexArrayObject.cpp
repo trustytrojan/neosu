@@ -136,8 +136,8 @@ void OpenGLVertexArrayObject::init() {
     if(this->colors.size() > 0) {
         this->iNumColors = this->colors.size();
 
-        for(size_t i = 0; i < this->colors.size(); i++) {
-            this->colors[i] = ARGBtoABGR(this->colors[i]);
+        for(auto& color : this->colors) {
+            color = ARGBtoABGR(color);
         }
 
         glGenBuffers(1, &this->iColorBuffer);

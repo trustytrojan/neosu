@@ -1,6 +1,7 @@
 #pragma once
 
-#include "cbase.h"
+#include "UString.h"
+#include <atomic>
 
 class UpdateHandler {
    public:

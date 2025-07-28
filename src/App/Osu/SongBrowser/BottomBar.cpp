@@ -46,9 +46,9 @@ void press_bottombar_button(i32 btn_index) {
 
 f32 get_bottombar_height() {
     f32 max = 0.f;
-    for(i32 i = 0; i < 4; i++) {
-        if(btn_heights[i] > max) {
-            max = btn_heights[i];
+    for(float btn_height : btn_heights) {
+        if(btn_height > max) {
+            max = btn_height;
         }
     }
     return max * global_scale;

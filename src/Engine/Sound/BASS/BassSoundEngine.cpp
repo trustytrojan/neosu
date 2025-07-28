@@ -95,8 +95,8 @@ void BassSoundEngine::updateOutputDevices(bool /*printInfo*/) {
         int duplicateNameCounter = 2;
         while(true) {
             bool foundDuplicateName = false;
-            for(size_t i = 0; i < this->outputDevices.size(); i++) {
-                if(this->outputDevices[i].name == soundDevice.name) {
+            for(auto &outputDevice : this->outputDevices) {
+                if(outputDevice.name == soundDevice.name) {
                     foundDuplicateName = true;
 
                     soundDevice.name = deviceInfo.name;
