@@ -124,9 +124,23 @@ class DatabaseLoader : public Resource {
 
         // load database
         lct_set_map(NULL);
+
         VolNormalization::abort();
+        this->db->loudness_to_calc.clear();
+
         MapCalcThread::abort();
-        this->db->beatmapsets.clear();  // TODO @kiwec: this just leaks memory?
+        this->db->maps_to_recalc.clear();
+
+        for(auto &beatmapset : this->db->beatmapsets) {
+            SAFE_DELETE(beatmapset);
+        }
+        this->db->beatmapsets.clear();
+
+        for(auto &neosu_set : this->db->neosu_sets) {
+            SAFE_DELETE(neosu_set);
+        }
+        this->db->neosu_sets.clear();
+
         if(env->fileExists(fmt::format("{}" PREF_PATHSEP "osu!.db", cv::osu_folder.getString())) &&
            cv::database_enabled.getBool()) {
             this->bNeedRawLoad = false;
@@ -181,13 +195,23 @@ Database::~Database() {
     sct_abort();
     lct_set_map(NULL);
     VolNormalization::abort();
+    this->loudness_to_calc.clear();
+
     MapCalcThread::abort();
+    this->maps_to_recalc.clear();
+
     for(auto &beatmapset : this->beatmapsets) {
-        delete beatmapset;
+        SAFE_DELETE(beatmapset);
     }
+    this->beatmapsets.clear();
+
+    for(auto &neosu_set : this->neosu_sets) {
+        SAFE_DELETE(neosu_set);
+    }
+    this->neosu_sets.clear();
 
     for(auto &scoreSortingMethod : this->scoreSortingMethods) {
-        delete scoreSortingMethod.comparator;
+        SAFE_DELETE(scoreSortingMethod.comparator);
     }
 
     unload_collections();
@@ -1166,34 +1190,6 @@ void Database::loadDB() {
                 diff2->iMinBPM = bpm.min;
                 diff2->iMaxBPM = bpm.max;
                 diff2->iMostCommonBPM = bpm.most_common;
-
-                bool loudness_found = false;
-                if(overrides_found) {
-                    MapOverrides over = overrides->second;
-                    diff2->iLocalOffset = over.local_offset;
-                    diff2->iOnlineOffset = over.online_offset;
-                    diff2->fStarsNomod = over.star_rating;
-                    diff2->loudness = over.loudness;
-                    diff2->draw_background = over.draw_background;
-
-                    if(over.loudness != 0.f) {
-                        loudness_found = true;
-                    }
-                } else {
-                    if(nomod_star_rating <= 0.f) {
-                        nomod_star_rating *= -1.f;
-                        this->maps_to_recalc.push_back(diff2);
-                    }
-
-                    diff2->iLocalOffset = localOffset;
-                    diff2->iOnlineOffset = (long)onlineOffset;
-                    diff2->fStarsNomod = nomod_star_rating;
-                    diff2->draw_background = 1;
-                }
-
-                if(!loudness_found) {
-                    this->loudness_to_calc.push_back(diff2);
-                }
             }
 
             // special case: legacy fallback behavior for invalid beatmapSetID, try to parse the ID from the path
@@ -1217,8 +1213,8 @@ void Database::loadDB() {
             // it doesn't exist then create the set
             const auto result = setIDToIndex.find(beatmapSetID);
             const bool beatmapSetExists = (result != setIDToIndex.end());
+            bool diff_already_added = false;
             if(beatmapSetExists) {
-                bool diff_already_added = false;
                 for(auto existing_diff : *beatmapSets[result->second].diffs2) {
                     if(existing_diff->getMD5Hash() == diff2->getMD5Hash()) {
                         diff_already_added = true;
@@ -1236,6 +1232,38 @@ void Database::loadDB() {
                 s.diffs2 = new std::vector<DatabaseBeatmap *>();
                 s.diffs2->push_back(diff2);
                 beatmapSets.push_back(s);
+            }
+
+            if(!diff_already_added) {
+                bool loudness_found = false;
+                if(overrides_found) {
+                    MapOverrides over = overrides->second;
+                    diff2->iLocalOffset = over.local_offset;
+                    diff2->iOnlineOffset = over.online_offset;
+                    diff2->fStarsNomod = over.star_rating;
+                    diff2->loudness = over.loudness;
+                    diff2->draw_background = over.draw_background;
+
+                    if(over.loudness != 0.f) {
+                        loudness_found = true;
+                    }
+                } else {
+                    if(nomod_star_rating <= 0.f) {
+                        nomod_star_rating *= -1.f;
+                        this->maps_to_recalc.push_back(diff2);
+                    }
+
+                    diff2->iLocalOffset = localOffset;
+                    diff2->iOnlineOffset = (long)onlineOffset;
+                    diff2->fStarsNomod = nomod_star_rating;
+                    diff2->draw_background = true;
+                }
+
+                if(!loudness_found) {
+                    this->loudness_to_calc.push_back(diff2);
+                }
+            } else {
+                SAFE_DELETE(diff2); // we never added this diff to any container, so we have to free it here
             }
 
             nb_peppy_maps++;
