@@ -310,10 +310,12 @@ bool sort_by_title(SongButton const *a, SongButton const *b) {
 
 }  // namespace
 
-SongBrowser::SongBrowser() : ScreenBackable() {
+SongBrowser::SongBrowser()  // NOLINT(cert-msc51-cpp, cert-msc32-c)
+    : ScreenBackable() {
     // random selection algorithm init
-    auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-    this->rngalg = std::mt19937(static_cast<std::mt19937::result_type>(seed));
+    u64 seed{};
+    crypto::rng::get_bytes(reinterpret_cast<u8 *>(&seed), 8);
+    this->rngalg.seed(seed);
 
     // sorting/grouping + methods
     this->group = GROUP::GROUP_NO_GROUPING;

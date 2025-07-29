@@ -180,7 +180,7 @@ class SongBrowser final : public ScreenBackable {
     void selectPreviousRandomBeatmap();
     void playSelectedDifficulty();
 
-    std::mt19937 rngalg;
+    std::mt19937_64 rngalg;
 
     GROUP group;
     std::array<GROUPING, static_cast<size_t>(GROUP::GROUP_MAX)> groupings;
