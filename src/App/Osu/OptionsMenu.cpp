@@ -581,9 +581,9 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addSubSection("Layout");
     OPTIONS_ELEMENT resolutionSelect =
         *this->addButton("Select Resolution", UString::format("%ix%i", osu->getScreenWidth(), osu->getScreenHeight()));
-    this->resolutionSelectButton = (CBaseUIButton *)resolutionSelect.elements[0];
+    this->resolutionSelectButton = (CBaseUIButton *)resolutionSelect.baseElems[0];
     this->resolutionSelectButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onResolutionSelect>(this));
-    this->resolutionLabel = (CBaseUILabel *)resolutionSelect.elements[1];
+    this->resolutionLabel = (CBaseUILabel *)resolutionSelect.baseElems[1];
     this->fullscreenCheckbox = this->addCheckbox("Fullscreen");
     this->fullscreenCheckbox->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onFullscreenChange>(this));
     this->addCheckbox("Borderless",
@@ -665,13 +665,13 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
         this->outputDeviceResetButton = outputDeviceSelect.resetButton;
         this->outputDeviceResetButton->setClickCallback(
             SA::MakeDelegate<&OptionsMenu::onOutputDeviceResetClicked>(this));
-        this->outputDeviceSelectButton = (CBaseUIButton *)outputDeviceSelect.elements[0];
+        this->outputDeviceSelectButton = (CBaseUIButton *)outputDeviceSelect.baseElems[0];
         this->outputDeviceSelectButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onOutputDeviceSelect>(this));
 
-        this->outputDeviceLabel = (CBaseUILabel *)outputDeviceSelect.elements[1];
+        this->outputDeviceLabel = (CBaseUILabel *)outputDeviceSelect.baseElems[1];
 
         // Dirty...
-        auto wasapi_idx = this->elements.size();
+        auto wasapi_idx = this->elemContainers.size();
         {
             this->addSubSection("WASAPI");
             this->wasapiBufferSizeSlider =
@@ -700,13 +700,13 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
             restartSoundEngine->setColor(0xff00566b);
             this->addLabel("");
         }
-        auto wasapi_end_idx = this->elements.size();
+        auto wasapi_end_idx = this->elemContainers.size();
         for(auto i = wasapi_idx; i < wasapi_end_idx; i++) {
-            this->elements[i]->render_condition = RenderCondition::WASAPI_ENABLED;
+            this->elemContainers[i]->render_condition = RenderCondition::WASAPI_ENABLED;
         }
 
         // Dirty...
-        auto asio_idx = this->elements.size();
+        auto asio_idx = this->elemContainers.size();
         {
             this->addSubSection("ASIO");
             this->asioBufferSizeSlider = this->addSlider("Buffer Size:", 0, 44100, &cv::asio_buffer_size);
@@ -722,9 +722,9 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
             restartSoundEngine->setClickCallback(SA::MakeDelegate<&OptionsMenu::onOutputDeviceRestart>(this));
             restartSoundEngine->setColor(0xff00566b);
         }
-        auto asio_end_idx = this->elements.size();
+        auto asio_end_idx = this->elemContainers.size();
         for(auto i = asio_idx; i < asio_end_idx; i++) {
-            this->elements[i]->render_condition = RenderCondition::ASIO_ENABLED;
+            this->elemContainers[i]->render_condition = RenderCondition::ASIO_ENABLED;
         }
     }
 
@@ -773,8 +773,8 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
         OPTIONS_ELEMENT skinSelect;
         {
             skinSelect = *this->addButton("Select Skin", "default");
-            this->skinSelectLocalButton = skinSelect.elements[0];
-            this->skinLabel = (CBaseUILabel *)skinSelect.elements[1];
+            this->skinSelectLocalButton = skinSelect.baseElems[0];
+            this->skinLabel = (CBaseUILabel *)skinSelect.baseElems[1];
         }
         ((CBaseUIButton *)this->skinSelectLocalButton)
             ->setClickCallback(SA::MakeDelegate<&OptionsMenu::onSkinSelect>(this));
@@ -783,15 +783,15 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
             ->setClickCallback(SA::MakeDelegate<&OptionsMenu::openCurrentSkinFolder>(this));
 
         OPTIONS_ELEMENT skinReload = *this->addButtonButton("Reload Skin", "Random Skin");
-        ((UIButton *)skinReload.elements[0])->setClickCallback(SA::MakeDelegate<&OptionsMenu::onSkinReload>(this));
-        ((UIButton *)skinReload.elements[0])->setTooltipText("(CTRL + ALT + S)");
-        ((UIButton *)skinReload.elements[1])->setClickCallback(SA::MakeDelegate<&OptionsMenu::onSkinRandom>(this));
-        ((UIButton *)skinReload.elements[1])
+        ((UIButton *)skinReload.baseElems[0])->setClickCallback(SA::MakeDelegate<&OptionsMenu::onSkinReload>(this));
+        ((UIButton *)skinReload.baseElems[0])->setTooltipText("(CTRL + ALT + S)");
+        ((UIButton *)skinReload.baseElems[1])->setClickCallback(SA::MakeDelegate<&OptionsMenu::onSkinRandom>(this));
+        ((UIButton *)skinReload.baseElems[1])
             ->setTooltipText(
                 "Temporary, does not change your configured skin (reload to reset).\nUse \"osu_skin_random 1\" to "
                 "randomize on every skin reload.\nUse \"osu_skin_random_elements 1\" to mix multiple skins.\nUse "
                 "\"osu_skin_export\" to export the currently active skin.");
-        ((UIButton *)skinReload.elements[1])->setColor(0xff00566b);
+        ((UIButton *)skinReload.baseElems[1])->setColor(0xff00566b);
     }
     this->addSpacer();
     this->addCheckbox("Sort Skins Alphabetically",
@@ -1003,10 +1003,10 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addLabel("");
 
     OPTIONS_ELEMENT notelockSelect = *this->addButton("Select [Notelock]", "None", true);
-    ((CBaseUIButton *)notelockSelect.elements[0])
+    ((CBaseUIButton *)notelockSelect.baseElems[0])
         ->setClickCallback(SA::MakeDelegate<&OptionsMenu::onNotelockSelect>(this));
-    this->notelockSelectButton = notelockSelect.elements[0];
-    this->notelockSelectLabel = (CBaseUILabel *)notelockSelect.elements[1];
+    this->notelockSelectButton = notelockSelect.baseElems[0];
+    this->notelockSelectLabel = (CBaseUILabel *)notelockSelect.baseElems[1];
     this->notelockSelectResetButton = notelockSelect.resetButton;
     this->notelockSelectResetButton->setClickCallback(
         SA::MakeDelegate<&OptionsMenu::onNotelockSelectResetClicked>(this));
@@ -1218,34 +1218,34 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
 
     this->addSubSection("Online server");
     this->addLabel("If the server admins don't explicitly allow neosu,")->setTextColor(0xff666666);
-    this->elements.back()->render_condition = RenderCondition::SCORE_SUBMISSION_POLICY;
+    this->elemContainers.back()->render_condition = RenderCondition::SCORE_SUBMISSION_POLICY;
     this->addLabel("you might get banned!")->setTextColor(0xff666666);
-    this->elements.back()->render_condition = RenderCondition::SCORE_SUBMISSION_POLICY;
+    this->elemContainers.back()->render_condition = RenderCondition::SCORE_SUBMISSION_POLICY;
     this->addLabel("");
     this->serverTextbox = this->addTextbox(cv::mp_server.getString().c_str(), &cv::mp_server);
     this->submitScoresCheckbox = this->addCheckbox("Submit scores", &cv::submit_scores);
-    this->elements.back()->render_condition = RenderCondition::SCORE_SUBMISSION_POLICY;
+    this->elemContainers.back()->render_condition = RenderCondition::SCORE_SUBMISSION_POLICY;
 
     this->addSubSection("Login details (username/password)");
-    this->elements.back()->render_condition = RenderCondition::PASSWORD_AUTH;
+    this->elemContainers.back()->render_condition = RenderCondition::PASSWORD_AUTH;
     this->nameTextbox = this->addTextbox(cv::name.getString().c_str(), &cv::name);
-    this->elements.back()->render_condition = RenderCondition::PASSWORD_AUTH;
+    this->elemContainers.back()->render_condition = RenderCondition::PASSWORD_AUTH;
     const auto &md5pass = cv::mp_password_md5.getString();
     this->passwordTextbox = this->addTextbox(md5pass.empty() ? "" : md5pass.c_str(), &cv::mp_password_temporary);
     this->passwordTextbox->is_password = true;
-    this->elements.back()->render_condition = RenderCondition::PASSWORD_AUTH;
+    this->elemContainers.back()->render_condition = RenderCondition::PASSWORD_AUTH;
     {
         enum ELEMS : uint8_t { LOGINBTN = 0, KEEPSIGNEDCBX = 1 };
         OPTIONS_ELEMENT *loginElement = this->addButtonCheckbox("Log in", "Keep me logged in");
 
-        this->logInButton = static_cast<UIButton *>(loginElement->elements[LOGINBTN]);
+        this->logInButton = static_cast<UIButton *>(loginElement->baseElems[LOGINBTN]);
 
         this->logInButton->setHandleRightMouse(true);  // for canceling logins
         this->logInButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onLogInClicked>(this));
         this->logInButton->setColor(0xff00ff00);
         this->logInButton->setTextColor(0xffffffff);
 
-        auto *keepCbx = static_cast<UICheckbox *>(loginElement->elements[KEEPSIGNEDCBX]);
+        auto *keepCbx = static_cast<UICheckbox *>(loginElement->baseElems[KEEPSIGNEDCBX]);
 
         keepCbx->setChecked(cv::mp_autologin.getBool());
         keepCbx->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onCheckboxChange>(this));
@@ -1317,10 +1317,10 @@ OptionsMenu::~OptionsMenu() {
     SAFE_DELETE(this->spacer);
     SAFE_DELETE(this->contextMenu);
 
-    for(auto &element : this->elements) {
+    for(auto &element : this->elemContainers) {
         if(!element) continue;
         SAFE_DELETE(element->resetButton);
-        for(auto &sub : element->elements) {
+        for(auto &sub : element->baseElems) {
             SAFE_DELETE(sub);
         }
         SAFE_DELETE(element);
@@ -1739,21 +1739,21 @@ void OptionsMenu::updateLayout() {
     bool oauth = this->should_use_oauth_login();
 
     // set all elements to the current convar values, and update the reset button states
-    for(auto &element : this->elements) {
+    for(auto &element : this->elemContainers) {
         for(auto &cvm : element->cvars) {
             auto *cv = cvm.second;
             if(cv == nullptr) break;
             switch(element->type) {
                 case 6:   // checkbox
                 case 10:  // checkbox + button
-                    for(auto &e : element->elements) {
+                    for(auto &e : element->baseElems) {
                         CBaseUICheckbox *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(e);
                         if(checkboxPointer != NULL) checkboxPointer->setChecked(cv->getBool());
                     }
                     break;
                 case 7:  // slider
-                    if(element->elements.size() == 3) {
-                        auto *sliderPointer = dynamic_cast<CBaseUISlider *>(element->elements[1]);
+                    if(element->baseElems.size() == 3) {
+                        auto *sliderPointer = dynamic_cast<CBaseUISlider *>(element->baseElems[1]);
                         if(sliderPointer != NULL) {
                             // allow users to overscale certain values via the console
                             if(element->allowOverscale && cv->getFloat() > sliderPointer->getMax())
@@ -1769,8 +1769,8 @@ void OptionsMenu::updateLayout() {
                     }
                     break;
                 case 8:  // textbox
-                    if(element->elements.size() == 1) {
-                        auto *textboxPointer = dynamic_cast<CBaseUITextbox *>(element->elements[0]);
+                    if(element->baseElems.size() == 1) {
+                        auto *textboxPointer = dynamic_cast<CBaseUITextbox *>(element->baseElems[0]);
                         if(textboxPointer != NULL) {
                             // HACKHACK: don't override textbox with the mp_password_temporary (which gets deleted
                             // on login)
@@ -1780,8 +1780,8 @@ void OptionsMenu::updateLayout() {
                             }
                             textboxPointer->setText(textToSet);
                         }
-                    } else if(element->elements.size() == 2) {
-                        auto *textboxPointer = dynamic_cast<CBaseUITextbox *>(element->elements[1]);
+                    } else if(element->baseElems.size() == 2) {
+                        auto *textboxPointer = dynamic_cast<CBaseUITextbox *>(element->baseElems[1]);
                         if(textboxPointer != NULL) textboxPointer->setText(cv->getString().c_str());
                     }
                     break;
@@ -1850,18 +1850,18 @@ void OptionsMenu::updateLayout() {
     bool sectionTitleMatch = false;
     bool subSectionTitleMatch = false;
     const std::string search = this->sSearchString.length() > 0 ? this->sSearchString.c_str() : "";
-    for(int i = 0; i < this->elements.size(); i++) {
-        if(!this->elements[i]) continue;
-        if(this->elements[i]->render_condition == RenderCondition::ASIO_ENABLED &&
+    for(int i = 0; i < this->elemContainers.size(); i++) {
+        if(!this->elemContainers[i]) continue;
+        if(this->elemContainers[i]->render_condition == RenderCondition::ASIO_ENABLED &&
            !(soundEngine->getOutputDriverType() == SoundEngine::OutputDriver::BASS_ASIO))
             continue;
-        if(this->elements[i]->render_condition == RenderCondition::WASAPI_ENABLED &&
+        if(this->elemContainers[i]->render_condition == RenderCondition::WASAPI_ENABLED &&
            !(soundEngine->getOutputDriverType() == SoundEngine::OutputDriver::BASS_WASAPI))
             continue;
-        if(this->elements[i]->render_condition == RenderCondition::SCORE_SUBMISSION_POLICY &&
+        if(this->elemContainers[i]->render_condition == RenderCondition::SCORE_SUBMISSION_POLICY &&
            bancho->score_submission_policy != ServerPolicy::NO_PREFERENCE)
             continue;
-        if(this->elements[i]->render_condition == RenderCondition::PASSWORD_AUTH && oauth) continue;
+        if(this->elemContainers[i]->render_condition == RenderCondition::PASSWORD_AUTH && oauth) continue;
 
         // searching logic happens here:
         // section
@@ -1875,24 +1875,24 @@ void OptionsMenu::updateLayout() {
         // matcher is run through all remaining elements at every section + subsection
 
         if(this->sSearchString.length() > 0) {
-            const std::string searchTags = this->elements[i]->searchTags.toUtf8();
+            const std::string searchTags = this->elemContainers[i]->searchTags.toUtf8();
 
             // if this is a section
-            if(this->elements[i]->type == 1) {
+            if(this->elemContainers[i]->type == 1) {
                 bool sectionMatch = false;
 
-                const std::string sectionTitle = this->elements[i]->elements[0]->getName().toUtf8();
+                const std::string sectionTitle = this->elemContainers[i]->baseElems[0]->getName().toUtf8();
                 sectionTitleMatch = SString::contains_ncase(sectionTitle, search);
 
                 subSectionTitleMatch = false;
                 if(inSkipSection) inSkipSection = false;
 
-                for(int s = i + 1; s < this->elements.size(); s++) {
-                    if(!this->elements[s]) continue;
-                    if(this->elements[s]->type == 1)  // stop at next section
+                for(int s = i + 1; s < this->elemContainers.size(); s++) {
+                    if(!this->elemContainers[s]) continue;
+                    if(this->elemContainers[s]->type == 1)  // stop at next section
                         break;
 
-                    for(auto &element : this->elements[s]->elements) {
+                    for(auto &element : this->elemContainers[s]->baseElems) {
                         if(element->getName().length() > 0) {
                             std::string tags = element->getName().toUtf8();
 
@@ -1909,21 +1909,21 @@ void OptionsMenu::updateLayout() {
             }
 
             // if this is a subsection
-            if(this->elements[i]->type == 2) {
+            if(this->elemContainers[i]->type == 2) {
                 bool subSectionMatch = false;
 
-                const std::string subSectionTitle = this->elements[i]->elements[0]->getName().toUtf8();
+                const std::string subSectionTitle = this->elemContainers[i]->baseElems[0]->getName().toUtf8();
                 subSectionTitleMatch =
                     SString::contains_ncase(subSectionTitle, search) || SString::contains_ncase(searchTags, search);
 
                 if(inSkipSubSection) inSkipSubSection = false;
 
-                for(int s = i + 1; s < this->elements.size(); s++) {
-                    if(!this->elements[s]) continue;
-                    if(this->elements[s]->type == 2)  // stop at next subsection
+                for(int s = i + 1; s < this->elemContainers.size(); s++) {
+                    if(!this->elemContainers[s]) continue;
+                    if(this->elemContainers[s]->type == 2)  // stop at next subsection
                         break;
 
-                    for(auto &element : this->elements[s]->elements) {
+                    for(auto &element : this->elemContainers[s]->baseElems) {
                         if(element->getName().length() > 0) {
                             std::string tags = element->getName().toUtf8();
 
@@ -1942,8 +1942,8 @@ void OptionsMenu::updateLayout() {
             if(!inSkipSection && !inSkipSubSection) {
                 bool contentMatch = false;
 
-                if(this->elements[i]->type > 2) {
-                    for(auto &element : this->elements[i]->elements) {
+                if(this->elemContainers[i]->type > 2) {
+                    for(auto &element : this->elemContainers[i]->baseElems) {
                         if(!element) continue;
                         if(element->getName().length() > 0) {
                             std::string tags = element->getName().toUtf8();
@@ -1968,11 +1968,11 @@ void OptionsMenu::updateLayout() {
         // add all elements of the current entry
         {
             // reset button
-            if(this->elements[i]->resetButton != NULL)
-                this->options->getContainer()->addBaseUIElement(this->elements[i]->resetButton);
+            if(this->elemContainers[i]->resetButton != NULL)
+                this->options->getContainer()->addBaseUIElement(this->elemContainers[i]->resetButton);
 
             // (sub-)elements
-            for(auto &element : this->elements[i]->elements) {
+            for(auto &element : this->elemContainers[i]->baseElems) {
                 this->options->getContainer()->addBaseUIElement(element);
             }
         }
@@ -1980,28 +1980,28 @@ void OptionsMenu::updateLayout() {
         // and build the layout
 
         // if this element is a new section, add even more spacing
-        if(i > 0 && this->elements[i]->type == 1) yCounter += sectionEndSpacing;
+        if(i > 0 && this->elemContainers[i]->type == 1) yCounter += sectionEndSpacing;
 
         // if this element is a new subsection, add even more spacing
-        if(i > 0 && this->elements[i]->type == 2) yCounter += subsectionEndSpacing;
+        if(i > 0 && this->elemContainers[i]->type == 2) yCounter += subsectionEndSpacing;
 
         const int elementWidth = optionsWidth - 2 * sideMargin - 2 * dpiScale;
-        const bool isKeyBindButton = (this->elements[i]->type == 5);
-        const bool isButtonCheckbox = (this->elements[i]->type == 10);  // FUCK THESE RANDOM UNLABELED IDS
+        const bool isKeyBindButton = (this->elemContainers[i]->type == 5);
+        const bool isButtonCheckbox = (this->elemContainers[i]->type == 10);  // FUCK THESE RANDOM UNLABELED IDS
 
-        if(this->elements[i]->resetButton != NULL) {
-            CBaseUIButton *resetButton = this->elements[i]->resetButton;
+        if(this->elemContainers[i]->resetButton != NULL) {
+            CBaseUIButton *resetButton = this->elemContainers[i]->resetButton;
             resetButton->setSize(Vector2(35, 50) * dpiScale);
             resetButton->setRelPosY(yCounter);
             resetButton->setRelPosX(0);
         }
 
-        for(auto e : this->elements[i]->elements) {
+        for(auto e : this->elemContainers[i]->baseElems) {
             e->setSizeY(e->getRelSize().y * dpiScale);
         }
 
-        if(this->elements[i]->elements.size() == 1) {
-            CBaseUIElement *e = this->elements[i]->elements[0];
+        if(this->elemContainers[i]->baseElems.size() == 1) {
+            CBaseUIElement *e = this->elemContainers[i]->baseElems[0];
 
             int sideMarginAdd = 0;
             auto *labelPointer = dynamic_cast<CBaseUILabel *>(e);
@@ -2030,9 +2030,9 @@ void OptionsMenu::updateLayout() {
             e->setRelPosY(yCounter);
 
             yCounter += e->getSize().y;
-        } else if(this->elements[i]->elements.size() == 2 || isKeyBindButton) {
-            CBaseUIElement *e1 = this->elements[i]->elements[0];
-            CBaseUIElement *e2 = this->elements[i]->elements[1];
+        } else if(this->elemContainers[i]->baseElems.size() == 2 || isKeyBindButton) {
+            CBaseUIElement *e1 = this->elemContainers[i]->baseElems[0];
+            CBaseUIElement *e2 = this->elemContainers[i]->baseElems[1];
 
             int spacing = 15 * dpiScale;
 
@@ -2049,7 +2049,7 @@ void OptionsMenu::updateLayout() {
             if(buttonPointer != NULL && buttonPointer2 != NULL) spacing *= 0.35f;
 
             if(isKeyBindButton) {
-                CBaseUIElement *e3 = this->elements[i]->elements[2];
+                CBaseUIElement *e3 = this->elemContainers[i]->baseElems[2];
 
                 const float dividerMiddle = 5.0f / 8.0f;
                 const float dividerEnd = 2.0f / 8.0f;
@@ -2084,12 +2084,12 @@ void OptionsMenu::updateLayout() {
             }
 
             yCounter += e1->getSize().y;
-        } else if(this->elements[i]->elements.size() == 3) {
-            CBaseUIElement *e1 = this->elements[i]->elements[0];
-            CBaseUIElement *e2 = this->elements[i]->elements[1];
-            CBaseUIElement *e3 = this->elements[i]->elements[2];
+        } else if(this->elemContainers[i]->baseElems.size() == 3) {
+            CBaseUIElement *e1 = this->elemContainers[i]->baseElems[0];
+            CBaseUIElement *e2 = this->elemContainers[i]->baseElems[1];
+            CBaseUIElement *e3 = this->elemContainers[i]->baseElems[2];
 
-            if(this->elements[i]->type == 4) {
+            if(this->elemContainers[i]->type == 4) {
                 const int buttonButtonLabelOffset = 10 * dpiScale;
 
                 const int buttonSize = elementWidth / 3 - 2 * buttonButtonLabelOffset;
@@ -2117,11 +2117,11 @@ void OptionsMenu::updateLayout() {
                 auto *label1Pointer = dynamic_cast<CBaseUILabel *>(e1);
                 if(label1Pointer != NULL) {
                     label1Pointer->onResized();  // HACKHACK: framework, setSize*() does not update string metrics
-                    if(this->elements[i]->label1Width > 0.0f)
-                        label1Pointer->setSizeX(this->elements[i]->label1Width * dpiScale);
+                    if(this->elemContainers[i]->label1Width > 0.0f)
+                        label1Pointer->setSizeX(this->elemContainers[i]->label1Width * dpiScale);
                     else
                         label1Pointer->setSizeX(label1Pointer->getRelSize().x *
-                                                (96.0f / this->elements[i]->relSizeDPI) * dpiScale);
+                                                (96.0f / this->elemContainers[i]->relSizeDPI) * dpiScale);
                 }
 
                 auto *sliderPointer = dynamic_cast<CBaseUISlider *>(e2);
@@ -2130,7 +2130,7 @@ void OptionsMenu::updateLayout() {
                 auto *label2Pointer = dynamic_cast<CBaseUILabel *>(e3);
                 if(label2Pointer != NULL) {
                     label2Pointer->onResized();  // HACKHACK: framework, setSize*() does not update string metrics
-                    label2Pointer->setSizeX(label2Pointer->getRelSize().x * (96.0f / this->elements[i]->relSizeDPI) *
+                    label2Pointer->setSizeX(label2Pointer->getRelSize().x * (96.0f / this->elemContainers[i]->relSizeDPI) *
                                             dpiScale);
                 }
 
@@ -2153,7 +2153,7 @@ void OptionsMenu::updateLayout() {
 
         yCounter += elementSpacing;
 
-        switch(this->elements[i]->type) {
+        switch(this->elemContainers[i]->type) {
             case 0:
                 yCounter += spaceSpacing;
                 break;
@@ -2290,9 +2290,9 @@ void OptionsMenu::onFullscreenChange(CBaseUICheckbox *checkbox) {
         env->disableFullscreen();
 
     // and update reset button as usual
-    for(auto &element : this->elements) {
-        for(int e = 0; e < element->elements.size(); e++) {
-            if(element->elements[e] == checkbox) {
+    for(auto &element : this->elemContainers) {
+        for(int e = 0; e < element->baseElems.size(); e++) {
+            if(element->baseElems[e] == checkbox) {
                 this->onResetUpdate(element->resetButton);
 
                 break;
@@ -2307,9 +2307,9 @@ void OptionsMenu::onBorderlessWindowedChange(CBaseUICheckbox *checkbox) {
     if(checkbox->isChecked() && !env->isFullscreen()) env->enableFullscreen();
 
     // and update reset button as usual
-    for(auto &element : this->elements) {
-        for(int e = 0; e < element->elements.size(); e++) {
-            if(element->elements[e] == checkbox) {
+    for(auto &element : this->elemContainers) {
+        for(int e = 0; e < element->baseElems.size(); e++) {
+            if(element->baseElems[e] == checkbox) {
                 this->onResetUpdate(element->resetButton);
 
                 break;
@@ -2319,12 +2319,12 @@ void OptionsMenu::onBorderlessWindowedChange(CBaseUICheckbox *checkbox) {
 }
 
 void OptionsMenu::onDPIScalingChange(CBaseUICheckbox *checkbox) {
-    for(auto &element : this->elements) {
-        for(int e = 0; e < element->elements.size(); e++) {
-            if(element->elements[e] == checkbox) {
+    for(auto &element : this->elemContainers) {
+        for(int e = 0; e < element->baseElems.size(); e++) {
+            if(element->baseElems[e] == checkbox) {
                 const float prevUIScale = Osu::getUIScale();
 
-                auto *cv = element->cvars[element->elements[e]];
+                auto *cv = element->cvars[element->baseElems[e]];
                 if(cv != nullptr) {
                     cv->setValue(checkbox->isChecked());
                 }
@@ -2340,10 +2340,10 @@ void OptionsMenu::onDPIScalingChange(CBaseUICheckbox *checkbox) {
 }
 
 void OptionsMenu::onRawInputToAbsoluteWindowChange(CBaseUICheckbox *checkbox) {
-    for(auto &element : this->elements) {
-        for(int e = 0; e < element->elements.size(); e++) {
-            if(element->elements[e] == checkbox) {
-                auto *cv = element->cvars[element->elements[e]];
+    for(auto &element : this->elemContainers) {
+        for(int e = 0; e < element->baseElems.size(); e++) {
+            if(element->baseElems[e] == checkbox) {
+                auto *cv = element->cvars[element->baseElems[e]];
                 if(cv != nullptr) {
                     cv->setValue(checkbox->isChecked());
                 }
@@ -2687,9 +2687,9 @@ void OptionsMenu::onNotelockSelectResetUpdate() {
 
 void OptionsMenu::onCheckboxChange(CBaseUICheckbox *checkbox) {
     debugLogF("got checkbox change callback for {:p}\n", static_cast<void *>(checkbox));
-    for(auto &element : this->elements) {
-        for(int e = 0; e < element->elements.size(); e++) {
-            if(element->elements[e] == checkbox) {
+    for(auto &element : this->elemContainers) {
+        for(int e = 0; e < element->baseElems.size(); e++) {
+            if(element->baseElems[e] == checkbox) {
                 debugLogF("element->elements[{}] found checkbox\n", e);
                 auto *cv = element->cvars[checkbox];
                 if(cv != nullptr) {
@@ -2708,15 +2708,15 @@ void OptionsMenu::onCheckboxChange(CBaseUICheckbox *checkbox) {
 }
 
 void OptionsMenu::onSliderChange(CBaseUISlider *slider) {
-    for(auto &element : this->elements) {
-        for(int e = 0; e < element->elements.size(); e++) {
-            if(element->elements[e] == slider) {
+    for(auto &element : this->elemContainers) {
+        for(int e = 0; e < element->baseElems.size(); e++) {
+            if(element->baseElems[e] == slider) {
                 auto *cv = element->cvars[slider];
                 if(cv != nullptr) {
                     cv->setValue(std::round(slider->getFloat() * 100.0f) / 100.0f);  // round to 2 decimal places
 
-                    if(element->elements.size() == 3) {
-                        auto *labelPointer = dynamic_cast<CBaseUILabel *>(element->elements[2]);
+                    if(element->baseElems.size() == 3) {
+                        auto *labelPointer = dynamic_cast<CBaseUILabel *>(element->baseElems[2]);
                         labelPointer->setText(cv->getString().c_str());
                     }
                 }
@@ -2730,15 +2730,15 @@ void OptionsMenu::onSliderChange(CBaseUISlider *slider) {
 }
 
 void OptionsMenu::onSliderChangeOneDecimalPlace(CBaseUISlider *slider) {
-    for(auto &element : this->elements) {
-        for(int e = 0; e < element->elements.size(); e++) {
-            if(element->elements[e] == slider) {
+    for(auto &element : this->elemContainers) {
+        for(int e = 0; e < element->baseElems.size(); e++) {
+            if(element->baseElems[e] == slider) {
                 auto *cv = element->cvars[slider];
                 if(cv != nullptr) {
                     cv->setValue(std::round(slider->getFloat() * 10.0f) / 10.0f);  // round to 1 decimal place
 
-                    if(element->elements.size() == 3) {
-                        auto *labelPointer = dynamic_cast<CBaseUILabel *>(element->elements[2]);
+                    if(element->baseElems.size() == 3) {
+                        auto *labelPointer = dynamic_cast<CBaseUILabel *>(element->baseElems[2]);
                         labelPointer->setText(cv->getString().c_str());
                     }
                 }
@@ -2751,15 +2751,15 @@ void OptionsMenu::onSliderChangeOneDecimalPlace(CBaseUISlider *slider) {
 }
 
 void OptionsMenu::onSliderChangeTwoDecimalPlaces(CBaseUISlider *slider) {
-    for(auto &element : this->elements) {
-        for(int e = 0; e < element->elements.size(); e++) {
-            if(element->elements[e] == slider) {
+    for(auto &element : this->elemContainers) {
+        for(int e = 0; e < element->baseElems.size(); e++) {
+            if(element->baseElems[e] == slider) {
                 auto *cv = element->cvars[slider];
                 if(cv != nullptr) {
                     cv->setValue(std::round(slider->getFloat() * 100.0f) / 100.0f);  // round to 2 decimal places
 
-                    if(element->elements.size() == 3) {
-                        auto *labelPointer = dynamic_cast<CBaseUILabel *>(element->elements[2]);
+                    if(element->baseElems.size() == 3) {
+                        auto *labelPointer = dynamic_cast<CBaseUILabel *>(element->baseElems[2]);
                         labelPointer->setText(cv->getString().c_str());
                     }
                 }
@@ -2772,15 +2772,15 @@ void OptionsMenu::onSliderChangeTwoDecimalPlaces(CBaseUISlider *slider) {
 }
 
 void OptionsMenu::onSliderChangeOneDecimalPlaceMeters(CBaseUISlider *slider) {
-    for(auto &element : this->elements) {
-        for(int e = 0; e < element->elements.size(); e++) {
-            if(element->elements[e] == slider) {
+    for(auto &element : this->elemContainers) {
+        for(int e = 0; e < element->baseElems.size(); e++) {
+            if(element->baseElems[e] == slider) {
                 auto *cv = element->cvars[slider];
                 if(cv != nullptr) {
                     cv->setValue(std::round(slider->getFloat() * 10.0f) / 10.0f);  // round to 1 decimal place
 
-                    if(element->elements.size() == 3) {
-                        auto *labelPointer = dynamic_cast<CBaseUILabel *>(element->elements[2]);
+                    if(element->baseElems.size() == 3) {
+                        auto *labelPointer = dynamic_cast<CBaseUILabel *>(element->baseElems[2]);
                         labelPointer->setText(UString::format("%.1f m", cv->getFloat()));
                     }
                 }
@@ -2793,15 +2793,15 @@ void OptionsMenu::onSliderChangeOneDecimalPlaceMeters(CBaseUISlider *slider) {
 }
 
 void OptionsMenu::onSliderChangeInt(CBaseUISlider *slider) {
-    for(auto &element : this->elements) {
-        for(int e = 0; e < element->elements.size(); e++) {
-            if(element->elements[e] == slider) {
+    for(auto &element : this->elemContainers) {
+        for(int e = 0; e < element->baseElems.size(); e++) {
+            if(element->baseElems[e] == slider) {
                 auto *cv = element->cvars[slider];
                 if(cv != nullptr) {
                     if(cv != NULL) cv->setValue(std::round(slider->getFloat()));  // round to int
 
-                    if(element->elements.size() == 3) {
-                        auto *labelPointer = dynamic_cast<CBaseUILabel *>(element->elements[2]);
+                    if(element->baseElems.size() == 3) {
+                        auto *labelPointer = dynamic_cast<CBaseUILabel *>(element->baseElems[2]);
                         labelPointer->setText(cv->getString().c_str());
                     }
                 }
@@ -2814,15 +2814,15 @@ void OptionsMenu::onSliderChangeInt(CBaseUISlider *slider) {
 }
 
 void OptionsMenu::onSliderChangeIntMS(CBaseUISlider *slider) {
-    for(auto &element : this->elements) {
-        for(int e = 0; e < element->elements.size(); e++) {
-            if(element->elements[e] == slider) {
+    for(auto &element : this->elemContainers) {
+        for(int e = 0; e < element->baseElems.size(); e++) {
+            if(element->baseElems[e] == slider) {
                 auto *cv = element->cvars[slider];
                 if(cv != nullptr) {
                     cv->setValue(std::round(slider->getFloat()));  // round to int
 
-                    if(element->elements.size() == 3) {
-                        auto *labelPointer = dynamic_cast<CBaseUILabel *>(element->elements[2]);
+                    if(element->baseElems.size() == 3) {
+                        auto *labelPointer = dynamic_cast<CBaseUILabel *>(element->baseElems[2]);
                         std::string text = cv->getString();
                         text.append(" ms");
                         labelPointer->setText(text.c_str());
@@ -2837,15 +2837,15 @@ void OptionsMenu::onSliderChangeIntMS(CBaseUISlider *slider) {
 }
 
 void OptionsMenu::onSliderChangeFloatMS(CBaseUISlider *slider) {
-    for(auto &element : this->elements) {
-        for(int e = 0; e < element->elements.size(); e++) {
-            if(element->elements[e] == slider) {
+    for(auto &element : this->elemContainers) {
+        for(int e = 0; e < element->baseElems.size(); e++) {
+            if(element->baseElems[e] == slider) {
                 auto *cv = element->cvars[slider];
                 if(cv != nullptr) {
                     cv->setValue(slider->getFloat());
 
-                    if(element->elements.size() == 3) {
-                        auto *labelPointer = dynamic_cast<CBaseUILabel *>(element->elements[2]);
+                    if(element->baseElems.size() == 3) {
+                        auto *labelPointer = dynamic_cast<CBaseUILabel *>(element->baseElems[2]);
                         UString text = UString::format("%i", (int)std::round(cv->getFloat() * 1000.0f));
                         text.append(" ms");
                         labelPointer->setText(text);
@@ -2860,17 +2860,17 @@ void OptionsMenu::onSliderChangeFloatMS(CBaseUISlider *slider) {
 }
 
 void OptionsMenu::onSliderChangePercent(CBaseUISlider *slider) {
-    for(auto &element : this->elements) {
-        for(int e = 0; e < element->elements.size(); e++) {
-            if(element->elements[e] == slider) {
+    for(auto &element : this->elemContainers) {
+        for(int e = 0; e < element->baseElems.size(); e++) {
+            if(element->baseElems[e] == slider) {
                 auto *cv = element->cvars[slider];
                 if(cv != nullptr) {
                     cv->setValue(std::round(slider->getFloat() * 100.0f) / 100.0f);
 
-                    if(element->elements.size() == 3) {
+                    if(element->baseElems.size() == 3) {
                         int percent = std::round(cv->getFloat() * 100.0f);
 
-                        auto *labelPointer = dynamic_cast<CBaseUILabel *>(element->elements[2]);
+                        auto *labelPointer = dynamic_cast<CBaseUILabel *>(element->baseElems[2]);
                         labelPointer->setText(UString::format("%i%%", percent));
                     }
                 }
@@ -2883,9 +2883,9 @@ void OptionsMenu::onSliderChangePercent(CBaseUISlider *slider) {
 }
 
 void OptionsMenu::onKeyBindingButtonPressed(CBaseUIButton *button) {
-    for(auto &element : this->elements) {
-        for(int e = 0; e < element->elements.size(); e++) {
-            if(element->elements[e] == button) {
+    for(auto &element : this->elemContainers) {
+        for(int e = 0; e < element->baseElems.size(); e++) {
+            if(element->baseElems[e] == button) {
                 auto *cv = element->cvars[button];
                 if(cv != nullptr) {
                     this->waitingKey = cv;
@@ -2908,9 +2908,9 @@ void OptionsMenu::onKeyBindingButtonPressed(CBaseUIButton *button) {
 void OptionsMenu::onKeyUnbindButtonPressed(CBaseUIButton *button) {
     soundEngine->play(osu->getSkin()->getCheckOff());
 
-    for(auto &element : this->elements) {
-        for(int e = 0; e < element->elements.size(); e++) {
-            if(element->elements[e] == button) {
+    for(auto &element : this->elemContainers) {
+        for(int e = 0; e < element->baseElems.size(); e++) {
+            if(element->baseElems[e] == button) {
                 auto *cv = element->cvars[button];
                 if(cv != nullptr) {
                     cv->setValue(0.0f);
@@ -2946,16 +2946,16 @@ void OptionsMenu::onKeyBindingsResetAllPressed(CBaseUIButton * /*button*/) {
 }
 
 void OptionsMenu::onSliderChangeSliderQuality(CBaseUISlider *slider) {
-    for(auto &element : this->elements) {
-        for(int e = 0; e < element->elements.size(); e++) {
-            if(element->elements[e] == slider) {
+    for(auto &element : this->elemContainers) {
+        for(int e = 0; e < element->baseElems.size(); e++) {
+            if(element->baseElems[e] == slider) {
                 auto *cv = element->cvars[slider];
                 if(cv != nullptr) {
                     cv->setValue(std::round(slider->getFloat() * 100.0f) / 100.0f);  // round to 2 decimal places
                 }
 
-                if(element->elements.size() == 3) {
-                    auto *labelPointer = dynamic_cast<CBaseUILabel *>(element->elements[2]);
+                if(element->baseElems.size() == 3) {
+                    auto *labelPointer = dynamic_cast<CBaseUILabel *>(element->baseElems[2]);
 
                     int percent = std::round((slider->getPercent()) * 100.0f);
                     UString text = UString::format(percent > 49 ? "%i !" : "%i", percent);
@@ -2973,15 +2973,15 @@ void OptionsMenu::onSliderChangeSliderQuality(CBaseUISlider *slider) {
 void OptionsMenu::onSliderChangeLetterboxingOffset(CBaseUISlider *slider) {
     this->bLetterboxingOffsetUpdateScheduled = true;
 
-    for(auto &element : this->elements) {
-        for(int e = 0; e < element->elements.size(); e++) {
-            if(element->elements[e] == slider) {
+    for(auto &element : this->elemContainers) {
+        for(int e = 0; e < element->baseElems.size(); e++) {
+            if(element->baseElems[e] == slider) {
                 const float newValue = std::round(slider->getFloat() * 100.0f) / 100.0f;
 
-                if(element->elements.size() == 3) {
+                if(element->baseElems.size() == 3) {
                     const int percent = std::round(newValue * 100.0f);
 
-                    auto *labelPointer = dynamic_cast<CBaseUILabel *>(element->elements[2]);
+                    auto *labelPointer = dynamic_cast<CBaseUILabel *>(element->baseElems[2]);
                     labelPointer->setText(UString::format("%i%%", percent));
                 }
 
@@ -2998,15 +2998,15 @@ void OptionsMenu::onSliderChangeLetterboxingOffset(CBaseUISlider *slider) {
 void OptionsMenu::onSliderChangeUIScale(CBaseUISlider *slider) {
     this->bUIScaleChangeScheduled = true;
 
-    for(auto &element : this->elements) {
-        for(int e = 0; e < element->elements.size(); e++) {
-            if(element->elements[e] == slider) {
+    for(auto &element : this->elemContainers) {
+        for(int e = 0; e < element->baseElems.size(); e++) {
+            if(element->baseElems[e] == slider) {
                 const float newValue = std::round(slider->getFloat() * 100.0f) / 100.0f;
 
-                if(element->elements.size() == 3) {
+                if(element->baseElems.size() == 3) {
                     const int percent = std::round(newValue * 100.0f);
 
-                    auto *labelPointer = dynamic_cast<CBaseUILabel *>(element->elements[2]);
+                    auto *labelPointer = dynamic_cast<CBaseUILabel *>(element->baseElems[2]);
                     labelPointer->setText(UString::format("%i%%", percent));
                 }
 
@@ -3065,11 +3065,11 @@ void OptionsMenu::onASIOBufferChange([[maybe_unused]] CBaseUISlider *slider) {
 void OptionsMenu::onWASAPIBufferChange(CBaseUISlider *slider) {
     if(!this->updating_layout) this->bWASAPIBufferChangeScheduled = true;
 
-    for(auto &element : this->elements) {
-        for(int e = 0; e < element->elements.size(); e++) {
-            if(element->elements[e] == slider) {
-                if(element->elements.size() == 3) {
-                    auto *labelPointer = dynamic_cast<CBaseUILabel *>(element->elements[2]);
+    for(auto &element : this->elemContainers) {
+        for(int e = 0; e < element->baseElems.size(); e++) {
+            if(element->baseElems[e] == slider) {
+                if(element->baseElems.size() == 3) {
+                    auto *labelPointer = dynamic_cast<CBaseUILabel *>(element->baseElems[2]);
                     if(labelPointer) {
                         UString text = UString::format("%i", (int)std::round(slider->getFloat() * 1000.0f));
                         text.append(" ms");
@@ -3088,11 +3088,11 @@ void OptionsMenu::onWASAPIBufferChange(CBaseUISlider *slider) {
 void OptionsMenu::onWASAPIPeriodChange(CBaseUISlider *slider) {
     if(!this->updating_layout) this->bWASAPIPeriodChangeScheduled = true;
 
-    for(auto &element : this->elements) {
-        for(int e = 0; e < element->elements.size(); e++) {
-            if(element->elements[e] == slider) {
-                if(element->elements.size() == 3) {
-                    auto *labelPointer = dynamic_cast<CBaseUILabel *>(element->elements[2]);
+    for(auto &element : this->elemContainers) {
+        for(int e = 0; e < element->baseElems.size(); e++) {
+            if(element->baseElems[e] == slider) {
+                if(element->baseElems.size() == 3) {
+                    auto *labelPointer = dynamic_cast<CBaseUILabel *>(element->baseElems[2]);
                     if(labelPointer) {
                         UString text = UString::format("%i", (int)std::round(slider->getFloat() * 1000.0f));
                         text.append(" ms");
@@ -3140,9 +3140,9 @@ void OptionsMenu::onHighQualitySlidersCheckboxChange(CBaseUICheckbox *checkbox) 
 
 void OptionsMenu::onHighQualitySlidersConVarChange(const UString &newValue) {
     const bool enabled = newValue.toFloat() > 0;
-    for(auto &element : this->elements) {
+    for(auto &element : this->elemContainers) {
         bool contains = false;
-        for(auto &e : element->elements) {
+        for(auto &e : element->baseElems) {
             if(e == this->sliderQualitySlider) {
                 contains = true;
                 break;
@@ -3153,7 +3153,7 @@ void OptionsMenu::onHighQualitySlidersConVarChange(const UString &newValue) {
             // HACKHACK: show/hide quality slider, this is ugly as fuck
             // TODO: containers use setVisible() on all elements. there needs to be a separate API for hiding elements
             // while inside any kind of container
-            for(auto &e : element->elements) {
+            for(auto &e : element->baseElems) {
                 e->setEnabled(enabled);
 
                 auto *sliderPointer = dynamic_cast<UISlider *>(e);
@@ -3194,7 +3194,7 @@ void OptionsMenu::onCategoryClicked(CBaseUIButton *button) {
 void OptionsMenu::onResetUpdate(CBaseUIButton *button) {
     if(button == NULL) return;
 
-    for(auto &element : this->elements) {
+    for(auto &element : this->elemContainers) {
         if(element->resetButton == button && element->cvars[element->resetButton] != nullptr) {
             auto *cv = element->cvars[element->resetButton];
             switch(element->type) {
@@ -3214,19 +3214,19 @@ void OptionsMenu::onResetUpdate(CBaseUIButton *button) {
 void OptionsMenu::onResetClicked(CBaseUIButton *button) {
     if(button == NULL) return;
 
-    for(auto &element : this->elements) {
+    for(auto &element : this->elemContainers) {
         if(element->resetButton == button && element->cvars[element->resetButton] != nullptr) {
             auto *cv = element->cvars[element->resetButton];
             switch(element->type) {
                 case 6:  // checkbox
-                    for(auto &e : element->elements) {
+                    for(auto &e : element->baseElems) {
                         CBaseUICheckbox *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(e);
                         if(checkboxPointer != NULL) checkboxPointer->setChecked((bool)cv->getDefaultFloat());
                     }
                     break;
                 case 7:  // slider
-                    if(element->elements.size() == 3) {
-                        auto *sliderPointer = dynamic_cast<CBaseUISlider *>(element->elements[1]);
+                    if(element->baseElems.size() == 3) {
+                        auto *sliderPointer = dynamic_cast<CBaseUISlider *>(element->baseElems[1]);
                         if(sliderPointer != NULL) {
                             sliderPointer->setValue(cv->getDefaultFloat(), false);
                             sliderPointer->fireChangeCallback();
@@ -3252,7 +3252,7 @@ void OptionsMenu::onResetEverythingClicked(CBaseUIButton * /*button*/) {
         this->iNumResetEverythingPressed = 0;
 
         // first reset all settings
-        for(auto &element : this->elements) {
+        for(auto &element : this->elemContainers) {
             OptionsMenuResetButton *resetButton = element->resetButton;
             if(resetButton != NULL && resetButton->isEnabled()) resetButton->click();
         }
@@ -3278,7 +3278,7 @@ void OptionsMenu::onImportSettingsFromStable(CBaseUIButton * /*button*/) { impor
 void OptionsMenu::addSpacer() {
     auto *e = new OPTIONS_ELEMENT;
     e->type = 0;
-    this->elements.push_back(e);
+    this->elemContainers.push_back(e);
 }
 
 CBaseUILabel *OptionsMenu::addSection(const UString &text) {
@@ -3292,9 +3292,9 @@ CBaseUILabel *OptionsMenu::addSection(const UString &text) {
     this->options->getContainer()->addBaseUIElement(label);
 
     auto *e = new OPTIONS_ELEMENT;
-    e->elements.push_back(label);
+    e->baseElems.push_back(label);
     e->type = 1;
-    this->elements.push_back(e);
+    this->elemContainers.push_back(e);
 
     return label;
 }
@@ -3308,10 +3308,10 @@ CBaseUILabel *OptionsMenu::addSubSection(const UString &text, UString searchTags
     this->options->getContainer()->addBaseUIElement(label);
 
     auto *e = new OPTIONS_ELEMENT;
-    e->elements.push_back(label);
+    e->baseElems.push_back(label);
     e->type = 2;
     e->searchTags = std::move(searchTags);
-    this->elements.push_back(e);
+    this->elemContainers.push_back(e);
 
     return label;
 }
@@ -3324,9 +3324,9 @@ CBaseUILabel *OptionsMenu::addLabel(const UString &text) {
     this->options->getContainer()->addBaseUIElement(label);
 
     auto *e = new OPTIONS_ELEMENT;
-    e->elements.push_back(label);
+    e->baseElems.push_back(label);
     e->type = 3;
-    this->elements.push_back(e);
+    this->elemContainers.push_back(e);
 
     return label;
 }
@@ -3338,9 +3338,9 @@ UIButton *OptionsMenu::addButton(const UString &text) {
     this->options->getContainer()->addBaseUIElement(button);
 
     auto *e = new OPTIONS_ELEMENT;
-    e->elements.push_back(button);
+    e->baseElems.push_back(button);
     e->type = 4;
-    this->elements.push_back(e);
+    this->elemContainers.push_back(e);
 
     return button;
 }
@@ -3361,10 +3361,10 @@ OptionsMenu::OPTIONS_ELEMENT *OptionsMenu::addButton(const UString &text, const 
     if(withResetButton) {
         e->resetButton = new OptionsMenuResetButton(0, 0, 35, 50, "", "");
     }
-    e->elements.push_back(button);
-    e->elements.push_back(label);
+    e->baseElems.push_back(button);
+    e->baseElems.push_back(label);
     e->type = 4;
-    this->elements.push_back(e);
+    this->elemContainers.push_back(e);
 
     return e;
 }
@@ -3381,10 +3381,10 @@ OptionsMenu::OPTIONS_ELEMENT *OptionsMenu::addButtonButton(const UString &text1,
     this->options->getContainer()->addBaseUIElement(button2);
 
     auto *e = new OPTIONS_ELEMENT;
-    e->elements.push_back(button);
-    e->elements.push_back(button2);
+    e->baseElems.push_back(button);
+    e->baseElems.push_back(button2);
     e->type = 4;
-    this->elements.push_back(e);
+    this->elemContainers.push_back(e);
 
     return e;
 }
@@ -3410,11 +3410,11 @@ OptionsMenu::OPTIONS_ELEMENT *OptionsMenu::addButtonButtonLabel(const UString &t
     if(withResetButton) {
         e->resetButton = new OptionsMenuResetButton(0, 0, 35, 50, "", "");
     }
-    e->elements.push_back(button);
-    e->elements.push_back(button2);
-    e->elements.push_back(label);
+    e->baseElems.push_back(button);
+    e->baseElems.push_back(button2);
+    e->baseElems.push_back(label);
     e->type = 4;
-    this->elements.push_back(e);
+    this->elemContainers.push_back(e);
 
     return e;
 }
@@ -3443,12 +3443,12 @@ OptionsMenuKeyBindButton *OptionsMenu::addKeyBindButton(const UString &text, Con
     this->options->getContainer()->addBaseUIElement(label);
 
     auto *e = new OPTIONS_ELEMENT;
-    e->elements.push_back(unbindButton);
-    e->elements.push_back(bindButton);
-    e->elements.push_back(label);
+    e->baseElems.push_back(unbindButton);
+    e->baseElems.push_back(bindButton);
+    e->baseElems.push_back(label);
     e->type = 5;
     e->cvars[bindButton] = cvar;
-    this->elements.push_back(e);
+    this->elemContainers.push_back(e);
 
     return bindButton;
 }
@@ -3476,11 +3476,11 @@ CBaseUICheckbox *OptionsMenu::addCheckbox(const UString &text, const UString &to
         e->resetButton = new OptionsMenuResetButton(0, 0, 35, 50, "", "");
         e->resetButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onResetClicked>(this));
     }
-    e->elements.push_back(checkbox);
+    e->baseElems.push_back(checkbox);
     e->type = 6;
     e->cvars[e->resetButton] = cvar;
     e->cvars[checkbox] = cvar;
-    this->elements.push_back(e);
+    this->elemContainers.push_back(e);
 
     return checkbox;
 }
@@ -3500,10 +3500,10 @@ OptionsMenu::OPTIONS_ELEMENT *OptionsMenu::addButtonCheckbox(const UString &butt
     this->options->getContainer()->addBaseUIElement(checkbox);
 
     auto *e = new OPTIONS_ELEMENT;
-    e->elements.push_back(button);
-    e->elements.push_back(checkbox);
+    e->baseElems.push_back(button);
+    e->baseElems.push_back(checkbox);
     e->type = 10;
-    this->elements.push_back(e);
+    this->elemContainers.push_back(e);
 
     return e;
 }
@@ -3540,9 +3540,9 @@ UISlider *OptionsMenu::addSlider(const UString &text, float min, float max, ConV
         e->resetButton = new OptionsMenuResetButton(0, 0, 35, 50, "", "");
         e->resetButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onResetClicked>(this));
     }
-    e->elements.push_back(label1);
-    e->elements.push_back(slider);
-    e->elements.push_back(label2);
+    e->baseElems.push_back(label1);
+    e->baseElems.push_back(slider);
+    e->baseElems.push_back(label2);
     e->type = 7;
     e->cvars[e->resetButton] = cvar;
     e->cvars[slider] = cvar;
@@ -3550,7 +3550,7 @@ UISlider *OptionsMenu::addSlider(const UString &text, float min, float max, ConV
     e->relSizeDPI = label1->getFont()->getDPI();
     e->allowOverscale = allowOverscale;
     e->allowUnderscale = allowUnderscale;
-    this->elements.push_back(e);
+    this->elemContainers.push_back(e);
 
     return slider;
 }
@@ -3561,10 +3561,10 @@ CBaseUITextbox *OptionsMenu::addTextbox(UString text, ConVar *cvar) {
     this->options->getContainer()->addBaseUIElement(textbox);
 
     auto *e = new OPTIONS_ELEMENT;
-    e->elements.push_back(textbox);
+    e->baseElems.push_back(textbox);
     e->type = 8;
     e->cvars[textbox] = cvar;
-    this->elements.push_back(e);
+    this->elemContainers.push_back(e);
 
     return textbox;
 }
@@ -3581,11 +3581,11 @@ CBaseUITextbox *OptionsMenu::addTextbox(UString text, const UString &labelText, 
     this->options->getContainer()->addBaseUIElement(label);
 
     auto *e = new OPTIONS_ELEMENT;
-    e->elements.push_back(label);
-    e->elements.push_back(textbox);
+    e->baseElems.push_back(label);
+    e->baseElems.push_back(textbox);
     e->type = 8;
     e->cvars[textbox] = cvar;
-    this->elements.push_back(e);
+    this->elemContainers.push_back(e);
 
     return textbox;
 }
@@ -3595,9 +3595,9 @@ CBaseUIElement *OptionsMenu::addSkinPreview() {
     this->options->getContainer()->addBaseUIElement(skinPreview);
 
     auto *e = new OPTIONS_ELEMENT;
-    e->elements.push_back(skinPreview);
+    e->baseElems.push_back(skinPreview);
     e->type = 9;
-    this->elements.push_back(e);
+    this->elemContainers.push_back(e);
 
     return skinPreview;
 }
@@ -3607,9 +3607,9 @@ CBaseUIElement *OptionsMenu::addSliderPreview() {
     this->options->getContainer()->addBaseUIElement(sliderPreview);
 
     auto *e = new OPTIONS_ELEMENT;
-    e->elements.push_back(sliderPreview);
+    e->baseElems.push_back(sliderPreview);
     e->type = 9;
-    this->elements.push_back(e);
+    this->elemContainers.push_back(e);
 
     return sliderPreview;
 }

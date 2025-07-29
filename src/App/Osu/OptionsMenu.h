@@ -78,7 +78,7 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
         }
 
         OptionsMenuResetButton *resetButton;
-        std::vector<CBaseUIElement *> elements{};
+        std::vector<CBaseUIElement *> baseElems{};
         std::unordered_map<CBaseUIElement *, ConVar *> cvars{};
         int type;
 
@@ -202,7 +202,7 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     OptionsMenuCategoryButton *fposuCategoryButton;
 
     std::vector<OptionsMenuCategoryButton *> categoryButtons;
-    std::vector<OPTIONS_ELEMENT*> elements;
+    std::vector<OPTIONS_ELEMENT*> elemContainers;
 
     // custom
     bool bFullscreen;
