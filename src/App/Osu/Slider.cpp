@@ -996,7 +996,7 @@ void Slider::miss(long curPos) {
     }
 }
 
-Vector2 Slider::getRawPosAt(long pos) {
+Vector2 Slider::getRawPosAt(long pos) const {
     if(this->curve == NULL) return Vector2(0, 0);
 
     if(pos <= this->click_time)
@@ -1010,7 +1010,7 @@ Vector2 Slider::getRawPosAt(long pos) {
         return this->curve->pointAt(this->getT(pos, false));
 }
 
-Vector2 Slider::getOriginalRawPosAt(long pos) {
+Vector2 Slider::getOriginalRawPosAt(long pos) const {
     if(this->curve == NULL) return Vector2(0, 0);
 
     if(pos <= this->click_time)
@@ -1024,7 +1024,7 @@ Vector2 Slider::getOriginalRawPosAt(long pos) {
         return this->curve->originalPointAt(this->getT(pos, false));
 }
 
-float Slider::getT(long pos, bool raw) {
+float Slider::getT(long pos, bool raw) const {
     float t = (float)((long)pos - (long)this->click_time) / this->fSliderTimeWithoutRepeats;
     if(raw)
         return t;

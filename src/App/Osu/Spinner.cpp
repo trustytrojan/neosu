@@ -466,7 +466,7 @@ void Spinner::rotate(float rad) {
     this->fRotations = newRotations;
 }
 
-Vector2 Spinner::getAutoCursorPos(long curPos) {
+Vector2 Spinner::getAutoCursorPos(long curPos) const {
     // calculate point
     long delta = 0;
     if(curPos <= this->click_time)

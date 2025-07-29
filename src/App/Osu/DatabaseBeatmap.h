@@ -340,25 +340,6 @@ class DatabaseBeatmap {
     BeatmapType type;
 
     MD5Hash sMD5Hash;
-
-    // helper functions
-
-    struct TimingPointSortComparator {
-        bool operator()(DatabaseBeatmap::TIMINGPOINT const &a, DatabaseBeatmap::TIMINGPOINT const &b) const {
-            if(a.offset != b.offset) return a.offset < b.offset;
-
-            // non-inherited timingpoints go before inherited timingpoints
-            bool a_inherited = a.msPerBeat >= 0;
-            bool b_inherited = b.msPerBeat >= 0;
-            if(a_inherited != b_inherited) return a_inherited;
-
-            if(a.sampleType != b.sampleType) return static_cast<int>(a.sampleType) < static_cast<int>(b.sampleType);
-            if(a.sampleSet != b.sampleSet) return a.sampleSet < b.sampleSet;
-            if(a.kiai != b.kiai) return a.kiai;
-
-            return false;  // equivalent
-        }
-    };
 };
 
 class DatabaseBeatmapBackgroundImagePathLoader : public Resource {

@@ -189,8 +189,8 @@ void Beatmap::drawBackground() {
             const f32 backgroundFadeDimMultiplier =
                 std::clamp<f32>(1.0f - (cv::background_dim.getFloat() - 0.3f), 0.0f, 1.0f);
             const short dim = std::clamp<f32>((1.0f - cv::background_dim.getFloat()) +
-                                             this->fBreakBackgroundFade * backgroundFadeDimMultiplier,
-                                         0.0f, 1.0f) *
+                                                  this->fBreakBackgroundFade * backgroundFadeDimMultiplier,
+                                              0.0f, 1.0f) *
                               255.0f;
 
             g->setColor(argb(255, dim, dim, dim));
@@ -391,7 +391,7 @@ void Beatmap::keyPressed2(bool mouse) {
     }
 }
 
-void Beatmap::keyReleased1(bool  /*mouse*/) {
+void Beatmap::keyReleased1(bool /*mouse*/) {
     if(this->is_watching || bancho->spectating) return;
 
     // key overlay
@@ -403,7 +403,7 @@ void Beatmap::keyReleased1(bool  /*mouse*/) {
     this->current_keys = this->current_keys & ~(LegacyReplay::M1 | LegacyReplay::K1);
 }
 
-void Beatmap::keyReleased2(bool  /*mouse*/) {
+void Beatmap::keyReleased2(bool /*mouse*/) {
     if(this->is_watching || bancho->spectating) return;
 
     // key overlay
@@ -659,16 +659,7 @@ bool Beatmap::start() {
     this->hitobjectsSortedByEndTime = this->hitobjects;
 
     // sort hitobjects by endtime
-    struct HitObjectSortComparator {
-        bool operator()(HitObject const *a, HitObject const *b) const {
-            // strict weak ordering!
-            if((a->click_time + a->duration) == (b->click_time + b->duration))
-                return a < b;
-            else
-                return (a->click_time + a->duration) < (b->click_time + b->duration);
-        }
-    };
-    std::ranges::sort(this->hitobjectsSortedByEndTime, HitObjectSortComparator());
+    std::ranges::sort(this->hitobjectsSortedByEndTime, Beatmap::sortHitObjectByEndTimeComp);
 
     // after the hitobjects have been loaded we can calculate the stacks
     this->calculateStacks();
@@ -1134,11 +1125,12 @@ u32 Beatmap::getScoreV1DifficultyMultiplier() const {
     // NOTE: We intentionally get CS/HP/OD from beatmap data, not "real" CS/HP/OD
     //       Since this multiplier is only used for ScoreV1
     u32 breakTimeMS = this->getBreakDurationTotal();
-    f32 drainLength = std::max(this->getLengthPlayable() - std::min(breakTimeMS, this->getLengthPlayable()), (u32)1000) / 1000;
-    return std::round((this->selectedDifficulty2->getCS() + this->selectedDifficulty2->getHP() +
-                       this->selectedDifficulty2->getOD() +
-                       std::clamp<f32>((f32)this->selectedDifficulty2->getNumObjects() / drainLength * 8.0f, 0.0f, 16.0f)) /
-                      38.0f * 5.0f);
+    f32 drainLength =
+        std::max(this->getLengthPlayable() - std::min(breakTimeMS, this->getLengthPlayable()), (u32)1000) / 1000;
+    return std::round(
+        (this->selectedDifficulty2->getCS() + this->selectedDifficulty2->getHP() + this->selectedDifficulty2->getOD() +
+         std::clamp<f32>((f32)this->selectedDifficulty2->getNumObjects() / drainLength * 8.0f, 0.0f, 16.0f)) /
+        38.0f * 5.0f);
 }
 
 f32 Beatmap::getRawAR() const {
@@ -1454,6 +1446,32 @@ void Beatmap::updateTimingPoints(long curPos) {
     osu->getSkin()->setSampleVolume(std::clamp<f32>(t.volume / 100.0f, 0.0f, 1.0f));
 }
 
+bool Beatmap::sortHitObjectByStartTimeComp(HitObject const *a, HitObject const *b) {
+    if((a->click_time) != (b->click_time))
+        return (a->click_time) < (b->click_time);
+
+    if(a->type != b->type) return static_cast<int>(a->type) < static_cast<int>(b->type);
+    if(a->combo_number != b->combo_number) return a->combo_number < b->combo_number;
+
+    auto aPosAtStartTime = a->getRawPosAt(a->click_time), bPosAtClickTime = b->getRawPosAt(b->click_time);
+    if(aPosAtStartTime != bPosAtClickTime) return aPosAtStartTime < bPosAtClickTime;
+
+    return false; // equivalent
+}
+
+bool Beatmap::sortHitObjectByEndTimeComp(HitObject const *a, HitObject const *b) {
+    if((a->click_time + a->duration) != (b->click_time + b->duration))
+        return (a->click_time + a->duration) < (b->click_time + b->duration);
+
+    if(a->type != b->type) return static_cast<int>(a->type) < static_cast<int>(b->type);
+    if(a->combo_number != b->combo_number) return a->combo_number < b->combo_number;
+
+    auto aPosAtEndTime = a->getRawPosAt(a->click_time + a->duration), bPosAtClickTime = b->getRawPosAt(b->click_time + b->duration);
+    if(aPosAtEndTime != bPosAtClickTime) return aPosAtEndTime < bPosAtClickTime;
+
+    return false; // equivalent
+}
+
 long Beatmap::getPVS() {
     // this is an approximation with generous boundaries, it doesn't need to be exact (just good enough to filter 10000
     // hitobjects down to a few hundred or so) it will be used in both positive and negative directions (previous and
@@ -1529,7 +1547,7 @@ void Beatmap::loadMusic(bool stream) {
         if(!stream) resourceManager->requestNextLoadAsync();
 
         this->music = resourceManager->loadSoundAbs(this->selectedDifficulty2->getFullSoundFilePath(),
-                                                                 "OSU_BEATMAP_MUSIC", stream, false, false);
+                                                    "OSU_BEATMAP_MUSIC", stream, false, false);
         this->music->setVolume(this->getIdealVolume());
         this->fMusicFrequencyBackup = this->music->getFrequency();
         this->music->setSpeed(this->getSpeedMultiplier());
@@ -1771,9 +1789,10 @@ void Beatmap::drawFollowPoints() {
     // 0.7x means animation lasts only 0.7 of it's time
     const f64 animationMutiplier = this->getSpeedMultiplier() / osu->getAnimationSpeedMultiplier();
     const long followPointApproachTime =
-        animationMutiplier * (cv::followpoints_clamp.getBool()
-                                  ? std::min((long)this->getApproachTime(), (long)cv::followpoints_approachtime.getFloat())
-                                  : (long)cv::followpoints_approachtime.getFloat());
+        animationMutiplier *
+        (cv::followpoints_clamp.getBool()
+             ? std::min((long)this->getApproachTime(), (long)cv::followpoints_approachtime.getFloat())
+             : (long)cv::followpoints_approachtime.getFloat());
     const bool followPointsConnectCombos = cv::followpoints_connect_combos.getBool();
     const bool followPointsConnectSpinners = cv::followpoints_connect_spinners.getBool();
     const f32 followPointSeparationMultiplier = std::max(cv::followpoints_separation_multiplier.getFloat(), 0.1f);
@@ -2022,7 +2041,9 @@ void Beatmap::drawHitObjects() {
         // draw scene buffer
         if(shouldDrawBuffer) {
             g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_PREMUL_COLOR);
-            { this->mafhamFinishedRenderTarget->draw(0, 0); }
+            {
+                this->mafhamFinishedRenderTarget->draw(0, 0);
+            }
             g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ALPHA);
         }
 
@@ -2519,8 +2540,8 @@ void Beatmap::update2() {
             percent = (f32)ms_since_last_frame / (f32)next_frame.milliseconds_since_last_frame;
         }
 
-        this->interpolatedMousePos =
-            Vector2{std::lerp(current_frame.x, next_frame.x, percent), std::lerp(current_frame.y, next_frame.y, percent)};
+        this->interpolatedMousePos = Vector2{std::lerp(current_frame.x, next_frame.x, percent),
+                                             std::lerp(current_frame.y, next_frame.y, percent)};
 
         if(cv::playfield_mirror_horizontal.getBool())
             this->interpolatedMousePos.y = GameRules::OSU_COORD_HEIGHT - this->interpolatedMousePos.y;
@@ -2568,8 +2589,8 @@ void Beatmap::update2() {
                              ? this->getPVS()
                              : (this->hitobjects.size() > 0
                                     ? (this->hitobjects[std::clamp<int>(this->iCurrentHitObjectIndex +
-                                                                       cv::mod_mafham_render_livesize.getInt() + 1,
-                                                                   0, this->hitobjects.size() - 1)]
+                                                                            cv::mod_mafham_render_livesize.getInt() + 1,
+                                                                        0, this->hitobjects.size() - 1)]
                                            ->click_time -
                                        this->iCurMusicPosWithOffsets + 1500)
                                     : this->getPVS());

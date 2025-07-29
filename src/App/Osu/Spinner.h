@@ -12,9 +12,9 @@ class Spinner : public HitObject {
     void updateStackPosition(float  /*stackOffset*/) override { ; }
     void miss(long  /*curPos*/) override { ; }
 
-    Vector2 getRawPosAt(long  /*pos*/) override { return this->vRawPos; }
-    Vector2 getOriginalRawPosAt(long  /*pos*/) override { return this->vOriginalRawPos; }
-    Vector2 getAutoCursorPos(long curPos) override;
+    [[nodiscard]] Vector2 getRawPosAt(long  /*pos*/) const override { return this->vRawPos; }
+    [[nodiscard]] Vector2 getOriginalRawPosAt(long  /*pos*/) const override { return this->vOriginalRawPos; }
+    [[nodiscard]] Vector2 getAutoCursorPos(long curPos) const override;
 
     void onClickEvent(std::vector<Click> &clicks) override;
     void onReset(long curPos) override;

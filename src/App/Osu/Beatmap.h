@@ -228,6 +228,9 @@ class Beatmap : public BeatmapInterface {
     void addHealth(f64 percent, bool isFromHitResult);
     void updateTimingPoints(long curPos);
 
+    static bool sortHitObjectByStartTimeComp(HitObject const *a, HitObject const *b);
+    static bool sortHitObjectByEndTimeComp(HitObject const *a, HitObject const *b);
+
     // ILLEGAL:
     [[nodiscard]] inline const std::vector<HitObject *> &getHitObjectsPointer() const { return this->hitobjects; }
     [[nodiscard]] inline f32 getBreakBackgroundFadeAnim() const { return this->fBreakBackgroundFade; }

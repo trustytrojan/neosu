@@ -29,66 +29,63 @@
 
 Database *db = NULL;
 
-struct SortScoreByScore : public Database::SCORE_SORTING_COMPARATOR {
-    ~SortScoreByScore() override { ; }
-    bool operator()(FinishedScore const &a, FinishedScore const &b) const override {
-        if(a.score != b.score) return a.score > b.score;
-        if(a.unixTimestamp != b.unixTimestamp) return a.unixTimestamp > b.unixTimestamp;
-        return &a > &b;
-    }
-};
+namespace {  // static namespace
+bool sortScoreByScore(FinishedScore const &a, FinishedScore const &b) {
+    if(a.score != b.score) return a.score > b.score;
+    if(a.unixTimestamp != b.unixTimestamp) return a.unixTimestamp > b.unixTimestamp;
+    if(a.player_id != b.player_id) return a.player_id > b.player_id;
+    if(a.play_time_ms != b.play_time_ms) return a.play_time_ms > b.play_time_ms;
+    return false;  // equivalent
+}
 
-struct SortScoreByCombo : public Database::SCORE_SORTING_COMPARATOR {
-    ~SortScoreByCombo() override { ; }
-    bool operator()(FinishedScore const &a, FinishedScore const &b) const override {
-        if(a.comboMax != b.comboMax) return a.comboMax > b.comboMax;
-        if(a.score != b.score) return a.score > b.score;
-        if(a.unixTimestamp != b.unixTimestamp) return a.unixTimestamp > b.unixTimestamp;
-        return &a > &b;
-    }
-};
+bool sortScoreByCombo(FinishedScore const &a, FinishedScore const &b) {
+    if(a.comboMax != b.comboMax) return a.comboMax > b.comboMax;
+    if(a.score != b.score) return a.score > b.score;
+    if(a.unixTimestamp != b.unixTimestamp) return a.unixTimestamp > b.unixTimestamp;
+    if(a.player_id != b.player_id) return a.player_id > b.player_id;
+    if(a.play_time_ms != b.play_time_ms) return a.play_time_ms > b.play_time_ms;
+    return false;  // equivalent
+}
 
-struct SortScoreByDate : public Database::SCORE_SORTING_COMPARATOR {
-    ~SortScoreByDate() override { ; }
-    bool operator()(FinishedScore const &a, FinishedScore const &b) const override {
-        if(a.unixTimestamp != b.unixTimestamp) return a.unixTimestamp > b.unixTimestamp;
-        return &a > &b;
-    }
-};
+bool sortScoreByDate(FinishedScore const &a, FinishedScore const &b) {
+    if(a.unixTimestamp != b.unixTimestamp) return a.unixTimestamp > b.unixTimestamp;
+    if(a.player_id != b.player_id) return a.player_id > b.player_id;
+    if(a.play_time_ms != b.play_time_ms) return a.play_time_ms > b.play_time_ms;
+    return false;  // equivalent
+}
 
-struct SortScoreByMisses : public Database::SCORE_SORTING_COMPARATOR {
-    ~SortScoreByMisses() override { ; }
-    bool operator()(FinishedScore const &a, FinishedScore const &b) const override {
-        if(a.numMisses != b.numMisses) return a.numMisses < b.numMisses;
-        if(a.score != b.score) return a.score > b.score;
-        if(a.unixTimestamp != b.unixTimestamp) return a.unixTimestamp > b.unixTimestamp;
-        return &a > &b;
-    }
-};
+bool sortScoreByMisses(FinishedScore const &a, FinishedScore const &b) {
+    if(a.numMisses != b.numMisses) return a.numMisses < b.numMisses;
+    if(a.score != b.score) return a.score > b.score;
+    if(a.unixTimestamp != b.unixTimestamp) return a.unixTimestamp > b.unixTimestamp;
+    if(a.player_id != b.player_id) return a.player_id > b.player_id;
+    if(a.play_time_ms != b.play_time_ms) return a.play_time_ms > b.play_time_ms;
+    return false;  // equivalent
+}
 
-struct SortScoreByAccuracy : public Database::SCORE_SORTING_COMPARATOR {
-    ~SortScoreByAccuracy() override { ; }
-    bool operator()(FinishedScore const &a, FinishedScore const &b) const override {
-        auto a_acc = LiveScore::calculateAccuracy(a.num300s, a.num100s, a.num50s, a.numMisses);
-        auto b_acc = LiveScore::calculateAccuracy(b.num300s, b.num100s, b.num50s, b.numMisses);
-        if(a_acc != b_acc) return a_acc > b_acc;
-        if(a.score != b.score) return a.score > b.score;
-        if(a.unixTimestamp != b.unixTimestamp) return a.unixTimestamp > b.unixTimestamp;
-        return &a > &b;
-    }
-};
+bool sortScoreByAccuracy(FinishedScore const &a, FinishedScore const &b) {
+    auto a_acc = LiveScore::calculateAccuracy(a.num300s, a.num100s, a.num50s, a.numMisses);
+    auto b_acc = LiveScore::calculateAccuracy(b.num300s, b.num100s, b.num50s, b.numMisses);
+    if(a_acc != b_acc) return a_acc > b_acc;
+    if(a.score != b.score) return a.score > b.score;
+    if(a.unixTimestamp != b.unixTimestamp) return a.unixTimestamp > b.unixTimestamp;
+    if(a.player_id != b.player_id) return a.player_id > b.player_id;
+    if(a.play_time_ms != b.play_time_ms) return a.play_time_ms > b.play_time_ms;
+    return false;  // equivalent
+}
 
-struct SortScoreByPP : public Database::SCORE_SORTING_COMPARATOR {
-    ~SortScoreByPP() override { ; }
-    bool operator()(FinishedScore const &a, FinishedScore const &b) const override {
-        auto a_pp = std::max(a.get_pp() * 1000.0, 0.0);
-        auto b_pp = std::max(b.get_pp() * 1000.0, 0.0);
-        if(a_pp != b_pp) return a_pp > b_pp;
-        if(a.score != b.score) return a.score > b.score;
-        if(a.unixTimestamp != b.unixTimestamp) return a.unixTimestamp > b.unixTimestamp;
-        return &a > &b;
-    }
-};
+bool sortScoreByPP(FinishedScore const &a, FinishedScore const &b) {
+    auto a_pp = std::max(a.get_pp() * 1000.0, 0.0);
+    auto b_pp = std::max(b.get_pp() * 1000.0, 0.0);
+    if(a_pp != b_pp) return a_pp > b_pp;
+    if(a.score != b.score) return a.score > b.score;
+    if(a.unixTimestamp != b.unixTimestamp) return a.unixTimestamp > b.unixTimestamp;
+    if(a.player_id != b.player_id) return a.player_id > b.player_id;
+    if(a.play_time_ms != b.play_time_ms) return a.play_time_ms > b.play_time_ms;
+    return false;  // equivalent
+}
+
+}  // namespace
 
 class DatabaseLoader : public Resource {
    public:
@@ -181,12 +178,12 @@ Database::Database() {
     this->prevPlayerStats.percentToNextLevel = 0.0f;
     this->prevPlayerStats.totalScore = 0;
 
-    this->scoreSortingMethods.push_back({"Sort by accuracy", new SortScoreByAccuracy()});
-    this->scoreSortingMethods.push_back({"Sort by combo", new SortScoreByCombo()});
-    this->scoreSortingMethods.push_back({"Sort by date", new SortScoreByDate()});
-    this->scoreSortingMethods.push_back({"Sort by misses", new SortScoreByMisses()});
-    this->scoreSortingMethods.push_back({"Sort by score", new SortScoreByScore()});
-    this->scoreSortingMethods.push_back({"Sort by pp", new SortScoreByPP()});
+    this->scoreSortingMethods.push_back({"Sort by accuracy", sortScoreByAccuracy});
+    this->scoreSortingMethods.push_back({"Sort by combo", sortScoreByCombo});
+    this->scoreSortingMethods.push_back({"Sort by date", sortScoreByDate});
+    this->scoreSortingMethods.push_back({"Sort by misses", sortScoreByMisses});
+    this->scoreSortingMethods.push_back({"Sort by score", sortScoreByScore});
+    this->scoreSortingMethods.push_back({"Sort by pp", sortScoreByPP});
 }
 
 Database::~Database() {
@@ -209,10 +206,6 @@ Database::~Database() {
         SAFE_DELETE(neosu_set);
     }
     this->neosu_sets.clear();
-
-    for(auto &scoreSortingMethod : this->scoreSortingMethods) {
-        SAFE_DELETE(scoreSortingMethod.comparator);
-    }
 
     unload_collections();
 }
@@ -406,16 +399,7 @@ void Database::sortScoresInPlace(std::vector<FinishedScore> &scores) {
 
     for(auto &scoreSortingMethod : this->scoreSortingMethods) {
         if(cv::songbrowser_scores_sortingtype.getString() == scoreSortingMethod.name.utf8View()) {
-            struct COMPARATOR_WRAPPER {
-                SCORE_SORTING_COMPARATOR *comp;
-                bool operator()(FinishedScore const &a, FinishedScore const &b) const {
-                    return this->comp->operator()(a, b);
-                }
-            };
-            COMPARATOR_WRAPPER comparatorWrapper;
-            comparatorWrapper.comp = scoreSortingMethod.comparator;
-
-            std::ranges::sort(scores, comparatorWrapper);
+            std::ranges::sort(scores, scoreSortingMethod.comparator);
             return;
         }
     }
@@ -496,15 +480,6 @@ Database::PlayerPPScores Database::getPlayerPPScores(const UString &playerName) 
         keys.push_back(kv.first);
     }
 
-    struct ScoreSortComparator {
-        bool operator()(FinishedScore const *a, FinishedScore const *b) const {
-            auto ppa = a->get_pp();
-            auto ppb = b->get_pp();
-            if(ppa != ppb) return ppa < ppb;
-            return a < b;
-        }
-    };
-
     unsigned long long totalScore = 0;
     for(auto &key : keys) {
         if(this->scores[key].size() == 0) continue;
@@ -536,7 +511,8 @@ Database::PlayerPPScores Database::getPlayerPPScores(const UString &playerName) 
     }
 
     // sort by pp
-    std::ranges::sort(scores, ScoreSortComparator());
+    // for some reason this was originally backwards from sortScoreByPP, so negating it here
+    std::ranges::sort(scores, [](FinishedScore *a, FinishedScore *b) -> bool { return -sortScoreByPP(*a, *b); });
 
     ppScores.ppScores = std::move(scores);
     ppScores.totalScore = totalScore;
@@ -1263,7 +1239,7 @@ void Database::loadDB() {
                     this->loudness_to_calc.push_back(diff2);
                 }
             } else {
-                SAFE_DELETE(diff2); // we never added this diff to any container, so we have to free it here
+                SAFE_DELETE(diff2);  // we never added this diff to any container, so we have to free it here
             }
 
             nb_peppy_maps++;

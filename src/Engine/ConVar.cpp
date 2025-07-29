@@ -328,10 +328,7 @@ static void _find(const UString &args) {
     }
 
     if(matchingConVars.size() > 0) {
-        struct CONVAR_SORT_COMPARATOR {
-            bool operator()(const ConVar *var1, const ConVar *var2) { return (var1->getName() < var2->getName()); }
-        };
-        std::ranges::sort(matchingConVars, CONVAR_SORT_COMPARATOR());
+        std::ranges::sort(matchingConVars, {}, [](const ConVar *v) { return v->getName(); });
     }
 
     if(matchingConVars.size() < 1) {
@@ -405,10 +402,7 @@ static void _listcommands(void) {
     Engine::logRaw("----------------------------------------------\n");
     {
         std::vector<ConVar *> convars = convar->getConVarArray();
-        struct CONVAR_SORT_COMPARATOR {
-            bool operator()(ConVar const *var1, ConVar const *var2) { return (var1->getName() < var2->getName()); }
-        };
-        std::ranges::sort(convars, CONVAR_SORT_COMPARATOR());
+        std::ranges::sort(convars, {}, [](const ConVar *v) { return v->getName(); });
 
         for(auto &convar : convars) {
             if(convar->isFlagSet(FCVAR_HIDDEN)) continue;
@@ -442,10 +436,7 @@ static void _listcommands(void) {
 
 static void _dumpcommands(void) {
     std::vector<ConVar *> convars = convar->getConVarArray();
-    struct CONVAR_SORT_COMPARATOR {
-        bool operator()(ConVar const *var1, ConVar const *var2) { return (var1->getName() < var2->getName()); }
-    };
-    std::ranges::sort(convars, CONVAR_SORT_COMPARATOR());
+    std::ranges::sort(convars, {}, [](const ConVar *v) { return v->getName(); });
 
     FILE *file = fopen("commands.htm", "w");
     if(file == NULL) {

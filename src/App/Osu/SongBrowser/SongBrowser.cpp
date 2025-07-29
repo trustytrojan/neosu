@@ -52,6 +52,7 @@
 #include "UserCard.h"
 #include "VertexArrayObject.h"
 #include "SString.h"
+#include "crypto.h"
 
 #include <algorithm>
 #include <chrono>
@@ -221,6 +222,27 @@ class NoRecordsSetElement : public CBaseUILabel {
     UString sIconString;
 };
 
+bool sort_by_difficulty(SongButton const *a, SongButton const *b) {
+    const auto *aPtr = a->getDatabaseBeatmap(), *bPtr = b->getDatabaseBeatmap();
+    if((aPtr == nullptr) || (bPtr == nullptr)) return (aPtr == nullptr) < (bPtr == nullptr);
+
+    float stars1 = aPtr->getStarsNomod();
+    float stars2 = bPtr->getStarsNomod();
+    if(stars1 != stars2) return stars1 < stars2;
+
+    float diff1 = (aPtr->getAR() + 1) * (aPtr->getCS() + 1) * (aPtr->getHP() + 1) * (aPtr->getOD() + 1) *
+                  (std::max(aPtr->getMostCommonBPM(), 1));
+    float diff2 = (bPtr->getAR() + 1) * (bPtr->getCS() + 1) * (bPtr->getHP() + 1) * (bPtr->getOD() + 1) *
+                  (std::max(bPtr->getMostCommonBPM(), 1));
+
+    if(diff1 == diff2) return false;
+    return diff1 < diff2;
+}
+
+namespace {  // static namespace
+
+// not used anywhere else
+
 bool sort_by_artist(SongButton const *a, SongButton const *b) {
     const auto *aPtr = a->getDatabaseBeatmap(), *bPtr = b->getDatabaseBeatmap();
     if((aPtr == nullptr) || (bPtr == nullptr)) return (aPtr == nullptr) < (bPtr == nullptr);
@@ -261,21 +283,9 @@ bool sort_by_date_added(SongButton const *a, SongButton const *b) {
     return time1 > time2;
 }
 
-bool sort_by_difficulty(SongButton const *a, SongButton const *b) {
-    const auto *aPtr = a->getDatabaseBeatmap(), *bPtr = b->getDatabaseBeatmap();
-    if((aPtr == nullptr) || (bPtr == nullptr)) return (aPtr == nullptr) < (bPtr == nullptr);
-
-    float stars1 = aPtr->getStarsNomod();
-    float stars2 = bPtr->getStarsNomod();
-    if(stars1 != stars2) return stars1 < stars2;
-
-    float diff1 = (aPtr->getAR() + 1) * (aPtr->getCS() + 1) * (aPtr->getHP() + 1) * (aPtr->getOD() + 1) *
-                  (std::max(aPtr->getMostCommonBPM(), 1));
-    float diff2 = (bPtr->getAR() + 1) * (bPtr->getCS() + 1) * (bPtr->getHP() + 1) * (bPtr->getOD() + 1) *
-                  (std::max(bPtr->getMostCommonBPM(), 1));
-
-    if(diff1 == diff2) return false;
-    return diff1 < diff2;
+bool sort_by_grade(SongButton const *a, SongButton const *b) {
+    if(a->grade == b->grade) return false;
+    return a->grade < b->grade;
 }
 
 bool sort_by_length(SongButton const *a, SongButton const *b) {
@@ -298,13 +308,6 @@ bool sort_by_title(SongButton const *a, SongButton const *b) {
     return strcasecmp(titleA.c_str(), titleB.c_str()) < 0;
 }
 
-namespace {  // static namespace
-
-// not used anywhere else
-bool sort_by_grade(SongButton const *a, SongButton const *b) {
-    if(a->grade == b->grade) return false;
-    return a->grade < b->grade;
-}
 }  // namespace
 
 SongBrowser::SongBrowser() : ScreenBackable() {
@@ -342,6 +345,7 @@ SongBrowser::SongBrowser() : ScreenBackable() {
     this->bSongBrowserRightClickScrolling = false;
     this->bNextScrollToSongButtonJumpFixScheduled = false;
     this->bNextScrollToSongButtonJumpFixUseScrollSizeDelta = false;
+    this->fNextScrollToSongButtonJumpFixOldScrollSizeY = 0.0f;
     this->fNextScrollToSongButtonJumpFixOldRelPosY = 0.0f;
 
     this->selectionPreviousSongButton = NULL;

@@ -130,16 +130,7 @@ bool SimulatedBeatmap::start() {
 
     // sort hitobjects by endtime
     this->hitobjectsSortedByEndTime = this->hitobjects;
-    struct HitObjectSortComparator {
-        bool operator()(HitObject const *a, HitObject const *b) const {
-            // strict weak ordering!
-            if((a->click_time + a->duration) == (b->click_time + b->duration))
-                return a < b;
-            else
-                return (a->click_time + a->duration) < (b->click_time + b->duration);
-        }
-    };
-    std::ranges::sort(this->hitobjectsSortedByEndTime, HitObjectSortComparator());
+    std::ranges::sort(this->hitobjectsSortedByEndTime, Beatmap::sortHitObjectByEndTimeComp);
 
     // after the hitobjects have been loaded we can calculate the stacks
     this->calculateStacks();

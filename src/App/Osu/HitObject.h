@@ -52,9 +52,9 @@ class HitObject {
     void setAutopilotDelta(long delta) { this->iAutopilotDelta = delta; }
     void setBlocked(bool blocked) { this->bBlocked = blocked; }
 
-    virtual Vector2 getRawPosAt(long pos) = 0;          // with stack calculation modifications
-    virtual Vector2 getOriginalRawPosAt(long pos) = 0;  // without stack calculations
-    virtual Vector2 getAutoCursorPos(long curPos) = 0;
+    [[nodiscard]] virtual Vector2 getRawPosAt(long pos) const = 0;          // with stack calculation modifications
+    [[nodiscard]] virtual Vector2 getOriginalRawPosAt(long pos) const = 0;  // without stack calculations
+    [[nodiscard]] virtual Vector2 getAutoCursorPos(long curPos) const = 0;
 
     [[nodiscard]] inline int getStack() const { return this->iStack; }
     [[nodiscard]] inline int getColorCounter() const { return this->iColorCounter; }

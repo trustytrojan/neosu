@@ -590,4 +590,4 @@ void Circle::onReset(long curPos) {
     }
 }
 
-Vector2 Circle::getAutoCursorPos(long  /*curPos*/) { return this->bi->osuCoords2Pixels(this->vRawPos); }
+Vector2 Circle::getAutoCursorPos(long  /*curPos*/) const { return this->bi->osuCoords2Pixels(this->vRawPos); }

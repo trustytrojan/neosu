@@ -26,6 +26,23 @@
 #include "SliderCurves.h"
 #include "SongBrowser/SongBrowser.h"
 #include "Spinner.h"
+namespace {  // static namespace
+
+bool timingPointSortComparator(DatabaseBeatmap::TIMINGPOINT const &a, DatabaseBeatmap::TIMINGPOINT const &b) {
+    if(a.offset != b.offset) return a.offset < b.offset;
+
+    // non-inherited timingpoints go before inherited timingpoints
+    bool a_inherited = a.msPerBeat >= 0;
+    bool b_inherited = b.msPerBeat >= 0;
+    if(a_inherited != b_inherited) return a_inherited;
+
+    if(a.sampleType != b.sampleType) return static_cast<int>(a.sampleType) < static_cast<int>(b.sampleType);
+    if(a.sampleSet != b.sampleSet) return a.sampleSet < b.sampleSet;
+    if(a.kiai != b.kiai) return a.kiai;
+
+    return false;  // equivalent
+}
+}  // namespace
 
 DatabaseBeatmap::DatabaseBeatmap(std::string filePath, std::string folder, BeatmapType type) {
     this->sFilePath = std::move(filePath);
@@ -117,13 +134,13 @@ DatabaseBeatmap::~DatabaseBeatmap() {
     }
 }
 
-DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const std::string& osuFilePath) {
+DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const std::string &osuFilePath) {
     std::atomic<bool> dead;
     dead = false;
     return loadPrimitiveObjects(osuFilePath, dead);
 }
 
-DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const std::string& osuFilePath,
+DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const std::string &osuFilePath,
                                                                            const std::atomic<bool> &dead) {
     PRIMITIVE_CONTAINER c;
     {
@@ -145,7 +162,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
     const float sliderSanityRange = cv::slider_curve_max_length.getFloat();  // infinity sanity check, same as before
     const int sliderMaxRepeatRange =
         cv::slider_max_repeats.getInt();  // NOTE: osu! will refuse to play any beatmap which has sliders with more than
-                                         // 9000 repeats, here we just clamp it instead
+                                          // 9000 repeats, here we just clamp it instead
 
     // open osu file for parsing
     {
@@ -174,7 +191,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
 
             const char *curLineChar = curLine.c_str();
             if(!curLine.starts_with("//"))  // ignore comments, but only if at the beginning of a line (e.g. allow
-                                   // Artist:DJ'TEKINA//SOMETHING)
+                                            // Artist:DJ'TEKINA//SOMETHING)
             {
                 if(curLine.find("[General]") != std::string::npos)
                     curBlock = 1;
@@ -462,7 +479,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
     }
 
     // sort timingpoints by time
-    if(c.timingpoints.size() > 1) std::ranges::sort(c.timingpoints, TimingPointSortComparator());
+    if(c.timingpoints.size() > 1) std::ranges::sort(c.timingpoints, timingPointSortComparator);
 
     return c;
 }
@@ -500,8 +517,7 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
             return duration >= 1.0f ? duration : 1.0f;  // sanity check
         }
 
-        static float getSliderVelocity(const TIMING_INFO &timingInfo, float sliderMultiplier,
-                                       float sliderTickRate) {
+        static float getSliderVelocity(const TIMING_INFO &timingInfo, float sliderMultiplier, float sliderTickRate) {
             const float beatLength = timingInfo.beatLength;
             if(beatLength > 0.0f)
                 return (getSliderTickDistance(sliderMultiplier, sliderTickRate) * sliderTickRate *
@@ -621,7 +637,7 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
                                                         const OsuDifficultyHitObject::SLIDER_SCORING_TIME &b) -> bool {
             if(a.time != b.time) return a.time < b.time;
             if(a.type != b.type) return static_cast<int>(a.type) < static_cast<int>(b.type);
-            return false; // equivalent
+            return false;  // equivalent
         };
 
         // 5) sort scoringTimes from earliest to latest
@@ -633,7 +649,7 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
     return r;
 }
 
-DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(const std::string& osuFilePath, float AR,
+DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(const std::string &osuFilePath, float AR,
                                                                                float CS, float speedMultiplier,
                                                                                bool calculateStarsInaccurately) {
     std::atomic<bool> dead;
@@ -641,7 +657,7 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(c
     return loadDifficultyHitObjects(osuFilePath, AR, CS, speedMultiplier, calculateStarsInaccurately, dead);
 }
 
-DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(const std::string& osuFilePath, float AR,
+DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(const std::string &osuFilePath, float AR,
                                                                                float CS, float speedMultiplier,
                                                                                bool calculateStarsInaccurately,
                                                                                const std::atomic<bool> &dead) {
@@ -1124,7 +1140,7 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
     if(this->timingpoints.size() > 0) {
         // sort timingpoints by time
         if(this->timingpoints.size() > 1) {
-            std::ranges::sort(this->timingpoints, TimingPointSortComparator());
+            std::ranges::sort(this->timingpoints, timingPointSortComparator);
         }
 
         if(this->iMostCommonBPM == 0) {
@@ -1232,17 +1248,8 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
     }
 
     // sort hitobjects by starttime
-    struct HitObjectSortComparator {
-        bool operator()(HitObject const *a, HitObject const *b) const {
-            // strict weak ordering!
-            if(a->click_time == b->click_time)
-                return a < b;
-            else
-                return a->click_time < b->click_time;
-        }
-    };
     if(result.hitobjects.size() > 1) {
-        std::ranges::sort(result.hitobjects, HitObjectSortComparator());
+        std::ranges::sort(result.hitobjects, Beatmap::sortHitObjectByStartTimeComp);
     }
 
     // update beatmap length stat
@@ -1432,7 +1439,8 @@ void DatabaseBeatmapBackgroundImagePathLoader::initAsync() {
     char stringBuffer[1024];
     while(file.canRead()) {
         std::string curLine = file.readLine();
-        if(!curLine.starts_with("//"))  // ignore comments, but only if at the beginning of a line (e.g. allow Artist:DJ'TEKINA//SOMETHING)
+        if(!curLine.starts_with("//"))  // ignore comments, but only if at the beginning of a line (e.g. allow
+                                        // Artist:DJ'TEKINA//SOMETHING)
         {
             if(curLine.find("[Events]") != std::string::npos)
                 curBlock = 1;

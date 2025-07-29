@@ -47,14 +47,9 @@ class Database {
         unsigned long long totalScore;
     };
 
-    struct SCORE_SORTING_COMPARATOR {
-        virtual ~SCORE_SORTING_COMPARATOR() { ; }
-        virtual bool operator()(FinishedScore const &a, FinishedScore const &b) const = 0;
-    };
-
     struct SCORE_SORTING_METHOD {
         UString name;
-        SCORE_SORTING_COMPARATOR *comparator;
+        std::function<bool(FinishedScore const &, FinishedScore const &)> comparator;
     };
 
    public:

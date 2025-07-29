@@ -31,9 +31,9 @@ class Slider : public HitObject {
     void miss(long curPos) override;
     int getCombo() override { return 2 + std::max((this->iRepeat - 1), 0) + (std::max((this->iRepeat - 1), 0) + 1) * this->ticks.size(); }
 
-    Vector2 getRawPosAt(long pos) override;
-    Vector2 getOriginalRawPosAt(long pos) override;
-    inline Vector2 getAutoCursorPos(long  /*curPos*/) override { return this->vCurPoint; }
+    [[nodiscard]] Vector2 getRawPosAt(long pos) const override;
+    [[nodiscard]] Vector2 getOriginalRawPosAt(long pos) const override;
+    [[nodiscard]] inline Vector2 getAutoCursorPos(long  /*curPos*/) const override { return this->vCurPoint; }
 
     void onClickEvent(std::vector<Click> &clicks) override;
     void onReset(long curPos) override;
@@ -63,7 +63,7 @@ class Slider : public HitObject {
     void onTickHit(bool successful, int tickIndex);
     void onSliderBreak();
 
-    float getT(long pos, bool raw);
+    [[nodiscard]] float getT(long pos, bool raw) const;
 
     bool isClickHeldSlider();  // special logic to disallow hold tapping
 

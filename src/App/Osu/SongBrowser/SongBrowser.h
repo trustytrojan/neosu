@@ -33,13 +33,7 @@ class ConVar;
 class SongBrowserBackgroundSearchMatcher;
 
 typedef bool (*SORTING_COMPARATOR)(const SongButton *a, const SongButton *b);
-bool sort_by_artist(const SongButton *a, const SongButton *b);
-bool sort_by_bpm(const SongButton *a, const SongButton *b);
-bool sort_by_creator(const SongButton *a, const SongButton *b);
-bool sort_by_date_added(const SongButton *a, const SongButton *b);
 bool sort_by_difficulty(const SongButton *a, const SongButton *b);
-bool sort_by_length(const SongButton *a, const SongButton *b);
-bool sort_by_title(const SongButton *a, const SongButton *b);
 
 class SongBrowser final : public ScreenBackable {
    public:
