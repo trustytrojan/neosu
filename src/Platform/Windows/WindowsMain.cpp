@@ -454,6 +454,9 @@ void WindowsMain::processBufferedRawInput() {
         bufferSize *= 8;  // WoW64 requirement from MSDN
     }
 
+    // MSDN example allows 16 messages to be queued, seems reasonable?
+    bufferSize *= 16;
+
     bufferSize = std::min(bufferSize, this->maxRawInputBufferSize);
     if(this->vRawInputBuffer.size < bufferSize) {
         this->vRawInputBuffer.resize(bufferSize, alignment);
