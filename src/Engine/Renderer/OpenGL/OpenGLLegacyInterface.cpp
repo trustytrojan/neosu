@@ -107,7 +107,7 @@ void OpenGLLegacyInterface::beginScene() {
 }
 
 void OpenGLLegacyInterface::endScene() {
-    VPROF_BUDGET("OpenGLLegacyInterface::endScene", VPROF_BUDGETGROUP_DRAW_SWAPBUFFERS);
+    VPROF_BUDGET("endScene", VPROF_BUDGETGROUP_DRAW_SWAPBUFFERS);
     popTransform();
 
 #ifdef _DEBUG

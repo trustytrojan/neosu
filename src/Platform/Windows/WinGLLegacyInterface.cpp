@@ -183,7 +183,7 @@ WinGLLegacyInterface::~WinGLLegacyInterface() {
 void WinGLLegacyInterface::endScene() {
     OpenGLLegacyInterface::endScene();
     {
-        VPROF_BUDGET("WinGLLegacyInterface::endScene", VPROF_BUDGETGROUP_DRAW_SWAPBUFFERS);
+        VPROF_BUDGET("SwapBuffers", VPROF_BUDGETGROUP_DRAW_SWAPBUFFERS);
         SwapBuffers(this->hdc);
     }
 }

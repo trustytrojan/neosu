@@ -25,6 +25,8 @@
 #define VPROF_BUDGETGROUP_DRAW "Draw"
 #define VPROF_BUDGETGROUP_DRAW_SWAPBUFFERS "SwapBuffers"
 
+// #define DETAILED_PROFILING
+
 #ifdef DETAILED_PROFILING
 #include <execution>
 
@@ -54,10 +56,12 @@
     } while(false);
 #define VPROF_MAX_NUM_BUDGETGROUPS 128
 #define VPROF_MAX_NUM_NODES 128
+#define VPROF_BUDGET_DBG VPROF_BUDGET
 #else
 #define DBGTIME(...)
 #define VPROF_MAX_NUM_BUDGETGROUPS 32
 #define VPROF_MAX_NUM_NODES 32
+#define VPROF_BUDGET_DBG(...)
 #endif
 
 class ProfilerNode {

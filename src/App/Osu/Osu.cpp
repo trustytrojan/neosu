@@ -40,6 +40,7 @@
 #include "OptionsMenu.h"
 #include "PauseMenu.h"
 #include "PeppyImporter.h"
+#include "Profiler.h"
 #include "PromptScreen.h"
 #include "RankingScreen.h"
 #include "RenderTarget.h"
@@ -837,9 +838,18 @@ void Osu::update() {
     }
 
     // multiplayer/networking update
-    BANCHO::Net::update_networking();
-    BANCHO::Net::receive_api_responses();
-    BANCHO::Net::receive_bancho_packets();
+    {
+        VPROF_BUDGET_DBG("Bancho::update", VPROF_BUDGETGROUP_UPDATE);
+        BANCHO::Net::update_networking();
+    }
+    {
+        VPROF_BUDGET_DBG("Bancho::recvapi", VPROF_BUDGETGROUP_UPDATE);
+        BANCHO::Net::receive_api_responses();
+    }
+    {
+        VPROF_BUDGET_DBG("Bancho::recvpkt", VPROF_BUDGETGROUP_UPDATE);
+        BANCHO::Net::receive_bancho_packets();
+    }
 
     // skin async loading
     if(this->bSkinLoadScheduled) {

@@ -48,7 +48,7 @@ LinuxGLLegacyInterface::~LinuxGLLegacyInterface() {
 void LinuxGLLegacyInterface::endScene() {
     OpenGLLegacyInterface::endScene();
     {
-        VPROF_BUDGET("LinuxGLLegacyInterface::endScene", VPROF_BUDGETGROUP_DRAW_SWAPBUFFERS);
+        VPROF_BUDGET("SwapBuffers", VPROF_BUDGETGROUP_DRAW_SWAPBUFFERS);
         glXSwapBuffers(this->display, this->window);
     }
 }
