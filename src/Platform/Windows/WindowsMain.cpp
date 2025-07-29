@@ -333,7 +333,7 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> &arg
         {
             VPROF_BUDGET("Events", VPROF_BUDGETGROUP_EVENTS);
 
-            if(FALSE && cv::mouse_raw_input.getBool() && cv::win_mouse_raw_input_buffer.getBool() && mouse != NULL) {
+            if(cv::mouse_raw_input.getBool() && cv::win_mouse_raw_input_buffer.getBool() && mouse != NULL) {
                 // need to process buffered inputs outside of the window procedure and remove those messages first
                 this->processBufferedRawInput();
 
