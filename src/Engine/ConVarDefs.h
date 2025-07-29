@@ -27,6 +27,9 @@ struct dummyEnv {
     inline void setFullscreenWindowedBorderless(bool /**/) { ; }
 };
 dummyEnv *env{};
+namespace Environment {
+inline void setProcessPriority(float /**/) { ; }
+}  // namespace Environment
 
 extern void _borderless();
 extern void _center();
@@ -61,7 +64,7 @@ extern void _volume(const UString &, const UString &);
 namespace BANCHO::Net {
 extern void reconnect();
 extern void disconnect();
-}
+}  // namespace BANCHO::Net
 #endif
 
 // ########################################################################################################################
@@ -77,7 +80,7 @@ extern void disconnect();
 #define CONVAR(name, ...) ConVar _CV(name)(__VA_ARGS__)
 #define CFUNC(func) SA::delegate<decltype(func)>::template create<func>()
 #include "KeyboardKeys.h"
-#include "BanchoNetworking.h" // defines some things we need like OSU_VERSION_DATEONLY
+#include "BanchoNetworking.h"  // defines some things we need like OSU_VERSION_DATEONLY
 #else
 #define CONVAR(name, ...) extern ConVar _CV(name)
 #define CFUNC(func)
@@ -327,7 +330,8 @@ CONVAR(debug_rt, "debug_rt", false, FCVAR_LOCKED | FCVAR_GAMEPLAY,
        "draws all rendertargets with a translucent green background");
 CONVAR(debug_shaders, "debug_shaders", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(debug_vprof, "debug_vprof", false, FCVAR_BANCHO_COMPATIBLE);
-CONVAR(debug_network, "debug_network", false, FCVAR_HIDDEN | FCVAR_PRIVATE | FCVAR_GAMEPLAY | FCVAR_NOSAVE | FCVAR_NOLOAD);
+CONVAR(debug_network, "debug_network", false,
+       FCVAR_HIDDEN | FCVAR_PRIVATE | FCVAR_GAMEPLAY | FCVAR_NOSAVE | FCVAR_NOLOAD);
 CONVAR(disable_mousebuttons, "osu_disable_mousebuttons", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(disable_mousewheel, "osu_disable_mousewheel", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(drain_kill, "osu_drain_kill", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_GAMEPLAY,
@@ -1224,8 +1228,9 @@ CONVAR(win_ink_workaround, "win_ink_workaround", false, FCVAR_BANCHO_COMPATIBLE 
 CONVAR(win_mouse_raw_input_buffer, "win_mouse_raw_input_buffer", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "use GetRawInputBuffer() to reduce wndproc event queue overflow stalls on insane "
        "mouse usb polling rates above 1000 Hz");
+// this is not windows-only anymore, just keeping it with the "win_" prefix to not break old configs
 CONVAR(win_processpriority, "win_processpriority", 1, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
-       "if compiled on Windows, sets the main process priority (0 = normal, 1 = high)");
+       "sets the main process priority (0 = normal, 1 = high)", CFUNC(Environment::setProcessPriority));
 CONVAR(win_snd_wasapi_buffer_size, "win_snd_wasapi_buffer_size", 0.011f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "buffer size/length in seconds (e.g. 0.011 = 11 ms), directly responsible for audio delay and crackling");
 CONVAR(win_snd_wasapi_exclusive, "win_snd_wasapi_exclusive", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);

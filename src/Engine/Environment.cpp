@@ -8,6 +8,7 @@
 #include <SDL3/SDL_messagebox.h>
 #include <SDL3/SDL_dialog.h>
 #include <SDL3/SDL_misc.h>
+#include <SDL3/SDL_thread.h>
 
 #ifdef MCENGINE_PLATFORM_WINDOWS
 #include "WinDebloatDefs.h"
@@ -19,10 +20,17 @@
 #include <sstream>
 #include <iomanip>
 
+// convar callback
+void Environment::setProcessPriority(float newPrio) {
+    SDL_SetCurrentThreadPriority(!!static_cast<int>(newPrio) ? SDL_THREAD_PRIORITY_HIGH : SDL_THREAD_PRIORITY_NORMAL);
+}
+
 Environment::Environment(const std::vector<UString> &argCmdline,
                          const std::unordered_map<UString, std::optional<UString>> &argMap)
     : mArgMap(argMap), vCmdLine(argCmdline) {
     this->bFullscreenWindowedBorderless = false;
+
+    Environment::setProcessPriority(cv::win_processpriority.getFloat());
 }
 
 void Environment::setFullscreenWindowedBorderless(bool fullscreenWindowedBorderless) {

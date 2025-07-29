@@ -223,8 +223,8 @@ void UpdateHandler::installUpdate(const std::string &zipFilePath) {
 
             // .exe and .dll can't be directly overwritten on windows
             if(outFilePath.length() > 4) {
-                if(!strcmp(outFilePath.c_str() + outFilePath.length() - 4, ".exe") ||
-                   !strcmp(outFilePath.c_str() + outFilePath.length() - 4, ".dll")) {
+                if(!strcasecmp(outFilePath.c_str() + outFilePath.length() - 4, ".exe") ||
+                   !strcasecmp(outFilePath.c_str() + outFilePath.length() - 4, ".dll")) {
                     std::string old_path = outFilePath;
                     old_path.append(".old");
                     env->deleteFile(old_path);

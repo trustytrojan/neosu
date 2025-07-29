@@ -58,6 +58,7 @@ class Environment {
     static std::string getEnvVariable(const std::string &varToQuery) noexcept;
 
     static const std::string &getExeFolder();
+    static void setProcessPriority(float newVal); // != 0.0 : high
 
     // replace non-alphanum characters in a string to %-encoded ones viable for a URL
     [[nodiscard]] static std::string encodeStringToURL(const std::string &stringToConvert) noexcept;

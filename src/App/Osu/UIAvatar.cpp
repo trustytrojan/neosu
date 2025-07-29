@@ -18,6 +18,7 @@
 #include "Skin.h"
 #include "UIUserContextMenu.h"
 
+namespace {  // static namespace
 // Returns true when avatar is fully downloaded
 bool download_avatar(i32 user_id) {
     if(user_id == 0) return false;
@@ -56,11 +57,14 @@ bool download_avatar(i32 user_id) {
     return true;
 }
 
+}  // namespace
+
 UIAvatar::UIAvatar(i32 player_id, float xPos, float yPos, float xSize, float ySize)
     : CBaseUIButton(xPos, yPos, xSize, ySize, "avatar", "") {
     this->player_id = player_id;
 
-    this->avatar_path = UString::format(MCENGINE_DATA_DIR "avatars/%s/%d", bancho->endpoint.toUtf8(), player_id).toUtf8();
+    this->avatar_path =
+        UString::format(MCENGINE_DATA_DIR "avatars/%s/%d", bancho->endpoint.toUtf8(), player_id).toUtf8();
     this->setClickCallback(SA::MakeDelegate<&UIAvatar::onAvatarClicked>(this));
 
     struct stat attr;

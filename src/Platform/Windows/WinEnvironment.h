@@ -82,7 +82,6 @@ class WinEnvironment final : public Environment {
     // ILLEGAL:
     // (also custom)
     void setDPIOverride(int newForcedDPI) { this->iDPIOverride = newForcedDPI; }
-    bool setProcessPriority(int priority);  // 0 = normal, 1 = high
     bool setProcessAffinity(int affinity);  // -1 = reset (all cores), 0 = first core, 1 = last core
     void disableWindowsKey();
     void enableWindowsKey();

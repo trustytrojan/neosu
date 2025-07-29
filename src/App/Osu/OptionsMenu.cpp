@@ -558,8 +558,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addSubSection("Renderer");
     this->addCheckbox("VSync", "If enabled: plz enjoy input lag.", &cv::vsync);
 
-    if constexpr(Env::cfg(OS::WINDOWS))
-        this->addCheckbox("High Priority", "Sets the game process priority to high", &cv::win_processpriority);
+    this->addCheckbox("High Priority", "Sets the game process priority to high", &cv::win_processpriority);
 
     this->addCheckbox("Show FPS Counter", &cv::draw_fps);
 

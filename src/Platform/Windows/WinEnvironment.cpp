@@ -57,10 +57,7 @@ WinEnvironment::WinEnvironment(HWND hwnd, HINSTANCE hinstance, const std::vector
     }
 
     // convar callbacks
-    cv::win_processpriority.setCallback(SA::MakeDelegate<&WinEnvironment::onProcessPriorityChange>(this));
     cv::win_disable_windows_key.setCallback(SA::MakeDelegate<&WinEnvironment::onDisableWindowsKeyChange>(this));
-
-    setProcessPriority(cv::win_processpriority.getInt());
 }
 
 WinEnvironment::~WinEnvironment() { enableWindowsKey(); }
@@ -678,10 +675,6 @@ UString WinEnvironment::keyCodeToString(KEYCODE keyCode) {
     return UString(keyNameString);
 }
 
-bool WinEnvironment::setProcessPriority(int priority) {
-    return SetPriorityClass(GetCurrentProcess(), priority < 1 ? NORMAL_PRIORITY_CLASS : HIGH_PRIORITY_CLASS);
-}
-
 bool WinEnvironment::setProcessAffinity(int affinity) {
     HANDLE currentProcess = GetCurrentProcess();
     DWORD_PTR dwProcessAffinityMask;
@@ -761,10 +754,6 @@ void WinEnvironment::handleShowMessageFullscreen() {
 void WinEnvironment::enumerateMonitors() {
     this->vMonitors.clear();
     EnumDisplayMonitors(NULL, NULL, WinEnvironment::monitorEnumProc, 0);
-}
-
-void WinEnvironment::onProcessPriorityChange(const UString & /*oldValue*/, const UString &newValue) {
-    setProcessPriority(newValue.toInt());
 }
 
 void WinEnvironment::onDisableWindowsKeyChange(const UString & /*oldValue*/, const UString &newValue) {
