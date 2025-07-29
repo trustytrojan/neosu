@@ -505,8 +505,6 @@ void LinuxEnvironment::setCursorVisible(bool visible) {
 
 void LinuxEnvironment::setMousePos(double x, double y) {
     XIWarpPointer(this->display, XI2Handler::clientPointerDevID, None, this->window, 0, 0, 0, 0, x, y);
-    // XFlush is usually sufficient, XSync forces unnecessary round-trip
-    XFlush(this->display);
 
     // update cached position immediately
     this->vCachedMousePos = Vector2(x, y);

@@ -17,7 +17,9 @@
 #include "Profiler.h"
 
 XVisualInfo *LinuxGLLegacyInterface::getVisualInfo(Display *display) {
-    return glXChooseVisual(display, 0, std::array<GLint, 7>{GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_STENCIL_SIZE, 1, GLX_DOUBLEBUFFER, None}.data());
+    return glXChooseVisual(
+        display, DefaultScreen(display),
+        std::array<GLint, 7>{GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_STENCIL_SIZE, 1, GLX_DOUBLEBUFFER, None}.data());
 }
 
 LinuxGLLegacyInterface::LinuxGLLegacyInterface(Display *display, Window window) : OpenGLLegacyInterface() {

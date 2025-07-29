@@ -11,8 +11,8 @@ CBaseUIContainer::~CBaseUIContainer() { this->freeElements(); }
 
 // free memory from children
 void CBaseUIContainer::freeElements() {
-    for(auto &elem : this->vElements) {
-        SAFE_DELETE(elem);
+    for(size_t i = 0; i < this->vElements.size(); i++) {
+        delete this->vElements[i];
     }
     this->vElements.clear();
 }
@@ -124,8 +124,8 @@ CBaseUIContainer *CBaseUIContainer::deleteBaseUIElement(CBaseUIElement *element)
 
 CBaseUIElement *CBaseUIContainer::getBaseUIElement(const UString &name) {
     MC_UNROLL
-    for(auto &elem : this->vElements) {
-        if(elem->getName() == name) return elem;
+    for(size_t i = 0; i < this->vElements.size(); i++) {
+        if(this->vElements[i]->getName() == name) return this->vElements[i];
     }
     debugLog("CBaseUIContainer ERROR: GetBaseUIElement() \"%s\" does not exist!!!\n", name.toUtf8());
     return NULL;
@@ -135,7 +135,8 @@ void CBaseUIContainer::draw() {
     if(!this->bVisible) return;
 
     MC_UNROLL
-    for(auto e : this->vElements) {
+    for(size_t i = 0; i < this->vElements.size(); i++) {
+        const auto &e = this->vElements[i];
         if(e->isVisible()) {
             e->draw();
         }
@@ -150,13 +151,17 @@ void CBaseUIContainer::draw_debug() {
     g->drawLine(this->vPos.x + this->vSize.x, this->vPos.y, this->vPos.x + this->vSize.x, this->vPos.y + this->vSize.y);
 
     g->setColor(0xff0000ff);
-    for(auto &elem : this->vElements) {
-        g->drawLine(elem->vPos.x, elem->vPos.y, elem->vPos.x + elem->vSize.x, elem->vPos.y);
-        g->drawLine(elem->vPos.x, elem->vPos.y, elem->vPos.x, elem->vPos.y + elem->vSize.y);
-        g->drawLine(elem->vPos.x, elem->vPos.y + elem->vSize.y, elem->vPos.x + elem->vSize.x,
-                    elem->vPos.y + elem->vSize.y);
-        g->drawLine(elem->vPos.x + elem->vSize.x, elem->vPos.y, elem->vPos.x + elem->vSize.x,
-                    elem->vPos.y + elem->vSize.y);
+    for(size_t i = 0; i < this->vElements.size(); i++) {
+        g->drawLine(this->vElements[i]->vPos.x, this->vElements[i]->vPos.y,
+                    this->vElements[i]->vPos.x + this->vElements[i]->vSize.x, this->vElements[i]->vPos.y);
+        g->drawLine(this->vElements[i]->vPos.x, this->vElements[i]->vPos.y, this->vElements[i]->vPos.x,
+                    this->vElements[i]->vPos.y + this->vElements[i]->vSize.y);
+        g->drawLine(this->vElements[i]->vPos.x, this->vElements[i]->vPos.y + this->vElements[i]->vSize.y,
+                    this->vElements[i]->vPos.x + this->vElements[i]->vSize.x,
+                    this->vElements[i]->vPos.y + this->vElements[i]->vSize.y);
+        g->drawLine(this->vElements[i]->vPos.x + this->vElements[i]->vSize.x, this->vElements[i]->vPos.y,
+                    this->vElements[i]->vPos.x + this->vElements[i]->vSize.x,
+                    this->vElements[i]->vPos.y + this->vElements[i]->vSize.y);
     }
 }
 
@@ -165,57 +170,58 @@ void CBaseUIContainer::mouse_update(bool *propagate_clicks) {
     CBaseUIElement::mouse_update(propagate_clicks);
 
     MC_UNROLL
-    for(auto &elem : this->vElements) {
-        elem->mouse_update(propagate_clicks);
+    for(size_t i = 0; i < this->vElements.size(); i++) {
+        this->vElements[i]->mouse_update(propagate_clicks);
     }
 }
 
 void CBaseUIContainer::update_pos() {
     const auto &thisPos = this->vPos;
     MC_UNROLL
-    for(auto e : this->vElements) {
+    for(size_t i = 0; i < this->vElements.size(); i++) {
+        const auto &e = this->vElements[i];
         e->setPos(thisPos + e->getRelPos());
     }
 }
 
 void CBaseUIContainer::onKeyUp(KeyboardEvent &e) {
     MC_UNROLL
-    for(auto &elem : this->vElements) {
-        if(elem->isVisible()) elem->onKeyUp(e);
+    for(size_t i = 0; i < this->vElements.size(); i++) {
+        if(this->vElements[i]->isVisible()) this->vElements[i]->onKeyUp(e);
     }
 }
 void CBaseUIContainer::onKeyDown(KeyboardEvent &e) {
     MC_UNROLL
-    for(auto &elem : this->vElements) {
-        if(elem->isVisible()) elem->onKeyDown(e);
+    for(size_t i = 0; i < this->vElements.size(); i++) {
+        if(this->vElements[i]->isVisible()) this->vElements[i]->onKeyDown(e);
     }
 }
 
 void CBaseUIContainer::onChar(KeyboardEvent &e) {
     MC_UNROLL
-    for(auto &elem : this->vElements) {
-        if(elem->isVisible()) elem->onChar(e);
+    for(size_t i = 0; i < this->vElements.size(); i++) {
+        if(this->vElements[i]->isVisible()) this->vElements[i]->onChar(e);
     }
 }
 
 void CBaseUIContainer::onFocusStolen() {
     MC_UNROLL
-    for(auto &elem : this->vElements) {
-        elem->stealFocus();
+    for(size_t i = 0; i < this->vElements.size(); i++) {
+        this->vElements[i]->stealFocus();
     }
 }
 
 void CBaseUIContainer::onEnabled() {
     MC_UNROLL
-    for(auto &elem : this->vElements) {
-        elem->setEnabled(true);
+    for(size_t i = 0; i < this->vElements.size(); i++) {
+        this->vElements[i]->setEnabled(true);
     }
 }
 
 void CBaseUIContainer::onDisabled() {
     MC_UNROLL
-    for(auto &elem : this->vElements) {
-        elem->setEnabled(false);
+    for(size_t i = 0; i < this->vElements.size(); i++) {
+        this->vElements[i]->setEnabled(false);
     }
 }
 
@@ -224,8 +230,8 @@ void CBaseUIContainer::onMouseDownOutside(bool /*left*/, bool /*right*/) { this-
 bool CBaseUIContainer::isBusy() {
     if(!this->bVisible) return false;
     MC_UNROLL
-    for(auto &elem : this->vElements) {
-        if(elem->isBusy()) return true;
+    for(size_t i = 0; i < this->vElements.size(); i++) {
+        if(this->vElements[i]->isBusy()) return true;
     }
 
     return false;
@@ -234,8 +240,8 @@ bool CBaseUIContainer::isBusy() {
 bool CBaseUIContainer::isActive() {
     if(!this->bVisible) return false;
     MC_UNROLL
-    for(auto &elem : this->vElements) {
-        if(elem->isActive()) return true;
+    for(size_t i = 0; i < this->vElements.size(); i++) {
+        if(this->vElements[i]->isActive()) return true;
     }
 
     return false;

@@ -34,7 +34,7 @@ void TextureAtlas::init() {
 
 void TextureAtlas::initAsync() { this->bAsyncReady = true; }
 
-void TextureAtlas::destroy() { SAFE_DELETE(this->atlasImage); }
+void TextureAtlas::destroy() { resourceManager->destroyResource(this->atlasImage); }
 
 void TextureAtlas::putAt(int x, int y, int width, int height, bool flipHorizontal, bool flipVertical, Color *pixels) {
     if(width < 1 || height < 1 || pixels == nullptr || this->atlasImage == nullptr) return;

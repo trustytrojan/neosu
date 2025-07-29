@@ -123,7 +123,7 @@ class DirectoryCache final {
     }
 
    private:
-    static constexpr size_t DIR_CACHE_MAX_ENTRIES = 100;
+    static constexpr size_t DIR_CACHE_MAX_ENTRIES = 1000;
     static constexpr size_t DIR_CACHE_EVICT_COUNT = DIR_CACHE_MAX_ENTRIES / 4;
 
     // evict least recently used entries when cache is full
@@ -157,7 +157,11 @@ class DirectoryCache final {
 };
 
 // init static directory cache
+#ifndef MCENGINE_PLATFORM_WINDOWS
 std::unique_ptr<DirectoryCache> File::s_directoryCache = std::make_unique<DirectoryCache>();
+#else
+std::unique_ptr<DirectoryCache> File::s_directoryCache;
+#endif
 
 //------------------------------------------------------------------------------
 // path resolution methods
@@ -378,4 +382,25 @@ const char *File::readFile() {
         return this->vFullBuffer.data();
 
     return nullptr;
+}
+
+std::vector<char> File::takeFileBuffer() {
+    if(cv::debug_file.getBool()) debugLog("File::takeFileBuffer() on {:s}\n", this->sFilePath);
+
+    // if buffer is already populated, move it out
+    if(!this->vFullBuffer.empty()) return std::move(this->vFullBuffer);
+
+    if(!this->bReady || !this->canRead()) return {};
+
+    // allocate buffer for file contents
+    this->vFullBuffer.resize(this->iFileSize);
+
+    // read entire file
+    this->ifstream->seekg(0, std::ios::beg);
+    if(this->ifstream->read(this->vFullBuffer.data(), static_cast<std::streamsize>(this->iFileSize)))
+        return std::move(this->vFullBuffer);
+
+    // read failed, clear buffer and return empty vector
+    this->vFullBuffer.clear();
+    return {};
 }

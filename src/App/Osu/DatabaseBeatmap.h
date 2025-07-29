@@ -344,7 +344,7 @@ class DatabaseBeatmap {
 
 class DatabaseBeatmapBackgroundImagePathLoader : public Resource {
    public:
-    DatabaseBeatmapBackgroundImagePathLoader(const std::string &filePath);
+    DatabaseBeatmapBackgroundImagePathLoader(const std::string &filePath) : Resource(filePath) {}
 
     [[nodiscard]] inline const std::string &getLoadedBackgroundImageFileName() const {
         return this->sLoadedBackgroundImageFileName;
@@ -355,7 +355,6 @@ class DatabaseBeatmapBackgroundImagePathLoader : public Resource {
     void initAsync() override;
     void destroy() override { ; }
 
-    std::string sFilePath;
     std::string sLoadedBackgroundImageFileName;
 };
 

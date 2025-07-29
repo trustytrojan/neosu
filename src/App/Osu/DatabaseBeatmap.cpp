@@ -935,13 +935,22 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
 
     if(cv::debug.getBool()) debugLog("DatabaseBeatmap::loadMetadata() : %s\n", this->sFilePath.c_str());
 
-    File file(this->sFilePath);
-    const u8 *beatmapFile = NULL;
-    size_t beatmapFileSize = 0;
-    if(file.canRead()) {
-        beatmapFile = reinterpret_cast<const u8 *>(file.readFile());
-        beatmapFileSize = file.getFileSize();
-    } else {
+    std::vector<char> fileBuffer;
+    const u8 *beatmapFile{nullptr};
+    size_t beatmapFileSize{0};
+
+    {
+        File file(this->sFilePath);
+        if(file.canRead()) {
+            beatmapFileSize = file.getFileSize();
+            fileBuffer = file.takeFileBuffer();
+            beatmapFile = reinterpret_cast<const u8 *>(fileBuffer.data());
+        }
+        // close the file here
+    }
+
+    if (fileBuffer.empty())
+    {
         debugLog("Osu Error: Couldn't read file %s\n", this->sFilePath.c_str());
         return false;
     }
@@ -1421,47 +1430,53 @@ DatabaseBeatmap::TIMING_INFO DatabaseBeatmap::getTimingInfoForTimeAndTimingPoint
     return ti;
 }
 
-DatabaseBeatmapBackgroundImagePathLoader::DatabaseBeatmapBackgroundImagePathLoader(const std::string &filePath)
-    : Resource() {
-    this->sFilePath = filePath;
-}
-
 void DatabaseBeatmapBackgroundImagePathLoader::init() {
     // (nothing)
     this->bReady = true;
 }
 
 void DatabaseBeatmapBackgroundImagePathLoader::initAsync() {
-    File file(this->sFilePath);
-    if(!file.canRead()) return;
+    if(this->bInterrupted) return;
 
-    int curBlock = -1;
-    char stringBuffer[1024];
-    while(file.canRead()) {
-        std::string curLine = file.readLine();
-        if(!curLine.starts_with("//"))  // ignore comments, but only if at the beginning of a line (e.g. allow
-                                        // Artist:DJ'TEKINA//SOMETHING)
-        {
-            if(curLine.find("[Events]") != std::string::npos)
-                curBlock = 1;
-            else if(curLine.find("[TimingPoints]") != std::string::npos)
-                break;  // NOTE: stop early
-            else if(curLine.find("[Colours]") != std::string::npos)
-                break;  // NOTE: stop early
-            else if(curLine.find("[HitObjects]") != std::string::npos)
-                break;  // NOTE: stop early
+    {
+        File file(this->sFilePath);
+        if(this->bInterrupted || !file.canRead()) return;
 
-            switch(curBlock) {
-                case 1:  // Events
-                {
-                    memset(stringBuffer, '\0', 1024);
-                    int type, startTime;
-                    if(sscanf(curLine.c_str(), R"( %i , %i , "%1023[^"]")", &type, &startTime, stringBuffer) == 3) {
-                        if(type == 0) this->sLoadedBackgroundImageFileName = stringBuffer;
-                    }
-                } break;
+        int curBlock = -1;
+        char stringBuffer[1024];
+        while(file.canRead()) {
+            if(this->bInterrupted) {
+                return;
+            }
+            std::string curLine = file.readLine();
+            if(!curLine.starts_with("//"))  // ignore comments, but only if at the beginning of a line (e.g. allow
+                                            // Artist:DJ'TEKINA//SOMETHING)
+            {
+                if(curLine.find("[Events]") != std::string::npos)
+                    curBlock = 1;
+                else if(curLine.find("[TimingPoints]") != std::string::npos)
+                    break;  // NOTE: stop early
+                else if(curLine.find("[Colours]") != std::string::npos)
+                    break;  // NOTE: stop early
+                else if(curLine.find("[HitObjects]") != std::string::npos)
+                    break;  // NOTE: stop early
+
+                switch(curBlock) {
+                    case 1:  // Events
+                    {
+                        memset(stringBuffer, '\0', 1024);
+                        int type, startTime;
+                        if(sscanf(curLine.c_str(), R"( %i , %i , "%1023[^"]")", &type, &startTime, stringBuffer) == 3) {
+                            if(type == 0) this->sLoadedBackgroundImageFileName = stringBuffer;
+                        }
+                    } break;
+                }
             }
         }
+    }
+
+    if(this->bInterrupted) {
+        return;
     }
 
     this->bAsyncReady = true;

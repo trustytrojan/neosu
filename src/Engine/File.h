@@ -52,8 +52,11 @@ class File {
 
     std::string readLine();
     std::string readString();
-    // WARNING: this is NOT a null-terminated string! DO NOT USE THIS with UString/std::string!
-    const char *readFile();
+
+    const char *readFile();  // WARNING: this is NOT a null-terminated string! DO NOT USE THIS with UString/std::string!
+
+    [[nodiscard]] std::vector<char>
+    takeFileBuffer();  // moves the file buffer out, allowing immediate destruction of the file object
 
     [[nodiscard]] constexpr size_t getFileSize() const { return this->iFileSize; }
     [[nodiscard]] inline std::string getPath() const { return this->sFilePath; }

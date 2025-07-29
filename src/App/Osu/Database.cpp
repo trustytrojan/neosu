@@ -109,7 +109,7 @@ class DatabaseLoader : public Resource {
         }
         sct_calc(this->db->scores_to_convert);
 
-        delete this;  // commit sudoku
+        resourceManager->destroyResource(this);  // commit sudoku
     }
 
     void initAsync() override {

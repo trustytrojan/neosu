@@ -285,27 +285,34 @@ bool Image::loadRawImage() {
             return false;
 
         // load entire file
-        File file(this->sFilePath);
-        if(!file.canRead()) {
-            debugLogF("Image Error: Couldn't canRead() file {:s}\n", this->sFilePath);
-            return false;
-        }
-        if(file.getFileSize() < 4) {
-            debugLogF("Image Error: FileSize is < 4 in file {:s}\n", this->sFilePath);
-            return false;
+        std::vector<char> fileBuffer;
+        size_t fileSize{0};
+        {
+            File file(this->sFilePath);
+            if(!file.canRead()) {
+                debugLogF("Image Error: Couldn't canRead() file {:s}\n", this->sFilePath);
+                return false;
+            }
+            if((fileSize = file.getFileSize()) < 4) {
+                debugLogF("Image Error: FileSize is < 4 in file {:s}\n", this->sFilePath);
+                return false;
+            }
+
+            if(this->bInterrupted)  // cancellation point
+                return false;
+
+            fileBuffer = file.takeFileBuffer();
+            if(fileBuffer.empty()) {
+                debugLogF("Image Error: Couldn't readFile() file {:s}\n", this->sFilePath);
+                return false;
+            }
+            // don't keep the file open
         }
 
         if(this->bInterrupted)  // cancellation point
             return false;
 
-        const char *data = file.readFile();
-        if(data == NULL) {
-            debugLogF("Image Error: Couldn't readFile() file {:s}\n", this->sFilePath);
-            return false;
-        }
-
-        if(this->bInterrupted)  // cancellation point
-            return false;
+        const char *data{fileBuffer.data()};
 
         // determine file type by magic number (png/jpg)
         bool isJPEG = false;
@@ -327,7 +334,7 @@ bool Image::loadRawImage() {
 
         // depending on the type, load either jpeg or png
         if(isJPEG) {
-            type = Image::TYPE::TYPE_JPG;
+            this->type = Image::TYPE::TYPE_JPG;
 
             // decode jpeg
             tjhandle tjInstance = tj3Init(TJINIT_DECOMPRESS);
@@ -336,7 +343,7 @@ bool Image::loadRawImage() {
                 return false;
             }
 
-            if(tj3DecompressHeader(tjInstance, (unsigned char *)data, file.getFileSize()) < 0) {
+            if(tj3DecompressHeader(tjInstance, (unsigned char *)data, fileSize) < 0) {
                 debugLogF("Image Error: tj3DecompressHeader failed: {:s} in file {:s}\n", tj3GetErrorStr(tjInstance),
                           this->sFilePath);
                 tj3Destroy(tjInstance);
@@ -371,8 +378,7 @@ bool Image::loadRawImage() {
             this->rawImage.resize(static_cast<long>(this->iWidth * this->iHeight * this->iNumChannels));
 
             // decompress directly to RGBA
-            if(tj3Decompress8(tjInstance, (unsigned char *)data, file.getFileSize(), &this->rawImage[0], 0, TJPF_RGBA) <
-               0) {
+            if(tj3Decompress8(tjInstance, (unsigned char *)data, fileSize, &this->rawImage[0], 0, TJPF_RGBA) < 0) {
                 debugLogF("Image Error: tj3Decompress8 failed: {:s} in file {:s}\n", tj3GetErrorStr(tjInstance),
                           this->sFilePath);
                 tj3Destroy(tjInstance);
@@ -384,8 +390,8 @@ bool Image::loadRawImage() {
             this->type = Image::TYPE::TYPE_PNG;
 
             // decode png using libpng
-            if(!decodePNGFromMemory((const unsigned char *)data, file.getFileSize(), this->rawImage, this->iWidth,
-                                    this->iHeight, this->iNumChannels)) {
+            if(!decodePNGFromMemory((const unsigned char *)data, fileSize, this->rawImage, this->iWidth, this->iHeight,
+                                    this->iNumChannels)) {
                 debugLogF("Image Error: PNG decoding failed in file {:s}\n", this->sFilePath);
                 return false;
             }

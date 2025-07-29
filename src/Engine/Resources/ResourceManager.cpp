@@ -61,12 +61,15 @@ void ResourceManager::destroyResources() {
 }
 
 void ResourceManager::destroyResource(Resource *rs) {
+    const bool debug = cv::debug_rm.getBool();
     if(rs == nullptr) {
-        if(cv::debug_rm.getBool()) debugLogF("ResourceManager Warning: destroyResource(NULL)!\n");
+        if(debug) debugLogF("ResourceManager Warning: destroyResource(NULL)!\n");
         return;
     }
 
-    if(cv::debug_rm.getBool()) debugLogF("ResourceManager: Destroying {:s}\n", rs->getName());
+    if(debug) {
+        debugLogF("ResourceManager: destroying {:8p} : {:s}\n", static_cast<const void *>(rs), rs->getName());
+    }
 
     bool isManagedResource = false;
     int managedResourceIndex = -1;
@@ -80,7 +83,9 @@ void ResourceManager::destroyResource(Resource *rs) {
 
     // check if it's being loaded and schedule async destroy if so
     if(this->asyncLoader->isLoadingResource(rs)) {
-        if(cv::debug_rm.getBool()) debugLogF("Resource Manager: Scheduled async destroy of {:s}\n", rs->getName());
+        if(debug)
+            debugLogF("Resource Manager: Scheduled async destroy of {:8p} : {:s}\n", static_cast<const void *>(rs),
+                      rs->getName());
 
         if(cv::rm_interrupt_on_destroy.getBool()) rs->interruptLoad();
 
@@ -98,6 +103,12 @@ void ResourceManager::destroyResource(Resource *rs) {
 }
 
 void ResourceManager::loadResource(Resource *res, bool load) {
+    if(res == nullptr) {
+        if(cv::debug_rm.getBool()) debugLogF("ResourceManager Warning: loadResource(NULL)!\n");
+        resetFlags();
+        return;
+    }
+
     // handle flags
     const bool isManaged = (this->nextLoadUnmanagedStack.size() < 1 || !this->nextLoadUnmanagedStack.top());
     if(isManaged) addManagedResource(res);

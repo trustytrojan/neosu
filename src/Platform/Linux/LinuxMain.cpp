@@ -132,7 +132,7 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdl
     if(rc) {
         // one...
         XSetWMName(this->dpy, this->clientWindow, &wm_name_prop);
-        XFree(wm_name_prop.value); // insanity
+        XFree(wm_name_prop.value);  // insanity
     }
 
     XClassHint *wm_class_hint = XAllocClassHint();
@@ -293,7 +293,7 @@ void LinuxMain::WndProc() {
         case ConfigureNotify:
             if(engine != NULL) {
                 const Vector2 size{this->xev.xconfigure.width, this->xev.xconfigure.height};
-                if(size != Vector2{0}) { // ignore 0,0 size
+                if(size != Vector2{0}) {  // ignore 0,0 size
                     engine->requestResolutionChange(size);
                 }
             }
