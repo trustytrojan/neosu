@@ -16,15 +16,9 @@ typedef unsigned char BYTE;
 
 #ifdef MCENGINE_FEATURE_OPENGL
 
-#include <X11/X.h>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-
 #include "OpenGLHeaders.h"
 
-XVisualInfo *getVisualInfo(Display *display);
-
-class LinuxGLLegacyInterface : public OpenGLLegacyInterface {
+class LinuxGLLegacyInterface final : public OpenGLLegacyInterface {
    public:
     LinuxGLLegacyInterface(Display *display, Window window);
     ~LinuxGLLegacyInterface() override;
@@ -37,6 +31,8 @@ class LinuxGLLegacyInterface : public OpenGLLegacyInterface {
 
     // ILLEGAL:
     [[nodiscard]] inline GLXContext getGLXContext() const { return this->glc; }
+
+    static XVisualInfo *getVisualInfo(Display *display);
 
    private:
     Display *display;

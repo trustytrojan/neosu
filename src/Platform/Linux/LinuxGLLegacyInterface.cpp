@@ -14,10 +14,10 @@
 #include "ConVar.h"
 #include "Engine.h"
 #include "LinuxEnvironment.h"
+#include "Profiler.h"
 
-XVisualInfo *getVisualInfo(Display *display) {
-    GLint att[] = {GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_STENCIL_SIZE, 1, GLX_DOUBLEBUFFER, None};
-    return glXChooseVisual(display, 0, att);
+XVisualInfo *LinuxGLLegacyInterface::getVisualInfo(Display *display) {
+    return glXChooseVisual(display, 0, std::array<GLint, 7>{GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_STENCIL_SIZE, 1, GLX_DOUBLEBUFFER, None}.data());
 }
 
 LinuxGLLegacyInterface::LinuxGLLegacyInterface(Display *display, Window window) : OpenGLLegacyInterface() {
@@ -47,8 +47,10 @@ LinuxGLLegacyInterface::~LinuxGLLegacyInterface() {
 
 void LinuxGLLegacyInterface::endScene() {
     OpenGLLegacyInterface::endScene();
-    glFlush();
-    glXSwapBuffers(this->display, this->window);
+    {
+        VPROF_BUDGET("LinuxGLLegacyInterface::endScene", VPROF_BUDGETGROUP_DRAW_SWAPBUFFERS);
+        glXSwapBuffers(this->display, this->window);
+    }
 }
 
 void LinuxGLLegacyInterface::setVSync(bool vsync) {

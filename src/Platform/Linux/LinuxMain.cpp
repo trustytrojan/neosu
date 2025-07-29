@@ -83,7 +83,7 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdl
     glXQueryVersion(this->dpy, &major, &minor);
     debugLogF("GLX Version: {}.{}\n", major, minor);
 
-    XVisualInfo *vi = getVisualInfo(this->dpy);
+    XVisualInfo *vi = LinuxGLLegacyInterface::getVisualInfo(this->dpy);
     if(!vi) {
         printf("FATAL ERROR: Couldn't glXChooseVisual!\n\n");
         return;

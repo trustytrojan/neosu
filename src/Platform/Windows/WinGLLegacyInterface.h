@@ -28,7 +28,7 @@ struct FAKE_CONTEXT {
     HDC hdc;
 };
 
-class WinGLLegacyInterface : public OpenGLLegacyInterface {
+class WinGLLegacyInterface final : public OpenGLLegacyInterface {
    public:
     static FAKE_CONTEXT createAndMakeCurrentWGLContext(HWND hwnd, PIXELFORMATDESCRIPTOR pfdIn);
 

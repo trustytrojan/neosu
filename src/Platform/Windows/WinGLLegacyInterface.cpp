@@ -9,6 +9,7 @@
 #include "Engine.h"
 #include "OpenGLHeaders.h"
 #include "WinEnvironment.h"
+#include "Profiler.h"
 
 bool g_bARBMultisampleSupported = false;
 int g_iARBMultisampleFormat = 0;
@@ -181,8 +182,10 @@ WinGLLegacyInterface::~WinGLLegacyInterface() {
 
 void WinGLLegacyInterface::endScene() {
     OpenGLLegacyInterface::endScene();
-    glFlush();
-    SwapBuffers(this->hdc);
+    {
+        VPROF_BUDGET("WinGLLegacyInterface::endScene", VPROF_BUDGETGROUP_DRAW_SWAPBUFFERS);
+        SwapBuffers(this->hdc);
+    }
 }
 
 void WinGLLegacyInterface::setVSync(bool vsync) {
