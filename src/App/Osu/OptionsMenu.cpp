@@ -2690,17 +2690,12 @@ void OptionsMenu::onNotelockSelectResetUpdate() {
 }
 
 void OptionsMenu::onCheckboxChange(CBaseUICheckbox *checkbox) {
-    debugLogF("got checkbox change callback for {:p}\n", static_cast<void *>(checkbox));
     for(auto &element : this->elemContainers) {
         for(int e = 0; e < element->baseElems.size(); e++) {
             if(element->baseElems[e] == checkbox) {
-                debugLogF("element->elements[{}] found checkbox\n", e);
                 auto *cv = element->cvars[checkbox];
                 if(cv != nullptr) {
                     cv->setValue(checkbox->isChecked());
-                    debugLogF("element->elements[{}] convar {} was NOT null\n", e, cv->getName());
-                } else {
-                    debugLogF("element->elements[{}] convar was null!\n", e);
                 }
 
                 this->onResetUpdate(element->resetButton);
