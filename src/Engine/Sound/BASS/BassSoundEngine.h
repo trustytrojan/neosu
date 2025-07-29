@@ -39,6 +39,10 @@ class BassSoundEngine final : public SoundEngine {
     void onFreqChanged(float oldValue, float newValue) override;
     void onParamChanged(float oldValue, float newValue) override;
 
+#ifdef MCENGINE_PLATFORM_WINDOWS
+    static DWORD ASIO_clamp(BASS_ASIO_INFO info, DWORD buflen);
+#endif
+
     SOUND_ENGINE_TYPE(BassSoundEngine, BASS, SoundEngine)
    private:
     bool isASIO() { return this->currentOutputDevice.driver == OutputDriver::BASS_ASIO; }
@@ -48,10 +52,6 @@ class BassSoundEngine final : public SoundEngine {
     double ready_since{-1.0};
     SOUNDHANDLE g_bassOutputMixer = 0;
 };
-
-#ifdef MCENGINE_PLATFORM_WINDOWS
-DWORD ASIO_clamp(BASS_ASIO_INFO info, DWORD buflen);
-#endif
 
 // convenience conversion macro to get the sound handle, extra args are any extra conditions to check for besides general state validity
 // just minor boilerplate reduction

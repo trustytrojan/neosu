@@ -7,6 +7,8 @@
 #include "ConVar.h"
 #include "Database.h"
 #include "Engine.h"
+
+#include <utility>
 #include "OptionsMenu.h"
 #include "Osu.h"
 #include "ResourceManager.h"
@@ -18,18 +20,18 @@
 #ifdef MCENGINE_PLATFORM_WINDOWS
 #include "CBaseUISlider.h"
 
-DWORD ASIO_clamp(BASS_ASIO_INFO info, DWORD buflen) {
-    if(buflen == -1) return info.bufpref;
+DWORD BassSoundEngine::ASIO_clamp(BASS_ASIO_INFO info, DWORD buflen) {
+    if(std::cmp_equal(buflen, -1)) return info.bufpref;
     if(buflen < info.bufmin) return info.bufmin;
     if(buflen > info.bufmax) return info.bufmax;
     if(info.bufgran == 0) return buflen;
 
     if(info.bufgran == -1) {
         // Buffer lengths are only allowed in powers of 2
-        for(int oksize = info.bufmin; oksize <= info.bufmax; oksize *= 2) {
-            if(oksize == buflen) {
+        for(int oksize = info.bufmin; std::cmp_less_equal(oksize, info.bufmax); oksize *= 2) {
+            if(std::cmp_equal(oksize, buflen)) {
                 return buflen;
-            } else if(oksize > buflen) {
+            } else if(std::cmp_greater(oksize, buflen)) {
                 oksize /= 2;
                 return oksize;
             }
@@ -319,7 +321,7 @@ bool BassSoundEngine::initializeOutputDevice(const SoundEngine::OUTPUT_DEVICE &d
 
         BASS_ASIO_INFO info{};
         BASS_ASIO_GetInfo(&info);
-        auto bufsize = cv::asio_buffer_size.getInt();
+        auto bufsize = cv::asio_buffer_size.getVal<unsigned long>();
         bufsize = ASIO_clamp(info, bufsize);
 
         if(osu && osu->optionsMenu) {
