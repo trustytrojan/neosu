@@ -129,7 +129,7 @@ void WindowsMain::handle_neosu_url(const char *url) {
         // Will be reenabled after the login succeeds
         cv::mp_autologin.setValue(false);
 
-        osu->optionsMenu->logInButton->is_loading = true;
+        osu->getOptionsMenu()->setLoginLoadingState(true);
 
         // TODO @kiwec: make request to https://neosu.net/oauth/btoken with bancho.oauth_verifier + the code in
         //              neosu://login/<code> to get access token and refresh token

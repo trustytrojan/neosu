@@ -1,7 +1,7 @@
 #pragma once
 #include "NotificationOverlay.h"
 #include "ScreenBackable.h"
-#include "UICheckbox.h"
+#include "VolumeOverlay.h"
 
 #include <atomic>
 
@@ -27,6 +27,8 @@ class CBaseUITextbox;
 class ConVar;
 
 class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener {
+    friend bool VolumeOverlay::canChangeVolume(); // for contextMenu
+
    public:
     OptionsMenu();
     ~OptionsMenu() override;
@@ -55,7 +57,26 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     bool isMouseInside() override;
     bool isBusy() override;
 
-   public:
+    // "illegal", used by BassSoundEngine, can easily be turned into callbacks like for SoLoud instead
+    void scheduleLayoutUpdate() { this->bSearchLayoutUpdateScheduled = true; }
+    void onOutputDeviceResetUpdate();
+    CBaseUISlider *asioBufferSizeSlider = NULL;
+    CBaseUILabel *outputDeviceLabel;
+
+    // used by Osu
+    void onSkinSelect();
+
+    // used by Chat
+    void askForLoginDetails();
+
+    // used by networking stuff
+    void setLoginLoadingState(bool state);
+    void update_login_button();
+
+    // used by WindowsMain for osk handling (this needs to be moved...)
+    void updateSkinNameLabel();
+
+   private:
     enum class RenderCondition : uint8_t {
         NONE,
         ASIO_ENABLED,
@@ -64,31 +85,36 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
         PASSWORD_AUTH,
     };
 
+    enum class OPTIONS_MENU_ELEMENT_TYPE : int8_t {
+        INIT_ELEM_TYPE = -1,  // initial value
+        SPCR = 0,             // spacer
+        SECT = 1,             // section
+        SUBSECT = 2,          // sub-section
+        LABEL = 3,            // ...
+        BTN = 4,              // button
+        BINDBTN = 5,          // keybind button
+        CBX = 6,              // checkbox
+        SLDR = 7,             // slider
+        TBX = 8,              // textbox
+        SKNPRVW = 9,          // skin preview
+        CBX_BTN = 10          // checkbox+button
+    };
+
+    using enum OptionsMenu::OPTIONS_MENU_ELEMENT_TYPE;
+
     struct OPTIONS_ELEMENT {
-        OPTIONS_ELEMENT() {
-            this->resetButton = NULL;
-            this->type = -1;
-
-            this->label1Width = 0.0f;
-            this->relSizeDPI = 96.0f;
-
-            this->allowOverscale = false;
-            this->allowUnderscale = false;
-            this->render_condition = RenderCondition::NONE;
-        }
-
-        OptionsMenuResetButton *resetButton;
+        OptionsMenuResetButton *resetButton{nullptr};
         std::vector<CBaseUIElement *> baseElems{};
         std::unordered_map<CBaseUIElement *, ConVar *> cvars{};
-        int type;
+        OPTIONS_MENU_ELEMENT_TYPE type{OPTIONS_MENU_ELEMENT_TYPE::INIT_ELEM_TYPE};
 
-        float label1Width;
-        float relSizeDPI;
+        float label1Width{0.f};
+        float relSizeDPI{96.f};
 
-        RenderCondition render_condition;
+        RenderCondition render_condition{RenderCondition::NONE};
 
-        bool allowOverscale;
-        bool allowUnderscale;
+        bool allowOverscale{false};
+        bool allowUnderscale{false};
 
         UString searchTags;
     };
@@ -98,15 +124,11 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
 
     void setVisibleInt(bool visible, bool fromOnBack = false);
     void scheduleSearchUpdate();
-    void scheduleLayoutUpdate() { this->bSearchLayoutUpdateScheduled = true; }
 
-    void askForLoginDetails();
     void updateOsuFolder();
     void updateFposuDPI();
     void updateFposuCMper360();
-    void updateSkinNameLabel();
     void updateNotelockSelectLabel();
-    void update_login_button();
 
     // options
     void onFullscreenChange(CBaseUICheckbox *checkbox);
@@ -114,7 +136,6 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     void onDPIScalingChange(CBaseUICheckbox *checkbox);
     void onRawInputToAbsoluteWindowChange(CBaseUICheckbox *checkbox);
     void openCurrentSkinFolder();
-    void onSkinSelect();
     void onSkinSelect2(const UString &skinName, int id = -1);
     void onSkinReload();
     void onSkinRandom();
@@ -123,7 +144,6 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     void onOutputDeviceSelect();
     void onOutputDeviceSelect2(const UString &outputDeviceName, int id = -1);
     void onOutputDeviceResetClicked();
-    void onOutputDeviceResetUpdate();
     void onOutputDeviceRestart();
     void onLogInClicked(bool left, bool right);
     void onCM360CalculatorLinkClicked();
@@ -169,7 +189,10 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     void onResetEverythingClicked(CBaseUIButton *button);
     void onImportSettingsFromStable(CBaseUIButton *button);
 
-    // options
+    // categories
+    OptionsMenuCategoryButton *addCategory(CBaseUIElement *section, wchar_t icon);
+
+    // elements
     void addSpacer();
     CBaseUILabel *addSection(const UString &text);
     CBaseUILabel *addSubSection(const UString &text, UString searchTags = "");
@@ -178,7 +201,7 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     OPTIONS_ELEMENT *addButton(const UString &text, const UString &labelText, bool withResetButton = false);
     OPTIONS_ELEMENT *addButtonButton(const UString &text1, const UString &text2);
     OPTIONS_ELEMENT *addButtonButtonLabel(const UString &text1, const UString &text2, const UString &labelText,
-                                         bool withResetButton = false);
+                                          bool withResetButton = false);
     OptionsMenuKeyBindButton *addKeyBindButton(const UString &text, ConVar *cvar);
     CBaseUICheckbox *addCheckbox(const UString &text, ConVar *cvar);
     CBaseUICheckbox *addCheckbox(const UString &text, const UString &tooltipText = "", ConVar *cvar = NULL);
@@ -190,9 +213,6 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     CBaseUIElement *addSkinPreview();
     CBaseUIElement *addSliderPreview();
 
-    // categories
-    OptionsMenuCategoryButton *addCategory(CBaseUIElement *section, wchar_t icon);
-
     // vars
     CBaseUIScrollView *categories;
     CBaseUIScrollView *options;
@@ -200,9 +220,8 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     UISearchOverlay *search;
     CBaseUILabel *spacer;
     OptionsMenuCategoryButton *fposuCategoryButton;
-
     std::vector<OptionsMenuCategoryButton *> categoryButtons;
-    std::vector<OPTIONS_ELEMENT*> elemContainers;
+    std::vector<OPTIONS_ELEMENT *> elemContainers;
 
     // custom
     bool bFullscreen;
@@ -232,14 +251,12 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     CBaseUILabel *resolutionLabel;
     CBaseUITextbox *osuFolderTextbox;
     CBaseUIButton *outputDeviceSelectButton;
-    CBaseUILabel *outputDeviceLabel;
     OptionsMenuResetButton *outputDeviceResetButton;
     CBaseUISlider *wasapiBufferSizeSlider;
     CBaseUISlider *wasapiPeriodSizeSlider;
     OptionsMenuResetButton *asioBufferSizeResetButton;
     OptionsMenuResetButton *wasapiBufferSizeResetButton;
     OptionsMenuResetButton *wasapiPeriodSizeResetButton;
-    CBaseUISlider *asioBufferSizeSlider = NULL;
     CBaseUISlider *sliderQualitySlider;
     CBaseUISlider *letterboxingOffsetXSlider;
     CBaseUISlider *letterboxingOffsetYSlider;
@@ -262,7 +279,6 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     CBaseUICheckbox *submitScoresCheckbox;
     CBaseUITextbox *nameTextbox;
     CBaseUITextbox *passwordTextbox;
-    //UICheckbox *keepLoggedInCheckbox;
     UIButton *logInButton;
 
     ConVar *waitingKey = NULL;

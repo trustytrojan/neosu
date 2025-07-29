@@ -416,7 +416,7 @@ void reconnect() {
         }
     }
 
-    osu->optionsMenu->logInButton->is_loading = true;
+    osu->getOptionsMenu()->setLoginLoadingState(true);
     try_logging_in = true;
 }
 

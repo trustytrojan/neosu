@@ -1619,6 +1619,8 @@ void OptionsMenu::onKeyDown(KeyboardEvent &e) {
                 this->scheduleSearchUpdate();
                 e.consume();
                 return;
+            default:
+                break;
         }
     }
 
@@ -1744,14 +1746,14 @@ void OptionsMenu::updateLayout() {
             auto *cv = cvm.second;
             if(cv == nullptr) break;
             switch(element->type) {
-                case 6:   // checkbox
-                case 10:  // checkbox + button
+                case CBX:
+                case CBX_BTN:
                     for(auto &e : element->baseElems) {
                         CBaseUICheckbox *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(e);
                         if(checkboxPointer != NULL) checkboxPointer->setChecked(cv->getBool());
                     }
                     break;
-                case 7:  // slider
+                case SLDR:
                     if(element->baseElems.size() == 3) {
                         auto *sliderPointer = dynamic_cast<CBaseUISlider *>(element->baseElems[1]);
                         if(sliderPointer != NULL) {
@@ -1768,7 +1770,7 @@ void OptionsMenu::updateLayout() {
                         }
                     }
                     break;
-                case 8:  // textbox
+                case TBX:
                     if(element->baseElems.size() == 1) {
                         auto *textboxPointer = dynamic_cast<CBaseUITextbox *>(element->baseElems[0]);
                         if(textboxPointer != NULL) {
@@ -1784,6 +1786,8 @@ void OptionsMenu::updateLayout() {
                         auto *textboxPointer = dynamic_cast<CBaseUITextbox *>(element->baseElems[1]);
                         if(textboxPointer != NULL) textboxPointer->setText(cv->getString().c_str());
                     }
+                    break;
+                default:
                     break;
             }
         }
@@ -1878,7 +1882,7 @@ void OptionsMenu::updateLayout() {
             const std::string searchTags = this->elemContainers[i]->searchTags.toUtf8();
 
             // if this is a section
-            if(this->elemContainers[i]->type == 1) {
+            if(this->elemContainers[i]->type == SECT) {
                 bool sectionMatch = false;
 
                 const std::string sectionTitle = this->elemContainers[i]->baseElems[0]->getName().toUtf8();
@@ -1889,7 +1893,7 @@ void OptionsMenu::updateLayout() {
 
                 for(int s = i + 1; s < this->elemContainers.size(); s++) {
                     if(!this->elemContainers[s]) continue;
-                    if(this->elemContainers[s]->type == 1)  // stop at next section
+                    if(this->elemContainers[s]->type == SECT)  // stop at next section
                         break;
 
                     for(auto &element : this->elemContainers[s]->baseElems) {
@@ -1909,7 +1913,7 @@ void OptionsMenu::updateLayout() {
             }
 
             // if this is a subsection
-            if(this->elemContainers[i]->type == 2) {
+            if(this->elemContainers[i]->type == SUBSECT) {
                 bool subSectionMatch = false;
 
                 const std::string subSectionTitle = this->elemContainers[i]->baseElems[0]->getName().toUtf8();
@@ -1920,7 +1924,7 @@ void OptionsMenu::updateLayout() {
 
                 for(int s = i + 1; s < this->elemContainers.size(); s++) {
                     if(!this->elemContainers[s]) continue;
-                    if(this->elemContainers[s]->type == 2)  // stop at next subsection
+                    if(this->elemContainers[s]->type == SUBSECT)  // stop at next subsection
                         break;
 
                     for(auto &element : this->elemContainers[s]->baseElems) {
@@ -1942,7 +1946,7 @@ void OptionsMenu::updateLayout() {
             if(!inSkipSection && !inSkipSubSection) {
                 bool contentMatch = false;
 
-                if(this->elemContainers[i]->type > 2) {
+                if(this->elemContainers[i]->type > SUBSECT) {
                     for(auto &element : this->elemContainers[i]->baseElems) {
                         if(!element) continue;
                         if(element->getName().length() > 0) {
@@ -1980,14 +1984,14 @@ void OptionsMenu::updateLayout() {
         // and build the layout
 
         // if this element is a new section, add even more spacing
-        if(i > 0 && this->elemContainers[i]->type == 1) yCounter += sectionEndSpacing;
+        if(i > 0 && this->elemContainers[i]->type == SECT) yCounter += sectionEndSpacing;
 
         // if this element is a new subsection, add even more spacing
-        if(i > 0 && this->elemContainers[i]->type == 2) yCounter += subsectionEndSpacing;
+        if(i > 0 && this->elemContainers[i]->type == SUBSECT) yCounter += subsectionEndSpacing;
 
         const int elementWidth = optionsWidth - 2 * sideMargin - 2 * dpiScale;
-        const bool isKeyBindButton = (this->elemContainers[i]->type == 5);
-        const bool isButtonCheckbox = (this->elemContainers[i]->type == 10);  // FUCK THESE RANDOM UNLABELED IDS
+        const bool isKeyBindButton = (this->elemContainers[i]->type == BINDBTN);
+        const bool isButtonCheckbox = (this->elemContainers[i]->type == CBX_BTN);
 
         if(this->elemContainers[i]->resetButton != NULL) {
             CBaseUIButton *resetButton = this->elemContainers[i]->resetButton;
@@ -2089,7 +2093,7 @@ void OptionsMenu::updateLayout() {
             CBaseUIElement *e2 = this->elemContainers[i]->baseElems[1];
             CBaseUIElement *e3 = this->elemContainers[i]->baseElems[2];
 
-            if(this->elemContainers[i]->type == 4) {
+            if(this->elemContainers[i]->type == BTN) {
                 const int buttonButtonLabelOffset = 10 * dpiScale;
 
                 const int buttonSize = elementWidth / 3 - 2 * buttonButtonLabelOffset;
@@ -2130,8 +2134,8 @@ void OptionsMenu::updateLayout() {
                 auto *label2Pointer = dynamic_cast<CBaseUILabel *>(e3);
                 if(label2Pointer != NULL) {
                     label2Pointer->onResized();  // HACKHACK: framework, setSize*() does not update string metrics
-                    label2Pointer->setSizeX(label2Pointer->getRelSize().x * (96.0f / this->elemContainers[i]->relSizeDPI) *
-                                            dpiScale);
+                    label2Pointer->setSizeX(label2Pointer->getRelSize().x *
+                                            (96.0f / this->elemContainers[i]->relSizeDPI) * dpiScale);
                 }
 
                 int sliderSize = elementWidth - e1->getSize().x - e3->getSize().x;
@@ -2154,13 +2158,13 @@ void OptionsMenu::updateLayout() {
         yCounter += elementSpacing;
 
         switch(this->elemContainers[i]->type) {
-            case 0:
+            case SPCR:
                 yCounter += spaceSpacing;
                 break;
-            case 1:
+            case SECT:
                 yCounter += sectionSpacing;
                 break;
-            case 2:
+            case SUBSECT:
                 yCounter += subsectionSpacing;
                 break;
             default:
@@ -3198,11 +3202,13 @@ void OptionsMenu::onResetUpdate(CBaseUIButton *button) {
         if(element->resetButton == button && element->cvars[element->resetButton] != nullptr) {
             auto *cv = element->cvars[element->resetButton];
             switch(element->type) {
-                case 6:  // checkbox
+                case CBX:
                     element->resetButton->setEnabled(cv->getBool() != (bool)cv->getDefaultFloat());
                     break;
-                case 7:  // slider
+                case SLDR:
                     element->resetButton->setEnabled(cv->getFloat() != cv->getDefaultFloat());
+                    break;
+                default:
                     break;
             }
 
@@ -3218,13 +3224,13 @@ void OptionsMenu::onResetClicked(CBaseUIButton *button) {
         if(element->resetButton == button && element->cvars[element->resetButton] != nullptr) {
             auto *cv = element->cvars[element->resetButton];
             switch(element->type) {
-                case 6:  // checkbox
+                case CBX:
                     for(auto &e : element->baseElems) {
                         CBaseUICheckbox *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(e);
                         if(checkboxPointer != NULL) checkboxPointer->setChecked((bool)cv->getDefaultFloat());
                     }
                     break;
-                case 7:  // slider
+                case SLDR:
                     if(element->baseElems.size() == 3) {
                         auto *sliderPointer = dynamic_cast<CBaseUISlider *>(element->baseElems[1]);
                         if(sliderPointer != NULL) {
@@ -3232,6 +3238,8 @@ void OptionsMenu::onResetClicked(CBaseUIButton *button) {
                             sliderPointer->fireChangeCallback();
                         }
                     }
+                    break;
+                default:
                     break;
             }
 
@@ -3277,7 +3285,7 @@ void OptionsMenu::onImportSettingsFromStable(CBaseUIButton * /*button*/) { impor
 
 void OptionsMenu::addSpacer() {
     auto *e = new OPTIONS_ELEMENT;
-    e->type = 0;
+    e->type = SPCR;
     this->elemContainers.push_back(e);
 }
 
@@ -3293,7 +3301,7 @@ CBaseUILabel *OptionsMenu::addSection(const UString &text) {
 
     auto *e = new OPTIONS_ELEMENT;
     e->baseElems.push_back(label);
-    e->type = 1;
+    e->type = SECT;
     this->elemContainers.push_back(e);
 
     return label;
@@ -3309,7 +3317,7 @@ CBaseUILabel *OptionsMenu::addSubSection(const UString &text, UString searchTags
 
     auto *e = new OPTIONS_ELEMENT;
     e->baseElems.push_back(label);
-    e->type = 2;
+    e->type = SUBSECT;
     e->searchTags = std::move(searchTags);
     this->elemContainers.push_back(e);
 
@@ -3325,7 +3333,7 @@ CBaseUILabel *OptionsMenu::addLabel(const UString &text) {
 
     auto *e = new OPTIONS_ELEMENT;
     e->baseElems.push_back(label);
-    e->type = 3;
+    e->type = LABEL;
     this->elemContainers.push_back(e);
 
     return label;
@@ -3339,7 +3347,7 @@ UIButton *OptionsMenu::addButton(const UString &text) {
 
     auto *e = new OPTIONS_ELEMENT;
     e->baseElems.push_back(button);
-    e->type = 4;
+    e->type = BTN;
     this->elemContainers.push_back(e);
 
     return button;
@@ -3363,7 +3371,7 @@ OptionsMenu::OPTIONS_ELEMENT *OptionsMenu::addButton(const UString &text, const 
     }
     e->baseElems.push_back(button);
     e->baseElems.push_back(label);
-    e->type = 4;
+    e->type = BTN;
     this->elemContainers.push_back(e);
 
     return e;
@@ -3383,7 +3391,7 @@ OptionsMenu::OPTIONS_ELEMENT *OptionsMenu::addButtonButton(const UString &text1,
     auto *e = new OPTIONS_ELEMENT;
     e->baseElems.push_back(button);
     e->baseElems.push_back(button2);
-    e->type = 4;
+    e->type = BTN;
     this->elemContainers.push_back(e);
 
     return e;
@@ -3413,7 +3421,7 @@ OptionsMenu::OPTIONS_ELEMENT *OptionsMenu::addButtonButtonLabel(const UString &t
     e->baseElems.push_back(button);
     e->baseElems.push_back(button2);
     e->baseElems.push_back(label);
-    e->type = 4;
+    e->type = BTN;
     this->elemContainers.push_back(e);
 
     return e;
@@ -3446,7 +3454,7 @@ OptionsMenuKeyBindButton *OptionsMenu::addKeyBindButton(const UString &text, Con
     e->baseElems.push_back(unbindButton);
     e->baseElems.push_back(bindButton);
     e->baseElems.push_back(label);
-    e->type = 5;
+    e->type = BINDBTN;
     e->cvars[bindButton] = cvar;
     this->elemContainers.push_back(e);
 
@@ -3477,7 +3485,7 @@ CBaseUICheckbox *OptionsMenu::addCheckbox(const UString &text, const UString &to
         e->resetButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onResetClicked>(this));
     }
     e->baseElems.push_back(checkbox);
-    e->type = 6;
+    e->type = CBX;
     e->cvars[e->resetButton] = cvar;
     e->cvars[checkbox] = cvar;
     this->elemContainers.push_back(e);
@@ -3502,7 +3510,7 @@ OptionsMenu::OPTIONS_ELEMENT *OptionsMenu::addButtonCheckbox(const UString &butt
     auto *e = new OPTIONS_ELEMENT;
     e->baseElems.push_back(button);
     e->baseElems.push_back(checkbox);
-    e->type = 10;
+    e->type = CBX_BTN;
     this->elemContainers.push_back(e);
 
     return e;
@@ -3543,7 +3551,7 @@ UISlider *OptionsMenu::addSlider(const UString &text, float min, float max, ConV
     e->baseElems.push_back(label1);
     e->baseElems.push_back(slider);
     e->baseElems.push_back(label2);
-    e->type = 7;
+    e->type = SLDR;
     e->cvars[e->resetButton] = cvar;
     e->cvars[slider] = cvar;
     e->label1Width = label1Width;
@@ -3562,7 +3570,7 @@ CBaseUITextbox *OptionsMenu::addTextbox(UString text, ConVar *cvar) {
 
     auto *e = new OPTIONS_ELEMENT;
     e->baseElems.push_back(textbox);
-    e->type = 8;
+    e->type = TBX;
     e->cvars[textbox] = cvar;
     this->elemContainers.push_back(e);
 
@@ -3583,7 +3591,7 @@ CBaseUITextbox *OptionsMenu::addTextbox(UString text, const UString &labelText, 
     auto *e = new OPTIONS_ELEMENT;
     e->baseElems.push_back(label);
     e->baseElems.push_back(textbox);
-    e->type = 8;
+    e->type = TBX;
     e->cvars[textbox] = cvar;
     this->elemContainers.push_back(e);
 
@@ -3596,7 +3604,7 @@ CBaseUIElement *OptionsMenu::addSkinPreview() {
 
     auto *e = new OPTIONS_ELEMENT;
     e->baseElems.push_back(skinPreview);
-    e->type = 9;
+    e->type = SKNPRVW;
     this->elemContainers.push_back(e);
 
     return skinPreview;
@@ -3608,7 +3616,7 @@ CBaseUIElement *OptionsMenu::addSliderPreview() {
 
     auto *e = new OPTIONS_ELEMENT;
     e->baseElems.push_back(sliderPreview);
-    e->type = 9;
+    e->type = SKNPRVW;
     this->elemContainers.push_back(e);
 
     return sliderPreview;
@@ -3719,3 +3727,5 @@ bool OptionsMenu::should_use_oauth_login() {
 
     return false;
 }
+
+void OptionsMenu::setLoginLoadingState(bool state) { this->logInButton->is_loading = state; }
