@@ -1053,7 +1053,7 @@ CONVAR(snd_dev_buffer, "snd_dev_buffer", 30, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRI
        "BASS_CONFIG_DEV_BUFFER length in milliseconds");
 CONVAR(snd_dev_period, "snd_dev_period", 10, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "BASS_CONFIG_DEV_PERIOD length in milliseconds, or if negative then in samples");
-CONVAR(snd_freq, "snd_freq", 44100, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE, "output sampling rate in Hz");
+CONVAR(snd_freq, "snd_freq", 44100, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_NOSAVE, "output sampling rate in Hz");
 CONVAR(snd_output_device, "snd_output_device", "Default", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
 CONVAR(snd_play_interp_duration, "snd_play_interp_duration", 0.75f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "smooth over freshly started channel position jitter with engine time over this duration in seconds");
