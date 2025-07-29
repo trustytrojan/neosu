@@ -1,6 +1,7 @@
 #pragma once
 #include "NotificationOverlay.h"
 #include "ScreenBackable.h"
+#include "UICheckbox.h"
 
 #include <atomic>
 
@@ -66,7 +67,6 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     struct OPTIONS_ELEMENT {
         OPTIONS_ELEMENT() {
             this->resetButton = NULL;
-            this->cvar = NULL;
             this->type = -1;
 
             this->label1Width = 0.0f;
@@ -78,8 +78,8 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
         }
 
         OptionsMenuResetButton *resetButton;
-        std::vector<CBaseUIElement *> elements;
-        ConVar *cvar;
+        std::vector<CBaseUIElement *> elements{};
+        std::unordered_map<CBaseUIElement *, ConVar *> cvars{};
         int type;
 
         float label1Width;
@@ -175,13 +175,14 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     CBaseUILabel *addSubSection(const UString &text, UString searchTags = "");
     CBaseUILabel *addLabel(const UString &text);
     UIButton *addButton(const UString &text);
-    OPTIONS_ELEMENT addButton(const UString &text, const UString &labelText, bool withResetButton = false);
-    OPTIONS_ELEMENT addButtonButton(const UString &text1, const UString &text2);
-    OPTIONS_ELEMENT addButtonButtonLabel(const UString &text1, const UString &text2, const UString &labelText,
+    OPTIONS_ELEMENT *addButton(const UString &text, const UString &labelText, bool withResetButton = false);
+    OPTIONS_ELEMENT *addButtonButton(const UString &text1, const UString &text2);
+    OPTIONS_ELEMENT *addButtonButtonLabel(const UString &text1, const UString &text2, const UString &labelText,
                                          bool withResetButton = false);
     OptionsMenuKeyBindButton *addKeyBindButton(const UString &text, ConVar *cvar);
     CBaseUICheckbox *addCheckbox(const UString &text, ConVar *cvar);
     CBaseUICheckbox *addCheckbox(const UString &text, const UString &tooltipText = "", ConVar *cvar = NULL);
+    OPTIONS_ELEMENT *addButtonCheckbox(const UString &buttontext, const UString &cbxtooltip);
     UISlider *addSlider(const UString &text, float min = 0.0f, float max = 1.0f, ConVar *cvar = NULL,
                         float label1Width = 0.0f, bool allowOverscale = false, bool allowUnderscale = false);
     CBaseUITextbox *addTextbox(UString text, ConVar *cvar = NULL);
@@ -201,7 +202,7 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     OptionsMenuCategoryButton *fposuCategoryButton;
 
     std::vector<OptionsMenuCategoryButton *> categoryButtons;
-    std::vector<OPTIONS_ELEMENT> elements;
+    std::vector<OPTIONS_ELEMENT*> elements;
 
     // custom
     bool bFullscreen;
@@ -261,6 +262,7 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     CBaseUICheckbox *submitScoresCheckbox;
     CBaseUITextbox *nameTextbox;
     CBaseUITextbox *passwordTextbox;
+    //UICheckbox *keepLoggedInCheckbox;
     UIButton *logInButton;
 
     ConVar *waitingKey = NULL;

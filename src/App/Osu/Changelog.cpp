@@ -29,7 +29,7 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG v39_10;
     v39_10.title = NEOSU_VERSION " (" __DATE__ ")";
     v39_10.changes = {
-        R"(- <placeholder>)",
+        R"(- Added a "keep me signed in" checkbox next to the login button)",
     };
     changelogs.push_back(v39_10);
 
