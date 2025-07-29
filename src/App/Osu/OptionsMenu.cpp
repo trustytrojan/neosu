@@ -873,7 +873,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     if constexpr(Env::cfg(OS::WINDOWS | OS::LINUX)) {
         this->addCheckbox("Raw Input", &cv::mouse_raw_input);
         if constexpr(Env::cfg(OS::WINDOWS)) {
-            this->addCheckbox("[Beta] RawInputBuffer",
+            this->addCheckbox("RawInputBuffer",
                               "Improves performance problems caused by insane mouse usb polling rates above 1000 "
                               "Hz.\nOnly relevant if \"Raw Input\" is enabled, or if in FPoSu mode (with disabled "
                               "\"Tablet/Absolute Mode\").",

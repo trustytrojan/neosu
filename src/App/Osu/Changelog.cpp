@@ -30,6 +30,7 @@ Changelog::Changelog() : ScreenBackable() {
     v39_10.title = NEOSU_VERSION " (" __DATE__ ")";
     v39_10.changes = {
         R"(- Added a "keep me signed in" checkbox next to the login button)",
+        R"(- Fixed "RawInputBuffer" option on Windows, should work much more reliably)",
     };
     changelogs.push_back(v39_10);
 

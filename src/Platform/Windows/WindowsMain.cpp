@@ -8,6 +8,7 @@
 #include <dwmapi.h>
 #include <shellapi.h>
 #include <objbase.h>
+#include <processthreadsapi.h>  // for IsWow64Process
 // clang-format on
 
 #include "Mouse.h"
@@ -18,6 +19,8 @@ typedef uint64_t QWORD;
 #include <stdio.h>
 #include <stdlib.h>
 #include <tchar.h>
+
+#include <utility>
 
 #include "ConVar.h"
 #include "Engine.h"
@@ -322,60 +325,29 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> &arg
     MSG msg;
     msg.message = WM_NULL;
     unsigned long tickCounter = 0;
-    UINT currentRawInputBufferNumBytes = 0;
-    RAWINPUT *currentRawInputBuffer = NULL;
+
     while(this->bRunning) {
         VPROF_MAIN();
 
         // handle window message queue
         {
             VPROF_BUDGET("Events", VPROF_BUDGETGROUP_EVENTS);
-            if(cv::win_mouse_raw_input_buffer.getBool() && mouse != NULL) {
-                UINT minRawInputBufferNumBytes = 0;
-                UINT hr = GetRawInputBuffer(NULL, &minRawInputBufferNumBytes, sizeof(RAWINPUTHEADER));
-                if(hr != (UINT)-1 && minRawInputBufferNumBytes > 0) {
-                    // resize buffer up to 1 MB sanity limit (if we lagspike this could easily be hit, 8000 Hz polling
-                    // rate will produce ~0.12 MB per second)
-                    const UINT numAlignmentBytes = 8;
-                    const UINT rawInputBufferNumBytes =
-                        std::clamp<UINT>(minRawInputBufferNumBytes * numAlignmentBytes * 1024, 1, 1024 * 1024);
-                    if(currentRawInputBuffer == NULL || currentRawInputBufferNumBytes < rawInputBufferNumBytes) {
-                        currentRawInputBufferNumBytes = rawInputBufferNumBytes;
-                        {
-                            if(currentRawInputBuffer != NULL) _aligned_free(currentRawInputBuffer);
-                        }
-                        currentRawInputBuffer =
-                            static_cast<RAWINPUT *>(_aligned_malloc(currentRawInputBufferNumBytes, alignof(RAWINPUT)));
-                    }
 
-                    // grab and go through all buffered RAWINPUT events
-                    hr = GetRawInputBuffer(currentRawInputBuffer, &currentRawInputBufferNumBytes,
-                                           sizeof(RAWINPUTHEADER));
-                    if(hr != (UINT)-1) {
-                        RAWINPUT *currentRawInput = currentRawInputBuffer;
-                        for(; hr > 0; hr--)  // (hr = number of rawInputs)
-                        {
-                            if(currentRawInput->header.dwType == RIM_TYPEMOUSE) {
-                                const LONG lastX = currentRawInput->data.mouse.lLastX;
-                                const LONG lastY = currentRawInput->data.mouse.lLastY;
-                                const USHORT usFlags = currentRawInput->data.mouse.usFlags;
+            if(FALSE && cv::mouse_raw_input.getBool() && cv::win_mouse_raw_input_buffer.getBool() && mouse != NULL) {
+                // need to process buffered inputs outside of the window procedure and remove those messages first
+                this->processBufferedRawInput();
 
-                                mouse->onRawMove(lastX, lastY, (usFlags & MOUSE_MOVE_ABSOLUTE),
-                                                 (usFlags & MOUSE_VIRTUAL_DESKTOP));
-                            }
-
-                            currentRawInput = NEXTRAWINPUTBLOCK(currentRawInput);
-                        }
-                    }
+                // process all messages EXCEPT WM_INPUT (leave those for the buffer)
+                while(PeekMessageW(&msg, NULL, 0, WM_INPUT - 1, PM_REMOVE) != 0) {
+                    TranslateMessage(&msg);
+                    DispatchMessageW(&msg);
                 }
-
-                // handle all remaining non-WM_INPUT messages
-                while(PeekMessageW(&msg, NULL, 0U, WM_INPUT - 1, PM_REMOVE) != 0 ||
-                      PeekMessageW(&msg, NULL, WM_INPUT + 1, 0U, PM_REMOVE) != 0) {
+                while(PeekMessageW(&msg, NULL, WM_INPUT + 1, UINT_MAX, PM_REMOVE) != 0) {
                     TranslateMessage(&msg);
                     DispatchMessageW(&msg);
                 }
             } else {
+                // non-RawInputBuffer path
                 while(PeekMessageW(&msg, NULL, 0U, 0U, PM_REMOVE) != 0) {
                     TranslateMessage(&msg);
                     DispatchMessageW(&msg);
@@ -420,7 +392,6 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> &arg
         {
             VPROF_BUDGET("FPSLimiter", VPROF_BUDGETGROUP_SLEEP);
 
-            // delay the next frame
             const int target_fps =
                 inBackground ? cv::fps_max_background.getInt()
                              : (cv::fps_unlimited.getBool() || cv::fps_max.getInt() <= 0 ? 0 : cv::fps_max.getInt());
@@ -460,6 +431,81 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> &arg
 //****************//
 //	Message loop  //
 //****************//
+
+void WindowsMain::processBufferedRawInput() {
+    if(mouse == NULL) return;
+
+    UINT bufferSize = 0;
+    UINT result = GetRawInputBuffer(NULL, &bufferSize, sizeof(RAWINPUTHEADER));
+    if(std::cmp_equal(result, -1) || bufferSize == 0) {
+        return;
+    }
+
+    static const bool isWow64 = []() {
+        BOOL wow64 = FALSE;
+        IsWow64Process(GetCurrentProcess(), &wow64);
+        return wow64 != FALSE;
+    }();
+
+    // WoW64 needs 8-byte alignment
+    static const size_t alignment = isWow64 ? 8 : sizeof(DWORD);
+
+    if(isWow64) {
+        bufferSize *= 8;  // WoW64 requirement from MSDN
+    }
+
+    bufferSize = std::min(bufferSize, this->maxRawInputBufferSize);
+    if(this->vRawInputBuffer.size < bufferSize) {
+        this->vRawInputBuffer.resize(bufferSize, alignment);
+    }
+
+    auto *rawInputArray = static_cast<RAWINPUT *>(this->vRawInputBuffer.ptr);
+
+    UINT actualBufferSize = bufferSize;
+    UINT numInputs = GetRawInputBuffer(rawInputArray, &actualBufferSize, sizeof(RAWINPUTHEADER));
+    if(std::cmp_equal(numInputs, -1)) {
+        return;
+    }
+
+    // process all raw inputs in the buffer
+    if(isWow64) {
+        // on WoW64, the structure layout is different
+        // mouse data is at offset 16+8=24 instead of 16
+        auto *currentPtr = reinterpret_cast<BYTE *>(rawInputArray);
+
+        for(UINT i = 0; i < numInputs; i++) {
+            auto *header = reinterpret_cast<RAWINPUTHEADER *>(currentPtr);
+
+            if(header->dwType == RIM_TYPEMOUSE) {
+                // on WoW64, mouse data starts at header + 24 bytes (16 + 8 padding)
+                auto *mouseData = reinterpret_cast<RAWMOUSE *>(currentPtr + 24);
+
+                mouse->onRawMove(mouseData->lLastX, mouseData->lLastY, (mouseData->usFlags & MOUSE_MOVE_ABSOLUTE) != 0,
+                                 (mouseData->usFlags & MOUSE_VIRTUAL_DESKTOP) != 0);
+            }
+
+            // move to next input, manually calculate size with 8-byte alignment (not sure if this is required)
+            UINT inputSize = header->dwSize;
+            inputSize = (inputSize + 7) & ~7;  // round up to 8-byte boundary
+            currentPtr += inputSize;
+        }
+    } else {
+        RAWINPUT *currentInput = rawInputArray;
+        for(UINT i = 0; i < numInputs; i++) {
+            if(currentInput->header.dwType == RIM_TYPEMOUSE) {
+                const LONG deltaX = currentInput->data.mouse.lLastX;
+                const LONG deltaY = currentInput->data.mouse.lLastY;
+                const USHORT flags = currentInput->data.mouse.usFlags;
+
+                mouse->onRawMove(deltaX, deltaY, (flags & MOUSE_MOVE_ABSOLUTE) != 0,
+                                 (flags & MOUSE_VIRTUAL_DESKTOP) != 0);
+            }
+
+            // move to next input in buffer
+            currentInput = NEXTRAWINPUTBLOCK(currentInput);
+        }
+    }
+}
 
 LRESULT CALLBACK WindowsMain::realWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     switch(msg) {
@@ -698,6 +744,7 @@ LRESULT CALLBACK WindowsMain::realWndProc(HWND hwnd, UINT msg, WPARAM wParam, LP
 
         // raw input handling (only for mouse movement atm)
         case WM_INPUT: {
+            if(!cv::mouse_raw_input.getBool()) break;
             RAWINPUT raw;
             UINT dwSize = sizeof(raw);
 
@@ -706,8 +753,8 @@ LRESULT CALLBACK WindowsMain::realWndProc(HWND hwnd, UINT msg, WPARAM wParam, LP
             if(raw.header.dwType == RIM_TYPEMOUSE) {
                 if(mouse != NULL) {
                     mouse->onRawMove(raw.data.mouse.lLastX, raw.data.mouse.lLastY,
-                                     (raw.data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE),
-                                     (raw.data.mouse.usFlags & MOUSE_VIRTUAL_DESKTOP));
+                                     (raw.data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE) != 0,
+                                     (raw.data.mouse.usFlags & MOUSE_VIRTUAL_DESKTOP) != 0);
                 }
             }
         } break;

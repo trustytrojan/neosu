@@ -23,7 +23,8 @@ class WindowsMain final {
     bool bMinimized{false};                       // for fps_max_background
     bool bHasFocus{false};                        // for fps_max_background
     bool bIsCursorVisible{true};                  // local variable
-    static bool bSupportsPerMonitorDpiAwareness;  // checked in wndproc on creation (WM_NCCREATE) for enabling non-client dpi scaling
+    static bool bSupportsPerMonitorDpiAwareness;  // checked in wndproc on creation (WM_NCCREATE) for enabling
+                                                  // non-client dpi scaling
 
     HWND createWinWindow(HINSTANCE hInstance);
 
@@ -35,6 +36,29 @@ class WindowsMain final {
     HRESULT doCoInitialize();
     void doCoUninitialize();
     FARPROC doLoadComBaseFunction(const char *name);
+
+    // rawinputbuffer utils
+    struct AlignedBuffer {
+        void *ptr{nullptr};
+        size_t size{0};
+
+        ~AlignedBuffer() {
+            if(this->ptr) _aligned_free(this->ptr);
+        }
+
+        void resize(size_t newSize, size_t alignment) {
+            if(newSize > this->size) {
+                if(this->ptr) _aligned_free(this->ptr);
+                this->ptr = _aligned_malloc(newSize, alignment);
+                this->size = newSize;
+            }
+        }
+    };
+
+    static constexpr UINT maxRawInputBufferSize{64 * 1024};
+    AlignedBuffer vRawInputBuffer;
+
+    void processBufferedRawInput();
 
     // misc helpers (which shouldn't be here, to be moved)
     void handle_osk(const char *osk_path);
