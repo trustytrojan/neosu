@@ -356,7 +356,7 @@ Osu::Osu() {
 
     // don't auto update if this env var is set to anything other than 0 or empty (if it is set)
     const std::string extUpdater = Environment::getEnvVariable("NEOSU_EXTERNAL_UPDATE_PROVIDER");
-    if(cv::auto_update.getBool() && (extUpdater.empty() || std::strtol(extUpdater.c_str(), nullptr, 10) == 0)) {
+    if(cv::auto_update.getBool() && (extUpdater.empty() || strtol(extUpdater.c_str(), nullptr, 10) == 0)) {
         this->updateHandler->checkForUpdates();
     }
 

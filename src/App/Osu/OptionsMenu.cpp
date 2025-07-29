@@ -3042,18 +3042,18 @@ void OptionsMenu::onASIOBufferChange([[maybe_unused]] CBaseUISlider *slider) {
     bufsize = ASIO_clamp(info, bufsize);
     double latency = 1000.0 * (double)bufsize / std::max(BASS_ASIO_GetRate(), 44100.0);
 
-    for(int i = 0; i < this->elements.size(); i++) {
-        for(int e = 0; e < this->elements[i]->elements.size(); e++) {
-            if(this->elements[i]->elements[e] == slider) {
-                if(this->elements[i]->elements.size() == 3) {
-                    auto *labelPointer = dynamic_cast<CBaseUILabel *>(this->elements[i]->elements[2]);
+    for(int i = 0; i < this->elemContainers.size(); i++) {
+        for(int e = 0; e < this->elemContainers[i]->baseElems.size(); e++) {
+            if(this->elemContainers[i]->baseElems[e] == slider) {
+                if(this->elemContainers[i]->baseElems.size() == 3) {
+                    auto *labelPointer = dynamic_cast<CBaseUILabel *>(this->elemContainers[i]->baseElems[2]);
                     if(labelPointer) {
                         UString text = UString::format("%.1f ms", latency);
                         labelPointer->setText(text);
                     }
                 }
 
-                this->asioBufferSizeResetButton = this->elements[i]->resetButton;  // HACKHACK: disgusting
+                this->asioBufferSizeResetButton = this->elemContainers[i]->resetButton;  // HACKHACK: disgusting
 
                 break;
             }

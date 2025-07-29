@@ -62,7 +62,7 @@ std::vector<Frame> get_frames(u8* replay_data, i32 replay_size) {
         return replay_frames;
     }
 
-    long cur_music_pos = 0;
+    i64 cur_music_pos = 0;
     u8 outbuf[BUFSIZ];
     Packet output;
     strm.next_in = replay_data;
@@ -87,7 +87,7 @@ std::vector<Frame> get_frames(u8* replay_data, i32 replay_size) {
             Frame frame;
 
             char* ms = SString::strtok_x('|', &line);
-            frame.milliseconds_since_last_frame = strtoul(ms, NULL, 10);
+            frame.milliseconds_since_last_frame = strtoll(ms, NULL, 10);
 
             char* x = SString::strtok_x('|', &line);
             frame.x = strtof(x, NULL);

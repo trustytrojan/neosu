@@ -24,8 +24,5 @@ using u64 = uint64_t;
 using f32 = float;
 using f64 = double;
 
-
-
 static_assert(sizeof(f32) == 4);
 static_assert(sizeof(f64) == 8);
-

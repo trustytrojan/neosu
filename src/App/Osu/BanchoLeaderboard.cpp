@@ -24,9 +24,9 @@ FinishedScore parse_score(char *score_line) {
     auto tokens = SString::split(score_line, "|");
     if(tokens.size() < 15) return score;
 
-    score.bancho_score_id = strtoul(tokens[0].c_str(), NULL, 10);
+    score.bancho_score_id = strtoull(tokens[0].c_str(), NULL, 10);
     score.playerName = tokens[1].c_str();
-    score.score = strtoul(tokens[2].c_str(), NULL, 10);
+    score.score = strtoull(tokens[2].c_str(), NULL, 10);
     score.comboMax = static_cast<i32>(strtol(tokens[3].c_str(), NULL, 10));
     score.num50s = static_cast<i32>(strtol(tokens[4].c_str(), NULL, 10));
     score.num100s = static_cast<i32>(strtol(tokens[5].c_str(), NULL, 10));
@@ -35,9 +35,9 @@ FinishedScore parse_score(char *score_line) {
     score.numKatus = static_cast<i32>(strtol(tokens[8].c_str(), NULL, 10));
     score.numGekis = static_cast<i32>(strtol(tokens[9].c_str(), NULL, 10));
     score.perfect = strtoul(tokens[10].c_str(), NULL, 10) == 1;
-    score.mods = Replay::Mods::from_legacy(static_cast<u32>(strtol(tokens[11].c_str(), NULL, 10)));
+    score.mods = Replay::Mods::from_legacy(static_cast<u32>(strtoul(tokens[11].c_str(), NULL, 10)));
     score.player_id = static_cast<i32>(strtol(tokens[12].c_str(), NULL, 10));
-    score.unixTimestamp = strtoul(tokens[14].c_str(), NULL, 10);
+    score.unixTimestamp = strtoull(tokens[14].c_str(), NULL, 10);
 
     // @PPV3: score can only be ppv2, AND we need to recompute ppv2 on it
     // might also be missing some important fields here, double check

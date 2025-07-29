@@ -200,19 +200,19 @@ class UString {
         else if constexpr(std::is_same_v<T, long double>)
             return std::strtold(this->sUtf8.c_str(), nullptr);
         else if constexpr(std::is_same_v<T, int>)
-            return static_cast<int>(std::strtol(this->sUtf8.c_str(), nullptr, 0));
+            return static_cast<int>((std::strtol)(this->sUtf8.c_str(), nullptr, 0));
         else if constexpr(std::is_same_v<T, bool>)
-            return !!static_cast<int>(std::strtol(this->sUtf8.c_str(), nullptr, 0));
+            return !!static_cast<int>((std::strtol)(this->sUtf8.c_str(), nullptr, 0));
         else if constexpr(std::is_same_v<T, long>)
-            return std::strtol(this->sUtf8.c_str(), nullptr, 0);
+            return (std::strtol)(this->sUtf8.c_str(), nullptr, 0);
         else if constexpr(std::is_same_v<T, long long>)
-            return std::strtoll(this->sUtf8.c_str(), nullptr, 0);
+            return (std::strtoll)(this->sUtf8.c_str(), nullptr, 0);
         else if constexpr(std::is_same_v<T, unsigned int>)
-            return static_cast<unsigned int>(std::strtoul(this->sUtf8.c_str(), nullptr, 0));
+            return static_cast<unsigned int>((std::strtoul)(this->sUtf8.c_str(), nullptr, 0));
         else if constexpr(std::is_same_v<T, unsigned long>)
-            return std::strtoul(this->sUtf8.c_str(), nullptr, 0);
+            return (std::strtoul)(this->sUtf8.c_str(), nullptr, 0);
         else if constexpr(std::is_same_v<T, unsigned long long>)
-            return std::strtoull(this->sUtf8.c_str(), nullptr, 0);
+            return (std::strtoull)(this->sUtf8.c_str(), nullptr, 0);
         else
             static_assert(Env::always_false_v<T>, "unsupported type");
     }
