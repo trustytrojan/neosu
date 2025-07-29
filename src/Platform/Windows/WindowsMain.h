@@ -30,17 +30,17 @@ class WindowsMain final {
     static LRESULT CALLBACK wndProcWrapper(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
     LRESULT CALLBACK realWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-    // misc helpers
-    void handle_osk(const char *osk_path);
-    void handle_osz(const char *osz_path);
-    void handle_neosu_url(const char *url);
-    void register_neosu_file_associations();
-
     WPARAM mapLeftRightKeys(WPARAM wParam, LPARAM lParam);
 
     HRESULT doCoInitialize();
     void doCoUninitialize();
     FARPROC doLoadComBaseFunction(const char *name);
+
+    // misc helpers (which shouldn't be here, to be moved)
+    void handle_osk(const char *osk_path);
+    void handle_osz(const char *osz_path);
+    void handle_neosu_url(const char *url);
+    void register_neosu_file_associations();
 };
 
 using Main = WindowsMain;

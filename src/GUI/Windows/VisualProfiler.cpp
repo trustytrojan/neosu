@@ -448,7 +448,7 @@ void VisualProfiler::mouse_update(bool *propagate_clicks) {
                 group.color = 0xffffffff;
             else if(strcmp(group.name, VPROF_BUDGETGROUP_SLEEP) == 0)
                 group.color = 0xff5555bb;
-            else if(strcmp(group.name, VPROF_BUDGETGROUP_WNDPROC) == 0)
+            else if(strcmp(group.name, VPROF_BUDGETGROUP_EVENTS) == 0)
                 group.color = 0xffffff00;
             else if(strcmp(group.name, VPROF_BUDGETGROUP_UPDATE) == 0)
                 group.color = 0xff00bb00;

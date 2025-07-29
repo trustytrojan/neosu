@@ -200,7 +200,7 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdl
 
         // handle window message queue
         {
-            VPROF_BUDGET("Events", VPROF_BUDGETGROUP_WNDPROC);
+            VPROF_BUDGET("Events", VPROF_BUDGETGROUP_EVENTS);
 
             if(Environment::s_sdl_dialog_opened > 0) {
                 /* From SDL_dialog.h:

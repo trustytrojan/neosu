@@ -299,12 +299,14 @@ void Engine::onUpdate() {
     VPROF_BUDGET("Engine::onUpdate", VPROF_BUDGETGROUP_UPDATE);
 
     if(this->bBlackout) return;
-
-    // update time
     {
-        this->timer->update();
-        this->dRunTime = this->timer->getElapsedTime();
-        this->dTime += this->dFrameTime;
+        VPROF_BUDGET("Timer::update", VPROF_BUDGETGROUP_UPDATE);
+        // update time
+        {
+            this->timer->update();
+            this->dRunTime = this->timer->getElapsedTime();
+            this->dTime += this->dFrameTime;
+        }
     }
 
     // handle pending queued resolution changes
@@ -320,8 +322,11 @@ void Engine::onUpdate() {
 
     // update miscellaneous engine subsystems
     {
-        for(auto &inputDevice : this->inputDevices) {
-            inputDevice->update();
+        {
+            VPROF_BUDGET("InputDevices::update", VPROF_BUDGETGROUP_UPDATE);
+            for(auto &inputDevice : this->inputDevices) {
+                inputDevice->update();
+            }
         }
 
         {
@@ -330,8 +335,8 @@ void Engine::onUpdate() {
         }
 
         {
-            VPROF_BUDGET("SoundEngine::update", VPROF_BUDGETGROUP_UPDATE);
-            soundEngine->update();
+            // VPROF_BUDGET("SoundEngine::update", VPROF_BUDGETGROUP_UPDATE);
+            soundEngine->update();  // currently does nothing anyways
         }
 
         {
@@ -339,17 +344,20 @@ void Engine::onUpdate() {
             resourceManager->update();
         }
 
-        // update gui
-        bool propagate_clicks = true;
-        if(this->guiContainer != NULL) this->guiContainer->mouse_update(&propagate_clicks);
+        {
+            VPROF_BUDGET("GUI::update", VPROF_BUDGETGROUP_UPDATE);
+            // update gui
+            bool propagate_clicks = true;
+            if(this->guiContainer != NULL) this->guiContainer->mouse_update(&propagate_clicks);
 
-        // execute queued commands
-        // TODO: this is shit
-        if(Console::g_commandQueue.size() > 0) {
-            for(const auto &i : Console::g_commandQueue) {
-                Console::processCommand(i);
+            // execute queued commands
+            // TODO: this is shit
+            if(Console::g_commandQueue.size() > 0) {
+                for(const auto &i : Console::g_commandQueue) {
+                    Console::processCommand(i);
+                }
+                Console::g_commandQueue.clear();  // reset
             }
-            Console::g_commandQueue.clear();  // reset
         }
     }
 
