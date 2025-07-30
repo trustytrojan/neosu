@@ -420,8 +420,6 @@ class ConVar {
     // callback storage (allow having 1 "change" callback and 1 single value (or void) callback)
     ExecutionCallback callback{std::monostate()};
     ChangeCallback changeCallback{std::monostate()};
-
-    mutable std::mutex flagLock;
 };
 
 //*******************//

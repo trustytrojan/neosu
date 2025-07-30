@@ -102,9 +102,14 @@ class CBaseUIButton : public CBaseUIElement {
 
     void updateStringMetrics();
 
-    bool bDrawFrame;
-    bool bDrawBackground;
-    bool bTextLeft;
+    UString sText;
+
+    ButtonClickCallback clickCallback;
+
+    McFont *font;
+
+    float fStringWidth;
+    float fStringHeight;
 
     Color frameColor;
     Color backgroundColor;
@@ -112,10 +117,7 @@ class CBaseUIButton : public CBaseUIElement {
     Color textBrightColor;
     Color textDarkColor;
 
-    McFont *font;
-    UString sText;
-    float fStringWidth;
-    float fStringHeight;
-
-    ButtonClickCallback clickCallback;
+    bool bDrawFrame;
+    bool bDrawBackground;
+    bool bTextLeft;
 };

@@ -8,7 +8,7 @@ class RenderTarget;
 
 class CBaseUIWindow : public CBaseUIElement {
    public:
-    CBaseUIWindow(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, const UString& name = "");
+    CBaseUIWindow(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, const UString &name = "");
     ~CBaseUIWindow() override;
 
     void draw() override;
@@ -120,6 +120,28 @@ class CBaseUIWindow : public CBaseUIElement {
     inline CBaseUIButton *getMinimizeButton() { return this->minimizeButton; }
 
    private:
+    CBaseUIButton *closeButton;
+    CBaseUIButton *minimizeButton;
+
+    // main container
+    CBaseUIContainer *container;
+
+    // title bar
+    CBaseUIContainer *titleBarContainer;
+    McFont *titleFont;
+    UString sTitle;
+    float fTitleFontWidth;
+    float fTitleFontHeight;
+    int iTitleBarHeight;
+
+    // resizing
+    Vector2 vResizeLimit;
+    Vector2 vLastSize;
+
+    // moving
+    Vector2 vMousePosBackup;
+    Vector2 vLastPos;
+
     // colors
     Color frameColor;
     Color frameBrightColor;
@@ -128,42 +150,33 @@ class CBaseUIWindow : public CBaseUIElement {
     Color titleColor;
 
     // window properties
-    bool bIsOpen;
-    bool bAnimIn;
-    bool bResizeable;
-    bool bCoherenceMode;
+
     float fAnimation;
 
-    bool bDrawFrame;
-    bool bDrawBackground;
-    bool bRoundedRectangle;
+    enum class RESIZETYPE : uint8_t {
+        UNKNOWN = 0,
+        TOPLEFT = 1,
+        LEFT = 2,
+        BOTLEFT = 3,
+        BOT = 4,
+        BOTRIGHT = 5,
+        RIGHT = 6,
+        TOPRIGHT = 7,
+        TOP = 8,
+    };
 
-    // title bar
-    bool bDrawTitleBarLine;
-    CBaseUIContainer *titleBarContainer;
-    McFont *titleFont;
-    float fTitleFontWidth;
-    float fTitleFontHeight;
-    int iTitleBarHeight;
-    UString sTitle;
+    RESIZETYPE iResizeType : 4;
 
-    CBaseUIButton *closeButton;
-    CBaseUIButton *minimizeButton;
+    unsigned bIsOpen : 1;
+    unsigned bAnimIn : 1;
+    unsigned bResizeable : 1;
+    unsigned bCoherenceMode : 1;
 
-    // main container
-    CBaseUIContainer *container;
+    unsigned bDrawFrame : 1;
+    unsigned bDrawBackground : 1;
+    unsigned bRoundedRectangle : 1;
+    unsigned bResizing : 1;
 
-    // moving
-    bool bMoving;
-    Vector2 vMousePosBackup;
-    Vector2 vLastPos;
-
-    // resizing
-    Vector2 vResizeLimit;
-    bool bResizing;
-    int iResizeType;
-    Vector2 vLastSize;
-
-    // test features
-    // RenderTarget *rt;
+    unsigned bDrawTitleBarLine : 1;
+    unsigned bMoving : 1;
 };

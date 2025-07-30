@@ -14,10 +14,10 @@ enum class HitObjectType : uint8_t {
 
 class HitObject {
    public:
-    static void drawHitResult(Beatmap *beatmap, Vector2 rawPos, LiveScore::HIT result,
-                              float animPercentInv, float hitDeltaRangePercent);
-    static void drawHitResult(Skin *skin, float hitcircleDiameter, float rawHitcircleDiameter,
-                              Vector2 rawPos, LiveScore::HIT result, float animPercentInv, float hitDeltaRangePercent);
+    static void drawHitResult(Beatmap *beatmap, Vector2 rawPos, LiveScore::HIT result, float animPercentInv,
+                              float hitDeltaRangePercent);
+    static void drawHitResult(Skin *skin, float hitcircleDiameter, float rawHitcircleDiameter, Vector2 rawPos,
+                              LiveScore::HIT result, float animPercentInv, float hitDeltaRangePercent);
 
    public:
     HitObject(long time, int sampleType, int comboNumber, bool isEndOfCombo, int colorCounter, int colorOffset,
@@ -33,12 +33,12 @@ class HitObject {
 
     virtual int getCombo() { return 1; }  // how much combo this hitobject is "worth"
 
-	// Gameplay logic
+    // Gameplay logic
     HitObjectType type;
     i64 click_time;
     i64 duration;
 
-	// Visual
+    // Visual
     i32 combo_number;
     bool is_end_of_combo = false;
 
@@ -72,42 +72,15 @@ class HitObject {
     virtual void onClickEvent(std::vector<Click> & /*clicks*/) { ; }
     virtual void onReset(long curPos);
 
-   protected:
-    BeatmapInterface *bi = NULL;
-    Beatmap *bm = NULL;  // NULL when simulating
-
-    bool bVisible;
-    bool bFinished;
-
-    int iSampleType;
-    int iColorCounter;
-    int iColorOffset;
-
-    float fAlpha;
-    float fAlphaWithoutHidden;
-    float fAlphaForApproachCircle;
-    float fApproachScale;
-    float fHittableDimRGBColorMultiplierPercent;
-    long iDelta;  // this must be signed
-    long iApproachTime;
-    long iFadeInTime;  // extra time added before the approachTime to let the object smoothly become visible
-
-    int iStack;
-
-    bool bBlocked;
-    bool bOverrideHDApproachCircle;
-    bool bMisAim;
-    long iAutopilotDelta;
-    bool bUseFadeInTimeAsApproachTime;
-
+   private:
    private:
     static float lerp3f(float a, float b, float c, float percent);
 
     struct HITRESULTANIM {
-        float time;
         Vector2 rawPos;
-        LiveScore::HIT result;
         long delta;
+        float time;
+        LiveScore::HIT result;
         bool addObjectDurationToSkinAnimationTimeStartOffset;
     };
 
@@ -115,4 +88,32 @@ class HitObject {
 
     HITRESULTANIM hitresultanim1;
     HITRESULTANIM hitresultanim2;
+
+   protected:
+    BeatmapInterface *bi = NULL;
+    Beatmap *bm = NULL;  // NULL when simulating
+
+    long iDelta;  // this must be signed
+    long iApproachTime;
+    long iFadeInTime;  // extra time added before the approachTime to let the object smoothly become visible
+    long iAutopilotDelta;
+
+    int iSampleType;
+    int iColorCounter;
+    int iColorOffset;
+
+    int iStack;
+
+    float fAlpha;
+    float fAlphaWithoutHidden;
+    float fAlphaForApproachCircle;
+    float fApproachScale;
+    float fHittableDimRGBColorMultiplierPercent;
+
+    unsigned bBlocked : 1;
+    unsigned bOverrideHDApproachCircle : 1;
+    unsigned bMisAim : 1;
+    unsigned bUseFadeInTimeAsApproachTime : 1;
+    unsigned bVisible : 1;
+    unsigned bFinished : 1;
 };

@@ -191,8 +191,7 @@ void ResourceManager::setResourceName(Resource *res, std::string name) {
     if(!currentName.empty() && currentName == name) return;  // it's already the same name, nothing to do
 
     if(name.empty())  // add a default name (mostly for debugging, see Resource constructor)
-        name = fmt::format("{:p}:postinit=y:found={}:{:s}", static_cast<const void *>(res), res->bFileFound,
-                           res->getFilePath());
+        name = fmt::format("{:p}:postinit=y:{:s}", static_cast<const void *>(res), res->getFilePath());
 
     res->setName(name);
     // add the new name to the resource map (if it's a managed resource)

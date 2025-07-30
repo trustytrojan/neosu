@@ -16,7 +16,7 @@
 
 typedef struct __GLsync *GLsync;
 
-class OpenGLSync {
+class OpenGLSync final {
    public:
     OpenGLSync();
     ~OpenGLSync();

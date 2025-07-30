@@ -110,16 +110,6 @@ class CBaseUIScrollView : public CBaseUIElement {
     void onFocusStolen() override;
     void onEnabled() override;
     void onDisabled() override;
-
-    // When you scrolled to the bottom, and new content is added, setting this
-    // to true makes it so you'll stay at the bottom.
-    // Useful in places where you're waiting on new content, like chat logs.
-    bool sticky = false;
-
-    bool bHorizontalClipping = true;
-    bool bVerticalClipping = true;
-    bool bScrollbarOnLeft = false;
-
    protected:
     void onMoved() override;
 
@@ -134,10 +124,6 @@ class CBaseUIScrollView : public CBaseUIElement {
     CBaseUIContainer *container;
 
     // vars
-    bool bDrawFrame;
-    bool bDrawBackground;
-    bool bDrawScrollbars;
-
     Color backgroundColor;
     Color frameColor;
     Color frameBrightColor;
@@ -154,23 +140,39 @@ class CBaseUIScrollView : public CBaseUIElement {
     McRect horizontalScrollbar;
 
     // scroll logic
-    bool bScrolling;
-    bool bScrollbarScrolling;
-    bool bScrollbarIsVerticalScrolling;
-    bool bBlockScrolling;
-    bool bHorizontalScrolling;
-    bool bVerticalScrolling;
-    bool bFirstScrollSizeToContent = true;
     Vector2 vScrollSize;
     Vector2 vMouseBackup2;
     Vector2 vMouseBackup3;
     Vector2 vVelocity;
     Vector2 vKineticAverage;
 
-    bool bAutoScrollingX;
-    bool bAutoScrollingY;
     int iPrevScrollDeltaX;
-
-    bool bScrollResistanceCheck;
     int iScrollResistance;
+
+    unsigned bAutoScrollingX : 1;
+    unsigned bAutoScrollingY : 1;
+
+    unsigned bScrollResistanceCheck : 1;
+    unsigned bScrolling : 1;
+    unsigned bScrollbarScrolling : 1;
+    unsigned bScrollbarIsVerticalScrolling : 1;
+    unsigned bBlockScrolling : 1;
+    unsigned bHorizontalScrolling : 1;
+    unsigned bVerticalScrolling : 1;
+    unsigned bFirstScrollSizeToContent : 1 = true;
+
+    // vars
+    unsigned bDrawFrame : 1;
+    unsigned bDrawBackground : 1;
+    unsigned bDrawScrollbars : 1;
+
+public:
+    // When you scrolled to the bottom, and new content is added, setting this
+    // to true makes it so you'll stay at the bottom.
+    // Useful in places where you're waiting on new content, like chat logs.
+    unsigned sticky : 1 = false;
+
+    unsigned bHorizontalClipping : 1 = true;
+    unsigned bVerticalClipping : 1 = true;
+    unsigned bScrollbarOnLeft : 1 = false;
 };

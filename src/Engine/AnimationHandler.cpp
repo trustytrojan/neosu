@@ -167,8 +167,8 @@ void AnimationHandler::addAnimation(float *base, float target, float duration, f
         .fDuration = duration,
         .fStartValue = *base,
         .fStartTime = static_cast<float>(engine->getTime()) + delay,
-        .animType = type,
         .fFactor = smoothFactor,
+        .animType = type,
         .bStarted = (delay == 0.0f),
     });
 }

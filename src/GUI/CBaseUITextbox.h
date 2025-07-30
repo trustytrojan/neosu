@@ -106,6 +106,20 @@ class CBaseUITextbox : public CBaseUIElement {
 
     McFont *font;
 
+    float fTextScrollAddX;
+    float fLinetime;
+    float fTextWidth;
+
+    int iTextAddX;
+    int iTextAddY;
+    int iCaretX;
+    int iCaretWidth;
+    int iTextJustification;
+
+    int iSelectStart;
+    int iSelectEnd;
+    int iSelectX;
+
     Color textColor;
     Color frameColor;
     Color frameBrightColor;
@@ -113,27 +127,12 @@ class CBaseUITextbox : public CBaseUIElement {
     Color caretColor;
     Color backgroundColor;
 
-    bool bContextMouse;
-    bool bBlockMouse;
-    bool bCatchMouse;
-    bool bDrawFrame;
-    bool bDrawBackground;
-    bool bLine;
-
-    int iTextAddX;
-    int iTextAddY;
-    float fTextScrollAddX;
-    int iCaretX;
-    int iCaretWidth;
-    int iTextJustification;
-
-    float fLinetime;
-    float fTextWidth;
-
-    bool bHitenter;
-
-    bool bSelectCheck;
-    int iSelectStart;
-    int iSelectEnd;
-    int iSelectX;
+    unsigned bHitenter : 1;
+    unsigned bContextMouse : 1;
+    unsigned bBlockMouse : 1;
+    unsigned bCatchMouse : 1;
+    unsigned bDrawFrame : 1;
+    unsigned bDrawBackground : 1;
+    unsigned bLine : 1;
+    unsigned bSelectCheck : 1;
 };

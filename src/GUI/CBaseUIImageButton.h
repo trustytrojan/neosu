@@ -35,9 +35,10 @@ class CBaseUIImageButton : public CBaseUIButton {
 
    protected:
     std::string sImageResourceName;
+    Vector2 vScale;
 
     float fRot;
-    Vector2 vScale;
+
     bool bScaleToFit;
     bool bKeepAspectRatio;
 };

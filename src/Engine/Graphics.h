@@ -47,7 +47,13 @@ class Graphics {
 
     enum class DRAWPIXELS_TYPE : uint8_t { DRAWPIXELS_UBYTE, DRAWPIXELS_FLOAT };
 
-    enum class MULTISAMPLE_TYPE : uint8_t { MULTISAMPLE_0X, MULTISAMPLE_2X, MULTISAMPLE_4X, MULTISAMPLE_8X, MULTISAMPLE_16X };
+    enum class MULTISAMPLE_TYPE : uint8_t {
+        MULTISAMPLE_0X,
+        MULTISAMPLE_2X,
+        MULTISAMPLE_4X,
+        MULTISAMPLE_8X,
+        MULTISAMPLE_16X
+    };
 
     enum class WRAP_MODE : uint8_t { WRAP_MODE_CLAMP, WRAP_MODE_REPEAT };
 
@@ -152,8 +158,8 @@ class Graphics {
     virtual void onResolutionChange(Vector2 newResolution) = 0;
 
     // factory
-	virtual Image *createImage(std::string filePath, bool mipmapped, bool keepInSystemMemory) = 0;
-	virtual Image *createImage(int width, int height, bool mipmapped, bool keepInSystemMemory) = 0;
+    virtual Image *createImage(std::string filePath, bool mipmapped, bool keepInSystemMemory) = 0;
+    virtual Image *createImage(int width, int height, bool mipmapped, bool keepInSystemMemory) = 0;
     virtual RenderTarget *createRenderTarget(int x, int y, int width, int height,
                                              Graphics::MULTISAMPLE_TYPE multiSampleType) = 0;
     virtual Shader *createShaderFromFile(std::string vertexShaderFilePath, std::string fragmentShaderFilePath) = 0;
@@ -199,7 +205,7 @@ class Graphics {
     void offset3DScene(float x, float y, float z = 0);
 
    protected:
-	virtual void init() {;} // must be called after the OS implementation constructor
+    virtual void init() { ; }  // must be called after the OS implementation constructor
     virtual void onTransformUpdate(
         Matrix4 &projectionMatrix,
         Matrix4 &worldMatrix) = 0;  // called if matrices have changed and need to be (re-)applied/uploaded
@@ -208,15 +214,16 @@ class Graphics {
     void checkStackLeaks();
 
     // transforms
-    bool bTransformUpToDate;
     std::stack<Matrix4> worldTransformStack;
     std::stack<Matrix4> projectionTransformStack;
 
     // 3d gui scenes
-    bool bIs3dScene;
     std::stack<bool> scene_stack;
     McRect scene_region;
     Vector3 v3dSceneOffset;
     Matrix4 scene_world_matrix;
     Matrix4 scene_projection_matrix;
+
+    bool bTransformUpToDate;
+    bool bIs3dScene;
 };

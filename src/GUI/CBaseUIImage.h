@@ -64,6 +64,10 @@ class CBaseUIImage : public CBaseUIElement {
    private:
     Image *image;
 
+    Vector2 vScale;
+
+    float fRot;
+
     Color frameColor;
     Color backgroundColor;
     Color color;
@@ -71,7 +75,4 @@ class CBaseUIImage : public CBaseUIElement {
     bool bDrawFrame;
     bool bDrawBackground;
     bool bScaleToFit;
-
-    float fRot;
-    Vector2 vScale;
 };

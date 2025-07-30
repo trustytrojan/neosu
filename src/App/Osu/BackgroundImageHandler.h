@@ -28,18 +28,20 @@ class BackgroundImageHandler {
 
    private:
     struct ENTRY {
-        bool isLoadScheduled;
-        bool wasUsedLastFrame;
-        float loadingTime;
-        float evictionTime;
-        unsigned long evictionTimeFrameCount;
-
         std::string osuFilePath;
         std::string folder;
         std::string backgroundImageFileName;
 
         DatabaseBeatmapBackgroundImagePathLoader *backgroundImagePathLoader;
         Image *image;
+
+        unsigned long evictionTimeFrameCount;
+
+        float loadingTime;
+        float evictionTime;
+
+        bool isLoadScheduled;
+        bool wasUsedLastFrame;
     };
 
     void handleLoadPathForEntry(ENTRY &entry);

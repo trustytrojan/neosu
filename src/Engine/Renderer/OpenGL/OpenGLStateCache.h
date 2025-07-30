@@ -13,42 +13,41 @@
 
 #if defined(MCENGINE_FEATURE_OPENGL) || defined(MCENGINE_FEATURE_GLES32)
 
-class OpenGLStateCache
-{
-public:
-	static OpenGLStateCache &getInstance();
+class OpenGLStateCache final {
+   public:
+    static OpenGLStateCache &getInstance();
 
-	// program state
-	void setCurrentProgram(int program);
-	[[nodiscard]] int getCurrentProgram() const;
+    // program state
+    void setCurrentProgram(int program);
+    [[nodiscard]] int getCurrentProgram() const;
 
-	// framebuffer state
-	void setCurrentFramebuffer(int framebuffer);
-	[[nodiscard]] int getCurrentFramebuffer() const;
+    // framebuffer state
+    void setCurrentFramebuffer(int framebuffer);
+    [[nodiscard]] int getCurrentFramebuffer() const;
 
-	// viewport state
-	void setCurrentViewport(int x, int y, int width, int height);
-	void getCurrentViewport(int &x, int &y, int &width, int &height);
+    // viewport state
+    void setCurrentViewport(int x, int y, int width, int height);
+    void getCurrentViewport(int &x, int &y, int &width, int &height);
 
-	// initialize cache with actual GL states (once at startup)
-	void initialize();
+    // initialize cache with actual GL states (once at startup)
+    void initialize();
 
-	// force a refresh of cached states from actual GL state (expensive, avoid)
-	void refresh();
+    // force a refresh of cached states from actual GL state (expensive, avoid)
+    void refresh();
 
-private:
-	OpenGLStateCache();
-	~OpenGLStateCache() = default;
+   private:
+    OpenGLStateCache();
+    ~OpenGLStateCache() = default;
 
-	// singleton pattern
-	static OpenGLStateCache *s_instance;
+    // singleton pattern
+    static OpenGLStateCache *s_instance;
 
-	// cache
-	int iCurrentProgram;
-	int iCurrentFramebuffer;
-	int iViewport[4];
+    // cache
+    int iCurrentProgram;
+    int iCurrentFramebuffer;
+    int iViewport[4];
 
-	bool bInitialized;
+    bool bInitialized;
 };
 
 #endif

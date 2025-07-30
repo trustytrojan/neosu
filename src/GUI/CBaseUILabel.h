@@ -3,11 +3,15 @@
 
 class CBaseUILabel : public CBaseUIElement {
    public:
-    enum TEXT_JUSTIFICATION : uint8_t { TEXT_JUSTIFICATION_LEFT, TEXT_JUSTIFICATION_CENTERED, TEXT_JUSTIFICATION_RIGHT };
+    enum TEXT_JUSTIFICATION : uint8_t {
+        TEXT_JUSTIFICATION_LEFT,
+        TEXT_JUSTIFICATION_CENTERED,
+        TEXT_JUSTIFICATION_RIGHT
+    };
 
    public:
     CBaseUILabel(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, UString name = "",
-                 const UString& text = "");
+                 const UString &text = "");
     ~CBaseUILabel() override { ; }
 
     void draw() override;
@@ -80,18 +84,19 @@ class CBaseUILabel : public CBaseUIElement {
 
     void updateStringMetrics();
 
-    McFont *font;
     UString sText;
+    McFont *font;
+
     float fStringWidth;
     float fStringHeight;
-
-    bool bDrawFrame;
-    bool bDrawBackground;
-    bool bCenterText;
 
     Color frameColor;
     Color backgroundColor;
     Color textColor;
 
-    TEXT_JUSTIFICATION textJustification;
+    TEXT_JUSTIFICATION textJustification : 2;
+
+    unsigned bDrawFrame : 1;
+    unsigned bDrawBackground : 1;
+    unsigned bCenterText : 1;
 };

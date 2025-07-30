@@ -68,10 +68,10 @@ void OpenGLImage::init()
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		}
 
-		const GLint internalFormat = (this->iNumChannels == 4 ? GL_RGBA : (this->iNumChannels == 3 ? GL_RGB : (this->iNumChannels == 1 ? GL_LUMINANCE : GL_RGBA)));
-		const GLint format = (this->iNumChannels == 4 ? GL_RGBA : (this->iNumChannels == 3 ? GL_RGB : (this->iNumChannels == 1 ? GL_LUMINANCE : GL_RGBA)));
+		// const GLint internalFormat = (this->iNumChannels == 4 ? GL_RGBA : (this->iNumChannels == 3 ? GL_RGB : (this->iNumChannels == 1 ? GL_LUMINANCE : GL_RGBA)));
+		// const GLint format = (this->iNumChannels == 4 ? GL_RGBA : (this->iNumChannels == 3 ? GL_RGB : (this->iNumChannels == 1 ? GL_LUMINANCE : GL_RGBA)));
 
-		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, this->iWidth, this->iHeight, 0, format, GL_UNSIGNED_BYTE, &this->rawImage[0]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->iWidth, this->iHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, &this->rawImage[0]);
 		if (this->bMipmapped)
 		{
 			glGenerateMipmap(GL_TEXTURE_2D);

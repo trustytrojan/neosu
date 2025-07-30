@@ -23,6 +23,9 @@ class CBaseUITextField : public CBaseUIScrollView {
     //	The object which is added to this scrollview wrapper  //
     //********************************************************//
 
+    class TextObject;
+
+    TextObject *textObject;
     class TextObject : public CBaseUIElement {
        public:
         TextObject(float xPos, float yPos, float width, float height, UString text);
@@ -56,13 +59,12 @@ class CBaseUITextField : public CBaseUIScrollView {
        private:
         void updateStringMetrics();
 
+        UString sText;
+        McFont *font;
         Vector2 vParentSize;
 
-        UString sText;
         Color textColor;
-        McFont *font;
+
         float fStringHeight;
     };
-
-    TextObject *textObject;
 };

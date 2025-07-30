@@ -75,27 +75,25 @@ class VertexArrayObject : public Resource {
 
     void updateTexcoordArraySize(unsigned int textureUnit);
 
-    Graphics::PRIMITIVE primitive;
-    Graphics::USAGE_TYPE usage;
-    bool bKeepInSystemMemory;
-
     std::vector<Vector3> vertices;
     std::vector<std::vector<Vector2>> texcoords;
     std::vector<Vector3> normals;
     std::vector<Color> colors;
 
-    unsigned int iNumVertices;
-    bool bHasTexcoords;
-
     std::vector<int> partialUpdateVertexIndices;
     std::vector<int> partialUpdateColorIndices;
 
-    // custom
+    unsigned int iNumVertices;
     int iDrawRangeFromIndex;
     int iDrawRangeToIndex;
     int iDrawPercentNearestMultiple;
     float fDrawPercentFromPercent;
     float fDrawPercentToPercent;
+
+    Graphics::PRIMITIVE primitive;
+    Graphics::USAGE_TYPE usage;
+    bool bKeepInSystemMemory;
+    bool bHasTexcoords;
 };
 
 #endif

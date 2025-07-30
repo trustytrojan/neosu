@@ -39,7 +39,7 @@ public:
 	};
 
 public:
-	Resource();
+	Resource() = default;
 	Resource(std::string filepath);
 
 	virtual ~Resource() = default;
@@ -67,12 +67,12 @@ protected:
 	virtual void initAsync() = 0;
 	virtual void destroy() = 0;
 
-	std::string sFilePath;
-	std::string sName;
+	std::string sFilePath{};
+	std::string sName{};
 
-	std::atomic<bool> bReady;
-	std::atomic<bool> bAsyncReady;
-	std::atomic<bool> bInterrupted;
+	std::atomic<bool> bReady{false};
+	std::atomic<bool> bAsyncReady{false};
+	std::atomic<bool> bInterrupted{false};
 
 public:
 	// type inspection
@@ -131,9 +131,9 @@ public:
 	[[nodiscard]] const virtual TextureAtlas *asTextureAtlas() const { return nullptr; }
 	[[nodiscard]] const virtual VertexArrayObject *asVAO() const { return nullptr; }
 	[[nodiscard]] const virtual Sound *asSound() const { return nullptr; }
+
 private:
 	inline void setName(const std::string &name) { this->sName = name; }
-	bool bFileFound;
 };
 
 #endif

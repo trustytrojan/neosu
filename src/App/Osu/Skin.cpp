@@ -1542,7 +1542,6 @@ void Skin::checkLoadImage(Image **addressOfPointer, const std::string &skinEleme
 
                 *addressOfPointer = resourceManager->loadImageAbs(defaultFilePath1, defaultResourceName,
                                                                   cv::skin_mipmaps.getBool() || forceLoadMipmaps);
-                (*addressOfPointer)->is_2x = true;
             } else {
                 // fallback to @1x
                 if(existsDefaultFilePath2) {
@@ -1553,7 +1552,6 @@ void Skin::checkLoadImage(Image **addressOfPointer, const std::string &skinEleme
 
                     *addressOfPointer = resourceManager->loadImageAbs(defaultFilePath2, defaultResourceName,
                                                                       cv::skin_mipmaps.getBool() || forceLoadMipmaps);
-                    (*addressOfPointer)->is_2x = false;
                 }
             }
         }
@@ -1564,7 +1562,6 @@ void Skin::checkLoadImage(Image **addressOfPointer, const std::string &skinEleme
 
             *addressOfPointer =
                 resourceManager->loadImageAbs(filepath1, "", cv::skin_mipmaps.getBool() || forceLoadMipmaps);
-            (*addressOfPointer)->is_2x = true;
             this->resources.push_back(*addressOfPointer);
 
             // export
@@ -1592,7 +1589,6 @@ void Skin::checkLoadImage(Image **addressOfPointer, const std::string &skinEleme
 
             *addressOfPointer = resourceManager->loadImageAbs(defaultFilePath2, defaultResourceName,
                                                               cv::skin_mipmaps.getBool() || forceLoadMipmaps);
-            (*addressOfPointer)->is_2x = false;
         }
     }
 
@@ -1602,7 +1598,6 @@ void Skin::checkLoadImage(Image **addressOfPointer, const std::string &skinEleme
 
         *addressOfPointer =
             resourceManager->loadImageAbs(filepath2, "", cv::skin_mipmaps.getBool() || forceLoadMipmaps);
-        (*addressOfPointer)->is_2x = false;
         this->resources.push_back(*addressOfPointer);
     }
 

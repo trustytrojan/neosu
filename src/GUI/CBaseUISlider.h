@@ -78,22 +78,23 @@ class CBaseUISlider : public CBaseUIElement {
 
     void updateBlockPos();
 
-    bool bDrawFrame, bDrawBackground;
-    bool bHorizontal;
-    bool bHasChanged;
-    bool bAnimated;
-    bool bLiveUpdate;
-    bool bAllowMouseWheel;
-    Color frameColor, backgroundColor;
+    SliderChangeCallback sliderChangeCallback;
+
+    Vector2 vBlockSize, vBlockPos;
+    Vector2 vGrabBackup;
 
     float fMinValue, fMaxValue, fCurValue, fCurPercent;
-    Vector2 vBlockSize, vBlockPos;
-
-    Vector2 vGrabBackup;
     float fPrevValue;
-
     float fKeyDelta;
     float fLastSoundPlayTime = 0.f;
 
-    SliderChangeCallback sliderChangeCallback;
+    Color frameColor, backgroundColor;
+
+    unsigned bDrawFrame : 1;
+    unsigned bDrawBackground : 1;
+    unsigned bHorizontal : 1;
+    unsigned bHasChanged : 1;
+    unsigned bAnimated : 1;
+    unsigned bLiveUpdate : 1;
+    unsigned bAllowMouseWheel : 1;
 };

@@ -25,7 +25,7 @@ class DatabaseBeatmap;
 typedef DatabaseBeatmap BeatmapDifficulty;
 typedef DatabaseBeatmap BeatmapSet;
 
-class DatabaseBeatmap {
+class DatabaseBeatmap final {
    public:
     // raw structs
 
@@ -49,23 +49,18 @@ class DatabaseBeatmap {
     // custom structs
 
     struct LOAD_DIFFOBJ_RESULT {
-        int errorCode{0};
-
         std::vector<OsuDifficultyHitObject> diffobjects{};
 
         int maxPossibleCombo{};
-
-        LOAD_DIFFOBJ_RESULT() : diffobjects() {}
+        int errorCode{0};
     };
 
     struct LOAD_GAMEPLAY_RESULT {
-        int errorCode;
-
         std::vector<HitObject *> hitobjects;
         std::vector<BREAK> breaks;
         std::vector<Color> combocolors;
 
-        LOAD_GAMEPLAY_RESULT() { this->errorCode = 0; }
+        int errorCode{0};
     };
 
     struct TIMING_INFO {
@@ -128,7 +123,6 @@ class DatabaseBeatmap {
     };
 
     struct PRIMITIVE_CONTAINER {
-        int errorCode{0};
 
         std::vector<HITCIRCLE> hitcircles{};
         std::vector<SLIDER> sliders{};
@@ -149,6 +143,7 @@ class DatabaseBeatmap {
         u32 numHitobjects{};
 
         int version{};
+        int errorCode{0};
     };
 
     DatabaseBeatmap(std::string filePath, std::string folder, BeatmapType type);
@@ -258,18 +253,17 @@ class DatabaseBeatmap {
     [[nodiscard]] inline long getLocalOffset() const { return this->iLocalOffset; }
     [[nodiscard]] inline long getOnlineOffset() const { return this->iOnlineOffset; }
 
-    bool draw_background = true;
-    bool do_not_store = false;
-
     // song select mod-adjusted pp/stars
     pp_info pp;
 
-    // raw metadata
+    zarray<DatabaseBeatmap::TIMINGPOINT> timingpoints;  // necessary for main menu anim
 
-    int iVersion;   // e.g. "osu file format v12" -> 12
-    int iGameMode;  // 0 = osu!standard, 1 = Taiko, 2 = Catch the Beat, 3 = osu!mania
-    long iID;       // online ID, if uploaded
-    int iSetID;     // online set ID, if uploaded
+    // redundant data (technically contained in metadata, but precomputed anyway)
+
+    std::string sFullSoundFilePath;
+    std::string sFullBackgroundImageFilePath;
+
+    // raw metadata
 
     std::string sTitle;
     std::string sArtist;
@@ -280,7 +274,13 @@ class DatabaseBeatmap {
     std::string sBackgroundImageFileName;
     std::string sAudioFileName;
 
+    long iID;       // online ID, if uploaded
     unsigned long iLengthMS;
+
+    int iVersion;   // e.g. "osu file format v12" -> 12
+    int iGameMode;  // 0 = osu!standard, 1 = Taiko, 2 = Catch the Beat, 3 = osu!mania
+    int iSetID;     // online set ID, if uploaded
+
     int iPreviewTime;
 
     float fAR;
@@ -291,13 +291,6 @@ class DatabaseBeatmap {
     float fStackLeniency;
     float fSliderTickRate;
     float fSliderMultiplier;
-
-    zarray<DatabaseBeatmap::TIMINGPOINT> timingpoints;  // necessary for main menu anim
-
-    // redundant data (technically contained in metadata, but precomputed anyway)
-
-    std::string sFullSoundFilePath;
-    std::string sFullBackgroundImageFilePath;
 
     // precomputed data (can-run-without-but-nice-to-have data)
 
@@ -313,10 +306,10 @@ class DatabaseBeatmap {
     int iNumSpinners;
 
     // custom data (not necessary, not part of the beatmap file, and not precomputed)
+    std::atomic<f32> loudness = 0.f;
 
     long iLocalOffset;
     long iOnlineOffset;
-    std::atomic<f32> loudness = 0.f;
 
     struct CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT {
         int errorCode;
@@ -340,6 +333,9 @@ class DatabaseBeatmap {
     BeatmapType type;
 
     MD5Hash sMD5Hash;
+
+    bool draw_background = true;
+    bool do_not_store = false;
 };
 
 class DatabaseBeatmapBackgroundImagePathLoader : public Resource {

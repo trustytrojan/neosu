@@ -135,17 +135,6 @@ class McFont final : public Resource {
     // helper to set font size on any face for this font instance
     void setFaceSize(FT_Face face) const;
 
-    int iFontSize;
-    bool bAntialiasing;
-    int iFontDPI;
-    float fHeight;
-    TextureAtlas *textureAtlas;
-    GLYPH_METRICS errorGlyph;
-
-    // per-instance freetype resources (only primary font face)
-    FT_Face ftFace;  // primary font face
-    bool bFreeTypeInitialized;
-
     std::vector<wchar_t> vGlyphs;
     std::unordered_map<wchar_t, bool> vGlyphExistence;
     std::unordered_map<wchar_t, GLYPH_METRICS> vGlyphMetrics;
@@ -154,11 +143,25 @@ class McFont final : public Resource {
     TextBatch batchQueue;
     std::vector<Vector3> vertices;
     std::vector<Vector2> texcoords;
-    bool batchActive;
+
+    TextureAtlas *textureAtlas;
+
+    // per-instance freetype resources (only primary font face)
+    FT_Face ftFace;  // primary font face
+
+    int iFontSize;
+    int iFontDPI;
+    float fHeight;
+    GLYPH_METRICS errorGlyph;
 
     // atlas management
-    mutable bool bAtlasNeedsRebuild;
     std::vector<wchar_t> vPendingGlyphs;
+
+    mutable bool bAtlasNeedsRebuild;
+
+    bool batchActive;
+    bool bFreeTypeInitialized;
+    bool bAntialiasing;
 };
 
 #endif

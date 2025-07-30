@@ -14,26 +14,16 @@
 Resource::Resource(std::string filepath)
 {
 	this->sFilePath = std::move(filepath);
-	this->bFileFound = true;
+
+	bool file_found = true;
 	if (File::existsCaseInsensitive(this->sFilePath) != File::FILETYPE::FILE) // modifies the input string if found
 	{
 		debugLogF("Resource Warning: File {:s} does not exist!\n", this->sFilePath);
-		this->bFileFound = false;
+		file_found = false;
 	}
 
-	this->bReady = false;
-	this->bAsyncReady = false;
-	this->bInterrupted = false;
 	// give it a dummy name for unnamed resources, mainly for debugging purposes
-	this->sName = fmt::format("{:p}:postinit=n:found={}:{:s}", static_cast<const void*>(this), this->bFileFound, this->sFilePath);
-}
-
-Resource::Resource()
-{
-	this->bReady = false;
-	this->bAsyncReady = false;
-	this->bInterrupted = false;
-	this->bFileFound = true;
+	this->sName = fmt::format("{:p}:postinit=n:found={}:{:s}", static_cast<const void*>(this), file_found, this->sFilePath);
 }
 
 void Resource::load()

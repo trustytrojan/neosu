@@ -83,9 +83,9 @@ class AnimationHandler {
 
         float fStartValue;
         float fStartTime;
-        ANIMATION_TYPE animType;
-
         float fFactor;
+
+        ANIMATION_TYPE animType;
         bool bStarted;
     };
 

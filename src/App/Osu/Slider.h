@@ -5,15 +5,15 @@ class SliderCurve;
 
 class VertexArrayObject;
 
-class Slider : public HitObject {
+class Slider final : public HitObject {
    public:
     struct SLIDERCLICK {
         long time;
+        int type;
+        int tickIndex;
         bool finished;
         bool successful;
         bool sliderend;
-        int type;
-        int tickIndex;
     };
 
    public:
@@ -67,24 +67,31 @@ class Slider : public HitObject {
 
     bool isClickHeldSlider();  // special logic to disallow hold tapping
 
-    SliderCurve *curve;
-
-    char cType;
-    int iRepeat;
-    float fPixelLength;
-    std::vector<Vector2> points;
-    std::vector<int> hitSounds;
-    float fSliderTime;
-    float fSliderTimeWithoutRepeats;
-
     struct SLIDERTICK {
         float percent;
         bool finished;
     };
+
+    std::vector<Vector2> points;
+    std::vector<int> hitSounds;
+
     std::vector<SLIDERTICK> ticks;  // ticks (drawing)
 
     // TEMP: auto cursordance
     std::vector<SLIDERCLICK> clicks;  // repeats (type 0) + ticks (type 1)
+
+    SliderCurve *curve;
+    VertexArrayObject *vao;
+
+    Vector2 vCurPoint;
+    Vector2 vCurPointRaw;
+
+    long iStrictTrackingModLastClickHeldTime;
+
+    float fPixelLength;
+
+    float fSliderTime;
+    float fSliderTimeWithoutRepeats;
 
     float fSlidePercent;        // 0.0f - 1.0f - 0.0f - 1.0f - etc.
     float fActualSlidePercent;  // 0.0f - 1.0f
@@ -92,33 +99,33 @@ class Slider : public HitObject {
     float fReverseArrowAlpha;
     float fBodyAlpha;
 
-    Vector2 vCurPoint;
-    Vector2 vCurPointRaw;
-
-    LiveScore::HIT startResult;
-    LiveScore::HIT endResult;
-    bool bStartFinished;
     float fStartHitAnimation;
-    bool bEndFinished;
     float fEndHitAnimation;
     float fEndSliderBodyFadeAnimation;
-    long iStrictTrackingModLastClickHeldTime;
-    int iFatFingerKey;
-    int iPrevSliderSlideSoundSampleSet;
-    bool bCursorLeft;
-    bool bCursorInside;
-    bool bHeldTillEnd;
-    bool bHeldTillEndForLenienceHack;
-    bool bHeldTillEndForLenienceHackCheck;
+
     float fFollowCircleTickAnimationScale;
     float fFollowCircleAnimationScale;
     float fFollowCircleAnimationAlpha;
 
+    int iRepeat;
+    int iFatFingerKey;
+    int iPrevSliderSlideSoundSampleSet;
     int iReverseArrowPos;
     int iCurRepeat;
     int iCurRepeatCounterForHitSounds;
-    bool bInReverse;
-    bool bHideNumberAfterFirstRepeatHit;
 
-    VertexArrayObject *vao;
+    char cType;
+
+    LiveScore::HIT startResult : 4;
+    LiveScore::HIT endResult : 4;
+
+    unsigned bStartFinished : 1;
+    unsigned bEndFinished : 1;
+    unsigned bCursorLeft : 1;
+    unsigned bCursorInside : 1;
+    unsigned bHeldTillEnd : 1;
+    unsigned bHeldTillEndForLenienceHack : 1;
+    unsigned bHeldTillEndForLenienceHackCheck : 1;
+    unsigned bInReverse : 1;
+    unsigned bHideNumberAfterFirstRepeatHit : 1;
 };

@@ -4,7 +4,7 @@
 class ModFPoSu;
 class SkinImage;
 
-class Circle : public HitObject {
+class Circle final : public HitObject {
    public:
     // main
     static void drawApproachCircle(Beatmap *beatmap, Vector2 rawPos, int number, int colorCounter,
@@ -72,10 +72,11 @@ class Circle : public HitObject {
 
     void onHit(LiveScore::HIT result, long delta, float targetDelta = 0.0f, float targetAngle = 0.0f);
 
+    bool bWaiting;
+
     Vector2 vRawPos;
     Vector2 vOriginalRawPos;  // for live mod changing
 
-    bool bWaiting;
     float fHitAnimation;
     float fShakeAnimation;
 };

@@ -1,7 +1,7 @@
 #pragma once
 #include "HitObject.h"
 
-class Spinner : public HitObject {
+class Spinner final : public HitObject {
    public:
     Spinner(int x, int y, long time, int sampleType, bool isEndOfCombo, long endTime, BeatmapInterface *beatmap);
     ~Spinner() override;
@@ -9,11 +9,11 @@ class Spinner : public HitObject {
     void draw() override;
     void update(long curPos, f64 frame_time) override;
 
-    void updateStackPosition(float  /*stackOffset*/) override { ; }
-    void miss(long  /*curPos*/) override { ; }
+    void updateStackPosition(float /*stackOffset*/) override { ; }
+    void miss(long /*curPos*/) override { ; }
 
-    [[nodiscard]] Vector2 getRawPosAt(long  /*pos*/) const override { return this->vRawPos; }
-    [[nodiscard]] Vector2 getOriginalRawPosAt(long  /*pos*/) const override { return this->vOriginalRawPos; }
+    [[nodiscard]] Vector2 getRawPosAt(long /*pos*/) const override { return this->vRawPos; }
+    [[nodiscard]] Vector2 getOriginalRawPosAt(long /*pos*/) const override { return this->vOriginalRawPos; }
     [[nodiscard]] Vector2 getAutoCursorPos(long curPos) const override;
 
     void onClickEvent(std::vector<Click> &clicks) override;

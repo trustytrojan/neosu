@@ -35,16 +35,14 @@ class Image : public Resource {
     [[nodiscard]] Color getPixel(int x, int y) const;
 
     [[nodiscard]] inline Image::TYPE getType() const { return this->type; }
-    [[nodiscard]] inline int getNumChannels() const { return this->iNumChannels; }
+    [[nodiscard]] constexpr int getNumChannels() const { return Image::iNumChannels; }
     [[nodiscard]] inline int getWidth() const { return this->iWidth; }
     [[nodiscard]] inline int getHeight() const { return this->iHeight; }
     [[nodiscard]] inline Vector2 getSize() const {
         return Vector2{static_cast<float>(this->iWidth), static_cast<float>(this->iHeight)};
     }
 
-    [[nodiscard]] inline bool hasAlphaChannel() const { return this->bHasAlphaChannel; }
-
-    std::atomic<bool> is_2x{false};
+    [[nodiscard]] constexpr bool hasAlphaChannel() const { return true; }
 
     // type inspection
     [[nodiscard]] Type getResType() const final { return IMAGE; }
@@ -53,33 +51,34 @@ class Image : public Resource {
     [[nodiscard]] const Image *asImage() const final { return this; }
 
    protected:
+    // all images are converted to RGBA
+    static constexpr const int iNumChannels{4};
+
     void init() override = 0;
     void initAsync() override = 0;
     void destroy() override = 0;
 
     bool loadRawImage();
 
-    Image::TYPE type;
-    Graphics::FILTER_MODE filterMode;
-    Graphics::WRAP_MODE wrapMode;
+    std::vector<unsigned char> rawImage;
 
-    int iNumChannels;
     int iWidth;
     int iHeight;
 
-    bool bHasAlphaChannel;
+    Graphics::WRAP_MODE wrapMode;
+    Image::TYPE type;
+    Graphics::FILTER_MODE filterMode;
+
     bool bMipmapped;
     bool bCreatedImage;
     bool bKeepInSystemMemory;
-
-    std::vector<unsigned char> rawImage;
 
    private:
     [[nodiscard]] bool isCompletelyTransparent() const;
     static bool canHaveTransparency(const unsigned char *data, size_t size);
 
     static bool decodePNGFromMemory(const unsigned char *data, size_t size, std::vector<unsigned char> &outData,
-                                    int &outWidth, int &outHeight, int &outChannels);
+                                    int &outWidth, int &outHeight);
 };
 
 #endif
