@@ -1,10 +1,7 @@
 #include "SliderRenderer.h"
 
-#include <limits>
-
 #include "ConVar.h"
 #include "Engine.h"
-#include "Environment.h"
 #include "GameRules.h"
 #include "OpenGLHeaders.h"
 #include "OpenGLLegacyInterface.h"
@@ -15,26 +12,39 @@
 #include "Skin.h"
 #include "VertexArrayObject.h"
 
+#include <limits>
 
+namespace SliderRenderer {
 
-Shader *SliderRenderer::BLEND_SHADER = NULL;
+namespace {  // static namespace
 
-float SliderRenderer::MESH_CENTER_HEIGHT =
-    0.5f;  // Camera::buildMatrixOrtho2D() uses -1 to 1 for zn/zf, so don't make this too high
-int SliderRenderer::UNIT_CIRCLE_SUBDIVISIONS = 0;  // see osu_slider_body_unit_circle_subdivisions now
-std::vector<float> SliderRenderer::UNIT_CIRCLE;
-VertexArrayObject *SliderRenderer::UNIT_CIRCLE_VAO = NULL;
-VertexArrayObject *SliderRenderer::UNIT_CIRCLE_VAO_BAKED = NULL;
-VertexArrayObject *SliderRenderer::UNIT_CIRCLE_VAO_TRIANGLES = NULL;
-float SliderRenderer::UNIT_CIRCLE_VAO_DIAMETER = 0.0f;
+Shader *BLEND_SHADER = NULL;
+float UNIT_CIRCLE_VAO_DIAMETER = 0.0f;
 
-float SliderRenderer::fBoundingBoxMinX = (std::numeric_limits<float>::max)();
-float SliderRenderer::fBoundingBoxMaxX = 0.0f;
-float SliderRenderer::fBoundingBoxMinY = (std::numeric_limits<float>::max)();
-float SliderRenderer::fBoundingBoxMaxY = 0.0f;
+// base mesh
+float MESH_CENTER_HEIGHT = 0.5f;   // Camera::buildMatrixOrtho2D() uses -1 to 1 for zn/zf, so don't make this too high
+int UNIT_CIRCLE_SUBDIVISIONS = 0;  // see osu_slider_body_unit_circle_subdivisions now
+std::vector<float> UNIT_CIRCLE;
+VertexArrayObject *UNIT_CIRCLE_VAO = NULL;
+VertexArrayObject *UNIT_CIRCLE_VAO_BAKED = NULL;
+VertexArrayObject *UNIT_CIRCLE_VAO_TRIANGLES = NULL;
 
-VertexArrayObject *SliderRenderer::generateVAO(const std::vector<Vector2> &points, float hitcircleDiameter,
-                                               Vector3 translation, bool skipOOBPoints) {
+// tiny rendering optimization for RenderTarget
+float fBoundingBoxMinX = (std::numeric_limits<float>::max)();
+float fBoundingBoxMaxX = 0.0f;
+float fBoundingBoxMinY = (std::numeric_limits<float>::max)();
+float fBoundingBoxMaxY = 0.0f;
+
+// forward decls
+void drawFillSliderBodyPeppy(const std::vector<Vector2> &points, VertexArrayObject *circleMesh, float radius,
+                             int drawFromIndex, int drawUpToIndex, Shader *shader = NULL);
+void checkUpdateVars(float hitcircleDiameter);
+void resetRenderTargetBoundingBox();
+
+}  // namespace
+
+VertexArrayObject *generateVAO(const std::vector<Vector2> &points, float hitcircleDiameter, Vector3 translation,
+                               bool skipOOBPoints) {
     resourceManager->requestNextLoadUnmanaged();
     VertexArrayObject *vao = resourceManager->createVertexArrayObject();
 
@@ -91,14 +101,13 @@ VertexArrayObject *SliderRenderer::generateVAO(const std::vector<Vector2> &point
     if(vao->getNumVertices() > 0)
         resourceManager->loadResource(vao);
     else
-        debugLog("SliderRenderer::generateSliderVAO() ERROR: Zero triangles!\n");
+        debugLog("generateSliderVAO() ERROR: Zero triangles!\n");
 
     return vao;
 }
 
-void SliderRenderer::draw(const std::vector<Vector2> &points, const std::vector<Vector2> &alwaysPoints,
-                          float hitcircleDiameter, float from, float to, Color undimmedColor, float colorRGBMultiplier,
-                          float alpha, long sliderTimeForRainbow) {
+void draw(const std::vector<Vector2> &points, const std::vector<Vector2> &alwaysPoints, float hitcircleDiameter,
+          float from, float to, Color undimmedColor, float colorRGBMultiplier, float alpha, long sliderTimeForRainbow) {
     if(cv::slider_alpha_multiplier.getFloat() <= 0.0f || alpha <= 0.0f) return;
 
     checkUpdateVars(hitcircleDiameter);
@@ -230,21 +239,20 @@ void SliderRenderer::draw(const std::vector<Vector2> &points, const std::vector<
 
     // now draw the slider to the screen (with alpha blending enabled again)
     const int pixelFudge = 2;
-    SliderRenderer::fBoundingBoxMinX -= pixelFudge;
-    SliderRenderer::fBoundingBoxMaxX += pixelFudge;
-    SliderRenderer::fBoundingBoxMinY -= pixelFudge;
-    SliderRenderer::fBoundingBoxMaxY += pixelFudge;
+    fBoundingBoxMinX -= pixelFudge;
+    fBoundingBoxMaxX += pixelFudge;
+    fBoundingBoxMinY -= pixelFudge;
+    fBoundingBoxMaxY += pixelFudge;
 
     osu->getSliderFrameBuffer()->setColor(argb(alpha * cv::slider_alpha_multiplier.getFloat(), 1.0f, 1.0f, 1.0f));
-    osu->getSliderFrameBuffer()->drawRect(SliderRenderer::fBoundingBoxMinX, SliderRenderer::fBoundingBoxMinY,
-                                          SliderRenderer::fBoundingBoxMaxX - SliderRenderer::fBoundingBoxMinX,
-                                          SliderRenderer::fBoundingBoxMaxY - SliderRenderer::fBoundingBoxMinY);
+    osu->getSliderFrameBuffer()->drawRect(fBoundingBoxMinX, fBoundingBoxMinY, fBoundingBoxMaxX - fBoundingBoxMinX,
+                                          fBoundingBoxMaxY - fBoundingBoxMinY);
 }
 
-void SliderRenderer::draw(VertexArrayObject *vao, const std::vector<Vector2> &alwaysPoints, Vector2 translation,
-                          float scale, float hitcircleDiameter, float from, float to, Color undimmedColor,
-                          float colorRGBMultiplier, float alpha, long sliderTimeForRainbow, bool doEnableRenderTarget,
-                          bool doDisableRenderTarget, bool doDrawSliderFrameBufferToScreen) {
+void draw(VertexArrayObject *vao, const std::vector<Vector2> &alwaysPoints, Vector2 translation, float scale,
+          float hitcircleDiameter, float from, float to, Color undimmedColor, float colorRGBMultiplier, float alpha,
+          long sliderTimeForRainbow, bool doEnableRenderTarget, bool doDisableRenderTarget,
+          bool doDrawSliderFrameBufferToScreen) {
     if((cv::slider_alpha_multiplier.getFloat() <= 0.0f && doDrawSliderFrameBufferToScreen) ||
        (alpha <= 0.0f && doDrawSliderFrameBufferToScreen) || vao == NULL)
         return;
@@ -359,8 +367,10 @@ void SliderRenderer::draw(VertexArrayObject *vao, const std::vector<Vector2> &al
     }
 }
 
-void SliderRenderer::drawFillSliderBodyPeppy(const std::vector<Vector2> &points, VertexArrayObject *circleMesh,
-                                             float radius, int drawFromIndex, int drawUpToIndex, Shader * /*shader*/) {
+namespace {  // static
+
+void drawFillSliderBodyPeppy(const std::vector<Vector2> &points, VertexArrayObject *circleMesh, float radius,
+                             int drawFromIndex, int drawUpToIndex, Shader * /*shader*/) {
     if(drawFromIndex < 0) drawFromIndex = 0;
     if(drawUpToIndex < 0) drawUpToIndex = points.size();
 
@@ -385,159 +395,16 @@ void SliderRenderer::drawFillSliderBodyPeppy(const std::vector<Vector2> &points,
             startX = x;
             startY = y;
 
-            if(x - radius < SliderRenderer::fBoundingBoxMinX) SliderRenderer::fBoundingBoxMinX = x - radius;
-            if(x + radius > SliderRenderer::fBoundingBoxMaxX) SliderRenderer::fBoundingBoxMaxX = x + radius;
-            if(y - radius < SliderRenderer::fBoundingBoxMinY) SliderRenderer::fBoundingBoxMinY = y - radius;
-            if(y + radius > SliderRenderer::fBoundingBoxMaxY) SliderRenderer::fBoundingBoxMaxY = y + radius;
+            if(x - radius < fBoundingBoxMinX) fBoundingBoxMinX = x - radius;
+            if(x + radius > fBoundingBoxMaxX) fBoundingBoxMaxX = x + radius;
+            if(y - radius < fBoundingBoxMinY) fBoundingBoxMinY = y - radius;
+            if(y + radius > fBoundingBoxMaxY) fBoundingBoxMaxY = y + radius;
         }
     }
     g->popTransform();
 }
 
-void SliderRenderer::drawFillSliderBodyMM(const std::vector<Vector2> &points, float radius, int  /*drawFromIndex*/,
-                                          int  /*drawUpToIndex*/) {
-    // modified version of
-    // https://github.com/ppy/osu-framework/blob/master/osu.Framework/Graphics/Lines/Path_DrawNode.cs
-
-    // TODO: remaining problems
-    // 1) how to handle snaking? very very annoying to do via draw call bounds (due to inconsistent mesh topology)
-    // 2) check performance for baked vao, maybe as a compatibility option for slower pcs
-    // 3) recalculating every frame is not an option, way too slow
-    // 4) since we already have smoothsnake begin+end circles, could precalculate a list of draw call bounds indices for
-    // snaking and shrinking respectively 5) unbaked performance is way worse than legacy sliders, so it will only be
-    // used in baked form
-
-    VertexArrayObject vao(Graphics::PRIMITIVE::PRIMITIVE_TRIANGLES);
-
-    struct Helper {
-        static inline Vector2 pointOnCircle(float angle) { return Vector2(std::sin(angle), -std::cos(angle)); }
-
-        static void addLineCap(Vector2 origin, float theta, float thetaDiff, float radius, VertexArrayObject &vao) {
-            const float step = PI / 32.0f;  // MAX_RES
-
-            const float dir = std::signbit(thetaDiff) ? -1.0f : 1.0f;
-            thetaDiff = dir * thetaDiff;
-
-            const int amountPoints = (int)std::ceil(thetaDiff / step);
-
-            if(amountPoints > 0) {
-                if(dir < 0) theta += PI;
-
-                Vector2 current = origin + pointOnCircle(theta) * radius;
-
-                for(int p = 1; p <= amountPoints; p++) {
-                    // center
-                    vao.addTexcoord(1, 0);
-                    vao.addVertex(origin.x, origin.y, MESH_CENTER_HEIGHT);
-
-                    // first outer point
-                    vao.addTexcoord(0, 0);
-                    vao.addVertex(current.x, current.y);
-
-                    const float angularOffset = std::min(p * step, thetaDiff);
-                    current = origin + pointOnCircle(theta + dir * angularOffset) * radius;
-
-                    // second outer point
-                    vao.addTexcoord(0, 0);
-                    vao.addVertex(current.x, current.y);
-                }
-            }
-        }
-    };
-
-    float prevLineTheta = 0.0f;
-
-    for(int i = 1; i < points.size(); i++) {
-        const Vector2 lineStartPoint = points[i - 1];
-        const Vector2 lineEndPoint = points[i];
-
-        const Vector2 lineDirection = (lineEndPoint - lineStartPoint);
-        const Vector2 lineDirectionNormalized = Vector2(lineDirection.x, lineDirection.y).normalize();
-        const Vector2 lineOrthogonalDirection = Vector2(-lineDirectionNormalized.y, lineDirectionNormalized.x);
-
-        const float lineTheta = std::atan2(lineEndPoint.y - lineStartPoint.y, lineEndPoint.x - lineStartPoint.x);
-
-        // start cap
-        if(i == 1) Helper::addLineCap(lineStartPoint, lineTheta + PI, PI, radius, vao);
-
-        // body
-        {
-            const Vector2 ortho = lineOrthogonalDirection;
-
-            const Vector2 screenLineLeftStartPoint = lineStartPoint + ortho * radius;
-            const Vector2 screenLineLeftEndPoint = lineEndPoint + ortho * radius;
-
-            const Vector2 screenLineRightStartPoint = lineStartPoint - ortho * radius;
-            const Vector2 screenLineRightEndPoint = lineEndPoint - ortho * radius;
-
-            const Vector2 screenLineStartPoint = lineStartPoint;
-            const Vector2 screenLineEndPoint = lineEndPoint;
-
-            // type is triangles, build a rectangle out of 6 vertices
-
-            //
-            // 1   3   5
-            // *---*---*
-            // |  /|  /|
-            // | / | / |     // the line 3-4 is the center of the slider (with a raised z-coordinate for blending)
-            // |/  |/  |
-            // *---*---*
-            // 2   4   6
-            //
-
-            vao.addTexcoord(0, 0);
-            vao.addVertex(screenLineLeftEndPoint.x, screenLineLeftEndPoint.y);  // 1
-            vao.addTexcoord(0, 0);
-            vao.addVertex(screenLineLeftStartPoint.x, screenLineLeftStartPoint.y);  // 2
-            vao.addTexcoord(1, 0);
-            vao.addVertex(screenLineEndPoint.x, screenLineEndPoint.y, MESH_CENTER_HEIGHT);  // 3
-
-            vao.addTexcoord(1, 0);
-            vao.addVertex(screenLineEndPoint.x, screenLineEndPoint.y, MESH_CENTER_HEIGHT);  // 3
-            vao.addTexcoord(0, 0);
-            vao.addVertex(screenLineLeftStartPoint.x, screenLineLeftStartPoint.y);  // 2
-            vao.addTexcoord(1, 0);
-            vao.addVertex(screenLineStartPoint.x, screenLineStartPoint.y, MESH_CENTER_HEIGHT);  // 4
-
-            vao.addTexcoord(1, 0);
-            vao.addVertex(screenLineEndPoint.x, screenLineEndPoint.y, MESH_CENTER_HEIGHT);  // 3
-            vao.addTexcoord(1, 0);
-            vao.addVertex(screenLineStartPoint.x, screenLineStartPoint.y, MESH_CENTER_HEIGHT);  // 4
-            vao.addTexcoord(0, 0);
-            vao.addVertex(screenLineRightEndPoint.x, screenLineRightEndPoint.y);  // 5
-
-            vao.addTexcoord(0, 0);
-            vao.addVertex(screenLineRightEndPoint.x, screenLineRightEndPoint.y);  // 5
-            vao.addTexcoord(1, 0);
-            vao.addVertex(screenLineStartPoint.x, screenLineStartPoint.y, MESH_CENTER_HEIGHT);  // 4
-            vao.addTexcoord(0, 0);
-            vao.addVertex(screenLineRightStartPoint.x, screenLineRightStartPoint.y);  // 6
-        }
-
-        // TODO: fix non-rolled-over theta causing full circle to be built at perfect angle points at e.g. reach out at
-        // 0:48 these would also break snaking, so we have to handle that special case and not generate any meshes there
-
-        // wedges
-        if(i > 1) Helper::addLineCap(lineStartPoint, prevLineTheta, lineTheta - prevLineTheta, radius, vao);
-
-        // end cap
-        if(i == (points.size() - 1)) Helper::addLineCap(lineEndPoint, lineTheta, PI, radius, vao);
-
-        prevLineTheta = lineTheta;
-    }
-
-    // draw it
-    if(vao.getNumVertices() > 0) {
-        if(cv::slider_debug_wireframe.getBool()) g->setWireframe(true);
-
-        // draw body
-        g->drawVAO(&vao);
-
-        if(cv::slider_debug_wireframe.getBool()) g->setWireframe(false);
-    }
-}
-
-void SliderRenderer::checkUpdateVars(float hitcircleDiameter) {
+void checkUpdateVars(float hitcircleDiameter) {
     // static globals
 
     // build shaders and circle mesh
@@ -646,9 +513,12 @@ void SliderRenderer::checkUpdateVars(float hitcircleDiameter) {
     }
 }
 
-void SliderRenderer::resetRenderTargetBoundingBox() {
-    SliderRenderer::fBoundingBoxMinX = (std::numeric_limits<float>::max)();
-    SliderRenderer::fBoundingBoxMaxX = 0.0f;
-    SliderRenderer::fBoundingBoxMinY = (std::numeric_limits<float>::max)();
-    SliderRenderer::fBoundingBoxMaxY = 0.0f;
+void resetRenderTargetBoundingBox() {
+    fBoundingBoxMinX = (std::numeric_limits<float>::max)();
+    fBoundingBoxMaxX = 0.0f;
+    fBoundingBoxMinY = (std::numeric_limits<float>::max)();
+    fBoundingBoxMaxY = 0.0f;
 }
+}  // namespace
+
+}  // namespace SliderRenderer
