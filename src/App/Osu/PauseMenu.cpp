@@ -1,5 +1,6 @@
 #include "PauseMenu.h"
 
+#include <cmath>
 #include <utility>
 
 #include "AnimationHandler.h"
@@ -95,7 +96,7 @@ void PauseMenu::draw() {
     // draw selection arrows
     if(this->selectedButton != NULL) {
         const Color arrowColor = argb(255, 0, 114, 255);
-        float animation = fmod((float)(engine->getTime() - this->fWarningArrowsAnimStartTime) * 3.2f, 2.0f);
+        float animation = std::fmod((float)(engine->getTime() - this->fWarningArrowsAnimStartTime) * 3.2f, 2.0f);
         if(animation > 1.0f) animation = 2.0f - animation;
 
         animation = -animation * (animation - 2);  // quad out

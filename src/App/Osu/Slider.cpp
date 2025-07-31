@@ -1,5 +1,6 @@
 #include "Slider.h"
 
+#include <cmath>
 #include <utility>
 
 #include "AnimationHandler.h"
@@ -230,7 +231,7 @@ void Slider::draw() {
                 reverseArrowColor = Colors::scale(reverseArrowColor, this->fHittableDimRGBColorMultiplierPercent);
 
                 float div = 0.30f;
-                float pulse = (div - fmod(std::abs(this->bm->getCurMusicPos()) / 1000.0f, div)) / div;
+                float pulse = (div - std::fmod(std::abs(this->bm->getCurMusicPos()) / 1000.0f, div)) / div;
                 pulse *= pulse;  // quad in
 
                 if(!cv::slider_reverse_arrow_animated.getBool() || this->bm->isInMafhamRenderChunk()) pulse = 0.0f;

@@ -1,6 +1,7 @@
 #include "Lobby.h"
 
 #include <algorithm>
+#include <cmath>
 #include <utility>
 
 #include "Bancho.h"
@@ -183,8 +184,9 @@ void Lobby::updateLayout(Vector2 newResolution) {
     float heading_ratio = 70 / newResolution.y;
     float chat_ratio = 0.3;
     float free_ratio = 1.f - (heading_ratio + chat_ratio);
-    this->create_room_btn->setPos(round(newResolution.x * 0.3) - this->create_room_btn->getSize().x / 2,
-                              70 + round(newResolution.y * free_ratio / 2) - this->create_room_btn->getSize().y / 2);
+    this->create_room_btn->setPos(
+        round(newResolution.x * 0.3) - this->create_room_btn->getSize().x / 2,
+        70 + std::round(newResolution.y * free_ratio / 2) - this->create_room_btn->getSize().y / 2);
 
     float y = 10;
     const float room_height = 105;

@@ -1,5 +1,7 @@
 #include "RankingScreen.h"
 
+#include <cmath>
+
 #include "AnimationHandler.h"
 #include "Bancho.h"
 #include "Beatmap.h"
@@ -114,7 +116,7 @@ class RankingScreenScrollDownInfoButton : public CBaseUIButton {
         {
             const float scale = (this->vSize.y / this->fStringHeight) * textScale;
 
-            float animation = fmod((float)(engine->getTime() - 0.0f) * 3.2f, 2.0f);
+            float animation = std::fmod((float)(engine->getTime() - 0.0f) * 3.2f, 2.0f);
             if(animation > 1.0f) animation = 2.0f - animation;
 
             animation = -animation * (animation - 2);  // quad out

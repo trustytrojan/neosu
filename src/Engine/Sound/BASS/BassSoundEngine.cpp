@@ -8,6 +8,7 @@
 #include "Database.h"
 #include "Engine.h"
 
+#include <cmath>
 #include <utility>
 #include "OptionsMenu.h"
 #include "Osu.h"
@@ -469,7 +470,7 @@ bool BassSoundEngine::play(Sound *snd, float pan, float pitch) {
     if(pitch != 0.0f) {
         f32 freq = cv::snd_freq.getFloat();
         BASS_ChannelGetAttribute(channel, BASS_ATTRIB_FREQ, &freq);
-        BASS_ChannelSetAttribute(channel, BASS_ATTRIB_FREQ, pow(2.0f, pitch) * freq);
+        BASS_ChannelSetAttribute(channel, BASS_ATTRIB_FREQ, std::pow(2.0f, pitch) * freq);
     }
 
     BASS_ChannelFlags(channel, bassSound->isLooped() ? BASS_SAMPLE_LOOP : 0, BASS_SAMPLE_LOOP);

@@ -1,5 +1,6 @@
 #include "ModFPoSu.h"
 
+#include <cmath>
 #include <sstream>
 
 #include "AnimationHandler.h"
@@ -439,7 +440,8 @@ Vector2 ModFPoSu::intersectRayMesh(Vector3 pos, Vector3 dir) {
                         const float downLength = (Down - TopLeft).length();
                         const float x = u / (rightLength * rightLength);
                         const float y = v / (downLength * downLength);
-                        const float distancePerFace = (float)osu->getScreenWidth() / pow(2.0f, (float)SUBDIVISIONS);
+                        const float distancePerFace =
+                            (float)osu->getScreenWidth() / std::pow(2.0f, (float)SUBDIVISIONS);
                         const float distanceInFace = distancePerFace * x;
 
                         const Vector2 newMousePos =

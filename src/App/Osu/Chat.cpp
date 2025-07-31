@@ -33,6 +33,7 @@
 #include "UserCard2.h"
 
 #include <algorithm>
+#include <cmath>
 #include <regex>
 #include <utility>
 
@@ -876,13 +877,13 @@ void Chat::updateLayout(Vector2 newResolution) {
 
     // In the lobby and in multi rooms don't take the full horizontal width to allow for cleaner UI designs.
     if(this->isSmallChat()) {
-        newResolution.x = round(newResolution.x * 0.6f);
+        newResolution.x = std::round(newResolution.x * 0.6f);
     }
 
     this->setSize(newResolution);
 
     const float chat_w = newResolution.x;
-    const float chat_h = round(newResolution.y * 0.3f) - this->input_box_height;
+    const float chat_h = std::round(newResolution.y * 0.3f) - this->input_box_height;
     const float chat_y = newResolution.y - (chat_h + this->input_box_height);
     for(auto chan : this->channels) {
         chan->updateLayout(Vector2{0.f, chat_y}, Vector2{chat_w, chat_h});
@@ -923,7 +924,7 @@ void Chat::updateButtonLayout(Vector2 screen) {
         total_x += button_width;
     }
 
-    const float chat_y = round(screen.y * 0.7f);
+    const float chat_y = std::round(screen.y * 0.7f);
     float total_y = 0.f;
     total_x = initial_x;
     for(auto chan : this->channels) {

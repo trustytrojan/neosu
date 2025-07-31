@@ -1,5 +1,6 @@
 #include "MainMenu.h"
 
+#include <cmath>
 #include <utility>
 
 #include "AnimationHandler.h"
@@ -415,7 +416,7 @@ void MainMenu::draw() {
 
     // draw notification arrow for changelog (version button)
     if(this->bDrawVersionNotificationArrow) {
-        float animation = fmod((float)(engine->getTime()) * 3.2f, 2.0f);
+        float animation = std::fmod((float)(engine->getTime()) * 3.2f, 2.0f);
         if(animation > 1.0f) animation = 2.0f - animation;
         animation = -animation * (animation - 2);  // quad out
         float offset = osu->getUIScale(45.0f * animation);
