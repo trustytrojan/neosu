@@ -185,7 +185,7 @@ class ProfilerProfile {
     int groupNameToID(const char *group);
 
     int iNumGroups;
-    BUDGETGROUP groups[VPROF_MAX_NUM_BUDGETGROUPS];
+    BUDGETGROUP groups[VPROF_MAX_NUM_BUDGETGROUPS]{};
 
     bool bManualStartViaMain;
 

@@ -44,10 +44,10 @@ NetworkHandler::NetworkHandler() : multi_handle(nullptr) {
     runtime_assert(s_banchoInstance, "Bancho failed to initialize!");
 
     // start network thread
-    this->network_thread = std::make_unique<McThread>(
-        [this](std::stop_token stopToken) { this->networkThreadFunc(std::move(stopToken)); });
+    this->network_thread = std::make_unique<std::jthread>(
+        [this](const std::stop_token& stopToken) { this->networkThreadFunc(stopToken); });
 
-    if(!this->network_thread->isReady()) {
+    if(!this->network_thread->joinable()) {
         debugLogF("ERROR: Failed to create network thread!\n");
     }
 }
@@ -78,7 +78,9 @@ NetworkHandler::~NetworkHandler() {
     curl_global_cleanup();
 }
 
-void NetworkHandler::networkThreadFunc(std::stop_token stopToken) {
+void NetworkHandler::networkThreadFunc(const std::stop_token& stopToken) {
+    McThread::set_current_thread_name("net_manager");
+
     while(!stopToken.stop_requested()) {
         processNewRequests();
 
@@ -99,9 +101,8 @@ void NetworkHandler::networkThreadFunc(std::stop_token stopToken) {
 
             std::stop_callback stopCallback(stopToken, [&]() { this->request_queue_cv.notify_all(); });
 
-            this->request_queue_cv.wait_for(lock, std::chrono::milliseconds(100), [this, &stopToken] {
-                return !this->pending_requests.empty() || stopToken.stop_requested();
-            });
+            this->request_queue_cv.wait_for(lock, stopToken, std::chrono::milliseconds(100),
+                                            [this] { return !this->pending_requests.empty(); });
         } else {
             // brief sleep to avoid busy waiting
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -211,7 +212,7 @@ void NetworkHandler::setupCurlHandle(CURL* handle, NetworkRequest* request) {
     curl_easy_setopt(handle, CURLOPT_HEADERDATA, request);
     curl_easy_setopt(handle, CURLOPT_SSL_VERIFYPEER, true);
     curl_easy_setopt(handle, CURLOPT_NOSIGNAL, 1L);
-    curl_easy_setopt(handle, CURLOPT_FAILONERROR, 1L); // fail on HTTP responses >= 400
+    curl_easy_setopt(handle, CURLOPT_FAILONERROR, 1L);  // fail on HTTP responses >= 400
 
     if(!request->options.userAgent.empty()) {
         curl_easy_setopt(handle, CURLOPT_USERAGENT, request->options.userAgent.c_str());

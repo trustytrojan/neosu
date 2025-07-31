@@ -8,9 +8,9 @@
 #include <queue>
 #include <functional>
 #include <map>
+#include <thread>
 
 struct Bancho;
-class McThread;
 
 // forward declare for async requests
 struct NetworkRequest;
@@ -68,11 +68,11 @@ class NetworkHandler {
    private:
     // curl_multi implementation
     CURLM* multi_handle;
-    std::unique_ptr<McThread> network_thread;
+    std::unique_ptr<std::jthread> network_thread;
 
     // request queuing
     std::mutex request_queue_mutex;
-    std::condition_variable request_queue_cv;
+    std::condition_variable_any request_queue_cv;
     std::queue<std::unique_ptr<NetworkRequest>> pending_requests;
 
     // active requests tracking
@@ -84,7 +84,7 @@ class NetworkHandler {
     std::map<void*, std::condition_variable*> sync_request_cvs;
     std::map<void*, Response> sync_responses;
 
-    void networkThreadFunc(std::stop_token stopToken);
+    void networkThreadFunc(const std::stop_token &stopToken);
     void processNewRequests();
     void processCompletedRequests();
     std::unique_ptr<NetworkRequest> createRequest(const UString& url, AsyncCallback callback,

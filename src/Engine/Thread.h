@@ -9,134 +9,37 @@
 #ifndef THREAD_H
 #define THREAD_H
 
-#if defined(_HAS_EXCEPTIONS)
-#if _HAS_EXCEPTIONS == 0
-#undef __EXCEPTIONS
+#include "UString.h"
+
+#if defined(_WIN32) && defined(WINVER) && (WINVER >= 0x0A00)
+#include "WinDebloatDefs.h"
+#include <processthreadsapi.h>
+#ifndef SUCCEEDED
+#define SUCCEEDED(hr) (((HRESULT)(hr)) >= 0)
+#endif
 #else
-#define __EXCEPTIONS
-#endif
-#endif
-
-#ifdef __EXCEPTIONS
-#include "Engine.h" // for debugLog
+#include <pthread.h>
 #endif
 
-#include <functional>
-#include <stop_token>
-#include <thread>
-#include <utility>
-
-class McThread final
-{
-public:
-	
-
-	typedef void *(*START_ROUTINE)(void *);
-	typedef void *(*START_ROUTINE_WITH_STOP_TOKEN)(void *, std::stop_token);
-
-public:
-	// backward compatibility
-	McThread(START_ROUTINE start_routine, void *arg)
-#ifndef __EXCEPTIONS
-	    noexcept
+namespace McThread {
+// WARNING: must be called from within the thread itself! otherwise, the main process name will be changed
+static inline bool set_current_thread_name(const UString &name) {
+#if defined(_WIN32) && defined(WINVER) && (WINVER >= 0x0A00)
+    HANDLE handle = GetCurrentThread();
+    HRESULT hr = SetThreadDescription(handle, name.wc_str());
+    return SUCCEEDED(hr);
+#elif defined(__linux__)
+    auto truncated_name = name.substr<std::string>(0, 15);
+    return pthread_setname_np(pthread_self(), truncated_name.c_str()) == 0;
+#elif defined(__APPLE__)
+    return pthread_setname_np(name.toUtf8()) == 0;
+#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
+    pthread_set_name_np(pthread_self(), name.toUtf8());
+    return true;
+#else
+    return false;
 #endif
-	{
-		this->bReady = false;
-		this->bUsesStopToken = false;
-#ifdef __EXCEPTIONS
-		try
-		{
-#endif
-			// wrap the legacy function for jthreads
-			this->thread = std::jthread([start_routine, arg](const std::stop_token&) -> void { start_routine(arg); });
-			this->bReady = true;
-#ifdef __EXCEPTIONS
-		}
-		catch (const std::system_error &e)
-		{
-			debugLog("McThread Error: std::jthread constructor exception: {:s}\n", e.what());
-		}
-#endif
-	}
-
-	// constructor which takes a stop token directly
-	McThread(START_ROUTINE_WITH_STOP_TOKEN start_routine, void *arg)
-#ifndef __EXCEPTIONS
-	    noexcept
-#endif
-	{
-		this->bReady = false;
-		this->bUsesStopToken = true;
-#ifdef __EXCEPTIONS
-		try
-		{
-#endif
-			this->thread = std::jthread([start_routine, arg](std::stop_token token) -> void { start_routine(arg, std::move(token)); });
-			this->bReady = true;
-#ifdef __EXCEPTIONS
-		}
-		catch (const std::system_error &e)
-		{
-			debugLog("McThread Error: std::jthread constructor exception: {:s}\n", e.what());
-		}
-#endif
-	}
-
-	// ctor that takes a std::function directly
-	McThread(std::function<void(std::stop_token)> func)
-#ifndef __EXCEPTIONS
-	    noexcept
-#endif
-	{
-		this->bReady = false;
-		this->bUsesStopToken = true;
-#ifdef __EXCEPTIONS
-		try
-		{
-#endif
-			this->thread = std::jthread(std::move(func));
-			this->bReady = true;
-#ifdef __EXCEPTIONS
-		}
-		catch (const std::system_error &e)
-		{
-			debugLog("McThread Error: std::jthread constructor exception: {:s}\n", e.what());
-		}
-#endif
-	}
-
-	~McThread()
-	{
-		if (!this->bReady)
-			return;
-
-		this->bReady = false;
-
-		// jthread automatically requests stop and joins in destructor
-		// but we can be explicit about it
-		if (this->thread.joinable())
-		{
-			this->thread.request_stop();
-			this->thread.join();
-		}
-	}
-
-	[[nodiscard]] inline bool isReady() const { return this->bReady; }
-	[[nodiscard]] inline bool isStopRequested() const { return this->bReady && this->thread.get_stop_token().stop_requested(); }
-
-	inline void requestStop()
-	{
-		if (this->bReady)
-			this->thread.request_stop();
-	}
-
-	[[nodiscard]] inline std::stop_token getStopToken() const { return this->thread.get_stop_token(); }
-	[[nodiscard]] inline bool usesStopToken() const { return this->bUsesStopToken; }
-
-private:
-	std::jthread thread;
-	bool bReady;
-	bool bUsesStopToken;
-};
+}
+};  // namespace McThread
 
 #endif

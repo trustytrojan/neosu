@@ -80,7 +80,7 @@ class Sound : public Resource {
 
    protected:
     void init() override = 0;
-    void initAsync() override = 0;
+    void initAsync() override;
     void destroy() override = 0;
 
     inline void setLastPlayTime(f64 lastPlayTime) { this->fLastPlayTime = lastPlayTime; }

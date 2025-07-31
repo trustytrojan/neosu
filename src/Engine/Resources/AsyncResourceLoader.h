@@ -15,13 +15,13 @@
 #include <memory>
 #include <mutex>
 #include <queue>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
 #include "Resource.h"
 
 class ConVar;
-class McThread;
 
 // everything is public because the class data should only be accessed by ResourceManager and the resource threads
 // themselves
@@ -59,10 +59,6 @@ class AsyncResourceLoader final {
     class LoaderThread;
     friend class LoaderThread;
 
-    // threading configuration
-    static constexpr unsigned int MIN_NUM_THREADS = 1;
-    static constexpr auto THREAD_IDLE_TIMEOUT = std::chrono::seconds{5};
-
     // thread management
     void ensureThreadAvailable();
     void cleanupIdleThreads();
@@ -72,11 +68,17 @@ class AsyncResourceLoader final {
     void markWorkAsyncComplete(std::unique_ptr<LoadingWork> work);
     std::unique_ptr<LoadingWork> getNextAsyncCompleteWork();
 
+    // set during ctor, dependent on hardware
     size_t iMaxThreads;
-    std::chrono::seconds threadIdleTimeout{5};
+    static constexpr const size_t HARD_THREADCOUNT_LIMIT{32};
+
+    // thread idle configuration
+    static constexpr std::chrono::milliseconds IDLE_GRACE_PERIOD{1000};  // 1 sec
+    static constexpr std::chrono::milliseconds IDLE_TIMEOUT{15000};      // 15 sec
+    std::chrono::steady_clock::time_point lastCleanupTime;
 
     // thread pool
-    std::vector<std::unique_ptr<LoaderThread>> threads;
+    std::unordered_map<size_t, std::unique_ptr<LoaderThread>> threadpool;  // index to thread
     mutable std::mutex threadsMutex;
 
     // thread lifecycle tracking
@@ -99,7 +101,7 @@ class AsyncResourceLoader final {
     std::atomic<size_t> iWorkIdCounter{0};
 
     // work notification
-    std::condition_variable workAvailable;
+    std::condition_variable_any workAvailable;
     std::mutex workAvailableMutex;
 
     // async destroy queue
