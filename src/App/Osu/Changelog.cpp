@@ -399,7 +399,7 @@ Changelog::Changelog() : ScreenBackable() {
     v34_02.changes.emplace_back("- Added [quit] indicator next to users who quit a match");
     v34_02.changes.emplace_back("- Made main menu shuffle through songs instead of looping over the same one");
     v34_02.changes.emplace_back("- Fixed \"No records set!\" banner display");
-    v34_02.changes.emplace_back("- Fixed \"Server has restarded\" loop after a login error");
+    v34_02.changes.emplace_back("- Fixed \"Server has restarted\" loop after a login error");
     v34_02.changes.emplace_back("- Fixed chat being force-hid during breaks and before map start");
     v34_02.changes.emplace_back("- Fixed chat not supporting expected keyboard navigation");
     v34_02.changes.emplace_back("- Fixed text selection for password field");
