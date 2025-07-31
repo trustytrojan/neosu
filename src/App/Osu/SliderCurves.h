@@ -63,7 +63,7 @@ class SliderCurveType {
 
     virtual Vector2 pointAt(float t) = 0;
 
-    [[nodiscard]] inline const int getNumPoints() const { return this->points.size(); }
+    [[nodiscard]] inline int getNumPoints() const { return this->points.size(); }
 
     [[nodiscard]] inline const std::vector<Vector2> &getCurvePoints() const { return this->points; }
     [[nodiscard]] inline const std::vector<float> &getCurveDistances() const { return this->curveDistances; }
@@ -151,7 +151,7 @@ class SliderCurveCircumscribedCircle final : public SliderCurve {
    private:
     Vector2 intersect(Vector2 a, Vector2 ta, Vector2 b, Vector2 tb);
 
-    inline bool const isIn(float a, float b, float c) { return ((b > a && b < c) || (b < a && b > c)); }
+    static forceinline bool isIn(float a, float b, float c) { return ((b > a && b < c) || (b < a && b > c)); }
 
     Vector2 vCircleCenter;
     Vector2 vOriginalCircleCenter;

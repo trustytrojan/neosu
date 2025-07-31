@@ -1310,7 +1310,7 @@ std::vector<SCORE_ENTRY> HUD::getCurrentScores() {
         nb_slots++;
     }
 
-    auto sorting_type = bancho->is_in_a_multi_room() ? bancho->room.win_condition : SCOREV1;
+    WinCondition sorting_type = bancho->is_in_a_multi_room() ? (WinCondition)bancho->room.win_condition : SCOREV1;
     std::ranges::sort(scores, [sorting_type](const SCORE_ENTRY &a, const SCORE_ENTRY &b) {
         if(sorting_type == ACCURACY) {
             return a.accuracy > b.accuracy;

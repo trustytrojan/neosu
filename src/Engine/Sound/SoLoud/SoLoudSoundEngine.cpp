@@ -406,16 +406,16 @@ bool SoLoudSoundEngine::initializeOutputDevice(const OUTPUT_DEVICE &device) {
             backend = SoLoud::Soloud::MINIAUDIO;
     }
 
-    unsigned int sampleRate = (cv::snd_freq.getVal<unsigned int>() == static_cast<int>(cv::snd_freq.getDefaultFloat())
-                                   ? SoLoud::Soloud::AUTO
+    unsigned int sampleRate = (cv::snd_freq.getVal<unsigned int>() == static_cast<unsigned int>(cv::snd_freq.getDefaultFloat())
+                                   ? (unsigned int)SoLoud::Soloud::AUTO
                                    : cv::snd_freq.getVal<unsigned int>());
-    if(sampleRate <= 0) sampleRate = SoLoud::Soloud::AUTO;
+    if(sampleRate < 22500 || sampleRate > 192000) sampleRate = SoLoud::Soloud::AUTO;
 
     unsigned int bufferSize =
-        (cv::snd_soloud_buffer.getVal<unsigned int>() == static_cast<int>(cv::snd_soloud_buffer.getDefaultFloat())
-             ? SoLoud::Soloud::AUTO
+        (cv::snd_soloud_buffer.getVal<unsigned int>() == static_cast<unsigned int>(cv::snd_soloud_buffer.getDefaultFloat())
+             ? (unsigned int)SoLoud::Soloud::AUTO
              : cv::snd_soloud_buffer.getVal<unsigned int>());
-    if(bufferSize < 0) bufferSize = SoLoud::Soloud::AUTO;
+    if(bufferSize > 2048) bufferSize = SoLoud::Soloud::AUTO;
 
     // use stereo output
     constexpr unsigned int channels = 2;

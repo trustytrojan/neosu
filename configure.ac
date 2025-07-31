@@ -606,8 +606,8 @@ AS_IF([test "x$enable_lto" != "xno"], [
     ])
 ])
 
-NEOSU_CPPFLAGS="$NEOSU_CPPFLAGS -DCJSON_HIDE_SYMBOLS -DGLM_ENABLE_EXPERIMENTAL"
-NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -Wall -Wno-sign-compare -Wunused-parameter -Wdeprecated-declarations -Wno-error=deprecated-declarations -pthread"
+NEOSU_CPPFLAGS="$NEOSU_CPPFLAGS -DCJSON_HIDE_SYMBOLS -DGLM_ENABLE_EXPERIMENTAL -DGLM_FORCE_INLINE"
+NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -Wall -Wextra -Wno-sign-compare -Wunused-parameter -Wdeprecated-declarations -Wno-error=deprecated-declarations -pthread"
 NEOSU_LDFLAGS="$NEOSU_LDFLAGS -pthread"
 AC_SUBST([NEOSU_CPPFLAGS])
 AC_SUBST([NEOSU_CXXFLAGS])

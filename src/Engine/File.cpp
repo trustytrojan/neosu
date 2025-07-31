@@ -201,7 +201,7 @@ File::FILETYPE File::existsCaseInsensitive(std::string &filePath, fs::path &path
 
     // try case-insensitive lookup using cache
     auto [resolvedName, fileType] =
-        s_directoryCache->lookup(parentPath, {path.filename().string().c_str()});  // takes the bare filename
+        s_directoryCache->lookup(parentPath, {path.filename().string()});  // takes the bare filename
 
     if(fileType == File::FILETYPE::NONE) return File::FILETYPE::NONE;  // no match, even case-insensitively
 
@@ -284,13 +284,9 @@ bool File::openForReading() {
     }
 
     // validate file size
-    if(this->iFileSize == 0)  // empty file is valid
+    if(this->iFileSize == 0) {  // empty file is valid
         return true;
-    else if(this->iFileSize < 0) {
-        debugLogF("File Error: FileSize is < 0\n");
-        return false;
-    } else if(std::cmp_greater(this->iFileSize, 1024 * 1024 * cv::file_size_max.getInt()))  // size sanity check
-    {
+    } else if(std::cmp_greater(this->iFileSize, 1024 * 1024 * cv::file_size_max.getInt())) {  // size sanity check
         debugLogF("File Error: FileSize of {:s} is > {} MB!!!\n", this->sFilePath, cv::file_size_max.getInt());
         return false;
     }

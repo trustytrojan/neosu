@@ -12,8 +12,8 @@
 #include "config.h"
 
 #if defined(MCENGINE_FEATURE_BASS)
-
-#include <cstdint>  // need to include before bass headers because namespace things
+// need to include before bass headers because namespace things
+#include <cstdint> // IWYU pragma: keep
 #include <string>
 
 class UString;
@@ -63,7 +63,7 @@ extern "C" {
 #define BASSMIXVERSION_REAL 0x2040c04
 #endif
 
-#define BASSLOUDVERSION_REAL 0x00000000  // TODO: lazy
+#define BASSLOUDVERSION_REAL 0x00000001  // TODO: lazy
 
 namespace BassManager {
 namespace BassFuncs {
