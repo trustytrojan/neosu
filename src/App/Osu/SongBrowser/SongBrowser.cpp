@@ -3559,15 +3559,21 @@ void SongBrowser::recreateCollectionsButtons() {
             auto it = this->hashToSongButton.find(map);
             if(it == this->hashToSongButton.end()) continue;
 
-            u32 set_id = 0;
-            auto song_button = it->second;
-            const auto &songButtonChildren = song_button->getChildren();
             std::vector<SongButton *> matching_diffs;
-            for(SongButton *sbc : songButtonChildren) {
-                for(auto &map2 : collection->maps) {
-                    if(sbc->getDatabaseBeatmap()->getMD5Hash() == map2) {
-                        matching_diffs.push_back(sbc);
-                        set_id = sbc->getDatabaseBeatmap()->getSetID();
+
+            auto song_button = it->second;
+            i32 set_id = song_button->getDatabaseBeatmap()->getSetID();
+
+            const auto &songButtonChildren = song_button->getChildren();
+            if(songButtonChildren.empty()) {
+                // button is a difficulty, not a set
+                matching_diffs.push_back(song_button);
+            } else {
+                for(SongButton *sbc : songButtonChildren) {
+                    for(auto &map2 : collection->maps) {
+                        if(sbc->getDatabaseBeatmap()->getMD5Hash() == map2) {
+                            matching_diffs.push_back(sbc);
+                        }
                     }
                 }
             }

@@ -31,6 +31,7 @@ Changelog::Changelog() : ScreenBackable() {
     v39_10.changes = {
         R"(- Added a "keep me signed in" checkbox next to the login button)",
         R"(- Adjusted hit windows to match stable)",
+        R"(- Fixed collections not displaying all available maps)",
         R"(- Fixed "RawInputBuffer" option on Windows, should work much more reliably)",
     };
     changelogs.push_back(v39_10);
