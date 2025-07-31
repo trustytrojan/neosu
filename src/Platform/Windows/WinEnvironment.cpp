@@ -18,7 +18,6 @@
 #include "ConVar.h"
 #include "Engine.h"
 #include "Mouse.h"
-#include "NullGraphicsInterface.h"
 #include "WinGLLegacyInterface.h"
 #include "cbase.h"
 

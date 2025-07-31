@@ -107,10 +107,6 @@ neosu_SOURCES = \
 	src/Engine/NetworkHandler.cpp \
 	src/Engine/Profiler.cpp \
 	src/Engine/RenderTarget.cpp \
-	src/Engine/Renderer/NullGraphicsInterface.cpp \
-	src/Engine/Renderer/NullImage.cpp \
-	src/Engine/Renderer/NullRenderTarget.cpp \
-	src/Engine/Renderer/NullShader.cpp \
 	src/Engine/Renderer/OpenGL/OpenGLImage.cpp \
 	src/Engine/Renderer/OpenGL/OpenGLLegacyInterface.cpp \
 	src/Engine/Renderer/OpenGL/OpenGLRenderTarget.cpp \
