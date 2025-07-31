@@ -5,7 +5,7 @@ class Skin;
 
 class Image;
 
-class SkinImage {
+class SkinImage final {
    public:
     struct IMAGE {
         Image *img;
@@ -15,16 +15,16 @@ class SkinImage {
    public:
     SkinImage(Skin *skin, const std::string& skinElementName, Vector2 baseSizeForScaling2x, float osuSize,
               const std::string& animationSeparator = "-", bool ignoreDefaultSkin = false);
-    virtual ~SkinImage();
+    ~SkinImage();
 
-    virtual void draw(Vector2 pos,
+    void draw(Vector2 pos,
                       float scale = 1.0f);  // for objects scaled automatically to the current resolution
 
     // for objects which scale depending on external factors
     // (e.g. hitobjects, depending on the diameter defined by the CS)
-    virtual void drawRaw(Vector2 pos, float scale, AnchorPoint anchor = AnchorPoint::CENTER);
+    void drawRaw(Vector2 pos, float scale, AnchorPoint anchor = AnchorPoint::CENTER);
 
-    virtual void update(float speedMultiplier, bool useEngineTimeForAnimations = true, long curMusicPos = 0);
+    void update(float speedMultiplier, bool useEngineTimeForAnimations = true, long curMusicPos = 0);
 
     void setAnimationFramerate(float fps) { this->fFrameDuration = 1.0f / std::clamp<float>(fps, 1.0f, 9999.0f); }
     void setAnimationTimeOffset(float speedMultiplier,

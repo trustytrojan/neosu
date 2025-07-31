@@ -18,22 +18,22 @@ namespace SliderRenderer {
 
 namespace {  // static namespace
 
-Shader *BLEND_SHADER = NULL;
-float UNIT_CIRCLE_VAO_DIAMETER = 0.0f;
+Shader *s_BLEND_SHADER = NULL;
+float s_UNIT_CIRCLE_VAO_DIAMETER = 0.0f;
 
 // base mesh
-float MESH_CENTER_HEIGHT = 0.5f;   // Camera::buildMatrixOrtho2D() uses -1 to 1 for zn/zf, so don't make this too high
-int UNIT_CIRCLE_SUBDIVISIONS = 0;  // see osu_slider_body_unit_circle_subdivisions now
-std::vector<float> UNIT_CIRCLE;
-VertexArrayObject *UNIT_CIRCLE_VAO = NULL;
-VertexArrayObject *UNIT_CIRCLE_VAO_BAKED = NULL;
-VertexArrayObject *UNIT_CIRCLE_VAO_TRIANGLES = NULL;
+float s_MESH_CENTER_HEIGHT = 0.5f;   // Camera::buildMatrixOrtho2D() uses -1 to 1 for zn/zf, so don't make this too high
+int s_UNIT_CIRCLE_SUBDIVISIONS = 0;  // see osu_slider_body_unit_circle_subdivisions now
+std::vector<float> s_UNIT_CIRCLE;
+VertexArrayObject *s_UNIT_CIRCLE_VAO = NULL;
+VertexArrayObject *s_UNIT_CIRCLE_VAO_BAKED = NULL;
+VertexArrayObject *s_UNIT_CIRCLE_VAO_TRIANGLES = NULL;
 
 // tiny rendering optimization for RenderTarget
-float fBoundingBoxMinX = (std::numeric_limits<float>::max)();
-float fBoundingBoxMaxX = 0.0f;
-float fBoundingBoxMinY = (std::numeric_limits<float>::max)();
-float fBoundingBoxMaxY = 0.0f;
+float s_fBoundingBoxMinX = (std::numeric_limits<float>::max)();
+float s_fBoundingBoxMaxX = 0.0f;
+float s_fBoundingBoxMinY = (std::numeric_limits<float>::max)();
+float s_fBoundingBoxMaxY = 0.0f;
 
 // forward decls
 void drawFillSliderBodyPeppy(const std::vector<Vector2> &points, VertexArrayObject *circleMesh, float radius,
@@ -66,8 +66,8 @@ VertexArrayObject *generateVAO(const std::vector<Vector2> &points, float hitcirc
         }
 
         if(!debugSquareVao) {
-            const std::vector<Vector3> &meshVertices = UNIT_CIRCLE_VAO_TRIANGLES->getVertices();
-            const std::vector<std::vector<Vector2>> &meshTexCoords = UNIT_CIRCLE_VAO_TRIANGLES->getTexcoords();
+            const std::vector<Vector3> &meshVertices = s_UNIT_CIRCLE_VAO_TRIANGLES->getVertices();
+            const std::vector<std::vector<Vector2>> &meshTexCoords = s_UNIT_CIRCLE_VAO_TRIANGLES->getTexcoords();
             for(int v = 0; v < meshVertices.size(); v++) {
                 vao->addVertex(meshVertices[v] + Vector3(point.x, point.y, 0) + translation);
                 vao->addTexcoord(meshTexCoords[0][v]);
@@ -202,15 +202,16 @@ void draw(const std::vector<Vector2> &points, const std::vector<Vector2> &always
             }
 
             if(!cv::slider_use_gradient_image.getBool()) {
-                BLEND_SHADER->enable();
-                BLEND_SHADER->setUniform1i("style", cv::slider_osu_next_style.getBool() ? 1 : 0);
-                BLEND_SHADER->setUniform1f("bodyAlphaMultiplier", cv::slider_body_alpha_multiplier.getFloat());
-                BLEND_SHADER->setUniform1f("bodyColorSaturation", cv::slider_body_color_saturation.getFloat());
-                BLEND_SHADER->setUniform1f("borderSizeMultiplier", cv::slider_border_size_multiplier.getFloat());
-                BLEND_SHADER->setUniform1f("borderFeather", cv::slider_border_feather.getFloat());
-                BLEND_SHADER->setUniform3f("colBorder", dimmedBorderColor.Rf(), dimmedBorderColor.Gf(),
-                                           dimmedBorderColor.Bf());
-                BLEND_SHADER->setUniform3f("colBody", dimmedBodyColor.Rf(), dimmedBodyColor.Gf(), dimmedBodyColor.Bf());
+                s_BLEND_SHADER->enable();
+                s_BLEND_SHADER->setUniform1i("style", cv::slider_osu_next_style.getBool() ? 1 : 0);
+                s_BLEND_SHADER->setUniform1f("bodyAlphaMultiplier", cv::slider_body_alpha_multiplier.getFloat());
+                s_BLEND_SHADER->setUniform1f("bodyColorSaturation", cv::slider_body_color_saturation.getFloat());
+                s_BLEND_SHADER->setUniform1f("borderSizeMultiplier", cv::slider_border_size_multiplier.getFloat());
+                s_BLEND_SHADER->setUniform1f("borderFeather", cv::slider_border_feather.getFloat());
+                s_BLEND_SHADER->setUniform3f("colBorder", dimmedBorderColor.Rf(), dimmedBorderColor.Gf(),
+                                             dimmedBorderColor.Bf());
+                s_BLEND_SHADER->setUniform3f("colBody", dimmedBodyColor.Rf(), dimmedBodyColor.Gf(),
+                                             dimmedBodyColor.Bf());
             }
 
             g->setColor(argb(1.0f, colorRGBMultiplier, colorRGBMultiplier,
@@ -221,16 +222,17 @@ void draw(const std::vector<Vector2> &points, const std::vector<Vector2> &always
                 // draw curve mesh
                 {
                     drawFillSliderBodyPeppy(
-                        points, (cv::slider_legacy_use_baked_vao.getBool() ? UNIT_CIRCLE_VAO_BAKED : UNIT_CIRCLE_VAO),
-                        hitcircleDiameter / 2.0f, drawFromIndex, drawUpToIndex, BLEND_SHADER);
+                        points,
+                        (cv::slider_legacy_use_baked_vao.getBool() ? s_UNIT_CIRCLE_VAO_BAKED : s_UNIT_CIRCLE_VAO),
+                        hitcircleDiameter / 2.0f, drawFromIndex, drawUpToIndex, s_BLEND_SHADER);
 
                     if(alwaysPoints.size() > 0)
-                        drawFillSliderBodyPeppy(alwaysPoints, UNIT_CIRCLE_VAO_BAKED, hitcircleDiameter / 2.0f, 0,
-                                                alwaysPoints.size(), BLEND_SHADER);
+                        drawFillSliderBodyPeppy(alwaysPoints, s_UNIT_CIRCLE_VAO_BAKED, hitcircleDiameter / 2.0f, 0,
+                                                alwaysPoints.size(), s_BLEND_SHADER);
                 }
             }
 
-            if(!cv::slider_use_gradient_image.getBool()) BLEND_SHADER->disable();
+            if(!cv::slider_use_gradient_image.getBool()) s_BLEND_SHADER->disable();
         }
         osu->getSliderFrameBuffer()->disable();
     }
@@ -239,14 +241,15 @@ void draw(const std::vector<Vector2> &points, const std::vector<Vector2> &always
 
     // now draw the slider to the screen (with alpha blending enabled again)
     const int pixelFudge = 2;
-    fBoundingBoxMinX -= pixelFudge;
-    fBoundingBoxMaxX += pixelFudge;
-    fBoundingBoxMinY -= pixelFudge;
-    fBoundingBoxMaxY += pixelFudge;
+    s_fBoundingBoxMinX -= pixelFudge;
+    s_fBoundingBoxMaxX += pixelFudge;
+    s_fBoundingBoxMinY -= pixelFudge;
+    s_fBoundingBoxMaxY += pixelFudge;
 
     osu->getSliderFrameBuffer()->setColor(argb(alpha * cv::slider_alpha_multiplier.getFloat(), 1.0f, 1.0f, 1.0f));
-    osu->getSliderFrameBuffer()->drawRect(fBoundingBoxMinX, fBoundingBoxMinY, fBoundingBoxMaxX - fBoundingBoxMinX,
-                                          fBoundingBoxMaxY - fBoundingBoxMinY);
+    osu->getSliderFrameBuffer()->drawRect(s_fBoundingBoxMinX, s_fBoundingBoxMinY,
+                                          s_fBoundingBoxMaxX - s_fBoundingBoxMinX,
+                                          s_fBoundingBoxMaxY - s_fBoundingBoxMinY);
 }
 
 void draw(VertexArrayObject *vao, const std::vector<Vector2> &alwaysPoints, Vector2 translation, float scale,
@@ -317,15 +320,16 @@ void draw(VertexArrayObject *vao, const std::vector<Vector2> &alwaysPoints, Vect
             }
 
             if(!cv::slider_use_gradient_image.getBool()) {
-                BLEND_SHADER->enable();
-                BLEND_SHADER->setUniform1i("style", cv::slider_osu_next_style.getBool() ? 1 : 0);
-                BLEND_SHADER->setUniform1f("bodyAlphaMultiplier", cv::slider_body_alpha_multiplier.getFloat());
-                BLEND_SHADER->setUniform1f("bodyColorSaturation", cv::slider_body_color_saturation.getFloat());
-                BLEND_SHADER->setUniform1f("borderSizeMultiplier", cv::slider_border_size_multiplier.getFloat());
-                BLEND_SHADER->setUniform1f("borderFeather", cv::slider_border_feather.getFloat());
-                BLEND_SHADER->setUniform3f("colBorder", dimmedBorderColor.Rf(), dimmedBorderColor.Gf(),
-                                           dimmedBorderColor.Bf());
-                BLEND_SHADER->setUniform3f("colBody", dimmedBodyColor.Rf(), dimmedBodyColor.Gf(), dimmedBodyColor.Bf());
+                s_BLEND_SHADER->enable();
+                s_BLEND_SHADER->setUniform1i("style", cv::slider_osu_next_style.getBool() ? 1 : 0);
+                s_BLEND_SHADER->setUniform1f("bodyAlphaMultiplier", cv::slider_body_alpha_multiplier.getFloat());
+                s_BLEND_SHADER->setUniform1f("bodyColorSaturation", cv::slider_body_color_saturation.getFloat());
+                s_BLEND_SHADER->setUniform1f("borderSizeMultiplier", cv::slider_border_size_multiplier.getFloat());
+                s_BLEND_SHADER->setUniform1f("borderFeather", cv::slider_border_feather.getFloat());
+                s_BLEND_SHADER->setUniform3f("colBorder", dimmedBorderColor.Rf(), dimmedBorderColor.Gf(),
+                                             dimmedBorderColor.Bf());
+                s_BLEND_SHADER->setUniform3f("colBody", dimmedBodyColor.Rf(), dimmedBodyColor.Gf(),
+                                             dimmedBodyColor.Bf());
             }
 
             g->setColor(argb(1.0f, colorRGBMultiplier, colorRGBMultiplier,
@@ -335,7 +339,7 @@ void draw(VertexArrayObject *vao, const std::vector<Vector2> &alwaysPoints, Vect
             {
                 // draw curve mesh
                 {
-                    vao->setDrawPercent(from, to, UNIT_CIRCLE_VAO_TRIANGLES->getVertices().size());
+                    vao->setDrawPercent(from, to, s_UNIT_CIRCLE_VAO_TRIANGLES->getVertices().size());
                     g->pushTransform();
                     {
                         g->scale(scale, scale);
@@ -348,12 +352,12 @@ void draw(VertexArrayObject *vao, const std::vector<Vector2> &alwaysPoints, Vect
                     g->popTransform();
 
                     if(alwaysPoints.size() > 0)
-                        drawFillSliderBodyPeppy(alwaysPoints, UNIT_CIRCLE_VAO_BAKED, hitcircleDiameter / 2.0f, 0,
-                                                alwaysPoints.size(), BLEND_SHADER);
+                        drawFillSliderBodyPeppy(alwaysPoints, s_UNIT_CIRCLE_VAO_BAKED, hitcircleDiameter / 2.0f, 0,
+                                                alwaysPoints.size(), s_BLEND_SHADER);
                 }
             }
 
-            if(!cv::slider_use_gradient_image.getBool()) BLEND_SHADER->disable();
+            if(!cv::slider_use_gradient_image.getBool()) s_BLEND_SHADER->disable();
         }
 
         if(doDisableRenderTarget) osu->getSliderFrameBuffer()->disable();
@@ -395,10 +399,10 @@ void drawFillSliderBodyPeppy(const std::vector<Vector2> &points, VertexArrayObje
             startX = x;
             startY = y;
 
-            if(x - radius < fBoundingBoxMinX) fBoundingBoxMinX = x - radius;
-            if(x + radius > fBoundingBoxMaxX) fBoundingBoxMaxX = x + radius;
-            if(y - radius < fBoundingBoxMinY) fBoundingBoxMinY = y - radius;
-            if(y + radius > fBoundingBoxMaxY) fBoundingBoxMaxY = y + radius;
+            if(x - radius < s_fBoundingBoxMinX) s_fBoundingBoxMinX = x - radius;
+            if(x + radius > s_fBoundingBoxMaxX) s_fBoundingBoxMaxX = x + radius;
+            if(y - radius < s_fBoundingBoxMinY) s_fBoundingBoxMinY = y - radius;
+            if(y + radius > s_fBoundingBoxMaxY) s_fBoundingBoxMaxY = y + radius;
         }
     }
     g->popTransform();
@@ -408,116 +412,118 @@ void checkUpdateVars(float hitcircleDiameter) {
     // static globals
 
     // build shaders and circle mesh
-    if(BLEND_SHADER == NULL)  // only do this once
+    if(s_BLEND_SHADER == NULL)  // only do this once
     {
         // build shaders
-        BLEND_SHADER = resourceManager->loadShader("slider.vsh", "slider.fsh", "slider");
+        s_BLEND_SHADER = resourceManager->loadShader("slider.vsh", "slider.fsh", "slider");
     }
 
     const int subdivisions = cv::slider_body_unit_circle_subdivisions.getInt();
-    if(subdivisions != UNIT_CIRCLE_SUBDIVISIONS) {
-        UNIT_CIRCLE_SUBDIVISIONS = subdivisions;
+    if(subdivisions != s_UNIT_CIRCLE_SUBDIVISIONS) {
+        s_UNIT_CIRCLE_SUBDIVISIONS = subdivisions;
 
         // build unit cone
         {
-            UNIT_CIRCLE.clear();
+            s_UNIT_CIRCLE.clear();
 
             // tip of the cone
             // texture coordinates
-            UNIT_CIRCLE.push_back(1.0f);
-            UNIT_CIRCLE.push_back(0.0f);
+            s_UNIT_CIRCLE.push_back(1.0f);
+            s_UNIT_CIRCLE.push_back(0.0f);
 
             // position
-            UNIT_CIRCLE.push_back(0.0f);
-            UNIT_CIRCLE.push_back(0.0f);
-            UNIT_CIRCLE.push_back(MESH_CENTER_HEIGHT);
+            s_UNIT_CIRCLE.push_back(0.0f);
+            s_UNIT_CIRCLE.push_back(0.0f);
+            s_UNIT_CIRCLE.push_back(s_MESH_CENTER_HEIGHT);
 
             for(int j = 0; j < subdivisions; ++j) {
                 float phase = j * (float)PI * 2.0f / subdivisions;
 
                 // texture coordinates
-                UNIT_CIRCLE.push_back(0.0f);
-                UNIT_CIRCLE.push_back(0.0f);
+                s_UNIT_CIRCLE.push_back(0.0f);
+                s_UNIT_CIRCLE.push_back(0.0f);
 
                 // positon
-                UNIT_CIRCLE.push_back((float)std::sin(phase));
-                UNIT_CIRCLE.push_back((float)std::cos(phase));
-                UNIT_CIRCLE.push_back(0.0f);
+                s_UNIT_CIRCLE.push_back((float)std::sin(phase));
+                s_UNIT_CIRCLE.push_back((float)std::cos(phase));
+                s_UNIT_CIRCLE.push_back(0.0f);
             }
 
             // texture coordinates
-            UNIT_CIRCLE.push_back(0.0f);
-            UNIT_CIRCLE.push_back(0.0f);
+            s_UNIT_CIRCLE.push_back(0.0f);
+            s_UNIT_CIRCLE.push_back(0.0f);
 
             // positon
-            UNIT_CIRCLE.push_back((float)std::sin(0.0f));
-            UNIT_CIRCLE.push_back((float)std::cos(0.0f));
-            UNIT_CIRCLE.push_back(0.0f);
+            s_UNIT_CIRCLE.push_back((float)std::sin(0.0f));
+            s_UNIT_CIRCLE.push_back((float)std::cos(0.0f));
+            s_UNIT_CIRCLE.push_back(0.0f);
         }
     }
 
     // build vaos
-    if(UNIT_CIRCLE_VAO == NULL) UNIT_CIRCLE_VAO = new VertexArrayObject(Graphics::PRIMITIVE::PRIMITIVE_TRIANGLE_FAN);
-    if(UNIT_CIRCLE_VAO_BAKED == NULL)
-        UNIT_CIRCLE_VAO_BAKED = resourceManager->createVertexArrayObject(Graphics::PRIMITIVE::PRIMITIVE_TRIANGLE_FAN);
-    if(UNIT_CIRCLE_VAO_TRIANGLES == NULL)
-        UNIT_CIRCLE_VAO_TRIANGLES = new VertexArrayObject(Graphics::PRIMITIVE::PRIMITIVE_TRIANGLES);
+    if(s_UNIT_CIRCLE_VAO == NULL)
+        s_UNIT_CIRCLE_VAO = new VertexArrayObject(Graphics::PRIMITIVE::PRIMITIVE_TRIANGLE_FAN);
+    if(s_UNIT_CIRCLE_VAO_BAKED == NULL)
+        s_UNIT_CIRCLE_VAO_BAKED = resourceManager->createVertexArrayObject(Graphics::PRIMITIVE::PRIMITIVE_TRIANGLE_FAN);
+    if(s_UNIT_CIRCLE_VAO_TRIANGLES == NULL)
+        s_UNIT_CIRCLE_VAO_TRIANGLES = new VertexArrayObject(Graphics::PRIMITIVE::PRIMITIVE_TRIANGLES);
 
     // (re-)generate master circle mesh (centered) if the size changed
     // dynamic mods like minimize or wobble have to use the legacy renderer anyway, since the slider shape may change
     // every frame
-    if(hitcircleDiameter != UNIT_CIRCLE_VAO_DIAMETER) {
+    if(hitcircleDiameter != s_UNIT_CIRCLE_VAO_DIAMETER) {
         const float radius = hitcircleDiameter / 2.0f;
 
-        UNIT_CIRCLE_VAO_BAKED->release();
+        s_UNIT_CIRCLE_VAO_BAKED->release();
 
         // triangle fan
-        UNIT_CIRCLE_VAO_DIAMETER = hitcircleDiameter;
-        UNIT_CIRCLE_VAO->clear();
-        for(int i = 0; i < UNIT_CIRCLE.size() / 5; i++) {
-            Vector3 vertexPos =
-                Vector3((radius * UNIT_CIRCLE[i * 5 + 2]), (radius * UNIT_CIRCLE[i * 5 + 3]), UNIT_CIRCLE[i * 5 + 4]);
-            Vector2 vertexTexcoord = Vector2(UNIT_CIRCLE[i * 5 + 0], UNIT_CIRCLE[i * 5 + 1]);
+        s_UNIT_CIRCLE_VAO_DIAMETER = hitcircleDiameter;
+        s_UNIT_CIRCLE_VAO->clear();
+        for(int i = 0; i < s_UNIT_CIRCLE.size() / 5; i++) {
+            Vector3 vertexPos = Vector3((radius * s_UNIT_CIRCLE[i * 5 + 2]), (radius * s_UNIT_CIRCLE[i * 5 + 3]),
+                                        s_UNIT_CIRCLE[i * 5 + 4]);
+            Vector2 vertexTexcoord = Vector2(s_UNIT_CIRCLE[i * 5 + 0], s_UNIT_CIRCLE[i * 5 + 1]);
 
-            UNIT_CIRCLE_VAO->addVertex(vertexPos);
-            UNIT_CIRCLE_VAO->addTexcoord(vertexTexcoord);
+            s_UNIT_CIRCLE_VAO->addVertex(vertexPos);
+            s_UNIT_CIRCLE_VAO->addTexcoord(vertexTexcoord);
 
-            UNIT_CIRCLE_VAO_BAKED->addVertex(vertexPos);
-            UNIT_CIRCLE_VAO_BAKED->addTexcoord(vertexTexcoord);
+            s_UNIT_CIRCLE_VAO_BAKED->addVertex(vertexPos);
+            s_UNIT_CIRCLE_VAO_BAKED->addTexcoord(vertexTexcoord);
         }
 
-        resourceManager->loadResource(UNIT_CIRCLE_VAO_BAKED);
+        resourceManager->loadResource(s_UNIT_CIRCLE_VAO_BAKED);
 
         // pure triangles (needed for VertexArrayObject, because we can't merge multiple triangle fan meshes into one
         // VertexArrayObject)
-        UNIT_CIRCLE_VAO_TRIANGLES->clear();
+        s_UNIT_CIRCLE_VAO_TRIANGLES->clear();
         Vector3 startVertex =
-            Vector3((radius * UNIT_CIRCLE[0 * 5 + 2]), (radius * UNIT_CIRCLE[0 * 5 + 3]), UNIT_CIRCLE[0 * 5 + 4]);
-        Vector2 startUV = Vector2(UNIT_CIRCLE[0 * 5 + 0], UNIT_CIRCLE[0 * 5 + 1]);
-        for(int i = 1; i < UNIT_CIRCLE.size() / 5 - 1; i++) {
+            Vector3((radius * s_UNIT_CIRCLE[0 * 5 + 2]), (radius * s_UNIT_CIRCLE[0 * 5 + 3]), s_UNIT_CIRCLE[0 * 5 + 4]);
+        Vector2 startUV = Vector2(s_UNIT_CIRCLE[0 * 5 + 0], s_UNIT_CIRCLE[0 * 5 + 1]);
+        for(int i = 1; i < s_UNIT_CIRCLE.size() / 5 - 1; i++) {
             // center
-            UNIT_CIRCLE_VAO_TRIANGLES->addVertex(startVertex);
-            UNIT_CIRCLE_VAO_TRIANGLES->addTexcoord(startUV);
+            s_UNIT_CIRCLE_VAO_TRIANGLES->addVertex(startVertex);
+            s_UNIT_CIRCLE_VAO_TRIANGLES->addTexcoord(startUV);
 
             // pizza slice edge 1
-            UNIT_CIRCLE_VAO_TRIANGLES->addVertex(
-                Vector3((radius * UNIT_CIRCLE[i * 5 + 2]), (radius * UNIT_CIRCLE[i * 5 + 3]), UNIT_CIRCLE[i * 5 + 4]));
-            UNIT_CIRCLE_VAO_TRIANGLES->addTexcoord(Vector2(UNIT_CIRCLE[i * 5 + 0], UNIT_CIRCLE[i * 5 + 1]));
+            s_UNIT_CIRCLE_VAO_TRIANGLES->addVertex(Vector3(
+                (radius * s_UNIT_CIRCLE[i * 5 + 2]), (radius * s_UNIT_CIRCLE[i * 5 + 3]), s_UNIT_CIRCLE[i * 5 + 4]));
+            s_UNIT_CIRCLE_VAO_TRIANGLES->addTexcoord(Vector2(s_UNIT_CIRCLE[i * 5 + 0], s_UNIT_CIRCLE[i * 5 + 1]));
 
             // pizza slice edge 2
-            UNIT_CIRCLE_VAO_TRIANGLES->addVertex(Vector3((radius * UNIT_CIRCLE[(i + 1) * 5 + 2]),
-                                                         (radius * UNIT_CIRCLE[(i + 1) * 5 + 3]),
-                                                         UNIT_CIRCLE[(i + 1) * 5 + 4]));
-            UNIT_CIRCLE_VAO_TRIANGLES->addTexcoord(Vector2(UNIT_CIRCLE[(i + 1) * 5 + 0], UNIT_CIRCLE[(i + 1) * 5 + 1]));
+            s_UNIT_CIRCLE_VAO_TRIANGLES->addVertex(Vector3((radius * s_UNIT_CIRCLE[(i + 1) * 5 + 2]),
+                                                           (radius * s_UNIT_CIRCLE[(i + 1) * 5 + 3]),
+                                                           s_UNIT_CIRCLE[(i + 1) * 5 + 4]));
+            s_UNIT_CIRCLE_VAO_TRIANGLES->addTexcoord(
+                Vector2(s_UNIT_CIRCLE[(i + 1) * 5 + 0], s_UNIT_CIRCLE[(i + 1) * 5 + 1]));
         }
     }
 }
 
 void resetRenderTargetBoundingBox() {
-    fBoundingBoxMinX = (std::numeric_limits<float>::max)();
-    fBoundingBoxMaxX = 0.0f;
-    fBoundingBoxMinY = (std::numeric_limits<float>::max)();
-    fBoundingBoxMaxY = 0.0f;
+    s_fBoundingBoxMinX = (std::numeric_limits<float>::max)();
+    s_fBoundingBoxMaxX = 0.0f;
+    s_fBoundingBoxMinY = (std::numeric_limits<float>::max)();
+    s_fBoundingBoxMaxY = 0.0f;
 }
 }  // namespace
 
