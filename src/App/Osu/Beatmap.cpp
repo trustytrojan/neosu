@@ -1447,8 +1447,7 @@ void Beatmap::updateTimingPoints(long curPos) {
 }
 
 bool Beatmap::sortHitObjectByStartTimeComp(HitObject const *a, HitObject const *b) {
-    if((a->click_time) != (b->click_time))
-        return (a->click_time) < (b->click_time);
+    if((a->click_time) != (b->click_time)) return (a->click_time) < (b->click_time);
 
     if(a->type != b->type) return static_cast<int>(a->type) < static_cast<int>(b->type);
     if(a->combo_number != b->combo_number) return a->combo_number < b->combo_number;
@@ -1456,7 +1455,7 @@ bool Beatmap::sortHitObjectByStartTimeComp(HitObject const *a, HitObject const *
     auto aPosAtStartTime = a->getRawPosAt(a->click_time), bPosAtClickTime = b->getRawPosAt(b->click_time);
     if(aPosAtStartTime != bPosAtClickTime) return aPosAtStartTime < bPosAtClickTime;
 
-    return false; // equivalent
+    return false;  // equivalent
 }
 
 bool Beatmap::sortHitObjectByEndTimeComp(HitObject const *a, HitObject const *b) {
@@ -1466,10 +1465,11 @@ bool Beatmap::sortHitObjectByEndTimeComp(HitObject const *a, HitObject const *b)
     if(a->type != b->type) return static_cast<int>(a->type) < static_cast<int>(b->type);
     if(a->combo_number != b->combo_number) return a->combo_number < b->combo_number;
 
-    auto aPosAtEndTime = a->getRawPosAt(a->click_time + a->duration), bPosAtClickTime = b->getRawPosAt(b->click_time + b->duration);
+    auto aPosAtEndTime = a->getRawPosAt(a->click_time + a->duration),
+         bPosAtClickTime = b->getRawPosAt(b->click_time + b->duration);
     if(aPosAtEndTime != bPosAtClickTime) return aPosAtEndTime < bPosAtClickTime;
 
-    return false; // equivalent
+    return false;  // equivalent
 }
 
 long Beatmap::getPVS() {
@@ -1925,43 +1925,41 @@ void Beatmap::drawHitObjects() {
 
     if(!cv::mod_mafham.getBool()) {
         if(!cv::draw_reverse_order.getBool()) {
-            for(int i = this->hitobjectsSortedByEndTime.size() - 1; i >= 0; i--) {
+            for(auto &obj : this->hitobjectsSortedByEndTime | std::views::reverse) {
                 // PVS optimization (reversed)
                 if(usePVS) {
-                    if(this->hitobjectsSortedByEndTime[i]->isFinished() &&
-                       (curPos - pvs > this->hitobjectsSortedByEndTime[i]->click_time +
-                                           this->hitobjectsSortedByEndTime[i]->duration))  // past objects
+                    if(obj->isFinished() && (curPos - pvs > obj->click_time + obj->duration))  // past objects
                         break;
-                    if(this->hitobjectsSortedByEndTime[i]->click_time > curPos + pvs)  // future objects
+                    if(obj->click_time > curPos + pvs)  // future objects
                         continue;
                 }
 
-                this->hitobjectsSortedByEndTime[i]->draw();
+                obj->draw();
             }
         } else {
-            for(auto &i : this->hitobjectsSortedByEndTime) {
+            for(auto &obj : this->hitobjectsSortedByEndTime) {
                 // PVS optimization
                 if(usePVS) {
-                    if(i->isFinished() && (curPos - pvs > i->click_time + i->duration))  // past objects
+                    if(obj->isFinished() && (curPos - pvs > obj->click_time + obj->duration))  // past objects
                         continue;
-                    if(i->click_time > curPos + pvs)  // future objects
+                    if(obj->click_time > curPos + pvs)  // future objects
                         break;
                 }
 
-                i->draw();
+                obj->draw();
             }
         }
-        for(auto &i : this->hitobjectsSortedByEndTime) {
+        for(auto &obj : this->hitobjectsSortedByEndTime) {
             // NOTE: to fix mayday simultaneous sliders with increasing endtime getting culled here, would have to
             // switch from m_hitobjectsSortedByEndTime to m_hitobjects PVS optimization
             if(usePVS) {
-                if(i->isFinished() && (curPos - pvs > i->click_time + i->duration))  // past objects
+                if(obj->isFinished() && (curPos - pvs > obj->click_time + obj->duration))  // past objects
                     continue;
-                if(i->click_time > curPos + pvs)  // future objects
+                if(obj->click_time > curPos + pvs)  // future objects
                     break;
             }
 
-            i->draw2();
+            obj->draw2();
         }
     } else {
         const int mafhamRenderLiveSize = cv::mod_mafham_render_livesize.getInt();

@@ -66,6 +66,9 @@ class AsyncResourceLoader::LoaderThread final {
                 continue;
             }
 
+            // notify that this thread completed work
+            this->last_active.store(std::chrono::steady_clock::now());
+
             Resource *resource = work->resource;
             work->state.store(AsyncResourceLoader::WorkState::ASYNC_IN_PROGRESS);
 
@@ -91,9 +94,6 @@ class AsyncResourceLoader::LoaderThread final {
 
             work->state.store(AsyncResourceLoader::WorkState::ASYNC_COMPLETE);
             this->loader_ptr->markWorkAsyncComplete(std::move(work));
-
-            // notify that this thread completed work
-            this->last_active.store(std::chrono::steady_clock::now());
 
             // yield again before loop
             Timing::sleep(0);

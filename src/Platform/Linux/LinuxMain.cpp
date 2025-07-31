@@ -45,6 +45,7 @@
 
 LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdline,
                      const std::unordered_map<UString, std::optional<UString>> &argMap) {
+    //XInitThreads();
     this->dpy = XOpenDisplay(nullptr);
     if(this->dpy == nullptr) {
         printf("FATAL ERROR: XOpenDisplay() can't connect to X server!\n\n");

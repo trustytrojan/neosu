@@ -1744,7 +1744,7 @@ void OptionsMenu::updateLayout() {
     for(auto &element : this->elemContainers) {
         for(auto &cvm : element->cvars) {
             auto *cv = cvm.second;
-            if(cv == nullptr) break;
+            if(cv == nullptr) continue;
             switch(element->type) {
                 case CBX:
                 case CBX_BTN:

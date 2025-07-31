@@ -30,6 +30,7 @@ Environment::Environment(const std::vector<UString> &argCmdline,
     : mArgMap(argMap), vCmdLine(argCmdline) {
     this->bFullscreenWindowedBorderless = false;
 
+    // set high priority right away
     Environment::setProcessPriority(cv::win_processpriority.getFloat());
 }
 
@@ -53,15 +54,15 @@ const std::string &Environment::getPathToSelf(const char *argv0) {
 
     if constexpr(Env::cfg(OS::LINUX))
         exe_path = fs::canonical("/proc/self/exe", ec);
-    else
-    {
+    else {
         UString uPath{argv0};
         exe_path = fs::canonical(fs::path(uPath.plat_str()), ec);
     }
 
     if(!ec && !exe_path.empty())  // canonical path found
     {
-        pathStr = exe_path.string();
+        UString uPath{exe_path.string().c_str()};
+        pathStr = uPath.toUtf8();
     } else {
 #if defined(MCENGINE_PLATFORM_WINDOWS)  // fallback to GetModuleFileNameW
         std::array<wchar_t, MAX_PATH> buf;
@@ -221,7 +222,7 @@ bool Environment::directoryExists(const std::string &directoryName) {
 }
 
 bool Environment::createDirectory(const std::string &directoryName) {
-    return SDL_CreateDirectory(directoryName.c_str());
+    return SDL_CreateDirectory(directoryName.c_str());  // returns true if it already exists
 }
 
 bool Environment::renameFile(const std::string &oldFileName, const std::string &newFileName) {
@@ -375,8 +376,8 @@ std::vector<std::string> Environment::enumerateDirectory(const std::string &path
     const bool wantDirs = (type == SDL_PATHTYPE_DIRECTORY);
 
     for(const auto &entry : fs::directory_iterator(pathToEnum, ec)) {
-        auto fileType = entry.status(ec).type();
         if(ec) continue;
+        auto fileType = entry.status(ec).type();
 
         if((wantFiles && fileType == fs::file_type::regular) || (wantDirs && fileType == fs::file_type::directory)) {
             const auto &filename = entry.path().filename();

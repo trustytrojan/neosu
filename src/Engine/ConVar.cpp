@@ -264,19 +264,19 @@ ConVarString ConVarHandler::flagsToString(uint8_t flags) {
         if(flags == 0) {
             string.append("no flags");
         } else {
-            if(flags & FCVAR_HIDDEN) string.append(string.length() > 0 ? " hidden" : "hidden");
-            if(flags & FCVAR_BANCHO_SUBMITTABLE)
+            if((flags & FCVAR_HIDDEN) == FCVAR_HIDDEN) string.append(string.length() > 0 ? " hidden" : "hidden");
+            if((flags & FCVAR_BANCHO_SUBMITTABLE) == FCVAR_BANCHO_SUBMITTABLE)
                 string.append(string.length() > 0 ? " bancho_submittable" : "bancho_submittable");
-            if(flags & FCVAR_BANCHO_COMPATIBLE)
+            if((flags & FCVAR_BANCHO_COMPATIBLE) == FCVAR_BANCHO_COMPATIBLE)
                 string.append(string.length() > 0 ? " bancho_compatible" : "bancho_compatible");
 #ifdef _DEBUG
-            bool internal = flags & FCVAR_INTERNAL;
+            bool internal = (flags & FCVAR_INTERNAL) == FCVAR_INTERNAL;
             if(internal) {
                 string.append(string.length() > 0 ? " internal" : "internal");
             } else {
-                if(flags & FCVAR_NOEXEC) string.append(string.length() > 0 ? " noexec" : "noexec");
-                if(flags & FCVAR_NOSAVE) string.append(string.length() > 0 ? " nosave" : "nosave");
-                if(flags & FCVAR_NOLOAD) string.append(string.length() > 0 ? " noload" : "noload");
+                if((flags & FCVAR_NOEXEC) == FCVAR_NOEXEC) string.append(string.length() > 0 ? " noexec" : "noexec");
+                if((flags & FCVAR_NOSAVE) == FCVAR_NOSAVE) string.append(string.length() > 0 ? " nosave" : "nosave");
+                if((flags & FCVAR_NOLOAD) == FCVAR_NOLOAD) string.append(string.length() > 0 ? " noload" : "noload");
             }
 #endif
         }
