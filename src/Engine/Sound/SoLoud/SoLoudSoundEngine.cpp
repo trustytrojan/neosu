@@ -71,11 +71,26 @@ bool SoLoudSoundEngine::play(Sound *snd, float pan, float pitch) {
         handle = 0;
         soloudSound->handle = 0;
     }
-    if(handle != 0 && soloud->getPause(handle)) {
-        // just unpause if paused
-        soloudSound->setPitch(pitch);
-        soloudSound->setPan(pan);
-        soloud->setPause(handle, false);
+    if(handle != 0 && !soloudSound->isOverlayable()) {
+        if(soloudSound->getPitch() != pitch) {
+            soloudSound->setPitch(pitch);
+        }
+
+        if(soloudSound->getSpeed() != pan) {
+            soloudSound->setPan(pan);
+        }
+
+        const bool wasPaused = soloud->getPause(handle);
+
+        if(wasPaused) {
+            // just unpause if paused
+            soloud->setPause(handle, false);
+        }
+
+        if(cv::debug_snd.getBool()) {
+            debugLogF("handle was already valid (and was{} paused), for non-overlayable sound {}\n", wasPaused ? "" : "n't",
+                      soloudSound->getFilePath());
+        }
         return true;
     }
 
@@ -406,15 +421,16 @@ bool SoLoudSoundEngine::initializeOutputDevice(const OUTPUT_DEVICE &device) {
             backend = SoLoud::Soloud::MINIAUDIO;
     }
 
-    unsigned int sampleRate = (cv::snd_freq.getVal<unsigned int>() == static_cast<unsigned int>(cv::snd_freq.getDefaultFloat())
-                                   ? (unsigned int)SoLoud::Soloud::AUTO
-                                   : cv::snd_freq.getVal<unsigned int>());
+    unsigned int sampleRate =
+        (cv::snd_freq.getVal<unsigned int>() == static_cast<unsigned int>(cv::snd_freq.getDefaultFloat())
+             ? (unsigned int)SoLoud::Soloud::AUTO
+             : cv::snd_freq.getVal<unsigned int>());
     if(sampleRate < 22500 || sampleRate > 192000) sampleRate = SoLoud::Soloud::AUTO;
 
-    unsigned int bufferSize =
-        (cv::snd_soloud_buffer.getVal<unsigned int>() == static_cast<unsigned int>(cv::snd_soloud_buffer.getDefaultFloat())
-             ? (unsigned int)SoLoud::Soloud::AUTO
-             : cv::snd_soloud_buffer.getVal<unsigned int>());
+    unsigned int bufferSize = (cv::snd_soloud_buffer.getVal<unsigned int>() ==
+                                       static_cast<unsigned int>(cv::snd_soloud_buffer.getDefaultFloat())
+                                   ? (unsigned int)SoLoud::Soloud::AUTO
+                                   : cv::snd_soloud_buffer.getVal<unsigned int>());
     if(bufferSize > 2048) bufferSize = SoLoud::Soloud::AUTO;
 
     // use stereo output
