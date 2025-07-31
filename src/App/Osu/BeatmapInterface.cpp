@@ -3,18 +3,18 @@
 #include "GameRules.h"
 
 f32 BeatmapInterface::getHitWindow300() {
-    return GameRules::mapDifficultyRange(this->getOD(), GameRules::getMinHitWindow300(), GameRules::getMidHitWindow300(),
-                                         GameRules::getMaxHitWindow300());
+    return GameRules::mapDifficultyRange(this->getOD(), GameRules::getMinHitWindow300(),
+                                         GameRules::getMidHitWindow300(), GameRules::getMaxHitWindow300());
 }
 
 f32 BeatmapInterface::getRawHitWindow300() {
-    return GameRules::mapDifficultyRange(this->getRawOD(), GameRules::getMinHitWindow300(), GameRules::getMidHitWindow300(),
-                                         GameRules::getMaxHitWindow300());
+    return GameRules::mapDifficultyRange(this->getRawOD(), GameRules::getMinHitWindow300(),
+                                         GameRules::getMidHitWindow300(), GameRules::getMaxHitWindow300());
 }
 
 f32 BeatmapInterface::getHitWindow100() {
-    return GameRules::mapDifficultyRange(this->getOD(), GameRules::getMinHitWindow100(), GameRules::getMidHitWindow100(),
-                                         GameRules::getMaxHitWindow100());
+    return GameRules::mapDifficultyRange(this->getOD(), GameRules::getMinHitWindow100(),
+                                         GameRules::getMidHitWindow100(), GameRules::getMaxHitWindow100());
 }
 
 f32 BeatmapInterface::getHitWindow50() {
@@ -59,46 +59,28 @@ f32 BeatmapInterface::getConstantOverallDifficultyForSpeedMultiplier() {
 }
 
 LiveScore::HIT BeatmapInterface::getHitResult(i32 delta) {
-    if(this->mod_halfwindow && delta > 0 && delta <= (i32)GameRules::getHitWindowMiss()) {
-        if(!this->mod_halfwindow_allow_300s)
-            return LiveScore::HIT::HIT_MISS;
-        else if(delta > (i32)this->getHitWindow300())
-            return LiveScore::HIT::HIT_MISS;
+    // "stable-like" hit windows, see https://github.com/ppy/osu/pull/33882
+    f32 window300 = std::floor(this->getHitWindow300()) - 0.5;
+    f32 window100 = std::floor(this->getHitWindow100()) - 0.5;
+    f32 window50 = std::floor(this->getHitWindow50()) - 0.5;
+    f32 windowMiss = std::floor(GameRules::getHitWindowMiss()) - 0.5;
+    f32 fDelta = std::abs((f32)delta);
+
+    // We are 400ms away from the hitobject, don't count this as a miss
+    if(fDelta > windowMiss) {
+        return LiveScore::HIT::HIT_NULL;
     }
 
-    delta = std::abs(delta);
-
-    LiveScore::HIT result = LiveScore::HIT::HIT_NULL;
-
-    if(this->mod_ming3012) {
-        if(delta <= (i32)this->getHitWindow300())
-            result = LiveScore::HIT::HIT_300;
-        else if(delta <= (i32)this->getHitWindow50())
-            result = LiveScore::HIT::HIT_50;
-        else if(delta <= (i32)GameRules::getHitWindowMiss())
-            result = LiveScore::HIT::HIT_MISS;
-    } else if(this->mod_no100s) {
-        if(delta <= (i32)this->getHitWindow300())
-            result = LiveScore::HIT::HIT_300;
-        else if(delta <= (i32)GameRules::getHitWindowMiss())
-            result = LiveScore::HIT::HIT_MISS;
-    } else if(this->mod_no50s) {
-        if(delta <= (i32)this->getHitWindow300())
-            result = LiveScore::HIT::HIT_300;
-        else if(delta <= (i32)this->getHitWindow100())
-            result = LiveScore::HIT::HIT_100;
-        else if(delta <= (i32)GameRules::getHitWindowMiss())
-            result = LiveScore::HIT::HIT_MISS;
-    } else {
-        if(delta <= (i32)this->getHitWindow300())
-            result = LiveScore::HIT::HIT_300;
-        else if(delta <= (i32)this->getHitWindow100())
-            result = LiveScore::HIT::HIT_100;
-        else if(delta <= (i32)this->getHitWindow50())
-            result = LiveScore::HIT::HIT_50;
-        else if(delta <= (i32)GameRules::getHitWindowMiss())
-            result = LiveScore::HIT::HIT_MISS;
+    // mod_halfwindow only allows early hits
+    // mod_halfwindow_allow_300s also allows "late" perfect hits
+    if(this->mod_halfwindow && delta > 0) {
+        if(fDelta > window300 || !this->mod_halfwindow_allow_300s) {
+            return LiveScore::HIT::HIT_MISS;
+        }
     }
 
-    return result;
+    if(fDelta < window300) return LiveScore::HIT::HIT_300;
+    if(fDelta < window100 && !(this->mod_no100s || this->mod_ming3012)) return LiveScore::HIT::HIT_100;
+    if(fDelta < window50 && !(this->mod_no100s || this->mod_no50s)) return LiveScore::HIT::HIT_50;
+    return LiveScore::HIT::HIT_MISS;
 }
