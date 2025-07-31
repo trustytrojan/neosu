@@ -6593,10 +6593,10 @@ else case e in #(
 esac
 fi
 
-if test "$host_cpu" = "x86_64" && test -z "$CLANG"
+if test "$host_cpu" = "x86_64" && test -z "$LLVMMINGW"
 then :
 
-    # this is only possible on x86_64, and not clang
+    # this is only possible on x86_64, and not with llvm-mingw
     # faster tls access
     CFLAGS="$CFLAGS -mtls-dialect=gnu2"
     CXXFLAGS="$CXXFLAGS -mtls-dialect=gnu2"

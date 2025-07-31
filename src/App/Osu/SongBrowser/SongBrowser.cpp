@@ -2630,7 +2630,7 @@ void SongBrowser::onDatabaseLoadingFinished() {
     Timer t(true);
 
     // having a copy of the vector in here is actually completely unnecessary
-    this->beatmaps = std::vector<DatabaseBeatmap *>(db->getDatabaseBeatmaps());
+    this->beatmaps = db->getDatabaseBeatmaps();
 
     debugLogF("Loading {} beatmapsets from database.\n", this->beatmaps.size());
 
@@ -2962,10 +2962,9 @@ void SongBrowser::onSortScoresClicked(CBaseUIButton *button) {
         if(cv::songbrowser_scores_sortingtype.getString() == "Online Leaderboard")
             button->setTextBrightColor(0xff00ff00);
 
-        const std::vector<Database::SCORE_SORTING_METHOD> &scoreSortingMethods = db->getScoreSortingMethods();
-        for(const auto &scoreSortingMethod : scoreSortingMethods) {
-            CBaseUIButton *button = this->contextMenu->addButton(scoreSortingMethod.name);
-            if(scoreSortingMethod.name.utf8View() == cv::songbrowser_scores_sortingtype.getString())
+        for(const auto &scoreSortingMethod : db->getScoreSortingMethods()) {
+            CBaseUIButton *button = this->contextMenu->addButton(UString{scoreSortingMethod.name});
+            if(scoreSortingMethod.name == cv::songbrowser_scores_sortingtype.getString())
                 button->setTextBrightColor(0xff00ff00);
         }
     }
@@ -3193,10 +3192,10 @@ void SongBrowser::rebuildAfterGroupOrSortChange(GROUP group, SORTING_COMPARATOR 
 void SongBrowser::onSelectionMode() {
     if(cv::mod_fposu.getBool()) {
         cv::mod_fposu.setValue(false);
-        osu->getNotificationOverlay()->addToast("Enabled FPoSu mode.", 0xff00ff00);
+        osu->getNotificationOverlay()->addToast("Disabled FPoSu mode.", 0xff00ff00);
     } else {
         cv::mod_fposu.setValue(true);
-        osu->getNotificationOverlay()->addToast("Disabled FPoSu mode.", 0xff00ff00);
+        osu->getNotificationOverlay()->addToast("Enabled FPoSu mode.", 0xff00ff00);
     }
 }
 
@@ -3230,12 +3229,6 @@ void SongBrowser::onSelectionOptions() {
             collectionButtonPointer->triggerContextMenu(heuristicSongButtonPositionAfterSmoothScrollFinishes);
         }
     }
-}
-
-void SongBrowser::onModeChange(const UString &text) { this->onModeChange2(text); }
-
-void SongBrowser::onModeChange2(const UString &text, int id) {
-    cv::mod_fposu.setValue(id == 2 || text == UString("fposu"));
 }
 
 void SongBrowser::onScoreClicked(CBaseUIButton *button) {

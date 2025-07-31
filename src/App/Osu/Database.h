@@ -48,7 +48,7 @@ class Database {
     };
 
     struct SCORE_SORTING_METHOD {
-        UString name;
+        std::string name;
         std::function<bool(FinishedScore const &, FinishedScore const &)> comparator;
     };
 
@@ -87,13 +87,13 @@ class Database {
     inline bool isFinished() const { return (this->getProgress() >= 1.0f); }
     inline bool foundChanges() const { return this->bFoundChanges; }
 
-    inline const std::vector<DatabaseBeatmap *> getDatabaseBeatmaps() const { return this->beatmapsets; }
+    inline const std::vector<DatabaseBeatmap *> &getDatabaseBeatmaps() const { return this->beatmapsets; }
     DatabaseBeatmap *getBeatmapDifficulty(const MD5Hash &md5hash);
     DatabaseBeatmap *getBeatmapDifficulty(i32 map_id);
     DatabaseBeatmap *getBeatmapSet(i32 set_id);
 
     inline std::unordered_map<MD5Hash, std::vector<FinishedScore>> *getScores() { return &this->scores; }
-    inline const std::vector<SCORE_SORTING_METHOD> &getScoreSortingMethods() const { return this->scoreSortingMethods; }
+    inline const std::array<SCORE_SORTING_METHOD, 6> &getScoreSortingMethods() const { return this->scoreSortingMethods; }
 
     std::unordered_map<MD5Hash, std::vector<FinishedScore>> online_scores;
     static const std::string &getOsuSongsFolder();
@@ -149,7 +149,7 @@ class Database {
 
     bool bDidScoresChangeForStats;
     PlayerStats prevPlayerStats;
-    std::vector<SCORE_SORTING_METHOD> scoreSortingMethods;
+    std::array<SCORE_SORTING_METHOD, 6> scoreSortingMethods;
 
     // raw load
     bool bRawBeatmapLoadScheduled{false};

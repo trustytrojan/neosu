@@ -1,3 +1,5 @@
+#include "BottomBar.h"
+
 #include "AnimationHandler.h"
 #include "Engine.h"
 #include "LeaderboardPPCalcThread.h"

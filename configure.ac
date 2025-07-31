@@ -318,8 +318,8 @@ AS_IF([test "x$enable_clang" = "xyes"], [
     NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -fimplicit-constexpr"
 ])
 
-AS_IF([test "$host_cpu" = "x86_64" && test -z "$CLANG"], [
-    # this is only possible on x86_64, and not clang
+AS_IF([test "$host_cpu" = "x86_64" && test -z "$LLVMMINGW"], [
+    # this is only possible on x86_64, and not with llvm-mingw
     # faster tls access
     CFLAGS="$CFLAGS -mtls-dialect=gnu2"
     CXXFLAGS="$CXXFLAGS -mtls-dialect=gnu2"

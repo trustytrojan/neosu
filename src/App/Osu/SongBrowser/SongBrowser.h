@@ -171,9 +171,6 @@ class SongBrowser final : public ScreenBackable {
     void onSelectionRandom();
     void onSelectionOptions();
 
-    void onModeChange(const UString& text);
-    void onModeChange2(const UString& text, int id = -1);
-
     void onScoreClicked(CBaseUIButton *button);
 
     void selectSongButton(Button *songButton);

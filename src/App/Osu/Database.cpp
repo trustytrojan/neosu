@@ -178,12 +178,12 @@ Database::Database() {
     this->prevPlayerStats.percentToNextLevel = 0.0f;
     this->prevPlayerStats.totalScore = 0;
 
-    this->scoreSortingMethods.push_back({"Sort by accuracy", sortScoreByAccuracy});
-    this->scoreSortingMethods.push_back({"Sort by combo", sortScoreByCombo});
-    this->scoreSortingMethods.push_back({"Sort by date", sortScoreByDate});
-    this->scoreSortingMethods.push_back({"Sort by misses", sortScoreByMisses});
-    this->scoreSortingMethods.push_back({"Sort by score", sortScoreByScore});
-    this->scoreSortingMethods.push_back({"Sort by pp", sortScoreByPP});
+    this->scoreSortingMethods = {{{.name = "Sort by accuracy", .comparator = sortScoreByAccuracy},
+                                  {.name = "Sort by combo", .comparator = sortScoreByCombo},
+                                  {.name = "Sort by date", .comparator = sortScoreByDate},
+                                  {.name = "Sort by misses", .comparator = sortScoreByMisses},
+                                  {.name = "Sort by score", .comparator = sortScoreByScore},
+                                  {.name = "Sort by pp", .comparator = sortScoreByPP}}};
 }
 
 Database::~Database() {
@@ -398,7 +398,7 @@ void Database::sortScoresInPlace(std::vector<FinishedScore> &scores) {
     }
 
     for(auto &scoreSortingMethod : this->scoreSortingMethods) {
-        if(cv::songbrowser_scores_sortingtype.getString() == scoreSortingMethod.name.utf8View()) {
+        if(cv::songbrowser_scores_sortingtype.getString() == scoreSortingMethod.name) {
             std::ranges::sort(scores, scoreSortingMethod.comparator);
             return;
         }
