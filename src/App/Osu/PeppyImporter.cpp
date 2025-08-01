@@ -295,7 +295,7 @@ void import_settings_from_osu_stable() {
         } else if(sscanf(curLine.c_str(), " ScoreMeterScale = %f[^\n]", &flt) == 1) {
             cv::hud_hiterrorbar_scale.setValue(flt);
         } else if(sscanf(curLine.c_str(), " NotifyFriends = %i[^\n]", &num) == 1) {
-            cv::notify_friends.setValue(num == 1);
+            cv::notify_friend_status_change.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " PopupDuringGameplay = %i[^\n]", &num) == 1) {
             cv::notify_during_gameplay.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " ScoreboardVisible = %i[^\n]", &num) == 1) {
@@ -305,6 +305,8 @@ void import_settings_from_osu_stable() {
             cv::draw_songbrowser_thumbnails.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " ShowSpectators = %i[^\n]", &num) == 1) {
             cv::draw_spectator_list.setValue(num == 1);
+        } else if(sscanf(curLine.c_str(), " AutoSendNowPlaying = %i[^\n]", &num) == 1) {
+            cv::spec_share_map.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " ShowStoryboard = %i[^\n]", &num) == 1) {
             cv::draw_storyboard.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " Skin = %1023[^\n]", str) == 1) {

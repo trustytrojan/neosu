@@ -468,6 +468,11 @@ bool Beatmap::play() {
             proto::write<ScoreFrame>(&packet, ScoreFrame::get());
             proto::write<u16>(&packet, this->spectator_sequence++);
             BANCHO::Net::send_packet(packet);
+
+            if(cv::spec_share_map.getBool()) {
+                osu->chat->addChannel("#spectator", true);
+                osu->chat->handle_command("/np");
+            }
         }
 
         return true;

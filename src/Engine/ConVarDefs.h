@@ -236,6 +236,13 @@ CONVAR(beatmap_version, "osu_beatmap_version", 128, FCVAR_BANCHO_COMPATIBLE,
        "maximum supported .osu file version, above this will simply not load (this was 14 but got "
        "bumped to 128 due to lazer backports)");
 CONVAR(bug_flicker_log, "osu_bug_flicker_log", false, FCVAR_BANCHO_COMPATIBLE);
+CONVAR(chat_auto_hide, "chat_auto_hide", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
+       "automatically hide chat during gameplay");
+CONVAR(chat_highlight_words, "chat_highlight_words", "", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
+       "space-separated list of words to treat as a mention");
+CONVAR(chat_ignore_list, "chat_ignore_list", "", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
+       "space-separated list of words to ignore");
+CONVAR(chat_ticker, "chat_ticker", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(circle_color_saturation, "osu_circle_color_saturation", 1.0f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(circle_fade_out_scale, "osu_circle_fade_out_scale", 0.4f, FCVAR_LOCKED);
 CONVAR(circle_number_rainbow, "osu_circle_number_rainbow", false, FCVAR_BANCHO_COMPATIBLE);
@@ -851,6 +858,8 @@ CONVAR(notelock_stable_tolerance2b, "osu_notelock_stable_tolerance2b", 3, FCVAR_
 CONVAR(notelock_type, "osu_notelock_type", 2, FCVAR_LOCKED | FCVAR_GAMEPLAY,
        "which notelock algorithm to use (0 = None, 1 = neosu, 2 = osu!stable, 3 = osu!lazer 2020)");
 CONVAR(notification_duration, "osu_notification_duration", 1.25f, FCVAR_BANCHO_COMPATIBLE);
+CONVAR(notify_friend_status_change, "notify_friend_status_change", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
+       "notify when friends change status");
 CONVAR(number_max, "osu_number_max", 0, FCVAR_BANCHO_COMPATIBLE,
        "0 = disabled, 1/2/3/4/etc. limits visual circle numbers to this number");
 CONVAR(number_scale_multiplier, "osu_number_scale_multiplier", 1.0f, FCVAR_BANCHO_COMPATIBLE);
@@ -1143,6 +1152,8 @@ CONVAR(speed_override, "osu_speed_override", -1.0f, FCVAR_BANCHO_COMPATIBLE | FC
 
 CONVAR(spec_buffer, "spec_buffer", 2500, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "size of spectator buffer in milliseconds");
+CONVAR(spec_share_map, "spec_share_map", true, FCVAR_BANCHO_COMPATIBLE,
+       "automatically send currently-playing beatmap to #spectator");
 
 CONVAR(spinner_fade_out_time_multiplier, "osu_spinner_fade_out_time_multiplier", 0.7f, FCVAR_LOCKED);
 CONVAR(spinner_use_ar_fadein, "osu_spinner_use_ar_fadein", false, FCVAR_BANCHO_COMPATIBLE,
@@ -1263,22 +1274,13 @@ CONVAR(allow_mp_invites, "allow_mp_invites", true, FCVAR_BANCHO_COMPATIBLE | FCV
        "allow multiplayer game invites from all users");
 CONVAR(allow_stranger_dms, "allow_stranger_dms", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "allow private messages from non-friends");
-CONVAR(chat_auto_hide, "chat_auto_hide", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
-       "automatically hide chat during gameplay");
-CONVAR(chat_highlight_words, "chat_highlight_words", "", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
-       "space-separated list of words to treat as a mention");
-CONVAR(chat_ignore_list, "chat_ignore_list", "", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
-       "space-separated list of users to ignore");
 CONVAR(chat_notify_on_mention, "chat_notify_on_mention", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "get notified when someone says your name");
 CONVAR(chat_ping_on_mention, "chat_ping_on_mention", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "play a sound when someone says your name");
-CONVAR(chat_ticker, "chat_ticker", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(ignore_beatmap_samples, "ignore_beatmap_samples", false, FCVAR_BANCHO_COMPATIBLE, "ignore beatmap hitsounds");
 CONVAR(ignore_beatmap_skins, "ignore_beatmap_skins", false, FCVAR_BANCHO_COMPATIBLE, "ignore beatmap skins");
 CONVAR(language, "language", "en", FCVAR_BANCHO_COMPATIBLE);
-CONVAR(notify_friends, "notify_friend_status_change", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
-       "notify when friends change status");
 CONVAR(notify_during_gameplay, "notify_during_gameplay", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "show notification popups instantly during gameplay");
 CONVAR(draw_storyboard, "draw_storyboard", true, FCVAR_BANCHO_COMPATIBLE);

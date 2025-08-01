@@ -160,6 +160,9 @@ void Bancho::handle_packet(Packet *packet) {
         user->global_rank = proto::read<i32>(packet);
         user->pp = proto::read<u16>(packet);
 
+        if(user->is_friend() && cv::notify_friend_status_change.getBool()) {
+            // TODO @kiwec: waiting for notify_during_gameplay impl
+        }
         if(stats_user_id == this->user_id) {
             osu->userButton->updateUserStats();
         }
@@ -530,7 +533,9 @@ bool Bancho::can_submit_scores() const {
     }
 }
 
-void Bancho::change_login_state(bool logged_in) { ConVar::relaxed_checks.store(!logged_in, std::memory_order_release); };
+void Bancho::change_login_state(bool logged_in) {
+    ConVar::relaxed_checks.store(!logged_in, std::memory_order_release);
+};
 
 void Bancho::update_channel(const UString &name, const UString &topic, i32 nb_members) {
     Channel *chan{nullptr};
@@ -583,7 +588,7 @@ UString Bancho::get_disk_uuid_blkid() const {
     const std::string &exe_path = Environment::getPathToSelf();
 
     // get the device number of the device the current exe is running from
-    struct stat st{};
+    struct stat st {};
     if(stat(exe_path.c_str(), &st) != 0) {
         return w_uuid;
     }

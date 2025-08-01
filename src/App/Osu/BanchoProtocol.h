@@ -19,6 +19,18 @@ enum Action : uint8_t {
     OSU_DIRECT = 13,
 };
 
+enum Privileges : uint8_t {
+    PLAYER = 1,
+    NOMINATOR = 2,
+    SUPPORTER = 4,
+    OWNER = 8,
+    DEVELOPER = 16,
+    TOURNAMENT_STAFF = 32,
+
+    // Made-up flag for convenience
+    MODERATOR = OWNER | DEVELOPER | TOURNAMENT_STAFF,
+};
+
 enum WinCondition : uint8_t {
     SCOREV1 = 0,
     ACCURACY = 1,
@@ -343,4 +355,4 @@ template <typename T>
 void write(Packet *packet, T t) {
     write_bytes(packet, (u8 *)&t, sizeof(T));
 }
-}
+}  // namespace BANCHO::Proto

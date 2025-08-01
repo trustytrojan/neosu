@@ -39,6 +39,7 @@ class Chat : public OsuScreen {
     ~Chat() override;
 
     void draw() override;
+    void drawTicker();
     void mouse_update(bool *propagate_clicks) override;
     void onKeyDown(KeyboardEvent &e) override;
     void onKeyUp(KeyboardEvent &e) override;
@@ -47,18 +48,19 @@ class Chat : public OsuScreen {
 
     void mark_as_read(ChatChannel *chan);
     void switchToChannel(ChatChannel *chan);
-    void addChannel(const UString& channel_name, bool switch_to = false);
-    void addMessage(UString channel_name, const ChatMessage& msg, bool mark_unread = true);
+    void addChannel(const UString &channel_name, bool switch_to = false);
+    void addMessage(UString channel_name, const ChatMessage &msg, bool mark_unread = true);
     void addSystemMessage(UString msg);
-    void removeChannel(const UString& channel_name);
+    void removeChannel(const UString &channel_name);
     void updateLayout(Vector2 newResolution);
     void updateButtonLayout(Vector2 screen);
+    void updateTickerLayout(Vector2 screen);
     void updateUserList();
 
     void join(const UString &channel_name);
     void leave(const UString &channel_name);
-    void handle_command(const UString& msg);
-    void send_message(const UString& msg);
+    void handle_command(const UString &msg);
+    void send_message(const UString &msg);
     void onDisconnect();
 
     CBaseUIContainer *setVisible(bool visible) override;
@@ -76,7 +78,6 @@ class Chat : public OsuScreen {
     CBaseUITextbox *input_box;
     CBaseUIScrollView *user_list;
 
-    McFont *font;
     float fAnimation = 0.f;
     bool user_wants_chat = false;
     bool visibility_was_forced = false;
@@ -88,4 +89,7 @@ class Chat : public OsuScreen {
     UString away_msg;
     UString tab_completion_prefix;
     UString tab_completion_match;
+
+    ChatChannel *ticker = NULL;
+    f64 ticker_tms = 0.0;
 };

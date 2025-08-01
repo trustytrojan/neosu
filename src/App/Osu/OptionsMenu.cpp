@@ -1254,9 +1254,33 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
         loginElement->cvars[keepCbx] = &cv::mp_autologin;
     }
 
-    this->addSubSection("Online settings");
+    // this->addSubSection("Alerts");
+    // this->addCheckbox("Notify when friends change status", &cv::notify_friend_status_change);
+    // TODO: show chat message notifications (for dms, i guess?)
+    // TODO: show toast when someone says your name
+    // TODO: play sound when someone says your name
+    // TODO: show toasts during gameplay
+
+    this->addSubSection("In-game chat");
+    // this->addCheckbox("Chat ticker", &cv::chat_ticker);
+    this->addCheckbox("Automatically hide chat during gameplay", &cv::chat_auto_hide);
+
+    this->addSpacer();
+    this->addLabel("Chat word ignore list (space-separated)");
+    this->addLabel("");
+    this->addTextbox(cv::chat_ignore_list.getString().c_str(), &cv::chat_ignore_list);
+    // this->addSpacer();
+    // this->addLabel("Chat word highlight list (space-separated)");
+    // this->addLabel("");
+    // this->addTextbox(cv::chat_highlight_words.getString().c_str(), &cv::chat_highlight_words);
+
+    this->addSubSection("Privacy");
     this->addCheckbox("Automatically update neosu to the latest version", &cv::auto_update);
+    // this->addCheckbox("Allow private messages from strangers", &cv::allow_stranger_dms);
+    // this->addCheckbox("Allow game invites from strangers", &cv::allow_mp_invites);
     this->addCheckbox("Replace main menu logo with server logo", &cv::main_menu_use_server_logo);
+    this->addCheckbox("Show spectator list", &cv::draw_spectator_list);
+    this->addCheckbox("Share currently played map with spectators", &cv::spec_share_map);
     this->addCheckbox("Enable Discord Rich Presence",
                       "Shows your current game state in your friends' friendslists.\ne.g.: Playing Gavin G - Reach Out "
                       "[Cherry Blossom's Insane]",
