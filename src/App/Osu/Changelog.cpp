@@ -33,6 +33,7 @@ Changelog::Changelog() : ScreenBackable() {
         R"(- Added ability to import McOsu/neosu/stable collections and scores from database files)",
         R"(- Adjusted hit windows to match stable)",
         R"(- Fixed collections not displaying all available maps)",
+        R"(- Fixed keys being counted before first hitobject)",
         R"(- Fixed "RawInputBuffer" option on Windows, should work much more reliably)",
         R"(- Fixed search text being hidden under some skin elements)",
     };

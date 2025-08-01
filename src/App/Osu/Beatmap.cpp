@@ -338,7 +338,10 @@ void Beatmap::keyPressed1(bool mouse) {
 
     if(this->bFailed) return;
 
-    if(!this->bInBreak && !this->bIsInSkippableSection && this->bIsPlaying) osu->getScore()->addKeyCount(mouse ? 3 : 1);
+    bool hasAnyHitObjects = (this->hitobjects.size() > 0);
+    bool is_too_early = hasAnyHitObjects && this->iCurMusicPosWithOffsets < this->hitobjects[0]->click_time;
+    bool should_count_keypress = !is_too_early && !this->bInBreak && !this->bIsInSkippableSection && this->bIsPlaying;
+    if(should_count_keypress) osu->getScore()->addKeyCount(mouse ? 3 : 1);
 
     this->bPrevKeyWasKey1 = true;
     this->bClick1Held = true;
@@ -373,7 +376,10 @@ void Beatmap::keyPressed2(bool mouse) {
 
     if(this->bFailed) return;
 
-    if(!this->bInBreak && !this->bIsInSkippableSection && this->bIsPlaying) osu->getScore()->addKeyCount(mouse ? 4 : 2);
+    bool hasAnyHitObjects = (this->hitobjects.size() > 0);
+    bool is_too_early = hasAnyHitObjects && this->iCurMusicPosWithOffsets < this->hitobjects[0]->click_time;
+    bool should_count_keypress = !is_too_early && !this->bInBreak && !this->bIsInSkippableSection && this->bIsPlaying;
+    if(should_count_keypress) osu->getScore()->addKeyCount(mouse ? 4 : 2);
 
     this->bPrevKeyWasKey1 = false;
     this->bClick2Held = true;
@@ -2039,9 +2045,7 @@ void Beatmap::drawHitObjects() {
         // draw scene buffer
         if(shouldDrawBuffer) {
             g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_PREMUL_COLOR);
-            {
-                this->mafhamFinishedRenderTarget->draw(0, 0);
-            }
+            { this->mafhamFinishedRenderTarget->draw(0, 0); }
             g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ALPHA);
         }
 
@@ -2503,18 +2507,22 @@ void Beatmap::update2() {
                 osu->getHUD()->animateInputoverlay(4, false);
             }
 
+            bool hasAnyHitObjects = (this->hitobjects.size() > 0);
+            bool is_too_early = hasAnyHitObjects && this->iCurMusicPosWithOffsets < this->hitobjects[0]->click_time;
+            bool should_count_keypress = !is_too_early && !this->bInBreak && !this->bIsInSkippableSection;
+
             // Pressed key 1
             if(!(this->last_keys & LegacyReplay::K1) && this->current_keys & LegacyReplay::K1) {
                 this->bPrevKeyWasKey1 = true;
                 osu->getHUD()->animateInputoverlay(1, true);
                 this->clicks.push_back(click);
-                if(!this->bInBreak && !this->bIsInSkippableSection) osu->getScore()->addKeyCount(1);
+                if(should_count_keypress) osu->getScore()->addKeyCount(1);
             }
             if(!(this->last_keys & LegacyReplay::M1) && this->current_keys & LegacyReplay::M1) {
                 this->bPrevKeyWasKey1 = true;
                 osu->getHUD()->animateInputoverlay(3, true);
                 this->clicks.push_back(click);
-                if(!this->bInBreak && !this->bIsInSkippableSection) osu->getScore()->addKeyCount(3);
+                if(should_count_keypress) osu->getScore()->addKeyCount(3);
             }
 
             // Pressed key 2
@@ -2522,13 +2530,13 @@ void Beatmap::update2() {
                 this->bPrevKeyWasKey1 = false;
                 osu->getHUD()->animateInputoverlay(2, true);
                 this->clicks.push_back(click);
-                if(!this->bInBreak && !this->bIsInSkippableSection) osu->getScore()->addKeyCount(2);
+                if(should_count_keypress) osu->getScore()->addKeyCount(2);
             }
             if(!(this->last_keys & LegacyReplay::M2) && this->current_keys & LegacyReplay::M2) {
                 this->bPrevKeyWasKey1 = false;
                 osu->getHUD()->animateInputoverlay(4, true);
                 this->clicks.push_back(click);
-                if(!this->bInBreak && !this->bIsInSkippableSection) osu->getScore()->addKeyCount(4);
+                if(should_count_keypress) osu->getScore()->addKeyCount(4);
             }
         }
 
