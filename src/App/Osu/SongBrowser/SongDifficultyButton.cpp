@@ -20,18 +20,14 @@
 #include "SoundEngine.h"
 #include "Timing.h"
 
-
-
 SongDifficultyButton::SongDifficultyButton(SongBrowser *songBrowser, CBaseUIScrollView *view,
                                            UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize,
                                            UString name, DatabaseBeatmap *diff2, SongButton *parentSongButton)
     : SongButton(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, std::move(name), NULL) {
     this->databaseBeatmap = diff2;  // NOTE: can't use parent constructor for passing this argument, as it would
-                                      // otherwise try to build a full button (and not just a diff button)
+                                    // otherwise try to build a full button (and not just a diff button)
     this->parentSongButton = parentSongButton;
 
-    this->sTitle = this->databaseBeatmap->getTitle();
-    this->sArtist = this->databaseBeatmap->getArtist();
     this->sMapper = this->databaseBeatmap->getCreator();
     this->sDiff = this->databaseBeatmap->getDifficultyName();
 
@@ -67,7 +63,10 @@ void SongDifficultyButton::draw() {
         osu->getBackgroundImageHandler()->getLoadBackgroundImage(this->databaseBeatmap));
 
     if(this->grade != FinishedScore::Grade::N) this->drawGrade();
+
+    this->sTitle = this->databaseBeatmap->getTitle();
     this->drawTitle(!isIndependentDiff ? 0.2f : 1.0f);
+    this->sArtist = this->databaseBeatmap->getArtist();
     this->drawSubTitle(!isIndependentDiff ? 0.2f : 1.0f);
 
     // draw diff name
@@ -94,7 +93,8 @@ void SongDifficultyButton::draw() {
         const float starWidth = (size.y * 0.2);
         const float starScale = starWidth / skin->getStar()->getHeight();
         const int numFullStars = std::clamp<int>((int)stars, 0, 25);
-        const float partialStarScale = std::max(0.5f, std::clamp<float>(stars - numFullStars, 0.0f, 1.0f));  // at least 0.5x
+        const float partialStarScale =
+            std::max(0.5f, std::clamp<float>(stars - numFullStars, 0.0f, 1.0f));  // at least 0.5x
 
         g->setColor(this->bSelected ? skin->getSongSelectActiveText() : skin->getSongSelectInactiveText());
 
@@ -212,7 +212,7 @@ Color SongDifficultyButton::getInactiveBackgroundColor() const {
         return SongButton::getInactiveBackgroundColor();
     else
         return argb(std::clamp<int>(cv::songbrowser_button_difficulty_inactive_color_a.getInt(), 0, 255),
-                     std::clamp<int>(cv::songbrowser_button_difficulty_inactive_color_r.getInt(), 0, 255),
-                     std::clamp<int>(cv::songbrowser_button_difficulty_inactive_color_g.getInt(), 0, 255),
-                     std::clamp<int>(cv::songbrowser_button_difficulty_inactive_color_b.getInt(), 0, 255));
+                    std::clamp<int>(cv::songbrowser_button_difficulty_inactive_color_r.getInt(), 0, 255),
+                    std::clamp<int>(cv::songbrowser_button_difficulty_inactive_color_g.getInt(), 0, 255),
+                    std::clamp<int>(cv::songbrowser_button_difficulty_inactive_color_b.getInt(), 0, 255));
 }

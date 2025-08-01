@@ -881,6 +881,7 @@ CONVAR(playfield_mirror_horizontal, "osu_playfield_mirror_horizontal", false, FC
 CONVAR(playfield_mirror_vertical, "osu_playfield_mirror_vertical", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_GAMEPLAY);
 CONVAR(playfield_rotation, "osu_playfield_rotation", 0.0f, FCVAR_LOCKED | FCVAR_GAMEPLAY,
        "rotates the entire playfield by this many degrees");
+CONVAR(prefer_cjk, "prefer_cjk", false, FCVAR_BANCHO_COMPATIBLE, "prefer metadata in original language");
 CONVAR(pvs, "osu_pvs", true, FCVAR_BANCHO_COMPATIBLE,
        "optimizes all loops over all hitobjects by clamping the range to the Potentially Visible Set");
 CONVAR(quick_retry_delay, "osu_quick_retry_delay", 0.27f, FCVAR_BANCHO_COMPATIBLE);
@@ -1281,7 +1282,6 @@ CONVAR(notify_during_gameplay, "notify_during_gameplay", false, FCVAR_BANCHO_COM
        "show notification popups instantly during gameplay");
 CONVAR(draw_storyboard, "draw_storyboard", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(draw_video, "draw_video", true, FCVAR_BANCHO_COMPATIBLE);
-CONVAR(prefer_cjk, "prefer_cjk", false, FCVAR_BANCHO_COMPATIBLE, "prefer metadata in original language");
 CONVAR(SMOKE, "key_smoke", 0, FCVAR_BANCHO_COMPATIBLE);
 
 // NOLINTEND(misc-definitions-in-headers)

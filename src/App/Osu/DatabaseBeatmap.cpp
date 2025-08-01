@@ -93,7 +93,9 @@ DatabaseBeatmap::DatabaseBeatmap(std::vector<DatabaseBeatmap *> *difficulties, B
 
     // set representative values for this container (i.e. use values from first difficulty)
     this->sTitle = (*this->difficulties)[0]->sTitle;
+    this->sTitleUnicode = (*this->difficulties)[0]->sTitleUnicode;
     this->sArtist = (*this->difficulties)[0]->sArtist;
+    this->sArtistUnicode = (*this->difficulties)[0]->sArtistUnicode;
     this->sCreator = (*this->difficulties)[0]->sCreator;
     this->sBackgroundImageFileName = (*this->difficulties)[0]->sBackgroundImageFileName;
     this->iSetID = (*this->difficulties)[0]->iSetID;
@@ -497,9 +499,7 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
     int beatmapVersion, std::vector<SLIDER> &sliders, zarray<DatabaseBeatmap::TIMINGPOINT> &timingpoints,
     float sliderMultiplier, float sliderTickRate, const std::atomic<bool> &dead) {
     CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT r;
-    {
-        r.errorCode = 0;
-    }
+    { r.errorCode = 0; }
 
     if(timingpoints.size() < 1) {
         r.errorCode = 3;
@@ -949,8 +949,7 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
         // close the file here
     }
 
-    if (fileBuffer.empty())
-    {
+    if(fileBuffer.empty()) {
         debugLog("Osu Error: Couldn't read file %s\n", this->sFilePath.c_str());
         return false;
     }
@@ -1026,8 +1025,20 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
                 }
 
                 memset(stringBuffer, '\0', 1024);
+                if(sscanf(curLineChar, " TitleUnicode :%1023[^\n]", stringBuffer) == 1) {
+                    this->sTitleUnicode = stringBuffer;
+                    SString::trim(&this->sTitle);
+                }
+
+                memset(stringBuffer, '\0', 1024);
                 if(sscanf(curLineChar, " Artist :%1023[^\n]", stringBuffer) == 1) {
                     this->sArtist = stringBuffer;
+                    SString::trim(&this->sArtist);
+                }
+
+                memset(stringBuffer, '\0', 1024);
+                if(sscanf(curLineChar, " ArtistUnicode :%1023[^\n]", stringBuffer) == 1) {
+                    this->sArtistUnicode = stringBuffer;
                     SString::trim(&this->sArtist);
                 }
 
@@ -1131,6 +1142,9 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
             } break;
         }
     }
+
+    if(this->sTitleUnicode.empty()) this->sTitleUnicode = this->sTitle;
+    if(this->sArtistUnicode.empty()) this->sArtistUnicode = this->sArtist;
 
     // gamemode filter
     if(this->iGameMode != 0) return false;  // nothing more to do here

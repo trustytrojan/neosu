@@ -123,7 +123,6 @@ class DatabaseBeatmap final {
     };
 
     struct PRIMITIVE_CONTAINER {
-
         std::vector<HITCIRCLE> hitcircles{};
         std::vector<SLIDER> sliders{};
         std::vector<SPINNER> spinners{};
@@ -199,8 +198,20 @@ class DatabaseBeatmap final {
     [[nodiscard]] inline int getID() const { return this->iID; }
     [[nodiscard]] inline int getSetID() const { return this->iSetID; }
 
-    [[nodiscard]] inline const std::string &getTitle() const { return this->sTitle; }
-    [[nodiscard]] inline const std::string &getArtist() const { return this->sArtist; }
+    [[nodiscard]] inline const std::string &getTitle() const {
+        if(cv::prefer_cjk.getBool()) {
+            return this->sTitleUnicode;
+        } else {
+            return this->sTitle;
+        }
+    }
+    [[nodiscard]] inline const std::string &getArtist() const {
+        if(cv::prefer_cjk.getBool()) {
+            return this->sArtistUnicode;
+        } else {
+            return this->sArtist;
+        }
+    }
     [[nodiscard]] inline const std::string &getCreator() const { return this->sCreator; }
     [[nodiscard]] inline const std::string &getDifficultyName() const { return this->sDifficultyName; }
     [[nodiscard]] inline const std::string &getSource() const { return this->sSource; }
@@ -266,7 +277,9 @@ class DatabaseBeatmap final {
     // raw metadata
 
     std::string sTitle;
+    std::string sTitleUnicode;
     std::string sArtist;
+    std::string sArtistUnicode;
     std::string sCreator;
     std::string sDifficultyName;  // difficulty name ("Version")
     std::string sSource;          // only used by search
@@ -274,7 +287,7 @@ class DatabaseBeatmap final {
     std::string sBackgroundImageFileName;
     std::string sAudioFileName;
 
-    long iID;       // online ID, if uploaded
+    long iID;  // online ID, if uploaded
     unsigned long iLengthMS;
 
     int iVersion;   // e.g. "osu file format v12" -> 12

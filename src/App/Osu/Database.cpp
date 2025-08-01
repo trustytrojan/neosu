@@ -857,6 +857,14 @@ void Database::loadMaps() {
                     diff->loudness = loudness;
                 }
 
+                if(version >= 20250801) {
+                    diff->sTitleUnicode = neosu_maps.read_string();
+                    diff->sArtistUnicode = neosu_maps.read_string();
+                } else {
+                    diff->sTitleUnicode = diff->sTitle;
+                    diff->sArtistUnicode = diff->sArtist;
+                }
+
                 this->beatmap_difficulties[diff->sMD5Hash] = diff;
                 diffs->push_back(diff);
                 nb_neosu_maps++;
@@ -1141,12 +1149,14 @@ void Database::loadMaps() {
                 new DatabaseBeatmap(fullFilePath, beatmapPath, DatabaseBeatmap::BeatmapType::PEPPY_DIFFICULTY);
             {
                 diff2->sTitle = songTitle;
+                diff2->sTitleUnicode = songTitleUnicode;
                 diff2->sAudioFileName = audioFileName;
                 diff2->iLengthMS = duration;
 
                 diff2->fStackLeniency = stackLeniency;
 
                 diff2->sArtist = artistName;
+                diff2->sArtistUnicode = artistNameUnicode;
                 diff2->sCreator = creatorName;
                 diff2->sDifficultyName = difficultyName;
                 diff2->sSource = songSource;
@@ -1348,6 +1358,8 @@ void Database::saveMaps() {
             maps.write<i32>(diff->iMostCommonBPM);
             maps.write<u8>(diff->draw_background);
             maps.write<f32>(diff->loudness.load());
+            maps.write_string(diff->sTitleUnicode.c_str());
+            maps.write_string(diff->sArtistUnicode.c_str());
 
             nb_diffs_saved++;
         }
