@@ -764,13 +764,6 @@ void SongBrowser::draw() {
     // draw song browser
     this->carousel->draw();
 
-    // draw search
-    this->search->setSearchString(this->sSearchString, cv::songbrowser_search_hardcoded_filter.getString().c_str());
-    this->search->setDrawNumResults(this->bInSearch);
-    this->search->setNumFoundResults(this->visibleSongButtons.size());
-    this->search->setSearching(!this->backgroundSearchMatcher->isDead());
-    this->search->draw();
-
     // draw topbar background
     g->setColor(0xffffffff);
     g->pushTransform();
@@ -795,6 +788,13 @@ void SongBrowser::draw() {
     if(cv::debug.getBool()) this->topbarLeft->draw_debug();
     this->topbarRight->draw();
     if(cv::debug.getBool()) this->topbarRight->draw_debug();
+
+    // draw search
+    this->search->setSearchString(this->sSearchString, cv::songbrowser_search_hardcoded_filter.getString().c_str());
+    this->search->setDrawNumResults(this->bInSearch);
+    this->search->setNumFoundResults(this->visibleSongButtons.size());
+    this->search->setSearching(!this->backgroundSearchMatcher->isDead());
+    this->search->draw();
 
     // NOTE: Intentionally not calling ScreenBackable::draw() here, since we're already drawing
     //       the back button in draw_bottombar().

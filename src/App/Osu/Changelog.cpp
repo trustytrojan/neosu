@@ -34,6 +34,7 @@ Changelog::Changelog() : ScreenBackable() {
         R"(- Adjusted hit windows to match stable)",
         R"(- Fixed collections not displaying all available maps)",
         R"(- Fixed "RawInputBuffer" option on Windows, should work much more reliably)",
+        R"(- Fixed search text being hidden under some skin elements)",
     };
     changelogs.push_back(v39_10);
 
