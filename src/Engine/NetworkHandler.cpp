@@ -105,7 +105,7 @@ void NetworkHandler::networkThreadFunc(const std::stop_token& stopToken) {
                                             [this] { return !this->pending_requests.empty(); });
         } else {
             // brief sleep to avoid busy waiting
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            Timing::sleepMS(1);
         }
     }
 }

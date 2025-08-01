@@ -54,7 +54,7 @@ class AsyncResourceLoader::LoaderThread final {
             auto work = this->loader_ptr->getNextPendingWork();
             if(!work) {
                 // yield in case we're sharing a logical CPU, like on a single-core system
-                Timing::sleep(0);
+                Timing::sleepMS(1);
 
                 std::unique_lock<std::mutex> lock(this->loader_ptr->workAvailableMutex);
 
@@ -96,7 +96,7 @@ class AsyncResourceLoader::LoaderThread final {
             this->loader_ptr->markWorkAsyncComplete(std::move(work));
 
             // yield again before loop
-            Timing::sleep(0);
+            Timing::sleepMS(1);
         }
 
         this->loader_ptr->iActiveThreadCount.fetch_sub(1);

@@ -428,7 +428,7 @@ class ConVar {
     ChangeCallback changeCallback{std::monostate()};
 
     // shared variable for avoiding expensive flag checking while offline
-    friend class Bancho;
+    friend struct Bancho;
     static std::atomic<bool> relaxed_checks;
 };
 

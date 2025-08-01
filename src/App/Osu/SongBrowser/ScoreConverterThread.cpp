@@ -21,7 +21,7 @@ static void run_sct() {
         while(osu->should_pause_background_threads.load() && !dead.load()) {
             Timing::sleepMS(100);
         }
-        Timing::sleep(0);
+        Timing::sleep(1);
 
         if(dead.load()) return;
 

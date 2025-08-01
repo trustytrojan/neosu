@@ -64,7 +64,7 @@ struct VolNormalization::LoudnessCalcThread {
             while(osu->should_pause_background_threads.load() && !this->dead.load()) {
                 Timing::sleepMS(100);
             }
-            Timing::sleep(0);
+            Timing::sleep(1);
 
             if(this->dead.load()) return;
             if(diff2->loudness.load() != 0.f) continue;

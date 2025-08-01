@@ -49,15 +49,15 @@ static constexpr forceinline INLINE_BODY uint64_t ticksNSToMS(uint64_t ns) noexc
 static forceinline INLINE_BODY uint64_t getTicksMS() noexcept { return ticksNSToMS(getTicksNS()); }
 
 static forceinline INLINE_BODY void sleep(uint64_t us) noexcept {
-    us > 0 ? SDL_DelayPrecise(us * NS_PER_US) : detail::yield_internal();
+    us > 0 ? SDL_DelayNS(us * NS_PER_US) : detail::yield_internal();
 }
 
 static forceinline INLINE_BODY void sleepNS(uint64_t ns) noexcept {
-    ns > 0 ? SDL_DelayPrecise(ns) : detail::yield_internal();
+    ns > 0 ? SDL_DelayNS(ns) : detail::yield_internal();
 }
 
 static forceinline INLINE_BODY void sleepMS(uint64_t ms) noexcept {
-    ms > 0 ? SDL_DelayPrecise(ms * NS_PER_MS) : detail::yield_internal();
+    ms > 0 ? SDL_DelayNS(ms * NS_PER_MS) : detail::yield_internal();
 }
 
 template <typename T = double>

@@ -25,6 +25,7 @@ class LinuxMain final {
     Window clientWindow{0};
     int screen_num{0};
     Screen *screen{nullptr};
+    SDL_Window *sdlwnd{nullptr};
 
     // input
     XIM im{0};
@@ -36,6 +37,7 @@ class LinuxMain final {
 
     Atom WM_PROTOCOLS_atom{};
     Atom WM_DELETE_WINDOW_atom{};
+    Atom _NET_ACTIVE_WINDOW_atom{};
 
     static bool sdl_eventhook(void *thisptr, XEvent *xev) { return !static_cast<LinuxMain *>(thisptr)->WndProc(xev); }
 };

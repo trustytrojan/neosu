@@ -59,6 +59,9 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdl
     SDL_SetHintWithPriority(SDL_HINT_TOUCH_MOUSE_EVENTS, "0", SDL_HINT_OVERRIDE);
     SDL_SetHintWithPriority(SDL_HINT_MOUSE_EMULATE_WARP_WITH_RELATIVE, "0", SDL_HINT_OVERRIDE);
     SDL_SetHintWithPriority(SDL_HINT_VIDEO_X11_EXTERNAL_WINDOW_INPUT, "0", SDL_HINT_OVERRIDE);
+    SDL_SetHintWithPriority(SDL_HINT_X11_FORCE_OVERRIDE_REDIRECT, "1", SDL_HINT_OVERRIDE);
+    SDL_SetHintWithPriority(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "1", SDL_HINT_OVERRIDE);
+    SDL_SetHintWithPriority(SDL_HINT_NO_SIGNAL_HANDLERS, "1", SDL_HINT_OVERRIDE);
 
     if(!SDL_Init(SDL_INIT_VIDEO)) {
         fprintf(stderr, "FATAL ERROR: Couldn't SDL_Init(): %s\n", SDL_GetError());
@@ -105,38 +108,40 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdl
     SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, windowCreateHeight);
     SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_RESIZABLE_BOOLEAN, false);
     SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_MAXIMIZED_BOOLEAN, false);
-    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_FLAGS_NUMBER, windowFlags);
     SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_BORDERLESS_BOOLEAN, true);
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_FLAGS_NUMBER, windowFlags);
 
     // create window
-    SDL_Window *sdlwnd = SDL_CreateWindowWithProperties(props);
+    this->sdlwnd = SDL_CreateWindowWithProperties(props);
     SDL_DestroyProperties(props);
 
-    if(!sdlwnd) {
+    if(!this->sdlwnd) {
         fprintf(stderr, "FATAL ERROR: Couldn't SDL_CreateWindow(): %s\n", SDL_GetError());
         return;
     }
 
+    SDL_SetWindowMinimumSize(this->sdlwnd, WINDOW_WIDTH_MIN, WINDOW_HEIGHT_MIN);
+
     SDL_GLContext sdlglctx{nullptr};
     if constexpr(Env::cfg((REND::GL | REND::GLES32), !REND::DX11)) {
-        sdlglctx = SDL_GL_CreateContext(sdlwnd);
+        sdlglctx = SDL_GL_CreateContext(this->sdlwnd);
         if(!sdlglctx) {
             fprintf(stderr, "FATAL ERROR: Couldn't SDL_GL_CreateContext(): %s\n", SDL_GetError());
         }
-        if(!SDL_GL_MakeCurrent(sdlwnd, sdlglctx)) {
+        if(!SDL_GL_MakeCurrent(this->sdlwnd, sdlglctx)) {
             fprintf(stderr, "FATAL ERROR: Couldn't SDL_GL_MakeCurrent(): %s\n", SDL_GetError());
         }
     }
 
-    this->dpy = (Display *)SDL_GetPointerProperty(SDL_GetWindowProperties(sdlwnd), SDL_PROP_WINDOW_X11_DISPLAY_POINTER,
-                                                  nullptr);
+    this->dpy = (Display *)SDL_GetPointerProperty(SDL_GetWindowProperties(this->sdlwnd),
+                                                  SDL_PROP_WINDOW_X11_DISPLAY_POINTER, nullptr);
     if(!this->dpy) {
         fprintf(stderr, "FATAL ERROR: Couldn't get X11 display: %s\n", SDL_GetError());
         return;
     }
 
     this->clientWindow =
-        (Window)SDL_GetNumberProperty(SDL_GetWindowProperties(sdlwnd), SDL_PROP_WINDOW_X11_WINDOW_NUMBER, 0);
+        (Window)SDL_GetNumberProperty(SDL_GetWindowProperties(this->sdlwnd), SDL_PROP_WINDOW_X11_WINDOW_NUMBER, 0);
     if(!this->clientWindow) {
         fprintf(stderr, "FATAL ERROR: Couldn't create X11 window: %s\n", SDL_GetError());
         return;
@@ -153,7 +158,7 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdl
     SDL_SetX11EventHook(LinuxMain::sdl_eventhook, this);
 
     this->screen_num =
-        (int)SDL_GetNumberProperty(SDL_GetWindowProperties(sdlwnd), SDL_PROP_WINDOW_X11_SCREEN_NUMBER, 0);
+        (int)SDL_GetNumberProperty(SDL_GetWindowProperties(this->sdlwnd), SDL_PROP_WINDOW_X11_SCREEN_NUMBER, 0);
     this->screen = ScreenOfDisplay(this->dpy, this->screen_num);
 
     XWindowAttributes xwa{};
@@ -172,28 +177,12 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdl
         this->dpy, this->clientWindow,
         ExposureMask | FocusChangeMask | KeyPressMask | KeyReleaseMask | StructureNotifyMask | KeymapStateMask);
 
-    // window resize limit
-    XSizeHints *winSizeHints = XAllocSizeHints();
-    if(!winSizeHints) {
-        printf("FATAL ERROR: XAllocSizeHints() out of memory!\n\n");
-        return;
-    }
-    winSizeHints->flags = PMinSize;
-    winSizeHints->min_width = WINDOW_WIDTH_MIN;
-    winSizeHints->min_height = WINDOW_HEIGHT_MIN;
-    XSetWMNormalHints(this->dpy, this->clientWindow, winSizeHints);
-    XFree(winSizeHints);
-
     // register custom delete message for quitting the engine (received as ClientMessage in the main loop)
     this->WM_DELETE_WINDOW_atom = XInternAtom(this->dpy, "WM_DELETE_WINDOW", False);
     XSetWMProtocols(this->dpy, this->clientWindow, &this->WM_DELETE_WINDOW_atom, 1);
-    this->WM_PROTOCOLS_atom = XInternAtom(this->dpy, "WM_PROTOCOLS", False);
 
-    // hint that compositing should be disabled (disable forced vsync)
-    constexpr const unsigned char shouldBypassCompositor = 1;
-    Atom _net_wm_bypass_compositor = XInternAtom(this->dpy, "_NET_WM_BYPASS_COMPOSITOR", false);
-    XChangeProperty(this->dpy, this->clientWindow, _net_wm_bypass_compositor, XA_CARDINAL, 32, PropModeReplace,
-                    &shouldBypassCompositor, 1);
+    this->WM_PROTOCOLS_atom = XInternAtom(this->dpy, "WM_PROTOCOLS", False);
+    this->_NET_ACTIVE_WINDOW_atom = XInternAtom(this->dpy, "_NET_ACTIVE_WINDOW", False);
 
     // why are there 4 different properties to set for the title...
     XTextProperty wm_name_prop;
@@ -214,8 +203,8 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdl
     }
 
     // make window visible & set title
-    SDL_ShowWindow(sdlwnd);
-    SDL_RaiseWindow(sdlwnd);
+    SDL_ShowWindow(this->sdlwnd);
+    SDL_RaiseWindow(this->sdlwnd);
 
     XStoreName(this->dpy, this->clientWindow, WINDOW_TITLE);  // four.
 
@@ -224,8 +213,8 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdl
     // debugLogF("moving to {} {}\n",  defaultScreen->width / 2 - WINDOW_WIDTH / 2,
     //             defaultScreen->height / 2 - WINDOW_HEIGHT / 2);
     {
-        const SDL_DisplayID di = SDL_GetDisplayForWindow(sdlwnd);
-        SDL_SetWindowPosition(sdlwnd, SDL_WINDOWPOS_CENTERED_DISPLAY(di), SDL_WINDOWPOS_CENTERED_DISPLAY(di));
+        const SDL_DisplayID di = SDL_GetDisplayForWindow(this->sdlwnd);
+        SDL_SetWindowPosition(this->sdlwnd, SDL_WINDOWPOS_CENTERED_DISPLAY(di), SDL_WINDOWPOS_CENTERED_DISPLAY(di));
     }
 
     // get input method
@@ -260,7 +249,7 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdl
     auto *deltaTimer = new Timer();
 
     // initialize engine
-    baseEnv = new LinuxEnvironment(this->dpy, this->clientWindow, this->screen, sdlwnd, argCmdline, argMap);
+    baseEnv = new LinuxEnvironment(this->dpy, this->clientWindow, this->screen, this->sdlwnd, argCmdline, argMap);
     engine = new Engine(argc, argv);
 
     deltaTimer->start();
@@ -272,7 +261,8 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdl
     SDL_PumpEvents();
     SDL_FlushEvents(SDL_EVENT_FIRST, SDL_EVENT_LAST);
 
-    XEvent xev;
+    constexpr int SIZE_EVENTS = 64;
+    std::array<XEvent, SIZE_EVENTS> events{};
 
     // main loop
     while(this->bRunning) {
@@ -291,14 +281,43 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdl
                 SDL_PumpEvents();
             }
 
-            while(XPending(this->dpy)) {
-                XNextEvent(this->dpy, &xev);
+            int eventCount = 0;
+            do {
+                {
+                    VPROF_BUDGET("X11_CollectEvents", VPROF_BUDGETGROUP_EVENTS);
 
-                if(XFilterEvent(&xev, this->clientWindow))  // for keyboard chars
-                    continue;
+                    int available_events = XEventsQueued(this->dpy, QueuedAfterReading);
+                    if(available_events == 0) break;
 
-                WndProc(&xev);
-            }
+                    // collect up to SIZE_EVENTS events into our array
+                    eventCount = 0;
+                    while(eventCount < SIZE_EVENTS && XPending(this->dpy)) {
+                        XNextEvent(this->dpy, &events[eventCount]);
+
+                        // apply XFilterEvent check here, for keyboard chars during collection
+                        if(XFilterEvent(&events[eventCount], this->clientWindow))
+                            continue;  // don't increment eventCount, overwrite this slot
+
+                        // handle GenericEvent (XI2) immediately - can't be batched due to xcookie data
+                        if(events[eventCount].type == GenericEvent) {
+                            WndProc(&events[eventCount]);
+                            continue;  // don't add to batch, already processed
+                        }
+
+                        eventCount++;
+                    }
+                }
+
+                {
+                    VPROF_BUDGET("X11_ProcessEvents", VPROF_BUDGETGROUP_EVENTS);
+
+                    // process the collected batch (non-XI2 events only)
+                    for(int i = 0; i < eventCount; ++i) {
+                        WndProc(&events[i]);
+                    }
+                }
+
+            } while(eventCount == SIZE_EVENTS);
         }
 
         // update
@@ -337,7 +356,7 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdl
 
     // destroy the gl context and window
     if(sdlglctx) SDL_GL_DestroyContext(sdlglctx);
-    SDL_DestroyWindow(sdlwnd);
+    SDL_DestroyWindow(this->sdlwnd);
     SDL_Quit();
 
     ret = 0;
@@ -374,6 +393,36 @@ bool LinuxMain::WndProc(XEvent *xev) {
                     engine->requestResolutionChange(size);
                 }
             }
+            return true;
+
+        case PropertyNotify: {
+            if(cv::debug_env.getBool()) {
+                char *name = XGetAtomName(this->dpy, xev->xproperty.atom);
+                if(name) {
+                    debugLog("window 0x%lx: PropertyNotify: %s %s time=%lu\n", xev->xany.window, name,
+                             (xev->xproperty.state == PropertyDelete) ? "deleted" : "changed", xev->xproperty.time);
+                    XFree(name);
+                }
+            }
+            // if(env && this->bHasFocus && (env->isFullscreen() || env->isFullscreenWindowedBorderless()) &&
+            //    xev->xproperty.atom == this->_NET_ACTIVE_WINDOW_atom) {
+            //     // what the hell is this
+            //     SDL_SetWindowResizable(this->sdlwnd, true);
+            //     SDL_SetWindowFullscreen(this->sdlwnd, false);
+            //     int width = 100;
+            //     int height = 100;
+            //     SDL_GetWindowSize(this->sdlwnd, &width, &height);
+            //     SDL_SetWindowSize(this->sdlwnd, width - 10, height - 10);
+            //     SDL_SyncWindow(this->sdlwnd);
+            //     const SDL_DisplayID di = SDL_GetDisplayForWindow(this->sdlwnd);
+            //     SDL_SetWindowPosition(this->sdlwnd, SDL_WINDOWPOS_CENTERED_DISPLAY(di),
+            //                           SDL_WINDOWPOS_CENTERED_DISPLAY(di));
+            //     SDL_SyncWindow(this->sdlwnd);
+            //     SDL_SetWindowFullscreen(this->sdlwnd, true);
+            //     SDL_SetWindowResizable(this->sdlwnd, false);
+            //     SDL_FlushEvents(SDL_EVENT_FIRST, SDL_EVENT_LAST);
+            // }
+        }
             return true;
 
         case Expose:
