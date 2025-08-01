@@ -199,14 +199,16 @@ class DatabaseBeatmap final {
     [[nodiscard]] inline int getSetID() const { return this->iSetID; }
 
     [[nodiscard]] inline const std::string &getTitle() const {
-        if(cv::prefer_cjk.getBool()) {
+        // Disabled; too laggy to be usable for now
+        if(false && cv::prefer_cjk.getBool()) {
             return this->sTitleUnicode;
         } else {
             return this->sTitle;
         }
     }
     [[nodiscard]] inline const std::string &getArtist() const {
-        if(cv::prefer_cjk.getBool()) {
+        // Disabled; too laggy to be usable for now
+        if(false && cv::prefer_cjk.getBool()) {
             return this->sArtistUnicode;
         } else {
             return this->sArtist;
