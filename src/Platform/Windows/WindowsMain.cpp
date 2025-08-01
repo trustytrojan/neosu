@@ -263,11 +263,11 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> &arg
         lpDevMode.dmDriverExtra = 0;
 
         if(EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &lpDevMode)) {
-            float displayFrequency = static_cast<float>(lpDevMode.dmDisplayFrequency);
-            /// printf("Display Refresh Rate is %.2f Hz, setting fps_max to %i.\n\n", displayFrequency,
-            /// (int)displayFrequency);
-            cv::fps_max.setValue((int)displayFrequency);
-            cv::fps_max.setDefaultFloat((int)displayFrequency);
+            f32 displayFrequency = static_cast<f32>(lpDevMode.dmDisplayFrequency);
+            cv::fps_max.setValue(displayFrequency * 4.f);
+            cv::fps_max.setDefaultFloat(displayFrequency * 4.f);
+            cv::fps_max_menu.setValue(displayFrequency);
+            cv::fps_max_menu.setDefaultFloat(displayFrequency);
         }
     }
 
@@ -392,9 +392,9 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> &arg
         {
             VPROF_BUDGET("FPSLimiter", VPROF_BUDGETGROUP_SLEEP);
 
-            const int target_fps =
-                inBackground ? cv::fps_max_background.getInt()
-                             : (cv::fps_unlimited.getBool() || cv::fps_max.getInt() <= 0 ? 0 : cv::fps_max.getInt());
+            const int target_fps = inBackground
+                                       ? cv::fps_max_background.getInt()
+                                       : (osu->isInPlayMode() ? cv::fps_max.getInt() : cv::fps_max_menu.getInt());
             FPSLimiter::limit_frames(target_fps);
         }
     }

@@ -193,7 +193,6 @@ class ConVar {
     void execFloat(float args);
 
     // set
-    void resetDefaults();
     void setDefaultBool(bool defaultValue) { this->setDefaultFloat(defaultValue ? 1.f : 0.f); }
     void setDefaultInt(int defaultValue) { this->setDefaultFloat((float)defaultValue); }
     void setDefaultFloat(float defaultValue);

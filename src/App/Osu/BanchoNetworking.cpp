@@ -337,10 +337,6 @@ void disconnect() {
         bancho->server_icon = NULL;
     }
 
-    for(auto &var : convar->getConVarArray()) {
-        var->resetDefaults();
-    }
-
     bancho->score_submission_policy = ServerPolicy::NO_PREFERENCE;
     osu->optionsMenu->update_login_button();
     osu->optionsMenu->scheduleLayoutUpdate();
@@ -391,7 +387,7 @@ void reconnect() {
             const char *tempStr{tempConVar->getString().c_str()};
             const auto hash{Bancho::md5((u8 *)tempStr, strlen(tempStr))};
             cv::mp_password_md5.setValue(hash.hash.data());
-            tempConVar->resetDefaults();
+            tempConVar->setValue("");
         }
     }
     if(cv::mp_password_md5.getString().length() != 32) {

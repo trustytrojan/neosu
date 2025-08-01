@@ -485,17 +485,22 @@ CONVAR(fposu_zoom_fov, "fposu_zoom_fov", 45.0f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(fposu_zoom_sensitivity_ratio, "fposu_zoom_sensitivity_ratio", 1.0f, FCVAR_BANCHO_COMPATIBLE,
        "replicates zoom_sensitivity_ratio behavior on css/csgo/tf2/etc.");
 CONVAR(fposu_zoom_toggle, "fposu_zoom_toggle", false, FCVAR_BANCHO_COMPATIBLE, "whether the zoom key acts as a toggle");
-CONVAR(fps_max, "fps_max", 60.0f, FCVAR_BANCHO_COMPATIBLE, "framerate limiter, foreground");
-CONVAR(fps_max_background, "fps_max_background", 30.0f, FCVAR_BANCHO_COMPATIBLE, "framerate limiter, background");
-CONVAR(fps_max_background_interleaved, "fps_max_background_interleaved", 1, FCVAR_BANCHO_COMPATIBLE,
+CONVAR(fps_max, "fps_max", 1000.0f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE, "framerate limiter, gameplay");
+CONVAR(fps_max_menu, "fps_max_menu", 420.f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE, "framerate limiter, menus");
+CONVAR(fps_max_background, "fps_max_background", 30.0f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
+       "framerate limiter, background");
+CONVAR(fps_max_background_interleaved, "fps_max_background_interleaved", 1, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "experimental, update normally but only draw every n-th frame");
-CONVAR(fps_max_yield, "fps_max_yield", false, FCVAR_BANCHO_COMPATIBLE,
+CONVAR(fps_max_yield, "fps_max_yield", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "always release rest of timeslice once per frame (call scheduler via sleep(0))");
-CONVAR(fps_unlimited, "fps_unlimited", false, FCVAR_BANCHO_COMPATIBLE);
+
+// Unused since v39.01. Instead we just check if fps_max <= 0 (see MainMenu.cpp for migration).
+CONVAR(fps_unlimited, "fps_unlimited", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_HIDDEN);
+
 CONVAR(
-    fps_unlimited_yield, "fps_unlimited_yield", true, FCVAR_BANCHO_COMPATIBLE,
+    fps_unlimited_yield, "fps_unlimited_yield", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
     "always release rest of timeslice once per frame (call scheduler via sleep(0)), even if unlimited fps are enabled");
-CONVAR(fullscreen_windowed_borderless, "fullscreen_windowed_borderless", false, FCVAR_BANCHO_COMPATIBLE,
+CONVAR(fullscreen_windowed_borderless, "fullscreen_windowed_borderless", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        [](float newValue) -> void {
            env ? env->setFullscreenWindowedBorderless(!!static_cast<int>(newValue)) : (void)0;
        });
@@ -1047,13 +1052,14 @@ CONVAR(slider_use_gradient_image, "osu_slider_use_gradient_image", false, FCVAR_
 CONVAR(snaking_sliders, "osu_snaking_sliders", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(snd_async_buffer, "snd_async_buffer", 65536, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "BASS_CONFIG_ASYNCFILE_BUFFER length in bytes. Set to 0 to disable.");
-CONVAR(snd_change_check_interval, "snd_change_check_interval", 0.0f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
-       "check for output device changes every this many seconds. 0 = disabled (default)");
+CONVAR(snd_change_check_interval, "snd_change_check_interval", 0.5f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
+       "check for output device changes every this many seconds. 0 = disabled");
 CONVAR(snd_dev_buffer, "snd_dev_buffer", 30, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "BASS_CONFIG_DEV_BUFFER length in milliseconds");
 CONVAR(snd_dev_period, "snd_dev_period", 10, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "BASS_CONFIG_DEV_PERIOD length in milliseconds, or if negative then in samples");
-CONVAR(snd_freq, "snd_freq", 44100, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_NOSAVE, "output sampling rate in Hz");
+CONVAR(snd_freq, "snd_freq", 44100, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_NOSAVE,
+       "output sampling rate in Hz");
 CONVAR(snd_output_device, "snd_output_device", "Default", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
 CONVAR(snd_play_interp_duration, "snd_play_interp_duration", 0.75f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "smooth over freshly started channel position jitter with engine time over this duration in seconds");

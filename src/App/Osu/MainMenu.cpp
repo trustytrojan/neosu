@@ -221,7 +221,13 @@ MainMenu::MainMenu() : OsuScreen() {
                         const char *plaintext_pw{cv::mp_password.getString().c_str()};
                         const auto hash{Bancho::md5((u8 *)plaintext_pw, strlen(plaintext_pw))};
                         cv::mp_password_md5.setValue(hash.hash.data());
-                        cv::mp_password.resetDefaults();
+                        cv::mp_password.setValue("");
+                        osu->getOptionsMenu()->save();
+                    }
+                }
+                if(version < 39.01) {
+                    if(cv::fps_unlimited.getBool()) {
+                        cv::fps_max.setValue(0);
                         osu->getOptionsMenu()->save();
                     }
                 }

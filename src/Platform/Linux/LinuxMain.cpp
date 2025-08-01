@@ -45,7 +45,7 @@
 
 LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdline,
                      const std::unordered_map<UString, std::optional<UString>> &argMap) {
-    //XInitThreads();
+    // XInitThreads();
     this->dpy = XOpenDisplay(nullptr);
     if(this->dpy == nullptr) {
         printf("FATAL ERROR: XOpenDisplay() can't connect to X server!\n\n");
@@ -240,10 +240,8 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdl
             VPROF_BUDGET("FPSLimiter", VPROF_BUDGETGROUP_SLEEP);
 
             // delay the next frame
-            const int target_fps =
-                !this->bHasFocus
-                    ? cv::fps_max_background.getInt()
-                    : (cv::fps_unlimited.getBool() || cv::fps_max.getInt() <= 0 ? 0 : cv::fps_max.getInt());
+            const int target_fps = !this->bHasFocus ? cv::fps_max_background.getInt()
+                                                    : osu->isInPlayMode() ? cv::fps_max.getInt() : cv::fps_max_menu.getInt());
             FPSLimiter::limit_frames(target_fps);
         }
     }

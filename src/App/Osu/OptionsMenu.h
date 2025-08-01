@@ -27,7 +27,7 @@ class CBaseUITextbox;
 class ConVar;
 
 class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener {
-    friend bool VolumeOverlay::canChangeVolume(); // for contextMenu
+    friend bool VolumeOverlay::canChangeVolume();  // for contextMenu
 
    public:
     OptionsMenu();
@@ -161,6 +161,7 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     void onSliderChangeIntMS(CBaseUISlider *slider);
     void onSliderChangeFloatMS(CBaseUISlider *slider);
     void onSliderChangePercent(CBaseUISlider *slider);
+    void onFPSSliderChange(CBaseUISlider *slider);
 
     void onKeyBindingButtonPressed(CBaseUIButton *button);
     void onKeyUnbindButtonPressed(CBaseUIButton *button);

@@ -402,9 +402,7 @@ class OptionsMenuResetButton : public CBaseUIButton {
 
         if(this->isMouseInside()) {
             osu->getTooltipOverlay()->begin();
-            {
-                osu->getTooltipOverlay()->addLine("Reset");
-            }
+            { osu->getTooltipOverlay()->addLine("Reset"); }
             osu->getTooltipOverlay()->end();
         }
     }
@@ -572,11 +570,13 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
 
     this->addSpacer();
 
-    this->addCheckbox("Unlimited FPS", &cv::fps_unlimited);
-
-    CBaseUISlider *fpsSlider = this->addSlider("FPS Limiter:", 60.0f, 1000.0f, &cv::fps_max, -1.0f, true);
-    fpsSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangeInt>(this));
+    CBaseUISlider *fpsSlider = this->addSlider("FPS Limiter:", 0.0f, 1000.0f, &cv::fps_max, -1.0f, true);
+    fpsSlider->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onFPSSliderChange>(this));
     fpsSlider->setKeyDelta(1);
+
+    CBaseUISlider *fpsSlider2 = this->addSlider("FPS Limiter (menus):", 0.0f, 1000.0f, &cv::fps_max_menu, -1.0f, true);
+    fpsSlider2->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onFPSSliderChange>(this));
+    fpsSlider2->setKeyDelta(1);
 
     this->addSubSection("Layout");
     OPTIONS_ELEMENT resolutionSelect =
@@ -2723,6 +2723,35 @@ void OptionsMenu::onSliderChange(CBaseUISlider *slider) {
                 this->onResetUpdate(element->resetButton);
 
                 break;
+            }
+        }
+    }
+}
+
+void OptionsMenu::onFPSSliderChange(CBaseUISlider *slider) {
+    for(auto &element : this->elemContainers) {
+        for(int e = 0; e < element->baseElems.size(); e++) {
+            if(element->baseElems[e] == slider) {
+                auto *cv = element->cvars[slider];
+                if(cv != nullptr) {
+                    if(slider->getFloat() < 60.f) {
+                        cv->setValue(0.f);
+                        if(element->baseElems.size() == 3) {
+                            auto *labelPointer = dynamic_cast<CBaseUILabel *>(element->baseElems[2]);
+                            labelPointer->setText("∞");
+                        }
+                    } else {
+                        cv->setValue(std::round(slider->getFloat()));  // round to int
+                        if(element->baseElems.size() == 3) {
+                            auto *labelPointer = dynamic_cast<CBaseUILabel *>(element->baseElems[2]);
+                            labelPointer->setText(cv->getString().c_str());
+                        }
+                    }
+
+                    this->onResetUpdate(element->resetButton);
+
+                    break;
+                }
             }
         }
     }

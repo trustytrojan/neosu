@@ -116,30 +116,14 @@ void ConVar::execFloat(float args) {
     if(auto *cb = std::get_if<NativeConVarCallbackFloat>(&this->callback)) (*cb)(args);
 }
 
-// Reset default values to the actual defaults (before neosu.json overrides)
-void ConVar::resetDefaults() {
-    std::atomic_thread_fence(std::memory_order_seq_cst);
-    if(this->fDefaultValue != this->fDefaultDefaultValue) this->fDefaultValue = this->fDefaultDefaultValue;
-    if(this->sDefaultValue != this->sDefaultDefaultValue) this->sDefaultValue = this->sDefaultDefaultValue;
-    if(this->iFlags != this->iDefaultFlags) this->iFlags = this->iDefaultFlags;
-}
-
 void ConVar::setFlags(uint8_t new_flags) {
     std::atomic_thread_fence(std::memory_order_seq_cst);
     this->iFlags = new_flags;
 }
 
-void ConVar::setDefaultString(const UString &defaultValue) {
-    if(this->isFlagSet(FCVAR_PRIVATE)) return;
+void ConVar::setDefaultString(const UString &defaultValue) { this->setDefaultStringInt(defaultValue.utf8View()); }
 
-    this->setDefaultStringInt(defaultValue.utf8View());
-}
-
-void ConVar::setDefaultFloat(float defaultValue) {
-    if(this->isFlagSet(FCVAR_PRIVATE)) return;
-
-    this->setDefaultFloatInt(defaultValue);
-}
+void ConVar::setDefaultFloat(float defaultValue) { this->setDefaultFloatInt(defaultValue); }
 
 void ConVar::setDefaultFloatInt(float defaultValue) {
     this->fDefaultValue = defaultValue;

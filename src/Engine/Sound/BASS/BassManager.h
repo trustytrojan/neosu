@@ -13,7 +13,7 @@
 
 #if defined(MCENGINE_FEATURE_BASS)
 // need to include before bass headers because namespace things
-#include <cstdint> // IWYU pragma: keep
+#include <cstdint>  // IWYU pragma: keep
 #include <string>
 
 class UString;
@@ -70,31 +70,31 @@ namespace BassFuncs {
 // imported enums/defines
 using bass_EXTERN::QWORD;
 #ifndef MCENGINE_PLATFORM_WINDOWS
+using bass_EXTERN::BOOL;
+using bass_EXTERN::BYTE;
 using bass_EXTERN::DWORD;
 using bass_EXTERN::WORD;
-using bass_EXTERN::BYTE;
-using bass_EXTERN::BOOL;
 #endif
 
-using bass_EXTERN::SYNCPROC;
-using bass_EXTERN::HSYNC;
-using bass_EXTERN::HSTREAM;
-using bass_EXTERN::HCHANNEL;
-using bass_EXTERN::HSAMPLE;
-using bass_EXTERN::HPLUGIN;
+using bass_EXTERN::BASS_3DVECTOR;
 using bass_EXTERN::BASS_DEVICEINFO;
 using bass_EXTERN::BASS_INFO;
-using bass_EXTERN::BASS_3DVECTOR;
+using bass_EXTERN::HCHANNEL;
+using bass_EXTERN::HPLUGIN;
+using bass_EXTERN::HSAMPLE;
+using bass_EXTERN::HSTREAM;
+using bass_EXTERN::HSYNC;
+using bass_EXTERN::SYNCPROC;
 
 // bassfx enums
 using bass_EXTERN::BASS_ATTRIB_TEMPO_OPTION_AA_FILTER_LENGTH;
+using bass_EXTERN::BASS_ATTRIB_TEMPO_OPTION_OLDPOS;
 using bass_EXTERN::BASS_ATTRIB_TEMPO_OPTION_OVERLAP_MS;
 using bass_EXTERN::BASS_ATTRIB_TEMPO_OPTION_PREVENT_CLICK;
 using bass_EXTERN::BASS_ATTRIB_TEMPO_OPTION_SEEKWINDOW_MS;
 using bass_EXTERN::BASS_ATTRIB_TEMPO_OPTION_SEQUENCE_MS;
 using bass_EXTERN::BASS_ATTRIB_TEMPO_OPTION_USE_AA_FILTER;
 using bass_EXTERN::BASS_ATTRIB_TEMPO_OPTION_USE_QUICKALGO;
-using bass_EXTERN::BASS_ATTRIB_TEMPO_OPTION_OLDPOS;
 
 using bass_EXTERN::BASS_ATTRIB_TEMPO;
 using bass_EXTERN::BASS_ATTRIB_TEMPO_FREQ;
@@ -217,7 +217,7 @@ using WASAPIPROC = bass_EXTERN::WASAPIPROC;
 	std::string getFailedLoad();
 
 	std::string printBassError(const std::string &context, int code);
-    UString getErrorUString(int code = (-0x7fffffff - 1));
+    UString getErrorUString(int code = INT_MIN);
 //clang-format on
 }; // namespace BassManager
 

@@ -120,13 +120,6 @@ Osu::Osu() {
     engine->getConsoleBox()->setRequireShiftToActivate(true);
     mouse->addListener(this);
 
-    cv::vsync.setValue(0.0f);
-    cv::fps_max.setValue(420.0f);
-    cv::fps_max.setDefaultFloat(420.0f);
-
-    cv::snd_change_check_interval.setDefaultFloat(0.5f);
-    cv::snd_change_check_interval.setValue(cv::snd_change_check_interval.getDefaultFloat());
-
     env->setWindowResizable(false);
 
     // convar callbacks
