@@ -341,10 +341,6 @@ $CXX -m32 "\$@"
 EOF
         AS_IF([ "x$enable_clang" = "xyes" ], [
             NEOSU_LDFLAGS="$NEOSU_LDFLAGS -latomic"
-        ],[
-            # ld complains about libcrypto.a(libcrypto-lib-cast-586.o): warning: relocation against `CAST_S_table1' in read-only section `.text'
-            NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -fno-PIE -no-pie"
-            NEOSU_LDFLAGS="$NEOSU_LDFLAGS -no-pie"
         ])
         AC_SUBST([NASMOBJ],[elf32])
     ],[
@@ -476,10 +472,16 @@ AC_SUBST([CXX])
 
 AS_IF([test "$host_cpu" = "x86_64"], [COMMON_FLAGS="$COMMON_FLAGS -mcmodel=small"])
 
+AS_IF([test "x$enable_static" = "xyes"], [
+    COMMON_FLAGS="$COMMON_FLAGS -fno-pic -fno-PIC -fno-pie -fno-PIE -Wl,-no-pie"
+    LDFLAGS="$LDFLAGS -fno-pic -fno-PIC -fno-pie -fno-PIE -no-pie"
+])
+
 CPPFLAGS="$CPPFLAGS -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64"
-COMMON_FLAGS="$COMMON_FLAGS -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64 -ffunction-sections -fdata-sections -fwrapv -fno-strict-aliasing -fno-semantic-interposition -ftls-model=initial-exec"
-CXXFLAGS="$CXXFLAGS $COMMON_FLAGS -fno-exceptions" # -fno-rtti
+COMMON_FLAGS="$COMMON_FLAGS -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64 -fno-plt -ffunction-sections -fdata-sections -fwrapv -fno-strict-aliasing -fno-semantic-interposition -ftls-model=initial-exec"
+CXXFLAGS="$CXXFLAGS $COMMON_FLAGS -fno-exceptions -fno-unwind-tables" # -fno-rtti
 CFLAGS="$CFLAGS $COMMON_FLAGS"
+
 AS_IF([! { test "x$enable_clang" = "xyes" && test "$host_os" = "linux-gnu" ; } && { test -z "$ubercompat" || test "x$enable_static" = "xyes" ; }], [
     LDFLAGS="$LDFLAGS -static-libstdc++ -static-libgcc"
 ])
@@ -528,8 +530,8 @@ AS_IF([test "x$enable_debug" = "xyes"], [
         CXXFLAGS="$CXXFLAGS -g -Og"
         CFLAGS="$CFLAGS -g -Og"
     ], [
-        CXXFLAGS="$CXXFLAGS -ggdb3 -gdwarf-5 -Og -fasynchronous-unwind-tables"
-        CFLAGS="$CFLAGS -ggdb3 -gdwarf-5 -Og -fasynchronous-unwind-tables"
+        CXXFLAGS="$CXXFLAGS -ggdb3 -gdwarf-5 -Og"
+        CFLAGS="$CFLAGS -ggdb3 -gdwarf-5 -Og"
     ])
     ENABLE_DEBUG=$enable_debug
     NEOSU_CPPFLAGS="$NEOSU_CPPFLAGS -D_DEBUG"
@@ -602,6 +604,13 @@ AS_IF([test "x$enable_lto" != "xno"], [
                 CFLAGS="$CFLAGS -flto-incremental=$PWD/.ltocache-gcc"
                 LDFLAGS="$LDFLAGS -flto-incremental=$PWD/.ltocache-gcc"
             ])
+        ])
+    ])
+    # this is hilariously slow, don't use it
+    AS_IF([test "x$enable_lto" = "xultra"], [
+        AX_CHECK_LINK_FLAG([-flto-partition=one], [
+            NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -flto-partition=one"
+            NEOSU_LDFLAGS="$NEOSU_LDFLAGS -flto-partition=one"
         ])
     ])
 ])

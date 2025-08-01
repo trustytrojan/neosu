@@ -382,27 +382,17 @@ float SoLoudSound::getPitch() {
 }
 
 bool SoLoudSound::isPlaying() {
-    if(!this->bReady || !this->handle) return false;
+    if(!this->bReady) return false;
 
-    // a sound is playing if the handle is valid and the sound isn't paused
-    if(!soloud->isValidVoiceHandle(this->handle)) {
-        this->handle = 0;
-    }
-
-    return (this->handle != 0) && !soloud->getPause(this->handle);
+    // a sound is playing if our handle is valid and the sound isn't paused
+    return this->is_playing_cached();
 }
 
 bool SoLoudSound::isFinished() {
     if(!this->bReady) return false;
 
-    if(this->handle == 0) return true;
-
-    // a sound is finished if the handle is no longer valid
-    if(!soloud->isValidVoiceHandle(this->handle)) {
-        this->handle = 0;
-    }
-
-    return this->handle == 0;
+    // a sound is finished if our handle is no longer valid
+    return !this->valid_handle_cached();
 }
 
 void SoLoudSound::rebuild(std::string newFilePath) {
@@ -427,6 +417,32 @@ double SoLoudSound::getSourceLengthInSeconds() const {
         return static_cast<SoLoud::SLFXStream *>(this->audioSource)->getLength();
     else
         return static_cast<SoLoud::Wav *>(this->audioSource)->getLength();
+}
+
+bool SoLoudSound::valid_handle_cached() {
+    if(this->handle == 0) return false;
+
+    const auto now = engine->getTime();
+    if(now >= this->soloud_valid_handle_cache_time + 0.01) {  // 10ms intervals should be fast enough
+        this->soloud_valid_handle_cache_time = now;
+        if(!soloud->isValidVoiceHandle(this->handle)) {
+            this->handle = 0;
+        }
+    }
+
+    return this->handle != 0;
+}
+
+bool SoLoudSound::is_playing_cached() {
+    if(!this->valid_handle_cached()) return false;
+
+    const auto now = engine->getTime();
+    if(now >= this->soloud_paused_handle_cache_time + 0.01) {
+        this->soloud_paused_handle_cache_time = now;
+        this->cached_pause_state = soloud->getPause(this->handle);
+    }
+
+    return this->cached_pause_state != true;
 }
 
 #endif  // MCENGINE_FEATURE_SOLOUD

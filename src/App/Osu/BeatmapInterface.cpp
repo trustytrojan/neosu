@@ -2,61 +2,13 @@
 
 #include "GameRules.h"
 
-f32 BeatmapInterface::getHitWindow300() {
-    return GameRules::mapDifficultyRange(this->getOD(), GameRules::getMinHitWindow300(),
-                                         GameRules::getMidHitWindow300(), GameRules::getMaxHitWindow300());
-}
+#define X(rettype, methodname, refresh_time, impl) \
+    rettype BeatmapInterface::methodname() const { CACHED_METHOD_IMPL(rettype, refresh_time, impl) }
+CACHED_BASE_METHODS
+#undef X
 
-f32 BeatmapInterface::getRawHitWindow300() {
-    return GameRules::mapDifficultyRange(this->getRawOD(), GameRules::getMinHitWindow300(),
-                                         GameRules::getMidHitWindow300(), GameRules::getMaxHitWindow300());
-}
-
-f32 BeatmapInterface::getHitWindow100() {
-    return GameRules::mapDifficultyRange(this->getOD(), GameRules::getMinHitWindow100(),
-                                         GameRules::getMidHitWindow100(), GameRules::getMaxHitWindow100());
-}
-
-f32 BeatmapInterface::getHitWindow50() {
-    return GameRules::mapDifficultyRange(this->getOD(), GameRules::getMinHitWindow50(), GameRules::getMidHitWindow50(),
-                                         GameRules::getMaxHitWindow50());
-}
-
-f32 BeatmapInterface::getApproachRateForSpeedMultiplier() {
-    return GameRules::mapDifficultyRangeInv((f32)this->getApproachTime() * (1.0f / this->getSpeedMultiplier()),
-                                            GameRules::getMinApproachTime(), GameRules::getMidApproachTime(),
-                                            GameRules::getMaxApproachTime());
-}
-
-f32 BeatmapInterface::getRawApproachRateForSpeedMultiplier() {
-    return GameRules::mapDifficultyRangeInv((f32)this->getRawApproachTime() * (1.0f / this->getSpeedMultiplier()),
-                                            GameRules::getMinApproachTime(), GameRules::getMidApproachTime(),
-                                            GameRules::getMaxApproachTime());
-}
-
-f32 BeatmapInterface::getConstantApproachRateForSpeedMultiplier() {
-    return GameRules::mapDifficultyRangeInv((f32)this->getRawApproachTime() * this->getSpeedMultiplier(),
-                                            GameRules::getMinApproachTime(), GameRules::getMidApproachTime(),
-                                            GameRules::getMaxApproachTime());
-}
-
-f32 BeatmapInterface::getOverallDifficultyForSpeedMultiplier() {
-    return GameRules::mapDifficultyRangeInv((f32)this->getHitWindow300() * (1.0f / this->getSpeedMultiplier()),
-                                            GameRules::getMinHitWindow300(), GameRules::getMidHitWindow300(),
-                                            GameRules::getMaxHitWindow300());
-}
-
-f32 BeatmapInterface::getRawOverallDifficultyForSpeedMultiplier() {
-    return GameRules::mapDifficultyRangeInv((f32)this->getRawHitWindow300() * (1.0f / this->getSpeedMultiplier()),
-                                            GameRules::getMinHitWindow300(), GameRules::getMidHitWindow300(),
-                                            GameRules::getMaxHitWindow300());
-}
-
-f32 BeatmapInterface::getConstantOverallDifficultyForSpeedMultiplier() {
-    return GameRules::mapDifficultyRangeInv((f32)this->getRawHitWindow300() * this->getSpeedMultiplier(),
-                                            GameRules::getMinHitWindow300(), GameRules::getMidHitWindow300(),
-                                            GameRules::getMaxHitWindow300());
-}
+#undef CACHED_BASE_METHODS
+#undef CACHED_METHOD_IMPL
 
 LiveScore::HIT BeatmapInterface::getHitResult(i32 delta) {
     // "stable-like" hit windows, see https://github.com/ppy/osu/pull/33882

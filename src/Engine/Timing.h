@@ -26,37 +26,43 @@ constexpr uint64_t US_PER_MS = 1'000;
 constexpr uint64_t MS_PER_SECOND = 1'000;
 
 namespace detail {
-forceinline void yield_internal() noexcept {
+static forceinline INLINE_BODY void yield_internal() noexcept {
     if constexpr(Env::cfg(OS::WASM))
-        SDL_Delay(0);
+        SDL_DelayNS(0);
     else
         std::this_thread::yield();
 }
 
 template <uint64_t Ratio>
-constexpr uint64_t convertTime(uint64_t ns) noexcept {
+static constexpr forceinline INLINE_BODY uint64_t convert_time(uint64_t ns) noexcept {
     return ns / Ratio;
 }
 
-inline INLINE_BODY void sleepPrecise(uint64_t ns) noexcept { SDL_DelayPrecise(ns); }
-
 }  // namespace detail
 
-inline INLINE_BODY uint64_t getTicksNS() noexcept { return SDL_GetTicksNS(); }
+static forceinline INLINE_BODY uint64_t getTicksNS() noexcept { return SDL_GetTicksNS(); }
 
-constexpr uint64_t ticksNSToMS(uint64_t ns) noexcept { return detail::convertTime<NS_PER_MS>(ns); }
+static constexpr forceinline INLINE_BODY uint64_t ticksNSToMS(uint64_t ns) noexcept {
+    return detail::convert_time<NS_PER_MS>(ns);
+}
 
-inline uint64_t getTicksMS() noexcept { return ticksNSToMS(getTicksNS()); }
+static forceinline INLINE_BODY uint64_t getTicksMS() noexcept { return ticksNSToMS(getTicksNS()); }
 
-inline void sleep(uint64_t us) noexcept { !!us ? detail::sleepPrecise(us * NS_PER_US) : detail::yield_internal(); }
+static forceinline INLINE_BODY void sleep(uint64_t us) noexcept {
+    us > 0 ? SDL_DelayPrecise(us * NS_PER_US) : detail::yield_internal();
+}
 
-inline void sleepNS(uint64_t ns) noexcept { !!ns ? detail::sleepPrecise(ns) : detail::yield_internal(); }
+static forceinline INLINE_BODY void sleepNS(uint64_t ns) noexcept {
+    ns > 0 ? SDL_DelayPrecise(ns) : detail::yield_internal();
+}
 
-inline void sleepMS(uint64_t ms) noexcept { !!ms ? detail::sleepPrecise(ms * NS_PER_MS) : detail::yield_internal(); }
+static forceinline INLINE_BODY void sleepMS(uint64_t ms) noexcept {
+    ms > 0 ? SDL_DelayPrecise(ms * NS_PER_MS) : detail::yield_internal();
+}
 
 template <typename T = double>
     requires(std::floating_point<T>)
-constexpr T timeNSToSeconds(uint64_t ns) noexcept {
+static constexpr forceinline INLINE_BODY T timeNSToSeconds(uint64_t ns) noexcept {
     return static_cast<T>(ns) / static_cast<T>(NS_PER_SECOND);
 }
 
@@ -64,7 +70,7 @@ constexpr T timeNSToSeconds(uint64_t ns) noexcept {
 // decoupled from engine updates!
 template <typename T = double>
     requires(std::floating_point<T>)
-inline T getTimeReal() noexcept {
+static forceinline INLINE_BODY T getTimeReal() noexcept {
     return timeNSToSeconds<T>(getTicksNS());
 }
 

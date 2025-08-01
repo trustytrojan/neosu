@@ -6629,13 +6629,6 @@ then :
 
             NEOSU_LDFLAGS="$NEOSU_LDFLAGS -latomic"
 
-else case e in #(
-  e)
-            # ld complains about libcrypto.a(libcrypto-lib-cast-586.o): warning: relocation against `CAST_S_table1' in read-only section `.text'
-            NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -fno-PIE -no-pie"
-            NEOSU_LDFLAGS="$NEOSU_LDFLAGS -no-pie"
-         ;;
-esac
 fi
         NASMOBJ=elf32
 
@@ -8159,10 +8152,19 @@ then :
   COMMON_FLAGS="$COMMON_FLAGS -mcmodel=small"
 fi
 
+if test "x$enable_static" = "xyes"
+then :
+
+    COMMON_FLAGS="$COMMON_FLAGS -fno-pic -fno-PIC -fno-pie -fno-PIE -Wl,-no-pie"
+    LDFLAGS="$LDFLAGS -fno-pic -fno-PIC -fno-pie -fno-PIE -no-pie"
+
+fi
+
 CPPFLAGS="$CPPFLAGS -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64"
-COMMON_FLAGS="$COMMON_FLAGS -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64 -ffunction-sections -fdata-sections -fwrapv -fno-strict-aliasing -fno-semantic-interposition -ftls-model=initial-exec"
-CXXFLAGS="$CXXFLAGS $COMMON_FLAGS -fno-exceptions" # -fno-rtti
+COMMON_FLAGS="$COMMON_FLAGS -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64 -fno-plt -ffunction-sections -fdata-sections -fwrapv -fno-strict-aliasing -fno-semantic-interposition -ftls-model=initial-exec"
+CXXFLAGS="$CXXFLAGS $COMMON_FLAGS -fno-exceptions -fno-unwind-tables" # -fno-rtti
 CFLAGS="$CFLAGS $COMMON_FLAGS"
+
 if ! { test "x$enable_clang" = "xyes" && test "$host_os" = "linux-gnu" ; } && { test -z "$ubercompat" || test "x$enable_static" = "xyes" ; }
 then :
 
@@ -8745,8 +8747,8 @@ then :
 
 else case e in #(
   e)
-        CXXFLAGS="$CXXFLAGS -ggdb3 -gdwarf-5 -Og -fasynchronous-unwind-tables"
-        CFLAGS="$CFLAGS -ggdb3 -gdwarf-5 -Og -fasynchronous-unwind-tables"
+        CXXFLAGS="$CXXFLAGS -ggdb3 -gdwarf-5 -Og"
+        CFLAGS="$CFLAGS -ggdb3 -gdwarf-5 -Og"
      ;;
 esac
 fi
@@ -9076,6 +9078,57 @@ fi
 esac
 fi
 
+    # this is hilariously slow, don't use it
+    if test "x$enable_lto" = "xultra"
+then :
+
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -flto-partition=one" >&5
+printf %s "checking whether the linker accepts -flto-partition=one... " >&6; }
+if test ${ax_cv_check_ldflags___flto_partition_one+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e)
+  ax_check_save_flags=$LDFLAGS
+  LDFLAGS="$LDFLAGS  -flto-partition=one"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"
+then :
+  ax_cv_check_ldflags___flto_partition_one=yes
+else case e in #(
+  e) ax_cv_check_ldflags___flto_partition_one=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$ax_check_save_flags ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___flto_partition_one" >&5
+printf "%s\n" "$ax_cv_check_ldflags___flto_partition_one" >&6; }
+if test "x$ax_cv_check_ldflags___flto_partition_one" = xyes
+then :
+
+            NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -flto-partition=one"
+            NEOSU_LDFLAGS="$NEOSU_LDFLAGS -flto-partition=one"
+
+else case e in #(
+  e) : ;;
+esac
+fi
+
+
+fi
 
 fi
 

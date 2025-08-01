@@ -279,6 +279,8 @@ void handle_api_response(Packet packet) {
 UString cho_token = "";
 
 void disconnect() {
+    Bancho::change_login_state(false);
+
     // Logout
     // This is a blocking call, but we *do* want this to block when quitting the game.
     if(bancho->is_online()) {

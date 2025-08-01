@@ -91,7 +91,7 @@ void OpenGLImage::init()
 
 	// free memory
 	if (!this->bKeepInSystemMemory)
-		this->rawImage = std::vector<unsigned char>();
+		this->rawImage.clear();
 
 	this->bReady = true;
 
@@ -123,7 +123,7 @@ void OpenGLImage::destroy()
 		this->GLTexture = 0;
 	}
 
-	this->rawImage = std::vector<unsigned char>();
+	this->rawImage.clear();
 }
 
 void OpenGLImage::bind(unsigned int textureUnit)

@@ -14,7 +14,7 @@ enum class ServerPolicy : uint8_t {
     NO_PREFERENCE,
 };
 
-struct Bancho {
+struct Bancho final {
     Bancho() = default;
     ~Bancho() = default;
 
@@ -75,6 +75,8 @@ struct Bancho {
     [[nodiscard]] inline bool is_playing_a_multi_map() const { return this->match_started; }
     [[nodiscard]] inline bool is_online() const { return this->user_id > 0; }
     [[nodiscard]] bool can_submit_scores() const;
+
+    static void change_login_state(bool logged);
 
    private:
     // internal helpers

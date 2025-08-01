@@ -201,7 +201,7 @@ class ConVar {
 
     template <typename T>
     void setValue(T &&value, const bool &doCallback = true) {
-        if(!this->isUnlocked() || !this->gameplayCompatCheck()) return;
+        if(!this->is_unlocked() || !this->is_gameplay_compatible()) return;
 
         this->setValueInt(std::forward<T>(value), doCallback);
     }
@@ -236,7 +236,7 @@ class ConVar {
 
     template <typename T = int>
     [[nodiscard]] constexpr auto getVal() const {
-        return static_cast<T>(this->isUnlocked() ? this->fValue.load() : this->fDefaultValue.load());
+        return static_cast<T>(this->is_unlocked() ? this->fValue.load() : this->fDefaultValue.load());
     }
 
     [[nodiscard]] constexpr int getInt() const { return getVal<int>(); }
@@ -245,7 +245,7 @@ class ConVar {
 
     [[nodiscard]]
     constexpr const ConVarString &getString() const {
-        return this->isUnlocked() ? this->sValue : this->sDefaultValue;
+        return this->is_unlocked() ? this->sValue : this->sDefaultValue;
     }
 
     [[nodiscard]] inline const ConVarString &getHelpstring() const { return this->sHelpString; }
@@ -264,8 +264,15 @@ class ConVar {
     [[nodiscard]] inline bool isFlagSet(uint8_t flag) const { return (bool)((this->iFlags & flag) == flag); }
 
    private:
-    [[nodiscard]] bool isUnlocked() const;
-    [[nodiscard]] bool gameplayCompatCheck() const;
+    // lightweight check (offline play)
+    [[nodiscard]] forceinline bool is_unlocked() const {
+        if(this->isFlagSet(FCVAR_PRIVATE) || relaxed_checks.load(std::memory_order_acquire)) {
+            return true;
+        }
+        return is_unlocked_full();
+    }
+    [[nodiscard]] bool is_unlocked_full() const;
+    [[nodiscard]] bool is_gameplay_compatible() const;
 
     // unified init for callback-only convars
     template <typename Callback>
@@ -419,6 +426,10 @@ class ConVar {
     // callback storage (allow having 1 "change" callback and 1 single value (or void) callback)
     ExecutionCallback callback{std::monostate()};
     ChangeCallback changeCallback{std::monostate()};
+
+    // shared variable for avoiding expensive flag checking while offline
+    friend class Bancho;
+    static std::atomic<bool> relaxed_checks;
 };
 
 //*******************//

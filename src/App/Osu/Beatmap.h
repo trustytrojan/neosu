@@ -134,7 +134,6 @@ class Beatmap : public BeatmapInterface {
 
     // live statistics
     [[nodiscard]] int getMostCommonBPM() const;
-    [[nodiscard]] f32 getSpeedMultiplier() const override;
     [[nodiscard]] inline int getNPS() const { return this->iNPS; }
     [[nodiscard]] inline int getND() const { return this->iND; }
 
@@ -178,16 +177,6 @@ class Beatmap : public BeatmapInterface {
     [[nodiscard]] inline long getCurMusicPos() const { return this->iCurMusicPos; }
     [[nodiscard]] inline long getCurMusicPosWithOffsets() const { return this->iCurMusicPosWithOffsets; }
 
-    [[nodiscard]] u32 getScoreV1DifficultyMultiplier() const override;
-    [[nodiscard]] f32 getRawAR() const override;
-    [[nodiscard]] f32 getAR() const override;
-    [[nodiscard]] f32 getCS() const override;
-    [[nodiscard]] f32 getHP() const override;
-    [[nodiscard]] f32 getRawOD() const override;
-    [[nodiscard]] f32 getOD() const override;
-    [[nodiscard]] f32 getApproachTime() const override;
-    [[nodiscard]] f32 getRawApproachTime() const override;
-
     // health
     [[nodiscard]] inline f64 getHealth() const { return this->fHealth; }
     [[nodiscard]] inline bool hasFailed() const { return this->bFailed; }
@@ -209,8 +198,6 @@ class Beatmap : public BeatmapInterface {
     [[nodiscard]] bool isKey1Down() const override;
     [[nodiscard]] bool isKey2Down() const override;
     [[nodiscard]] bool isClickHeld() const override;
-    [[nodiscard]] Replay::Mods getMods() const override;
-    [[nodiscard]] u32 getModsLegacy() const override;
 
     [[nodiscard]] std::string getTitle() const;
     [[nodiscard]] std::string getArtist() const;
@@ -330,6 +317,20 @@ class Beatmap : public BeatmapInterface {
     int iPreviousFollowPointObjectIndex;  // TODO: this shouldn't be in this class
 
    private:
+
+    [[nodiscard]] u32 getScoreV1DifficultyMultiplier_full() const override;
+    [[nodiscard]] Replay::Mods getMods_full() const override;
+    [[nodiscard]] u32 getModsLegacy_full() const override;
+    [[nodiscard]] f32 getSpeedMultiplier_full() const override;
+    [[nodiscard]] f32 getRawAR_full() const override;
+    [[nodiscard]] f32 getAR_full() const override;
+    [[nodiscard]] f32 getCS_full() const override;
+    [[nodiscard]] f32 getHP_full() const override;
+    [[nodiscard]] f32 getRawOD_full() const override;
+    [[nodiscard]] f32 getOD_full() const override;
+    [[nodiscard]] f32 getApproachTime_full() const override;
+    [[nodiscard]] f32 getRawApproachTime_full() const override;
+
     static inline Vector2 mapNormalizedCoordsOntoUnitCircle(const Vector2 &in) {
         return Vector2(in.x * std::sqrt(1.0f - in.y * in.y / 2.0f), in.y * std::sqrt(1.0f - in.x * in.x / 2.0f));
     }

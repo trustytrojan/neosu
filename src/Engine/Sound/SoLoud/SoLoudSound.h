@@ -75,12 +75,25 @@ class SoLoudSound final : public Sound {
     [[nodiscard]] double getStreamPositionInSeconds() const;
 
     // current playback parameters
-    float fFrequency{44100.0f};  // sample rate in Hz
+    float fFrequency{44100.0f};         // sample rate in Hz
     bool bIsLoopingActuallySet{false};  // looping has been set on the soloud audio handle
 
     // SoLoud-specific members
     SoLoud::AudioSource *audioSource{nullptr};  // base class pointer, could be either SLFXStream or Wav
     SOUNDHANDLE handle{0};                      // current voice (i.e. "Sound") handle
+
+    // these are some caching workarounds for limitations of the main soloud instance running on the main thread
+    // while its device audio callback being threaded (possibly, not necessarily, pulseaudio + miniaudio creates
+    // separate thread for example) this causes the internal audio mutex (global lock) to be held for each voice handle
+    // query, which can add up and be unnecessarily slow
+
+    // avoid calling soloud->isValidVoiceHandle too often, because it locks the entire internal audio mutex
+    bool valid_handle_cached();
+    double soloud_valid_handle_cache_time{-1.};
+    // same with soloud->getPause(), for getPosition queries
+    bool is_playing_cached();
+    bool cached_pause_state{false};
+    double soloud_paused_handle_cache_time{-1.};
 };
 
 #else

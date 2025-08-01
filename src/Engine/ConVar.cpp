@@ -18,6 +18,8 @@
 #include <algorithm>
 #include <unordered_set>
 
+std::atomic<bool> ConVar::relaxed_checks{true};
+
 static std::vector<ConVar *> &_getGlobalConVarArray() {
     static std::vector<ConVar *> g_vConVars;  // (singleton)
     return g_vConVars;
@@ -85,7 +87,7 @@ ConVarString ConVar::typeToString(CONVAR_TYPE type) {
 }
 
 void ConVar::exec() {
-    if(!this->isUnlocked()) return;
+    if(!this->is_unlocked()) return;
 
     if(osu != nullptr) {
         auto is_vanilla = convar->isVanilla();
@@ -105,13 +107,13 @@ void ConVar::exec() {
 }
 
 void ConVar::execArgs(const UString &args) {
-    if(!this->isUnlocked()) return;
+    if(!this->is_unlocked()) return;
 
     if(auto *cb = std::get_if<NativeConVarCallbackArgs>(&this->callback)) (*cb)(args);
 }
 
 void ConVar::execFloat(float args) {
-    if(!this->isUnlocked()) return;
+    if(!this->is_unlocked()) return;
 
     if(auto *cb = std::get_if<NativeConVarCallbackFloat>(&this->callback)) (*cb)(args);
 }
@@ -139,8 +141,7 @@ void ConVar::setDefaultStringInt(const std::string_view &defaultValue) {
     }
 }
 
-bool ConVar::isUnlocked() const {
-    if(this->isFlagSet(FCVAR_PRIVATE)) return true;
+bool ConVar::is_unlocked_full() const {
     if(bancho == nullptr || !bancho->is_online()) return true;
 
     if(bancho->is_in_a_multi_room()) {
@@ -150,9 +151,9 @@ bool ConVar::isUnlocked() const {
     }
 }
 
-bool ConVar::gameplayCompatCheck() const {
+bool ConVar::is_gameplay_compatible() const {
     if(osu && this->isFlagSet(FCVAR_GAMEPLAY)) {
-        if(bancho->is_playing_a_multi_map()) {
+        if(!relaxed_checks.load(std::memory_order_acquire) && bancho->is_playing_a_multi_map()) {
             debugLog("Can't edit %s while in a multiplayer match.\n", this->sName);
             return false;
         } else {

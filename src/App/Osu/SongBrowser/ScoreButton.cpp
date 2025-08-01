@@ -618,10 +618,7 @@ void ScoreButton::setScore(const FinishedScore &score, DatabaseBeatmap *diff2, i
     // NOTE: Allows dropped sliderends. Should fix with @PPV3
     const bool fullCombo = (score.maxPossibleCombo > 0 && score.numMisses == 0 && score.numSliderBreaks == 0);
 
-    if(this->avatar) {
-        delete this->avatar;
-        this->avatar = NULL;
-    }
+    SAFE_DELETE(this->avatar);
     if(score.player_id != 0) {
         this->avatar = new UIAvatar(score.player_id, this->vPos.x, this->vPos.y, this->vSize.y, this->vSize.y);
 
@@ -715,16 +712,12 @@ void ScoreButton::setScore(const FinishedScore &score, DatabaseBeatmap *diff2, i
     using namespace Replay::ModFlags;
 
     this->tooltipLines.push_back(tooltipMods);
-    if(eq(score.mods.flags, ApproachDifferent))
-        this->tooltipLines.emplace_back("+ approach different");
+    if(eq(score.mods.flags, ApproachDifferent)) this->tooltipLines.emplace_back("+ approach different");
     if(eq(score.mods.flags, ARTimewarp)) this->tooltipLines.emplace_back("+ AR timewarp");
     if(eq(score.mods.flags, ARWobble)) this->tooltipLines.emplace_back("+ AR wobble");
-    if(eq(score.mods.flags, FadingCursor))
-        this->tooltipLines.emplace_back("+ fading cursor");
-    if(eq(score.mods.flags, FullAlternate))
-        this->tooltipLines.emplace_back("+ full alternate");
-    if(eq(score.mods.flags, FPoSu_Strafing))
-        this->tooltipLines.emplace_back("+ FPoSu strafing");
+    if(eq(score.mods.flags, FadingCursor)) this->tooltipLines.emplace_back("+ fading cursor");
+    if(eq(score.mods.flags, FullAlternate)) this->tooltipLines.emplace_back("+ full alternate");
+    if(eq(score.mods.flags, FPoSu_Strafing)) this->tooltipLines.emplace_back("+ FPoSu strafing");
     if(eq(score.mods.flags, FPS)) this->tooltipLines.emplace_back("+ FPS");
     if(eq(score.mods.flags, HalfWindow)) this->tooltipLines.emplace_back("+ half window");
     if(eq(score.mods.flags, Jigsaw1)) this->tooltipLines.emplace_back("+ jigsaw1");
@@ -733,18 +726,14 @@ void ScoreButton::setScore(const FinishedScore &score, DatabaseBeatmap *diff2, i
     if(eq(score.mods.flags, Millhioref)) this->tooltipLines.emplace_back("+ millhioref");
     if(eq(score.mods.flags, Minimize)) this->tooltipLines.emplace_back("+ minimize");
     if(eq(score.mods.flags, Ming3012)) this->tooltipLines.emplace_back("+ ming3012");
-    if(eq(score.mods.flags, MirrorHorizontal))
-        this->tooltipLines.emplace_back("+ mirror (horizontal)");
-    if(eq(score.mods.flags, MirrorVertical))
-        this->tooltipLines.emplace_back("+ mirror (vertical)");
+    if(eq(score.mods.flags, MirrorHorizontal)) this->tooltipLines.emplace_back("+ mirror (horizontal)");
+    if(eq(score.mods.flags, MirrorVertical)) this->tooltipLines.emplace_back("+ mirror (vertical)");
     if(eq(score.mods.flags, No50s)) this->tooltipLines.emplace_back("+ no 50s");
     if(eq(score.mods.flags, No100s)) this->tooltipLines.emplace_back("+ no 100s");
-    if(eq(score.mods.flags, ReverseSliders))
-        this->tooltipLines.emplace_back("+ reverse sliders");
+    if(eq(score.mods.flags, ReverseSliders)) this->tooltipLines.emplace_back("+ reverse sliders");
     if(eq(score.mods.flags, Timewarp)) this->tooltipLines.emplace_back("+ timewarp");
     if(eq(score.mods.flags, Shirone)) this->tooltipLines.emplace_back("+ shirone");
-    if(eq(score.mods.flags, StrictTracking))
-        this->tooltipLines.emplace_back("+ strict tracking");
+    if(eq(score.mods.flags, StrictTracking)) this->tooltipLines.emplace_back("+ strict tracking");
     if(eq(score.mods.flags, Wobble1)) this->tooltipLines.emplace_back("+ wobble1");
     if(eq(score.mods.flags, Wobble2)) this->tooltipLines.emplace_back("+ wobble2");
 
@@ -795,9 +784,7 @@ UString ScoreButton::getModsStringForDisplay(Replay::Mods mods) {
     if(eq(mods.flags, ScoreV2)) modsString.append("v2,");
     if(eq(mods.flags, Target)) modsString.append("Target,");
     if(eq(mods.flags, Nightmare)) modsString.append("Nightmare,");
-    if(eq(mods.flags, MirrorHorizontal) ||
-       eq(mods.flags, MirrorVertical))
-        modsString.append("Mirror,");
+    if(eq(mods.flags, MirrorHorizontal) || eq(mods.flags, MirrorVertical)) modsString.append("Mirror,");
     if(eq(mods.flags, FPoSu)) modsString.append("FPoSu,");
 
     if(modsString.length() > 0) modsString = modsString.substr(0, modsString.length() - 1);

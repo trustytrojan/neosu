@@ -67,6 +67,8 @@ void Bancho::handle_packet(Packet *packet) {
         this->user_id = new_user_id;
         osu->optionsMenu->update_login_button();
 
+        Bancho::change_login_state(new_user_id > 0);
+
         if(new_user_id > 0) {
             debugLog("Logged in as user #%d.\n", new_user_id);
             cv::mp_autologin.setValue(true);
@@ -528,6 +530,8 @@ bool Bancho::can_submit_scores() const {
     }
 }
 
+void Bancho::change_login_state(bool logged_in) { ConVar::relaxed_checks.store(!logged_in, std::memory_order_release); };
+
 void Bancho::update_channel(const UString &name, const UString &topic, i32 nb_members) {
     Channel *chan{nullptr};
     auto name_str = std::string(name.toUtf8());
@@ -657,7 +661,7 @@ UString Bancho::get_disk_uuid_win32() const {
                 }
             }
         }
-    } else { // the above might fail under Wine, this should work well enough as a fallback
+    } else {  // the above might fail under Wine, this should work well enough as a fallback
         std::array<wchar_t, 4> drive_root{};  // "C:\" + null
         if(volume_path[0] != L'\0' && volume_path[1] == L':') {
             drive_root[0] = volume_path[0];

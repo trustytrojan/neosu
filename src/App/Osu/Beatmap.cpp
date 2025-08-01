@@ -1117,7 +1117,7 @@ int Beatmap::getMostCommonBPM() const {
         return 0;
 }
 
-f32 Beatmap::getSpeedMultiplier() const {
+f32 Beatmap::getSpeedMultiplier_full() const {
     if(cv::speed_override.getFloat() >= 0.0f) {
         return std::max(cv::speed_override.getFloat(), 0.05f);
     } else {
@@ -1127,7 +1127,7 @@ f32 Beatmap::getSpeedMultiplier() const {
 
 Skin *Beatmap::getSkin() const { return osu->getSkin(); }
 
-u32 Beatmap::getScoreV1DifficultyMultiplier() const {
+u32 Beatmap::getScoreV1DifficultyMultiplier_full() const {
     // NOTE: We intentionally get CS/HP/OD from beatmap data, not "real" CS/HP/OD
     //       Since this multiplier is only used for ScoreV1
     u32 breakTimeMS = this->getBreakDurationTotal();
@@ -1139,13 +1139,13 @@ u32 Beatmap::getScoreV1DifficultyMultiplier() const {
         38.0f * 5.0f);
 }
 
-f32 Beatmap::getRawAR() const {
+f32 Beatmap::getRawAR_full() const {
     if(this->selectedDifficulty2 == NULL) return 5.0f;
 
     return std::clamp<f32>(this->selectedDifficulty2->getAR() * osu->getDifficultyMultiplier(), 0.0f, 10.0f);
 }
 
-f32 Beatmap::getAR() const {
+f32 Beatmap::getAR_full() const {
     if(this->selectedDifficulty2 == NULL) return 5.0f;
 
     f32 AR = this->getRawAR();
@@ -1175,7 +1175,7 @@ f32 Beatmap::getAR() const {
     return AR;
 }
 
-f32 Beatmap::getCS() const {
+f32 Beatmap::getCS_full() const {
     if(this->selectedDifficulty2 == NULL) return 5.0f;
 
     f32 CS = std::clamp<f32>(this->selectedDifficulty2->getCS() * osu->getCSDifficultyMultiplier(), 0.0f, 10.0f);
@@ -1200,7 +1200,7 @@ f32 Beatmap::getCS() const {
     return CS;
 }
 
-f32 Beatmap::getHP() const {
+f32 Beatmap::getHP_full() const {
     if(this->selectedDifficulty2 == NULL) return 5.0f;
 
     f32 HP = std::clamp<f32>(this->selectedDifficulty2->getHP() * osu->getDifficultyMultiplier(), 0.0f, 10.0f);
@@ -1209,13 +1209,13 @@ f32 Beatmap::getHP() const {
     return HP;
 }
 
-f32 Beatmap::getRawOD() const {
+f32 Beatmap::getRawOD_full() const {
     if(this->selectedDifficulty2 == NULL) return 5.0f;
 
     return std::clamp<f32>(this->selectedDifficulty2->getOD() * osu->getDifficultyMultiplier(), 0.0f, 10.0f);
 }
 
-f32 Beatmap::getOD() const {
+f32 Beatmap::getOD_full() const {
     f32 OD = this->getRawOD();
 
     if(cv::od_override.getFloat() >= 0.0f) OD = cv::od_override.getFloat();
@@ -4185,20 +4185,20 @@ void Beatmap::computeDrainRate() {
     }
 }
 
-f32 Beatmap::getApproachTime() const {
+f32 Beatmap::getApproachTime_full() const {
     return cv::mod_mafham.getBool()
                ? this->getLength() * 2
                : GameRules::mapDifficultyRange(this->getAR(), GameRules::getMinApproachTime(),
                                                GameRules::getMidApproachTime(), GameRules::getMaxApproachTime());
 }
 
-f32 Beatmap::getRawApproachTime() const {
+f32 Beatmap::getRawApproachTime_full() const {
     return cv::mod_mafham.getBool()
                ? this->getLength() * 2
                : GameRules::mapDifficultyRange(this->getRawAR(), GameRules::getMinApproachTime(),
                                                GameRules::getMidApproachTime(), GameRules::getMaxApproachTime());
 }
 
-Replay::Mods Beatmap::getMods() const { return osu->getScore()->mods; }
+Replay::Mods Beatmap::getMods_full() const { return osu->getScore()->mods; }
 
-u32 Beatmap::getModsLegacy() const { return osu->getScore()->getModsLegacy(); }
+u32 Beatmap::getModsLegacy_full() const { return osu->getScore()->getModsLegacy(); }
