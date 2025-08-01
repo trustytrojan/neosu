@@ -84,7 +84,7 @@ void BassSoundEngine::updateOutputDevices(bool /*printInfo*/) {
     this->outputDevices.clear();
 
     BASS_DEVICEINFO deviceInfo;
-    for(int d = 0; (BASS_GetDeviceInfo(d, &deviceInfo) == true); d++) {
+    for(int d = 0; (BASS_GetDeviceInfo(d, &deviceInfo) == TRUE); d++) {
         const bool isEnabled = (deviceInfo.flags & BASS_DEVICE_ENABLED);
         const bool isDefault = (deviceInfo.flags & BASS_DEVICE_DEFAULT);
 
@@ -123,7 +123,7 @@ void BassSoundEngine::updateOutputDevices(bool /*printInfo*/) {
 
 #ifdef _WIN32
     BASS_ASIO_DEVICEINFO asioDeviceInfo;
-    for(int d = 0; (BASS_ASIO_GetDeviceInfo(d, &asioDeviceInfo) == true); d++) {
+    for(int d = 0; (BASS_ASIO_GetDeviceInfo(d, &asioDeviceInfo) == TRUE); d++) {
         SoundEngine::OUTPUT_DEVICE soundDevice;
         soundDevice.id = d;
         soundDevice.name = asioDeviceInfo.name;
@@ -158,7 +158,7 @@ void BassSoundEngine::updateOutputDevices(bool /*printInfo*/) {
     }
 
     BASS_WASAPI_DEVICEINFO wasapiDeviceInfo;
-    for(int d = 0; (BASS_WASAPI_GetDeviceInfo(d, &wasapiDeviceInfo) == true); d++) {
+    for(int d = 0; (BASS_WASAPI_GetDeviceInfo(d, &wasapiDeviceInfo) == TRUE); d++) {
         const bool isEnabled = (wasapiDeviceInfo.flags & BASS_DEVICE_ENABLED);
         const bool isDefault = (wasapiDeviceInfo.flags & BASS_DEVICE_DEFAULT);
         const bool isInput = (wasapiDeviceInfo.flags & BASS_DEVICE_INPUT);
