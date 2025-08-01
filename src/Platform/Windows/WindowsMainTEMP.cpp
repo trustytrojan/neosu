@@ -111,19 +111,31 @@ void WindowsMain::handle_neosu_url(const char *url) {
     }
 }
 
-void WindowsMain::handle_cmdline_args(const char *args) {
-    if(args[0] == '-') return;
-    if(strlen(args) < 4) return;
+void WindowsMain::handle_cmdline_args(std::vector<std::string> args) {
+    bool need_to_reload_database = false;
 
-    if(strstr(args, "neosu://") == args) {
-        handle_neosu_url(args);
-    } else {
-        auto extension = env->getFileExtensionFromFilePath(args);
-        if(!extension.compare("osz")) {
-            handle_osz(args);
-        } else if(!extension.compare("osk") || !extension.compare("zip")) {
-            handle_osk(args);
+    for(auto &arg : args) {
+        if(arg[0] == '-') return;
+        if(arg.length() < 4) return;
+
+        if(strstr(arg.c_str(), "neosu://") == arg.c_str()) {
+            handle_neosu_url(arg.c_str());
+        } else {
+            auto extension = env->getFileExtensionFromFilePath(arg);
+            if(!extension.compare("osz")) {
+                // NOTE: we're assuming db is loaded here?
+                handle_osz(arg.c_str());
+            } else if(!extension.compare("osk") || !extension.compare("zip")) {
+                handle_osk(arg.c_str());
+            } else if(!extension.compare("db") && !db->isLoading()) {
+                db->dbPathsToImport.push_back(arg);
+                need_to_reload_database = true;
+            }
         }
+    }
+
+    if(need_to_reload_database) {
+        osu->getSongBrowser()->refreshBeatmaps();
     }
 }
 

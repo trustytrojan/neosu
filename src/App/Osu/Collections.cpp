@@ -4,6 +4,7 @@
 #include <utility>
 
 #include "ByteBufferedFile.h"
+#include "File.h"  // PREF_PATHSEP
 #include "ConVar.h"
 #include "Database.h"
 #include "Engine.h"
@@ -94,6 +95,111 @@ Collection* get_or_create_collection(std::string name) {
     return collection;
 }
 
+// Should only be called from db loader thread!
+bool load_peppy_collections(ByteBufferedFile::Reader& peppy_collections) {
+    if(peppy_collections.total_size == 0) return false;
+    if(!cv::collections_legacy_enabled.getBool()) {
+        db->bytes_processed += peppy_collections.total_size;
+        return false;
+    }
+
+    u32 version = peppy_collections.read<u32>();
+    if(version > cv::database_version.getVal<u32>()) {
+        debugLog("osu!stable collection.db version is too recent!\n");
+        db->bytes_processed += peppy_collections.total_size;
+        return false;
+    }
+
+    u32 total_maps = 0;
+    u32 nb_collections = peppy_collections.read<u32>();
+    for(int c = 0; std::cmp_less(c, nb_collections); c++) {
+        auto name = peppy_collections.read_string();
+        u32 nb_maps = peppy_collections.read<u32>();
+        total_maps += nb_maps;
+
+        auto collection = get_or_create_collection(name);
+        collection->maps.reserve(nb_maps);
+        collection->peppy_maps.reserve(nb_maps);
+
+        for(int m = 0; m < nb_maps; m++) {
+            auto map_hash = peppy_collections.read_hash();
+            collection->maps.push_back(map_hash);
+            collection->peppy_maps.push_back(map_hash);
+        }
+
+        u32 progress_bytes = db->bytes_processed + peppy_collections.total_pos;
+        f64 progress_float = (f64)progress_bytes / (f64)db->total_bytes;
+        db->fLoadingProgress = std::clamp(progress_float, 0.01, 0.99);
+    }
+
+    debugLog("Loaded %d peppy collections (%d maps)\n", nb_collections, total_maps);
+    db->bytes_processed += peppy_collections.total_size;
+    return true;
+}
+
+// Should only be called from db loader thread!
+bool load_mcneosu_collections(ByteBufferedFile::Reader& neosu_collections) {
+    if(neosu_collections.total_size == 0) return false;
+
+    u32 total_maps = 0;
+
+    u32 version = neosu_collections.read<u32>();
+    u32 nb_collections = neosu_collections.read<u32>();
+
+    if(version > COLLECTIONS_DB_VERSION) {
+        debugLog("neosu collections.db version is too recent! Cannot load it without stuff breaking.\n");
+        db->bytes_processed += neosu_collections.total_size;
+        return false;
+    }
+
+    for(u32 c = 0; std::cmp_less(c, nb_collections); c++) {
+        auto name = neosu_collections.read_string();
+        auto collection = get_or_create_collection(name);
+
+        u32 nb_deleted_maps = 0;
+        if(version >= 20240429) {
+            nb_deleted_maps = neosu_collections.read<u32>();
+        }
+
+        collection->deleted_maps.reserve(nb_deleted_maps);
+        for(int d = 0; std::cmp_less(d, nb_deleted_maps); d++) {
+            auto map_hash = neosu_collections.read_hash();
+
+            auto it = std::ranges::find(collection->maps, map_hash);
+            if(it != collection->maps.end()) {
+                collection->maps.erase(it);
+            }
+
+            collection->deleted_maps.push_back(map_hash);
+        }
+
+        u32 nb_maps = neosu_collections.read<u32>();
+        total_maps += nb_maps;
+        collection->maps.reserve(collection->maps.size() + nb_maps);
+        collection->neosu_maps.reserve(nb_maps);
+
+        for(int m = 0; std::cmp_less(m, nb_maps); m++) {
+            auto map_hash = neosu_collections.read_hash();
+
+            auto it = std::ranges::find(collection->maps, map_hash);
+            if(it == collection->maps.end()) {
+                collection->maps.push_back(map_hash);
+            }
+
+            collection->neosu_maps.push_back(map_hash);
+        }
+
+        u32 progress_bytes = db->bytes_processed + neosu_collections.total_pos;
+        f64 progress_float = (f64)progress_bytes / (f64)db->total_bytes;
+        db->fLoadingProgress = std::clamp(progress_float, 0.01, 0.99);
+    }
+
+    debugLog("Loaded %d neosu collections (%d maps)\n", nb_collections, total_maps);
+    db->bytes_processed += neosu_collections.total_size;
+    return true;
+}
+
+// Should only be called from db loader thread!
 bool load_collections() {
     const double startTime = Timing::getTimeReal();
 
@@ -102,97 +208,14 @@ bool load_collections() {
     auto osu_database_version = cv::database_version.getVal<u32>();
 
     std::string peppy_collections_path = cv::osu_folder.getString();
-    peppy_collections_path.append("collection.db");
+    peppy_collections_path.append(PREF_PATHSEP "collection.db");
+    auto& peppy_collections = db->database_files[peppy_collections_path];
+    load_peppy_collections(peppy_collections);
 
-    ByteBufferedFile::Reader peppy_collections(UString{peppy_collections_path});
-    if(peppy_collections.total_size > 0) {
-        u32 version = peppy_collections.read<u32>();
-        u32 nb_collections = peppy_collections.read<u32>();
+    auto& mcneosu_collections = db->database_files["collections.db"];
+    load_mcneosu_collections(mcneosu_collections);
 
-        if(version > osu_database_version) {
-            debugLog("osu!stable collection.db version more recent than neosu, loading might fail.\n");
-        }
-
-        for(int c = 0; std::cmp_less(c, nb_collections); c++) {
-            auto name = peppy_collections.read_string();
-            u32 nb_maps = peppy_collections.read<u32>();
-
-            auto collection = get_or_create_collection(name);
-            collection->maps.reserve(nb_maps);
-            collection->peppy_maps.reserve(nb_maps);
-
-            for(int m = 0; m < nb_maps; m++) {
-                auto map_hash = peppy_collections.read_hash();
-                collection->maps.push_back(map_hash);
-                collection->peppy_maps.push_back(map_hash);
-            }
-        }
-    }
-
-    ByteBufferedFile::Reader neosu_collections("collections.db");
-    if(neosu_collections.total_size > 0) {
-        u32 version = neosu_collections.read<u32>();
-        u32 nb_collections = neosu_collections.read<u32>();
-
-        if(version > COLLECTIONS_DB_VERSION) {
-            debugLog("neosu collections.db version is too recent! Cannot load it without stuff breaking.\n");
-            unload_collections();
-            return false;
-        } else if(version < COLLECTIONS_DB_VERSION) {
-            // Reading from older database version: backup just in case
-            auto backup_path = fmt::format("collections.db.{}", version);
-            ByteBufferedFile::copy("collections.db", UString{backup_path});
-        }
-
-        for(int c = 0; std::cmp_less(c, nb_collections); c++) {
-            auto name = neosu_collections.read_string();
-            auto collection = get_or_create_collection(name);
-
-            u32 nb_deleted_maps = 0;
-            if(version >= 20240429) {
-                nb_deleted_maps = neosu_collections.read<u32>();
-            }
-
-            collection->deleted_maps.reserve(nb_deleted_maps);
-            for(int d = 0; std::cmp_less(d, nb_deleted_maps); d++) {
-                auto map_hash = neosu_collections.read_hash();
-
-                auto it = std::ranges::find(collection->maps, map_hash);
-                if(it != collection->maps.end()) {
-                    collection->maps.erase(it);
-                }
-
-                collection->deleted_maps.push_back(map_hash);
-            }
-
-            u32 nb_maps = neosu_collections.read<u32>();
-            collection->maps.reserve(collection->maps.size() + nb_maps);
-            collection->neosu_maps.reserve(nb_maps);
-
-            for(int m = 0; std::cmp_less(m, nb_maps); m++) {
-                auto map_hash = neosu_collections.read_hash();
-
-                auto it = std::ranges::find(collection->maps, map_hash);
-                if(it == collection->maps.end()) {
-                    collection->maps.push_back(map_hash);
-                }
-
-                collection->neosu_maps.push_back(map_hash);
-            }
-        }
-    }
-
-    u32 nb_peppy = 0;
-    u32 nb_neosu = 0;
-    u32 nb_total = 0;
-    for(auto collection : collections) {
-        nb_peppy += collection->peppy_maps.size();
-        nb_neosu += collection->neosu_maps.size();
-        nb_total += collection->maps.size();
-    }
-
-    debugLog("peppy+neosu collections: loading took %f seconds (%d peppy, %d neosu, %d maps total)\n",
-             (Timing::getTimeReal() - startTime), nb_peppy, nb_neosu, nb_total);
+    debugLog("peppy+neosu collections: loading took %f seconds\n", (Timing::getTimeReal() - startTime));
     collections_loaded = true;
     return true;
 }

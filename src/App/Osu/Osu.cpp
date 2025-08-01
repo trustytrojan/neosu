@@ -172,7 +172,6 @@ Osu::Osu() {
     this->fQuickSaveTime = 0.0f;
 
     this->bToggleModSelectionScheduled = false;
-    this->bToggleSongBrowserScheduled = false;
     this->bToggleOptionsMenuScheduled = false;
     this->bOptionsMenuFullscreen = true;
     this->bToggleChangelogScheduled = false;
@@ -363,9 +362,11 @@ Osu::Osu() {
 
 #ifdef _WIN32
     // Process cmdline args now, after everything has been initialized
+    std::vector<std::string> args;
     for(i32 i = 0; i < engine->iArgc; i++) {
-        mainloopPtrHack->handle_cmdline_args(engine->sArgv[i]);
+        args.push_back(engine->sArgv[i]);
     }
+    mainloopPtrHack->handle_cmdline_args(args);
 #endif
 
     // Not the type of shader you want players to tweak or delete, so loading from string
@@ -779,35 +780,6 @@ void Osu::update() {
         } else if(!this->isInPlayMode() && this->songBrowser2 != NULL) {
             this->songBrowser2->setVisible(!this->modSelector->isVisible());
         }
-    }
-    if(this->bToggleSongBrowserScheduled) {
-        this->bToggleSongBrowserScheduled = false;
-
-        if(this->mainMenu->isVisible() && this->optionsMenu->isVisible()) this->optionsMenu->setVisible(false);
-
-        if(this->songBrowser2 != NULL) this->songBrowser2->setVisible(!this->songBrowser2->isVisible());
-
-        if(bancho->is_in_a_multi_room()) {
-            // We didn't select a map; revert to previously selected one
-            auto diff2 = this->songBrowser2->lastSelectedBeatmap;
-            if(diff2 != NULL) {
-                bancho->room.map_name = UString::format("%s - %s [%s]", diff2->getArtist().c_str(),
-                                                        diff2->getTitle().c_str(), diff2->getDifficultyName().c_str());
-                bancho->room.map_md5 = diff2->getMD5Hash();
-                bancho->room.map_id = diff2->getID();
-
-                Packet packet;
-                packet.id = MATCH_CHANGE_SETTINGS;
-                bancho->room.pack(&packet);
-                BANCHO::Net::send_packet(packet);
-
-                this->room->on_map_change();
-            }
-        } else {
-            this->mainMenu->setVisible(!(this->songBrowser2 != NULL && this->songBrowser2->isVisible()));
-        }
-
-        this->updateConfineCursor();
     }
     if(this->bToggleOptionsMenuScheduled) {
         this->bToggleOptionsMenuScheduled = false;
@@ -1422,7 +1394,32 @@ void Osu::toggleModSelection(bool waitForF1KeyUp) {
 
 void Osu::toggleSongBrowser() {
     if(bancho->spectating) return;
-    this->bToggleSongBrowserScheduled = true;
+
+    if(this->mainMenu->isVisible() && this->optionsMenu->isVisible()) this->optionsMenu->setVisible(false);
+
+    this->songBrowser2->setVisible(!this->songBrowser2->isVisible());
+
+    if(bancho->is_in_a_multi_room()) {
+        // We didn't select a map; revert to previously selected one
+        auto diff2 = this->songBrowser2->lastSelectedBeatmap;
+        if(diff2 != NULL) {
+            bancho->room.map_name = UString::format("%s - %s [%s]", diff2->getArtist().c_str(),
+                                                    diff2->getTitle().c_str(), diff2->getDifficultyName().c_str());
+            bancho->room.map_md5 = diff2->getMD5Hash();
+            bancho->room.map_id = diff2->getID();
+
+            Packet packet;
+            packet.id = MATCH_CHANGE_SETTINGS;
+            bancho->room.pack(&packet);
+            BANCHO::Net::send_packet(packet);
+
+            this->room->on_map_change();
+        }
+    } else {
+        this->mainMenu->setVisible(!this->songBrowser2->isVisible());
+    }
+
+    this->updateConfineCursor();
 }
 
 void Osu::toggleOptionsMenu() {

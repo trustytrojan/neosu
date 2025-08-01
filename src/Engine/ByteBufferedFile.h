@@ -28,6 +28,7 @@ class ByteBufferedFile {
    public:
     class Reader {
        public:
+        Reader() {}  // MSVC complains if no default constructor
         Reader(const UString &uPath);
         ~Reader() = default;
 

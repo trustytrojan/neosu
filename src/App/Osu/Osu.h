@@ -279,7 +279,6 @@ class Osu final : public MouseListener, public KeyboardListener {
     // async toggles
     // TODO: this way of doing things is bullshit
     bool bToggleModSelectionScheduled;
-    bool bToggleSongBrowserScheduled;
     bool bToggleOptionsMenuScheduled;
     bool bOptionsMenuFullscreen;
     bool bToggleChangelogScheduled;

@@ -115,17 +115,13 @@ class DatabaseLoader : public Resource {
     void initAsync() override {
         debugLog("DatabaseLoader::initAsync()\n");
 
-        // load scores
+        // stop threads that rely on database content
         sct_abort();
-        this->db->loadScores();
-
-        // load database
         lct_set_map(NULL);
-
-        VolNormalization::abort();
-        this->db->loudness_to_calc.clear();
-
         MapCalcThread::abort();
+        VolNormalization::abort();
+
+        this->db->loudness_to_calc.clear();
         this->db->maps_to_recalc.clear();
 
         for(auto &beatmapset : this->db->beatmapsets) {
@@ -138,14 +134,33 @@ class DatabaseLoader : public Resource {
         }
         this->db->neosu_sets.clear();
 
-        if(env->fileExists(fmt::format("{}" PREF_PATHSEP "osu!.db", cv::osu_folder.getString())) &&
-           cv::database_enabled.getBool()) {
-            this->bNeedRawLoad = false;
-            this->db->loadDB();
-        } else {
-            this->bNeedRawLoad = true;
+        this->db->openDatabases();
+
+        std::string peppy_scores_path = cv::osu_folder.getString();
+        peppy_scores_path.append(PREF_PATHSEP "scores.db");
+        this->db->scores_to_convert.clear();
+        this->db->loadScores(this->db->database_files["neosu_scores.db"]);
+        this->db->loadOldMcNeosuScores(this->db->database_files["scores.db"]);
+        this->db->loadPeppyScores(this->db->database_files[peppy_scores_path]);
+        this->db->bScoresLoaded = true;
+
+        this->db->loadMaps();
+
+        // .db files that were dropped on the main window
+        for(auto &db_path : this->db->dbPathsToImport) {
+            this->db->importDatabase(db_path);
+        }
+        this->db->dbPathsToImport.clear();
+
+        this->bNeedRawLoad = (!env->fileExists(fmt::format("{}" PREF_PATHSEP "osu!.db", cv::osu_folder.getString())) ||
+                              !cv::database_enabled.getBool());
+
+        if(!this->bNeedRawLoad) {
+            load_collections();
         }
 
+        // signal that we are done
+        this->db->fLoadingProgress = 1.0f;
         this->bAsyncReady = true;
     }
 
@@ -244,7 +259,6 @@ void Database::update() {
                 debugLogF("Refresh finished, added {} beatmaps in {:f} seconds.\n", this->beatmapsets.size(),
                           this->importTimer->getElapsedTime());
 
-                // TODO: does this even work for raw loads?
                 load_collections();
 
                 for(auto &set : this->beatmapsets) {
@@ -512,7 +526,7 @@ Database::PlayerPPScores Database::getPlayerPPScores(const UString &playerName) 
 
     // sort by pp
     // for some reason this was originally backwards from sortScoreByPP, so negating it here
-    std::ranges::sort(scores, [](FinishedScore *a, FinishedScore *b) -> bool { return -sortScoreByPP(*a, *b); });
+    std::ranges::sort(scores, [](FinishedScore *a, FinishedScore *b) -> bool { return !sortScoreByPP(*a, *b); });
 
     ppScores.ppScores = std::move(scores);
     ppScores.totalScore = totalScore;
@@ -731,16 +745,14 @@ void Database::scheduleLoadRaw() {
     this->bIsFirstLoad = false;
 }
 
-void Database::loadDB() {
+void Database::loadMaps() {
     std::scoped_lock lock(this->beatmap_difficulties_mtx);
     this->peppy_overrides_mtx.lock();
 
-    std::string osuDbFilePath = cv::osu_folder.getString();
-    osuDbFilePath.append(PREF_PATHSEP "osu!.db");
-    ByteBufferedFile::Reader db(UString{osuDbFilePath});
-    ByteBufferedFile::Reader neosu_maps("neosu_maps.db");
-
-    u32 db_size_sum = neosu_maps.total_size + db.total_size;
+    std::string peppy_maps_path = cv::osu_folder.getString();
+    peppy_maps_path.append(PREF_PATHSEP "osu!.db");
+    auto &db = this->database_files[peppy_maps_path];
+    auto &neosu_maps = this->database_files["neosu_maps.db"];
 
     const std::string &songFolder = this->getOsuSongsFolder();
     debugLog("Database: songFolder = %s\n", songFolder.c_str());
@@ -774,11 +786,9 @@ void Database::loadDB() {
 
         u32 nb_sets = neosu_maps.read<u32>();
         for(u32 i = 0; i < nb_sets; i++) {
-            u32 db_pos_sum = db.total_pos + neosu_maps.total_pos;
-            float progress = (float)db_pos_sum / (float)db_size_sum;
-            if(progress == 0.f) progress = 0.01f;
-            if(progress >= 1.f) progress = 0.99f;
-            this->fLoadingProgress = progress;
+            u32 progress_bytes = this->bytes_processed + neosu_maps.total_pos;
+            f64 progress_float = (f64)progress_bytes / (f64)this->total_bytes;
+            this->fLoadingProgress = std::clamp(progress_float, 0.01, 0.99);
 
             i32 set_id = neosu_maps.read<i32>();
             u16 nb_diffs = neosu_maps.read<u16>();
@@ -885,9 +895,10 @@ void Database::loadDB() {
             }
         }
     }
+    this->bytes_processed += neosu_maps.total_size;
     this->neosu_maps_loaded = true;
 
-    bool should_read_peppy_database = db.total_size > 0;
+    bool should_read_peppy_database = db.total_size > 0 && cv::database_enabled.getBool();
     if(should_read_peppy_database) {
         // read header
         this->iVersion = db.read<u32>();
@@ -917,11 +928,9 @@ void Database::loadDB() {
                 debugLog("Database: Reading beatmap %i/%i ...\n", (i + 1), this->iNumBeatmapsToLoad);
 
             // update progress (another thread checks if progress >= 1.f to know when we're done)
-            u32 db_pos_sum = db.total_pos + neosu_maps.total_pos;
-            float progress = (float)db_pos_sum / (float)db_size_sum;
-            if(progress == 0.f) progress = 0.01f;
-            if(progress >= 1.f) progress = 0.99f;
-            this->fLoadingProgress = progress;
+            u32 progress_bytes = this->bytes_processed + db.total_pos;
+            f64 progress_float = (f64)progress_bytes / (f64)this->total_bytes;
+            this->fLoadingProgress = std::clamp(progress_float, 0.01, 0.99);
 
             // NOTE: This is documented wrongly in many places.
             //       This int was added in 20160408 and removed in 20191106
@@ -1277,18 +1286,14 @@ void Database::loadDB() {
             }
         }
     }
+    this->bytes_processed += db.total_size;
 
     this->importTimer->update();
     debugLog("peppy+neosu maps: loading took %f seconds (%d peppy, %d neosu, %d maps total)\n",
              this->importTimer->getElapsedTime(), nb_peppy_maps, nb_neosu_maps, nb_peppy_maps + nb_neosu_maps);
     debugLog("Found %d overrides; %d maps need star recalc, %d maps need loudness recalc\n", nb_overrides,
              this->maps_to_recalc.size(), this->loudness_to_calc.size());
-    // @PPV3: save neosu_scores.db once all scores are converted
 
-    load_collections();
-
-    // signal that we are done
-    this->fLoadingProgress = 1.0f;
     this->peppy_overrides_mtx.unlock();
 }
 
@@ -1379,225 +1384,461 @@ void Database::saveMaps() {
     debugLog("Saved %d maps (+ %d overrides) in %f seconds.\n", nb_diffs_saved, nb_overrides, t.getElapsedTime());
 }
 
-void Database::loadScores() {
-    debugLog("Database::loadScores()\n");
+void Database::openDatabases() {
+    this->bytes_processed = 0;
+    this->total_bytes = 0;
+    this->database_files.clear();
 
-    this->scores_to_convert.clear();
+    std::string peppy_scores_path = cv::osu_folder.getString();
+    peppy_scores_path.append(PREF_PATHSEP "scores.db");
+    this->database_files.emplace(peppy_scores_path, UString(peppy_scores_path));
+    this->database_files.emplace("neosu_scores.db", UString("neosu_scores.db"));
+    this->database_files.emplace("scores.db", UString("scores.db"));  // mcneosu database
+
+    std::string peppy_maps_path = cv::osu_folder.getString();
+    peppy_maps_path.append(PREF_PATHSEP "osu!.db");
+    this->database_files.emplace(peppy_maps_path, UString(peppy_maps_path));
+    this->database_files.emplace("neosu_maps.db", UString("neosu_maps.db"));
+
+    std::string peppy_collections_path = cv::osu_folder.getString();
+    peppy_collections_path.append(PREF_PATHSEP "collection.db");
+    this->database_files.emplace(peppy_collections_path, UString(peppy_collections_path));
+    this->database_files.emplace("collections.db", UString("collections.db"));
+
+    for(auto &db_path : this->dbPathsToImport) {
+        this->database_files.emplace(db_path, UString(db_path));
+    }
+
+    for(auto &file : this->database_files) {
+        this->total_bytes += file.second.total_size;
+    }
+}
+
+// Detects what type of database it is, then imports it
+bool Database::importDatabase(std::string db_path) {
+    std::string db_name = env->getFileNameFromFilePath(db_path);
+    auto &db = this->database_files[db_path];
+
+    if(db_name == "collection.db") {
+        // osu! collections
+        return load_peppy_collections(db);
+    }
+
+    if(db_name == "collections.db") {
+        // mcosu/neosu collections
+        return load_mcneosu_collections(db);
+    }
+
+    if(db_name == "neosu_scores.db") {
+        // neosu!
+        this->loadScores(db);
+        return true;
+    }
+
+    if(db_name == "scores.db") {
+        ByteBufferedFile::Reader score_db{UString(db_path)};
+        u32 db_version = score_db.read<u32>();
+        if(!score_db.good() || db_version == 0) {
+            return false;
+        }
+
+        if(db_version == 20210106 || db_version == 20210108 || db_version == 20210110) {
+            // McOsu 100%!
+            this->loadOldMcNeosuScores(db);
+            return true;
+        } else {
+            // We need to do some heuristics to detect whether this is an old neosu or a peppy database.
+            u32 nb_beatmaps = score_db.read<u32>();
+            for(u32 i = 0; i < nb_beatmaps; i++) {
+                auto map_md5 = score_db.read_hash();
+                u32 nb_scores = score_db.read<u32>();
+                for(u32 j = 0; j < nb_scores; j++) {
+                    u8 gamemode = score_db.read<u8>();         // could check for 0xA9, but better method below
+                    u32 score_version = score_db.read<u32>();  // useless
+
+                    // Here, neosu stores an int64 timestamp. First 32 bits should be 0 (until 2106).
+                    // Meanwhile, peppy stores the beatmap hash, which will NEVER be 0, since
+                    // it is stored as a string, which starts with an uleb128 (its length).
+                    u32 timestamp_check = score_db.read<u32>();
+                    if(timestamp_check == 0) {
+                        // neosu 100%!
+                        this->loadOldMcNeosuScores(db);
+                        return true;
+                    } else {
+                        // peppy 100%!
+                        this->loadPeppyScores(db);
+                        return true;
+                    }
+
+                    // unreachable
+                }
+            }
+
+            // 0 maps or 0 scores
+            return false;
+        }
+    }
+
+    return false;
+}
+
+void Database::loadScores(ByteBufferedFile::Reader &db) {
+    if(db.total_size == 0) {
+        this->bytes_processed += db.total_size;
+        return;
+    }
 
     u32 nb_neosu_scores = 0;
-    ByteBufferedFile::Reader db("neosu_scores.db");
-    if(!this->bScoresLoaded && db.total_size > 0) {
-        u8 magic_bytes[6] = {0};
-        if(db.read_bytes(magic_bytes, 5) != 5 || memcmp(magic_bytes, "NEOSC", 5) != 0) {
-            osu->getNotificationOverlay()->addToast("Failed to load neosu_scores.db!", 0xffff0000);
-            return;
+    u8 magic_bytes[6] = {0};
+    if(db.read_bytes(magic_bytes, 5) != 5 || memcmp(magic_bytes, "NEOSC", 5) != 0) {
+        osu->getNotificationOverlay()->addToast("Failed to load neosu_scores.db!", 0xffff0000);
+        this->bytes_processed += db.total_size;
+        return;
+    }
+
+    u32 db_version = db.read<u32>();
+    if(db_version > NEOSU_SCORE_DB_VERSION) {
+        debugLog("neosu_scores.db version is newer than current neosu version!\n");
+        this->bytes_processed += db.total_size;
+        return;
+    } else if(db_version < NEOSU_SCORE_DB_VERSION) {
+        // Reading from older database version: backup just in case
+        auto backup_path = fmt::format("neosu_scores.db.{}", db_version);
+        ByteBufferedFile::copy("neosu_scores.db", UString{backup_path});
+    }
+
+    u32 nb_beatmaps = db.read<u32>();
+    u32 nb_scores = db.read<u32>();
+    this->scores.reserve(nb_beatmaps);
+
+    for(u32 b = 0; b < nb_beatmaps; b++) {
+        MD5Hash beatmap_hash = db.read_hash();
+        u32 nb_beatmap_scores = db.read<u32>();
+
+        for(u32 s = 0; s < nb_beatmap_scores; s++) {
+            FinishedScore sc;
+
+            sc.mods.flags = db.read<u64>();
+            sc.mods.speed = db.read<f32>();
+            sc.mods.notelock_type = db.read<i32>();
+            sc.mods.ar_override = db.read<f32>();
+            sc.mods.ar_overridenegative = db.read<f32>();
+            sc.mods.cs_override = db.read<f32>();
+            sc.mods.cs_overridenegative = db.read<f32>();
+            sc.mods.hp_override = db.read<f32>();
+            sc.mods.od_override = db.read<f32>();
+            using namespace ModMasks;
+            using namespace Replay::ModFlags;
+            if(eq(sc.mods.flags, Autopilot)) {
+                sc.mods.autopilot_lenience = db.read<f32>();
+            }
+            if(eq(sc.mods.flags, Timewarp)) {
+                sc.mods.timewarp_multiplier = db.read<f32>();
+            }
+            if(eq(sc.mods.flags, Minimize)) {
+                sc.mods.minimize_multiplier = db.read<f32>();
+            }
+            if(eq(sc.mods.flags, ARTimewarp)) {
+                sc.mods.artimewarp_multiplier = db.read<f32>();
+            }
+            if(eq(sc.mods.flags, ARWobble)) {
+                sc.mods.arwobble_strength = db.read<f32>();
+                sc.mods.arwobble_interval = db.read<f32>();
+            }
+            if(eq(sc.mods.flags, Wobble1) || eq(sc.mods.flags, Wobble2)) {
+                sc.mods.wobble_strength = db.read<f32>();
+                sc.mods.wobble_frequency = db.read<f32>();
+                sc.mods.wobble_rotation_speed = db.read<f32>();
+            }
+            if(eq(sc.mods.flags, Jigsaw1) || eq(sc.mods.flags, Jigsaw2)) {
+                sc.mods.jigsaw_followcircle_radius_factor = db.read<f32>();
+            }
+            if(eq(sc.mods.flags, Shirone)) {
+                sc.mods.shirone_combo = db.read<f32>();
+            }
+
+            sc.score = db.read<u64>();
+            sc.spinner_bonus = db.read<u64>();
+            sc.unixTimestamp = db.read<u64>();
+            sc.player_id = db.read<i32>();
+            sc.playerName = db.read_string();
+            sc.grade = (FinishedScore::Grade)db.read<u8>();
+
+            sc.client = db.read_string();
+            sc.server = db.read_string();
+            sc.bancho_score_id = db.read<u64>();
+            sc.peppy_replay_tms = db.read<u64>();
+
+            sc.num300s = db.read<u16>();
+            sc.num100s = db.read<u16>();
+            sc.num50s = db.read<u16>();
+            sc.numGekis = db.read<u16>();
+            sc.numKatus = db.read<u16>();
+            sc.numMisses = db.read<u16>();
+            sc.comboMax = db.read<u16>();
+
+            sc.ppv2_version = db.read<u32>();
+            sc.ppv2_score = db.read<f32>();
+            sc.ppv2_total_stars = db.read<f32>();
+            sc.ppv2_aim_stars = db.read<f32>();
+            sc.ppv2_speed_stars = db.read<f32>();
+
+            sc.numSliderBreaks = db.read<u16>();
+            sc.unstableRate = db.read<f32>();
+            sc.hitErrorAvgMin = db.read<f32>();
+            sc.hitErrorAvgMax = db.read<f32>();
+            sc.maxPossibleCombo = db.read<u32>();
+            sc.numHitObjects = db.read<u32>();
+            sc.numCircles = db.read<u32>();
+
+            sc.beatmap_hash = beatmap_hash;
+
+            this->addScoreRaw(sc);
+            nb_neosu_scores++;
         }
 
-        u32 db_version = db.read<u32>();
-        if(db_version > NEOSU_SCORE_DB_VERSION) {
-            debugLog("neosu_scores.db version is newer than current neosu version!\n");
-            return;
-        } else if(db_version < NEOSU_SCORE_DB_VERSION) {
-            // Reading from older database version: backup just in case
-            auto backup_path = fmt::format("neosu_scores.db.{}", db_version);
-            ByteBufferedFile::copy("neosu_scores.db", UString{backup_path});
-        }
+        u32 progress_bytes = this->bytes_processed + db.total_pos;
+        f64 progress_float = (f64)progress_bytes / (f64)this->total_bytes;
+        this->fLoadingProgress = std::clamp(progress_float, 0.01, 0.99);
+    }
 
+    if(nb_neosu_scores != nb_scores) {
+        debugLog("Inconsistency in neosu_scores.db! Expected %d scores, found %d!\n", nb_scores, nb_neosu_scores);
+    }
+
+    debugLog("Loaded %d neosu scores\n", nb_neosu_scores);
+    this->bytes_processed += db.total_size;
+}
+
+// import scores from mcosu, or old neosu (before we started saving replays)
+void Database::loadOldMcNeosuScores(ByteBufferedFile::Reader &db) {
+    u32 db_version = db.read<u32>();
+    if(db.total_size == 0 || db_version == 0) {
+        this->bytes_processed += db.total_size;
+        return;
+    }
+
+    u32 nb_imported = 0;
+    bool is_mcosu = (db_version == 20210106 || db_version == 20210108 || db_version == 20210110);
+    bool is_neosu = !is_mcosu;
+
+    if(is_neosu) {
         u32 nb_beatmaps = db.read<u32>();
-        u32 nb_scores = db.read<u32>();
-        this->scores.reserve(nb_beatmaps);
-
         for(u32 b = 0; b < nb_beatmaps; b++) {
-            MD5Hash beatmap_hash = db.read_hash();
-            u32 nb_beatmap_scores = db.read<u32>();
+            u32 progress_bytes = this->bytes_processed + db.total_pos;
+            f64 progress_float = (f64)progress_bytes / (f64)this->total_bytes;
+            this->fLoadingProgress = std::clamp(progress_float, 0.01, 0.99);
 
-            for(u32 s = 0; s < nb_beatmap_scores; s++) {
+            auto md5hash = db.read_hash();
+            u32 nb_scores = db.read<u32>();
+
+            for(u32 s = 0; s < nb_scores; s++) {
+                db.skip<u8>();   // gamemode (always 0)
+                db.skip<u32>();  // score version
+
                 FinishedScore sc;
-
-                sc.mods.flags = db.read<u64>();
-                sc.mods.speed = db.read<f32>();
-                sc.mods.notelock_type = db.read<i32>();
-                sc.mods.ar_override = db.read<f32>();
-                sc.mods.ar_overridenegative = db.read<f32>();
-                sc.mods.cs_override = db.read<f32>();
-                sc.mods.cs_overridenegative = db.read<f32>();
-                sc.mods.hp_override = db.read<f32>();
-                sc.mods.od_override = db.read<f32>();
-                using namespace ModMasks;
-                using namespace Replay::ModFlags;
-                if(eq(sc.mods.flags, Autopilot)) {
-                    sc.mods.autopilot_lenience = db.read<f32>();
-                }
-                if(eq(sc.mods.flags, Timewarp)) {
-                    sc.mods.timewarp_multiplier = db.read<f32>();
-                }
-                if(eq(sc.mods.flags, Minimize)) {
-                    sc.mods.minimize_multiplier = db.read<f32>();
-                }
-                if(eq(sc.mods.flags, ARTimewarp)) {
-                    sc.mods.artimewarp_multiplier = db.read<f32>();
-                }
-                if(eq(sc.mods.flags, ARWobble)) {
-                    sc.mods.arwobble_strength = db.read<f32>();
-                    sc.mods.arwobble_interval = db.read<f32>();
-                }
-                if(eq(sc.mods.flags, Wobble1) || eq(sc.mods.flags, Wobble2)) {
-                    sc.mods.wobble_strength = db.read<f32>();
-                    sc.mods.wobble_frequency = db.read<f32>();
-                    sc.mods.wobble_rotation_speed = db.read<f32>();
-                }
-                if(eq(sc.mods.flags, Jigsaw1) || eq(sc.mods.flags, Jigsaw2)) {
-                    sc.mods.jigsaw_followcircle_radius_factor = db.read<f32>();
-                }
-                if(eq(sc.mods.flags, Shirone)) {
-                    sc.mods.shirone_combo = db.read<f32>();
-                }
-
-                sc.score = db.read<u64>();
-                sc.spinner_bonus = db.read<u64>();
                 sc.unixTimestamp = db.read<u64>();
-                sc.player_id = db.read<i32>();
                 sc.playerName = db.read_string();
-                sc.grade = (FinishedScore::Grade)db.read<u8>();
-
-                sc.client = db.read_string();
-                sc.server = db.read_string();
-                sc.bancho_score_id = db.read<u64>();
-                sc.peppy_replay_tms = db.read<u64>();
-
                 sc.num300s = db.read<u16>();
                 sc.num100s = db.read<u16>();
                 sc.num50s = db.read<u16>();
                 sc.numGekis = db.read<u16>();
                 sc.numKatus = db.read<u16>();
                 sc.numMisses = db.read<u16>();
+                sc.score = db.read<u64>();
                 sc.comboMax = db.read<u16>();
-
-                sc.ppv2_version = db.read<u32>();
-                sc.ppv2_score = db.read<f32>();
-                sc.ppv2_total_stars = db.read<f32>();
-                sc.ppv2_aim_stars = db.read<f32>();
-                sc.ppv2_speed_stars = db.read<f32>();
-
+                sc.mods = Replay::Mods::from_legacy(db.read<u32>());
                 sc.numSliderBreaks = db.read<u16>();
+                sc.ppv2_version = 20220902;
+                sc.ppv2_score = db.read<f32>();
                 sc.unstableRate = db.read<f32>();
                 sc.hitErrorAvgMin = db.read<f32>();
                 sc.hitErrorAvgMax = db.read<f32>();
+                sc.ppv2_total_stars = db.read<f32>();
+                sc.ppv2_aim_stars = db.read<f32>();
+                sc.ppv2_speed_stars = db.read<f32>();
+                sc.mods.speed = db.read<f32>();
+                sc.mods.cs_override = db.read<f32>();
+                sc.mods.ar_override = db.read<f32>();
+                sc.mods.od_override = db.read<f32>();
+                sc.mods.hp_override = db.read<f32>();
                 sc.maxPossibleCombo = db.read<u32>();
                 sc.numHitObjects = db.read<u32>();
                 sc.numCircles = db.read<u32>();
+                sc.bancho_score_id = db.read<u32>();
+                sc.client = "neosu-win64-release-35.10";  // we don't know the actual version
+                sc.server = db.read_string();
 
-                sc.beatmap_hash = beatmap_hash;
+                std::string experimentalModsConVars = db.read_string();
+                auto experimentalMods = SString::split(experimentalModsConVars, ";");
+                for(const auto &mod : experimentalMods) {
+                    if(mod == "") continue;
+                    if(mod == "fposu_mod_strafing") sc.mods.flags |= Replay::ModFlags::FPoSu_Strafing;
+                    if(mod == "osu_mod_wobble") sc.mods.flags |= Replay::ModFlags::Wobble1;
+                    if(mod == "osu_mod_wobble2") sc.mods.flags |= Replay::ModFlags::Wobble2;
+                    if(mod == "osu_mod_arwobble") sc.mods.flags |= Replay::ModFlags::ARWobble;
+                    if(mod == "osu_mod_timewarp") sc.mods.flags |= Replay::ModFlags::Timewarp;
+                    if(mod == "osu_mod_artimewarp") sc.mods.flags |= Replay::ModFlags::ARTimewarp;
+                    if(mod == "osu_mod_minimize") sc.mods.flags |= Replay::ModFlags::Minimize;
+                    if(mod == "osu_mod_fadingcursor") sc.mods.flags |= Replay::ModFlags::FadingCursor;
+                    if(mod == "osu_mod_fps") sc.mods.flags |= Replay::ModFlags::FPS;
+                    if(mod == "osu_mod_jigsaw1") sc.mods.flags |= Replay::ModFlags::Jigsaw1;
+                    if(mod == "osu_mod_jigsaw2") sc.mods.flags |= Replay::ModFlags::Jigsaw2;
+                    if(mod == "osu_mod_fullalternate") sc.mods.flags |= Replay::ModFlags::FullAlternate;
+                    if(mod == "osu_mod_reverse_sliders") sc.mods.flags |= Replay::ModFlags::ReverseSliders;
+                    if(mod == "osu_mod_no50s") sc.mods.flags |= Replay::ModFlags::No50s;
+                    if(mod == "osu_mod_no100s") sc.mods.flags |= Replay::ModFlags::No100s;
+                    if(mod == "osu_mod_ming3012") sc.mods.flags |= Replay::ModFlags::Ming3012;
+                    if(mod == "osu_mod_halfwindow") sc.mods.flags |= Replay::ModFlags::HalfWindow;
+                    if(mod == "osu_mod_millhioref") sc.mods.flags |= Replay::ModFlags::Millhioref;
+                    if(mod == "osu_mod_mafham") sc.mods.flags |= Replay::ModFlags::Mafham;
+                    if(mod == "osu_mod_strict_tracking") sc.mods.flags |= Replay::ModFlags::StrictTracking;
+                    if(mod == "osu_playfield_mirror_horizontal") sc.mods.flags |= Replay::ModFlags::MirrorHorizontal;
+                    if(mod == "osu_playfield_mirror_vertical") sc.mods.flags |= Replay::ModFlags::MirrorVertical;
+                    if(mod == "osu_mod_shirone") sc.mods.flags |= Replay::ModFlags::Shirone;
+                    if(mod == "osu_mod_approach_different") sc.mods.flags |= Replay::ModFlags::ApproachDifferent;
+                }
 
-                this->addScoreRaw(sc);
-                nb_neosu_scores++;
+                sc.beatmap_hash = md5hash;
+                sc.perfect = sc.comboMax >= sc.maxPossibleCombo;
+                sc.grade = sc.calculate_grade();
+
+                if(this->addScoreRaw(sc)) {
+                    nb_imported++;
+                }
             }
         }
 
-        if(nb_neosu_scores != nb_scores) {
-            debugLog("Inconsistency in neosu_scores.db! Expected %d scores, found %d!\n", nb_scores, nb_neosu_scores);
-        }
-    }
+        debugLogF("Loaded {} old-neosu scores\n", nb_imported);
+    } else {  // mcosu (this is copy-pasted from mcosu-ng)
+        const int numBeatmaps = db.read<int32_t>();
+        debugLogF("McOsu scores: version = {}, numBeatmaps = {}\n", db_version, numBeatmaps);
 
-    u32 nb_old_mcneosu_imported = this->importOldMcNeosuScores();
-    u32 nb_peppy_imported = this->importPeppyScores();
-    this->bScoresLoaded = true;
+        for(int b = 0; b < numBeatmaps; b++) {
+            u32 progress_bytes = this->bytes_processed + db.total_pos;
+            f64 progress_float = (f64)progress_bytes / (f64)this->total_bytes;
+            this->fLoadingProgress = std::clamp(progress_float, 0.01, 0.99);
 
-    u32 scores_total = nb_old_mcneosu_imported + nb_neosu_scores + nb_peppy_imported;
-    debugLog("Loaded %i scores (%d old mc/neosu, %d neosu, %d peppy)\n", scores_total, nb_old_mcneosu_imported,
-             nb_neosu_scores, nb_peppy_imported);
-}
+            const auto md5hash = db.read_hash();
+            const int numScores = db.read<int32_t>();
 
-// import scores from mcosu, and scores from neosu scores.db if version == 20240412 (before rename to neosu_scores.db,
-// may contain replays)
-u32 Database::importOldMcNeosuScores() {
-    bool is_neosu = true;
-    u32 db_version = 0;
-    int nb_imported = 0;
-
-    // mcosu logic
-    constexpr auto latest_mcosu_custom_scores_ver = 20210110;
-    int makeBackupType = 0;
-    const int backupLessThanVersion = 20210103;
-    const int backupMoreThanVersion = 20210105;
-    // end mcosu logic
-
-    {
-        ByteBufferedFile::Reader dbCheck("scores.db");
-        if(!dbCheck.good()) {
-            return 0;
-        }
-
-        db_version = dbCheck.read<u32>();
-        if(db_version == 0) {
-            // scores.db doesn't exist
-            return 0;
-        }
-
-        // 20240412 is the only neosu scores.db version in which replays are saved,
-        // treat other versions as coming from mcosu
-        if(db_version != 20240412) {
-            is_neosu = false;
-            if(db_version > latest_mcosu_custom_scores_ver) {  // newest mcosu scores.db version
-                debugLog("Unsupported custom scores.db version.\n");
-                return 0;
+            if(md5hash.length() < 32) {
+                debugLogF("WARNING: Invalid score on beatmap {} with md5hash.length() = {}!\n", b, md5hash.length());
+                continue;
+            } else if(md5hash.length() > 32) {
+                debugLogF("ERROR: Corrupt score database/entry detected, stopping.\n");
+                break;
             }
-        }
-    }
 
-    {
-        ByteBufferedFile::Reader db("scores.db");
-        if(!db.good()) {
-            return 0;
-        }
+            if(cv::debug.getBool())
+                debugLogF("Beatmap[{}]: md5hash = {:s}, numScores = {}\n", b, md5hash.hash.data(), numScores);
 
-        db.skip<u32>();  // skip version, we already checked
+            for(int s = 0; s < numScores; s++) {
+                const auto gamemode = db.read<uint8_t>();  // NOTE: abused as isImportedLegacyScore flag (because I
+                                                           // forgot to add a version cap to old builds)
+                const int scoreVersion = db.read<int32_t>();
+                if(db_version == 20210103 && scoreVersion > 20190103) {
+                    /* isImportedLegacyScore = */ db.skip<uint8_t>();  // too lazy to handle this logic
+                }
+                const auto unixTimestamp = db.read<uint64_t>();
+                if(this->isScoreAlreadyInDB(unixTimestamp, md5hash)) {
+                    db.skip_string();  // playerName
+                    u32 bytesToSkipUntilNextScore = 0;
+                    bytesToSkipUntilNextScore +=
+                        (sizeof(uint16_t) * 8) + (sizeof(int64_t)) + (sizeof(int32_t)) + (sizeof(f32) * 12);
+                    if(scoreVersion > 20180722) {
+                        // maxPossibleCombos
+                        bytesToSkipUntilNextScore += sizeof(int32_t) * 3;
+                    }
+                    db.skip_bytes(bytesToSkipUntilNextScore);
+                    db.skip_string();  // experimentalMods
+                    if(cv::debug.getBool()) {
+                        debugLogF("skipped score {} (already loaded from neosu_scores.db)\n", md5hash.hash.data());
+                    }
+                    continue;
+                }
 
-        if(is_neosu) {
-            u32 nb_beatmaps = db.read<u32>();
-            for(u32 b = 0; b < nb_beatmaps; b++) {
-                auto md5hash = db.read_hash();
-                u32 nb_scores = db.read<u32>();
+                // default
+                const std::string playerName{db.read_string()};
 
-                for(u32 s = 0; s < nb_scores; s++) {
-                    db.skip<u8>();   // gamemode (always 0)
-                    db.skip<u32>();  // score version
+                const auto num300s = db.read<uint16_t>();
+                const auto num100s = db.read<uint16_t>();
+                const auto num50s = db.read<uint16_t>();
+                const auto numGekis = db.read<uint16_t>();
+                const auto numKatus = db.read<uint16_t>();
+                const auto numMisses = db.read<uint16_t>();
 
+                const auto score = db.read<int64_t>();
+                const auto maxCombo = db.read<uint16_t>();
+                const auto mods = Replay::Mods::from_legacy(db.read<uint32_t>());
+
+                // custom
+                const auto numSliderBreaks = db.read<uint16_t>();
+                const auto pp = db.read<f32>();
+                const auto unstableRate = db.read<f32>();
+                const auto hitErrorAvgMin = db.read<f32>();
+                const auto hitErrorAvgMax = db.read<f32>();
+                const auto starsTomTotal = db.read<f32>();
+                const auto starsTomAim = db.read<f32>();
+                const auto starsTomSpeed = db.read<f32>();
+                const auto speedMultiplier = db.read<f32>();
+                const auto CS = db.read<f32>();
+                const auto AR = db.read<f32>();
+                const auto OD = db.read<f32>();
+                const auto HP = db.read<f32>();
+
+                int maxPossibleCombo = -1;
+                int numHitObjects = -1;
+                int numCircles = -1;
+                if(scoreVersion > 20180722) {
+                    maxPossibleCombo = db.read<int32_t>();
+                    numHitObjects = db.read<int32_t>();
+                    numCircles = db.read<int32_t>();
+                }
+
+                std::string experimentalModsConVars = db.read_string();
+                auto experimentalMods = SString::split(experimentalModsConVars, ";");
+
+                if(gamemode == 0x0 || (db_version > 20210103 &&
+                                       scoreVersion > 20190103))  // gamemode filter (osu!standard) // HACKHACK: for
+                                                                  // explanation see hackIsImportedLegacyScoreFlag
+                {
                     FinishedScore sc;
-                    sc.unixTimestamp = db.read<u64>();
-                    sc.playerName = db.read_string();
-                    sc.num300s = db.read<u16>();
-                    sc.num100s = db.read<u16>();
-                    sc.num50s = db.read<u16>();
-                    sc.numGekis = db.read<u16>();
-                    sc.numKatus = db.read<u16>();
-                    sc.numMisses = db.read<u16>();
-                    sc.score = db.read<u64>();
-                    sc.comboMax = db.read<u16>();
-                    sc.mods = Replay::Mods::from_legacy(db.read<u32>());
-                    sc.numSliderBreaks = db.read<u16>();
-                    sc.ppv2_version = 20220902;
-                    sc.ppv2_score = db.read<f32>();
-                    sc.unstableRate = db.read<f32>();
-                    sc.hitErrorAvgMin = db.read<f32>();
-                    sc.hitErrorAvgMax = db.read<f32>();
-                    sc.ppv2_total_stars = db.read<f32>();
-                    sc.ppv2_aim_stars = db.read<f32>();
-                    sc.ppv2_speed_stars = db.read<f32>();
-                    sc.mods.speed = db.read<f32>();
-                    sc.mods.cs_override = db.read<f32>();
-                    sc.mods.ar_override = db.read<f32>();
-                    sc.mods.od_override = db.read<f32>();
-                    sc.mods.hp_override = db.read<f32>();
-                    sc.maxPossibleCombo = db.read<u32>();
-                    sc.numHitObjects = db.read<u32>();
-                    sc.numCircles = db.read<u32>();
-                    sc.bancho_score_id = db.read<u32>();
-                    sc.client = "neosu-win64-release-35.10";  // we don't know the actual version
-                    sc.server = db.read_string();
 
-                    std::string experimentalModsConVars = db.read_string();
-                    auto experimentalMods = SString::split(experimentalModsConVars, ";");
+                    sc.unixTimestamp = unixTimestamp;
+
+                    // default
+                    sc.playerName = playerName;
+
+                    sc.num300s = num300s;
+                    sc.num100s = num100s;
+                    sc.num50s = num50s;
+                    sc.numGekis = numGekis;
+                    sc.numKatus = numKatus;
+                    sc.numMisses = numMisses;
+                    sc.score = score;
+                    sc.comboMax = maxCombo;
+                    sc.perfect = (maxPossibleCombo > 0 && sc.comboMax > 0 && sc.comboMax >= maxPossibleCombo);
+                    sc.mods = mods;
+
+                    // custom
+                    sc.numSliderBreaks = numSliderBreaks;
+                    sc.ppv2_version = 20220902;
+                    sc.ppv2_score = pp;
+                    sc.unstableRate = unstableRate;
+                    sc.hitErrorAvgMin = hitErrorAvgMin;
+                    sc.hitErrorAvgMax = hitErrorAvgMax;
+                    sc.ppv2_total_stars = starsTomTotal;
+                    sc.ppv2_aim_stars = starsTomAim;
+                    sc.ppv2_speed_stars = starsTomSpeed;
+                    sc.mods.speed = speedMultiplier;
+                    sc.mods.cs_override = CS;
+                    sc.mods.ar_override = AR;
+                    sc.mods.od_override = OD;
+                    sc.mods.hp_override = HP;
+                    sc.maxPossibleCombo = maxPossibleCombo;
+                    sc.numHitObjects = numHitObjects;
+                    sc.numCircles = numCircles;
                     for(const auto &mod : experimentalMods) {
                         if(mod == "") continue;
                         if(mod == "fposu_mod_strafing") sc.mods.flags |= Replay::ModFlags::FPoSu_Strafing;
@@ -1630,234 +1871,28 @@ u32 Database::importOldMcNeosuScores() {
                     sc.beatmap_hash = md5hash;
                     sc.perfect = sc.comboMax >= sc.maxPossibleCombo;
                     sc.grade = sc.calculate_grade();
+                    sc.client = fmt::format("mcosu-{}", scoreVersion);
 
                     if(this->addScoreRaw(sc)) {
                         nb_imported++;
                     }
                 }
             }
-        } else {  // mcosu (this is copy-pasted from mcosu-ng)
-            const int numBeatmaps = db.read<int32_t>();
-
-            if(db_version > backupMoreThanVersion)
-                makeBackupType = 2;
-            else if(db_version < backupLessThanVersion)
-                makeBackupType = 1;
-
-            debugLogF("McOsu scores: version = {}, numBeatmaps = {}\n", db_version, numBeatmaps);
-
-            if(db_version <= latest_mcosu_custom_scores_ver) {
-                for(int b = 0; b < numBeatmaps; b++) {
-                    const auto md5hash = db.read_hash();
-                    const int numScores = db.read<int32_t>();
-
-                    if(md5hash.length() < 32) {
-                        debugLogF("WARNING: Invalid score on beatmap {} with md5hash.length() = {}!\n", b,
-                                  md5hash.length());
-                        continue;
-                    } else if(md5hash.length() > 32) {
-                        debugLogF("ERROR: Corrupt score database/entry detected, stopping.\n");
-                        break;
-                    }
-
-                    if(cv::debug.getBool())
-                        debugLogF("Beatmap[{}]: md5hash = {:s}, numScores = {}\n", b, md5hash.hash.data(), numScores);
-
-                    for(int s = 0; s < numScores; s++) {
-                        const auto gamemode =
-                            db.read<uint8_t>();  // NOTE: abused as isImportedLegacyScore flag (because I forgot to
-                                                 // add a version cap to old builds)
-                        const int scoreVersion = db.read<int32_t>();
-                        if(db_version == 20210103 && scoreVersion > 20190103) {
-                            /* isImportedLegacyScore = */ db.skip<uint8_t>();  // too lazy to handle this logic
-                        }
-                        const auto unixTimestamp = db.read<uint64_t>();
-                        if(this->isScoreAlreadyInDB(unixTimestamp, md5hash)) {
-                            db.skip_string();  // playerName
-                            u32 bytesToSkipUntilNextScore = 0;
-                            bytesToSkipUntilNextScore +=
-                                (sizeof(uint16_t) * 8) + (sizeof(int64_t)) + (sizeof(int32_t)) + (sizeof(f32) * 12);
-                            if(scoreVersion > 20180722) {
-                                // maxPossibleCombos
-                                bytesToSkipUntilNextScore += sizeof(int32_t) * 3;
-                            }
-                            db.skip_bytes(bytesToSkipUntilNextScore);
-                            db.skip_string();  // experimentalMods
-                            if(cv::debug.getBool()) {
-                                debugLogF("skipped score {} (already loaded from neosu_scores.db)\n",
-                                          md5hash.hash.data());
-                            }
-                            continue;
-                        }
-
-                        // default
-                        const std::string playerName{db.read_string()};
-
-                        const auto num300s = db.read<uint16_t>();
-                        const auto num100s = db.read<uint16_t>();
-                        const auto num50s = db.read<uint16_t>();
-                        const auto numGekis = db.read<uint16_t>();
-                        const auto numKatus = db.read<uint16_t>();
-                        const auto numMisses = db.read<uint16_t>();
-
-                        const auto score = db.read<int64_t>();
-                        const auto maxCombo = db.read<uint16_t>();
-                        const auto mods = Replay::Mods::from_legacy(db.read<uint32_t>());
-
-                        // custom
-                        const auto numSliderBreaks = db.read<uint16_t>();
-                        const auto pp = db.read<f32>();
-                        const auto unstableRate = db.read<f32>();
-                        const auto hitErrorAvgMin = db.read<f32>();
-                        const auto hitErrorAvgMax = db.read<f32>();
-                        const auto starsTomTotal = db.read<f32>();
-                        const auto starsTomAim = db.read<f32>();
-                        const auto starsTomSpeed = db.read<f32>();
-                        const auto speedMultiplier = db.read<f32>();
-                        const auto CS = db.read<f32>();
-                        const auto AR = db.read<f32>();
-                        const auto OD = db.read<f32>();
-                        const auto HP = db.read<f32>();
-
-                        int maxPossibleCombo = -1;
-                        int numHitObjects = -1;
-                        int numCircles = -1;
-                        if(scoreVersion > 20180722) {
-                            maxPossibleCombo = db.read<int32_t>();
-                            numHitObjects = db.read<int32_t>();
-                            numCircles = db.read<int32_t>();
-                        }
-
-                        std::string experimentalModsConVars = db.read_string();
-                        auto experimentalMods = SString::split(experimentalModsConVars, ";");
-
-                        if(gamemode == 0x0 ||
-                           (db_version > 20210103 &&
-                            scoreVersion > 20190103))  // gamemode filter (osu!standard) // HACKHACK: for
-                                                       // explanation see hackIsImportedLegacyScoreFlag
-                        {
-                            FinishedScore sc;
-
-                            sc.unixTimestamp = unixTimestamp;
-
-                            // default
-                            sc.playerName = playerName;
-
-                            sc.num300s = num300s;
-                            sc.num100s = num100s;
-                            sc.num50s = num50s;
-                            sc.numGekis = numGekis;
-                            sc.numKatus = numKatus;
-                            sc.numMisses = numMisses;
-                            sc.score = score;
-                            sc.comboMax = maxCombo;
-                            sc.perfect = (maxPossibleCombo > 0 && sc.comboMax > 0 && sc.comboMax >= maxPossibleCombo);
-                            sc.mods = mods;
-
-                            // custom
-                            sc.numSliderBreaks = numSliderBreaks;
-                            sc.ppv2_version = 20220902;
-                            sc.ppv2_score = pp;
-                            sc.unstableRate = unstableRate;
-                            sc.hitErrorAvgMin = hitErrorAvgMin;
-                            sc.hitErrorAvgMax = hitErrorAvgMax;
-                            sc.ppv2_total_stars = starsTomTotal;
-                            sc.ppv2_aim_stars = starsTomAim;
-                            sc.ppv2_speed_stars = starsTomSpeed;
-                            sc.mods.speed = speedMultiplier;
-                            sc.mods.cs_override = CS;
-                            sc.mods.ar_override = AR;
-                            sc.mods.od_override = OD;
-                            sc.mods.hp_override = HP;
-                            sc.maxPossibleCombo = maxPossibleCombo;
-                            sc.numHitObjects = numHitObjects;
-                            sc.numCircles = numCircles;
-                            for(const auto &mod : experimentalMods) {
-                                if(mod == "") continue;
-                                if(mod == "fposu_mod_strafing") sc.mods.flags |= Replay::ModFlags::FPoSu_Strafing;
-                                if(mod == "osu_mod_wobble") sc.mods.flags |= Replay::ModFlags::Wobble1;
-                                if(mod == "osu_mod_wobble2") sc.mods.flags |= Replay::ModFlags::Wobble2;
-                                if(mod == "osu_mod_arwobble") sc.mods.flags |= Replay::ModFlags::ARWobble;
-                                if(mod == "osu_mod_timewarp") sc.mods.flags |= Replay::ModFlags::Timewarp;
-                                if(mod == "osu_mod_artimewarp") sc.mods.flags |= Replay::ModFlags::ARTimewarp;
-                                if(mod == "osu_mod_minimize") sc.mods.flags |= Replay::ModFlags::Minimize;
-                                if(mod == "osu_mod_fadingcursor") sc.mods.flags |= Replay::ModFlags::FadingCursor;
-                                if(mod == "osu_mod_fps") sc.mods.flags |= Replay::ModFlags::FPS;
-                                if(mod == "osu_mod_jigsaw1") sc.mods.flags |= Replay::ModFlags::Jigsaw1;
-                                if(mod == "osu_mod_jigsaw2") sc.mods.flags |= Replay::ModFlags::Jigsaw2;
-                                if(mod == "osu_mod_fullalternate") sc.mods.flags |= Replay::ModFlags::FullAlternate;
-                                if(mod == "osu_mod_reverse_sliders") sc.mods.flags |= Replay::ModFlags::ReverseSliders;
-                                if(mod == "osu_mod_no50s") sc.mods.flags |= Replay::ModFlags::No50s;
-                                if(mod == "osu_mod_no100s") sc.mods.flags |= Replay::ModFlags::No100s;
-                                if(mod == "osu_mod_ming3012") sc.mods.flags |= Replay::ModFlags::Ming3012;
-                                if(mod == "osu_mod_halfwindow") sc.mods.flags |= Replay::ModFlags::HalfWindow;
-                                if(mod == "osu_mod_millhioref") sc.mods.flags |= Replay::ModFlags::Millhioref;
-                                if(mod == "osu_mod_mafham") sc.mods.flags |= Replay::ModFlags::Mafham;
-                                if(mod == "osu_mod_strict_tracking") sc.mods.flags |= Replay::ModFlags::StrictTracking;
-                                if(mod == "osu_playfield_mirror_horizontal")
-                                    sc.mods.flags |= Replay::ModFlags::MirrorHorizontal;
-                                if(mod == "osu_playfield_mirror_vertical")
-                                    sc.mods.flags |= Replay::ModFlags::MirrorVertical;
-                                if(mod == "osu_mod_shirone") sc.mods.flags |= Replay::ModFlags::Shirone;
-                                if(mod == "osu_mod_approach_different")
-                                    sc.mods.flags |= Replay::ModFlags::ApproachDifferent;
-                            }
-
-                            sc.beatmap_hash = md5hash;
-                            sc.perfect = sc.comboMax >= sc.maxPossibleCombo;
-                            sc.grade = sc.calculate_grade();
-                            sc.client = fmt::format("mcosu-{}", scoreVersion);
-
-                            if(this->addScoreRaw(sc)) {
-                                nb_imported++;
-                            }
-                        }
-                    }
-                }
-                debugLogF("Loaded {} individual scores.\n", nb_imported);
-            } else
-                debugLogF("Newer scores.db version is not backwards compatible with old clients.\n");
         }
-
-        // one-time-backup for special occasions (sanity)
-        if(makeBackupType > 0) {
-            File originalScoresFile("scores.db");
-            if(originalScoresFile.canRead()) {
-                std::string backupScoresFilePath = "scores.db";
-                const int forcedBackupCounter = 5;
-                backupScoresFilePath.append(fmt::format(
-                    ".{}_{}.backup", (makeBackupType < 2 ? backupLessThanVersion : latest_mcosu_custom_scores_ver),
-                    forcedBackupCounter));
-
-                if(!env->fileExists(backupScoresFilePath))  // NOTE: avoid overwriting when people switch betas
-                {
-                    File backupScoresFile(backupScoresFilePath, File::TYPE::WRITE);
-                    if(backupScoresFile.canWrite()) {
-                        const char *originalScoresFileBytes = originalScoresFile.readFile();
-                        if(originalScoresFileBytes != NULL)
-                            backupScoresFile.write(originalScoresFileBytes, originalScoresFile.getFileSize());
-                    }
-                }
-            }
-        }
+        debugLogF("Loaded {} McOsu scores\n", nb_imported);
     }
 
-    return nb_imported;
+    this->bytes_processed += db.total_size;
 }
 
-u32 Database::importPeppyScores() {
+void Database::loadPeppyScores(ByteBufferedFile::Reader &db) {
     int nb_imported = 0;
-
-    std::string scoresPath = cv::osu_folder.getString();
-    scoresPath.append("/scores.db");
-    ByteBufferedFile::Reader db(UString{scoresPath});
 
     u32 db_version = db.read<u32>();
     u32 nb_beatmaps = db.read<u32>();
-
-    if(db_version == 0) {
-        // scores.db doesn't exist
-        return 0;
+    if(db.total_size == 0 || db_version == 0) {
+        this->bytes_processed += db.total_size;
+        return;
     }
 
     debugLog("osu!stable scores.db: version = %i, nb_beatmaps = %i\n", db_version, nb_beatmaps);
@@ -1940,10 +1975,14 @@ u32 Database::importPeppyScores() {
                 }
             }
         }
+
+        u32 progress_bytes = this->bytes_processed + db.total_pos;
+        f64 progress_float = (f64)progress_bytes / (f64)this->total_bytes;
+        this->fLoadingProgress = std::clamp(progress_float, 0.01, 0.99);
     }
 
-    debugLog("Imported %i scores from osu!stable.\n", nb_imported);
-    return nb_imported;
+    debugLog("Loaded %d osu!stable scores\n", nb_imported);
+    this->bytes_processed += db.total_size;
 }
 
 void Database::saveScores() {

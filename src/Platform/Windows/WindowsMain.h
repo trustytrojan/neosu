@@ -13,7 +13,7 @@ class WindowsMain final {
     static int ret;
 
     // I L L E G A L (sorry, that was the inner McKay in me)
-    void handle_cmdline_args(const char *args);
+    void handle_cmdline_args(std::vector<std::string> args);
 
    private:
     bool bRunning{true};
@@ -61,6 +61,7 @@ class WindowsMain final {
     void processBufferedRawInput();
 
     // misc helpers (which shouldn't be here, to be moved)
+    void handle_db(const char *db_path);
     void handle_osk(const char *osk_path);
     void handle_osz(const char *osz_path);
     void handle_neosu_url(const char *url);

@@ -30,6 +30,7 @@ Changelog::Changelog() : ScreenBackable() {
     v39_10.title = NEOSU_VERSION " (" __DATE__ ")";
     v39_10.changes = {
         R"(- Added a "keep me signed in" checkbox next to the login button)",
+        R"(- Added ability to import McOsu/neosu/stable collections and scores from database files)",
         R"(- Adjusted hit windows to match stable)",
         R"(- Fixed collections not displaying all available maps)",
         R"(- Fixed "RawInputBuffer" option on Windows, should work much more reliably)",

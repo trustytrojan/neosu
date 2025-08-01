@@ -518,9 +518,11 @@ LRESULT CALLBACK WindowsMain::realWndProc(HWND hwnd, UINT msg, WPARAM wParam, LP
 
             i32 argc = 0;
             char **argv = (char **)cds->lpData;
+            std::vector<std::string> args;
             for(i32 i = 0; i < argc; i++) {
-                handle_cmdline_args(argv[i]);
+                args.push_back(argv[i]);
             }
+            handle_cmdline_args(args);
 
             return 1;
         }
@@ -540,7 +542,9 @@ LRESULT CALLBACK WindowsMain::realWndProc(HWND hwnd, UINT msg, WPARAM wParam, LP
                 WideCharToMultiByte(CP_UTF8, 0, filePath, size, (LPSTR)utf8filepath.c_str(), size, NULL, NULL);
                 delete[] filePath;
 
-                handle_cmdline_args(utf8filepath.c_str());
+                std::vector<std::string> args;
+                args.push_back(utf8filepath.c_str());
+                handle_cmdline_args(args);
             }
 
             DragFinish(hDrop);
@@ -834,9 +838,7 @@ LRESULT CALLBACK WindowsMain::realWndProc(HWND hwnd, UINT msg, WPARAM wParam, LP
         // resize limit
         case WM_GETMINMAXINFO: {
             WINDOWPLACEMENT wPos;
-            {
-                wPos.length = sizeof(WINDOWPLACEMENT);
-            }
+            { wPos.length = sizeof(WINDOWPLACEMENT); }
             GetWindowPlacement(hwnd, &wPos);
 
             // min

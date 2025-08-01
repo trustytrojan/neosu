@@ -35,7 +35,7 @@ seek_error:
     return;
 }
 
-void ByteBufferedFile::Reader::set_error(const std::string& error_msg) {
+void ByteBufferedFile::Reader::set_error(const std::string &error_msg) {
     if(!this->error_flag) {  // only set first error
         this->error_flag = true;
         this->last_error = error_msg;
@@ -61,7 +61,7 @@ MD5Hash ByteBufferedFile::Reader::read_hash() {
         len = 32;
     }
 
-    if(this->read_bytes(reinterpret_cast<u8*>(hash.hash.data()), len) != len) {
+    if(this->read_bytes(reinterpret_cast<u8 *>(hash.hash.data()), len) != len) {
         // just continue, don't set error flag
         debugLogF("WARNING: failed to read {} bytes to obtain hash.\n", len);
         extra = len;
@@ -86,7 +86,7 @@ std::string ByteBufferedFile::Reader::read_string() {
         return {};
     }
 
-    std::string str_out(reinterpret_cast<const char*>(str.get()), len);
+    std::string str_out(reinterpret_cast<const char *>(str.get()), len);
 
     return str_out;
 }
@@ -153,7 +153,7 @@ ByteBufferedFile::Writer::~Writer() {
     }
 }
 
-void ByteBufferedFile::Writer::set_error(const std::string& error_msg) {
+void ByteBufferedFile::Writer::set_error(const std::string &error_msg) {
     if(!this->error_flag) {  // only set first error
         this->error_flag = true;
         this->last_error = error_msg;
@@ -167,7 +167,7 @@ void ByteBufferedFile::Writer::write_hash(MD5Hash hash) {
 
     this->write<u8>(0x0B);
     this->write<u8>(0x20);
-    this->write_bytes(reinterpret_cast<u8*>(hash.hash.data()), 32);
+    this->write_bytes(reinterpret_cast<u8 *>(hash.hash.data()), 32);
 }
 
 void ByteBufferedFile::Writer::write_string(std::string str) {
@@ -186,7 +186,7 @@ void ByteBufferedFile::Writer::write_string(std::string str) {
 
     u32 len = str.length();
     this->write_uleb128(len);
-    this->write_bytes(reinterpret_cast<u8*>(const_cast<char*>(str.c_str())), len);
+    this->write_bytes(reinterpret_cast<u8 *>(const_cast<char *>(str.c_str())), len);
 }
 
 void ByteBufferedFile::Writer::flush() {
@@ -194,7 +194,7 @@ void ByteBufferedFile::Writer::flush() {
         return;
     }
 
-    this->file.write(reinterpret_cast<const char*>(this->buffer.data()), this->pos);
+    this->file.write(reinterpret_cast<const char *>(this->buffer.data()), this->pos);
     if(this->file.fail()) {
         this->set_error("Failed to write to file: " + std::generic_category().message(errno));
         return;
@@ -202,7 +202,7 @@ void ByteBufferedFile::Writer::flush() {
     this->pos = 0;
 }
 
-void ByteBufferedFile::Writer::write_bytes(u8* bytes, size_t n) {
+void ByteBufferedFile::Writer::write_bytes(u8 *bytes, size_t n) {
     if(this->error_flag || !this->file.is_open()) {
         return;
     }

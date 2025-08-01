@@ -1,4 +1,5 @@
 #pragma once
+#include "ByteBufferedFile.h"
 #include "MD5Hash.h"
 
 #define COLLECTIONS_DB_VERSION 20240429
@@ -22,5 +23,7 @@ extern std::vector<Collection*> collections;
 Collection* get_or_create_collection(std::string name);
 
 bool load_collections();
+bool load_peppy_collections(ByteBufferedFile::Reader& peppy_collections);
+bool load_mcneosu_collections(ByteBufferedFile::Reader& neosu_collections);
 void unload_collections();
 bool save_collections();

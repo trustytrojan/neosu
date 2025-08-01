@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ByteBufferedFile.h"
 #include "LegacyReplay.h"
 #include "Overrides.h"
 #include "UString.h"
@@ -13,7 +14,6 @@ class Timer;
 }
 class ConVar;
 
-class OsuFile;
 class DatabaseBeatmap;
 class DatabaseLoader;
 typedef DatabaseBeatmap BeatmapDifficulty;
@@ -93,7 +93,9 @@ class Database {
     DatabaseBeatmap *getBeatmapSet(i32 set_id);
 
     inline std::unordered_map<MD5Hash, std::vector<FinishedScore>> *getScores() { return &this->scores; }
-    inline const std::array<SCORE_SORTING_METHOD, 6> &getScoreSortingMethods() const { return this->scoreSortingMethods; }
+    inline const std::array<SCORE_SORTING_METHOD, 6> &getScoreSortingMethods() const {
+        return this->scoreSortingMethods;
+    }
 
     std::unordered_map<MD5Hash, std::vector<FinishedScore>> online_scores;
     static const std::string &getOsuSongsFolder();
@@ -102,7 +104,6 @@ class Database {
 
     UString parseLegacyCfgBeatmapDirectoryParameter();
     void scheduleLoadRaw();
-    void loadDB();
     std::mutex peppy_overrides_mtx;
     std::unordered_map<MD5Hash, MapOverrides> peppy_overrides;
     std::vector<BeatmapDifficulty *> maps_to_recalc;
@@ -112,14 +113,26 @@ class Database {
     std::mutex scores_mtx;
     std::unordered_map<MD5Hash, std::vector<FinishedScore>> scores;
 
+    // should only be accessed from database loader thread!
+    std::unordered_map<std::string, ByteBufferedFile::Reader> database_files;
+    u64 bytes_processed;
+    u64 total_bytes;
+    std::atomic<float> fLoadingProgress;
+
+    // fine to be modified as long as the db is not currently being loaded
+    std::vector<std::string> dbPathsToImport;
+
    private:
     friend class DatabaseLoader;
 
     void saveMaps();
 
-    void loadScores();
-    u32 importOldMcNeosuScores();
-    u32 importPeppyScores();
+    void openDatabases();
+    bool importDatabase(std::string db_path);
+    void loadMaps();
+    void loadScores(ByteBufferedFile::Reader &db);
+    void loadOldMcNeosuScores(ByteBufferedFile::Reader &db);
+    void loadPeppyScores(ByteBufferedFile::Reader &db);
     void saveScores();
     bool addScoreRaw(const FinishedScore &score);
     bool isScoreAlreadyInDB(u64 unix_timestamp, const MD5Hash &map_hash);
@@ -130,7 +143,6 @@ class Database {
 
     // global
     int iNumBeatmapsToLoad;
-    std::atomic<float> fLoadingProgress;
     std::atomic<bool> bInterruptLoad;
     std::vector<BeatmapSet *> beatmapsets;
     std::vector<BeatmapSet *> neosu_sets;
