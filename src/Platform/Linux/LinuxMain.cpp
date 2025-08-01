@@ -1,7 +1,9 @@
+
 #ifdef __linux__
 
 #include <cstdio>
 #include <cstdlib>
+#include <utility>
 
 #include "LinuxMain.h"
 
@@ -28,7 +30,12 @@
 
 #include "OpenGLHeaders.h"
 
+#include <SDL3/SDL_video.h>
 #include <SDL3/SDL_events.h>  // for SDL_PumpEvents, needed for SDL_ShowOpenFileDialog/SDL_ShowOpenFolderDialog
+#include <SDL3/SDL_hints.h>
+#include <SDL3/SDL_init.h>
+#include <SDL3/SDL_system.h>
+#include <SDL3/SDL_log.h>
 
 #define WINDOW_TITLE "neosu"
 
@@ -45,64 +52,125 @@
 
 LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdline,
                      const std::unordered_map<UString, std::optional<UString>> &argMap) {
-    // XInitThreads();
-    this->dpy = XOpenDisplay(nullptr);
-    if(this->dpy == nullptr) {
-        printf("FATAL ERROR: XOpenDisplay() can't connect to X server!\n\n");
+    SDL_SetHintWithPriority(SDL_HINT_VIDEO_DOUBLE_BUFFER, "1", SDL_HINT_OVERRIDE);
+    SDL_SetHintWithPriority(SDL_HINT_VIDEO_DRIVER, "x11", SDL_HINT_OVERRIDE);
+    SDL_SetHintWithPriority(SDL_HINT_MOUSE_AUTO_CAPTURE, "0", SDL_HINT_OVERRIDE);
+    SDL_SetHintWithPriority(SDL_HINT_MOUSE_RELATIVE_MODE_CENTER, "0", SDL_HINT_OVERRIDE);
+    SDL_SetHintWithPriority(SDL_HINT_TOUCH_MOUSE_EVENTS, "0", SDL_HINT_OVERRIDE);
+    SDL_SetHintWithPriority(SDL_HINT_MOUSE_EMULATE_WARP_WITH_RELATIVE, "0", SDL_HINT_OVERRIDE);
+    SDL_SetHintWithPriority(SDL_HINT_VIDEO_X11_EXTERNAL_WINDOW_INPUT, "0", SDL_HINT_OVERRIDE);
+
+    if(!SDL_Init(SDL_INIT_VIDEO)) {
+        fprintf(stderr, "FATAL ERROR: Couldn't SDL_Init(): %s\n", SDL_GetError());
+        return;
+    }
+    // don't want em
+    SDL_QuitSubSystem(SDL_INIT_EVENTS);
+
+    if constexpr(Env::cfg((REND::GL | REND::GLES32), !REND::DX11)) {
+        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
+                            Env::cfg(REND::GL) ? SDL_GL_CONTEXT_PROFILE_COMPATIBILITY : SDL_GL_CONTEXT_PROFILE_ES);
+        if constexpr(!Env::cfg(REND::GL)) {
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+        }
+        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    }
+
+    // get default monitor resolution and create the window with that as the starting size
+    long windowCreateWidth = WINDOW_WIDTH;
+    long windowCreateHeight = WINDOW_HEIGHT;
+    {
+        SDL_DisplayID di = SDL_GetPrimaryDisplay();
+        const SDL_DisplayMode *dm = nullptr;
+        if(di && (dm = SDL_GetDesktopDisplayMode(di))) {
+            windowCreateWidth = dm->w;
+            windowCreateHeight = dm->h;
+        }
+    }
+
+    // set vulkan for linux dxvk-native, opengl otherwise
+    constexpr auto windowFlags =
+        SDL_WINDOW_HIDDEN | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS |
+        (Env::cfg((REND::GL | REND::GLES32)) ? SDL_WINDOW_OPENGL : (Env::cfg(REND::DX11) ? SDL_WINDOW_VULKAN : 0UL));
+
+    SDL_PropertiesID props = SDL_CreateProperties();
+    // if constexpr (Env::cfg(REND::DX11))
+    // 	SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_EXTERNAL_GRAPHICS_CONTEXT_BOOLEAN, true);
+    SDL_SetStringProperty(props, SDL_PROP_WINDOW_CREATE_TITLE_STRING, WINDOW_TITLE);
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_X_NUMBER, SDL_WINDOWPOS_CENTERED);
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_Y_NUMBER, SDL_WINDOWPOS_CENTERED);
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, windowCreateWidth);
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, windowCreateHeight);
+    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_RESIZABLE_BOOLEAN, false);
+    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_MAXIMIZED_BOOLEAN, false);
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_FLAGS_NUMBER, windowFlags);
+    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_BORDERLESS_BOOLEAN, true);
+
+    // create window
+    SDL_Window *sdlwnd = SDL_CreateWindowWithProperties(props);
+    SDL_DestroyProperties(props);
+
+    if(!sdlwnd) {
+        fprintf(stderr, "FATAL ERROR: Couldn't SDL_CreateWindow(): %s\n", SDL_GetError());
         return;
     }
 
-    // before we do anything, check if XInput is available (for raw mouse input, smooth horizontal & vertical mouse
-    // wheel etc.)
+    SDL_GLContext sdlglctx{nullptr};
+    if constexpr(Env::cfg((REND::GL | REND::GLES32), !REND::DX11)) {
+        sdlglctx = SDL_GL_CreateContext(sdlwnd);
+        if(!sdlglctx) {
+            fprintf(stderr, "FATAL ERROR: Couldn't SDL_GL_CreateContext(): %s\n", SDL_GetError());
+        }
+        if(!SDL_GL_MakeCurrent(sdlwnd, sdlglctx)) {
+            fprintf(stderr, "FATAL ERROR: Couldn't SDL_GL_MakeCurrent(): %s\n", SDL_GetError());
+        }
+    }
+
+    this->dpy = (Display *)SDL_GetPointerProperty(SDL_GetWindowProperties(sdlwnd), SDL_PROP_WINDOW_X11_DISPLAY_POINTER,
+                                                  nullptr);
+    if(!this->dpy) {
+        fprintf(stderr, "FATAL ERROR: Couldn't get X11 display: %s\n", SDL_GetError());
+        return;
+    }
+
+    this->clientWindow =
+        (Window)SDL_GetNumberProperty(SDL_GetWindowProperties(sdlwnd), SDL_PROP_WINDOW_X11_WINDOW_NUMBER, 0);
+    if(!this->clientWindow) {
+        fprintf(stderr, "FATAL ERROR: Couldn't create X11 window: %s\n", SDL_GetError());
+        return;
+    }
+
     int xi2firstEvent = -1, xi2error = -1;
+    // get xi2opcode
     if(!XQueryExtension(this->dpy, "XInputExtension", &this->xi2opcode, &xi2firstEvent, &xi2error)) {
-        printf("FATAL ERROR: XQueryExtension() XInput extension not available!\n\n");
+        fprintf(stderr, "FATAL ERROR: XQueryExtension() XInput extension not available!\n\n");
         return;
     }
 
-    // want version 2 at least
-    int ximajor = 2, ximinor = 0;
-    if(XIQueryVersion(this->dpy, &ximajor, &ximinor) == BadRequest) {
-        printf("FATAL ERROR: XIQueryVersion() XInput2 not available, server supports only %d.%d!\n\n", ximajor,
-               ximinor);
-        return;
-    }
+    // don't let sdl handle events
+    SDL_SetX11EventHook(LinuxMain::sdl_eventhook, this);
 
-    // debugLogF("XI2 version: {:d}.{:d}, opcode: {:d}, XI_RawMotion: {:d}\n", ximajor, ximinor, this->xi2opcode,
-    // XI_RawMotion);
+    this->screen_num =
+        (int)SDL_GetNumberProperty(SDL_GetWindowProperties(sdlwnd), SDL_PROP_WINDOW_X11_SCREEN_NUMBER, 0);
+    this->screen = ScreenOfDisplay(this->dpy, this->screen_num);
 
-    this->rootWindow = DefaultRootWindow(this->dpy);
+    XWindowAttributes xwa{};
+    XGetWindowAttributes(this->dpy, this->clientWindow, &xwa);
 
-    // resolve GLX functions
-    int screen = DefaultScreen(this->dpy);
-    if(!gladLoadGLX(this->dpy, screen)) {
-        printf("FATAL ERROR: Couldn't resolve GLX functions (gladLoadGLX() failed)!\n\n");
-        return;
-    }
-
-    int major = 0, minor = 0;
-    glXQueryVersion(this->dpy, &major, &minor);
-    debugLogF("GLX Version: {}.{}\n", major, minor);
-
-    XVisualInfo *vi = LinuxGLLegacyInterface::getVisualInfo(this->dpy);
-    if(!vi) {
-        printf("FATAL ERROR: Couldn't glXChooseVisual!\n\n");
-        return;
-    }
-
-    this->cmap = XCreateColormap(this->dpy, this->rootWindow, vi->visual, AllocNone);
-
-    // set window attributes
-    this->swa.colormap = this->cmap;
-    this->swa.event_mask =
+    XSetWindowAttributes swa{};
+    swa.colormap = xwa.colormap;
+    swa.event_mask =
         ExposureMask | FocusChangeMask | KeyPressMask | KeyReleaseMask | StructureNotifyMask | KeymapStateMask;
 
-    Screen *defaultScreen = DefaultScreenOfDisplay(this->dpy);
-    this->clientWindow = XCreateWindow(this->dpy, this->rootWindow, defaultScreen->width / 2 - WINDOW_WIDTH / 2,
-                                       defaultScreen->height / 2 - WINDOW_HEIGHT / 2, WINDOW_WIDTH, WINDOW_HEIGHT, 0,
-                                       vi->depth, InputOutput, vi->visual, CWColormap | CWEventMask, &this->swa);
+    XChangeWindowAttributes(
+        this->dpy, this->clientWindow,
+        CWOverrideRedirect | CWBackPixmap | CWBorderPixel | CWBackingStore | CWColormap | CWEventMask, &swa);
 
-    XFree(vi);
+    XSelectInput(
+        this->dpy, this->clientWindow,
+        ExposureMask | FocusChangeMask | KeyPressMask | KeyReleaseMask | StructureNotifyMask | KeymapStateMask);
 
     // window resize limit
     XSizeHints *winSizeHints = XAllocSizeHints();
@@ -117,8 +185,9 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdl
     XFree(winSizeHints);
 
     // register custom delete message for quitting the engine (received as ClientMessage in the main loop)
-    Atom wm_delete_window = XInternAtom(this->dpy, "WM_DELETE_WINDOW", false);
-    XSetWMProtocols(this->dpy, this->clientWindow, &wm_delete_window, 1);
+    this->WM_DELETE_WINDOW_atom = XInternAtom(this->dpy, "WM_DELETE_WINDOW", False);
+    XSetWMProtocols(this->dpy, this->clientWindow, &this->WM_DELETE_WINDOW_atom, 1);
+    this->WM_PROTOCOLS_atom = XInternAtom(this->dpy, "WM_PROTOCOLS", False);
 
     // hint that compositing should be disabled (disable forced vsync)
     constexpr const unsigned char shouldBypassCompositor = 1;
@@ -145,15 +214,19 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdl
     }
 
     // make window visible & set title
-    XMapWindow(this->dpy, this->clientWindow);
+    SDL_ShowWindow(sdlwnd);
+    SDL_RaiseWindow(sdlwnd);
+
     XStoreName(this->dpy, this->clientWindow, WINDOW_TITLE);  // four.
 
     // after the window is visible, center it again (if the window manager ignored the position of the window in
     // XCreateWindow(), because fuck you)
     // debugLogF("moving to {} {}\n",  defaultScreen->width / 2 - WINDOW_WIDTH / 2,
     //             defaultScreen->height / 2 - WINDOW_HEIGHT / 2);
-    XMoveWindow(this->dpy, this->clientWindow, defaultScreen->width / 2 - WINDOW_WIDTH / 2,
-                defaultScreen->height / 2 - WINDOW_HEIGHT / 2);
+    {
+        const SDL_DisplayID di = SDL_GetDisplayForWindow(sdlwnd);
+        SDL_SetWindowPosition(sdlwnd, SDL_WINDOWPOS_CENTERED_DISPLAY(di), SDL_WINDOWPOS_CENTERED_DISPLAY(di));
+    }
 
     // get input method
     this->im = XOpenIM(this->dpy, nullptr, nullptr, nullptr);
@@ -172,8 +245,8 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdl
 
     XSync(this->dpy, False);
 
-    XI2Handler::clientPointerDevID = XI2Handler::getClientPointer(this->dpy);
-    XI2Handler::updateDeviceCache(this->dpy);
+    // sets client pointer device and device cache
+    XI2Handler::updateDeviceCache(this->dpy, this->clientWindow);
 
     // select xi2 events
     XI2Handler::selectEvents(this->dpy, this->clientWindow, DefaultRootWindow(this->dpy));
@@ -187,13 +260,19 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdl
     auto *deltaTimer = new Timer();
 
     // initialize engine
-    baseEnv = new LinuxEnvironment(this->dpy, this->clientWindow, argCmdline, argMap);
+    baseEnv = new LinuxEnvironment(this->dpy, this->clientWindow, this->screen, sdlwnd, argCmdline, argMap);
     engine = new Engine(argc, argv);
 
     deltaTimer->start();
     deltaTimer->update();
 
     engine->loadApp();
+
+    // sdl gets stuck somewhere unless we do this
+    SDL_PumpEvents();
+    SDL_FlushEvents(SDL_EVENT_FIRST, SDL_EVENT_LAST);
+
+    XEvent xev;
 
     // main loop
     while(this->bRunning) {
@@ -213,12 +292,12 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdl
             }
 
             while(XPending(this->dpy)) {
-                XNextEvent(this->dpy, &this->xev);
+                XNextEvent(this->dpy, &xev);
 
-                if(XFilterEvent(&this->xev, this->clientWindow))  // for keyboard chars
+                if(XFilterEvent(&xev, this->clientWindow))  // for keyboard chars
                     continue;
 
-                WndProc();
+                WndProc(&xev);
             }
         }
 
@@ -240,8 +319,9 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdl
             VPROF_BUDGET("FPSLimiter", VPROF_BUDGETGROUP_SLEEP);
 
             // delay the next frame
-            const int target_fps = !this->bHasFocus ? cv::fps_max_background.getInt()
-                                                    : osu->isInPlayMode() ? cv::fps_max.getInt() : cv::fps_max_menu.getInt());
+            const int target_fps = !this->bHasFocus      ? cv::fps_max_background.getInt()
+                                   : osu->isInPlayMode() ? cv::fps_max.getInt()
+                                                         : cv::fps_max_menu.getInt();
             FPSLimiter::limit_frames(target_fps);
         }
     }
@@ -255,12 +335,10 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdl
     // release timer
     SAFE_DELETE(deltaTimer);
 
-    // destroy the window
-    XDestroyWindow(this->dpy, this->clientWindow);
-    XCloseDisplay(this->dpy);
-
-    // unload GLX
-    gladUnloadGLX();
+    // destroy the gl context and window
+    if(sdlglctx) SDL_GL_DestroyContext(sdlglctx);
+    SDL_DestroyWindow(sdlwnd);
+    SDL_Quit();
 
     ret = 0;
 }
@@ -281,33 +359,33 @@ KEYCODE LinuxMain::normalizeKeysym(KEYCODE keysym) {
     }
 }
 
-void LinuxMain::WndProc() {
-    switch(this->xev.type) {
+bool LinuxMain::WndProc(XEvent *xev) {
+    switch(xev->type) {
         case GenericEvent:
-            if(baseEnv && this->xev.xcookie.extension == this->xi2opcode) {
-                XI2Handler::handleGenericEvent(this->dpy, this->xev);
+            if(baseEnv && xev->xcookie.extension == this->xi2opcode) {
+                XI2Handler::handleGenericEvent(this->dpy, xev);
             }
-            break;
+            return true;
 
         case ConfigureNotify:
             if(engine != NULL) {
-                const Vector2 size{this->xev.xconfigure.width, this->xev.xconfigure.height};
+                const Vector2 size{xev->xconfigure.width, xev->xconfigure.height};
                 if(size != Vector2{0}) {  // ignore 0,0 size
                     engine->requestResolutionChange(size);
                 }
             }
-            break;
+            return true;
 
         case Expose:
         case MapNotify:
             if(engine != NULL && engine->isMinimized()) {
                 engine->onRestored();
             }
-            break;
+            return true;
 
         case KeymapNotify:
-            XRefreshKeyboardMapping(&this->xev.xmapping);
-            break;
+            XRefreshKeyboardMapping(&xev->xmapping);
+            return true;
 
         case FocusIn:
             this->bHasFocus = true;
@@ -317,7 +395,7 @@ void LinuxMain::WndProc() {
             if(this->bRunning && engine != NULL) {
                 engine->onFocusGained();
             }
-            break;
+            return true;
 
         case FocusOut:
             this->bHasFocus = false;
@@ -327,16 +405,16 @@ void LinuxMain::WndProc() {
             if(this->bRunning && engine != NULL) {
                 engine->onFocusLost();
             }
-            break;
+            return true;
 
         // clipboard
         case SelectionRequest:
-            if(baseEnv != NULL) baseEnv->handleSelectionRequest(this->xev.xselectionrequest);
-            break;
+            if(baseEnv != NULL) baseEnv->handleSelectionRequest(xev->xselectionrequest);
+            return true;
 
         // keyboard (TODO: move to xinput2)
         case KeyPress: {
-            XKeyEvent *ke = &this->xev.xkey;
+            XKeyEvent *ke = &xev->xkey;
             // always use shifted keysym for consistency, needs to be same as in KeyRelease
             unsigned long keysym = XLookupKeysym(ke, 1);
 
@@ -351,8 +429,8 @@ void LinuxMain::WndProc() {
             static std::array<char, buffSize> buf{};
             Status status = 0;
             KeySym textKeysym = 0;
-            int length = Xutf8LookupString(this->ic, (XKeyPressedEvent *)&this->xev.xkey, buf.data(), buffSize,
-                                           &textKeysym, &status);
+            int length =
+                Xutf8LookupString(this->ic, (XKeyPressedEvent *)&xev->xkey, buf.data(), buffSize, &textKeysym, &status);
 
             if(length > 0) {
                 buf[buffSize - 1] = 0;
@@ -360,10 +438,11 @@ void LinuxMain::WndProc() {
                     keyboard->onChar(buf[0]);
                 }
             }
-        } break;
+        }
+            return true;
 
         case KeyRelease: {
-            XKeyEvent *ke = &this->xev.xkey;
+            XKeyEvent *ke = &xev->xkey;
             // always use shifted keysym for consistency, needs to be same as in KeyPress
             unsigned long keysym = XLookupKeysym(ke, 1);
 
@@ -374,26 +453,32 @@ void LinuxMain::WndProc() {
                     XPeekEvent(this->dpy, &nextEvent);
                     if(nextEvent.type == KeyPress && nextEvent.xkey.time == ke->time &&
                        nextEvent.xkey.keycode == ke->keycode)
-                        break;  // throw the event away
+                        return true;  // throw the event away
                 }
 
                 // normalize shifted/unshifted keysym
                 KEYCODE normalizedKey = normalizeKeysym(keysym);
                 keyboard->onKeyUp(normalizedKey);
             }
-        } break;
+        }
+            return true;
 
         case ClientMessage:
-            if(engine != NULL) engine->onShutdown();
-            this->bRunning = false;
-            break;
-
+            if((xev->xclient.message_type == this->WM_PROTOCOLS_atom) && (xev->xclient.format == 32) &&
+               (std::cmp_equal(xev->xclient.data.l[0], this->WM_DELETE_WINDOW_atom))) {
+                if(engine != NULL) engine->onShutdown();
+                this->bRunning = false;
+                return true;
+            } else {
+                return false;
+            }
         default:
             if(cv::debug_env.getBool()) {
-                debugLogF("unhandled X11 event type: {}\n", this->xev.type);
+                debugLogF("unhandled X11 event type: {}\n", xev->type);
             }
             break;
     }
+    return false;
 }
 
 #endif

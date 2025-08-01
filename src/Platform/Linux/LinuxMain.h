@@ -3,11 +3,12 @@
 #ifdef __linux__
 
 #include "LinuxEnvironment.h"
-#include <unordered_set>
 
 class Engine;
 
 class LinuxMain final {
+    friend LinuxEnvironment;
+
    public:
     LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdline,
               const std::unordered_map<UString, std::optional<UString>> &argMap);
@@ -21,21 +22,22 @@ class LinuxMain final {
     bool bHasFocus{false};
 
     Display *dpy{nullptr};
-    Window rootWindow{0};
-
-    Colormap cmap{0};
-    XSetWindowAttributes swa{};
     Window clientWindow{0};
-
-    XEvent xev{};
+    int screen_num{0};
+    Screen *screen{nullptr};
 
     // input
     XIM im{0};
     XIC ic{0};
     int xi2opcode{0};
 
-    void WndProc();
+    bool WndProc(XEvent *xev);
     KEYCODE normalizeKeysym(KEYCODE keysym);
+
+    Atom WM_PROTOCOLS_atom{};
+    Atom WM_DELETE_WINDOW_atom{};
+
+    static bool sdl_eventhook(void *thisptr, XEvent *xev) { return !static_cast<LinuxMain *>(thisptr)->WndProc(xev); }
 };
 
 using Main = LinuxMain;

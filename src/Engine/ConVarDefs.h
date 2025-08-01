@@ -896,10 +896,11 @@ CONVAR(r_debug_flush_drawstring, "r_debug_flush_drawstring", false, FCVAR_BANCHO
 CONVAR(r_drawstring_max_string_length, "r_drawstring_max_string_length", 65536, FCVAR_LOCKED,
        "maximum number of characters per call, sanity/memory buffer limit");
 CONVAR(r_debug_drawstring_unbind, "r_debug_drawstring_unbind", false, FCVAR_BANCHO_COMPATIBLE);
-CONVAR(r_debug_font_atlas_padding, "r_debug_font_atlas_padding", 1, FCVAR_BANCHO_COMPATIBLE,
+CONVAR(r_debug_font_atlas_padding, "r_debug_font_atlas_padding", 1, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "padding between glyphs in the atlas to prevent bleeding");
-CONVAR(r_debug_font_unicode, "r_debug_font_unicode", false, FCVAR_BANCHO_COMPATIBLE,
+CONVAR(r_debug_font_unicode, "r_debug_font_unicode", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "debug messages for unicode/fallback font related stuff");
+CONVAR(debug_font, "debug_font", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
 CONVAR(r_sync_timeout, "r_sync_timeout", 5000000, FCVAR_BANCHO_COMPATIBLE,
        "timeout in microseconds for GPU synchronization operations");
 CONVAR(r_sync_enabled, "r_sync_enabled", true, FCVAR_BANCHO_COMPATIBLE,

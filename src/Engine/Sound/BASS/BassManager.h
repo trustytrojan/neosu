@@ -217,7 +217,7 @@ using WASAPIPROC = bass_EXTERN::WASAPIPROC;
 	std::string getFailedLoad();
 
 	std::string printBassError(const std::string &context, int code);
-    UString getErrorUString(int code = INT_MIN);
+    UString getErrorUString(int code = (-0x7fffffff - 1)); // anything it takes to avoid including another header within a header
 //clang-format on
 }; // namespace BassManager
 

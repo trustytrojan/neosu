@@ -35,11 +35,13 @@ typedef struct {
 bool LinuxEnvironment::bResizable = true;
 std::vector<McRect> LinuxEnvironment::vMonitors;
 
-LinuxEnvironment::LinuxEnvironment(Display *display, Window window, const std::vector<UString> &argCmdline,
+LinuxEnvironment::LinuxEnvironment(Display *display, Window window, Screen *screen, SDL_Window *sdlwnd, const std::vector<UString> &argCmdline,
                 const std::unordered_map<UString, std::optional<UString>> &argMap) : Environment(argCmdline, argMap) {
     env = this;
     this->display = display;
     this->window = window;
+    this->screen = screen;
+    this->sdlwnd = sdlwnd;
 
     this->bCursorClipped = false;
     this->bCursorRequest = false;
@@ -110,7 +112,7 @@ void LinuxEnvironment::update() {
         McRect(0, 0, engine->getScreenWidth(), engine->getScreenHeight()).contains(this->getMousePos());
 }
 
-Graphics *LinuxEnvironment::createRenderer() { return new LinuxGLLegacyInterface(this->display, this->window); }
+Graphics *LinuxEnvironment::createRenderer() { return new LinuxGLLegacyInterface(this->sdlwnd); }
 
 void LinuxEnvironment::shutdown() {
     XEvent ev;
@@ -160,9 +162,8 @@ void LinuxEnvironment::center() {
     if(this->bResizeDelayHack) windowSize = this->vResizeHackSize;
     this->bResizeDelayHack = false;
 
-    Screen *defaultScreen = XDefaultScreenOfDisplay(this->display);
-    XMoveResizeWindow(this->display, this->window, WidthOfScreen(defaultScreen) / 2 - (unsigned int)(windowSize.x / 2),
-                      HeightOfScreen(defaultScreen) / 2 - (unsigned int)(windowSize.y / 2), (unsigned int)windowSize.x,
+    XMoveResizeWindow(this->display, this->window, WidthOfScreen(this->screen) / 2 - (unsigned int)(windowSize.x / 2),
+                      HeightOfScreen(this->screen) / 2 - (unsigned int)(windowSize.y / 2), (unsigned int)windowSize.x,
                       (unsigned int)windowSize.y);
 }
 
@@ -406,8 +407,8 @@ int LinuxEnvironment::getMonitor() {
 std::vector<McRect> LinuxEnvironment::getMonitors() { return LinuxEnvironment::vMonitors; }
 
 Vector2 LinuxEnvironment::getNativeScreenSize() {
-    return Vector2(WidthOfScreen(DefaultScreenOfDisplay(this->display)),
-                   HeightOfScreen(DefaultScreenOfDisplay(this->display)));
+    return Vector2(WidthOfScreen(this->screen),
+                   HeightOfScreen(this->screen));
 }
 
 McRect LinuxEnvironment::getVirtualScreenRect() {

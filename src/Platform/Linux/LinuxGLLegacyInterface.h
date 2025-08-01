@@ -18,10 +18,12 @@ typedef unsigned char BYTE;
 
 #include "OpenGLHeaders.h"
 
+typedef struct SDL_Window SDL_Window;
+
 class LinuxGLLegacyInterface final : public OpenGLLegacyInterface {
    public:
-    LinuxGLLegacyInterface(Display *display, Window window);
-    ~LinuxGLLegacyInterface() override;
+    LinuxGLLegacyInterface(SDL_Window *window)
+        : OpenGLLegacyInterface(), sdl_window(window) {}
 
     // scene
     void endScene() override;
@@ -29,15 +31,8 @@ class LinuxGLLegacyInterface final : public OpenGLLegacyInterface {
     // device settings
     void setVSync(bool vsync) override;
 
-    // ILLEGAL:
-    [[nodiscard]] inline GLXContext getGLXContext() const { return this->glc; }
-
-    static XVisualInfo *getVisualInfo(Display *display);
-
    private:
-    Display *display;
-    Window window;
-    GLXContext glc;
+    SDL_Window *sdl_window;
 };
 
 #endif

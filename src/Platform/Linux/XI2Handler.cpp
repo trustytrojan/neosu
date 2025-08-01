@@ -63,6 +63,39 @@ static void cacheDeviceInfo(Display *display, int deviceId) {
     XIFreeDeviceInfo(devices);
 }
 
+std::array<XIEventMask, 2> get_event_masks(int device_id) {
+    static std::array<XIEventMask, 2> evmasks{};
+    static std::array<unsigned char, XIMaskLen(XI_LASTEVENT)> mask1{};
+    static std::array<unsigned char, XIMaskLen(XI_LASTEVENT)> mask2{};
+
+    // select device events for the application window
+    XISetMask(mask1.data(), XI_Motion);
+    XISetMask(mask1.data(), XI_ButtonPress);
+    XISetMask(mask1.data(), XI_ButtonRelease);
+    // XISetMask(mask1.data(), XI_KeyPress); // TODO: incomplete
+    // XISetMask(mask1.data(), XI_KeyRelease);
+    // XISetMask(mask1.data(), XI_Enter);
+    // XISetMask(mask1.data(), XI_Leave);
+    XISetMask(mask1.data(), XI_DeviceChanged);
+
+    evmasks[0].deviceid = device_id;
+    evmasks[0].mask_len = mask1.size();
+    evmasks[0].mask = mask1.data();
+
+    // select raw events for the root window
+    // raw events are only delivered to root windows
+    XISetMask(mask2.data(), XI_RawMotion);
+    // XISetMask(mask2.data(), XI_RawButtonPress); // TODO: incomplete
+    // XISetMask(mask2.data(), XI_RawButtonRelease);
+    // XISetMask(mask2.data(), XI_RawKeyPress);
+    // XISetMask(mask2.data(), XI_RawKeyRelease);
+
+    evmasks[1].deviceid = device_id;
+    evmasks[1].mask_len = mask2.size();
+    evmasks[1].mask = mask2.data();
+    return evmasks;
+}
+
 }  // namespace
 
 bool grab(Display *display, Window window, bool enable, bool grabHack) {
@@ -73,21 +106,19 @@ bool grab(Display *display, Window window, bool enable, bool grabHack) {
         }
 
         // create event mask for grab (all currently handled XI2 events)
-        XIEventMask mask;
-        std::array<unsigned char, XIMaskLen(XI_LASTEVENT)> maskBits{};
-        XISetMask(maskBits.data(), XI_RawMotion);
-        XISetMask(maskBits.data(), XI_Motion);
-        XISetMask(maskBits.data(), XI_ButtonPress);
-        XISetMask(maskBits.data(), XI_ButtonRelease);
-        XISetMask(maskBits.data(), XI_DeviceChanged);
-        mask.deviceid = clientPointerDevID;
-        mask.mask_len = maskBits.size();
-        mask.mask = maskBits.data();
+        auto evmasks = get_event_masks(clientPointerDevID);
+        auto grabwin = window;
 
-        // grab relative to the application window
-        int ret = XIGrabDevice(display, clientPointerDevID, window, CurrentTime, None, GrabModeAsync, GrabModeAsync,
+        int ret = -1;
+        bool succ = false;
+        for(auto &mask : evmasks) {
+            // grab relative to the application window
+            ret = XIGrabDevice(display, clientPointerDevID, grabwin, CurrentTime, None, GrabModeAsync, GrabModeAsync,
                                False, &mask);
-        if(ret == GrabSuccess || ret == AlreadyGrabbed) {
+            if(!succ) succ = (ret == GrabSuccess || ret == AlreadyGrabbed);
+            grabwin = DefaultRootWindow(display);
+        }
+        if(succ) {
             if(!grabHack) {
                 g_explicitGrab = true;
             }
@@ -110,12 +141,12 @@ bool grab(Display *display, Window window, bool enable, bool grabHack) {
     }
 }
 
-void handleGenericEvent(Display *dpy, XEvent &xev) {
-    XGetEventData(dpy, &xev.xcookie);
+void handleGenericEvent(Display *dpy, XEvent *xev) {
+    XGetEventData(dpy, &xev->xcookie);
 
-    switch(xev.xcookie.evtype) {
+    switch(xev->xcookie.evtype) {
         case XI_Motion: {
-            auto *event = static_cast<XIDeviceEvent *>(xev.xcookie.data);
+            auto *event = static_cast<XIDeviceEvent *>(xev->xcookie.data);
 
             // update cached position for master devices
             if(baseEnv != nullptr) {
@@ -129,10 +160,10 @@ void handleGenericEvent(Display *dpy, XEvent &xev) {
         case XI_RawButtonRelease: */
         case XI_ButtonPress:
         case XI_ButtonRelease: {
-            auto *event = static_cast<XIDeviceEvent *>(xev.xcookie.data);
+            auto *event = static_cast<XIDeviceEvent *>(xev->xcookie.data);
 
             if(mouse != nullptr) {
-                bool pressed = (xev.xcookie.evtype == XI_ButtonPress);
+                bool pressed = (xev->xcookie.evtype == XI_ButtonPress);
 
                 // workaround for XI2 server bug: grab-ungrab device during button events
                 // to ensure we receive raw motion events (freedesktop.org bug #26922)
@@ -182,7 +213,7 @@ void handleGenericEvent(Display *dpy, XEvent &xev) {
         }
 
         case XI_RawMotion: {
-            auto *event = static_cast<XIRawEvent *>(xev.xcookie.data);
+            auto *event = static_cast<XIRawEvent *>(xev->xcookie.data);
 
             if(mouse != nullptr) {
                 // check device cache first
@@ -223,6 +254,9 @@ void handleGenericEvent(Display *dpy, XEvent &xev) {
                 }
 
                 if(hasX || hasY) {
+                    // debugLogF("motion from {} device {} source {} serial {} send_event {}: {}, {}\n",
+                    //           devInfo.isAbsolute, event->deviceid, event->sourceid, event->serial, event->send_event,
+                    //           dx, dy);
                     mouse->onRawMove(dx, dy, devInfo.isAbsolute, false);
                 }
             }
@@ -234,10 +268,10 @@ void handleGenericEvent(Display *dpy, XEvent &xev) {
             case XI_RawKeyRelease: */
             // case XI_KeyPress:
             // case XI_KeyRelease: {
-            //     auto *event = static_cast<XIDeviceEvent *>(xev.xcookie.data);
+            //     auto *event = static_cast<XIDeviceEvent *>(xev->xcookie.data);
 
             //     if(keyboard != nullptr) {
-            //         bool pressed = (xev.xcookie.evtype == XI_KeyPress);
+            //         bool pressed = (xev->xcookie.evtype == XI_KeyPress);
             //         if(pressed) {
             //             keyboard->onKeyDown(event->detail);
             //         } else {
@@ -248,7 +282,7 @@ void handleGenericEvent(Display *dpy, XEvent &xev) {
             // }
 
         case XI_DeviceChanged: {
-            auto *event = static_cast<XIDeviceChangedEvent *>(xev.xcookie.data);
+            auto *event = static_cast<XIDeviceChangedEvent *>(xev->xcookie.data);
             if(event->reason == XIDeviceChange)  // we don't need to update the cache for XISlaveSwitch
                 cacheDeviceInfo(dpy, event->deviceid);
             break;
@@ -266,39 +300,11 @@ void handleGenericEvent(Display *dpy, XEvent &xev) {
             break;
     }
 
-    XFreeEventData(dpy, &xev.xcookie);
+    XFreeEventData(dpy, &xev->xcookie);
 }
 
 void selectEvents(Display *display, Window window, int root_window) {
-    std::array<XIEventMask, 2> evmasks{};
-    std::array<unsigned char, XIMaskLen(XI_LASTEVENT)> mask1{};
-    std::array<unsigned char, XIMaskLen(XI_LASTEVENT)> mask2{};
-
-    // select device events for the application window
-    XISetMask(mask1.data(), XI_Motion);
-    XISetMask(mask1.data(), XI_ButtonPress);
-    XISetMask(mask1.data(), XI_ButtonRelease);
-    // XISetMask(mask1.data(), XI_KeyPress); // TODO: incomplete
-    // XISetMask(mask1.data(), XI_KeyRelease);
-    // XISetMask(mask1.data(), XI_Enter);
-    // XISetMask(mask1.data(), XI_Leave);
-    XISetMask(mask1.data(), XI_DeviceChanged);
-
-    evmasks[0].deviceid = XIAllMasterDevices;
-    evmasks[0].mask_len = mask1.size();
-    evmasks[0].mask = mask1.data();
-
-    // select raw events for the root window
-    // raw events are only delivered to root windows
-    XISetMask(mask2.data(), XI_RawMotion);
-    // XISetMask(mask2.data(), XI_RawButtonPress); // TODO: incomplete
-    // XISetMask(mask2.data(), XI_RawButtonRelease);
-    // XISetMask(mask2.data(), XI_RawKeyPress);
-    // XISetMask(mask2.data(), XI_RawKeyRelease);
-
-    evmasks[1].deviceid = XIAllMasterDevices;
-    evmasks[1].mask_len = mask2.size();
-    evmasks[1].mask = mask2.data();
+    auto evmasks = get_event_masks(XIAllMasterDevices);
 
     // apply event masks
     XISelectEvents(display, window, &evmasks[0], 1);
@@ -307,20 +313,20 @@ void selectEvents(Display *display, Window window, int root_window) {
     XFlush(display);
 }
 
-int getClientPointer(Display *display) {
+int getClientPointer(Display *display, Window window) {
     int deviceid = -1;
-    if(XIGetClientPointer(display, None, &deviceid)) {
+    if(XIGetClientPointer(display, window, &deviceid)) {
         return deviceid;
     }
     return 2;  // fallback to default VCP
 }
 
-void updateDeviceCache(Display *display) {
+void updateDeviceCache(Display *display, Window window) {
     // clear existing cache
     deviceCache.clear();
 
     // update client pointer
-    clientPointerDevID = getClientPointer(display);
+    clientPointerDevID = getClientPointer(display, window);
 
     // cache all current pointer devices
     int ndevices = 0;

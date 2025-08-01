@@ -8,10 +8,11 @@
 #include <X11/extensions/XInput2.h>
 
 #include "Environment.h"
+typedef struct SDL_Window SDL_Window;
 
 class LinuxEnvironment final : public Environment {
    public:
-    LinuxEnvironment(Display *display, Window window, const std::vector<UString> &argCmdline,
+    LinuxEnvironment(Display *display, Window window, Screen *screen, SDL_Window *sdlwnd, const std::vector<UString> &argCmdline,
                      const std::unordered_map<UString, std::optional<UString>> &argMap);
     ~LinuxEnvironment() override;
 
@@ -137,6 +138,9 @@ class LinuxEnvironment final : public Environment {
     bool bPrevCursorHack;
     bool bFullscreenWasResizable;
     Vector2 vPrevDisableFullscreenWindowSize;
+
+    SDL_Window *sdlwnd;
+    Screen *screen;
 };
 
 using EnvironmentImpl = LinuxEnvironment;

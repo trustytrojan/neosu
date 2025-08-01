@@ -2,9 +2,6 @@
 
 #ifndef __EMSCRIPTEN__
 #include "glad/glad.h"
-#ifdef __linux__
-#include "glad_glx/glad_glx.h"
-#endif
 #ifdef _WIN32
 #include "glad_wgl/glad_wgl.h"
 #endif
