@@ -73,6 +73,9 @@ bool Archive::Entry::extractToFile(const std::string& outputPath) const {
             debugLog("Archive: failed to write to file %s\n", outputPath.c_str());
             return false;
         }
+    } else {
+        debugLog("Archive: extracted data for path %s is empty, not writing out!\n", outputPath.c_str());
+        return false;
     }
 
     return true;

@@ -196,19 +196,28 @@ void UpdateHandler::installUpdate(const std::string &zipFilePath) {
         if(outFilePath.length() == 0) continue;
 
         // .exe and .dll can't be directly overwritten on windows
+        std::string old_path{};
+        bool temp_created = false;
         if(outFilePath.length() > 4) {
             if(!strcasecmp(outFilePath.c_str() + outFilePath.length() - 4, ".exe") ||
                !strcasecmp(outFilePath.c_str() + outFilePath.length() - 4, ".dll")) {
-                std::string old_path = outFilePath;
+                old_path = outFilePath;
                 old_path.append(".old");
                 env->deleteFile(old_path);
                 env->renameFile(outFilePath, old_path);
+                temp_created = true;
             }
         }
 
         debugLog("UpdateHandler: Writing %s\n", outFilePath.c_str());
         if(!file.extractToFile(outFilePath)) {
             debugLog("UpdateHandler: Failed to extract file %s\n", outFilePath.c_str());
+            if(temp_created) {
+                env->deleteFile(outFilePath);
+                env->renameFile(old_path, outFilePath);
+            }
+            this->status = STATUS::STATUS_ERROR;
+            return;
         }
     }
 

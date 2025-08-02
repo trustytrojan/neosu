@@ -6629,6 +6629,13 @@ then :
 
             NEOSU_LDFLAGS="$NEOSU_LDFLAGS -latomic"
 
+else case e in #(
+  e)
+            # ld complains about libcrypto.a(libcrypto-lib-cast-586.o): warning: relocation against `CAST_S_table1' in read-only section `.text'
+            NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -fno-PIE -no-pie"
+            NEOSU_LDFLAGS="$NEOSU_LDFLAGS -no-pie"
+         ;;
+esac
 fi
         NASMOBJ=elf32
 
@@ -8152,23 +8159,8 @@ then :
   COMMON_FLAGS="$COMMON_FLAGS -mcmodel=small"
 fi
 
-if test "x$enable_static" = "xyes"
-then :
-
-    COMMON_FLAGS="$COMMON_FLAGS -fno-pic -fno-PIC -fno-pie -fno-PIE"
-    LDFLAGS="$LDFLAGS -fno-pic -fno-PIC -fno-pie -fno-PIE"
-    if test -z "$LLVMMINGW"
-then :
-
-        COMMON_FLAGS="$COMMON_FLAGS -Wl,-no-pie"
-        LDFLAGS="$LDFLAGS -no-pie"
-
-fi
-
-fi
-
 CPPFLAGS="$CPPFLAGS -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64"
-COMMON_FLAGS="$COMMON_FLAGS -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64 -fno-plt -ffunction-sections -fdata-sections -fwrapv -fno-strict-aliasing -fno-semantic-interposition -ftls-model=initial-exec"
+COMMON_FLAGS="$COMMON_FLAGS -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64 -ffunction-sections -fdata-sections -fwrapv -fno-strict-aliasing -fno-semantic-interposition -ftls-model=initial-exec"
 CXXFLAGS="$CXXFLAGS $COMMON_FLAGS -fno-exceptions -fno-unwind-tables" # -fno-rtti
 CFLAGS="$CFLAGS $COMMON_FLAGS"
 
