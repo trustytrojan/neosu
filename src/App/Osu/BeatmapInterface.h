@@ -5,54 +5,54 @@
 
 class HitObject;
 
-#define CACHED_VIRTUAL_METHODS                  \
-    X(u32, getScoreV1DifficultyMultiplier, 0.1) \
-    X(Replay::Mods, getMods, 0.1)               \
-    X(u32, getModsLegacy, 0.1)                  \
-    X(f32, getSpeedMultiplier, 0.1)             \
-    X(f32, getRawAR, 0.1)                       \
-    X(f32, getRawOD, 0.1)                       \
-    X(f32, getAR, 0.1)                          \
-    X(f32, getCS, 0.1)                          \
-    X(f32, getHP, 0.1)                          \
-    X(f32, getOD, 0.1)                          \
-    X(f32, getApproachTime, 0.1)                \
-    X(f32, getRawApproachTime, 0.1)
+#define CACHED_VIRTUAL_METHODS                   \
+    X(u32, getScoreV1DifficultyMultiplier, 0.01) \
+    X(Replay::Mods, getMods, 0.01)               \
+    X(u32, getModsLegacy, 0.01)                  \
+    X(f32, getSpeedMultiplier, 0.01)             \
+    X(f32, getRawAR, 0.01)                       \
+    X(f32, getRawOD, 0.01)                       \
+    X(f32, getAR, 0.01)                          \
+    X(f32, getCS, 0.01)                          \
+    X(f32, getHP, 0.01)                          \
+    X(f32, getOD, 0.01)                          \
+    X(f32, getApproachTime, 0.01)                \
+    X(f32, getRawApproachTime, 0.01)
 
 #define CACHED_BASE_METHODS                                                                                          \
-    X(f32, getHitWindow300, 0.1,                                                                                     \
+    X(f32, getHitWindow300, 0.01,                                                                                    \
       GameRules::mapDifficultyRange(this->getOD(), GameRules::getMinHitWindow300(), GameRules::getMidHitWindow300(), \
                                     GameRules::getMaxHitWindow300()))                                                \
-    X(f32, getRawHitWindow300, 0.1,                                                                                  \
+    X(f32, getRawHitWindow300, 0.01,                                                                                 \
       GameRules::mapDifficultyRange(this->getRawOD(), GameRules::getMinHitWindow300(),                               \
                                     GameRules::getMidHitWindow300(), GameRules::getMaxHitWindow300()))               \
-    X(f32, getHitWindow100, 0.1,                                                                                     \
+    X(f32, getHitWindow100, 0.01,                                                                                    \
       GameRules::mapDifficultyRange(this->getOD(), GameRules::getMinHitWindow100(), GameRules::getMidHitWindow100(), \
                                     GameRules::getMaxHitWindow100()))                                                \
-    X(f32, getHitWindow50, 0.1,                                                                                      \
+    X(f32, getHitWindow50, 0.01,                                                                                     \
       GameRules::mapDifficultyRange(this->getOD(), GameRules::getMinHitWindow50(), GameRules::getMidHitWindow50(),   \
                                     GameRules::getMaxHitWindow50()))                                                 \
-    X(f32, getApproachRateForSpeedMultiplier, 0.1,                                                                   \
+    X(f32, getApproachRateForSpeedMultiplier, 0.01,                                                                  \
       GameRules::mapDifficultyRangeInv((f32)this->getApproachTime() * (1.0f / this->getSpeedMultiplier()),           \
                                        GameRules::getMinApproachTime(), GameRules::getMidApproachTime(),             \
                                        GameRules::getMaxApproachTime()))                                             \
-    X(f32, getRawApproachRateForSpeedMultiplier, 0.1,                                                                \
+    X(f32, getRawApproachRateForSpeedMultiplier, 0.01,                                                               \
       GameRules::mapDifficultyRangeInv((f32)this->getRawApproachTime() * (1.0f / this->getSpeedMultiplier()),        \
                                        GameRules::getMinApproachTime(), GameRules::getMidApproachTime(),             \
                                        GameRules::getMaxApproachTime()))                                             \
-    X(f32, getConstantApproachRateForSpeedMultiplier, 0.1,                                                           \
+    X(f32, getConstantApproachRateForSpeedMultiplier, 0.01,                                                          \
       GameRules::mapDifficultyRangeInv((f32)this->getRawApproachTime() * this->getSpeedMultiplier(),                 \
                                        GameRules::getMinApproachTime(), GameRules::getMidApproachTime(),             \
                                        GameRules::getMaxApproachTime()))                                             \
-    X(f32, getOverallDifficultyForSpeedMultiplier, 0.1,                                                              \
+    X(f32, getOverallDifficultyForSpeedMultiplier, 0.01,                                                             \
       GameRules::mapDifficultyRangeInv((f32)this->getHitWindow300() * (1.0f / this->getSpeedMultiplier()),           \
                                        GameRules::getMinHitWindow300(), GameRules::getMidHitWindow300(),             \
                                        GameRules::getMaxHitWindow300()))                                             \
-    X(f32, getRawOverallDifficultyForSpeedMultiplier, 0.1,                                                           \
+    X(f32, getRawOverallDifficultyForSpeedMultiplier, 0.01,                                                          \
       GameRules::mapDifficultyRangeInv((f32)this->getRawHitWindow300() * (1.0f / this->getSpeedMultiplier()),        \
                                        GameRules::getMinHitWindow300(), GameRules::getMidHitWindow300(),             \
                                        GameRules::getMaxHitWindow300()))                                             \
-    X(f32, getConstantOverallDifficultyForSpeedMultiplier, 0.1,                                                      \
+    X(f32, getConstantOverallDifficultyForSpeedMultiplier, 0.01,                                                     \
       GameRules::mapDifficultyRangeInv((f32)this->getRawHitWindow300() * this->getSpeedMultiplier(),                 \
                                        GameRules::getMinHitWindow300(), GameRules::getMidHitWindow300(),             \
                                        GameRules::getMaxHitWindow300()))
@@ -123,7 +123,7 @@ class BeatmapInterface {
 #define CACHED_METHOD_IMPL(rettype, refresh_time, value_expr)                    \
     static_assert((double)(refresh_time) > 0 && (double)(refresh_time) <= 3600); \
     static rettype cached_value{};                                               \
-    static double cache_time{-(refresh_time)};                                               \
+    static double cache_time{-(refresh_time)};                                   \
     const auto now = engine->getTime();                                          \
     if(now >= cache_time + (refresh_time)) {                                     \
         cache_time = now;                                                        \

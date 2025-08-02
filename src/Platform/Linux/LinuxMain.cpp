@@ -261,8 +261,7 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdl
     SDL_PumpEvents();
     SDL_FlushEvents(SDL_EVENT_FIRST, SDL_EVENT_LAST);
 
-    constexpr int SIZE_EVENTS = 64;
-    std::array<XEvent, SIZE_EVENTS> events{};
+    XEvent xev;
 
     // main loop
     while(this->bRunning) {
@@ -281,43 +280,14 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdl
                 SDL_PumpEvents();
             }
 
-            int eventCount = 0;
-            do {
-                {
-                    VPROF_BUDGET("X11_CollectEvents", VPROF_BUDGETGROUP_EVENTS);
+            while(XPending(this->dpy)) {
+                XNextEvent(this->dpy, &xev);
 
-                    int available_events = XEventsQueued(this->dpy, QueuedAfterReading);
-                    if(available_events == 0) break;
+                if(XFilterEvent(&xev, this->clientWindow))  // for keyboard chars
+                    continue;
 
-                    // collect up to SIZE_EVENTS events into our array
-                    eventCount = 0;
-                    while(eventCount < SIZE_EVENTS && XPending(this->dpy)) {
-                        XNextEvent(this->dpy, &events[eventCount]);
-
-                        // apply XFilterEvent check here, for keyboard chars during collection
-                        if(XFilterEvent(&events[eventCount], this->clientWindow))
-                            continue;  // don't increment eventCount, overwrite this slot
-
-                        // handle GenericEvent (XI2) immediately - can't be batched due to xcookie data
-                        if(events[eventCount].type == GenericEvent) {
-                            WndProc(&events[eventCount]);
-                            continue;  // don't add to batch, already processed
-                        }
-
-                        eventCount++;
-                    }
-                }
-
-                {
-                    VPROF_BUDGET("X11_ProcessEvents", VPROF_BUDGETGROUP_EVENTS);
-
-                    // process the collected batch (non-XI2 events only)
-                    for(int i = 0; i < eventCount; ++i) {
-                        WndProc(&events[i]);
-                    }
-                }
-
-            } while(eventCount == SIZE_EVENTS);
+                WndProc(&xev);
+            }
         }
 
         // update
