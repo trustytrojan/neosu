@@ -39,9 +39,18 @@ Archive::Entry::Entry(struct archive* archive, struct archive_entry* entry) {
         size_t size;
         la_int64_t offset;
 
-        while(archive_read_data_block(archive, &buff, &size, &offset) == ARCHIVE_OK) {
+        int result;
+        while((result = archive_read_data_block(archive, &buff, &size, &offset)) == ARCHIVE_OK) {
             const u8* bytes = static_cast<const u8*>(buff);
             this->data.insert(this->data.end(), bytes, bytes + size);
+        }
+
+        // check for errors during data extraction
+        if(result != ARCHIVE_EOF) {
+            debugLog("Archive: failed to extract data for '%s': %s\n", this->sFilename.c_str(),
+                     archive_error_string(archive));
+            // clear any partial data on error
+            this->data.clear();
         }
     }
 }
