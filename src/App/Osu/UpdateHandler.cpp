@@ -161,8 +161,15 @@ void UpdateHandler::installUpdate(const std::string &zipFilePath) {
     }
 
     // separate raw dirs and files
+    std::string mainDirectory = "neosu/";
     std::vector<Archive::Entry> files, dirs;
     for(const auto &entry : entries) {
+        auto fileName = entry.getFilename();
+        if(fileName.find(mainDirectory) != 0) {
+            debugLog("UpdateHandler WARNING: Ignoring \"%s\" because it's not in the main dir!\n", fileName.c_str());
+            continue;
+        }
+
         if(entry.isDirectory()) {
             dirs.push_back(entry);
         } else {
@@ -174,56 +181,34 @@ void UpdateHandler::installUpdate(const std::string &zipFilePath) {
     }
 
     // repair/create missing/new dirs
-    std::string mainDirectory = "neosu/";
-    std::string cfgDir = MCENGINE_DATA_DIR "cfg" PREF_PATHSEP "";
-    bool cfgDirExists = env->directoryExists(cfgDir);
     for(const auto &dir : dirs) {
-        std::string dirName = dir.getFilename();
-        size_t mainDirectoryOffset = dirName.find(mainDirectory);
-        if(mainDirectoryOffset == 0 && dirName.length() - mainDirectoryOffset > 0 &&
-           mainDirectoryOffset + mainDirectory.length() < dirName.length()) {
-            std::string newDir = dirName.substr(mainDirectoryOffset + mainDirectory.length());
+        std::string newDir = dir.getFilename().substr(mainDirectory.length());
+        if(newDir.length() == 0) continue;
+        if(env->directoryExists(newDir)) continue;
 
-            if(!env->directoryExists(newDir)) {
-                debugLog("UpdateHandler: Creating directory %s\n", newDir.c_str());
-                env->createDirectory(newDir);
-            }
-        }
+        debugLog("UpdateHandler: Creating directory %s\n", newDir.c_str());
+        env->createDirectory(newDir);
     }
 
     // extract and overwrite almost everything
     for(const auto &file : files) {
-        std::string fileName = file.getFilename();
+        std::string outFilePath = file.getFilename().substr(mainDirectory.length());
+        if(outFilePath.length() == 0) continue;
 
-        // ignore cfg directory (don't want to overwrite user settings), except if it doesn't exist
-        if(fileName.find(cfgDir) != std::string::npos && cfgDirExists) {
-            debugLog("UpdateHandler: Ignoring file \"%s\"\n", fileName.c_str());
-            continue;
+        // .exe and .dll can't be directly overwritten on windows
+        if(outFilePath.length() > 4) {
+            if(!strcasecmp(outFilePath.c_str() + outFilePath.length() - 4, ".exe") ||
+               !strcasecmp(outFilePath.c_str() + outFilePath.length() - 4, ".dll")) {
+                std::string old_path = outFilePath;
+                old_path.append(".old");
+                env->deleteFile(old_path);
+                env->renameFile(outFilePath, old_path);
+            }
         }
 
-        size_t mainDirectoryOffset = fileName.find(mainDirectory);
-        if(mainDirectoryOffset == 0 && fileName.length() - mainDirectoryOffset > 0 &&
-           mainDirectoryOffset + mainDirectory.length() < fileName.length()) {
-            std::string outFilePath = fileName.substr(mainDirectoryOffset + mainDirectory.length());
-
-            // .exe and .dll can't be directly overwritten on windows
-            if(outFilePath.length() > 4) {
-                if(!strcasecmp(outFilePath.c_str() + outFilePath.length() - 4, ".exe") ||
-                   !strcasecmp(outFilePath.c_str() + outFilePath.length() - 4, ".dll")) {
-                    std::string old_path = outFilePath;
-                    old_path.append(".old");
-                    env->deleteFile(old_path);
-                    env->renameFile(outFilePath, old_path);
-                }
-            }
-
-            debugLog("UpdateHandler: Writing %s\n", outFilePath.c_str());
-            if(!file.extractToFile(outFilePath)) {
-                debugLog("UpdateHandler: Failed to extract file %s\n", outFilePath.c_str());
-            }
-        } else if(mainDirectoryOffset != 0) {
-            debugLog("UpdateHandler WARNING: Ignoring file \"%s\" because it's not in the main dir!\n",
-                     fileName.c_str());
+        debugLog("UpdateHandler: Writing %s\n", outFilePath.c_str());
+        if(!file.extractToFile(outFilePath)) {
+            debugLog("UpdateHandler: Failed to extract file %s\n", outFilePath.c_str());
         }
     }
 
