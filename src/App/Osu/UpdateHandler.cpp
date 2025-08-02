@@ -20,7 +20,10 @@ UpdateHandler::UpdateHandler() {
 }
 
 void UpdateHandler::checkForUpdates() {
-    if(!cv::auto_update.getBool() || cv::debug.getBool()) return;
+    if(!cv::auto_update.getBool()) return;
+#ifdef _DEBUG
+    return;
+#endif
 
     if(this->iNumRetries > 0) {
         debugLog("UpdateHandler: update check retry %i ...\n", this->iNumRetries);
@@ -32,7 +35,12 @@ void UpdateHandler::checkForUpdates() {
 void UpdateHandler::requestUpdate() {
     this->status = STATUS::STATUS_CHECKING_FOR_UPDATE;
 
-    UString versionUrl = "https://" NEOSU_DOMAIN "/update/" OS_NAME "/latest-version.txt";
+    UString versionUrl = "https://" NEOSU_DOMAIN;
+    if(cv::bleedingedge.getBool()) {
+        versionUrl.append("/bleedingedge/" OS_NAME ".txt");
+    } else {
+        versionUrl.append("/update/" OS_NAME "/latest-version.txt");
+    }
 
     debugLogF("UpdateHandler: Checking for a newer version from {}\n", versionUrl);
 
@@ -55,46 +63,44 @@ void UpdateHandler::onVersionCheckComplete(const std::string &response, bool suc
         return;
     }
 
-    float latest_version = strtof(response.c_str(), NULL);
+    auto lines = SString::split(response, "\n");
+    f32 latest_version = strtof(lines[0].c_str(), NULL);
+    f32 latest_build_timestamp = 0.f;
+    if(lines.size() > 1) {
+        latest_build_timestamp = strtof(lines[1].c_str(), NULL);
+    }
 
-    [[maybe_unused]] float latest_build_timestamp = 0.0f;
-
-    if(latest_version == 0.f) {
+    if(latest_version == 0.f && latest_build_timestamp == 0.f) {
         this->status = STATUS::STATUS_UP_TO_DATE;
         debugLog("UpdateHandler ERROR: Failed to parse version number\n");
         return;
     }
 
-    float current_version = cv::version.getFloat();
-
-    bool should_update = false;
-
-    if constexpr(Env::cfg(STREAM::EDGE)) {
-        float current_build_timestamp = cv::build_timestamp.getFloat();
-        should_update = current_version < latest_version || (current_build_timestamp < latest_build_timestamp);
-    } else {
-        should_update = current_version < latest_version;
-    }
-
+    bool should_update =
+        (cv::version.getFloat() < latest_version) || (cv::build_timestamp.getFloat() < latest_build_timestamp);
     if(!should_update) {
         // We're already up to date
         this->status = STATUS::STATUS_UP_TO_DATE;
-        debugLog("UpdateHandler: We're already up to date (current v%.2f, latest v%.2f)\n", current_version,
-                 latest_version);
+        debugLog("UpdateHandler: We're already up to date (current v%.2f (%f), latest v%.2f (%f))\n",
+                 cv::version.getFloat(), cv::build_timestamp.getFloat(), latest_version, latest_build_timestamp);
         return;
     }
 
     debugLog("UpdateHandler: Downloading latest update... (current v%.2f, latest v%.2f)\n", current_version,
              latest_version);
-    this->update_url = UString::format("https://" NEOSU_DOMAIN "/update/" OS_NAME "/v%.2f.zip", latest_version);
+
+    this->update_url = "https://" NEOSU_DOMAIN;
+    if(cv::bleedingedge.getBool()) {
+        this->update_url.append("/bleedingedge/" OS_NAME ".zip");
+    } else {
+        this->update_url.append("/update/" OS_NAME "/v%.2f.zip", latest_version);
+    }
 
     this->downloadUpdate();
 }
 
 void UpdateHandler::downloadUpdate() {
-    UString url = this->update_url;
-
-    debugLog("UpdateHandler: Downloading URL %s\n", url.toUtf8());
+    debugLog("UpdateHandler: Downloading URL %s\n", this->update_url.toUtf8());
     this->status = STATUS::STATUS_DOWNLOADING_UPDATE;
 
     NetworkHandler::RequestOptions options;
@@ -103,7 +109,7 @@ void UpdateHandler::downloadUpdate() {
     options.followRedirects = true;
 
     networkHandler->httpRequestAsync(
-        url,
+        this->update_url,
         [this](const NetworkHandler::Response &response) { this->onDownloadComplete(response.body, response.success); },
         options);
 }

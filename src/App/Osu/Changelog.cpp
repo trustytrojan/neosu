@@ -29,6 +29,7 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG v39_01;
     v39_01.title = NEOSU_VERSION;
     v39_01.changes = {
+        R"(- Added "bleedingedge" release stream)",
         R"(- Added a "keep me signed in" checkbox next to the login button)",
         R"(- Added ability to import McOsu/neosu/stable collections and scores from database files)",
         R"(- Adjusted hit windows to match stable)",

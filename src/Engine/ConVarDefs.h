@@ -180,7 +180,7 @@ CONVAR(auto_and_relax_block_user_input, "osu_auto_and_relax_block_user_input", t
 CONVAR(auto_cursordance, "osu_auto_cursordance", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(auto_snapping_strength, "osu_auto_snapping_strength", 1.0f, FCVAR_BANCHO_COMPATIBLE,
        "How many iterations of quadratic interpolation to use, more = snappier, 0 = linear");
-CONVAR(auto_update, "auto_update", true, FCVAR_BANCHO_COMPATIBLE);
+CONVAR(auto_update, "auto_update", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
 CONVAR(automatic_cursor_size, "osu_automatic_cursor_size", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(autopilot_lenience, "osu_autopilot_lenience", 0.75f, FCVAR_BANCHO_COMPATIBLE | FCVAR_GAMEPLAY);
 CONVAR(autopilot_snapping_strength, "osu_autopilot_snapping_strength", 2.0f, FCVAR_BANCHO_COMPATIBLE,
@@ -235,6 +235,7 @@ CONVAR(beatmap_preview_music_loop, "osu_beatmap_preview_music_loop", true, FCVAR
 CONVAR(beatmap_version, "osu_beatmap_version", 128, FCVAR_BANCHO_COMPATIBLE,
        "maximum supported .osu file version, above this will simply not load (this was 14 but got "
        "bumped to 128 due to lazer backports)");
+CONVAR(bleedingedge, "bleedingedge", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
 CONVAR(bug_flicker_log, "osu_bug_flicker_log", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(chat_auto_hide, "chat_auto_hide", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "automatically hide chat during gameplay");
@@ -1208,8 +1209,8 @@ CONVAR(user_draw_level_bar, "osu_user_draw_level_bar", true, FCVAR_BANCHO_COMPAT
 CONVAR(user_draw_pp, "osu_user_draw_pp", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(user_include_relax_and_autopilot_for_stats, "osu_user_include_relax_and_autopilot_for_stats", false,
        FCVAR_BANCHO_COMPATIBLE);
-CONVAR(version, "osu_version", NEOSU_VERSION, FCVAR_BANCHO_COMPATIBLE | FCVAR_HIDDEN);
-CONVAR(build_timestamp, "build_timestamp", BUILD_TIMESTAMP, FCVAR_BANCHO_COMPATIBLE | FCVAR_HIDDEN);
+CONVAR(version, "osu_version", NEOSU_VERSION, FCVAR_INTERNAL);
+CONVAR(build_timestamp, "build_timestamp", BUILD_TIMESTAMP, FCVAR_INTERNAL);
 CONVAR(volume, "volume", 1.0f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE, CFUNC(_volume));
 CONVAR(volume_change_interval, "osu_volume_change_interval", 0.05f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(volume_effects, "osu_volume_effects", 1.0f, FCVAR_BANCHO_COMPATIBLE);

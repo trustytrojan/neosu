@@ -22,12 +22,6 @@ enum class OS : uint8_t {
     MAC = 1 << 3,
     NONE = 0,
 };
-enum class STREAM : uint8_t {
-    RELEASE = 1 << 0,
-    EDGE = 1 << 1,
-    DEBUG = 1 << 2,
-    NONE = 0,
-};
 enum class FEAT : uint8_t {
     STEAM = 1 << 0,
     DISCORD = 1 << 1,
@@ -50,9 +44,6 @@ enum class REND : uint8_t {
 
 constexpr OS operator|(OS lhs, OS rhs) {
     return static_cast<OS>(static_cast<uint8_t>(lhs) | static_cast<uint8_t>(rhs));
-}
-constexpr STREAM operator|(STREAM lhs, STREAM rhs) {
-    return static_cast<STREAM>(static_cast<uint8_t>(lhs) | static_cast<uint8_t>(rhs));
 }
 constexpr FEAT operator|(FEAT lhs, FEAT rhs) {
     return static_cast<FEAT>(static_cast<uint8_t>(lhs) | static_cast<uint8_t>(rhs));
@@ -78,17 +69,6 @@ consteval OS getOS() {
 #else
 #error "Compiling for an unknown target!"
     return OS::NONE;
-#endif
-}
-
-// release stream
-consteval STREAM getReleaseStream() {
-#if defined(CI_DEVBUILD)
-    return STREAM::EDGE;
-#elif defined(_DEBUG)
-    return STREAM::DEBUG;
-#else  // TODO: add actual release identifier for tagged builds
-    return STREAM::RELEASE;
 #endif
 }
 
@@ -159,8 +139,6 @@ template <typename T>
 consteval bool matchesCurrentConfig(T mask) {
     if constexpr(std::is_same_v<T, OS>) {
         return (static_cast<uint8_t>(mask) & static_cast<uint8_t>(getOS())) != 0;
-    } else if constexpr(std::is_same_v<T, STREAM>) {
-        return (static_cast<uint8_t>(mask) & static_cast<uint8_t>(getReleaseStream())) != 0;
     } else if constexpr(std::is_same_v<T, FEAT>) {
         return (static_cast<uint8_t>(mask) & static_cast<uint8_t>(getFeatures())) != 0;
     } else if constexpr(std::is_same_v<T, AUD>) {
@@ -192,7 +170,6 @@ using Env::AUD;
 using Env::FEAT;
 using Env::OS;
 using Env::REND;
-using Env::STREAM;
 
 #ifdef __AVX512F__
 static constexpr auto OPTIMAL_UNROLL = 10;
@@ -204,7 +181,8 @@ static constexpr auto OPTIMAL_UNROLL = 6;
 static constexpr auto OPTIMAL_UNROLL = 4;
 #endif
 
-// fmt::print seems to crash on windows with no console allocated (at least with mingw), just use printf to be safe in that case
+// fmt::print seems to crash on windows with no console allocated (at least with mingw)
+// just use printf to be safe in that case
 #if defined(_WIN32) && !defined(_DEBUG)
 #define FMT_PRINT(...) printf("%s", fmt::format(__VA_ARGS__).c_str())
 #else

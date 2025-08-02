@@ -49,7 +49,7 @@ enum FCVAR_FLAGS : uint8_t {
 
     // don't save, load, or allow this convar to be modified (basically, make it completely invisible outside of engine
     // code)
-    FCVAR_INTERNAL = FCVAR_NOEXEC | FCVAR_NOSAVE | FCVAR_NOLOAD
+    FCVAR_INTERNAL = FCVAR_HIDDEN | FCVAR_PRIVATE | FCVAR_NOEXEC | FCVAR_NOSAVE | FCVAR_NOLOAD
 };
 
 class ConVar {

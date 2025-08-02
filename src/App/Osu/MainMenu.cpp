@@ -184,20 +184,13 @@ MainMenu::MainMenu() : OsuScreen() {
                    ((buildstamp = std::strtof(linebuf.c_str(), nullptr)) > 0.f)) {
                     // ignore bogus build timestamps (before 2025 or after 2030)
                     if(!(std::isfinite(buildstamp) && buildstamp < 30000000.0f && buildstamp > 25000000.0f)) {
-                        buildstamp = 0.0f;
+                        buildstamp = cv::build_timestamp.getFloat();
                     }
                 }
                 // debugLogF("versionFile version: {} our version: {}{}\n", version, cv::version.getFloat(),
                 //           buildstamp > 0.0f ? fmt::format(" build timestamp: {}", buildstamp) : "");
-                if constexpr(Env::cfg(STREAM::EDGE)) {
-                    if(version < cv::version.getFloat() ||
-                       (buildstamp > 0 && buildstamp < cv::build_timestamp.getFloat())) {
-                        this->bDrawVersionNotificationArrow = true;
-                    }
-                } else {
-                    if(version < cv::version.getFloat()) {
-                        this->bDrawVersionNotificationArrow = true;
-                    }
+                if(version < cv::version.getFloat() || buildstamp < cv::build_timestamp.getFloat()) {
+                    this->bDrawVersionNotificationArrow = true;
                 }
                 if(version < 35.06) {
                     // SoundEngine choking issues have been fixed, option has been removed from settings menu
@@ -269,7 +262,7 @@ MainMenu::MainMenu() : OsuScreen() {
 
     UString versionString;
 
-    if constexpr(Env::cfg(STREAM::EDGE)) {
+    if(cv::bleedingedge.getBool()) {
         versionString = UString::fmt("Version {:.2f} ({:s})", cv::version.getFloat(), cv::build_timestamp.getString());
         this->versionButton->setTextColor(rgb(255, 220, 220));
     } else {
