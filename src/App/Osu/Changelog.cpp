@@ -26,8 +26,15 @@ Changelog::Changelog() : ScreenBackable() {
 
     std::vector<CHANGELOG> changelogs;
 
+    CHANGELOG v39_02;
+    v39_02.title = "39.02";
+    v39_02.changes = {
+        R"()",
+    };
+    changelogs.push_back(v39_02);
+
     CHANGELOG v39_01;
-    v39_01.title = NEOSU_VERSION " (2025-08-02)";
+    v39_01.title = "39.01 (2025-08-02)";
     v39_01.changes = {
         R"(- Added "bleedingedge" release stream)",
         R"(- Added a "keep me signed in" checkbox next to the login button)",

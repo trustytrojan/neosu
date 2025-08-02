@@ -23,12 +23,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "neosu"
             VALUE "FileDescription", "cookie clicker with extra features"
-            VALUE "FileVersion", "39.01.0.0"
+            VALUE "FileVersion", "39.02.0.0"
             VALUE "InternalName", "neosu"
             VALUE "LegalCopyright", "Copyright (C) 2025"
             VALUE "OriginalFilename", "neosu.exe"
             VALUE "ProductName", "neosu"
-            VALUE "ProductVersion", "39.01"
+            VALUE "ProductVersion", "39.02"
         END
     END
     BLOCK "VarFileInfo"
