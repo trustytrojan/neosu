@@ -44,7 +44,7 @@ Changelog::Changelog() : ScreenBackable() {
         R"(- Fixed search text being hidden under some skin elements)",
         // R"(- Added setting to display map titles in their original language)",
     };
-    changelogs.push_back(v39_10);
+    changelogs.push_back(v39_01);
 
     CHANGELOG v39_00;
     v39_00.title = "39.00 (2025-07-27)";

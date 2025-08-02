@@ -9,6 +9,7 @@
 #include "Engine.h"
 #include "File.h"
 #include "NetworkHandler.h"
+#include "SString.h"
 #include "Osu.h"
 #include "ResourceManager.h"
 #include "UpdateHandler.h"
@@ -86,14 +87,14 @@ void UpdateHandler::onVersionCheckComplete(const std::string &response, bool suc
         return;
     }
 
-    debugLog("UpdateHandler: Downloading latest update... (current v%.2f, latest v%.2f)\n", current_version,
+    debugLog("UpdateHandler: Downloading latest update... (current v%.2f, latest v%.2f)\n", cv::version.getFloat(),
              latest_version);
 
     this->update_url = "https://" NEOSU_DOMAIN;
     if(cv::bleedingedge.getBool()) {
         this->update_url.append("/bleedingedge/" OS_NAME ".zip");
     } else {
-        this->update_url.append("/update/" OS_NAME "/v%.2f.zip", latest_version);
+        this->update_url.append(UString::format("/update/" OS_NAME "/v%.2f.zip", latest_version));
     }
 
     this->downloadUpdate();
