@@ -114,7 +114,7 @@ class Database {
     std::unordered_map<MD5Hash, std::vector<FinishedScore>> scores;
 
     // should only be accessed from database loader thread!
-    std::unordered_map<std::string, ByteBufferedFile::Reader> database_files;
+    std::unordered_map<std::string, UString> database_files;
     u64 bytes_processed;
     u64 total_bytes;
     std::atomic<float> fLoadingProgress;
@@ -128,11 +128,11 @@ class Database {
     void saveMaps();
 
     void openDatabases();
-    bool importDatabase(std::string db_path);
+    bool importDatabase(const std::string &db_path);
     void loadMaps();
-    void loadScores(ByteBufferedFile::Reader &db);
-    void loadOldMcNeosuScores(ByteBufferedFile::Reader &db);
-    void loadPeppyScores(ByteBufferedFile::Reader &db);
+    void loadScores(const UString &dbPath);
+    void loadOldMcNeosuScores(const UString &dbPath);
+    void loadPeppyScores(const UString &dbPath);
     void saveScores();
     bool addScoreRaw(const FinishedScore &score);
     bool isScoreAlreadyInDB(u64 unix_timestamp, const MD5Hash &map_hash);

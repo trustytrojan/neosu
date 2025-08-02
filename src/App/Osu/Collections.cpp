@@ -96,7 +96,8 @@ Collection* get_or_create_collection(std::string name) {
 }
 
 // Should only be called from db loader thread!
-bool load_peppy_collections(ByteBufferedFile::Reader& peppy_collections) {
+bool load_peppy_collections(const UString &peppy_collections_path) {
+    ByteBufferedFile::Reader peppy_collections(peppy_collections_path);
     if(peppy_collections.total_size == 0) return false;
     if(!cv::collections_legacy_enabled.getBool()) {
         db->bytes_processed += peppy_collections.total_size;
@@ -138,7 +139,8 @@ bool load_peppy_collections(ByteBufferedFile::Reader& peppy_collections) {
 }
 
 // Should only be called from db loader thread!
-bool load_mcneosu_collections(ByteBufferedFile::Reader& neosu_collections) {
+bool load_mcneosu_collections(const UString &neosu_collections_path) {
+    ByteBufferedFile::Reader neosu_collections(neosu_collections_path);
     if(neosu_collections.total_size == 0) return false;
 
     u32 total_maps = 0;
@@ -209,10 +211,10 @@ bool load_collections() {
 
     std::string peppy_collections_path = cv::osu_folder.getString();
     peppy_collections_path.append(PREF_PATHSEP "collection.db");
-    auto& peppy_collections = db->database_files[peppy_collections_path];
+    const auto& peppy_collections = db->database_files[peppy_collections_path];
     load_peppy_collections(peppy_collections);
 
-    auto& mcneosu_collections = db->database_files["collections.db"];
+    const auto& mcneosu_collections = db->database_files["collections.db"];
     load_mcneosu_collections(mcneosu_collections);
 
     debugLog("peppy+neosu collections: loading took %f seconds\n", (Timing::getTimeReal() - startTime));

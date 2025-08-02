@@ -1059,7 +1059,7 @@ void Chat::updateButtonLayout(Vector2 screen) {
     this->updateUserList();
 }
 
-void Chat::updateTickerLayout(Vector2 screen) {
+void Chat::updateTickerLayout(Vector2 /*screen*/) {
     // TODO @kiwec
     // this->ticker->updateLayout(Vector2{0.f, 0.f}, screen);
     // f32 h = this->ticker->ui->getScrollSize().y;
