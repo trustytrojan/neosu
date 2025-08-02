@@ -53,29 +53,29 @@ void UpdateHandler::onVersionCheckComplete(const std::string &response, bool suc
 
     auto lines = SString::split(response, "\n");
     f32 latest_version = strtof(lines[0].c_str(), NULL);
-    f32 latest_build_timestamp = 0.f;
+    u64 latest_build_tms = 0;
     if(lines.size() > 1) {
-        latest_build_timestamp = strtof(lines[1].c_str(), NULL);
+        latest_build_tms = std::strtoull(lines[1].c_str(), NULL, 10);
     }
 
-    if(latest_version == 0.f && latest_build_timestamp == 0.f) {
+    if(latest_version == 0.f && latest_build_tms == 0) {
         this->status = STATUS::STATUS_UP_TO_DATE;
         debugLog("UpdateHandler ERROR: Failed to parse version number\n");
         return;
     }
 
-    bool should_update =
-        (cv::version.getFloat() < latest_version) || (cv::build_timestamp.getFloat() < latest_build_timestamp);
+    u64 current_build_tms = cv::build_timestamp.getU64();
+    bool should_update = (cv::version.getFloat() < latest_version) || (current_build_tms < latest_build_tms);
     if(!should_update) {
         // We're already up to date
         this->status = STATUS::STATUS_UP_TO_DATE;
-        debugLog("UpdateHandler: We're already up to date (current v%.2f (%f), latest v%.2f (%f))\n",
-                 cv::version.getFloat(), cv::build_timestamp.getFloat(), latest_version, latest_build_timestamp);
+        debugLog("UpdateHandler: We're already up to date (current v%.2f (%d), latest v%.2f (%d))\n",
+                 cv::version.getFloat(), current_build_tms, latest_version, latest_build_tms);
         return;
     }
 
-    debugLog("UpdateHandler: Downloading latest update... (current v%.2f, latest v%.2f)\n", cv::version.getFloat(),
-             latest_version);
+    debugLog("UpdateHandler: Downloading latest update... (current v%.2f (%d), latest v%.2f (%d))\n",
+             cv::version.getFloat(), current_build_tms, latest_version, latest_build_tms);
 
     this->update_url = "https://" NEOSU_DOMAIN;
     if(cv::bleedingedge.getBool()) {
@@ -88,7 +88,7 @@ void UpdateHandler::onVersionCheckComplete(const std::string &response, bool suc
 }
 
 void UpdateHandler::downloadUpdate() {
-    debugLog("UpdateHandler: Downloading URL %s\n", this->update_url.toUtf8());
+    debugLog("UpdateHandler: Downloading %s\n", this->update_url.toUtf8());
     this->status = STATUS::STATUS_DOWNLOADING_UPDATE;
 
     NetworkHandler::RequestOptions options;
@@ -174,7 +174,7 @@ void UpdateHandler::installUpdate(const std::string &zipFilePath) {
     }
 
     // repair/create missing/new dirs
-    std::string mainDirectory = "neosu";
+    std::string mainDirectory = "neosu/";
     std::string cfgDir = MCENGINE_DATA_DIR "cfg" PREF_PATHSEP "";
     bool cfgDirExists = env->directoryExists(cfgDir);
     for(const auto &dir : dirs) {

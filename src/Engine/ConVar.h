@@ -9,6 +9,7 @@
 
 #include "Delegate.h"
 #include "UString.h"
+#include "types.h"
 
 #ifndef DEFINE_CONVARS
 #include "ConVarDefs.h"
@@ -231,6 +232,9 @@ class ConVar {
     // get
     [[nodiscard]] inline float getDefaultFloat() const { return this->fDefaultValue.load(); }
     [[nodiscard]] inline const ConVarString &getDefaultString() const { return this->sDefaultValue; }
+
+    // Used for build_timestamp, which is too big for f32
+    u64 getU64() const { return std::strtoull(this->getString().c_str(), nullptr, 10); }
 
     std::string getFancyDefaultValue();
 
