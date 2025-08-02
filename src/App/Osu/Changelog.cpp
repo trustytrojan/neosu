@@ -27,9 +27,10 @@ Changelog::Changelog() : ScreenBackable() {
     std::vector<CHANGELOG> changelogs;
 
     CHANGELOG v39_02;
-    v39_02.title = "39.02";
+    v39_02.title = "39.02 (2025-08-02)";
     v39_02.changes = {
-        R"()",
+        R"(- Fixed crash when saving score (and others))",
+        R"(- Fixed auto-updater failing to update)",
     };
     changelogs.push_back(v39_02);
 
