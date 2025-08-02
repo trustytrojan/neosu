@@ -31,7 +31,6 @@ class UpdateHandler {
     static constexpr const char* TEMP_UPDATE_DOWNLOAD_FILEPATH = "update.zip";
 
     // async operation chain
-    void requestUpdate();
     void onVersionCheckComplete(const std::string& response, bool success);
     void downloadUpdate();
     void onDownloadComplete(const std::string& data, bool success);

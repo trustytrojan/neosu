@@ -347,11 +347,13 @@ Osu::Osu() {
         BANCHO::Net::reconnect();
     }
 
+#ifndef _DEBUG
     // don't auto update if this env var is set to anything other than 0 or empty (if it is set)
     const std::string extUpdater = Environment::getEnvVariable("NEOSU_EXTERNAL_UPDATE_PROVIDER");
     if(cv::auto_update.getBool() && (extUpdater.empty() || strtol(extUpdater.c_str(), nullptr, 10) == 0)) {
         this->updateHandler->checkForUpdates();
     }
+#endif
 
 #ifdef _WIN32
     // Process cmdline args now, after everything has been initialized

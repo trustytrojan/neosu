@@ -16,24 +16,11 @@
 
 UpdateHandler::UpdateHandler() {
     this->update_url = "";
-    this->status = cv::auto_update.getBool() ? STATUS::STATUS_CHECKING_FOR_UPDATE : STATUS::STATUS_UP_TO_DATE;
+    this->status = STATUS::STATUS_UP_TO_DATE;
     this->iNumRetries = 0;
 }
 
 void UpdateHandler::checkForUpdates() {
-    if(!cv::auto_update.getBool()) return;
-#ifdef _DEBUG
-    return;
-#endif
-
-    if(this->iNumRetries > 0) {
-        debugLog("UpdateHandler: update check retry %i ...\n", this->iNumRetries);
-    }
-
-    this->requestUpdate();
-}
-
-void UpdateHandler::requestUpdate() {
     this->status = STATUS::STATUS_CHECKING_FOR_UPDATE;
 
     UString versionUrl = "https://" NEOSU_DOMAIN;
