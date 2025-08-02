@@ -26,9 +26,9 @@ Changelog::Changelog() : ScreenBackable() {
 
     std::vector<CHANGELOG> changelogs;
 
-    CHANGELOG v39_10;
-    v39_10.title = NEOSU_VERSION " (" __DATE__ ")";
-    v39_10.changes = {
+    CHANGELOG v39_01;
+    v39_01.title = NEOSU_VERSION;
+    v39_01.changes = {
         R"(- Added a "keep me signed in" checkbox next to the login button)",
         R"(- Added ability to import McOsu/neosu/stable collections and scores from database files)",
         R"(- Adjusted hit windows to match stable)",
