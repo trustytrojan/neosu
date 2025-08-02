@@ -419,8 +419,8 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> &arg
     if(isRestartScheduled) {
         wchar_t full_path[MAX_PATH];
         GetModuleFileNameW(NULL, full_path, MAX_PATH);
-        STARTUPINFOW startupInfo = {sizeof(STARTUPINFOW)};
-        PROCESS_INFORMATION processInfo;
+        STARTUPINFOW startupInfo{};
+        PROCESS_INFORMATION processInfo{};
         CreateProcessW(full_path, NULL, NULL, NULL, TRUE, NORMAL_PRIORITY_CLASS, NULL, NULL, &startupInfo,
                        &processInfo);
     }

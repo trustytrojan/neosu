@@ -8155,8 +8155,15 @@ fi
 if test "x$enable_static" = "xyes"
 then :
 
-    COMMON_FLAGS="$COMMON_FLAGS -fno-pic -fno-PIC -fno-pie -fno-PIE -Wl,-no-pie"
-    LDFLAGS="$LDFLAGS -fno-pic -fno-PIC -fno-pie -fno-PIE -no-pie"
+    COMMON_FLAGS="$COMMON_FLAGS -fno-pic -fno-PIC -fno-pie -fno-PIE"
+    LDFLAGS="$LDFLAGS -fno-pic -fno-PIC -fno-pie -fno-PIE"
+    if test -z "$LLVMMINGW"
+then :
+
+        COMMON_FLAGS="$COMMON_FLAGS -Wl,-no-pie"
+        LDFLAGS="$LDFLAGS -no-pie"
+
+fi
 
 fi
 

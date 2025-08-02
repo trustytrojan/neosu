@@ -473,8 +473,12 @@ AC_SUBST([CXX])
 AS_IF([test "$host_cpu" = "x86_64"], [COMMON_FLAGS="$COMMON_FLAGS -mcmodel=small"])
 
 AS_IF([test "x$enable_static" = "xyes"], [
-    COMMON_FLAGS="$COMMON_FLAGS -fno-pic -fno-PIC -fno-pie -fno-PIE -Wl,-no-pie"
-    LDFLAGS="$LDFLAGS -fno-pic -fno-PIC -fno-pie -fno-PIE -no-pie"
+    COMMON_FLAGS="$COMMON_FLAGS -fno-pic -fno-PIC -fno-pie -fno-PIE"
+    LDFLAGS="$LDFLAGS -fno-pic -fno-PIC -fno-pie -fno-PIE"
+    AS_IF([test -z "$LLVMMINGW"], [
+        COMMON_FLAGS="$COMMON_FLAGS -Wl,-no-pie"
+        LDFLAGS="$LDFLAGS -no-pie"
+    ])
 ])
 
 CPPFLAGS="$CPPFLAGS -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64"
