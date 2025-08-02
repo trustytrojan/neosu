@@ -25,7 +25,7 @@ void limit_frames(int target_fps) {
         // if we're ahead of schedule, sleep until next frame
         if(next_frame_time > now) {
             const u64 sleep_time = next_frame_time - now;
-            Timing::sleepNS(sleep_time);
+            Timing::sleepNSPrecise(sleep_time);
         } else if(cv::fps_max_yield.getBool()) {
             Timing::sleep(0);
             next_frame_time = Timing::getTicksNS();  // update "now" to reflect the time spent in yield

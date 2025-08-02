@@ -60,6 +60,19 @@ static forceinline INLINE_BODY void sleepMS(uint64_t ms) noexcept {
     ms > 0 ? SDL_DelayNS(ms * NS_PER_MS) : detail::yield_internal();
 }
 
+static forceinline INLINE_BODY void sleepPrecise(uint64_t us) noexcept {
+    us > 0 ? SDL_DelayPrecise(us * NS_PER_US) : detail::yield_internal();
+}
+
+static forceinline INLINE_BODY void sleepNSPrecise(uint64_t ns) noexcept {
+    ns > 0 ? SDL_DelayPrecise(ns) : detail::yield_internal();
+}
+
+static forceinline INLINE_BODY void sleepMSPrecise(uint64_t ms) noexcept {
+    ms > 0 ? SDL_DelayPrecise(ms * NS_PER_MS) : detail::yield_internal();
+}
+
+
 template <typename T = double>
     requires(std::floating_point<T>)
 static constexpr forceinline INLINE_BODY T timeNSToSeconds(uint64_t ns) noexcept {
