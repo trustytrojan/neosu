@@ -259,17 +259,6 @@ MainMenu::MainMenu() : OsuScreen() {
     }
 
     this->versionButton = new CBaseUIButton(0, 0, 0, 0, "", "");
-
-    UString versionString;
-
-    if(cv::bleedingedge.getBool()) {
-        versionString = UString::fmt("Version {:.2f} ({:s})", cv::version.getFloat(), cv::build_timestamp.getString());
-        this->versionButton->setTextColor(rgb(255, 220, 220));
-    } else {
-        versionString = UString::fmt("Version {:.2f}", cv::version.getFloat());
-    }
-
-    this->versionButton->setText(versionString);
     this->versionButton->setDrawBackground(false);
     this->versionButton->setDrawFrame(false);
     this->versionButton->setClickCallback(SA::MakeDelegate<&MainMenu::onVersionPressed>(this));
@@ -879,6 +868,16 @@ void MainMenu::draw() {
 
 void MainMenu::mouse_update(bool *propagate_clicks) {
     if(!this->bVisible) return;
+
+    UString versionString;
+    if(cv::bleedingedge.getBool()) {
+        versionString = UString::fmt("Version {:.2f} ({:s})", cv::version.getFloat(), cv::build_timestamp.getString());
+        this->versionButton->setTextColor(rgb(255, 220, 220));
+    } else {
+        versionString = UString::fmt("Version {:.2f}", cv::version.getFloat());
+        this->versionButton->setTextColor(rgb(255, 255, 255));
+    }
+    this->versionButton->setText(versionString);
 
     this->updateLayout();
 
