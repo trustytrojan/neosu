@@ -65,7 +65,7 @@ void UpdateHandler::onVersionCheckComplete(const std::string &response, bool suc
     }
 
     u64 current_build_tms = cv::build_timestamp.getU64();
-    bool should_update = true;  //(cv::version.getFloat() < latest_version) || (current_build_tms < latest_build_tms);
+    bool should_update = (cv::version.getFloat() < latest_version) || (current_build_tms < latest_build_tms);
     if(!should_update) {
         // We're already up to date
         this->status = STATUS::STATUS_UP_TO_DATE;
