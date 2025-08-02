@@ -173,16 +173,6 @@ void UpdateHandler::installUpdate(const std::string &zipFilePath) {
         return;
     }
 
-    // find main directory (assuming first entry is the main subdirectory)
-    std::string mainDirectory;
-    if(!entries.empty() && entries[0].isDirectory()) {
-        mainDirectory = entries[0].getFilename();
-    } else {
-        debugLog("UpdateHandler ERROR: first entry is not the main directory!\n");
-        this->status = STATUS::STATUS_ERROR;
-        return;
-    }
-
     // separate raw dirs and files
     std::vector<Archive::Entry> files, dirs;
     for(const auto &entry : entries) {
@@ -197,6 +187,7 @@ void UpdateHandler::installUpdate(const std::string &zipFilePath) {
     }
 
     // repair/create missing/new dirs
+    std::string mainDirectory = "neosu";
     std::string cfgDir = MCENGINE_DATA_DIR "cfg" PREF_PATHSEP "";
     bool cfgDirExists = env->directoryExists(cfgDir);
     for(const auto &dir : dirs) {
