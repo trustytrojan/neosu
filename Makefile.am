@@ -582,8 +582,8 @@ $(DEPS_PREFIX)/libpng-$(LIBPNG_VERSION).built: $(DEPS_PREFIX)/zlib-$(ZLIB_VERSIO
 		./configure lt_cv_prog_gnu_ld=yes --host=$(host) --build=$(build) --prefix="$(DEPS_PREFIX)" \
 		$(if $(STATICBUILD),--enable-static --disable-shared,--enable-shared --disable-static) \
 		--disable-tools --disable-tests --with-gnu-ld $(if $(or $(DISABLE_NATIVE),$(ENABLE_DEBUG)),,--enable-hardware-optimizations=on) \
-			CC="$(CC) $(shell $(PKG_CONFIG) --cflags zlib)" RANLIB="$(RANLIB)" AR="$(AR)" CXX="$(CXX)" LD="$(LD)" \
-			CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" LDFLAGS="$(LDFLAGS) $(shell $(PKG_CONFIG) --libs zlib)" && \
+			CC="$(CC) $(ZLIB_CFLAGS)" RANLIB="$(RANLIB)" AR="$(AR)" CXX="$(CXX)" LD="$(LD)" \
+			CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" LDFLAGS="$(LDFLAGS) $(ZLIB_LIBS)" && \
 	$(MAKE) && \
 	$(MAKE) install
 	$(PKG_CONFIG) --exists --print-errors libpng
@@ -762,7 +762,8 @@ $(DEPS_PREFIX)/libarchive-$(LIBARCHIVE_VERSION).built: $(DEPS_CACHE)/libarchive-
 		--without-nettle --without-mbedtls --without-lzo2 --without-lz4 --without-libiconv-prefix \
 		--without-iconv --without-libb2 --without-zstd --with-lzma --with-zlib --with-bz2lib \
 		CC="$(CC)" RANLIB="$(RANLIB)" AR="$(AR)" CXX="$(CXX)" LD="$(LD)" \
-		CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" LDFLAGS="$(LDFLAGS)" && \
+		CFLAGS="$(CFLAGS) -I$(DEPS_PREFIX)/include $(LZMA_CFLAGS) $(BZIP2_CFLAGS) $(ZLIB_CFLAGS)" \
+		LDFLAGS="$(LDFLAGS) -L$(DEPS_PREFIX)/lib $(LZMA_LIBS) $(BZIP2_LIBS) $(ZLIB_LIBS)" && \
 	$(MAKE) && \
 	$(MAKE) install
 	$(PKG_CONFIG) --exists --print-errors libarchive

@@ -5294,8 +5294,8 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source: $(DEPS_CACHE)/curl-$(CUR
 @BUILD_LIBPNG_TRUE@		./configure lt_cv_prog_gnu_ld=yes --host=$(host) --build=$(build) --prefix="$(DEPS_PREFIX)" \
 @BUILD_LIBPNG_TRUE@		$(if $(STATICBUILD),--enable-static --disable-shared,--enable-shared --disable-static) \
 @BUILD_LIBPNG_TRUE@		--disable-tools --disable-tests --with-gnu-ld $(if $(or $(DISABLE_NATIVE),$(ENABLE_DEBUG)),,--enable-hardware-optimizations=on) \
-@BUILD_LIBPNG_TRUE@			CC="$(CC) $(shell $(PKG_CONFIG) --cflags zlib)" RANLIB="$(RANLIB)" AR="$(AR)" CXX="$(CXX)" LD="$(LD)" \
-@BUILD_LIBPNG_TRUE@			CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" LDFLAGS="$(LDFLAGS) $(shell $(PKG_CONFIG) --libs zlib)" && \
+@BUILD_LIBPNG_TRUE@			CC="$(CC) $(ZLIB_CFLAGS)" RANLIB="$(RANLIB)" AR="$(AR)" CXX="$(CXX)" LD="$(LD)" \
+@BUILD_LIBPNG_TRUE@			CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" LDFLAGS="$(LDFLAGS) $(ZLIB_LIBS)" && \
 @BUILD_LIBPNG_TRUE@	$(MAKE) && \
 @BUILD_LIBPNG_TRUE@	$(MAKE) install
 @BUILD_LIBPNG_TRUE@	$(PKG_CONFIG) --exists --print-errors libpng
@@ -5438,7 +5438,8 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source: $(DEPS_CACHE)/curl-$(CUR
 @BUILD_LIBARCHIVE_TRUE@		--without-nettle --without-mbedtls --without-lzo2 --without-lz4 --without-libiconv-prefix \
 @BUILD_LIBARCHIVE_TRUE@		--without-iconv --without-libb2 --without-zstd --with-lzma --with-zlib --with-bz2lib \
 @BUILD_LIBARCHIVE_TRUE@		CC="$(CC)" RANLIB="$(RANLIB)" AR="$(AR)" CXX="$(CXX)" LD="$(LD)" \
-@BUILD_LIBARCHIVE_TRUE@		CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" LDFLAGS="$(LDFLAGS)" && \
+@BUILD_LIBARCHIVE_TRUE@		CFLAGS="$(CFLAGS) -I$(DEPS_PREFIX)/include $(LZMA_CFLAGS) $(BZIP2_CFLAGS) $(ZLIB_CFLAGS)" \
+@BUILD_LIBARCHIVE_TRUE@		LDFLAGS="$(LDFLAGS) -L$(DEPS_PREFIX)/lib $(LZMA_LIBS) $(BZIP2_LIBS) $(ZLIB_LIBS)" && \
 @BUILD_LIBARCHIVE_TRUE@	$(MAKE) && \
 @BUILD_LIBARCHIVE_TRUE@	$(MAKE) install
 @BUILD_LIBARCHIVE_TRUE@	$(PKG_CONFIG) --exists --print-errors libarchive
