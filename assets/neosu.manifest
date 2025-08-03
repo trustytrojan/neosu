@@ -3,10 +3,10 @@
   <assemblyIdentity
     type="win32"
     name="neosu"
-    version="39.02.0.0"
+    version="39.03.0.0"
     processorArchitecture="*"/>
   
-  <description>cookie clicker with extra features</description>
+  <description>neosu</description>
   
   <!-- execution level -->
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
