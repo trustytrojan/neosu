@@ -3579,7 +3579,7 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
             // XXX: Save bancho_score_id after getting submission result
         }
 
-        if(score.passed) {
+        if(score.passed || cv::save_failed_scores.getBool()) {
             int scoreIndex = db->addScore(score);
             if(scoreIndex == -1) {
                 osu->getNotificationOverlay()->addToast("Failed saving score!", 0xffff0000);

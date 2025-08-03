@@ -167,6 +167,7 @@ void SoLoudSound::destroy() {
     this->fVolume = 1.0f;
     this->fLastPlayTime = 0.0f;
     this->bIgnored = false;
+    this->bAsyncReady = false;
 }
 
 u32 SoLoudSound::setPosition(f64 percent) {

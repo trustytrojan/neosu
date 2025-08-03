@@ -402,7 +402,9 @@ class OptionsMenuResetButton : public CBaseUIButton {
 
         if(this->isMouseInside()) {
             osu->getTooltipOverlay()->begin();
-            { osu->getTooltipOverlay()->addLine("Reset"); }
+            {
+                osu->getTooltipOverlay()->addLine("Reset");
+            }
             osu->getTooltipOverlay()->end();
         }
     }
@@ -994,6 +996,9 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addCheckbox("Show Skip Button during Intro", "Skip intro to first hitobject.", &cv::skip_intro_enabled);
     this->addCheckbox("Show Skip Button during Breaks", "Skip breaks in the middle of beatmaps.",
                       &cv::skip_breaks_enabled);
+    // FIXME: broken
+    // this->addCheckbox("Save Failed Scores", "Allow failed scores to be saved as F ranks.",
+    //                   &cv::save_failed_scores);
     this->addSpacer();
     this->addSubSection("Mechanics", "health drain notelock lock block blocking noteblock");
     this->addCheckbox(

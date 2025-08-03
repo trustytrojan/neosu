@@ -347,6 +347,7 @@ CONVAR(drain_kill, "osu_drain_kill", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_GAMEP
        "whether to kill the player upon failing");
 CONVAR(drain_kill_notification_duration, "osu_drain_kill_notification_duration", 1.0f, FCVAR_BANCHO_COMPATIBLE,
        "how long to display the \"You have failed, but you can keep playing!\" notification (0 = disabled)");
+CONVAR(save_failed_scores, "osu_save_failed_scores", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_HIDDEN, "(BROKEN) save scores locally, even if there was a fail");
 CONVAR(draw_accuracy, "osu_draw_accuracy", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(draw_approach_circles, "osu_draw_approach_circles", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(draw_beatmap_background_image, "osu_draw_beatmap_background_image", true, FCVAR_BANCHO_COMPATIBLE);

@@ -53,7 +53,7 @@ NetworkHandler::NetworkHandler() : multi_handle(nullptr) {
 }
 
 NetworkHandler::~NetworkHandler() {
-    // McThread destructor automatically requests stop and joins the thread
+    // std::jthread destructor automatically requests stop and joins the thread
     this->network_thread.reset();
 
     // cleanup any remaining requests

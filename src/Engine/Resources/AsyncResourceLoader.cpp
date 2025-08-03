@@ -96,7 +96,7 @@ class AsyncResourceLoader::LoaderThread final {
             this->loader_ptr->markWorkAsyncComplete(std::move(work));
 
             // yield again before loop
-            Timing::sleepMS(1);
+            Timing::sleepMS(0);
         }
 
         this->loader_ptr->iActiveThreadCount.fetch_sub(1);
