@@ -5,7 +5,8 @@
 
 class UpdateHandler {
    public:
-    enum class STATUS : uint8_t {
+    enum class STATUS : int8_t {
+        STATUS_INITIAL,
         STATUS_UP_TO_DATE,
         STATUS_CHECKING_FOR_UPDATE,
         STATUS_DOWNLOADING_UPDATE,
@@ -43,6 +44,9 @@ class UpdateHandler {
 
     // release stream management
     void onBleedingEdgeChanged(float oldVal, float newVal);
+    // with bleeding edge identifier
+    static std::string getStreamArchiveName();
+    static std::string getStreamCacheName();
 
     // status
     std::atomic<STATUS> status;

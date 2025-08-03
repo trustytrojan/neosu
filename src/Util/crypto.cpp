@@ -1,7 +1,8 @@
 #include "crypto.h"
-#include "sha256.h"  // vendored library
-#include "base64.h"  // vendored library
-#include "MD5.h"     // vendored library
+#include "sha256.h"            // vendored library
+#include "base64.h"            // vendored library
+#include "MD5.h"               // vendored library
+#include "ByteBufferedFile.h"  // for file hashing functions
 #include <vector>
 #include <cstring>
 
@@ -66,6 +67,96 @@ void md5(const void* data, size_t size, u8* hash) {
     // fallback to vendored library
     MD5 hasher;
     hasher.update(static_cast<const unsigned char*>(data), size);
+    hasher.finalize();
+    std::memcpy(hash, hasher.getDigest(), 16);
+}
+
+void sha256_f(const UString& file_path, u8* hash) {
+    constexpr size_t CHUNK_SIZE{32768};
+    std::array<u8, CHUNK_SIZE> buffer{};
+    size_t bytes_read{0};
+
+#ifdef USE_OPENSSL
+    EVP_MD_CTX* ctx = EVP_MD_CTX_new();
+    if(ctx && EVP_DigestInit_ex(ctx, EVP_sha256(), nullptr) == 1) {
+        ByteBufferedFile::Reader reader(file_path);
+        if(reader.good()) {
+            bool success = true;
+
+            while(reader.good() && (bytes_read = reader.read_bytes(buffer.data(), CHUNK_SIZE)) > 0) {
+                if(EVP_DigestUpdate(ctx, buffer.data(), bytes_read) != 1) {
+                    success = false;
+                    break;
+                }
+            }
+
+            if(success && reader.good()) {
+                unsigned int hash_len = 0;
+                if(EVP_DigestFinal_ex(ctx, hash, &hash_len) == 1) {
+                    EVP_MD_CTX_free(ctx);
+                    return;
+                }
+            }
+        }
+        EVP_MD_CTX_free(ctx);
+    }
+#endif
+
+    // fallback to vendored library
+    struct sha256_buff buff;
+    sha256_init(&buff);
+
+    ByteBufferedFile::Reader reader(file_path);
+    if(reader.good()) {
+        while(reader.good() && (bytes_read = reader.read_bytes(buffer.data(), CHUNK_SIZE)) > 0) {
+            sha256_update(&buff, buffer.data(), bytes_read);
+        }
+    }
+
+    sha256_finalize(&buff);
+    sha256_read(&buff, hash);
+}
+
+void md5_f(const UString& file_path, u8* hash) {
+    constexpr size_t CHUNK_SIZE{32768};
+    std::array<u8, CHUNK_SIZE> buffer{};
+    size_t bytes_read{0};
+
+#ifdef USE_OPENSSL
+    EVP_MD_CTX* ctx = EVP_MD_CTX_new();
+    if(ctx && EVP_DigestInit_ex(ctx, EVP_md5(), nullptr) == 1) {
+        ByteBufferedFile::Reader reader(file_path);
+        if(reader.good()) {
+            bool success = true;
+
+            while(reader.good() && (bytes_read = reader.read_bytes(buffer.data(), CHUNK_SIZE)) > 0) {
+                if(EVP_DigestUpdate(ctx, buffer.data(), bytes_read) != 1) {
+                    success = false;
+                    break;
+                }
+            }
+
+            if(success && reader.good()) {
+                unsigned int hash_len;
+                if(EVP_DigestFinal_ex(ctx, hash, &hash_len) == 1) {
+                    EVP_MD_CTX_free(ctx);
+                    return;
+                }
+            }
+        }
+        EVP_MD_CTX_free(ctx);
+    }
+#endif
+
+    // fallback to vendored library
+    MD5 hasher;
+    ByteBufferedFile::Reader reader(file_path);
+    if(reader.good()) {
+        while(reader.good() && (bytes_read = reader.read_bytes(buffer.data(), CHUNK_SIZE)) > 0) {
+            hasher.update(buffer.data(), bytes_read);
+        }
+    }
+
     hasher.finalize();
     std::memcpy(hash, hasher.getDigest(), 16);
 }

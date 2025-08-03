@@ -3,6 +3,8 @@
 #include "types.h"
 #include <vector>
 
+class UString;
+
 namespace crypto {
 
 namespace rng {
@@ -12,6 +14,10 @@ void get_bytes(u8* out, size_t s_out);
 namespace hash {
 void sha256(const void* data, size_t size, u8* hash);
 void md5(const void* data, size_t size, u8* hash);
+
+// takes a file directly
+void sha256_f(const UString& file_path, u8* hash);
+void md5_f(const UString& file_path, u8* hash);
 }  // namespace hash
 
 namespace baseconv {

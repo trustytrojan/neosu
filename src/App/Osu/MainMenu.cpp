@@ -971,6 +971,9 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
     // handle update checker and status text
     if(this->updateAvailableButton != NULL) {
         switch(osu->getUpdateHandler()->getStatus()) {
+            case UpdateHandler::STATUS::STATUS_INITIAL:
+                std::abort();  // Programmer Error! :^)
+                break;
             case UpdateHandler::STATUS::STATUS_UP_TO_DATE:
                 if(this->updateAvailableButton->isVisible()) {
                     this->updateAvailableButton->setText("");
@@ -980,10 +983,12 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
             case UpdateHandler::STATUS::STATUS_CHECKING_FOR_UPDATE:
                 this->updateAvailableButton->setText("Checking for updates ...");
                 this->updateAvailableButton->setColor(0x2200ff00);
+                this->updateAvailableButton->setVisible(true);
                 break;
             case UpdateHandler::STATUS::STATUS_DOWNLOADING_UPDATE:
                 this->updateAvailableButton->setText("Downloading ...");
                 this->updateAvailableButton->setColor(0x2200ff00);
+                this->updateAvailableButton->setVisible(true);
                 break;
             case UpdateHandler::STATUS::STATUS_DOWNLOAD_COMPLETE:
                 if(engine->getTime() > this->fUpdateButtonTextTime && anim->isAnimating(&this->fUpdateButtonAnim) &&
@@ -992,6 +997,7 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
 
                     this->updateAvailableButton->setColor(rgb(0, 150, 230));
                     this->updateAvailableButton->setTextColor(0xffffffff);
+                    this->updateAvailableButton->setVisible(true);
 
                     if(this->updateAvailableButton->getText().find("ready") != -1)
                         this->updateAvailableButton->setText("Click here to install the update!");
@@ -1002,6 +1008,7 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
             case UpdateHandler::STATUS::STATUS_INSTALLING_UPDATE:
                 this->updateAvailableButton->setText("Installing ...");
                 this->updateAvailableButton->setColor(0x2200ff00);
+                this->updateAvailableButton->setVisible(true);
                 break;
             case UpdateHandler::STATUS::STATUS_SUCCESS_INSTALLATION:
                 if(engine->getTime() > this->fUpdateButtonTextTime && anim->isAnimating(&this->fUpdateButtonAnim) &&
@@ -1010,6 +1017,7 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
 
                     this->updateAvailableButton->setColor(rgb(0, 255, 0));
                     this->updateAvailableButton->setTextColor(0xffffffff);
+                    this->updateAvailableButton->setVisible(true);
 
                     if(this->updateAvailableButton->getText().find("installed") != -1)
                         this->updateAvailableButton->setText("Click here to restart now!");
@@ -1020,6 +1028,7 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
             case UpdateHandler::STATUS::STATUS_ERROR:
                 this->updateAvailableButton->setText("Update Error! Click to retry ...");
                 this->updateAvailableButton->setColor(rgb(255, 0, 0));
+                this->updateAvailableButton->setVisible(true);
                 break;
         }
     }

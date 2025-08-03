@@ -21,26 +21,37 @@
 
 using enum UpdateHandler::STATUS;
 
+std::string UpdateHandler::getStreamArchiveName() {
+    return cv::bleedingedge.getBool() ? "update-bleeding-" OS_NAME ".zip" : "update-" OS_NAME ".zip";
+}
+
+std::string UpdateHandler::getStreamCacheName() {
+    return cv::bleedingedge.getBool() ? "update_cache-bleeding-" OS_NAME ".txt" : "update_cache-" OS_NAME ".txt";
+}
+
 void UpdateHandler::onBleedingEdgeChanged(float oldVal, float newVal) {
     const bool oldState = !!static_cast<int>(oldVal);
     const bool newState = !!static_cast<int>(newVal);
 
-    if(oldState == newState) return;
+    if((oldState == newState) || ((this->getStreamArchiveName() == this->updateArchiveName) &&
+                                  (this->getStreamCacheName() == this->updateCacheInfoPath))) {
+        return;
+    }
 
     const auto status = this->getStatus();
-    const bool allowChange =
-        (status == STATUS_UP_TO_DATE || status == STATUS_DOWNLOAD_COMPLETE || status == STATUS_ERROR);
+    const bool allowChange = (status == STATUS_INITIAL || status == STATUS_UP_TO_DATE ||
+                              status == STATUS_DOWNLOAD_COMPLETE || status == STATUS_ERROR);
     if(allowChange) {
-        if(newState) {
-            this->updateArchiveName = "update-bleeding-" OS_NAME ".zip";
-            this->updateCacheInfoPath = "update_cache-bleeding-" OS_NAME ".txt";
-        } else {
-            this->updateArchiveName = "update-" OS_NAME ".zip";
-            this->updateCacheInfoPath = "update_cache-" OS_NAME ".txt";
+        // don't interfere with the normal update check if we got a change callback from reading a config
+        // just keep the cvar set, the pending update will use the right paths (depending on current cv::bleedingedge)
+        if(status != STATUS_INITIAL) {
+            this->updateArchiveName = this->getStreamArchiveName();
+            this->updateCacheInfoPath = this->getStreamCacheName();
+
+            this->status = STATUS_UP_TO_DATE;
+            this->iNumRetries = 0;
+            this->checkForUpdates();
         }
-        this->status = STATUS_UP_TO_DATE;
-        this->iNumRetries = 0;
-        this->checkForUpdates();
     } else {
         debugLog("Can't change release stream while an update is in progress!\n");
         cv::bleedingedge.setValue(oldState, false);
@@ -49,16 +60,28 @@ void UpdateHandler::onBleedingEdgeChanged(float oldVal, float newVal) {
 
 UpdateHandler::UpdateHandler() {
     this->update_url = "";
-    this->status = STATUS_UP_TO_DATE;
+    this->status = STATUS_INITIAL;
     this->iNumRetries = 0;
     this->currentVersionContent = "";
-    this->updateArchiveName = "update-" OS_NAME ".zip";
-    this->updateCacheInfoPath = "update_cache-" OS_NAME ".txt";
+    this->updateArchiveName = this->getStreamArchiveName();
+    this->updateCacheInfoPath = this->getStreamCacheName();
     cv::bleedingedge.setCallback(SA::MakeDelegate<&UpdateHandler::onBleedingEdgeChanged>(this));
+    cv::force_update.setCallback(SA::MakeDelegate<&UpdateHandler::checkForUpdates>(this));
 }
 
 void UpdateHandler::checkForUpdates() {
+    if(cv::force_update.getBool() &&
+       !(this->getStatus() == STATUS_UP_TO_DATE || this->getStatus() == STATUS_DOWNLOAD_COMPLETE ||
+         this->getStatus() == STATUS_ERROR)) {
+        debugLog("Can't force an update check now, wait until the update is finished!\n");
+        cv::force_update.setValue(false, false);
+        return;
+    }
+
     this->status = STATUS_CHECKING_FOR_UPDATE;
+
+    this->updateArchiveName = this->getStreamArchiveName();
+    this->updateCacheInfoPath = this->getStreamCacheName();
 
     UString versionUrl = "https://" NEOSU_DOMAIN;
     if(cv::bleedingedge.getBool()) {
@@ -105,7 +128,8 @@ void UpdateHandler::onVersionCheckComplete(const std::string &response, bool suc
     }
 
     u64 current_build_tms = cv::build_timestamp.getU64();
-    bool should_update = cv::force_update.getBool() || (cv::version.getFloat() < latest_version) || (current_build_tms < latest_build_tms);
+    bool should_update = cv::force_update.getBool() || (cv::version.getFloat() < latest_version) ||
+                         (current_build_tms < latest_build_tms);
     if(!should_update) {
         // We're already up to date
         this->status = STATUS_UP_TO_DATE;
@@ -188,7 +212,7 @@ void UpdateHandler::onDownloadComplete(const std::string &data, bool success) {
 
 void UpdateHandler::installUpdate() {
     if(this->getStatus() != STATUS_DOWNLOAD_COMPLETE) {
-        debugLog("UpdateHandler: not ready! current status: {}\n", static_cast<uint8_t>(this->getStatus()));
+        debugLog("UpdateHandler: not ready! current status: {}\n", static_cast<int8_t>(this->getStatus()));
         return;
     }
     debugLog("UpdateHandler: installing {:s}\n", this->updateArchiveName);
@@ -285,24 +309,23 @@ std::string UpdateHandler::calculateUpdateHash(const std::string &versionContent
         return "";
     }
 
-    // read zip file content
-    std::ifstream zipFile(this->updateArchiveName, std::ios::binary);
-    if(!zipFile.good()) {
+    // get sha256 of file
+    std::array<u8, 32> file_hash{};
+    crypto::hash::sha256_f(this->updateArchiveName.c_str(), file_hash.data());
+
+    if(file_hash == std::array<u8, 32>{}) {
         return "";
     }
 
-    std::string zipContent((std::istreambuf_iterator<char>(zipFile)), std::istreambuf_iterator<char>());
-    zipFile.close();
+    std::string combined_string{versionContent + std::string_view(reinterpret_cast<const char *>(file_hash.data())) +
+                                '\0'};
 
-    // combine version and zip content
-    std::string combined = versionContent + zipContent;
-
-    // get sha256
-    std::array<u8, 32> hash{};
-    crypto::hash::sha256(combined.data(), combined.size(), hash.data());
+    // get sha256 of (version + archive hash)
+    std::array<u8, 32> combined_hash{};
+    crypto::hash::sha256(combined_string.data(), combined_string.size(), combined_hash.data());
 
     std::stringstream ss;
-    for(unsigned char i : hash) {
+    for(unsigned char i : combined_hash) {
         ss << std::hex << std::setfill('0') << std::setw(2) << static_cast<unsigned>(i);
     }
 
