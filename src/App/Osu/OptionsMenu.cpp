@@ -3505,6 +3505,7 @@ OptionsMenuKeyBindButton *OptionsMenu::addKeyBindButton(const UString &text, Con
     e->baseElems.push_back(bindButton);
     e->baseElems.push_back(label);
     e->type = BINDBTN;
+    e->cvars[unbindButton] = cvar;
     e->cvars[bindButton] = cvar;
     this->elemContainers.push_back(e);
 
