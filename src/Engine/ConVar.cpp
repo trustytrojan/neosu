@@ -154,11 +154,11 @@ bool ConVar::is_unlocked_full() const {
 bool ConVar::is_gameplay_compatible() const {
     if(osu && this->isFlagSet(FCVAR_GAMEPLAY)) {
         if(!relaxed_checks.load(std::memory_order_acquire) && bancho->is_playing_a_multi_map()) {
-            debugLog("Can't edit %s while in a multiplayer match.\n", this->sName);
+            debugLog("Can't edit {:s} while in a multiplayer match.\n", this->sName);
             return false;
         } else {
             if(osu->isInPlayMode()) {
-                debugLog("%s affects gameplay: won't submit score.\n", this->sName);
+                debugLog("{:s} affects gameplay: won't submit score.\n", this->sName);
             }
             osu->getScore()->setCheated();
         }
@@ -487,11 +487,11 @@ void _osuOptionsSliderQualityWrapper(float newValue) {
 void spectate_by_username(const UString &username) {
     auto user = BANCHO::User::find_user(username);
     if(user == NULL) {
-        debugLog("Couldn't find user \"%s\"!", username.toUtf8());
+        debugLog("Couldn't find user \"{:s}\"!", username.toUtf8());
         return;
     }
 
-    debugLog("Spectating %s (user %d)...\n", username.toUtf8(), user->user_id);
+    debugLog("Spectating {:s} (user {:d})...\n", username.toUtf8(), user->user_id);
     start_spectating(user->user_id);
 }
 

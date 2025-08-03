@@ -35,7 +35,7 @@ OpenGLRenderTarget::OpenGLRenderTarget(int x, int y, int width, int height, Grap
 
 void OpenGLRenderTarget::init()
 {
-	debugLogF("Building RenderTarget ({}x{}) ...\n", (int)this->vSize.x, (int)this->vSize.y);
+	debugLog("Building RenderTarget ({}x{}) ...\n", (int)this->vSize.x, (int)this->vSize.y);
 
 	this->iFrameBuffer = 0;
 	this->iRenderTexture = 0;

@@ -362,7 +362,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                             {
                                 std::vector<UString> tokens = UString(curLineChar).split(",");
                                 if(tokens.size() < 8) {
-                                    debugLogF("Invalid slider in beatmap: {:s}\n\ncurLine = {:s}\n", osuFilePath,
+                                    debugLog("Invalid slider in beatmap: {:s}\n\ncurLine = {:s}\n", osuFilePath,
                                               curLineChar);
                                     continue;
                                     // engine->showMessageError("Error", UString::format("Invalid slider in beatmap:
@@ -373,7 +373,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                                 if(sliderTokens.size() < 1)  // partially allow bullshit sliders (no controlpoints!),
                                                              // e.g. https://osu.ppy.sh/beatmapsets/791900#osu/1676490
                                 {
-                                    debugLogF("Invalid slider tokens: {:s}\n\nIn beatmap: {:s}\n", curLineChar,
+                                    debugLog("Invalid slider tokens: {:s}\n\nIn beatmap: {:s}\n", curLineChar,
                                               osuFilePath);
                                     continue;
                                     // engine->showMessageError("Error", UString::format("Invalid slider tokens:
@@ -392,7 +392,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                                     if(sliderXY.size() != 2 || sliderXY[0].find("E") != -1 ||
                                        sliderXY[0].find("e") != -1 || sliderXY[1].find("E") != -1 ||
                                        sliderXY[1].find("e") != -1) {
-                                        debugLogF("Invalid slider positions: {:s}\n\nIn Beatmap: {:s}\n", curLineChar,
+                                        debugLog("Invalid slider positions: {:s}\n\nIn Beatmap: {:s}\n", curLineChar,
                                                   osuFilePath);
                                         continue;
                                         // engine->showMessageError("Error", UString::format("Invalid slider positions:
@@ -446,7 +446,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                             {
                                 auto tokens = UString(curLineChar).split<float>(",");
                                 if(tokens.size() < 6) {
-                                    debugLogF("Invalid spinner in beatmap: {:s}\n\ncurLine = {:s}\n", osuFilePath,
+                                    debugLog("Invalid spinner in beatmap: {:s}\n\ncurLine = {:s}\n", osuFilePath,
                                               curLineChar);
                                     continue;
                                     // engine->showMessageError("Error", UString::format("Invalid spinner in beatmap:
@@ -933,7 +933,7 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
     // reset
     this->timingpoints.clear();
 
-    if(cv::debug.getBool()) debugLog("DatabaseBeatmap::loadMetadata() : %s\n", this->sFilePath.c_str());
+    if(cv::debug.getBool()) debugLog("DatabaseBeatmap::loadMetadata() : {:s}\n", this->sFilePath.c_str());
 
     std::vector<char> fileBuffer;
     const u8 *beatmapFile{nullptr};
@@ -950,7 +950,7 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
     }
 
     if(fileBuffer.empty()) {
-        debugLog("Osu Error: Couldn't read file %s\n", this->sFilePath.c_str());
+        debugLog("Osu Error: Couldn't read file {:s}\n", this->sFilePath.c_str());
         return false;
     }
 
@@ -997,7 +997,7 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
             {
                 if(sscanf(curLineChar, " osu file format v %i \n", &this->iVersion) == 1) {
                     if(this->iVersion > cv::beatmap_version.getInt()) {
-                        debugLog("Ignoring unknown/invalid beatmap version %i\n", this->iVersion);
+                        debugLog("Ignoring unknown/invalid beatmap version {:d}\n", this->iVersion);
                         return false;
                     }
                 }
@@ -1347,7 +1347,7 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
         }
     }
 
-    debugLog("DatabaseBeatmap::loadGameplay() loaded %i hitobjects\n", result.hitobjects.size());
+    debugLog("DatabaseBeatmap::loadGameplay() loaded {:d} hitobjects\n", result.hitobjects.size());
 
     return result;
 }

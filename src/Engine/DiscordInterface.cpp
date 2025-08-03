@@ -34,9 +34,9 @@ struct IDiscordUserEvents users_events{};
 void on_discord_log(void * /*cdata*/, enum EDiscordLogLevel level, const char *message) {
     //(void)cdata;
     if(level == DiscordLogLevel_Error) {
-        debugLog("[Discord] ERROR: %s\n", message);
+        debugLog("[Discord] ERROR: {:s}\n", message);
     } else {
-        debugLog("[Discord] %s\n", message);
+        debugLog("[Discord] {:s}\n", message);
     }
 }
 #endif
@@ -64,7 +64,7 @@ void init_discord_sdk() {
 
     int res = DiscordCreate(DISCORD_VERSION, &params, &dapp.core);
     if(res != DiscordResult_Ok) {
-        debugLog("Failed to initialize Discord SDK! (error %d)\n", res);
+        debugLog("Failed to initialize Discord SDK! (error {:d})\n", res);
         return;
     }
 

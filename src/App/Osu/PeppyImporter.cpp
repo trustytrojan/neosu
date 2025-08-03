@@ -147,7 +147,7 @@ void try_set_key(const char* str, ConVar* cvar) {
     } else if(key == UString("PageDown")) {
         cvar->setValue((int)KEY_PAGEDOWN);
     } else {
-        debugLog("No key code found for '%s'!\n", key.toUtf8());
+        debugLog("No key code found for '{:s}'!\n", key.toUtf8());
     }
 }
 
@@ -199,7 +199,7 @@ void import_settings_from_osu_stable() {
     if(osu_folder.isWhitespaceOnly()) {
         osu_folder = get_osu_folder_from_registry();
         if(!osu_folder.isWhitespaceOnly()) {
-            debugLog("Found osu! folder from registry: %s\n", osu_folder.toUtf8());
+            debugLog("Found osu! folder from registry: {:s}\n", osu_folder.toUtf8());
             cv::osu_folder.setValue(osu_folder);
         }
     }

@@ -18,7 +18,7 @@ Resource::Resource(std::string filepath)
 	bool file_found = true;
 	if (File::existsCaseInsensitive(this->sFilePath) != File::FILETYPE::FILE) // modifies the input string if found
 	{
-		debugLogF("Resource Warning: File {:s} does not exist!\n", this->sFilePath);
+		debugLog("Resource Warning: File {:s} does not exist!\n", this->sFilePath);
 		file_found = false;
 	}
 

@@ -358,12 +358,12 @@ Vector2 SliderCurveEqualDistanceMulti::pointAt(float t) {
         if(this->iNCurve > -1 && this->iNCurve < this->curvePoints.size())
             return this->curvePoints[this->iNCurve];
         else {
-            debugLog("SliderCurveEqualDistanceMulti::pointAt() Error: Illegal index %i!!!\n", this->iNCurve);
+            debugLog("SliderCurveEqualDistanceMulti::pointAt() Error: Illegal index {:d}!!!\n", this->iNCurve);
             return Vector2(0, 0);
         }
     } else {
         if(index < 0 || index + 1 >= this->curvePoints.size()) {
-            debugLog("SliderCurveEqualDistanceMulti::pointAt() Error: Illegal index %i!!!\n", index);
+            debugLog("SliderCurveEqualDistanceMulti::pointAt() Error: Illegal index {:d}!!!\n", index);
             return Vector2(0, 0);
         }
 
@@ -385,12 +385,12 @@ Vector2 SliderCurveEqualDistanceMulti::originalPointAt(float t) {
         if(this->iNCurve > -1 && this->iNCurve < this->originalCurvePoints.size())
             return this->originalCurvePoints[this->iNCurve];
         else {
-            debugLog("SliderCurveEqualDistanceMulti::originalPointAt() Error: Illegal index %i!!!\n", this->iNCurve);
+            debugLog("SliderCurveEqualDistanceMulti::originalPointAt() Error: Illegal index {:d}!!!\n", this->iNCurve);
             return Vector2(0, 0);
         }
     } else {
         if(index < 0 || index + 1 >= this->originalCurvePoints.size()) {
-            debugLog("SliderCurveEqualDistanceMulti::originalPointAt() Error: Illegal index %i!!!\n", index);
+            debugLog("SliderCurveEqualDistanceMulti::originalPointAt() Error: Illegal index {:d}!!!\n", index);
             return Vector2(0, 0);
         }
 
@@ -546,7 +546,7 @@ SliderCurveCircumscribedCircle::SliderCurveCircumscribedCircle(std::vector<Vecto
                 this->isIn(this->fCalculationStartAngle, midAng, this->fCalculationEndAngle - (2 * PI)))
             this->fCalculationEndAngle -= 2 * PI;
         else {
-            debugLog("SliderCurveCircumscribedCircle() Error: Cannot find angles between midAng (%.3f %.3f %.3f)\n",
+            debugLog("SliderCurveCircumscribedCircle() Error: Cannot find angles between midAng ({:.3f} {:.3f} {:.3f})\n",
                      this->fCalculationStartAngle, midAng, this->fCalculationEndAngle);
             return;
         }

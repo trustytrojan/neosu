@@ -82,7 +82,7 @@ LinuxEnvironment::LinuxEnvironment(Display *display, Window window, Screen *scre
             if(XrmGetResource(db, "Xft.dpi", "String", &type, &value) == True) {
                 if(value.addr) {
                     this->iDPI = (int)std::atof(value.addr);
-                    /// debugLog("m_iDPI = %i\n", this->iDPI);
+                    /// debugLog("m_iDPI = {:d}\n", this->iDPI);
                 }
             }
         }

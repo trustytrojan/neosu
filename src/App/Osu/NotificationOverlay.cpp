@@ -171,7 +171,7 @@ void NotificationOverlay::onKeyDown(KeyboardEvent &e) {
         else {
             this->stopWaitingForKey(true);
 
-            debugLog("keyCode = %lu\n", e.getKeyCode());
+            debugLog("keyCode = {:d}\n", e.getKeyCode());
 
             if(this->keyListener != NULL) this->keyListener->onKey(e);
         }

@@ -127,7 +127,7 @@ CBaseUIElement *CBaseUIContainer::getBaseUIElement(const UString &name) {
     for(size_t i = 0; i < this->vElements.size(); i++) {
         if(this->vElements[i]->getName() == name) return this->vElements[i];
     }
-    debugLog("CBaseUIContainer ERROR: GetBaseUIElement() \"%s\" does not exist!!!\n", name.toUtf8());
+    debugLog("CBaseUIContainer ERROR: GetBaseUIElement() \"{:s}\" does not exist!!!\n", name.toUtf8());
     return NULL;
 }
 

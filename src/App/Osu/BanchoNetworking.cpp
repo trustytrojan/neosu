@@ -258,7 +258,7 @@ void handle_api_response(Packet packet) {
 
         case SUBMIT_SCORE: {
             // TODO @kiwec: handle response
-            debugLog("Score submit result: %s\n", reinterpret_cast<const char *>(packet.memory));
+            debugLog("Score submit result: {:s}\n", reinterpret_cast<const char *>(packet.memory));
 
             // Reset leaderboards so new score will appear
             db->online_scores.clear();
@@ -268,7 +268,7 @@ void handle_api_response(Packet packet) {
 
         default: {
             // NOTE: API Response type is same as API Request type
-            debugLog("No handler for API response type %d!\n", packet.id);
+            debugLog("No handler for API response type {:d}!\n", packet.id);
         }
     }
 }
@@ -393,7 +393,7 @@ void reconnect() {
         }
     }
     if(cv::mp_password_md5.getString().length() != 32) {
-        // debugLogF("no password, md5: {} length: {}\n", cv::mp_password_md5.getString().length(),
+        // debugLog("no password, md5: {} length: {}\n", cv::mp_password_md5.getString().length(),
         // cv::mp_password_md5.getString());
         //  No password: don't try to log in
         return;
@@ -528,7 +528,7 @@ void receive_bancho_packets() {
 
 void send_api_request(const APIRequest &request) {
     if(bancho->user_id <= 0) {
-        debugLog("Cannot send API request of type %u since we are not logged in.\n",
+        debugLog("Cannot send API request of type {:d} since we are not logged in.\n",
                  static_cast<unsigned int>(request.type));
         return;
     }
@@ -550,7 +550,7 @@ void send_packet(Packet &packet) {
         return;
     }
 
-    // debugLog("Sending packet of type %hu: ", packet.id);
+    // debugLog("Sending packet of type {:}: ", packet.id);
     // for (int i = 0; i < packet.pos; i++) {
     //     Engine::logRaw("{:02x} ", packet.memory[i]);
     // }

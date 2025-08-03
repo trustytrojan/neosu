@@ -133,7 +133,7 @@ bool load_peppy_collections(const UString &peppy_collections_path) {
         db->fLoadingProgress = std::clamp(progress_float, 0.01, 0.99);
     }
 
-    debugLog("Loaded %d peppy collections (%d maps)\n", nb_collections, total_maps);
+    debugLog("Loaded {:d} peppy collections ({:d} maps)\n", nb_collections, total_maps);
     db->bytes_processed += peppy_collections.total_size;
     return true;
 }
@@ -196,7 +196,7 @@ bool load_mcneosu_collections(const UString &neosu_collections_path) {
         db->fLoadingProgress = std::clamp(progress_float, 0.01, 0.99);
     }
 
-    debugLog("Loaded %d neosu collections (%d maps)\n", nb_collections, total_maps);
+    debugLog("Loaded {:d} neosu collections ({:d} maps)\n", nb_collections, total_maps);
     db->bytes_processed += neosu_collections.total_size;
     return true;
 }
@@ -217,7 +217,7 @@ bool load_collections() {
     const auto& mcneosu_collections = db->database_files["collections.db"];
     load_mcneosu_collections(mcneosu_collections);
 
-    debugLog("peppy+neosu collections: loading took %f seconds\n", (Timing::getTimeReal() - startTime));
+    debugLog("peppy+neosu collections: loading took {:f} seconds\n", (Timing::getTimeReal() - startTime));
     collections_loaded = true;
     return true;
 }
@@ -262,6 +262,6 @@ bool save_collections() {
         }
     }
 
-    debugLog("collections.db: saving took %f seconds\n", (Timing::getTimeReal() - startTime));
+    debugLog("collections.db: saving took {:f} seconds\n", (Timing::getTimeReal() - startTime));
     return true;
 }

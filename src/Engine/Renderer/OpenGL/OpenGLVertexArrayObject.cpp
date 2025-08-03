@@ -207,7 +207,7 @@ void OpenGLVertexArrayObject::destroy() {
 
 void OpenGLVertexArrayObject::draw() {
     if(!this->bReady) {
-        debugLogF("WARNING: called, but was not ready!\n");
+        debugLog("WARNING: called, but was not ready!\n");
         return;
     }
 

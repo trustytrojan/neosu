@@ -114,10 +114,10 @@ void Console::processCommand(std::string command, bool fromFile) {
     if(var == NULL || var->isFlagSet(FCVAR_NOEXEC) || (fromFile && var->isFlagSet(FCVAR_NOLOAD))) {
 #ifdef _DEBUG
         if(var) {
-            debugLogF("not executing {}, flags: {}\n", var->getName(), ConVarHandler::flagsToString(var->getFlags()));
+            debugLog("not executing {}, flags: {}\n", var->getName(), ConVarHandler::flagsToString(var->getFlags()));
         }
 #endif
-        debugLog("Unknown command: %s\n", commandName);
+        debugLog("Unknown command: {:s}\n", commandName);
         return;
     }
 
@@ -165,7 +165,7 @@ void Console::processCommand(std::string command, bool fromFile) {
             logMessage.append(var->getString());
         }
 
-        if(logMessage.length() > 0 && doLog) debugLogF("{:s}\n", logMessage);
+        if(logMessage.length() > 0 && doLog) debugLog("{:s}\n", logMessage);
     }
 }
 
@@ -176,7 +176,7 @@ void Console::execConfigFile(std::string filename) {
 
     File configFile(filename, File::TYPE::READ);
     if(!configFile.canRead()) {
-        debugLogF("error, file \"{:s}\" not found!\n", filename);
+        debugLog("error, file \"{:s}\" not found!\n", filename);
         return;
     }
 

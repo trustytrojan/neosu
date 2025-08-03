@@ -36,7 +36,7 @@ NetworkHandler::NetworkHandler() : multi_handle(nullptr) {
 
     this->multi_handle = curl_multi_init();
     if(!this->multi_handle) {
-        debugLogF("ERROR: Failed to initialize curl multi handle!\n");
+        debugLog("ERROR: Failed to initialize curl multi handle!\n");
         return;
     }
 
@@ -48,7 +48,7 @@ NetworkHandler::NetworkHandler() : multi_handle(nullptr) {
         [this](const std::stop_token& stopToken) { this->networkThreadFunc(stopToken); });
 
     if(!this->network_thread->joinable()) {
-        debugLogF("ERROR: Failed to create network thread!\n");
+        debugLog("ERROR: Failed to create network thread!\n");
     }
 }
 
@@ -89,7 +89,7 @@ void NetworkHandler::networkThreadFunc(const std::stop_token& stopToken) {
             CURLMcode mres = curl_multi_perform(this->multi_handle, &running_handles);
 
             if(mres != CURLM_OK) {
-                debugLogF("curl_multi_perform error: {}\n", curl_multi_strerror(mres));
+                debugLog("curl_multi_perform error: {}\n", curl_multi_strerror(mres));
             }
 
             processCompletedRequests();
@@ -342,7 +342,7 @@ UString NetworkHandler::httpGet(const UString& url, long timeout, long connectTi
     Response response = performSyncRequest(url, options);
 
     if(!response.success) {
-        debugLogF("Error while fetching {}: HTTP {}\n", url.toUtf8(), response.responseCode);
+        debugLog("Error while fetching {}: HTTP {}\n", url.toUtf8(), response.responseCode);
         return {""};
     }
 
@@ -358,7 +358,7 @@ std::string NetworkHandler::httpDownload(const UString& url, long timeout, long 
     Response response = performSyncRequest(url, options);
 
     if(!response.success) {
-        debugLogF("ERROR ({}): HTTP request failed\n", response.responseCode);
+        debugLog("ERROR ({}): HTTP request failed\n", response.responseCode);
         return {""};
     }
 

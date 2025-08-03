@@ -101,7 +101,7 @@ void McFont::constructor(const std::vector<wchar_t> &characters, int fontSize, b
 }
 
 void McFont::init() {
-    debugLogF("Resource Manager: Loading {:s}\n", this->sFilePath);
+    debugLog("Resource Manager: Loading {:s}\n", this->sFilePath);
 
     if(!initializeFreeType()) return;
 
@@ -137,16 +137,16 @@ bool McFont::loadGlyphDynamic(wchar_t ch) {
             // character not supported by any available font
             const char *charRange = FontTypeMap::getCharacterRangeName(ch);
             if(charRange)
-                debugLogF("Font Warning: Character U+{:04X} ({:s}) not supported by any font\n", (unsigned int)ch,
+                debugLog("Font Warning: Character U+{:04X} ({:s}) not supported by any font\n", (unsigned int)ch,
                           charRange);
             else
-                debugLogF("Font Warning: Character U+{:04X} not supported by any font\n", (unsigned int)ch);
+                debugLog("Font Warning: Character U+{:04X} not supported by any font\n", (unsigned int)ch);
         }
         return false;
     }
 
     if(cv::r_debug_font_unicode.getBool() && fontIndex > 0)
-        debugLogF("Font Info: Using fallback font #{:d} for character U+{:04X}\n", fontIndex, (unsigned int)ch);
+        debugLog("Font Info: Using fallback font #{:d} for character U+{:04X}\n", fontIndex, (unsigned int)ch);
 
     // load glyph from the selected font face
     if(!loadGlyphFromFace(ch, targetFace, fontIndex)) return false;
@@ -213,13 +213,13 @@ FT_Face McFont::getFontFaceForGlyph(wchar_t ch, int &fontIndex) {
 bool McFont::loadGlyphFromFace(wchar_t ch, FT_Face face, int fontIndex) {
     if(FT_Load_Glyph(face, FT_Get_Char_Index(face, ch),
                      this->bAntialiasing ? FT_LOAD_TARGET_NORMAL : FT_LOAD_TARGET_MONO)) {
-        debugLogF("Font Error: Failed to load glyph for character {:d} from font index {:d}\n", (int)ch, fontIndex);
+        debugLog("Font Error: Failed to load glyph for character {:d} from font index {:d}\n", (int)ch, fontIndex);
         return false;
     }
 
     FT_Glyph glyph{};
     if(FT_Get_Glyph(face->glyph, &glyph)) {
-        debugLogF("Font Error: Failed to get glyph for character {:d} from font index {:d}\n", (int)ch, fontIndex);
+        debugLog("Font Error: Failed to get glyph for character {:d} from font index {:d}\n", (int)ch, fontIndex);
         return false;
     }
 
@@ -271,7 +271,7 @@ bool McFont::initializeSharedFallbackFonts() {
     for(const auto &fontName : bundledFallbacks) {
         if(loadFallbackFont(UString{fontName}, false)) {
             if(cv::r_debug_font_unicode.getBool())
-                debugLogF("Font Info: Loaded bundled fallback font: {:s}\n", fontName);
+                debugLog("Font Info: Loaded bundled fallback font: {:s}\n", fontName);
         }
     }
 
@@ -319,13 +319,13 @@ bool McFont::loadFallbackFont(const UString &fontPath, bool isSystemFont) {
     FT_Face face{};
     if(FT_New_Face(s_sharedFtLibrary, fontPath.toUtf8(), 0, &face)) {
         if(cv::r_debug_font_unicode.getBool())
-            debugLogF("Font Warning: Failed to load fallback font: {:s}\n", fontPath);
+            debugLog("Font Warning: Failed to load fallback font: {:s}\n", fontPath);
         return false;
     }
 
     if(FT_Select_Charmap(face, ft_encoding_unicode)) {
         if(cv::r_debug_font_unicode.getBool())
-            debugLogF("Font Warning: Failed to select unicode charmap for fallback font: {:s}\n", fontPath);
+            debugLog("Font Warning: Failed to select unicode charmap for fallback font: {:s}\n", fontPath);
         FT_Done_Face(face);
         return false;
     }
@@ -370,7 +370,7 @@ void McFont::rebuildAtlas() {
 
     // create new atlas and render all glyphs
     if(!createAndPackAtlas(allGlyphs)) {
-        debugLogF("Font Error: Failed to rebuild atlas!\n");
+        debugLog("Font Error: Failed to rebuild atlas!\n");
         return;
     }
 
@@ -786,7 +786,7 @@ const McFont::GLYPH_METRICS &McFont::getGlyphMetrics(wchar_t ch) const {
     it = this->vGlyphMetrics.find(UNKNOWN_CHAR);
     if(it != this->vGlyphMetrics.end()) return it->second;
 
-    debugLogF("Font Error: Missing default backup glyph (UNKNOWN_CHAR)?\n");
+    debugLog("Font Error: Missing default backup glyph (UNKNOWN_CHAR)?\n");
     return this->errorGlyph;
 }
 

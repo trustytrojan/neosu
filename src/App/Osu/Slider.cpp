@@ -877,7 +877,7 @@ void Slider::update(long curPos, f64 frame_time) {
                     else
                         this->endResult = LiveScore::HIT::HIT_MISS;
 
-                    // debugLog("percent = %f\n", percent);
+                    // debugLog("percent = {:f}\n", percent);
 
                     if(!this->bHeldTillEnd && cv::slider_end_miss_breaks_combo.getBool()) this->onSliderBreak();
                 } else
@@ -1068,7 +1068,7 @@ void Slider::onHit(LiveScore::HIT result, long delta, bool startOrEnd, float tar
 
     // start + end of a slider add +30 points, if successful
 
-    // debugLog("startOrEnd = %i,    m_iCurRepeat = %i\n", (int)startOrEnd, this->iCurRepeat);
+    // debugLog("startOrEnd = {:d},    m_iCurRepeat = {:d}\n", (int)startOrEnd, this->iCurRepeat);
 
     // sound and hit animation and also sliderbreak combo drop
     {

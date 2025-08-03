@@ -38,7 +38,7 @@ SoundEngine::OUTPUT_DEVICE SoundEngine::getWantedDevice() {
         }
     }
 
-    debugLogF("Could not find sound device '{:s}', initializing default one instead.\n", wanted_name);
+    debugLog("Could not find sound device '{:s}', initializing default one instead.\n", wanted_name);
     return this->getDefaultDevice();
 }
 
@@ -49,7 +49,7 @@ SoundEngine::OUTPUT_DEVICE SoundEngine::getDefaultDevice() {
         }
     }
 
-    debugLogF("Could not find a working sound device!\n");
+    debugLog("Could not find a working sound device!\n");
     return {
         .id = 0,
         .enabled = true,

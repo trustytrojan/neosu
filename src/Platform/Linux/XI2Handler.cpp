@@ -130,7 +130,7 @@ bool grab(Display *display, Window window, bool enable, bool grabHack) {
             }
             return true;
         }
-        debugLogF("failed to grab: {}\n", ret);
+        debugLog("failed to grab: {}\n", ret);
         return false;
     } else {
         g_explicitGrab = false;
@@ -254,7 +254,7 @@ void handleGenericEvent(Display *dpy, XEvent *xev) {
                 }
 
                 if(hasX || hasY) {
-                    // debugLogF("motion from {} device {} source {} serial {} send_event {}: {}, {}\n",
+                    // debugLog("motion from {} device {} source {} serial {} send_event {}: {}, {}\n",
                     //           devInfo.isAbsolute, event->deviceid, event->sourceid, event->serial, event->send_event,
                     //           dx, dy);
                     mouse->onRawMove(dx, dy, devInfo.isAbsolute, false);

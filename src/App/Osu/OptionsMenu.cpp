@@ -2617,7 +2617,7 @@ void OptionsMenu::onOutputDeviceSelect() {
 
 void OptionsMenu::onOutputDeviceSelect2(const UString &outputDeviceName, int /*id*/) {
     if(outputDeviceName == soundEngine->getOutputDeviceName()) {
-        debugLog("SoundEngine::setOutputDevice() \"%s\" already is the current device.\n", outputDeviceName.toUtf8());
+        debugLog("SoundEngine::setOutputDevice() \"{:s}\" already is the current device.\n", outputDeviceName.toUtf8());
         return;
     }
 
@@ -2628,7 +2628,7 @@ void OptionsMenu::onOutputDeviceSelect2(const UString &outputDeviceName, int /*i
         return;
     }
 
-    debugLog("SoundEngine::setOutputDevice() couldn't find output device \"%s\"!\n", outputDeviceName.toUtf8());
+    debugLog("SoundEngine::setOutputDevice() couldn't find output device \"{:s}\"!\n", outputDeviceName.toUtf8());
 }
 
 void OptionsMenu::onOutputDeviceResetClicked() { soundEngine->setOutputDevice(soundEngine->getDefaultDevice()); }
@@ -2654,7 +2654,7 @@ void OptionsMenu::onLogInClicked(bool left, bool right) {
         // Manually clicked disconnect button: clear oauth token
         cv::mp_oauth_token.setValue("");
     } else {
-        // debugLogF("DEBUG: manually clicked login, password: {} md5: {}\n", cv::mp_password_temporary.getString(),
+        // debugLog("DEBUG: manually clicked login, password: {} md5: {}\n", cv::mp_password_temporary.getString(),
         //           cv::mp_password_md5.getString());
         if(this->should_use_oauth_login()) {
             bancho->endpoint = cv::mp_server.getString().c_str();
@@ -3688,7 +3688,7 @@ OptionsMenuCategoryButton *OptionsMenu::addCategory(CBaseUIElement *section, wch
 
 void OptionsMenu::save() {
     if(!cv::options_save_on_back.getBool()) {
-        debugLog("DEACTIVATED SAVE!!!! @ %f\n", engine->getTime());
+        debugLog("DEACTIVATED SAVE!!!! @ {:f}\n", engine->getTime());
         return;
     }
 

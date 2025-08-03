@@ -48,8 +48,8 @@ Engine::Engine(i32 argc, char **argv) {
     setvbuf(stderr, NULL, _IONBF, 0);
 
     // print debug information
-    debugLogF("-= Engine Startup =-\n");
-    debugLogF("cmdline: {:s}\n", UString::join(env->getCommandLine()));
+    debugLog("-= Engine Startup =-\n");
+    debugLog("cmdline: {:s}\n", UString::join(env->getCommandLine()));
 
     // timing
     this->timer = new Timer();
@@ -69,7 +69,7 @@ Engine::Engine(i32 argc, char **argv) {
     this->vNewScreenSize = this->vScreenSize;
     this->screenRect = {Vector2{}, this->vScreenSize};
 
-    debugLogF("Engine: ScreenSize = ({}x{})\n", (int)this->vScreenSize.x, (int)this->vScreenSize.y);
+    debugLog("Engine: ScreenSize = ({}x{})\n", (int)this->vScreenSize.x, (int)this->vScreenSize.y);
 
     // custom
     this->bDrawing = false;
@@ -314,7 +314,7 @@ void Engine::onUpdate() {
         this->bResolutionChange = false;
 
         if(cv::debug_engine.getBool())
-            debugLog("Engine: executing pending queued resolution change to (%i, %i)\n", (int)this->vNewScreenSize.x,
+            debugLog("Engine: executing pending queued resolution change to ({:d}, {:d})\n", (int)this->vNewScreenSize.x,
                      (int)this->vNewScreenSize.y);
 
         this->onResolutionChange(this->vNewScreenSize);
@@ -430,7 +430,7 @@ void Engine::onRestored() {
 }
 
 void Engine::onResolutionChange(Vector2 newResolution) {
-    debugLog(0xff00ff00, "Engine: onResolutionChange() (%i, %i) -> (%i, %i)\n", (int)this->vScreenSize.x,
+    debugLog(0xff00ff00, "Engine: onResolutionChange() ({:d}, {:d}) -> ({:d}, {:d})\n", (int)this->vScreenSize.x,
              (int)this->vScreenSize.y, (int)newResolution.x, (int)newResolution.y);
 
     // NOTE: Windows [Show Desktop] button in the superbar causes (0,0)
@@ -455,7 +455,7 @@ void Engine::onResolutionChange(Vector2 newResolution) {
 }
 
 void Engine::onDPIChange() {
-    debugLog(0xff00ff00, "Engine: DPI changed to %i\n", env->getDPI());
+    debugLog(0xff00ff00, "Engine: DPI changed to {:d}\n", env->getDPI());
 
     if(app != NULL) app->onDPIChanged();
 }
@@ -526,22 +526,22 @@ void Engine::toggleFullscreen() {
 void Engine::disableFullscreen() { env->disableFullscreen(); }
 
 void Engine::showMessageInfo(const UString &title, const UString &message) {
-    debugLog("INFO: [%s] | %s\n", title.toUtf8(), message.toUtf8());
+    debugLog("INFO: [{:s}] | {:s}\n", title.toUtf8(), message.toUtf8());
     env->showMessageInfo(title, message);
 }
 
 void Engine::showMessageWarning(const UString &title, const UString &message) {
-    debugLog("WARNING: [%s] | %s\n", title.toUtf8(), message.toUtf8());
+    debugLog("WARNING: [{:s}] | {:s}\n", title.toUtf8(), message.toUtf8());
     env->showMessageWarning(title, message);
 }
 
 void Engine::showMessageError(const UString &title, const UString &message) {
-    debugLog("ERROR: [%s] | %s\n", title.toUtf8(), message.toUtf8());
+    debugLog("ERROR: [{:s}] | {:s}\n", title.toUtf8(), message.toUtf8());
     env->showMessageError(title, message);
 }
 
 void Engine::showMessageErrorFatal(const UString &title, const UString &message) {
-    debugLog("FATAL ERROR: [%s] | %s\n", title.toUtf8(), message.toUtf8());
+    debugLog("FATAL ERROR: [{:s}] | {:s}\n", title.toUtf8(), message.toUtf8());
     env->showMessageErrorFatal(title, message);
 }
 
@@ -590,7 +590,7 @@ void _restart(void) { engine->restart(); }
 
 void _printsize(void) {
     Vector2 s = engine->getScreenSize();
-    debugLog("Engine: screenSize = (%f, %f)\n", s.x, s.y);
+    debugLog("Engine: screenSize = ({:f}, {:f})\n", s.x, s.y);
 }
 
 void _borderless(void) {
@@ -619,4 +619,4 @@ void _errortest(void) {
         "This is an error message, fullscreen mode should be disabled and you should be able to read this");
 }
 
-void _dpiinfo(void) { debugLog("env->getDPI() = %i, env->getDPIScale() = %f\n", env->getDPI(), env->getDPIScale()); }
+void _dpiinfo(void) { debugLog("env->getDPI() = {:d}, env->getDPIScale() = {:f}\n", env->getDPI(), env->getDPIScale()); }

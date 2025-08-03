@@ -47,7 +47,7 @@ void OpenGLLegacyInterface::init() {
         engine->shutdown();
         return;
     }
-    debugLogF("OpenGL Version: {}\n", reinterpret_cast<const char *>(glGetString(GL_VERSION)));
+    debugLog("OpenGL Version: {}\n", reinterpret_cast<const char *>(glGetString(GL_VERSION)));
 
     // init the synchronization object after we can check the gl version being used
     this->syncobj->init();
@@ -468,14 +468,14 @@ void OpenGLLegacyInterface::setClipRect(McRect clipRect) {
     int viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
 
-    // debugLogF("viewport = {}, {}, {}, {}\n", viewport[0], viewport[1], viewport[2], viewport[3]);
+    // debugLog("viewport = {}, {}, {}, {}\n", viewport[0], viewport[1], viewport[2], viewport[3]);
 
     glEnable(GL_SCISSOR_TEST);
     glScissor((int)clipRect.getX() + viewport[0],
               viewport[3] - ((int)clipRect.getY() - viewport[1] - 1 + (int)clipRect.getHeight()),
               (int)clipRect.getWidth(), (int)clipRect.getHeight());
 
-    // debugLogF("scissor = {}, {}, {}, {}\n", (int)clipRect.getX()+viewport[0],
+    // debugLog("scissor = {}, {}, {}, {}\n", (int)clipRect.getX()+viewport[0],
     // viewport[3]-((int)clipRect.getY()-viewport[1]-1+(int)clipRect.getHeight()), (int)clipRect.getWidth(),
     // (int)clipRect.getHeight());
 }

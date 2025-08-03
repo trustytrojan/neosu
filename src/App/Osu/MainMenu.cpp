@@ -187,7 +187,7 @@ MainMenu::MainMenu() : OsuScreen() {
                         buildstamp = cv::build_timestamp.getU64();
                     }
                 }
-                // debugLogF("versionFile version: {} our version: {}{}\n", version, cv::version.getFloat(),
+                // debugLog("versionFile version: {} our version: {}{}\n", version, cv::version.getFloat(),
                 //           buildstamp > 0.0f ? fmt::format(" build timestamp: {}", buildstamp) : "");
                 if(version < cv::version.getFloat() || buildstamp < cv::build_timestamp.getU64()) {
                     this->bDrawVersionNotificationArrow = true;
@@ -1064,13 +1064,13 @@ void MainMenu::selectRandomBeatmap() {
 
             BeatmapSet *set = db->loadRawBeatmap(mapset_folder);
             if(set == NULL) {
-                debugLog("Failed to load beatmap set '%s'\n", mapset_folder.c_str());
+                debugLog("Failed to load beatmap set '{:s}'\n", mapset_folder.c_str());
                 continue;
             }
 
             auto beatmap_diffs = set->getDifficulties();
             if(beatmap_diffs.size() == 0) {
-                debugLog("Beatmap '%s' has no difficulties!\n", mapset_folder.c_str());
+                debugLog("Beatmap '{:s}' has no difficulties!\n", mapset_folder.c_str());
                 delete set;
                 continue;
             }

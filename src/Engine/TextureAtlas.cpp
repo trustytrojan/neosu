@@ -40,7 +40,7 @@ void TextureAtlas::putAt(int x, int y, int width, int height, bool flipHorizonta
     if(width < 1 || height < 1 || pixels == nullptr || this->atlasImage == nullptr) return;
 
     if(x + width > this->iWidth || y + height > this->iHeight || x < 0 || y < 0) {
-        debugLogF("TextureAtlas::putAt( {}, {}, {}, {} ) WARNING: Out of bounds! Atlas size: {}x{}\n", x, y, width,
+        debugLog("TextureAtlas::putAt( {}, {}, {}, {} ) WARNING: Out of bounds! Atlas size: {}x{}\n", x, y, width,
                   height, this->iWidth, this->iHeight);
         return;
     }
@@ -57,7 +57,7 @@ void TextureAtlas::putAt(int x, int y, int width, int height, bool flipHorizonta
 
             // bounds checking with debug info
             if(atlasX >= this->iWidth || atlasY >= this->iHeight) {
-                debugLogF("WARNING: Pixel placement out of bounds: atlas=({},{}) in {}x{}\n", atlasX, atlasY,
+                debugLog("WARNING: Pixel placement out of bounds: atlas=({},{}) in {}x{}\n", atlasX, atlasY,
                           this->iWidth, this->iHeight);
                 continue;
             }
@@ -147,7 +147,7 @@ bool TextureAtlas::packRects(std::vector<PackRect> &rects) {
         }
 
         if(bestIndex == -1 || bestHeight > this->iHeight) {
-            debugLogF("ERROR: Packing failed for rect id={}: bestIndex={}, bestHeight={}, atlasHeight={}\n", rect.id,
+            debugLog("ERROR: Packing failed for rect id={}: bestIndex={}, bestHeight={}, atlasHeight={}\n", rect.id,
                       bestIndex, bestHeight, this->iHeight);
             return false;
         }

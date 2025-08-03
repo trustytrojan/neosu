@@ -8,7 +8,7 @@ ByteBufferedFile::Reader::Reader(const UString &uPath) : buffer(READ_BUFFER_SIZE
     this->file.open(path, std::ios::binary);
     if(!this->file.is_open()) {
         this->set_error("Failed to open file for reading: " + std::generic_category().message(errno));
-        debugLogF("Failed to open '{:s}': {:s}\n", path.string().c_str(),
+        debugLog("Failed to open '{:s}': {:s}\n", path.string().c_str(),
                   std::generic_category().message(errno).c_str());
         return;
     }
@@ -29,7 +29,7 @@ ByteBufferedFile::Reader::Reader(const UString &uPath) : buffer(READ_BUFFER_SIZE
 
 seek_error:
     this->set_error("Failed to initialize file reader: " + std::generic_category().message(errno));
-    debugLogF("Failed to initialize file reader '{:s}': {:s}\n", path.string().c_str(),
+    debugLog("Failed to initialize file reader '{:s}': {:s}\n", path.string().c_str(),
               std::generic_category().message(errno).c_str());
     this->file.close();
     return;
@@ -56,14 +56,14 @@ MD5Hash ByteBufferedFile::Reader::read_hash() {
     u32 extra = 0;
     if(len > 32) {
         // just continue, don't set error flag
-        debugLogF("WARNING: Expected 32 bytes for hash, got {}!\n", len);
+        debugLog("WARNING: Expected 32 bytes for hash, got {}!\n", len);
         extra = len - 32;
         len = 32;
     }
 
     if(this->read_bytes(reinterpret_cast<u8 *>(hash.hash.data()), len) != len) {
         // just continue, don't set error flag
-        debugLogF("WARNING: failed to read {} bytes to obtain hash.\n", len);
+        debugLog("WARNING: failed to read {} bytes to obtain hash.\n", len);
         extra = len;
     }
     this->skip_bytes(extra);
@@ -130,7 +130,7 @@ ByteBufferedFile::Writer::Writer(const UString &uPath) : buffer(WRITE_BUFFER_SIZ
     this->file.open(this->tmp_file_path, std::ios::binary);
     if(!this->file.is_open()) {
         this->set_error("Failed to open file for writing: " + std::generic_category().message(errno));
-        debugLogF("Failed to open '{:s}': {:s}\n", path.string().c_str(),
+        debugLog("Failed to open '{:s}': {:s}\n", path.string().c_str(),
                   std::generic_category().message(errno).c_str());
         return;
     }
@@ -147,7 +147,7 @@ ByteBufferedFile::Writer::~Writer() {
             std::filesystem::rename(this->tmp_file_path, this->file_path, ec);
             if(ec) {
                 // can't set error in destructor, but log it
-                debugLogF("Failed to rename temporary file: {:s}\n", ec.message().c_str());
+                debugLog("Failed to rename temporary file: {:s}\n", ec.message().c_str());
             }
         }
     }
@@ -250,12 +250,12 @@ void ByteBufferedFile::copy(const UString &from_uPath, const UString &to_uPath) 
     Writer to(to_uPath);
 
     if(!from.good()) {
-        debugLogF("Failed to open source file for copying: {:s}\n", from.error().data());
+        debugLog("Failed to open source file for copying: {:s}\n", from.error().data());
         return;
     }
 
     if(!to.good()) {
-        debugLogF("Failed to open destination file for copying: {:s}\n", to.error().data());
+        debugLog("Failed to open destination file for copying: {:s}\n", to.error().data());
         return;
     }
 
@@ -265,7 +265,7 @@ void ByteBufferedFile::copy(const UString &from_uPath, const UString &to_uPath) 
     while(remaining > 0 && from.good() && to.good()) {
         u32 len = std::min(remaining, static_cast<u32>(READ_BUFFER_SIZE));
         if(from.read_bytes(buf.data(), len) != len) {
-            debugLogF("Copy failed: could not read {} bytes, {} remaining\n", len, remaining);
+            debugLog("Copy failed: could not read {} bytes, {} remaining\n", len, remaining);
             break;
         }
         to.write_bytes(buf.data(), len);
@@ -273,9 +273,9 @@ void ByteBufferedFile::copy(const UString &from_uPath, const UString &to_uPath) 
     }
 
     if(!from.good()) {
-        debugLogF("Copy failed during read: {:s}\n", from.error().data());
+        debugLog("Copy failed during read: {:s}\n", from.error().data());
     }
     if(!to.good()) {
-        debugLogF("Copy failed during write: {:s}\n", to.error().data());
+        debugLog("Copy failed during write: {:s}\n", to.error().data());
     }
 }

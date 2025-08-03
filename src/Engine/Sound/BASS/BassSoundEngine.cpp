@@ -117,7 +117,7 @@ void BassSoundEngine::updateOutputDevices(bool /*printInfo*/) {
         soundDevice.driver = OutputDriver::BASS;
         this->outputDevices.push_back(soundDevice);
 
-        debugLog("DSOUND: Device %i = \"%s\", enabled = %i, default = %i\n", d, deviceInfo.name, (int)isEnabled,
+        debugLog("DSOUND: Device {:d} = \"{:s}\", enabled = {:d}, default = {:d}\n", d, deviceInfo.name, (int)isEnabled,
                  (int)isDefault);
     }
 
@@ -154,7 +154,7 @@ void BassSoundEngine::updateOutputDevices(bool /*printInfo*/) {
         soundDevice.name.append(" [ASIO]");
         this->outputDevices.push_back(soundDevice);
 
-        debugLog("ASIO: Device %i = \"%s\"\n", d, asioDeviceInfo.name);
+        debugLog("ASIO: Device {:d} = \"{:s}\"\n", d, asioDeviceInfo.name);
     }
 
     BASS_WASAPI_DEVICEINFO wasapiDeviceInfo;
@@ -194,7 +194,7 @@ void BassSoundEngine::updateOutputDevices(bool /*printInfo*/) {
         soundDevice.name.append(" [WASAPI]");
         this->outputDevices.push_back(soundDevice);
 
-        debugLog("WASAPI: Device %i = \"%s\", enabled = %i, default = %i\n", d, wasapiDeviceInfo.name, (int)isEnabled,
+        debugLog("WASAPI: Device {:d} = \"{:s}\", enabled = {:d}, default = {:d}\n", d, wasapiDeviceInfo.name, (int)isEnabled,
                  (int)isDefault);
     }
 #endif
@@ -221,7 +221,7 @@ bool BassSoundEngine::init_bass_mixer(const SoundEngine::OUTPUT_DEVICE &device) 
     if(device.driver == OutputDriver::BASS) {
         if(!BASS_Init(device.id, freq, bass_flags | BASS_DEVICE_SOFTWARE, NULL, NULL)) {
             this->ready_since = -1.0;
-            debugLog("BASS_Init(%d) errored out.\n", device.id);
+            debugLog("BASS_Init({:d}) errored out.\n", device.id);
             osu->getNotificationOverlay()->addToast(BassManager::getErrorUString());
             return false;
         }
@@ -248,7 +248,7 @@ bool BassSoundEngine::init_bass_mixer(const SoundEngine::OUTPUT_DEVICE &device) 
 }
 
 bool BassSoundEngine::initializeOutputDevice(const SoundEngine::OUTPUT_DEVICE &device) {
-    debugLog("BassSoundEngine: initializeOutputDevice( %s ) ...\n", device.name.toUtf8());
+    debugLog("BassSoundEngine: initializeOutputDevice( {:s} ) ...\n", device.name.toUtf8());
 
     this->shutdown();
 
@@ -259,7 +259,7 @@ bool BassSoundEngine::initializeOutputDevice(const SoundEngine::OUTPUT_DEVICE &d
         this->ready_since = -1.0;
         this->currentOutputDevice = device;
         cv::snd_output_device.setValue(this->currentOutputDevice.name);
-        debugLog("BassSoundEngine: Output Device = \"%s\"\n", this->currentOutputDevice.name.toUtf8());
+        debugLog("BassSoundEngine: Output Device = \"{:s}\"\n", this->currentOutputDevice.name.toUtf8());
 
         if(osu && osu->optionsMenu) {
             osu->optionsMenu->scheduleLayoutUpdate();
@@ -312,7 +312,7 @@ bool BassSoundEngine::initializeOutputDevice(const SoundEngine::OUTPUT_DEVICE &d
         double sample_rate = BASS_ASIO_GetRate();
         if(sample_rate == 0.0) {
             sample_rate = cv::snd_freq.getFloat();
-            debugLog("ASIO: BASS_ASIO_GetRate() returned 0, using %f instead!\n", sample_rate);
+            debugLog("ASIO: BASS_ASIO_GetRate() returned 0, using {:f} instead!\n", sample_rate);
         } else {
             cv::snd_freq.setValue(sample_rate);
         }
@@ -348,7 +348,7 @@ bool BassSoundEngine::initializeOutputDevice(const SoundEngine::OUTPUT_DEVICE &d
         double wanted_latency = 1000.0 * cv::asio_buffer_size.getFloat() / sample_rate;
         double actual_latency = 1000.0 * (double)BASS_ASIO_GetLatency(false) / sample_rate;
         BASS_ChannelSetAttribute(g_bassOutputMixer, BASS_ATTRIB_MIXER_LATENCY, actual_latency / 1000.0);
-        debugLog("ASIO: wanted %f ms, got %f ms latency. Sample rate: %f Hz\n", wanted_latency, actual_latency,
+        debugLog("ASIO: wanted {:f} ms, got {:f} ms latency. Sample rate: {:f} Hz\n", wanted_latency, actual_latency,
                  sample_rate);
     }
 
@@ -413,7 +413,7 @@ bool BassSoundEngine::initializeOutputDevice(const SoundEngine::OUTPUT_DEVICE &d
     this->ready_since = engine->getTime();
     this->currentOutputDevice = device;
     cv::snd_output_device.setValue(this->currentOutputDevice.name);
-    debugLog("BassSoundEngine: Output Device = \"%s\"\n", this->currentOutputDevice.name.toUtf8());
+    debugLog("BassSoundEngine: Output Device = \"{:s}\"\n", this->currentOutputDevice.name.toUtf8());
 
     if(osu && osu->optionsMenu) {
         osu->optionsMenu->scheduleLayoutUpdate();
@@ -459,7 +459,7 @@ bool BassSoundEngine::play(Sound *snd, float pan, float pitch) {
     }
 
     if(!channel) {
-        debugLog("BassSoundEngine::play() failed to get channel, errorcode %i\n", BASS_ErrorGetCode());
+        debugLog("BassSoundEngine::play() failed to get channel, errorcode {:d}\n", BASS_ErrorGetCode());
         return false;
     }
 
@@ -479,7 +479,7 @@ bool BassSoundEngine::play(Sound *snd, float pan, float pitch) {
 
     auto flags = BASS_MIXER_DOWNMIX | BASS_MIXER_NORAMPIN | BASS_STREAM_AUTOFREE;
     if(!BASS_Mixer_StreamAddChannel(this->g_bassOutputMixer, channel, flags)) {
-        debugLog("BASS_Mixer_StreamAddChannel() failed (%i)!\n", BASS_ErrorGetCode());
+        debugLog("BASS_Mixer_StreamAddChannel() failed ({:d})!\n", BASS_ErrorGetCode());
         return false;
     }
 
@@ -487,7 +487,7 @@ bool BassSoundEngine::play(Sound *snd, float pan, float pitch) {
     if(this->currentOutputDevice.driver == OutputDriver::BASS) {
         if(BASS_ChannelIsActive(this->g_bassOutputMixer) != BASS_ACTIVE_PLAYING) {
             if(!BASS_ChannelPlay(this->g_bassOutputMixer, true)) {
-                debugLog("BassSoundEngine::play() couldn't BASS_ChannelPlay(), errorcode %i\n", BASS_ErrorGetCode());
+                debugLog("BassSoundEngine::play() couldn't BASS_ChannelPlay(), errorcode {:d}\n", BASS_ErrorGetCode());
                 return false;
             }
         }
@@ -503,7 +503,7 @@ bool BassSoundEngine::play(Sound *snd, float pan, float pitch) {
     }
 
     if(cv::debug.getBool()) {
-        debugLog("Playing %s\n", bassSound->getFilePath().c_str());
+        debugLog("Playing {:s}\n", bassSound->getFilePath().c_str());
     }
 
     return true;

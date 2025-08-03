@@ -102,11 +102,11 @@ FAKE_CONTEXT WinGLLegacyInterface::createAndMakeCurrentWGLContext(HWND hwnd, PIX
 
     // get pixel format
     int pixelFormat = ChoosePixelFormat(tempHDC, &pfdIn);
-    debugLog("OpenGL: PixelFormat = %i\n", pixelFormat);
+    debugLog("OpenGL: PixelFormat = {:d}\n", pixelFormat);
 
     // set pixel format
     BOOL result = SetPixelFormat(tempHDC, pixelFormat, &pfdIn);
-    debugLog("OpenGL: SetPixelFormat() = %i\n", result);
+    debugLog("OpenGL: SetPixelFormat() = {:d}\n", result);
 
     // create temp context and make current
     context.hglrc = wglCreateContext(tempHDC);
@@ -135,7 +135,7 @@ WinGLLegacyInterface::WinGLLegacyInterface(HWND new_hwnd) : OpenGLLegacyInterfac
     else
         pixelFormat = ChoosePixelFormat(this->hdc, &pfd);
 
-    debugLog("OpenGL: PixelFormat = %i\n", pixelFormat);
+    debugLog("OpenGL: PixelFormat = {:d}\n", pixelFormat);
 
     if(pixelFormat == 0) {
         engine->showMessageErrorFatal(
@@ -147,7 +147,7 @@ WinGLLegacyInterface::WinGLLegacyInterface(HWND new_hwnd) : OpenGLLegacyInterfac
 
     // set pixel format
     BOOL result = SetPixelFormat(this->hdc, pixelFormat, &pfd);
-    debugLog("OpenGL: SetPixelFormat() = %i\n", result);
+    debugLog("OpenGL: SetPixelFormat() = {:d}\n", result);
 
     if(result == FALSE) {
         engine->showMessageErrorFatal(

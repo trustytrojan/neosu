@@ -235,7 +235,7 @@ std::vector<UString> WinEnvironment::getLogicalDrives() {
 
             DWORD attributes = GetFileAttributes(winDriveName);
 
-            // debugLog("checking %s, type = %i, free clusters = %lu\n", winDriveName,
+            // debugLog("checking {:s}, type = {:d}, free clusters = {:d}\n", winDriveName,
             // GetDriveType(winDriveName), attributes);
 
             // check if the drive is valid, and if there is media in it (e.g. ignore empty dvd drives)
@@ -708,14 +708,14 @@ bool WinEnvironment::setProcessAffinity(int affinity) {
                 }
                 break;
         }
-        debugLog("\ndwProcessAffinityMask = %i\n", dwProcessAffinityMask);
+        debugLog("\ndwProcessAffinityMask = {:d}\n", dwProcessAffinityMask);
 
         if(FAILED(SetProcessAffinityMask(currentProcess, dwProcessAffinityMask))) {
-            debugLog("Couldn't SetProcessAffinityMask(), GetLastError() = %i!\n", GetLastError());
+            debugLog("Couldn't SetProcessAffinityMask(), GetLastError() = {:d}!\n", GetLastError());
             return false;
         }
     } else {
-        debugLog("Couldn't GetProcessAffinityMask(), GetLastError() = %i!\n", GetLastError());
+        debugLog("Couldn't GetProcessAffinityMask(), GetLastError() = {:d}!\n", GetLastError());
         return false;
     }
 
@@ -786,7 +786,7 @@ BOOL CALLBACK WinEnvironment::monitorEnumProc(HMONITOR hMonitor, HDC /*hdcMonito
         WinEnvironment::vMonitors.push_back(monitorRect);
 
     if(cv::debug_env.getBool())
-        debugLog("Monitor %i: (right = %ld, bottom = %ld, left = %ld, top = %ld), isPrimaryMonitor = %i\n",
+        debugLog("Monitor {:d}: (right = {:d}, bottom = {:d}, left = {:d}, top = {:d}), isPrimaryMonitor = {:d}\n",
                  WinEnvironment::vMonitors.size(), lprcMonitor->right, lprcMonitor->bottom, lprcMonitor->left,
                  lprcMonitor->top, (int)isPrimaryMonitor);
 

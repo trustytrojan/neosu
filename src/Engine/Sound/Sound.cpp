@@ -12,7 +12,7 @@
 #include "SString.h"
 
 void Sound::initAsync() {
-    if(cv::debug_rm.getBool()) debugLogF("Resource Manager: Loading {:s}\n", this->sFilePath);
+    if(cv::debug_rm.getBool()) debugLog("Resource Manager: Loading {:s}\n", this->sFilePath);
 
     // sanity check for malformed audio files
     std::string fileExtensionLowerCase{SString::lower(env->getFileExtensionFromFilePath(this->sFilePath))};
@@ -21,10 +21,10 @@ void Sound::initAsync() {
         this->bIgnored = true;
     } else if(!this->isValidAudioFile(this->sFilePath, fileExtensionLowerCase)) {
         if(!cv::snd_force_load_unknown.getBool()) {
-            debugLogF("Sound: Ignoring malformed/corrupt .{:s} file {:s}\n", fileExtensionLowerCase, this->sFilePath);
+            debugLog("Sound: Ignoring malformed/corrupt .{:s} file {:s}\n", fileExtensionLowerCase, this->sFilePath);
             this->bIgnored = true;
         } else {
-            debugLogF(
+            debugLog(
                 "Sound: snd_force_load_unknown=true, loading what seems to be a malformed/corrupt .{:s} file {:s}\n",
                 fileExtensionLowerCase, this->sFilePath);
             this->bIgnored = false;

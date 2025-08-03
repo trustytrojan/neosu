@@ -509,7 +509,7 @@ void RoomScreen::on_map_change() {
     // Results screen has map background and such showing, so prevent map from changing while we're on it.
     if(osu->rankingScreen->isVisible()) return;
 
-    debugLog("Map changed to ID %d, MD5 %s: %s\n", bancho->room.map_id, bancho->room.map_md5.hash.data(),
+    debugLog("Map changed to ID {:d}, MD5 {:s}: {:s}\n", bancho->room.map_id, bancho->room.map_md5.hash.data(),
              bancho->room.map_name.toUtf8());
     this->ready_btn->is_loading = true;
 
@@ -557,11 +557,11 @@ void RoomScreen::on_map_change() {
 
 void RoomScreen::on_room_joined(Room room) {
     bancho->room = room;
-    debugLog("Joined room #%d\nPlayers:\n", room.id);
+    debugLog("Joined room #{:d}\nPlayers:\n", room.id);
     for(auto &slot : room.slots) {
         if(slot.has_player()) {
             auto user_info = BANCHO::User::get_user_info(slot.player_id, true);
-            debugLog("- %s\n", user_info->name.toUtf8());
+            debugLog("- {:s}\n", user_info->name.toUtf8());
         }
     }
 

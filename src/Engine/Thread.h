@@ -23,7 +23,7 @@
 
 namespace McThread {
 // WARNING: must be called from within the thread itself! otherwise, the main process name will be changed
-static inline bool set_current_thread_name(const UString &name) {
+static inline bool set_current_thread_name([[maybe_unused]] const UString &name) {
 #if defined(_WIN32) && defined(WINVER) && (WINVER >= 0x0A00)
     HANDLE handle = GetCurrentThread();
     HRESULT hr = SetThreadDescription(handle, name.wc_str());

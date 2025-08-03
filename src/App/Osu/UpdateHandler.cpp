@@ -30,7 +30,7 @@ void UpdateHandler::checkForUpdates() {
         versionUrl.append("/update/" OS_NAME "/latest-version.txt");
     }
 
-    debugLogF("UpdateHandler: Checking for a newer version from {}\n", versionUrl);
+    debugLog("UpdateHandler: Checking for a newer version from {}\n", versionUrl);
 
     NetworkHandler::RequestOptions options;
     options.timeout = 10;
@@ -69,12 +69,12 @@ void UpdateHandler::onVersionCheckComplete(const std::string &response, bool suc
     if(!should_update) {
         // We're already up to date
         this->status = STATUS::STATUS_UP_TO_DATE;
-        debugLog("UpdateHandler: We're already up to date (current v%.2f (%d), latest v%.2f (%d))\n",
+        debugLog("UpdateHandler: We're already up to date (current v{:.2f} ({:d}), latest v{:.2f} ({:d}))\n",
                  cv::version.getFloat(), current_build_tms, latest_version, latest_build_tms);
         return;
     }
 
-    debugLog("UpdateHandler: Downloading latest update... (current v%.2f (%d), latest v%.2f (%d))\n",
+    debugLog("UpdateHandler: Downloading latest update... (current v{:.2f} ({:d}), latest v{:.2f} ({:d}))\n",
              cv::version.getFloat(), current_build_tms, latest_version, latest_build_tms);
 
     this->update_url = "https://" NEOSU_DOMAIN;
@@ -88,7 +88,7 @@ void UpdateHandler::onVersionCheckComplete(const std::string &response, bool suc
 }
 
 void UpdateHandler::downloadUpdate() {
-    debugLog("UpdateHandler: Downloading %s\n", this->update_url.toUtf8());
+    debugLog("UpdateHandler: Downloading {:s}\n", this->update_url.toUtf8());
     this->status = STATUS::STATUS_DOWNLOADING_UPDATE;
 
     NetworkHandler::RequestOptions options;
@@ -104,7 +104,7 @@ void UpdateHandler::downloadUpdate() {
 
 void UpdateHandler::onDownloadComplete(const std::string &data, bool success) {
     if(!success || data.length() < 2) {
-        debugLog("UpdateHandler ERROR: downloaded file is too small or failed (%zu bytes)!\n", data.length());
+        debugLog("UpdateHandler ERROR: downloaded file is too small or failed ({:d} bytes)!\n", data.length());
         this->status = STATUS::STATUS_ERROR;
 
         // retry logic
@@ -116,7 +116,7 @@ void UpdateHandler::onDownloadComplete(const std::string &data, bool success) {
     }
 
     // write to disk
-    debugLog("UpdateHandler: Downloaded file has %zu bytes, writing ...\n", data.length());
+    debugLog("UpdateHandler: Downloaded file has {:d} bytes, writing ...\n", data.length());
     std::ofstream file(TEMP_UPDATE_DOWNLOAD_FILEPATH, std::ios::out | std::ios::binary);
     if(file.good()) {
         file.write(data.data(), static_cast<std::streamsize>(data.length()));
@@ -137,11 +137,11 @@ void UpdateHandler::onDownloadComplete(const std::string &data, bool success) {
 }
 
 void UpdateHandler::installUpdate(const std::string &zipFilePath) {
-    debugLog("UpdateHandler: installing %s\n", zipFilePath.c_str());
+    debugLog("UpdateHandler: installing {:s}\n", zipFilePath.c_str());
     this->status = STATUS::STATUS_INSTALLING_UPDATE;
 
     if(!env->fileExists(zipFilePath)) {
-        debugLog("UpdateHandler ERROR: \"%s\" does not exist!\n", zipFilePath.c_str());
+        debugLog("UpdateHandler ERROR: \"{:s}\" does not exist!\n", zipFilePath.c_str());
         this->status = STATUS::STATUS_ERROR;
         return;
     }
@@ -166,7 +166,7 @@ void UpdateHandler::installUpdate(const std::string &zipFilePath) {
     for(const auto &entry : entries) {
         auto fileName = entry.getFilename();
         if(fileName.find(mainDirectory) != 0) {
-            debugLog("UpdateHandler WARNING: Ignoring \"%s\" because it's not in the main dir!\n", fileName.c_str());
+            debugLog("UpdateHandler WARNING: Ignoring \"{:s}\" because it's not in the main dir!\n", fileName.c_str());
             continue;
         }
 
@@ -176,7 +176,7 @@ void UpdateHandler::installUpdate(const std::string &zipFilePath) {
             files.push_back(entry);
         }
 
-        debugLog("UpdateHandler: Filename: \"%s\", isDir: %i, uncompressed size: %u\n", entry.getFilename().c_str(),
+        debugLog("UpdateHandler: Filename: \"{:s}\", isDir: {:d}, uncompressed size: {:d}\n", entry.getFilename().c_str(),
                  (int)entry.isDirectory(), (unsigned int)entry.getUncompressedSize());
     }
 
@@ -186,7 +186,7 @@ void UpdateHandler::installUpdate(const std::string &zipFilePath) {
         if(newDir.length() == 0) continue;
         if(env->directoryExists(newDir)) continue;
 
-        debugLog("UpdateHandler: Creating directory %s\n", newDir.c_str());
+        debugLog("UpdateHandler: Creating directory {:s}\n", newDir.c_str());
         env->createDirectory(newDir);
     }
 
@@ -209,9 +209,9 @@ void UpdateHandler::installUpdate(const std::string &zipFilePath) {
             }
         }
 
-        debugLog("UpdateHandler: Writing %s\n", outFilePath.c_str());
+        debugLog("UpdateHandler: Writing {:s}\n", outFilePath.c_str());
         if(!file.extractToFile(outFilePath)) {
-            debugLog("UpdateHandler: Failed to extract file %s\n", outFilePath.c_str());
+            debugLog("UpdateHandler: Failed to extract file {:s}\n", outFilePath.c_str());
             if(temp_created) {
                 env->deleteFile(outFilePath);
                 env->renameFile(old_path, outFilePath);

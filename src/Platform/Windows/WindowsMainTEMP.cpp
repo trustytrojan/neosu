@@ -148,7 +148,7 @@ void WindowsMain::register_neosu_file_associations() {
     i32 err = RegCreateKeyExW(HKEY_CURRENT_USER, L"Software\\Classes\\neosu", 0, NULL, REG_OPTION_NON_VOLATILE,
                               KEY_WRITE, NULL, &neosu_key, NULL);
     if(err != ERROR_SUCCESS) {
-        debugLog("Failed to register neosu as an application. Error: %d (root)\n", err);
+        debugLog("Failed to register neosu as an application. Error: {:d} (root)\n", err);
         return;
     }
     RegSetValueExW(neosu_key, L"", 0, REG_SZ, (BYTE *)L"neosu", 12);
@@ -157,7 +157,7 @@ void WindowsMain::register_neosu_file_associations() {
     HKEY app_key;
     err = RegCreateKeyExW(neosu_key, L"Application", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &app_key, NULL);
     if(err != ERROR_SUCCESS) {
-        debugLog("Failed to register neosu as an application. Error: %d (app)\n", err);
+        debugLog("Failed to register neosu as an application. Error: {:d} (app)\n", err);
         RegCloseKey(neosu_key);
         return;
     }
@@ -170,7 +170,7 @@ void WindowsMain::register_neosu_file_associations() {
     err = RegCreateKeyExW(neosu_key, L"shell\\open\\command", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL,
                           &cmd_key, NULL);
     if(err != ERROR_SUCCESS) {
-        debugLog("Failed to register neosu as an application. Error: %d (command)\n", err);
+        debugLog("Failed to register neosu as an application. Error: {:d} (command)\n", err);
         RegCloseKey(neosu_key);
         return;
     }
@@ -184,7 +184,7 @@ void WindowsMain::register_neosu_file_associations() {
     err = RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("Software\\Classes\\.osk\\OpenWithProgids"), 0, NULL,
                          REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &osk_key, NULL);
     if(err != ERROR_SUCCESS) {
-        debugLog("Failed to register neosu as .osk format handler. Error: %d\n", err);
+        debugLog("Failed to register neosu as .osk format handler. Error: {:d}\n", err);
         return;
     }
     RegSetValueEx(osk_key, TEXT("neosu"), 0, REG_SZ, (BYTE *)L"", 2);
@@ -195,7 +195,7 @@ void WindowsMain::register_neosu_file_associations() {
     err = RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("Software\\Classes\\.osr\\OpenWithProgids"), 0, NULL,
                          REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &osr_key, NULL);
     if(err != ERROR_SUCCESS) {
-        debugLog("Failed to register neosu as .osr format handler. Error: %d\n", err);
+        debugLog("Failed to register neosu as .osr format handler. Error: {:d}\n", err);
         return;
     }
     RegSetValueEx(osr_key, TEXT("neosu"), 0, REG_SZ, (BYTE *)L"", 2);
@@ -206,7 +206,7 @@ void WindowsMain::register_neosu_file_associations() {
     err = RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("Software\\Classes\\.osz\\OpenWithProgids"), 0, NULL,
                          REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &osz_key, NULL);
     if(err != ERROR_SUCCESS) {
-        debugLog("Failed to register neosu as .osz format handler. Error: %d\n", err);
+        debugLog("Failed to register neosu as .osz format handler. Error: {:d}\n", err);
         return;
     }
     RegSetValueEx(osz_key, TEXT("neosu"), 0, REG_SZ, (BYTE *)L"", 2);

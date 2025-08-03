@@ -63,12 +63,12 @@ void ResourceManager::destroyResources() {
 void ResourceManager::destroyResource(Resource *rs) {
     const bool debug = cv::debug_rm.getBool();
     if(rs == nullptr) {
-        if(debug) debugLogF("ResourceManager Warning: destroyResource(NULL)!\n");
+        if(debug) debugLog("ResourceManager Warning: destroyResource(NULL)!\n");
         return;
     }
 
     if(debug) {
-        debugLogF("ResourceManager: destroying {:8p} : {:s}\n", static_cast<const void *>(rs), rs->getName());
+        debugLog("ResourceManager: destroying {:8p} : {:s}\n", static_cast<const void *>(rs), rs->getName());
     }
 
     bool isManagedResource = false;
@@ -84,7 +84,7 @@ void ResourceManager::destroyResource(Resource *rs) {
     // check if it's being loaded and schedule async destroy if so
     if(this->asyncLoader->isLoadingResource(rs)) {
         if(debug)
-            debugLogF("Resource Manager: Scheduled async destroy of {:8p} : {:s}\n", static_cast<const void *>(rs),
+            debugLog("Resource Manager: Scheduled async destroy of {:8p} : {:s}\n", static_cast<const void *>(rs),
                       rs->getName());
 
         if(cv::rm_interrupt_on_destroy.getBool()) rs->interruptLoad();
@@ -104,7 +104,7 @@ void ResourceManager::destroyResource(Resource *rs) {
 
 void ResourceManager::loadResource(Resource *res, bool load) {
     if(res == nullptr) {
-        if(cv::debug_rm.getBool()) debugLogF("ResourceManager Warning: loadResource(NULL)!\n");
+        if(cv::debug_rm.getBool()) debugLog("ResourceManager Warning: loadResource(NULL)!\n");
         resetFlags();
         return;
     }
@@ -154,7 +154,7 @@ void ResourceManager::requestNextLoadUnmanaged() { this->nextLoadUnmanagedStack.
 
 void ResourceManager::reloadResource(Resource *rs, bool async) {
     if(rs == nullptr) {
-        if(cv::debug_rm.getBool()) debugLogF("ResourceManager Warning: reloadResource(NULL)!\n");
+        if(cv::debug_rm.getBool()) debugLog("ResourceManager Warning: reloadResource(NULL)!\n");
         return;
     }
 
@@ -165,7 +165,7 @@ void ResourceManager::reloadResource(Resource *rs, bool async) {
 void ResourceManager::reloadResources(const std::vector<Resource *> &resources, bool async) {
     if(resources.empty()) {
         if(cv::debug_rm.getBool())
-            debugLogF("ResourceManager Warning: reloadResources with an empty resources vector!\n");
+            debugLog("ResourceManager Warning: reloadResources with an empty resources vector!\n");
         return;
     }
 
@@ -183,7 +183,7 @@ void ResourceManager::reloadResources(const std::vector<Resource *> &resources, 
 
 void ResourceManager::setResourceName(Resource *res, std::string name) {
     if(!res) {
-        if(cv::debug_rm.getBool()) debugLogF("ResourceManager: attempted to set name {:s} on NULL resource!\n", name);
+        if(cv::debug_rm.getBool()) debugLog("ResourceManager: attempted to set name {:s} on NULL resource!\n", name);
         return;
     }
 

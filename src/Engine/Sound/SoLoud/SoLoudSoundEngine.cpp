@@ -88,7 +88,7 @@ bool SoLoudSoundEngine::play(Sound *snd, float pan, float pitch) {
         }
 
         if(cv::debug_snd.getBool()) {
-            debugLogF("handle was already valid (and was{} paused), for non-overlayable sound {}\n", wasPaused ? "" : "n't",
+            debugLog("handle was already valid (and was{} paused), for non-overlayable sound {}\n", wasPaused ? "" : "n't",
                       soloudSound->getFilePath());
         }
         return true;
@@ -115,7 +115,7 @@ bool SoLoudSoundEngine::playSound(SoLoudSound *soloudSound, float pan, float pit
     }
 
     if(cv::debug_snd.getBool()) {
-        debugLogF("SoLoudSoundEngine: Playing {:s} (stream={:d}) with speed={:f}, pitch={:f}, volume={:f}\n",
+        debugLog("SoLoudSoundEngine: Playing {:s} (stream={:d}) with speed={:f}, pitch={:f}, volume={:f}\n",
                   soloudSound->sFilePath, soloudSound->bStream ? 1 : 0, soloudSound->fSpeed, pitch,
                   soloudSound->fVolume);
     }
@@ -142,7 +142,7 @@ bool SoLoudSoundEngine::playSound(SoLoudSound *soloudSound, float pan, float pit
                         // it would lead to getMaxActiveVoiceCount() <= getActiveVoiceCount()
 
         if(cv::debug_snd.getBool() && handle)
-            debugLogF("SoLoudSoundEngine: Playing streaming audio through SLFXStream with speed={:f}, pitch={:f}\n",
+            debugLog("SoLoudSoundEngine: Playing streaming audio through SLFXStream with speed={:f}, pitch={:f}\n",
                       soloudSound->fSpeed, soloudSound->fPitch);
     } else {
         // non-streaming audio (sound effects) - use direct playback with SoLoud's native speed/pitch control
@@ -167,7 +167,7 @@ bool SoLoudSoundEngine::playSound(SoLoudSound *soloudSound, float pan, float pit
         return true;
     }
 
-    if(cv::debug_snd.getBool()) debugLogF("SoLoudSoundEngine: Failed to play sound {:s}\n", soloudSound->sFilePath);
+    if(cv::debug_snd.getBool()) debugLog("SoLoudSoundEngine: Failed to play sound {:s}\n", soloudSound->sFilePath);
 
     return false;
 }
@@ -192,7 +192,7 @@ unsigned int SoLoudSoundEngine::playDirectSound(SoLoudSound *soloudSound, float 
         if(finalPitch != 1.0f) soloud->setRelativePlaySpeed(handle, finalPitch);
 
         if(cv::debug_snd.getBool())
-            debugLogF(
+            debugLog(
                 "SoLoudSoundEngine: Playing non-streaming audio with finalPitch={:f} (pitch={:f} * soundPitch={:f} * "
                 "speedAsPitch={:f})\n",
                 finalPitch, pitch, soloudSound->fPitch,
@@ -233,7 +233,7 @@ void SoLoudSoundEngine::setOutputDeviceByName(const UString &desiredDeviceName) 
         }
     }
 
-    debugLogF("couldn't find output device \"{:s}\"!\n", desiredDeviceName.toUtf8());
+    debugLog("couldn't find output device \"{:s}\"!\n", desiredDeviceName.toUtf8());
     this->initializeOutputDevice(this->getDefaultDevice());  // initialize default
 }
 
@@ -261,7 +261,7 @@ bool SoLoudSoundEngine::setOutputDeviceInt(const SoundEngine::OUTPUT_DEVICE &des
                 auto previous = this->currentOutputDevice;
                 if(!this->initializeOutputDevice(desiredDevice)) this->initializeOutputDevice(previous);
             } else {
-                debugLogF("\"{:s}\" already is the current device.\n", desiredDevice.name);
+                debugLog("\"{:s}\" already is the current device.\n", desiredDevice.name);
                 return false;
             }
 
@@ -269,7 +269,7 @@ bool SoLoudSoundEngine::setOutputDeviceInt(const SoundEngine::OUTPUT_DEVICE &des
         }
     }
 
-    debugLogF("couldn't find output device \"{:s}\"!\n", desiredDevice.name);
+    debugLog("couldn't find output device \"{:s}\"!\n", desiredDevice.name);
     return false;
 }
 
@@ -316,7 +316,7 @@ void SoLoudSoundEngine::setVolume(float volume) {
     this->fMasterVolume = std::clamp<float>(volume, 0.0f, 1.0f);
 
     // if (cv::debug_snd.getBool())
-    // 	debugLogF("setting global volume to {:f}\n", fVolume);
+    // 	debugLog("setting global volume to {:f}\n", fVolume);
     soloud->setGlobalVolume(this->fMasterVolume);
 }
 
@@ -325,7 +325,7 @@ void SoLoudSoundEngine::setVolumeGradual(unsigned int handle, float targetVol, f
 
     soloud->setVolume(handle, 0.0f);
 
-    if(cv::debug_snd.getBool()) debugLogF("fading in to {:.2f}\n", targetVol);
+    if(cv::debug_snd.getBool()) debugLog("fading in to {:.2f}\n", targetVol);
 
     soloud->fadeVolume(handle, targetVol, fadeTimeMs / 1000.0f);
 }
@@ -341,13 +341,13 @@ void SoLoudSoundEngine::updateOutputDevices(bool printInfo) {
     this->outputDevices.erase(this->outputDevices.begin() + 1,
                               this->outputDevices.end());  // keep default device (elem 0)
 
-    debugLogF("SoundEngine: Using SoLoud backend: {:s}\n", cv::snd_soloud_backend.getString());
+    debugLog("SoundEngine: Using SoLoud backend: {:s}\n", cv::snd_soloud_backend.getString());
     DeviceInfo currentDevice{};
 
     result res = soloud->getCurrentDevice(&currentDevice);
     if(res == SO_NO_ERROR) {
         this->mSoloudDevices[-1] = {currentDevice};
-        debugLogF("SoundEngine: Current device: {:s} (Default: {:s})\n", currentDevice.name,
+        debugLog("SoundEngine: Current device: {:s} (Default: {:s})\n", currentDevice.name,
                   currentDevice.isDefault ? "Yes" : "No");
     } else {
         this->mSoloudDevices[-1] = {
@@ -361,7 +361,7 @@ void SoLoudSoundEngine::updateOutputDevices(bool printInfo) {
     if(res == SO_NO_ERROR) {
         for(int d = 0; std::cmp_less(d, deviceCount); d++) {
             if(printInfo)
-                debugLogF("SoundEngine: Device {}: {:s} (Default: {:s})\n", d, devices[d].name,
+                debugLog("SoundEngine: Device {}: {:s} (Default: {:s})\n", d, devices[d].name,
                           devices[d].isDefault ? "Yes" : "No");
 
             UString originalDeviceName{&devices[d].name[0]};
@@ -389,7 +389,7 @@ void SoLoudSoundEngine::updateOutputDevices(bool printInfo) {
                 if(!foundDuplicateName) break;
             }
             if(cv::debug_snd.getBool()) {
-                debugLogF("added device id {} name {} iteration (d) {}\n", soundDevice.id, soundDevice.name, d);
+                debugLog("added device id {} name {} iteration (d) {}\n", soundDevice.id, soundDevice.name, d);
             }
             this->mSoloudDevices[d] = {devices[d]};
             this->outputDevices.push_back(soundDevice);
@@ -400,7 +400,7 @@ void SoLoudSoundEngine::updateOutputDevices(bool printInfo) {
 bool SoLoudSoundEngine::initializeOutputDevice(const OUTPUT_DEVICE &device) {
     // run callbacks pt. 1
     if(this->restartCBs[0] != nullptr) this->restartCBs[0]();
-    debugLogF("id {} name {}\n", device.id, device.name);
+    debugLog("id {} name {}\n", device.id, device.name);
 
     // cleanup potential previous device
     if(this->isReady()) {
@@ -478,7 +478,7 @@ bool SoLoudSoundEngine::initializeOutputDevice(const OUTPUT_DEVICE &device) {
 
     this->onMaxActiveChange(cv::snd_sanity_simultaneous_limit.getFloat());
 
-    debugLogF(
+    debugLog(
         "SoundEngine: Initialized SoLoud with output device = \"{:s}\" flags: 0x{:x}, backend: {:s}, sampleRate: {}, "
         "bufferSize: {}, channels: {}, "
         "maxActiveVoiceCount: {}\n",
@@ -500,7 +500,7 @@ void SoLoudSoundEngine::onMaxActiveChange(float newMax) {
     const auto desired = std::clamp<unsigned int>(static_cast<unsigned int>(newMax), 64, 255);
     if(std::cmp_not_equal(soloud->getMaxActiveVoiceCount(), desired)) {
         SoLoud::result res = soloud->setMaxActiveVoiceCount(desired);
-        if(res != SoLoud::SO_NO_ERROR) debugLogF("SoundEngine WARNING: failed to setMaxActiveVoiceCount ({})\n", res);
+        if(res != SoLoud::SO_NO_ERROR) debugLog("SoundEngine WARNING: failed to setMaxActiveVoiceCount ({})\n", res);
     }
     this->iMaxActiveVoices = static_cast<int>(soloud->getMaxActiveVoiceCount());
     cv::snd_sanity_simultaneous_limit.setValue(this->iMaxActiveVoices, false);  // no infinite callback loop

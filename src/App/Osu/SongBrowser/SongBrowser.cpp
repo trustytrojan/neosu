@@ -864,7 +864,7 @@ bool SongBrowser::selectBeatmapset(i32 set_id) {
         // Pasted from Downloader::download_beatmap
         auto mapset_path = UString::format(MCENGINE_DATA_DIR "maps/%d/", set_id);
         db->addBeatmapSet(mapset_path.toUtf8());
-        debugLog("Finished loading beatmapset %d.\n", set_id);
+        debugLog("Finished loading beatmapset {:d}.\n", set_id);
 
         beatmapset = db->getBeatmapSet(set_id);
     }
@@ -1833,7 +1833,7 @@ void SongBrowser::addSongButtonToAlphanumericGroup(SongButton *btn, std::vector<
     }
 
     if(cv::debug.getBool()) {
-        debugLog("Inserting %s\n", name.c_str());
+        debugLog("Inserting {:s}\n", name.c_str());
     }
 
     children->push_back(btn);
@@ -2105,14 +2105,14 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
                                        // matches the current difficulty
 
         for(const auto &searchStringToken : searchStringTokens) {
-            // debugLog("token[%i] = %s\n", i, tokens[i].toUtf8());
+            // debugLog("token[{:d}] = {:s}\n", i, tokens[i].toUtf8());
             //  determine token type, interpret expression
             bool expression = false;
             for(const auto &o : operators) {
                 if(searchStringToken.find(o.first) != std::string::npos) {
                     // split expression into left and right parts (only accept singular expressions, things like
                     // "0<bpm<1" will not work with this)
-                    // debugLog("splitting by string %s\n", operators[o].first.toUtf8());
+                    // debugLog("splitting by string {:s}\n", operators[o].first.toUtf8());
                     std::vector<std::string> values{SString::split(searchStringToken, o.first)};
                     if(values.size() == 2 && values[0].length() > 0 && values[1].length() > 0) {
                         const std::string &lvalue = values[0];
@@ -2233,7 +2233,7 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
                                         break;
                                 }
 
-                                // debugLog("comparing %f %s %f (operatorId = %i) = %i\n", compareValue,
+                                // debugLog("comparing {:f} {:s} {:f} (operatorId = {:d}) = {:d}\n", compareValue,
                                 // operators[o].first.toUtf8(), rvalue, (int)operators[o].second, (int)matches);
 
                                 if(!matches)  // if a single expression doesn't match, then the whole diff doesn't match
@@ -2641,7 +2641,7 @@ void SongBrowser::onDatabaseLoadingFinished() {
     // having a copy of the vector in here is actually completely unnecessary
     this->beatmaps = db->getDatabaseBeatmaps();
 
-    debugLogF("Loading {} beatmapsets from database.\n", this->beatmaps.size());
+    debugLog("Loading {} beatmapsets from database.\n", this->beatmaps.size());
 
     // initialize all collection (grouped) buttons
     {
@@ -2824,7 +2824,7 @@ void SongBrowser::onDatabaseLoadingFinished() {
     }
 
     t.update();
-    debugLogF("Took {} seconds.\n", t.getElapsedTime());
+    debugLog("Took {} seconds.\n", t.getElapsedTime());
 }
 
 void SongBrowser::onSearchUpdate() {
@@ -3265,7 +3265,7 @@ void SongBrowser::onScoreContextMenu(ScoreButton *scoreButton, int id) {
 }
 
 void SongBrowser::onSongButtonContextMenu(SongButton *songButton, const UString &text, int id) {
-    // debugLog("SongBrowser::onSongButtonContextMenu(%p, %s, %i)\n", songButton, text.toUtf8(), id);
+    // debugLog("SongBrowser::onSongButtonContextMenu({:p}, {:s}, {:d})\n", songButton, text.toUtf8(), id);
 
     struct CollectionManagementHelper {
         static std::vector<MD5Hash> getBeatmapSetHashesForSongButton(SongButton *songButton, Database *db) {
@@ -3614,5 +3614,5 @@ void SongBrowser::recreateCollectionsButtons() {
     }
 
     t.update();
-    debugLog("recreateCollectionsButtons(): %f seconds\n", t.getElapsedTime());
+    debugLog("recreateCollectionsButtons(): {:f} seconds\n", t.getElapsedTime());
 }

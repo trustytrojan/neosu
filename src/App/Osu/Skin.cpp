@@ -28,7 +28,7 @@ Image *Skin::m_missingTexture = NULL;
 
 void Skin::unpack(const char *filepath) {
     auto skin_name = env->getFileNameFromFilePath(filepath);
-    debugLog("Extracting %s...\n", skin_name.c_str());
+    debugLog("Extracting {:s}...\n", skin_name.c_str());
     skin_name.erase(skin_name.size() - 4);  // remove .osk extension
 
     auto skin_root = std::string(MCENGINE_DATA_DIR "skins/");
@@ -37,7 +37,7 @@ void Skin::unpack(const char *filepath) {
 
     File file(filepath);
     if(!file.canRead()) {
-        debugLog("Failed to read skin file %s\n", filepath);
+        debugLog("Failed to read skin file {:s}\n", filepath);
         return;
     }
 
@@ -79,7 +79,7 @@ void Skin::unpack(const char *filepath) {
         }
 
         if(!entry.extractToFile(file_path)) {
-            debugLog("Failed to extract skin file %s\n", filename.c_str());
+            debugLog("Failed to extract skin file {:s}\n", filename.c_str());
         }
 
     skip_file:;
@@ -1076,8 +1076,8 @@ void Skin::load() {
         this->defaultButtonRight = defaultButtonRight2;
 
     // print some debug info
-    debugLog("Skin: Version %f\n", this->fVersion);
-    debugLog("Skin: HitCircleOverlap = %i\n", this->iHitCircleOverlap);
+    debugLog("Skin: Version {:f}\n", this->fVersion);
+    debugLog("Skin: HitCircleOverlap = {:d}\n", this->iHitCircleOverlap);
 
     // delayed error notifications due to resource loading potentially blocking engine time
     if(!parseSkinIni1Status && parseSkinIni2Status && cv::skin.getString() != "default")
@@ -1087,7 +1087,7 @@ void Skin::load() {
 }
 
 void Skin::loadBeatmapOverride(const std::string & /*filepath*/) {
-    // debugLog("Skin::loadBeatmapOverride( %s )\n", filepath.c_str());
+    // debugLog("Skin::loadBeatmapOverride( {:s} )\n", filepath.c_str());
     //  TODO: beatmap skin support
 }
 
@@ -1105,7 +1105,7 @@ void Skin::reloadSounds() {
 bool Skin::parseSkinINI(std::string filepath) {
     File file(filepath);
     if(!file.canRead()) {
-        debugLogF("OsuSkin Error: Couldn't load {:s}\n", filepath);
+        debugLog("OsuSkin Error: Couldn't load {:s}\n", filepath);
         return false;
     }
 
@@ -1114,7 +1114,7 @@ bool Skin::parseSkinINI(std::string filepath) {
     size_t fileSize = file.getFileSize();
 
     if(!rawData || fileSize == 0) {
-        debugLogF("OsuSkin Error: Empty or unreadable file {:s}\n", filepath);
+        debugLog("OsuSkin Error: Empty or unreadable file {:s}\n", filepath);
         return false;
     }
 
@@ -1305,7 +1305,7 @@ void Skin::onIgnoreBeatmapSampleVolumeChange() { this->resetSampleVolume(); }
 void Skin::setSampleSet(int sampleSet) {
     if(this->iSampleSet == sampleSet) return;
 
-    /// debugLog("sample set = %i\n", sampleSet);
+    /// debugLog("sample set = {:d}\n", sampleSet);
     this->iSampleSet = sampleSet;
 }
 
@@ -1324,7 +1324,7 @@ void Skin::setSampleVolume(float volume, bool force) {
     if(!force && this->iSampleVolume == (int)(newSampleVolume * 100.0f)) return;
 
     this->iSampleVolume = (int)(newSampleVolume * 100.0f);
-    /// debugLog("sample volume = %f\n", sampleVolume);
+    /// debugLog("sample volume = {:f}\n", sampleVolume);
     for(auto &soundSample : this->soundSamples) {
         soundSample.sound->setVolume(newSampleVolume * soundSample.hardcodedVolumeMultiplier);
     }
@@ -1663,7 +1663,7 @@ void Skin::checkLoadSound(Sound **addressOfPointer, const std::string &skinEleme
 
     Sound *sound = *addressOfPointer;
     if(sound == NULL) {
-        debugLog("Skin Warning: NULL sound %s!\n", skinElementName.c_str());
+        debugLog("Skin Warning: NULL sound {:s}!\n", skinElementName.c_str());
         return;
     }
 

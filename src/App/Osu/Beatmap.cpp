@@ -612,7 +612,7 @@ bool Beatmap::start() {
             switch(result.errorCode) {
                 case 1: {
                     UString errorMessage = "Error: Couldn't load beatmap metadata :(";
-                    debugLog("Osu Error: Couldn't load beatmap metadata %s\n",
+                    debugLog("Osu Error: Couldn't load beatmap metadata {:s}\n",
                              this->selectedDifficulty2->getFilePath().c_str());
 
                     osu->getNotificationOverlay()->addToast(errorMessage, 0xffff0000);
@@ -620,7 +620,7 @@ bool Beatmap::start() {
 
                 case 2: {
                     UString errorMessage = "Error: Couldn't load beatmap file :(";
-                    debugLog("Osu Error: Couldn't load beatmap file %s\n",
+                    debugLog("Osu Error: Couldn't load beatmap file {:s}\n",
                              this->selectedDifficulty2->getFilePath().c_str());
 
                     osu->getNotificationOverlay()->addToast(errorMessage, 0xffff0000);
@@ -628,7 +628,7 @@ bool Beatmap::start() {
 
                 case 3: {
                     UString errorMessage = "Error: No timingpoints in beatmap :(";
-                    debugLog("Osu Error: No timingpoints in beatmap %s\n",
+                    debugLog("Osu Error: No timingpoints in beatmap {:s}\n",
                              this->selectedDifficulty2->getFilePath().c_str());
 
                     osu->getNotificationOverlay()->addToast(errorMessage, 0xffff0000);
@@ -636,7 +636,7 @@ bool Beatmap::start() {
 
                 case 4: {
                     UString errorMessage = "Error: No hitobjects in beatmap :(";
-                    debugLog("Osu Error: No hitobjects in beatmap %s\n",
+                    debugLog("Osu Error: No hitobjects in beatmap {:s}\n",
                              this->selectedDifficulty2->getFilePath().c_str());
 
                     osu->getNotificationOverlay()->addToast(errorMessage, 0xffff0000);
@@ -644,7 +644,7 @@ bool Beatmap::start() {
 
                 case 5: {
                     UString errorMessage = "Error: Too many hitobjects in beatmap :(";
-                    debugLog("Osu Error: Too many hitobjects in beatmap %s\n",
+                    debugLog("Osu Error: Too many hitobjects in beatmap {:s}\n",
                              this->selectedDifficulty2->getFilePath().c_str());
 
                     osu->getNotificationOverlay()->addToast(errorMessage, 0xffff0000);
@@ -1025,7 +1025,7 @@ void Beatmap::seekPercent(f64 percent) {
     }
 
     if(bancho->spectating) {
-        debugLog("After seeking, we are now %dms behind the player.\n", this->last_frame_ms - (i32)ms);
+        debugLog("After seeking, we are now {:d}ms behind the player.\n", this->last_frame_ms - (i32)ms);
     }
 
     if(this->is_watching) {
@@ -1448,7 +1448,7 @@ void Beatmap::addHealth(f64 percent, bool isFromHitResult) {
 void Beatmap::updateTimingPoints(long curPos) {
     if(curPos < 0) return;  // aspire pls >:(
 
-    /// debugLog("updateTimingPoints( %ld )\n", curPos);
+    /// debugLog("updateTimingPoints( {:d} )\n", curPos);
 
     const DatabaseBeatmap::TIMING_INFO t =
         this->selectedDifficulty2->getTimingInfoForTime(curPos + (long)cv::timingpoints_offset.getInt());
@@ -1663,7 +1663,7 @@ u32 Beatmap::getMusicPositionMSInterpolated() {
             f64 newInterpolatedPos = this->fInterpolatedMusicPos + interpolationDelta;
             f64 delta = newInterpolatedPos - curPos;
 
-            // debugLog("delta = %ld\n", (long)delta);
+            // debugLog("delta = {:d}\n", (long)delta);
 
             // approach and recalculate delta
             newInterpolatedPos -= delta / 8.0 / interpolationMultiplier;
@@ -1702,9 +1702,9 @@ u32 Beatmap::getMusicPositionMSInterpolated() {
             realTime;  // this is more accurate than engine->getFrameTime() for the delta calculation, since it
                        // correctly handles all possible delays inbetween
 
-        // debugLog("returning %lu \n", returnPos);
-        // debugLog("delta = %lu\n", (long)returnPos - m_iCurMusicPos);
-        // debugLog("raw delta = %ld\n", (long)returnPos - (long)curPos);
+        // debugLog("returning {:d} \n", returnPos);
+        // debugLog("delta = {:d}\n", (long)returnPos - m_iCurMusicPos);
+        // debugLog("raw delta = {:d}\n", (long)returnPos - (long)curPos);
 
         return returnPos;
     }
@@ -2465,7 +2465,7 @@ void Beatmap::update2() {
         if(this->iCurMusicPos + (2 * cv::spec_buffer.getInt()) < this->last_frame_ms) {
             i32 target = this->last_frame_ms - cv::spec_buffer.getInt();
             f32 percent = (f32)target / (f32)this->getLength();
-            debugLog("We're %dms behind, seeking to catch up to player...\n", this->last_frame_ms - this->iCurMusicPos);
+            debugLog("We're {:d}ms behind, seeking to catch up to player...\n", this->last_frame_ms - this->iCurMusicPos);
             this->seekPercent(percent);
             return;
         }
@@ -3168,7 +3168,7 @@ void Beatmap::write_frame() {
 }
 
 void Beatmap::onModUpdate(bool rebuildSliderVertexBuffers, bool recomputeDrainRate) {
-    if(cv::debug.getBool()) debugLog("Beatmap::onModUpdate() @ %f\n", engine->getTime());
+    if(cv::debug.getBool()) debugLog("Beatmap::onModUpdate() @ {:f}\n", engine->getTime());
 
     this->updatePlayfieldMetrics();
     this->updateHitobjectMetrics();
@@ -3241,7 +3241,7 @@ bool Beatmap::isBuffering() {
         }
 
         if(leeway >= cv::spec_buffer.getInt()) {
-            debugLog("UNPAUSING: leeway: %i, last_event: %d, last_frame: %d\n", leeway, this->iCurMusicPos,
+            debugLog("UNPAUSING: leeway: {:d}, last_event: {:d}, last_frame: {:d}\n", leeway, this->iCurMusicPos,
                      this->last_frame_ms);
             soundEngine->play(this->music);
             this->bIsPlaying = true;
@@ -3255,7 +3255,7 @@ bool Beatmap::isBuffering() {
         bool is_finished = lastHitObject != NULL && lastHitObject->isFinished();
 
         if(leeway < 0 && !is_finished) {
-            debugLog("PAUSING: leeway: %i, last_event: %d, last_frame: %d\n", leeway, this->iCurMusicPos,
+            debugLog("PAUSING: leeway: {:d}, last_event: {:d}, last_frame: {:d}\n", leeway, this->iCurMusicPos,
                      this->last_frame_ms);
             soundEngine->pause(this->music);
             this->bIsPlaying = false;
@@ -3830,7 +3830,7 @@ void Beatmap::updateSliderVertexBuffers() {
     this->fPrevHitCircleDiameter = this->fHitcircleDiameter;  // same here
     this->fPrevPlayfieldRotationFromConVar = cv::playfield_rotation.getFloat();  // same here
 
-    debugLog("Beatmap::updateSliderVertexBuffers() for %i hitobjects ...\n", this->hitobjects.size());
+    debugLog("Beatmap::updateSliderVertexBuffers() for {:d} hitobjects ...\n", this->hitobjects.size());
 
     for(auto &hitobject : this->hitobjects) {
         Slider *sliderPointer = dynamic_cast<Slider *>(hitobject);

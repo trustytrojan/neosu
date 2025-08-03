@@ -154,7 +154,7 @@ void submit_score(FinishedScore score) {
         size_t s_compressed_data = 0;
         LegacyReplay::compress_frames(score.replay, &compressed_data, &s_compressed_data);
         if(s_compressed_data <= 24) {
-            debugLog("Replay too small to submit! Compressed size: %d bytes\n", s_compressed_data);
+            debugLog("Replay too small to submit! Compressed size: {:d} bytes\n", s_compressed_data);
             goto err;
         }
 

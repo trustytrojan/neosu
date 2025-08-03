@@ -51,14 +51,14 @@ struct pngErrorManager {
 };
 
 void pngErrorExit(png_structp png_ptr, png_const_charp error_msg) {
-    debugLogF("PNG Error: {:s}\n", error_msg);
+    debugLog("PNG Error: {:s}\n", error_msg);
     auto *err = static_cast<pngErrorManager *>(png_get_error_ptr(png_ptr));
     longjmp(&err->setjmp_buffer[0], 1);
 }
 
 void pngWarning(png_structp, [[maybe_unused]] png_const_charp warning_msg) {
 #ifdef _DEBUG
-    debugLogF("PNG Warning: {:s}\n", warning_msg);
+    debugLog("PNG Warning: {:s}\n", warning_msg);
 #endif
 }
 
@@ -86,14 +86,14 @@ bool Image::decodePNGFromMemory(const unsigned char *data, size_t size, std::vec
     garbage_zlib();
     png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     if(!png_ptr) {
-        debugLogF("Image Error: png_create_read_struct failed\n");
+        debugLog("Image Error: png_create_read_struct failed\n");
         return false;
     }
 
     png_infop info_ptr = png_create_info_struct(png_ptr);
     if(!info_ptr) {
         png_destroy_read_struct(&png_ptr, NULL, NULL);
-        debugLogF("Image Error: png_create_info_struct failed\n");
+        debugLog("Image Error: png_create_info_struct failed\n");
         return false;
     }
 
@@ -143,7 +143,7 @@ bool Image::decodePNGFromMemory(const unsigned char *data, size_t size, std::vec
     // after transformations, we should always have RGBA
     if(outWidth > 8192 || outHeight > 8192) {
         png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
-        debugLogF("Image Error: PNG image size is too big ({} x {})\n", outWidth, outHeight);
+        debugLog("Image Error: PNG image size is too big ({} x {})\n", outWidth, outHeight);
         return false;
     }
 
@@ -165,11 +165,11 @@ bool Image::decodePNGFromMemory(const unsigned char *data, size_t size, std::vec
 
 void Image::saveToImage(unsigned char *data, unsigned int width, unsigned int height, std::string filepath) {
     garbage_zlib();
-    debugLogF("Saving image to {:s} ...\n", filepath);
+    debugLog("Saving image to {:s} ...\n", filepath);
 
     FILE *fp = fopen(filepath.c_str(), "wb");
     if(!fp) {
-        debugLogF("PNG error: Could not open file {:s} for writing\n", filepath);
+        debugLog("PNG error: Could not open file {:s} for writing\n", filepath);
         engine->showMessageError("PNG Error", "Could not open file for writing");
         return;
     }
@@ -177,7 +177,7 @@ void Image::saveToImage(unsigned char *data, unsigned int width, unsigned int he
     png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     if(!png_ptr) {
         fclose(fp);
-        debugLogF("PNG error: png_create_write_struct failed\n");
+        debugLog("PNG error: png_create_write_struct failed\n");
         engine->showMessageError("PNG Error", "png_create_write_struct failed");
         return;
     }
@@ -186,7 +186,7 @@ void Image::saveToImage(unsigned char *data, unsigned int width, unsigned int he
     if(!info_ptr) {
         png_destroy_write_struct(&png_ptr, NULL);
         fclose(fp);
-        debugLogF("PNG error: png_create_info_struct failed\n");
+        debugLog("PNG error: png_create_info_struct failed\n");
         engine->showMessageError("PNG Error", "png_create_info_struct failed");
         return;
     }
@@ -194,7 +194,7 @@ void Image::saveToImage(unsigned char *data, unsigned int width, unsigned int he
     if(setjmp(&png_jmpbuf(png_ptr)[0])) {
         png_destroy_write_struct(&png_ptr, &info_ptr);
         fclose(fp);
-        debugLogF("PNG error during write\n");
+        debugLog("PNG error during write\n");
         engine->showMessageError("PNG Error", "Error during PNG write");
         return;
     }
@@ -271,7 +271,7 @@ bool Image::loadRawImage() {
             return true;
 
         if(!env->fileExists(this->sFilePath)) {
-            debugLogF("Image Error: Couldn't find file {:s}\n", this->sFilePath);
+            debugLog("Image Error: Couldn't find file {:s}\n", this->sFilePath);
             return false;
         }
 
@@ -284,11 +284,11 @@ bool Image::loadRawImage() {
         {
             File file(this->sFilePath);
             if(!file.canRead()) {
-                debugLogF("Image Error: Couldn't canRead() file {:s}\n", this->sFilePath);
+                debugLog("Image Error: Couldn't canRead() file {:s}\n", this->sFilePath);
                 return false;
             }
             if((fileSize = file.getFileSize()) < 4) {
-                debugLogF("Image Error: FileSize is < 4 in file {:s}\n", this->sFilePath);
+                debugLog("Image Error: FileSize is < 4 in file {:s}\n", this->sFilePath);
                 return false;
             }
 
@@ -297,7 +297,7 @@ bool Image::loadRawImage() {
 
             fileBuffer = file.takeFileBuffer();
             if(fileBuffer.empty()) {
-                debugLogF("Image Error: Couldn't readFile() file {:s}\n", this->sFilePath);
+                debugLog("Image Error: Couldn't readFile() file {:s}\n", this->sFilePath);
                 return false;
             }
             // don't keep the file open
@@ -333,12 +333,12 @@ bool Image::loadRawImage() {
             // decode jpeg
             tjhandle tjInstance = tj3Init(TJINIT_DECOMPRESS);
             if(!tjInstance) {
-                debugLogF("Image Error: tj3Init failed in file {:s}\n", this->sFilePath);
+                debugLog("Image Error: tj3Init failed in file {:s}\n", this->sFilePath);
                 return false;
             }
 
             if(tj3DecompressHeader(tjInstance, (unsigned char *)data, fileSize) < 0) {
-                debugLogF("Image Error: tj3DecompressHeader failed: {:s} in file {:s}\n", tj3GetErrorStr(tjInstance),
+                debugLog("Image Error: tj3DecompressHeader failed: {:s} in file {:s}\n", tj3GetErrorStr(tjInstance),
                           this->sFilePath);
                 tj3Destroy(tjInstance);
                 return false;
@@ -354,7 +354,7 @@ bool Image::loadRawImage() {
             this->iHeight = tj3Get(tjInstance, TJPARAM_JPEGHEIGHT);
 
             if(this->iWidth > 8192 || this->iHeight > 8192) {
-                debugLogF("Image Error: JPEG image size is too big ({} x {}) in file {:s}\n", this->iWidth,
+                debugLog("Image Error: JPEG image size is too big ({} x {}) in file {:s}\n", this->iWidth,
                           this->iHeight, this->sFilePath);
                 tj3Destroy(tjInstance);
                 return false;
@@ -372,7 +372,7 @@ bool Image::loadRawImage() {
             // always convert to RGBA for consistency with PNG
             // decompress directly to RGBA
             if(tj3Decompress8(tjInstance, (unsigned char *)data, fileSize, &this->rawImage[0], 0, TJPF_RGBA) < 0) {
-                debugLogF("Image Error: tj3Decompress8 failed: {:s} in file {:s}\n", tj3GetErrorStr(tjInstance),
+                debugLog("Image Error: tj3Decompress8 failed: {:s} in file {:s}\n", tj3GetErrorStr(tjInstance),
                           this->sFilePath);
                 tj3Destroy(tjInstance);
                 return false;
@@ -385,11 +385,11 @@ bool Image::loadRawImage() {
             // decode png using libpng
             if(!decodePNGFromMemory((const unsigned char *)data, fileSize, this->rawImage, this->iWidth,
                                     this->iHeight)) {
-                debugLogF("Image Error: PNG decoding failed in file {:s}\n", this->sFilePath);
+                debugLog("Image Error: PNG decoding failed in file {:s}\n", this->sFilePath);
                 return false;
             }
         } else {
-            debugLogF("Image Error: Neither PNG nor JPEG in file {:s}\n", this->sFilePath);
+            debugLog("Image Error: Neither PNG nor JPEG in file {:s}\n", this->sFilePath);
             return false;
         }
     }
@@ -401,7 +401,7 @@ bool Image::loadRawImage() {
 
     // size sanity check
     if(this->rawImage.size() < static_cast<long>(this->iWidth * this->iHeight * Image::iNumChannels)) {
-        debugLogF("Image Error: Loaded image has only {}/{} bytes in file {:s}\n", (unsigned long)this->rawImage.size(),
+        debugLog("Image Error: Loaded image has only {}/{} bytes in file {:s}\n", (unsigned long)this->rawImage.size(),
                   this->iWidth * this->iHeight * Image::iNumChannels, this->sFilePath);
         // engine->showMessageError("Image Error", UString::format("Loaded image has only %i/%i bytes in file %s",
         // rawImage.size(), iWidth*iHeight*iNumChannels, this->sFilePath));
@@ -411,7 +411,7 @@ bool Image::loadRawImage() {
     // optimization: ignore completely transparent images (don't render) (only PNGs can have them, obviously)
     if(!alreadyLoaded && (type == Image::TYPE::TYPE_PNG) &&
        canHaveTransparency(this->rawImage.data(), this->rawImage.size()) && isCompletelyTransparent()) {
-        if(!this->bInterrupted) debugLogF("Image: Ignoring empty transparent image {:s}\n", this->sFilePath);
+        if(!this->bInterrupted) debugLog("Image: Ignoring empty transparent image {:s}\n", this->sFilePath);
         return false;
     }
 
@@ -452,19 +452,19 @@ void Image::setPixels(const char *data, size_t size, TYPE type) {
     switch(type) {
         case TYPE::TYPE_PNG: {
             if(!decodePNGFromMemory((const unsigned char *)data, size, this->rawImage, this->iWidth, this->iHeight)) {
-                debugLogF("Image Error: PNG decoding failed in setPixels\n");
+                debugLog("Image Error: PNG decoding failed in setPixels\n");
             }
         } break;
 
         default:
-            debugLogF("Image Error: Format not yet implemented\n");
+            debugLog("Image Error: Format not yet implemented\n");
             break;
     }
 }
 
 void Image::setPixels(const std::vector<unsigned char> &pixels) {
     if(pixels.size() < static_cast<long>(this->iWidth * this->iHeight * Image::iNumChannels)) {
-        debugLogF("Image Error: setPixels() supplied array is too small!\n");
+        debugLog("Image Error: setPixels() supplied array is too small!\n");
         return;
     }
 

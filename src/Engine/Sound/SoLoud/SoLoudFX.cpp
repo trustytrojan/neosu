@@ -35,7 +35,7 @@ ConVar snd_st_debug("snd_st_debug", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVA
 #define ST_DEBUG_LOG(...) \
 	if (ST_DEBUG_ENABLED) \
 	{ \
-		debugLogF(__VA_ARGS__); \
+		debugLog(__VA_ARGS__); \
 	}
 
 namespace SoLoud

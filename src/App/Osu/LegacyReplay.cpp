@@ -58,7 +58,7 @@ std::vector<Frame> get_frames(u8* replay_data, i32 replay_size) {
     lzma_stream strm = LZMA_STREAM_INIT;
     lzma_ret ret = lzma_alone_decoder(&strm, UINT64_MAX);
     if(ret != LZMA_OK) {
-        debugLog("Failed to init lzma library (%u)\n", static_cast<unsigned int>(ret));
+        debugLog("Failed to init lzma library ({:d})\n", static_cast<unsigned int>(ret));
         return replay_frames;
     }
 
@@ -73,7 +73,7 @@ std::vector<Frame> get_frames(u8* replay_data, i32 replay_size) {
 
         ret = lzma_code(&strm, LZMA_FINISH);
         if(ret != LZMA_OK && ret != LZMA_STREAM_END) {
-            debugLog("Decompression error (%u)\n", static_cast<unsigned int>(ret));
+            debugLog("Decompression error ({:d})\n", static_cast<unsigned int>(ret));
             goto end;
         }
 
@@ -118,7 +118,7 @@ void compress_frames(const std::vector<Frame>& frames, u8** compressed, size_t* 
     lzma_lzma_preset(&options, LZMA_PRESET_DEFAULT);
     lzma_ret ret = lzma_alone_encoder(&stream, &options);
     if(ret != LZMA_OK) {
-        debugLog("Failed to initialize lzma encoder: error %u\n", static_cast<unsigned int>(ret));
+        debugLog("Failed to initialize lzma encoder: error {:d}\n", static_cast<unsigned int>(ret));
         *compressed = NULL;
         *s_compressed = 0;
         return;
@@ -149,7 +149,7 @@ void compress_frames(const std::vector<Frame>& frames, u8** compressed, size_t* 
             stream.avail_out = *s_compressed - stream.total_out;
             stream.next_out = *compressed + stream.total_out;
         } else if(ret != LZMA_STREAM_END) {
-            debugLog("Error while compressing replay: error %u\n", static_cast<unsigned int>(ret));
+            debugLog("Error while compressing replay: error {:d}\n", static_cast<unsigned int>(ret));
             *compressed = NULL;
             *s_compressed = 0;
             lzma_end(&stream);
@@ -170,7 +170,7 @@ Info from_bytes(u8* data, int s_data) {
 
     info.gamemode = proto::read<u8>(&replay);
     if(info.gamemode != 0) {
-        debugLog("Replay has unexpected gamemode %d!", info.gamemode);
+        debugLog("Replay has unexpected gamemode {:d}!", info.gamemode);
         return info;
     }
 

@@ -84,7 +84,7 @@ void OpenGLImage::init()
 	if (this->rawImage.empty())
 	{
 		auto GLerror = glGetError();
-		debugLogF("OpenGL Image Error: {} on file {:s}!\n", GLerror, this->sFilePath.c_str());
+		debugLog("OpenGL Image Error: {} on file {:s}!\n", GLerror, this->sFilePath.c_str());
 		engine->showMessageError("Image Error", UString::format("OpenGL Image error %i on file %s", GLerror, this->sFilePath.c_str()));
 		return;
 	}
@@ -109,7 +109,7 @@ void OpenGLImage::initAsync()
 	if (!this->bCreatedImage)
 	{
 		if (cv::debug_rm.getBool())
-			debugLogF("Resource Manager: Loading {:s}\n", this->sFilePath.c_str());
+			debugLog("Resource Manager: Loading {:s}\n", this->sFilePath.c_str());
 
 		this->bAsyncReady = loadRawImage();
 	}

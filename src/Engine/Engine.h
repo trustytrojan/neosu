@@ -22,12 +22,9 @@ class ConsoleBox;
 class Console;
 
 #ifdef _DEBUG
-#define debugLogF(...) Engine::ContextLogger::log(std::source_location::current(), __FUNCTION__, __VA_ARGS__)
-#define debugLog(...) \
-    Engine::ContextLogger::logPrintf(std::source_location::current(), __FUNCTION__, __VA_ARGS__)  // deprecated
+#define debugLog(...) Engine::ContextLogger::log(std::source_location::current(), __FUNCTION__, __VA_ARGS__)
 #else
-#define debugLogF(...) Engine::ContextLogger::log(__FUNCTION__, __VA_ARGS__)
-#define debugLog(...) Engine::ContextLogger::logPrintf(__FUNCTION__, __VA_ARGS__)  // deprecated
+#define debugLog(...) Engine::ContextLogger::log(__FUNCTION__, __VA_ARGS__)
 #endif
 
 class Engine final : public KeyboardListener {
@@ -185,48 +182,6 @@ class Engine final : public KeyboardListener {
             auto contextPrefix = fmt::format("[{}] ", func);
             trim_to_last_scope(contextPrefix);
             auto message = fmt::format(fmt, std::forward<Args>(args)...);
-            Engine::logImpl(contextPrefix + message, color);
-        }
-
-        // debug build shows full source location
-        template <typename... Args>
-        //[[deprecated("use compile-time format string checked debugLogF instead")]]
-        static void logPrintf(const std::source_location &loc, const char *func, const std::string_view &fmt,
-                              Args &&...args) {
-            auto contextPrefix = fmt::format("[{}:{}:{}] [{}]: ", Environment::getFileNameFromFilePath(loc.file_name()),
-                                             loc.line(), loc.column(), func);
-
-            std::string message = fmt::sprintf(fmt, std::forward<Args>(args)...);
-            Engine::logImpl(contextPrefix + message);
-        }
-
-        template <typename... Args>
-        //[[deprecated("use compile-time format string checked debugLogF instead")]]
-        static void logPrintf(const std::source_location &loc, const char *func, Color color,
-                              const std::string_view &fmt, Args &&...args) {
-            auto contextPrefix = fmt::format("[{}:{}:{}] [{}]: ", Environment::getFileNameFromFilePath(loc.file_name()),
-                                             loc.line(), loc.column(), func);
-
-            std::string message = fmt::sprintf(fmt, std::forward<Args>(args)...);
-            Engine::logImpl(contextPrefix + message, color);
-        }
-
-        // release build only shows function name
-        template <typename... Args>
-        //[[deprecated("use compile-time format string checked debugLogF instead")]]
-        static void logPrintf(const char *func, const std::string_view &fmt, Args &&...args) {
-            auto contextPrefix = fmt::format("[{}] ", func);
-            trim_to_last_scope(contextPrefix);
-            std::string message = fmt::sprintf(fmt, std::forward<Args>(args)...);
-            Engine::logImpl(contextPrefix + message);
-        }
-
-        template <typename... Args>
-        //[[deprecated("use compile-time format string checked debugLogF instead")]]
-        static void logPrintf(const char *func, Color color, const std::string_view &fmt, Args &&...args) {
-            auto contextPrefix = fmt::format("[{}] ", func);
-            trim_to_last_scope(contextPrefix);
-            std::string message = fmt::sprintf(fmt, std::forward<Args>(args)...);
             Engine::logImpl(contextPrefix + message, color);
         }
     };

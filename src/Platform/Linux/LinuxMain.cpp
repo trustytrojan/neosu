@@ -210,7 +210,7 @@ LinuxMain::LinuxMain(int argc, char *argv[], const std::vector<UString> &argCmdl
 
     // after the window is visible, center it again (if the window manager ignored the position of the window in
     // XCreateWindow(), because fuck you)
-    // debugLogF("moving to {} {}\n",  defaultScreen->width / 2 - WINDOW_WIDTH / 2,
+    // debugLog("moving to {} {}\n",  defaultScreen->width / 2 - WINDOW_WIDTH / 2,
     //             defaultScreen->height / 2 - WINDOW_HEIGHT / 2);
     {
         const SDL_DisplayID di = SDL_GetDisplayForWindow(this->sdlwnd);
@@ -369,7 +369,7 @@ bool LinuxMain::WndProc(XEvent *xev) {
             if(cv::debug_env.getBool()) {
                 char *name = XGetAtomName(this->dpy, xev->xproperty.atom);
                 if(name) {
-                    debugLog("window 0x%lx: PropertyNotify: %s %s time=%lu\n", xev->xany.window, name,
+                    debugLog("window {:x}: PropertyNotify: {:s} {:s} time={:d}\n", xev->xany.window, name,
                              (xev->xproperty.state == PropertyDelete) ? "deleted" : "changed", xev->xproperty.time);
                     XFree(name);
                 }
@@ -493,7 +493,7 @@ bool LinuxMain::WndProc(XEvent *xev) {
             }
         default:
             if(cv::debug_env.getBool()) {
-                debugLogF("unhandled X11 event type: {}\n", xev->type);
+                debugLog("unhandled X11 event type: {}\n", xev->type);
             }
             break;
     }

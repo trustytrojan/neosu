@@ -29,7 +29,7 @@ static void run_sct() {
 
         if(score.replay.empty()) {
             if(!LegacyReplay::load_from_disk(&score, false)) {
-                debugLog("Failed to load replay for score %d\n", idx);
+                debugLog("Failed to load replay for score {:d}\n", idx);
                 sct_computed++;
                 idx++;
                 continue;
@@ -42,15 +42,15 @@ static void run_sct() {
         smap.simulate_to(diff->getLengthMS());
 
         if(score.comboMax != smap.live_score.getComboMax())
-            debugLog("Score %d: comboMax was %d, simulated %d\n", idx, score.comboMax, smap.live_score.getComboMax());
+            debugLog("Score {:d}: comboMax was {:d}, simulated {:d}\n", idx, score.comboMax, smap.live_score.getComboMax());
         if(score.num300s != smap.live_score.getNum300s())
-            debugLog("Score %d: n300 was %d, simulated %d\n", idx, score.num300s, smap.live_score.getNum300s());
+            debugLog("Score {:d}: n300 was {:d}, simulated {:d}\n", idx, score.num300s, smap.live_score.getNum300s());
         if(score.num100s != smap.live_score.getNum100s())
-            debugLog("Score %d: n100 was %d, simulated %d\n", idx, score.num100s, smap.live_score.getNum100s());
+            debugLog("Score {:d}: n100 was {:d}, simulated {:d}\n", idx, score.num100s, smap.live_score.getNum100s());
         if(score.num50s != smap.live_score.getNum50s())
-            debugLog("Score %d: n50 was %d, simulated %d\n", idx, score.num50s, smap.live_score.getNum50s());
+            debugLog("Score {:d}: n50 was {:d}, simulated {:d}\n", idx, score.num50s, smap.live_score.getNum50s());
         if(score.numMisses != smap.live_score.getNumMisses())
-            debugLog("Score %d: nMisses was %d, simulated %d\n", idx, score.numMisses, smap.live_score.getNumMisses());
+            debugLog("Score {:d}: nMisses was {:d}, simulated {:d}\n", idx, score.numMisses, smap.live_score.getNumMisses());
 
         db->scores_mtx.lock();
         for(auto& other : (*db->getScores())[score.beatmap_hash]) {

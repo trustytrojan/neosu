@@ -456,7 +456,7 @@ void Circle::draw2() {
     if(cv::bug_flicker_log.getBool()) {
         const float approachCircleImageScale =
             this->bm->fHitcircleDiameter / (128.0f * (this->bm->getSkin()->isApproachCircle2x() ? 2.0f : 1.0f));
-        debugLog("click_time = %ld, aScale = %f, iScale = %f\n", click_time, this->fApproachScale,
+        debugLog("click_time = {:d}, aScale = {:f}, iScale = {:f}\n", click_time, this->fApproachScale,
                  approachCircleImageScale);
     }
 

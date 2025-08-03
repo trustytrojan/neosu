@@ -60,7 +60,7 @@ namespace proto = BANCHO::Proto;
 void Bancho::handle_packet(Packet *packet) {
     // XXX: This is a bit of a mess, should at least group packets by type for readability
     if(cv::debug_network.getBool() && packet) {
-        debugLogF("packet id: {}\n", packet->id);
+        debugLog("packet id: {}\n", packet->id);
     }
     if(packet->id == USER_ID) {
         i32 new_user_id = proto::read<i32>(packet);
@@ -70,7 +70,7 @@ void Bancho::handle_packet(Packet *packet) {
         Bancho::change_login_state(new_user_id > 0);
 
         if(new_user_id > 0) {
-            debugLog("Logged in as user #%d.\n", new_user_id);
+            debugLog("Logged in as user #{:d}.\n", new_user_id);
             cv::mp_autologin.setValue(true);
             this->print_new_channels = true;
 
@@ -96,7 +96,7 @@ void Bancho::handle_packet(Packet *packet) {
         } else {
             cv::mp_autologin.setValue(false);
 
-            debugLog("Failed to log in, server returned code %d.\n", this->user_id);
+            debugLog("Failed to log in, server returned code {:d}.\n", this->user_id);
             UString errmsg =
                 UString::format("Failed to log in: %s (code %d)\n", BANCHO::Net::cho_token.toUtf8(), this->user_id);
             if(new_user_id == -2) {
@@ -193,7 +193,7 @@ void Bancho::handle_packet(Packet *packet) {
                 auto frame = proto::read<LiveReplayFrame>(packet);
 
                 if(frame.mouse_x < 0 || frame.mouse_x > 512 || frame.mouse_y < 0 || frame.mouse_y > 384) {
-                    debugLog("WEIRD FRAME: time %d, x %f, y %f\n", frame.time, frame.mouse_x, frame.mouse_y);
+                    debugLog("WEIRD FRAME: time {:d}, x {:f}, y {:f}\n", frame.time, frame.mouse_x, frame.mouse_y);
                 }
 
                 beatmap->spectated_replay.push_back(LegacyReplay::Frame{
@@ -253,30 +253,30 @@ void Bancho::handle_packet(Packet *packet) {
     } else if(packet->id == SPECTATOR_JOINED) {
         i32 spectator_id = proto::read<i32>(packet);
         if(std::ranges::find(this->spectators, spectator_id) == this->spectators.end()) {
-            debugLog("Spectator joined: user id %d\n", spectator_id);
+            debugLog("Spectator joined: user id {:d}\n", spectator_id);
             this->spectators.push_back(spectator_id);
         }
     } else if(packet->id == SPECTATOR_LEFT) {
         i32 spectator_id = proto::read<i32>(packet);
         auto it = std::ranges::find(this->spectators, spectator_id);
         if(it != this->spectators.end()) {
-            debugLog("Spectator left: user id %d\n", spectator_id);
+            debugLog("Spectator left: user id {:d}\n", spectator_id);
             this->spectators.erase(it);
         }
     } else if(packet->id == SPECTATOR_CANT_SPECTATE) {
         i32 spectator_id = proto::read<i32>(packet);
-        debugLog("Spectator can't spectate: user id %d\n", spectator_id);
+        debugLog("Spectator can't spectate: user id {:d}\n", spectator_id);
     } else if(packet->id == FELLOW_SPECTATOR_JOINED) {
         i32 spectator_id = proto::read<i32>(packet);
         if(std::ranges::find(this->fellow_spectators, spectator_id) == this->fellow_spectators.end()) {
-            debugLog("Fellow spectator joined: user id %d\n", spectator_id);
+            debugLog("Fellow spectator joined: user id {:d}\n", spectator_id);
             this->fellow_spectators.push_back(spectator_id);
         }
     } else if(packet->id == FELLOW_SPECTATOR_LEFT) {
         i32 spectator_id = proto::read<i32>(packet);
         auto it = std::ranges::find(this->fellow_spectators, spectator_id);
         if(it != this->fellow_spectators.end()) {
-            debugLog("Fellow spectator left: user id %d\n", spectator_id);
+            debugLog("Fellow spectator left: user id {:d}\n", spectator_id);
             this->fellow_spectators.erase(it);
         }
     } else if(packet->id == GET_ATTENTION) {
@@ -429,27 +429,27 @@ void Bancho::handle_packet(Packet *packet) {
         osu->chat->join("#osu");
     } else if(packet->id == ROOM_PASSWORD_CHANGED) {
         UString new_password = proto::read_string(packet);
-        debugLog("Room changed password to %s\n", new_password.toUtf8());
+        debugLog("Room changed password to {:s}\n", new_password.toUtf8());
         this->room.password = new_password;
     } else if(packet->id == SILENCE_END) {
         i32 delta = proto::read<i32>(packet);
-        debugLog("Silence ends in %d seconds.\n", delta);
+        debugLog("Silence ends in {:d} seconds.\n", delta);
         // XXX: Prevent user from sending messages while silenced
     } else if(packet->id == USER_SILENCED) {
         i32 user_id = proto::read<i32>(packet);
-        debugLog("User #%d silenced.\n", user_id);
+        debugLog("User #{:d} silenced.\n", user_id);
     } else if(packet->id == USER_DM_BLOCKED) {
         proto::read_string(packet);
         proto::read_string(packet);
         UString blocked = proto::read_string(packet);
         proto::read<u32>(packet);
-        debugLog("Blocked %s.\n", blocked.toUtf8());
+        debugLog("Blocked {:s}.\n", blocked.toUtf8());
     } else if(packet->id == TARGET_IS_SILENCED) {
         proto::read_string(packet);
         proto::read_string(packet);
         UString blocked = proto::read_string(packet);
         proto::read<u32>(packet);
-        debugLog("Silenced %s.\n", blocked.toUtf8());
+        debugLog("Silenced {:s}.\n", blocked.toUtf8());
     } else if(packet->id == VERSION_UPDATE) {
         // (nothing to do)
     } else if(packet->id == VERSION_UPDATE_FORCED) {
@@ -461,7 +461,7 @@ void Bancho::handle_packet(Packet *packet) {
     } else if(packet->id == MATCH_ABORT) {
         osu->room->on_match_aborted();
     } else {
-        debugLog("Unknown packet ID %d (%d bytes)!\n", packet->id, packet->size);
+        debugLog("Unknown packet ID {:d} ({:d} bytes)!\n", packet->id, packet->size);
     }
 }
 
@@ -563,7 +563,7 @@ void Bancho::update_channel(const UString &name, const UString &topic, i32 nb_me
         chan->topic = topic;
         chan->nb_members = nb_members;
     } else {
-        debugLogF("WARNING: no channel found??\n");
+        debugLog("WARNING: no channel found??\n");
     }
 }
 

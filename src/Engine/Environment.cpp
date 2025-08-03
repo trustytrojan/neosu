@@ -132,7 +132,7 @@ std::string Environment::filesystemPathToURI(const std::filesystem::path &path) 
 
 void Environment::openURLInDefaultBrowser(const std::string &url) noexcept {
     if(!SDL_OpenURL(url.c_str())) {
-        debugLogF("Failed to open URL: {:s}\n", SDL_GetError());
+        debugLog("Failed to open URL: {:s}\n", SDL_GetError());
     }
 }
 
@@ -149,7 +149,7 @@ void Environment::openFileBrowser(const std::string &initialpath) noexcept {
         Env::cfg(OS::WINDOWS) ? fmt::format("file:///{}", pathToOpen) : filesystemPathToURI(fs::path{pathToOpen});
 
     if(!SDL_OpenURL(encodedPath.c_str()))
-        debugLogF("Failed to open file URI {:s}: {:s}\n", encodedPath, SDL_GetError());
+        debugLog("Failed to open file URI {:s}: {:s}\n", encodedPath, SDL_GetError());
 }
 
 std::string Environment::getEnvVariable(const std::string &varToQuery) noexcept {
@@ -386,7 +386,7 @@ std::vector<std::string> Environment::enumerateDirectory(const std::string &path
     }
 
     if(ec && contents.empty()) {
-        debugLogF("Failed to enumerate directory: {}\n", ec.message());
+        debugLog("Failed to enumerate directory: {}\n", ec.message());
     }
 
     return contents;

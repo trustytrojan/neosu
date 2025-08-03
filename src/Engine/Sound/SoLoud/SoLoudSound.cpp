@@ -26,7 +26,7 @@ void SoLoudSound::init() {
     if(this->bIgnored || this->sFilePath.length() < 2 || !(this->bAsyncReady.load())) return;
 
     if(!this->audioSource)
-        debugLogF(0xffdd3333, "Couldn't load sound \"{}\", stream = {}, file = {}\n", this->sFilePath, this->bStream,
+        debugLog(0xffdd3333, "Couldn't load sound \"{}\", stream = {}, file = {}\n", this->sFilePath, this->bStream,
                   this->sFilePath);
     else
         this->bReady = true;
@@ -57,20 +57,20 @@ void SoLoudSound::initAsync() {
         File file(this->sFilePath);
 
         if(!file.canRead()) {
-            debugLogF("Sound Error: Cannot open file {:s}\n", this->sFilePath);
+            debugLog("Sound Error: Cannot open file {:s}\n", this->sFilePath);
             return;
         }
 
         fileSize = file.getFileSize();
         if(fileSize == 0) {
-            debugLogF("Sound Error: File is empty {:s}\n", this->sFilePath);
+            debugLog("Sound Error: File is empty {:s}\n", this->sFilePath);
             return;
         }
 
         fileBuffer = file.takeFileBuffer();
         fileData = fileBuffer.data();
         if(!fileData) {
-            debugLogF("Sound Error: Failed to read file data {:s}\n", this->sFilePath);
+            debugLog("Sound Error: Failed to read file data {:s}\n", this->sFilePath);
             return;
         }
         // file is closed here
@@ -96,14 +96,14 @@ void SoLoudSound::initAsync() {
                 true, false);  // keep ticking the sound if it goes to 0 volume, and don't kill it
 
             if(cv::debug_snd.getBool())
-                debugLogF(
+                debugLog(
                     "SoLoudSound: Created SLFXStream for {:s} with speed={:f}, pitch={:f}, looping={:s}, "
                     "decoder={:s}\n",
                     this->sFilePath, this->fSpeed, this->fPitch, this->bIsLooped ? "true" : "false",
                     stream->getDecoder());
         } else {
             delete stream;
-            debugLogF("Sound Error: SLFXStream::load() error {} on file {:s}\n", result, this->sFilePath);
+            debugLog("Sound Error: SLFXStream::load() error {} on file {:s}\n", result, this->sFilePath);
             return;
         }
     } else {
@@ -123,7 +123,7 @@ void SoLoudSound::initAsync() {
                 true, true);  // keep ticking the sound if it goes to 0 volume, but do kill it if necessary
         } else {
             delete wav;
-            debugLogF("Sound Error: SoLoud::Wav::load() error {} on file {:s}\n", result, this->sFilePath);
+            debugLog("Sound Error: SoLoud::Wav::load() error {} on file {:s}\n", result, this->sFilePath);
             return;
         }
     }
@@ -179,7 +179,7 @@ u32 SoLoudSound::setPosition(f64 percent) {
     double positionInSeconds = streamLengthInSeconds * percent;
 
     if(cv::debug_snd.getBool())
-        debugLogF("seeking to {:.2f} percent (position: {}ms, length: {}ms)\n", percent,
+        debugLog("seeking to {:.2f} percent (position: {}ms, length: {}ms)\n", percent,
                   static_cast<unsigned long>(positionInSeconds * 1000),
                   static_cast<unsigned long>(streamLengthInSeconds * 1000));
 
@@ -201,7 +201,7 @@ void SoLoudSound::setPositionMS(unsigned long ms) {
 
     double positionInSeconds = msD / 1000.0;
 
-    if(cv::debug_snd.getBool()) debugLogF("seeking to {:g}ms (length: {:g}ms)\n", msD, streamLengthMS);
+    if(cv::debug_snd.getBool()) debugLog("seeking to {:g}ms (length: {:g}ms)\n", msD, streamLengthMS);
 
     // seek
     soloud->seek(this->handle, positionInSeconds);
@@ -227,7 +227,7 @@ void SoLoudSound::setSpeed(float speed) {
     // sample speed could be supported, but there is nothing using it right now so i will only bother when the time
     // comes
     if(!this->bStream) {
-        debugLogF("Programmer Error: tried to setSpeed on a sample!\n");
+        debugLog("Programmer Error: tried to setSpeed on a sample!\n");
         return;
     }
 
@@ -251,7 +251,7 @@ void SoLoudSound::setSpeed(float speed) {
         }
 
         if(cv::debug_snd.getBool())
-            debugLogF("SoLoudSound: Speed change {:s}: {:f}->{:f} (nightcore_enjoyer={})\n", this->sFilePath,
+            debugLog("SoLoudSound: Speed change {:s}: {:f}->{:f} (nightcore_enjoyer={})\n", this->sFilePath,
                       previousSpeed, this->fSpeed, cv::nightcore_enjoyer.getBool());
     }
 }
@@ -262,7 +262,7 @@ void SoLoudSound::setPitch(float pitch) {
     // sample pitch could be supported, but there is nothing using it right now so i will only bother when the time
     // comes
     if(!this->bStream) {
-        debugLogF("Programmer Error: tried to this->setPitch on a sample!\n");
+        debugLog("Programmer Error: tried to this->setPitch on a sample!\n");
         return;
     }
 
@@ -277,7 +277,7 @@ void SoLoudSound::setPitch(float pitch) {
         stream->setPitchFactor(this->fPitch);
 
         if(cv::debug_snd.getBool())
-            debugLogF("SoLoudSound: Pitch change {:s}: {:f}->{:f} (stream, updated live)\n", this->sFilePath,
+            debugLog("SoLoudSound: Pitch change {:s}: {:f}->{:f} (stream, updated live)\n", this->sFilePath,
                       previousPitch, this->fPitch);
     }
 }
@@ -324,7 +324,7 @@ void SoLoudSound::setLoop(bool loop) {
 
     this->bIsLooped = loop;
 
-    if(cv::debug_snd.getBool()) debugLogF("setLoop {}\n", loop);
+    if(cv::debug_snd.getBool()) debugLog("setLoop {}\n", loop);
 
     // apply to the source
     this->audioSource->setLooping(loop);
@@ -365,7 +365,7 @@ u32 SoLoudSound::getLengthMS() {
 
     const double lengthInMilliSeconds = getSourceLengthInSeconds() * 1000.0;
     // if (cv::debug_snd.getBool())
-    // 	debugLogF("lengthMS for {:s}: {:g}\n", this->sFilePath, lengthInMilliSeconds);
+    // 	debugLog("lengthMS for {:s}: {:g}\n", this->sFilePath, lengthInMilliSeconds);
     return static_cast<u32>(lengthInMilliSeconds);
 }
 

@@ -1595,7 +1595,7 @@ bool Osu::shouldFallBackToLegacySliderRenderer() {
 }
 
 void Osu::onResolutionChanged(Vector2 newResolution) {
-    debugLog("Osu::onResolutionChanged(%i, %i), minimized = %i\n", (int)newResolution.x, (int)newResolution.y,
+    debugLog("Osu::onResolutionChanged({:d}, {:d}), minimized = {:d}\n", (int)newResolution.x, (int)newResolution.y,
              (int)engine->isMinimized());
 
     if(engine->isMinimized()) return;  // ignore if minimized
@@ -1621,7 +1621,7 @@ void Osu::onResolutionChanged(Vector2 newResolution) {
         if(((int)g_vInternalResolution.x == engine->getScreenWidth() &&
             (int)g_vInternalResolution.y == engine->getScreenHeight()) ||
            !env->isFullscreen() || windowsBorderlessHackCondition) {
-            debugLog("Internal resolution == Engine resolution || !Fullscreen, disabling resampler (%i, %i)\n",
+            debugLog("Internal resolution == Engine resolution || !Fullscreen, disabling resampler ({:d}, {:d})\n",
                      (int)(g_vInternalResolution == engine->getScreenSize()), (int)(!env->isFullscreen()));
             cv::resolution_enabled.setValue(0.0f);
             g_vInternalResolution = engine->getScreenSize();
@@ -1663,7 +1663,7 @@ void Osu::onDPIChanged() {
 }
 
 void Osu::rebuildRenderTargets() {
-    debugLog("Osu::rebuildRenderTargets: %fx%f\n", g_vInternalResolution.x, g_vInternalResolution.y);
+    debugLog("Osu::rebuildRenderTargets: {:f}x{:f}\n", g_vInternalResolution.x, g_vInternalResolution.y);
 
     this->backBuffer->rebuild(0, 0, g_vInternalResolution.x, g_vInternalResolution.y);
 

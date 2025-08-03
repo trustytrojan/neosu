@@ -600,7 +600,7 @@ void ScoreButton::setScore(const FinishedScore &score, DatabaseBeatmap *diff2, i
     this->score = score;
     this->score.beatmap_hash = diff2->getMD5Hash();
     this->score.diff2 = diff2;
-    // debugLogF(
+    // debugLog(
     //     "score.beatmap_hash {} this->beatmap_hash {} score.has_possible_replay {} this->has_possible_replay {} "
     //     "score.playername {} this->playername {}\n",
     //     score.beatmap_hash.hash.data(), this->score.beatmap_hash.hash.data(), score.has_possible_replay(),
