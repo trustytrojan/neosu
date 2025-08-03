@@ -85,49 +85,11 @@ WPARAM WindowsMain::mapLeftRightKeys(WPARAM wParam, LPARAM lParam) {
     return vkCode;
 }
 
-// these were pulled straight out of SDL3 (zlib licensed)
-HRESULT WindowsMain::doCoInitialize() {
-    typedef HRESULT(WINAPI * CoInitializeEx_t)(LPVOID, COINIT initType);
-    auto CoInitializeFunc = reinterpret_cast<CoInitializeEx_t>(doLoadComBaseFunction("CoInitializeEx"));
-
-    HRESULT hr = CoInitializeFunc(NULL, COINIT_APARTMENTTHREADED);
-    if(hr == RPC_E_CHANGED_MODE) {
-        hr = CoInitializeFunc(NULL, COINIT_MULTITHREADED);
-    }
-    if(hr == S_FALSE) {
-        return S_OK;
-    }
-    return hr;
-}
-
-void WindowsMain::doCoUninitialize(void) {
-    typedef void(WINAPI * CoUnInitialize_t)();
-    auto CoUninitializeFunc = reinterpret_cast<CoUnInitialize_t>(doLoadComBaseFunction("CoUninitialize"));
-    return CoUninitializeFunc();
-}
-
-FARPROC WindowsMain::doLoadComBaseFunction(const char *name) {
-    static bool s_bLoaded;
-    static HMODULE s_hComBase;
-
-    if(!s_bLoaded) {
-        s_hComBase = LoadLibraryEx(TEXT("combase.dll"), NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
-        s_bLoaded = true;
-    }
-    if(s_hComBase) {
-        return GetProcAddress(s_hComBase, name);
-    } else {
-        return NULL;
-    }
-}
-
 //********************//
 //	Main entry point  //
 //********************//
 
 Main *mainloopPtrHack = nullptr;  // FIXME: why is the handle_cmdline_args shit in the windows main file
-
-bool WindowsMain::bSupportsPerMonitorDpiAwareness = false;
 
 WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> &argCmdline,
                          const std::unordered_map<UString, std::optional<UString>> &argMap) {
@@ -171,13 +133,7 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> &arg
     if(argMap.contains("-noime"))
 #endif
     {
-        typedef BOOL(WINAPI * pfnImmDisableIME)(DWORD);
-        HMODULE hImm32 = LoadLibrary(TEXT("imm32.dll"));
-        if(hImm32 != NULL) {
-            auto pImmDisableIME = (pfnImmDisableIME)GetProcAddress(hImm32, "ImmDisableIME");
-            if(pImmDisableIME != NULL) pImmDisableIME(-1);
-            FreeLibrary(hImm32);
-        }
+        Setup::disable_ime();
     }
 
     // enable fancy themed windows controls (v6+), requires McEngine.exe.manifest AND linking to comctl32, for fucks
@@ -195,28 +151,7 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> &arg
     // WM_DPICHANGED notified
     // enable DPI awareness if not -nodpi
     if(!argMap.contains("-nodpi")) {
-        // Windows 8.1+
-        // per-monitor dpi scaling
-        {
-            HMODULE shcore = GetModuleHandle(TEXT("shcore.dll"));
-            if(shcore != NULL) {
-                typedef HRESULT(WINAPI * PSPDAN)(int);
-                PSPDAN pSetProcessDpiAwareness = (PSPDAN)GetProcAddress(shcore, "SetProcessDpiAwareness");
-                if(pSetProcessDpiAwareness != NULL) {
-                    const HRESULT result = pSetProcessDpiAwareness(2);  // 2 == PROCESS_PER_MONITOR_DPI_AWARE
-                    WindowsMain::bSupportsPerMonitorDpiAwareness = (result == S_OK || result == E_ACCESSDENIED);
-                }
-            }
-        }
-
-        if(!WindowsMain::bSupportsPerMonitorDpiAwareness) {
-            // Windows Vista+
-            // system-wide dpi scaling
-            {
-                auto pSetProcessDPIAware = GetProcAddress(GetModuleHandle(TEXT("user32.dll")), "SetProcessDPIAware");
-                if(pSetProcessDPIAware != NULL) pSetProcessDPIAware();
-            }
-        }
+        Setup::dpi_early();
     }
 
     HINSTANCE hInstance = GetModuleHandle(NULL);
@@ -287,7 +222,7 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> &arg
     {
         // initialize COM as apartment-threaded before any libraries get the chance to try initializing it as
         // multi-threaded
-        HRESULT hr = doCoInitialize();
+        HRESULT hr = Setup::com_init();
         if(hr != S_OK && hr != S_FALSE) {
             printf("WARNING: CoInitialize(COINIT_APARTMENTTHREADED) failed, hr: %#lx\n", hr);
         }
@@ -399,7 +334,7 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> &arg
         }
     }
 
-    doCoUninitialize();
+    Setup::com_uninit();
 
     // release the timers
     SAFE_DELETE(deltaTimer);
@@ -838,7 +773,9 @@ LRESULT CALLBACK WindowsMain::realWndProc(HWND hwnd, UINT msg, WPARAM wParam, LP
         // resize limit
         case WM_GETMINMAXINFO: {
             WINDOWPLACEMENT wPos;
-            { wPos.length = sizeof(WINDOWPLACEMENT); }
+            {
+                wPos.length = sizeof(WINDOWPLACEMENT);
+            }
             GetWindowPlacement(hwnd, &wPos);
 
             // min
@@ -908,12 +845,10 @@ LRESULT CALLBACK WindowsMain::wndProcWrapper(HWND hwnd, UINT msg, WPARAM wParam,
     if(ml) return ml->realWndProc(hwnd, msg, wParam, lParam);
 
     // the GWLP_USERDATA will be empty until after the window has already been created, so we have to check this here
-    if(msg == WM_NCCREATE && WindowsMain::bSupportsPerMonitorDpiAwareness) {
-        typedef BOOL(WINAPI * EPNCDS)(HWND);
-        EPNCDS pEnableNonClientDpiScaling =
-            (EPNCDS)GetProcAddress(GetModuleHandle(TEXT("user32.dll")), "EnableNonClientDpiScaling");
-        if(pEnableNonClientDpiScaling != NULL) pEnableNonClientDpiScaling(hwnd);
+    if(msg == WM_NCCREATE) {
+        Setup::dpi_late(hwnd);
     }
+
     return DefWindowProcW(hwnd, msg, wParam, lParam);
 }
 

@@ -20,11 +20,9 @@ class WindowsMain final {
     bool bUpdate{true};
     bool bDraw{true};
 
-    bool bMinimized{false};                       // for fps_max_background
-    bool bHasFocus{false};                        // for fps_max_background
-    bool bIsCursorVisible{true};                  // local variable
-    static bool bSupportsPerMonitorDpiAwareness;  // checked in wndproc on creation (WM_NCCREATE) for enabling
-                                                  // non-client dpi scaling
+    bool bMinimized{false};       // for fps_max_background
+    bool bHasFocus{false};        // for fps_max_background
+    bool bIsCursorVisible{true};  // local variable
 
     HWND createWinWindow(HINSTANCE hInstance);
 
@@ -32,10 +30,6 @@ class WindowsMain final {
     LRESULT CALLBACK realWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
     WPARAM mapLeftRightKeys(WPARAM wParam, LPARAM lParam);
-
-    HRESULT doCoInitialize();
-    void doCoUninitialize();
-    FARPROC doLoadComBaseFunction(const char *name);
 
     // rawinputbuffer utils
     struct AlignedBuffer {
@@ -59,6 +53,18 @@ class WindowsMain final {
     AlignedBuffer vRawInputBuffer;
 
     void processBufferedRawInput();
+
+    // external setup stuff
+    struct Setup {
+        static HRESULT com_init();
+        static void com_uninit(void);
+        static void disable_ime();
+        static void dpi_early();
+        static void dpi_late(HWND hwnd);
+
+       private:
+        Setup() = default;
+    };
 
     // misc helpers (which shouldn't be here, to be moved)
     void handle_db(const char *db_path);

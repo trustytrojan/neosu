@@ -6,8 +6,6 @@
 //===============================================================================//
 
 #pragma once
-#ifndef BASEENVIRONMENT_H
-#define BASEENVIRONMENT_H
 
 #include "config.h"
 
@@ -253,11 +251,11 @@ static constexpr auto OPTIMAL_UNROLL = 4;
 
 typedef void* HWND;
 
-#define MCENGINE_DATA_DIR "./"
+#define PREF_PATHSEP "/"
 
 #else  // Windows build
 
-#define MCENGINE_DATA_DIR ".\\"
+#define PREF_PATHSEP "\\"
 
 #if defined(_MSC_VER)
 #ifdef _WIN64
@@ -300,4 +298,4 @@ typedef SSIZE_T ssize_t;
 #error "OS not currently supported"
 #endif
 
-#endif
+#define MCENGINE_DATA_DIR "." PREF_PATHSEP

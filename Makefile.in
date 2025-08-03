@@ -297,11 +297,12 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/Platform/Windows/neosu-WinEnvironment.$(OBJEXT) \
 	src/Platform/Windows/neosu-WinGLLegacyInterface.$(OBJEXT) \
 	src/Platform/Windows/neosu-WindowsMain.$(OBJEXT) \
-	src/Platform/Windows/neosu-WindowsMainTEMP.$(OBJEXT) \
+	src/Platform/Windows/neosu-WindowsMain_aux.$(OBJEXT) \
 	src/Platform/neosu-main.$(OBJEXT) \
 	src/Util/neosu-Quaternion.$(OBJEXT) \
 	src/Util/neosu-Rect.$(OBJEXT) src/Util/neosu-UString.$(OBJEXT) \
-	src/Util/neosu-crypto.$(OBJEXT)
+	src/Util/neosu-crypto.$(OBJEXT) \
+	src/Util/neosu-dynutils.$(OBJEXT)
 neosu_OBJECTS = $(am_neosu_OBJECTS)
 @WIN_PLATFORM_TRUE@neosu_DEPENDENCIES = neosu_resource.o
 neosu_LINK = $(CXXLD) $(neosu_CXXFLAGS) $(CXXFLAGS) $(neosu_LDFLAGS) \
@@ -472,11 +473,12 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/Platform/Windows/$(DEPDIR)/neosu-WinEnvironment.Po \
 	src/Platform/Windows/$(DEPDIR)/neosu-WinGLLegacyInterface.Po \
 	src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain.Po \
-	src/Platform/Windows/$(DEPDIR)/neosu-WindowsMainTEMP.Po \
+	src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain_aux.Po \
 	src/Util/$(DEPDIR)/neosu-Quaternion.Po \
 	src/Util/$(DEPDIR)/neosu-Rect.Po \
 	src/Util/$(DEPDIR)/neosu-UString.Po \
-	src/Util/$(DEPDIR)/neosu-crypto.Po
+	src/Util/$(DEPDIR)/neosu-crypto.Po \
+	src/Util/$(DEPDIR)/neosu-dynutils.Po
 am__mv = mv -f
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -958,12 +960,13 @@ neosu_SOURCES = \
 	src/Platform/Windows/WinEnvironment.cpp \
 	src/Platform/Windows/WinGLLegacyInterface.cpp \
 	src/Platform/Windows/WindowsMain.cpp \
-	src/Platform/Windows/WindowsMainTEMP.cpp \
+	src/Platform/Windows/WindowsMain_aux.cpp \
 	src/Platform/main.cpp \
 	src/Util/Quaternion.cpp \
 	src/Util/Rect.cpp \
 	src/Util/UString.cpp \
 	src/Util/crypto.cpp \
+	src/Util/dynutils.cpp \
 $(NULL)
 
 
@@ -1688,7 +1691,7 @@ src/Platform/Windows/neosu-WinGLLegacyInterface.$(OBJEXT):  \
 src/Platform/Windows/neosu-WindowsMain.$(OBJEXT):  \
 	src/Platform/Windows/$(am__dirstamp) \
 	src/Platform/Windows/$(DEPDIR)/$(am__dirstamp)
-src/Platform/Windows/neosu-WindowsMainTEMP.$(OBJEXT):  \
+src/Platform/Windows/neosu-WindowsMain_aux.$(OBJEXT):  \
 	src/Platform/Windows/$(am__dirstamp) \
 	src/Platform/Windows/$(DEPDIR)/$(am__dirstamp)
 src/Platform/$(am__dirstamp):
@@ -1712,6 +1715,8 @@ src/Util/neosu-Rect.$(OBJEXT): src/Util/$(am__dirstamp) \
 src/Util/neosu-UString.$(OBJEXT): src/Util/$(am__dirstamp) \
 	src/Util/$(DEPDIR)/$(am__dirstamp)
 src/Util/neosu-crypto.$(OBJEXT): src/Util/$(am__dirstamp) \
+	src/Util/$(DEPDIR)/$(am__dirstamp)
+src/Util/neosu-dynutils.$(OBJEXT): src/Util/$(am__dirstamp) \
 	src/Util/$(DEPDIR)/$(am__dirstamp)
 
 neosu$(EXEEXT): $(neosu_OBJECTS) $(neosu_DEPENDENCIES) $(EXTRA_neosu_DEPENDENCIES) 
@@ -1893,11 +1898,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/Platform/Windows/$(DEPDIR)/neosu-WinEnvironment.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Platform/Windows/$(DEPDIR)/neosu-WinGLLegacyInterface.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Platform/Windows/$(DEPDIR)/neosu-WindowsMainTEMP.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain_aux.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Util/$(DEPDIR)/neosu-Quaternion.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Util/$(DEPDIR)/neosu-Rect.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Util/$(DEPDIR)/neosu-UString.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Util/$(DEPDIR)/neosu-crypto.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/Util/$(DEPDIR)/neosu-dynutils.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -4021,19 +4027,19 @@ src/Platform/Windows/neosu-WindowsMain.obj: src/Platform/Windows/WindowsMain.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Platform/Windows/neosu-WindowsMain.obj `if test -f 'src/Platform/Windows/WindowsMain.cpp'; then $(CYGPATH_W) 'src/Platform/Windows/WindowsMain.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Platform/Windows/WindowsMain.cpp'; fi`
 
-src/Platform/Windows/neosu-WindowsMainTEMP.o: src/Platform/Windows/WindowsMainTEMP.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Platform/Windows/neosu-WindowsMainTEMP.o -MD -MP -MF src/Platform/Windows/$(DEPDIR)/neosu-WindowsMainTEMP.Tpo -c -o src/Platform/Windows/neosu-WindowsMainTEMP.o `test -f 'src/Platform/Windows/WindowsMainTEMP.cpp' || echo '$(srcdir)/'`src/Platform/Windows/WindowsMainTEMP.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Platform/Windows/$(DEPDIR)/neosu-WindowsMainTEMP.Tpo src/Platform/Windows/$(DEPDIR)/neosu-WindowsMainTEMP.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Platform/Windows/WindowsMainTEMP.cpp' object='src/Platform/Windows/neosu-WindowsMainTEMP.o' libtool=no @AMDEPBACKSLASH@
+src/Platform/Windows/neosu-WindowsMain_aux.o: src/Platform/Windows/WindowsMain_aux.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Platform/Windows/neosu-WindowsMain_aux.o -MD -MP -MF src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain_aux.Tpo -c -o src/Platform/Windows/neosu-WindowsMain_aux.o `test -f 'src/Platform/Windows/WindowsMain_aux.cpp' || echo '$(srcdir)/'`src/Platform/Windows/WindowsMain_aux.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain_aux.Tpo src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain_aux.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Platform/Windows/WindowsMain_aux.cpp' object='src/Platform/Windows/neosu-WindowsMain_aux.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Platform/Windows/neosu-WindowsMainTEMP.o `test -f 'src/Platform/Windows/WindowsMainTEMP.cpp' || echo '$(srcdir)/'`src/Platform/Windows/WindowsMainTEMP.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Platform/Windows/neosu-WindowsMain_aux.o `test -f 'src/Platform/Windows/WindowsMain_aux.cpp' || echo '$(srcdir)/'`src/Platform/Windows/WindowsMain_aux.cpp
 
-src/Platform/Windows/neosu-WindowsMainTEMP.obj: src/Platform/Windows/WindowsMainTEMP.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Platform/Windows/neosu-WindowsMainTEMP.obj -MD -MP -MF src/Platform/Windows/$(DEPDIR)/neosu-WindowsMainTEMP.Tpo -c -o src/Platform/Windows/neosu-WindowsMainTEMP.obj `if test -f 'src/Platform/Windows/WindowsMainTEMP.cpp'; then $(CYGPATH_W) 'src/Platform/Windows/WindowsMainTEMP.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Platform/Windows/WindowsMainTEMP.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Platform/Windows/$(DEPDIR)/neosu-WindowsMainTEMP.Tpo src/Platform/Windows/$(DEPDIR)/neosu-WindowsMainTEMP.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Platform/Windows/WindowsMainTEMP.cpp' object='src/Platform/Windows/neosu-WindowsMainTEMP.obj' libtool=no @AMDEPBACKSLASH@
+src/Platform/Windows/neosu-WindowsMain_aux.obj: src/Platform/Windows/WindowsMain_aux.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Platform/Windows/neosu-WindowsMain_aux.obj -MD -MP -MF src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain_aux.Tpo -c -o src/Platform/Windows/neosu-WindowsMain_aux.obj `if test -f 'src/Platform/Windows/WindowsMain_aux.cpp'; then $(CYGPATH_W) 'src/Platform/Windows/WindowsMain_aux.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Platform/Windows/WindowsMain_aux.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain_aux.Tpo src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain_aux.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Platform/Windows/WindowsMain_aux.cpp' object='src/Platform/Windows/neosu-WindowsMain_aux.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Platform/Windows/neosu-WindowsMainTEMP.obj `if test -f 'src/Platform/Windows/WindowsMainTEMP.cpp'; then $(CYGPATH_W) 'src/Platform/Windows/WindowsMainTEMP.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Platform/Windows/WindowsMainTEMP.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Platform/Windows/neosu-WindowsMain_aux.obj `if test -f 'src/Platform/Windows/WindowsMain_aux.cpp'; then $(CYGPATH_W) 'src/Platform/Windows/WindowsMain_aux.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Platform/Windows/WindowsMain_aux.cpp'; fi`
 
 src/Platform/neosu-main.o: src/Platform/main.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Platform/neosu-main.o -MD -MP -MF src/Platform/$(DEPDIR)/neosu-main.Tpo -c -o src/Platform/neosu-main.o `test -f 'src/Platform/main.cpp' || echo '$(srcdir)/'`src/Platform/main.cpp
@@ -4104,6 +4110,20 @@ src/Util/neosu-crypto.obj: src/Util/crypto.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Util/crypto.cpp' object='src/Util/neosu-crypto.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Util/neosu-crypto.obj `if test -f 'src/Util/crypto.cpp'; then $(CYGPATH_W) 'src/Util/crypto.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Util/crypto.cpp'; fi`
+
+src/Util/neosu-dynutils.o: src/Util/dynutils.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Util/neosu-dynutils.o -MD -MP -MF src/Util/$(DEPDIR)/neosu-dynutils.Tpo -c -o src/Util/neosu-dynutils.o `test -f 'src/Util/dynutils.cpp' || echo '$(srcdir)/'`src/Util/dynutils.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Util/$(DEPDIR)/neosu-dynutils.Tpo src/Util/$(DEPDIR)/neosu-dynutils.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Util/dynutils.cpp' object='src/Util/neosu-dynutils.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Util/neosu-dynutils.o `test -f 'src/Util/dynutils.cpp' || echo '$(srcdir)/'`src/Util/dynutils.cpp
+
+src/Util/neosu-dynutils.obj: src/Util/dynutils.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Util/neosu-dynutils.obj -MD -MP -MF src/Util/$(DEPDIR)/neosu-dynutils.Tpo -c -o src/Util/neosu-dynutils.obj `if test -f 'src/Util/dynutils.cpp'; then $(CYGPATH_W) 'src/Util/dynutils.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Util/dynutils.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Util/$(DEPDIR)/neosu-dynutils.Tpo src/Util/$(DEPDIR)/neosu-dynutils.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Util/dynutils.cpp' object='src/Util/neosu-dynutils.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Util/neosu-dynutils.obj `if test -f 'src/Util/dynutils.cpp'; then $(CYGPATH_W) 'src/Util/dynutils.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Util/dynutils.cpp'; fi`
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
@@ -4580,11 +4600,12 @@ distclean: distclean-am
 	-rm -f src/Platform/Windows/$(DEPDIR)/neosu-WinEnvironment.Po
 	-rm -f src/Platform/Windows/$(DEPDIR)/neosu-WinGLLegacyInterface.Po
 	-rm -f src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain.Po
-	-rm -f src/Platform/Windows/$(DEPDIR)/neosu-WindowsMainTEMP.Po
+	-rm -f src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain_aux.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-Quaternion.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-Rect.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-UString.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-crypto.Po
+	-rm -f src/Util/$(DEPDIR)/neosu-dynutils.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-local distclean-tags
@@ -4784,11 +4805,12 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/Platform/Windows/$(DEPDIR)/neosu-WinEnvironment.Po
 	-rm -f src/Platform/Windows/$(DEPDIR)/neosu-WinGLLegacyInterface.Po
 	-rm -f src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain.Po
-	-rm -f src/Platform/Windows/$(DEPDIR)/neosu-WindowsMainTEMP.Po
+	-rm -f src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain_aux.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-Quaternion.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-Rect.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-UString.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-crypto.Po
+	-rm -f src/Util/$(DEPDIR)/neosu-dynutils.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic \
 	maintainer-clean-local

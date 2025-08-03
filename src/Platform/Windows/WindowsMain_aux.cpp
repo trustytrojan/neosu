@@ -17,6 +17,121 @@
 #include "Skin.h"
 #include "SongBrowser/SongBrowser.h"
 
+#include "dynutils.h"
+
+extern BOOL WINAPI pImmDisableIME(DWORD);
+enum PROCESS_DPI_AWARENESS {};  // NOLINT
+extern HRESULT WINAPI pSetProcessDpiAwareness(PROCESS_DPI_AWARENESS);
+extern WINUSERAPI BOOL WINAPI pEnableNonClientDpiScaling(HWND);
+
+using namespace dynutils;
+namespace {  // static
+
+bool s_pmdpia_supported;  // checked in wndproc on creation (WM_NCCREATE) for enabling
+                          // non-client dpi scaling, by setup_dpi_late
+
+lib_obj *combase_handle{nullptr};
+bool combase_loaded{false};
+
+bool setup_dpi_win81() {
+    HRESULT result = E_FAIL;
+
+    auto *shcore_handle =
+        reinterpret_cast<lib_obj *>(LoadLibraryEx(TEXT("shcore.dll"), NULL, LOAD_LIBRARY_SEARCH_SYSTEM32));
+    if(shcore_handle) {
+        auto spdpi_awareness_func = load_func<decltype(&pSetProcessDpiAwareness)>(shcore_handle, "SetProcessDpiAwareness");
+        if(spdpi_awareness_func) {
+            result = spdpi_awareness_func((PROCESS_DPI_AWARENESS)2);  // 2 == PROCESS_PER_MONITOR_DPI_AWARE
+        }
+        unload_lib(shcore_handle);
+    }
+
+    s_pmdpia_supported = (result == S_OK || result == E_ACCESSDENIED);
+
+    return s_pmdpia_supported;
+}
+
+void setup_dpi_vista() {
+    auto *user32_handle = reinterpret_cast<lib_obj *>(GetModuleHandle(TEXT("user32.dll")));
+    if(user32_handle) {
+        auto spdpi_aware_func = load_func<decltype(&SetProcessDPIAware)>(user32_handle, "SetProcessDPIAware");
+        if(spdpi_aware_func) {
+            spdpi_aware_func();
+        }
+    }
+}
+
+}  // namespace
+
+// these were pulled straight out of SDL3 (zlib licensed)
+HRESULT WindowsMain::Setup::com_init() {
+    HRESULT hr = E_FAIL;
+
+    if(!combase_loaded) {
+        combase_handle =
+            reinterpret_cast<lib_obj *>(LoadLibraryEx(TEXT("combase.dll"), NULL, LOAD_LIBRARY_SEARCH_SYSTEM32));
+        combase_loaded = true;
+    }
+
+    auto coinit_func = load_func<decltype(&CoInitializeEx)>(combase_handle, "CoInitializeEx");
+
+    if(coinit_func) {
+        hr = coinit_func(NULL, COINIT_APARTMENTTHREADED);
+        if(hr == RPC_E_CHANGED_MODE) {
+            hr = coinit_func(NULL, COINIT_MULTITHREADED);
+        }
+        if(hr == S_FALSE) {
+            return S_OK;
+        }
+    }
+
+    return hr;
+}
+
+void WindowsMain::Setup::com_uninit(void) {
+    if(combase_loaded) {
+        auto couninit_func = load_func<decltype(&CoUninitialize)>(combase_handle, "CoUninitialize");
+        if(couninit_func) {
+            couninit_func();
+        }
+        unload_lib(combase_handle);
+    }
+}
+
+void WindowsMain::Setup::disable_ime() {
+    auto *imm32_handle =
+        reinterpret_cast<lib_obj *>(LoadLibraryEx(TEXT("imm32.dll"), NULL, LOAD_LIBRARY_SEARCH_SYSTEM32));
+    if(imm32_handle) {
+        auto disable_ime_func = load_func<decltype(&pImmDisableIME)>(imm32_handle, "ImmDisableIME");
+        if(disable_ime_func) disable_ime_func(-1);
+        unload_lib(imm32_handle);
+    }
+}
+
+void WindowsMain::Setup::dpi_early() {
+    // Windows 8.1+
+    // per-monitor dpi scaling
+    if(!setup_dpi_win81()) {
+        // Windows Vista+
+        // system-wide dpi scaling
+        setup_dpi_vista();
+    }
+}
+
+// done in WM_NCCREATE
+void WindowsMain::Setup::dpi_late(HWND hwnd) {
+    if(s_pmdpia_supported) {
+        auto *user32_handle = reinterpret_cast<lib_obj *>(GetModuleHandle(TEXT("user32.dll")));
+        if(user32_handle) {
+            auto encdpiscale_func = load_func<decltype(&pEnableNonClientDpiScaling)>(user32_handle, "EnableNonClientDpiScaling");
+            if(encdpiscale_func) {
+                encdpiscale_func(hwnd);
+            }
+        }
+    }
+}
+
+// drag-drop/file associations/registry stuff below
 void WindowsMain::handle_osk(const char *osk_path) {
     Skin::unpack(osk_path);
 
@@ -35,7 +150,7 @@ void WindowsMain::handle_osz(const char *osz_path) {
         // path
         auto mapset_name = UString(env->getFileNameFromFilePath(osz_path).c_str());
         const std::vector<UString> tokens = mapset_name.split(" ");
-        for(auto token : tokens) {
+        for(const auto& token : tokens) {
             i32 id = token.toInt();
             if(id > 0) set_id = id;
         }

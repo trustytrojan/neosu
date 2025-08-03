@@ -21,12 +21,6 @@ class DirectoryCache;
 
 class File {
    public:
-#ifdef MCENGINE_PLATFORM_WINDOWS
-#define PREF_PATHSEP "\\"
-#else
-#define PREF_PATHSEP "/"
-#endif
-
     enum class TYPE : uint8_t { READ, WRITE };
 
     enum class FILETYPE : uint8_t { NONE, FILE, FOLDER, MAYBE_INSENSITIVE, OTHER };

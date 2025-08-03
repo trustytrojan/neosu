@@ -150,10 +150,11 @@ neosu_SOURCES = \
 	src/Platform/Windows/WinEnvironment.cpp \
 	src/Platform/Windows/WinGLLegacyInterface.cpp \
 	src/Platform/Windows/WindowsMain.cpp \
-	src/Platform/Windows/WindowsMainTEMP.cpp \
+	src/Platform/Windows/WindowsMain_aux.cpp \
 	src/Platform/main.cpp \
 	src/Util/Quaternion.cpp \
 	src/Util/Rect.cpp \
 	src/Util/UString.cpp \
 	src/Util/crypto.cpp \
+	src/Util/dynutils.cpp \
 $(NULL)
