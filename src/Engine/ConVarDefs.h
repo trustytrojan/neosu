@@ -236,6 +236,7 @@ CONVAR(beatmap_version, "osu_beatmap_version", 128, FCVAR_BANCHO_COMPATIBLE,
        "maximum supported .osu file version, above this will simply not load (this was 14 but got "
        "bumped to 128 due to lazer backports)");
 CONVAR(bleedingedge, "bleedingedge", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
+CONVAR(force_update, "force_update", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_NOSAVE);
 CONVAR(bug_flicker_log, "osu_bug_flicker_log", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(chat_auto_hide, "chat_auto_hide", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "automatically hide chat during gameplay");
