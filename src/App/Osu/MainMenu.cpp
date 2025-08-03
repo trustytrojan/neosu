@@ -444,13 +444,18 @@ void MainMenu::draw() {
 
     // draw update check button
     if(this->updateAvailableButton != NULL) {
-        if(osu->getUpdateHandler()->getStatus() == UpdateHandler::STATUS::STATUS_SUCCESS_INSTALLATION) {
+        using enum UpdateHandler::STATUS;
+        const auto status = osu->getUpdateHandler()->getStatus();
+        const bool drawAnim = (status == STATUS_SUCCESS_INSTALLATION || status == STATUS_DOWNLOAD_COMPLETE);
+        if(drawAnim) {
             g->push3DScene(McRect(this->updateAvailableButton->getPos().x, this->updateAvailableButton->getPos().y,
                                   this->updateAvailableButton->getSize().x, this->updateAvailableButton->getSize().y));
             g->rotate3DScene(this->fUpdateButtonAnim * 360.0f, 0, 0);
         }
         this->updateAvailableButton->draw();
-        if(osu->getUpdateHandler()->getStatus() == UpdateHandler::STATUS::STATUS_SUCCESS_INSTALLATION) g->pop3DScene();
+        if(drawAnim) {
+            g->pop3DScene();
+        }
     }
 
     // draw main button
@@ -974,38 +979,60 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
                 break;
             case UpdateHandler::STATUS::STATUS_CHECKING_FOR_UPDATE:
                 this->updateAvailableButton->setText("Checking for updates ...");
+                this->updateAvailableButton->setColor(0x2200ff00);
                 break;
             case UpdateHandler::STATUS::STATUS_DOWNLOADING_UPDATE:
                 this->updateAvailableButton->setText("Downloading ...");
+                this->updateAvailableButton->setColor(0x2200ff00);
+                break;
+            case UpdateHandler::STATUS::STATUS_DOWNLOAD_COMPLETE:
+                if(engine->getTime() > this->fUpdateButtonTextTime && anim->isAnimating(&this->fUpdateButtonAnim) &&
+                   this->fUpdateButtonAnim > 0.175f) {
+                    this->fUpdateButtonTextTime = this->fUpdateButtonAnimTime;
+
+                    this->updateAvailableButton->setColor(rgb(0, 150, 230));
+                    this->updateAvailableButton->setTextColor(0xffffffff);
+
+                    if(this->updateAvailableButton->getText().find("ready") != -1)
+                        this->updateAvailableButton->setText("Click here to install the update!");
+                    else
+                        this->updateAvailableButton->setText("A new version of neosu is ready!");
+                }
                 break;
             case UpdateHandler::STATUS::STATUS_INSTALLING_UPDATE:
                 this->updateAvailableButton->setText("Installing ...");
+                this->updateAvailableButton->setColor(0x2200ff00);
                 break;
             case UpdateHandler::STATUS::STATUS_SUCCESS_INSTALLATION:
                 if(engine->getTime() > this->fUpdateButtonTextTime && anim->isAnimating(&this->fUpdateButtonAnim) &&
                    this->fUpdateButtonAnim > 0.175f) {
                     this->fUpdateButtonTextTime = this->fUpdateButtonAnimTime;
 
-                    this->updateAvailableButton->setColor(0xff00ff00);
+                    this->updateAvailableButton->setColor(rgb(0, 255, 0));
                     this->updateAvailableButton->setTextColor(0xffffffff);
 
-                    if(this->updateAvailableButton->getText().find("ready") != -1)
+                    if(this->updateAvailableButton->getText().find("installed") != -1)
                         this->updateAvailableButton->setText("Click here to restart now!");
                     else
-                        this->updateAvailableButton->setText("A new version of neosu is ready!");
+                        this->updateAvailableButton->setText("Update installed!");
                 }
                 break;
             case UpdateHandler::STATUS::STATUS_ERROR:
                 this->updateAvailableButton->setText("Update Error! Click to retry ...");
+                this->updateAvailableButton->setColor(rgb(255, 0, 0));
                 break;
         }
     }
 
-    if(osu->getUpdateHandler()->getStatus() == UpdateHandler::STATUS::STATUS_SUCCESS_INSTALLATION &&
-       engine->getTime() > this->fUpdateButtonAnimTime) {
-        this->fUpdateButtonAnimTime = engine->getTime() + 3.0f;
-        this->fUpdateButtonAnim = 0.0f;
-        anim->moveQuadInOut(&this->fUpdateButtonAnim, 1.0f, 0.5f, true);
+    {
+        using enum UpdateHandler::STATUS;
+        const auto status = osu->getUpdateHandler()->getStatus();
+        if((status == STATUS_SUCCESS_INSTALLATION || status == STATUS_DOWNLOAD_COMPLETE) &&
+           engine->getTime() > this->fUpdateButtonAnimTime) {
+            this->fUpdateButtonAnimTime = engine->getTime() + 3.0f;
+            this->fUpdateButtonAnim = 0.0f;
+            anim->moveQuadInOut(&this->fUpdateButtonAnim, 1.0f, 0.5f, true);
+        }
     }
 
     // Update pause button and shuffle songs
@@ -1433,10 +1460,16 @@ void MainMenu::onPausePressed() {
 }
 
 void MainMenu::onUpdatePressed() {
-    if(osu->getUpdateHandler()->getStatus() == UpdateHandler::STATUS::STATUS_SUCCESS_INSTALLATION)
+    using enum UpdateHandler::STATUS;
+    auto *updateHandler = osu->getUpdateHandler();
+    const auto status = updateHandler->getStatus();
+
+    if(status == STATUS_DOWNLOAD_COMPLETE)
+        updateHandler->installUpdate();
+    else if(status == STATUS_SUCCESS_INSTALLATION)
         engine->restart();
-    else if(osu->getUpdateHandler()->getStatus() == UpdateHandler::STATUS::STATUS_ERROR)
-        osu->getUpdateHandler()->checkForUpdates();
+    else if(status == STATUS_ERROR)
+        updateHandler->checkForUpdates();
 }
 
 void MainMenu::onVersionPressed() {

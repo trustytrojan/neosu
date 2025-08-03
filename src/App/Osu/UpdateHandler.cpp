@@ -1,27 +1,64 @@
-#ifndef _WIN32
-#include <sys/stat.h>
-#include <sys/types.h>
-#endif
+#include "UpdateHandler.h"
 
 #include "Archival.h"
 #include "BanchoNetworking.h"
 #include "ConVar.h"
+#include "crypto.h"
 #include "Engine.h"
 #include "File.h"
 #include "NetworkHandler.h"
 #include "SString.h"
 #include "Osu.h"
-#include "ResourceManager.h"
-#include "UpdateHandler.h"
+
+#ifndef _WIN32
+#include <sys/stat.h>
+#include <sys/types.h>
+#endif
+
+#include <fstream>
+#include <iomanip>
+#include <sstream>
+
+using enum UpdateHandler::STATUS;
+
+void UpdateHandler::onBleedingEdgeChanged(float oldVal, float newVal) {
+    const bool oldState = !!static_cast<int>(oldVal);
+    const bool newState = !!static_cast<int>(newVal);
+
+    if(oldState == newState) return;
+
+    const auto status = this->getStatus();
+    const bool allowChange =
+        (status == STATUS_UP_TO_DATE || status == STATUS_DOWNLOAD_COMPLETE || status == STATUS_ERROR);
+    if(allowChange) {
+        if(newState) {
+            this->updateArchiveName = "update-bleeding-" OS_NAME ".zip";
+            this->updateCacheInfoPath = "update_cache-bleeding-" OS_NAME ".txt";
+        } else {
+            this->updateArchiveName = "update-" OS_NAME ".zip";
+            this->updateCacheInfoPath = "update_cache-" OS_NAME ".txt";
+        }
+        this->status = STATUS_UP_TO_DATE;
+        this->iNumRetries = 0;
+        this->checkForUpdates();
+    } else {
+        debugLog("Can't change release stream while an update is in progress!\n");
+        cv::bleedingedge.setValue(oldState, false);
+    }
+}
 
 UpdateHandler::UpdateHandler() {
     this->update_url = "";
-    this->status = STATUS::STATUS_UP_TO_DATE;
+    this->status = STATUS_UP_TO_DATE;
     this->iNumRetries = 0;
+    this->currentVersionContent = "";
+    this->updateArchiveName = "update-" OS_NAME ".zip";
+    this->updateCacheInfoPath = "update_cache-" OS_NAME ".txt";
+    cv::bleedingedge.setCallback(SA::MakeDelegate<&UpdateHandler::onBleedingEdgeChanged>(this));
 }
 
 void UpdateHandler::checkForUpdates() {
-    this->status = STATUS::STATUS_CHECKING_FOR_UPDATE;
+    this->status = STATUS_CHECKING_FOR_UPDATE;
 
     UString versionUrl = "https://" NEOSU_DOMAIN;
     if(cv::bleedingedge.getBool()) {
@@ -46,10 +83,13 @@ void UpdateHandler::checkForUpdates() {
 
 void UpdateHandler::onVersionCheckComplete(const std::string &response, bool success) {
     if(!success || response.empty()) {
-        this->status = STATUS::STATUS_UP_TO_DATE;
+        this->status = STATUS_UP_TO_DATE;
         debugLog("UpdateHandler ERROR: Failed to check for updates :/\n");
         return;
     }
+
+    // store version content for cache operations
+    this->currentVersionContent = response;
 
     auto lines = SString::split(response, "\n");
     f32 latest_version = strtof(lines[0].c_str(), NULL);
@@ -59,18 +99,25 @@ void UpdateHandler::onVersionCheckComplete(const std::string &response, bool suc
     }
 
     if(latest_version == 0.f && latest_build_tms == 0) {
-        this->status = STATUS::STATUS_UP_TO_DATE;
+        this->status = STATUS_UP_TO_DATE;
         debugLog("UpdateHandler ERROR: Failed to parse version number\n");
         return;
     }
 
     u64 current_build_tms = cv::build_timestamp.getU64();
-    bool should_update = (cv::version.getFloat() < latest_version) || (current_build_tms < latest_build_tms);
+    bool should_update = true; //(cv::version.getFloat() < latest_version) || (current_build_tms < latest_build_tms);
     if(!should_update) {
         // We're already up to date
-        this->status = STATUS::STATUS_UP_TO_DATE;
+        this->status = STATUS_UP_TO_DATE;
         debugLog("UpdateHandler: We're already up to date (current v{:.2f} ({:d}), latest v{:.2f} ({:d}))\n",
                  cv::version.getFloat(), current_build_tms, latest_version, latest_build_tms);
+        return;
+    }
+
+    // check if we have a cached update that matches this version
+    if(this->isCachedUpdateValid(response)) {
+        debugLog("UpdateHandler: Found valid cached update, skipping download\n");
+        this->status = STATUS_DOWNLOAD_COMPLETE;
         return;
     }
 
@@ -89,7 +136,7 @@ void UpdateHandler::onVersionCheckComplete(const std::string &response, bool suc
 
 void UpdateHandler::downloadUpdate() {
     debugLog("UpdateHandler: Downloading {:s}\n", this->update_url.toUtf8());
-    this->status = STATUS::STATUS_DOWNLOADING_UPDATE;
+    this->status = STATUS_DOWNLOADING_UPDATE;
 
     NetworkHandler::RequestOptions options;
     options.timeout = 300;  // 5 minutes for large downloads
@@ -105,7 +152,7 @@ void UpdateHandler::downloadUpdate() {
 void UpdateHandler::onDownloadComplete(const std::string &data, bool success) {
     if(!success || data.length() < 2) {
         debugLog("UpdateHandler ERROR: downloaded file is too small or failed ({:d} bytes)!\n", data.length());
-        this->status = STATUS::STATUS_ERROR;
+        this->status = STATUS_ERROR;
 
         // retry logic
         this->iNumRetries++;
@@ -117,16 +164,19 @@ void UpdateHandler::onDownloadComplete(const std::string &data, bool success) {
 
     // write to disk
     debugLog("UpdateHandler: Downloaded file has {:d} bytes, writing ...\n", data.length());
-    std::ofstream file(TEMP_UPDATE_DOWNLOAD_FILEPATH, std::ios::out | std::ios::binary);
+    std::ofstream file(this->updateArchiveName, std::ios::out | std::ios::binary);
     if(file.good()) {
         file.write(data.data(), static_cast<std::streamsize>(data.length()));
         file.close();
 
         debugLog("UpdateHandler: Update finished successfully.\n");
-        this->installUpdate(TEMP_UPDATE_DOWNLOAD_FILEPATH);
+        this->status = STATUS_DOWNLOAD_COMPLETE;
+
+        // save cache info for future use
+        this->saveCacheInfo(this->currentVersionContent);
     } else {
         debugLog("UpdateHandler ERROR: Can't write file!\n");
-        this->status = STATUS::STATUS_ERROR;
+        this->status = STATUS_ERROR;
 
         // retry logic
         this->iNumRetries++;
@@ -136,27 +186,31 @@ void UpdateHandler::onDownloadComplete(const std::string &data, bool success) {
     }
 }
 
-void UpdateHandler::installUpdate(const std::string &zipFilePath) {
-    debugLog("UpdateHandler: installing {:s}\n", zipFilePath.c_str());
-    this->status = STATUS::STATUS_INSTALLING_UPDATE;
+void UpdateHandler::installUpdate() {
+    if(this->getStatus() != STATUS_DOWNLOAD_COMPLETE) {
+        debugLog("UpdateHandler: not ready! current status: {}\n", static_cast<uint8_t>(this->getStatus()));
+        return;
+    }
+    debugLog("UpdateHandler: installing {:s}\n", this->updateArchiveName);
+    this->status = STATUS_INSTALLING_UPDATE;
 
-    if(!env->fileExists(zipFilePath)) {
-        debugLog("UpdateHandler ERROR: \"{:s}\" does not exist!\n", zipFilePath.c_str());
-        this->status = STATUS::STATUS_ERROR;
+    if(!env->fileExists(this->updateArchiveName)) {
+        debugLog("UpdateHandler ERROR: \"{:s}\" does not exist!\n", this->updateArchiveName);
+        this->status = STATUS_ERROR;
         return;
     }
 
-    Archive archive(zipFilePath);
+    Archive archive(this->updateArchiveName);
     if(!archive.isValid()) {
         debugLog("UpdateHandler ERROR: couldn't open archive!\n");
-        this->status = STATUS::STATUS_ERROR;
+        this->status = STATUS_ERROR;
         return;
     }
 
     auto entries = archive.getAllEntries();
     if(entries.empty()) {
         debugLog("UpdateHandler ERROR: archive is empty!\n");
-        this->status = STATUS::STATUS_ERROR;
+        this->status = STATUS_ERROR;
         return;
     }
 
@@ -165,7 +219,7 @@ void UpdateHandler::installUpdate(const std::string &zipFilePath) {
     std::vector<Archive::Entry> files, dirs;
     for(const auto &entry : entries) {
         auto fileName = entry.getFilename();
-        if(fileName.find(mainDirectory) != 0) {
+        if(!fileName.starts_with(mainDirectory)) {
             debugLog("UpdateHandler WARNING: Ignoring \"{:s}\" because it's not in the main dir!\n", fileName.c_str());
             continue;
         }
@@ -176,8 +230,8 @@ void UpdateHandler::installUpdate(const std::string &zipFilePath) {
             files.push_back(entry);
         }
 
-        debugLog("UpdateHandler: Filename: \"{:s}\", isDir: {:d}, uncompressed size: {:d}\n", entry.getFilename().c_str(),
-                 (int)entry.isDirectory(), (unsigned int)entry.getUncompressedSize());
+        debugLog("UpdateHandler: Filename: \"{:s}\", isDir: {}, uncompressed size: {}\n", entry.getFilename().c_str(),
+                 entry.isDirectory(), entry.getUncompressedSize());
     }
 
     // repair/create missing/new dirs
@@ -216,11 +270,96 @@ void UpdateHandler::installUpdate(const std::string &zipFilePath) {
                 env->deleteFile(outFilePath);
                 env->renameFile(old_path, outFilePath);
             }
-            this->status = STATUS::STATUS_ERROR;
+            this->status = STATUS_ERROR;
             return;
         }
     }
 
-    this->status = STATUS::STATUS_SUCCESS_INSTALLATION;
-    env->deleteFile(zipFilePath);
+    this->status = STATUS_SUCCESS_INSTALLATION;
+    env->deleteFile(this->updateArchiveName);
+    env->deleteFile(this->updateCacheInfoPath);  // clear cache after successful installation
+}
+
+std::string UpdateHandler::calculateUpdateHash(const std::string &versionContent) {
+    if(!env->fileExists(this->updateArchiveName)) {
+        return "";
+    }
+
+    // read zip file content
+    std::ifstream zipFile(this->updateArchiveName, std::ios::binary);
+    if(!zipFile.good()) {
+        return "";
+    }
+
+    std::string zipContent((std::istreambuf_iterator<char>(zipFile)), std::istreambuf_iterator<char>());
+    zipFile.close();
+
+    // combine version and zip content
+    std::string combined = versionContent + zipContent;
+
+    // get sha256
+    std::array<u8, 32> hash{};
+    crypto::hash::sha256(combined.data(), combined.size(), hash.data());
+
+    std::stringstream ss;
+    for(unsigned char i : hash) {
+        ss << std::hex << std::setfill('0') << std::setw(2) << static_cast<unsigned>(i);
+    }
+
+    return ss.str();
+}
+
+void UpdateHandler::saveCacheInfo(const std::string &versionContent) {
+    std::string hash = this->calculateUpdateHash(versionContent);
+    if(hash.empty()) {
+        debugLog("UpdateHandler: Failed to calculate hash for cache\n");
+        return;
+    }
+
+    std::ofstream cacheFile(this->updateCacheInfoPath);
+    if(cacheFile.good()) {
+        cacheFile << hash;
+        cacheFile.close();
+        debugLog("UpdateHandler: Saved cache info with hash: {:s}\n", hash.c_str());
+    } else {
+        debugLog("UpdateHandler: Failed to save cache info\n");
+    }
+}
+
+bool UpdateHandler::isCachedUpdateValid(const std::string &versionContent) {
+    // check if cache file exists
+    if(!env->fileExists(this->updateCacheInfoPath)) {
+        return false;
+    }
+
+    // check if zip file exists
+    if(!env->fileExists(this->updateArchiveName)) {
+        return false;
+    }
+
+    // read cached hash
+    std::ifstream cacheFile(this->updateCacheInfoPath);
+    if(!cacheFile.good()) {
+        return false;
+    }
+
+    std::string cachedHash;
+    std::getline(cacheFile, cachedHash);
+    cacheFile.close();
+
+    if(cachedHash.empty()) {
+        return false;
+    }
+
+    // calculate current hash
+    std::string currentHash = this->calculateUpdateHash(versionContent);
+    if(currentHash.empty()) {
+        return false;
+    }
+
+    const bool isValid = (cachedHash == currentHash);
+    debugLog("UpdateHandler: Cache validation - cached: {:s}, current: {:s}, valid: {}\n", cachedHash.c_str(),
+             currentHash.c_str(), isValid);
+
+    return isValid;
 }
