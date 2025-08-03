@@ -13,6 +13,7 @@ enum UserActions : uint8_t {
     INVITE_TO_GAME,
     UA_ADD_FRIEND,
     UA_REMOVE_FRIEND,
+    VIEW_TOP_PLAYS,
 };
 
 class UIUserContextMenuScreen : public OsuScreen {
@@ -22,12 +23,12 @@ class UIUserContextMenuScreen : public OsuScreen {
     void onResolutionChange(Vector2 newResolution) override;
     virtual void stealFocus();
 
-    void open(i32 user_id);
+    void open(i32 user_id, bool is_song_browser_button = false);
     void close();
     void on_action(const UString& text, int user_action);
 
     i32 user_id;
-    UIContextMenu *menu = NULL;
+    UIContextMenu* menu = NULL;
 };
 
 class UIUserLabel : public CBaseUILabel {

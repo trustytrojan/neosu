@@ -292,7 +292,7 @@ void MainMenu::draw() {
 
     // load server icon
     if(bancho->is_online() && bancho->server_icon_url.length() > 0 && bancho->server_icon == NULL) {
-        std::string icon_path = fmt::format(MCENGINE_DATA_DIR "avatars/{:s}", bancho->endpoint.toUtf8());
+        std::string icon_path = fmt::format(MCENGINE_DATA_DIR "avatars/{}", bancho->endpoint);
         if(!env->directoryExists(icon_path)) {
             env->createDirectory(icon_path);
         }

@@ -74,12 +74,12 @@ void Bancho::handle_packet(Packet *packet) {
             cv::mp_autologin.setValue(true);
             this->print_new_channels = true;
 
-            std::string avatar_dir = fmt::format(MCENGINE_DATA_DIR "avatars/{:s}", this->endpoint.toUtf8());
+            std::string avatar_dir = fmt::format(MCENGINE_DATA_DIR "avatars/{}", this->endpoint);
             if(!env->directoryExists(avatar_dir)) {
                 env->createDirectory(avatar_dir);
             }
 
-            std::string replays_dir = fmt::format(MCENGINE_DATA_DIR "replays/{:s}", this->endpoint.toUtf8());
+            std::string replays_dir = fmt::format(MCENGINE_DATA_DIR "replays/{}", this->endpoint);
             if(!env->directoryExists(replays_dir)) {
                 env->createDirectory(replays_dir);
             }
@@ -524,7 +524,9 @@ Packet Bancho::build_login_packet() {
 }
 
 bool Bancho::can_submit_scores() const {
-    if(this->score_submission_policy == ServerPolicy::NO_PREFERENCE) {
+    if(!this->is_online()) {
+        return false;
+    } else if(this->score_submission_policy == ServerPolicy::NO_PREFERENCE) {
         return cv::submit_scores.getBool();
     } else if(this->score_submission_policy == ServerPolicy::YES) {
         return true;

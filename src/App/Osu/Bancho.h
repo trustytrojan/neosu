@@ -28,7 +28,7 @@ struct Bancho final {
 
     UString neosu_version;
 
-    UString endpoint;
+    std::string endpoint;
     i32 user_id{0};
     UString username;
     MD5Hash pw_md5;

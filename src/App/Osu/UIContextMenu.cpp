@@ -245,6 +245,8 @@ void UIContextMenu::end(bool invertAnimation, bool clampUnderflowAndOverflowAndE
     const int margin = 9 * Osu::getUIScale();
 
     const std::vector<CBaseUIElement *> &elements = this->getContainer()->getElements();
+    if(elements.empty()) return;
+
     for(auto element : elements) {
         element->setSizeX(this->iWidthCounter - 2 * margin);
     }

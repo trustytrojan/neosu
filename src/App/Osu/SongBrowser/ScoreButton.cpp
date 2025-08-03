@@ -31,12 +31,14 @@
 #include "TooltipOverlay.h"
 #include "UIAvatar.h"
 #include "UIContextMenu.h"
+#include "UserStatsScreen.h"
 
 UString ScoreButton::recentScoreIconString;
 
-ScoreButton::ScoreButton(UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize)
+ScoreButton::ScoreButton(UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize, STYLE style)
     : CBaseUIButton(xPos, yPos, xSize, ySize, "", "") {
     this->contextMenu = contextMenu;
+    this->style = style;
 
     if(recentScoreIconString.length() < 1) recentScoreIconString.insert(0, Icons::ARROW_CIRCLE_UP);
 
@@ -61,24 +63,30 @@ void ScoreButton::draw() {
     if(!this->bVisible) return;
 
     // background
-    // XXX: Make it flash with song BPM
-    g->setColor(0xff000000);
-    g->setAlpha(0.59f * (0.5f + 0.5f * this->fIndexNumberAnim));
-    Image *backgroundImage = osu->getSkin()->getMenuButtonBackground();
-    g->pushTransform();
-    {
-        auto screen = osu->getScreenSize();
-        bool is_widescreen = ((i32)(std::max(0, (i32)((screen.x - (screen.y * 4.f / 3.f)) / 2.f))) > 0);
-        f32 global_scale = screen.x / (is_widescreen ? 1366.f : 1024.f);
+    if(this->style == STYLE::SONG_BROWSER) {
+        // XXX: Make it flash with song BPM
+        g->setColor(0xff000000);
+        g->setAlpha(0.59f * (0.5f + 0.5f * this->fIndexNumberAnim));
+        Image *backgroundImage = osu->getSkin()->getMenuButtonBackground();
+        g->pushTransform();
+        {
+            auto screen = osu->getScreenSize();
+            bool is_widescreen = ((i32)(std::max(0, (i32)((screen.x - (screen.y * 4.f / 3.f)) / 2.f))) > 0);
+            f32 global_scale = screen.x / (is_widescreen ? 1366.f : 1024.f);
 
-        f32 scale = global_scale * (osu->getSkin()->isMenuButtonBackground2x() ? 0.5f : 1.f);
-        scale *= 0.555f;  // idk
+            f32 scale = global_scale * (osu->getSkin()->isMenuButtonBackground2x() ? 0.5f : 1.f);
+            scale *= 0.555f;  // idk
 
-        g->scale(scale, scale);
-        g->translate(this->vPos.x, this->vPos.y + this->vSize.y / 2);
-        g->drawImage(backgroundImage, AnchorPoint::LEFT);
+            g->scale(scale, scale);
+            g->translate(this->vPos.x, this->vPos.y + this->vSize.y / 2);
+            g->drawImage(backgroundImage, AnchorPoint::LEFT);
+        }
+        g->popTransform();
+    } else if(this->style == STYLE::TOP_RANKS) {
+        g->setColor(0xff666666);  // from 33413c to 4e7466
+        g->setAlpha(0.59f * (0.5f + 0.5f * this->fIndexNumberAnim));
+        g->fillRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
     }
-    g->popTransform();
 
     const int yPos = (int)this->vPos.y;  // avoid max shimmering
 
@@ -98,7 +106,7 @@ void ScoreButton::draw() {
         this->avatar->draw_avatar(1.f);
     }
     const float indexNumberScale = 0.35f;
-    const float indexNumberWidthPercent = 0.15f;
+    const float indexNumberWidthPercent = (this->style == STYLE::TOP_RANKS ? 0.075f : 0.15f);
     McFont *indexNumberFont = osu->getSongBrowserFontBold();
     g->pushTransform();
     {
@@ -141,17 +149,17 @@ void ScoreButton::draw() {
     const float gradePaddingRight = this->vSize.y * 0.165f;
 
     // username | (artist + songName + diffName)
-    const float usernameScale = 0.7f;
+    const float usernameScale = (this->style == STYLE::TOP_RANKS ? 0.6f : 0.7f);
     McFont *usernameFont = osu->getSongBrowserFont();
     g->pushClipRect(McRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y));
     g->pushTransform();
     {
         const float height = this->vSize.y * 0.5f;
-        const float paddingTopPercent = (1.0f - usernameScale) * 0.4f;
+        const float paddingTopPercent = (1.0f - usernameScale) * (this->style == STYLE::TOP_RANKS ? 0.15f : 0.4f);
         const float paddingTop = height * paddingTopPercent;
         const float scale = (height / usernameFont->getHeight()) * usernameScale;
 
-        UString &string = this->sScoreUsername;
+        UString &string = (this->style == STYLE::TOP_RANKS ? this->sScoreTitle : this->sScoreUsername);
 
         g->scale(scale, scale);
         g->translate((int)(this->vPos.x + this->vSize.x * indexNumberWidthPercent + gradeWidth + gradePaddingRight),
@@ -174,11 +182,11 @@ void ScoreButton::draw() {
     g->pushTransform();
     {
         const float height = this->vSize.y * 0.5f;
-        const float paddingBottomPercent = (1.0f - scoreScale) * 0.25f;
+        const float paddingBottomPercent = (1.0f - scoreScale) * (this->style == STYLE::TOP_RANKS ? 0.1f : 0.25f);
         const float paddingBottom = height * paddingBottomPercent;
         const float scale = (height / scoreFont->getHeight()) * scoreScale;
 
-        UString &string = this->sScoreScorePP;
+        UString &string = (this->style == STYLE::TOP_RANKS ? this->sScoreScorePPWeightedPP : this->sScoreScorePP);
 
         g->scale(scale, scale);
         g->translate((int)(this->vPos.x + this->vSize.x * indexNumberWidthPercent + gradeWidth + gradePaddingRight),
@@ -186,15 +194,27 @@ void ScoreButton::draw() {
         g->translate(0.75f, 0.75f);
         g->setColor(0xff000000);
         g->setAlpha(0.75f);
-        g->drawString(scoreFont, (cv::scores_sort_by_pp.getBool() ? string : this->sScoreScore));
+        const auto &scoreStr = (this->style == STYLE::TOP_RANKS ? string : this->sScoreScore);
+        g->drawString(scoreFont, (cv::scores_sort_by_pp.getBool() ? string : scoreStr));
         g->translate(-0.75f, -0.75f);
-        g->setColor(0xffffffff);
-        g->drawString(scoreFont, (cv::scores_sort_by_pp.getBool() ? string : this->sScoreScore));
+        g->setColor((this->style == STYLE::TOP_RANKS ? 0xffdeff87 : 0xffffffff));
+        g->drawString(scoreFont, (cv::scores_sort_by_pp.getBool() ? string : scoreStr));
+
+        if(this->style == STYLE::TOP_RANKS) {
+            g->translate(scoreFont->getStringWidth(string) * scale, 0);
+            g->translate(0.75f, 0.75f);
+            g->setColor(0xff000000);
+            g->setAlpha(0.75f);
+            g->drawString(scoreFont, this->sScoreScorePPWeightedWeight);
+            g->translate(-0.75f, -0.75f);
+            g->setColor(0xffbbbbbb);
+            g->drawString(scoreFont, this->sScoreScorePPWeightedWeight);
+        }
     }
     g->popTransform();
 
     const float rightSideThirdHeight = this->vSize.y * 0.333f;
-    const float rightSidePaddingRight = this->vSize.x * 0.025f;
+    const float rightSidePaddingRight = (this->style == STYLE::TOP_RANKS ? 5 : this->vSize.x * 0.025f);
 
     // mods
     const float modScale = 0.7f;
@@ -225,7 +245,8 @@ void ScoreButton::draw() {
     McFont *accFont = osu->getSubTitleFont();
     g->pushTransform();
     {
-        const UString &scoreAccuracy = this->sScoreAccuracy;
+        const UString &scoreAccuracy =
+            (this->style == STYLE::TOP_RANKS ? this->sScoreAccuracyFC : this->sScoreAccuracy);
 
         const float height = rightSideThirdHeight;
         const float paddingTopPercent = (1.0f - modScale) * 0.45f;
@@ -241,13 +262,13 @@ void ScoreButton::draw() {
         g->setAlpha(0.75f);
         g->drawString(accFont, scoreAccuracy);
         g->translate(-0.75f, -0.75f);
-        g->setColor(0xffffffff);
+        g->setColor((this->style == STYLE::TOP_RANKS ? 0xffffcc22 : 0xffffffff));
         g->drawString(accFont, scoreAccuracy);
     }
     g->popTransform();
 
     // custom info (Spd.)
-    if(this->sCustom.length() > 0) {
+    if(this->style == STYLE::SONG_BROWSER && this->sCustom.length() > 0) {
         const float customScale = 0.50f;
         McFont *customFont = osu->getSubTitleFont();
         g->pushTransform();
@@ -272,6 +293,32 @@ void ScoreButton::draw() {
         g->popTransform();
     }
 
+    if(this->style == STYLE::TOP_RANKS) {
+        // weighted percent
+        const float weightScale = 0.65f;
+        McFont *weightFont = osu->getSubTitleFont();
+        g->pushTransform();
+        {
+            const float height = rightSideThirdHeight;
+            const float paddingBottomPercent = (1.0f - weightScale) * 0.05f;
+            const float paddingBottom = height * paddingBottomPercent;
+            const float scale = (height / weightFont->getHeight()) * weightScale;
+
+            g->scale(scale, scale);
+            g->translate((int)(this->vPos.x + this->vSize.x - weightFont->getStringWidth(this->sScoreWeight) * scale -
+                               rightSidePaddingRight),
+                         (int)(yPos + height * 2.5f + weightFont->getHeight() * scale / 2.0f - paddingBottom));
+            g->translate(0.75f, 0.75f);
+            g->setColor(0xff000000);
+            g->setAlpha(0.75f);
+            g->drawString(weightFont, this->sScoreWeight);
+            g->translate(-0.75f, -0.75f);
+            g->setColor(0xff999999);
+            g->drawString(weightFont, this->sScoreWeight);
+        }
+        g->popTransform();
+    }
+
     // recent icon + elapsed time since score
     const float upIconScale = 0.35f;
     const float timeElapsedScale = accScale;
@@ -280,7 +327,8 @@ void ScoreButton::draw() {
     if(this->iScoreUnixTimestamp > 0) {
         const float iconScale = (this->vSize.y / iconFont->getHeight()) * upIconScale;
         const float iconHeight = iconFont->getHeight() * iconScale;
-        const float iconPaddingLeft = 2;
+        f32 iconPaddingLeft = 2;
+        if(this->style == STYLE::TOP_RANKS) iconPaddingLeft += this->vSize.y * 0.125f;
 
         g->pushTransform();
         {
@@ -322,6 +370,11 @@ void ScoreButton::draw() {
     }
 
     // TODO: difference to below score in list, +12345
+
+    if(this->style == STYLE::TOP_RANKS) {
+        g->setColor(0xff111111);
+        g->drawRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
+    }
 }
 
 void ScoreButton::mouse_update(bool *propagate_clicks) {
@@ -455,7 +508,7 @@ void ScoreButton::updateElapsedTimeString() {
         const u64 deltaInDays = deltaInHours / 24;
         const u64 deltaInYears = deltaInDays / 365;
 
-        if(deltaInHours < 96) {
+        if(deltaInHours < 96 || this->style == STYLE::TOP_RANKS) {
             if(deltaInDays > 364)
                 this->sScoreTime = UString::format("%iy", (int)(deltaInYears));
             else if(deltaInHours > 47)
@@ -541,6 +594,14 @@ void ScoreButton::onRightMouseUpInside() {
 }
 
 void ScoreButton::onContextMenu(const UString &text, int id) {
+    if(osu->userStats->isVisible()) {
+        auto score = this->getScore();
+        osu->userStats->setVisible(false);
+
+        auto song_button = (Button *)osu->getSongBrowser()->hashToSongButton[score.beatmap_hash];
+        osu->getSongBrowser()->selectSongButton(song_button);
+    }
+
     if(id == 1) {
         this->onUseModsClicked();
         return;
@@ -593,10 +654,12 @@ void ScoreButton::onDeleteScoreConfirmed(const UString & /*text*/, int id) {
 
     // absolutely disgusting
     osu->getSongBrowser()->onScoreContextMenu(this, 2);
+
+    osu->userStats->rebuildScoreButtons();
 }
 
-void ScoreButton::setScore(const FinishedScore &score, DatabaseBeatmap *diff2, int index,
-                           const UString & /*titleString*/, float /*weight*/) {
+void ScoreButton::setScore(const FinishedScore &score, DatabaseBeatmap *diff2, int index, const UString &titleString,
+                           float weight) {
     this->score = score;
     this->score.beatmap_hash = diff2->getMD5Hash();
     this->score.diff2 = diff2;
@@ -736,6 +799,25 @@ void ScoreButton::setScore(const FinishedScore &score, DatabaseBeatmap *diff2, i
     if(eq(score.mods.flags, StrictTracking)) this->tooltipLines.emplace_back("+ strict tracking");
     if(eq(score.mods.flags, Wobble1)) this->tooltipLines.emplace_back("+ wobble1");
     if(eq(score.mods.flags, Wobble2)) this->tooltipLines.emplace_back("+ wobble2");
+
+    if(this->style == STYLE::TOP_RANKS) {
+        const int weightRounded = std::round(weight * 100.0f);
+        const int ppWeightedRounded = std::round(score.get_pp() * weight);
+
+        this->sScoreTitle = titleString;
+        this->sScoreScorePPWeightedPP = UString::format("%ipp", (int)std::round(score.get_pp()));
+        this->sScoreScorePPWeightedWeight =
+            UString::format("     weighted %i%% (%ipp)", weightRounded, ppWeightedRounded);
+        this->sScoreWeight = UString::format("weighted %i%%", weightRounded);
+
+        this->tooltipLines.push_back(UString::format("Stars: %.2f (%.2f aim, %.2f speed)", score.ppv2_total_stars,
+                                                     score.ppv2_aim_stars, score.ppv2_speed_stars));
+        this->tooltipLines.push_back(UString::format("Speed: %.3gx", score.mods.speed));
+        this->tooltipLines.push_back(UString::format("CS:%.4g AR:%.4g OD:%.4g HP:%.4g", CS, AR, OD, HP));
+        this->tooltipLines.push_back(
+            UString::format("Error: %.2fms - %.2fms avg", score.hitErrorAvgMin, score.hitErrorAvgMax));
+        this->tooltipLines.push_back(UString::format("Unstable Rate: %.2f", score.unstableRate));
+    }
 
     // custom
     this->updateElapsedTimeString();

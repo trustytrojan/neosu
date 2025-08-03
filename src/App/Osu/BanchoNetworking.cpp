@@ -28,6 +28,7 @@
 #include "RoomScreen.h"
 #include "SongBrowser/SongBrowser.h"
 #include "UIButton.h"
+#include "UserCard.h"
 
 #include <curl/curl.h>
 
@@ -60,7 +61,7 @@ void send_api_request_async(const APIRequest &api_out) {
     options.userAgent = "osu!";
 
     auto scheme = cv::use_https.getBool() ? "https://" : "http://";
-    auto query_url = UString::format("%sosu.%s%s", scheme, bancho->endpoint.toUtf8(), api_out.path.toUtf8());
+    auto query_url = UString::format("%sosu.%s%s", scheme, bancho->endpoint.c_str(), api_out.path.toUtf8());
 
     if(api_out.type == SUBMIT_SCORE) {
         auto token_header = UString::format("token: %s", cho_token.toUtf8());
@@ -125,7 +126,7 @@ void send_bancho_packet_async(Packet outgoing) {
     options.postData = std::string(reinterpret_cast<char *>(outgoing.memory), outgoing.pos);
 
     auto scheme = cv::use_https.getBool() ? "https://" : "http://";
-    auto query_url = UString::format("%sc.%s/", scheme, bancho->endpoint.toUtf8());
+    auto query_url = UString::format("%sc.%s/", scheme, bancho->endpoint.c_str());
 
     last_packet_tms = time(NULL);
 
@@ -312,7 +313,7 @@ void disconnect() {
         }
 
         auto scheme = cv::use_https.getBool() ? "https://" : "http://";
-        auto query_url = UString::format("%sc.%s/", scheme, bancho->endpoint.toUtf8());
+        auto query_url = UString::format("%sc.%s/", scheme, bancho->endpoint.c_str());
 
         // use sync request for logout to ensure it completes
         NetworkHandler::Response response = networkHandler->performSyncRequest(query_url, options);
@@ -329,6 +330,9 @@ void disconnect() {
     outgoing = Packet();
 
     bancho->user_id = 0;
+    osu->userButton->setID(0);
+
+    bancho->endpoint = "";
     bancho->spectating = false;
     bancho->spectated_player_id = 0;
     bancho->spectators.clear();
@@ -367,7 +371,7 @@ void reconnect() {
     cv::mp_autologin.setValue(false);
 
     bancho->username = cv::name.getString().c_str();
-    bancho->endpoint = cv::mp_server.getString().c_str();
+    bancho->endpoint = cv::mp_server.getString();
 
     // Admins told me they don't want any clients to connect
     constexpr auto server_blacklist = std::array{
@@ -375,7 +379,7 @@ void reconnect() {
         "gatari.pw",
     };
     for(const char *endpoint : server_blacklist) {
-        if(!strcmp(endpoint, bancho->endpoint.toUtf8())) {
+        if(!strcmp(endpoint, bancho->endpoint.c_str())) {
             osu->notificationOverlay->addToast("This server does not allow neosu clients.");
             return;
         }
@@ -408,7 +412,7 @@ void reconnect() {
         "ripple.moe",
     };
     for(const char *endpoint : submit_blacklist) {
-        if(!strcmp(endpoint, bancho->endpoint.toUtf8())) {
+        if(!strcmp(endpoint, bancho->endpoint.c_str())) {
             bancho->score_submission_policy = ServerPolicy::NO;
             break;
         }

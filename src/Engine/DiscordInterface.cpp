@@ -26,9 +26,9 @@ struct Application {
     DiscordUserId user_id;
 } dapp{};
 
-struct IDiscordActivityEvents activities_events{};
-struct IDiscordRelationshipEvents relationships_events{};
-struct IDiscordUserEvents users_events{};
+struct IDiscordActivityEvents activities_events {};
+struct IDiscordRelationshipEvents relationships_events {};
+struct IDiscordUserEvents users_events {};
 
 #ifdef _WIN64
 void on_discord_log(void * /*cdata*/, enum EDiscordLogLevel level, const char *message) {
@@ -54,7 +54,7 @@ void init_discord_sdk() {
     // users_events.on_current_user_update = OnUserUpdated;
     // relationships_events.on_refresh = OnRelationshipsRefresh;
 
-    struct DiscordCreateParams params{};
+    struct DiscordCreateParams params {};
     params.client_id = DISCORD_CLIENT_ID;
     params.flags = DiscordCreateFlags_NoRequireDiscord;
     params.event_data = &dapp;
@@ -95,7 +95,7 @@ void tick_discord_sdk() {
 #ifdef _WIN32
     dapp.core->run_callbacks(dapp.core);
 #else
-    // not enabled on linux cuz the sdk is broken there
+        // not enabled on linux cuz the sdk is broken there
 #endif
 }
 
@@ -108,11 +108,11 @@ void clear_discord_presence() {
 
 #ifdef _WIN32
     // TODO @kiwec: test if this works
-    struct DiscordActivity activity{};
+    struct DiscordActivity activity {};
     memset(&activity, 0, sizeof(activity));
     dapp.activities->update_activity(dapp.activities, &activity, NULL, NULL);
 #else
-    // not enabled on linux cuz the sdk is broken there
+        // not enabled on linux cuz the sdk is broken there
 #endif
 }
 
@@ -158,7 +158,7 @@ void set_discord_presence([[maybe_unused]] struct DiscordActivity *activity) {
 
         if(bancho->server_icon_url.length() > 0 && cv::main_menu_use_server_logo.getBool()) {
             strncpy(&activity->assets.small_image[0], bancho->server_icon_url.toUtf8(), 127);
-            strncpy(&activity->assets.small_text[0], bancho->endpoint.toUtf8(), 127);
+            strncpy(&activity->assets.small_text[0], bancho->endpoint.c_str(), 127);
         } else {
             strcpy(&activity->assets.small_image[0], "neosu_icon");
             activity->assets.small_text[0] = '\0';
@@ -167,7 +167,7 @@ void set_discord_presence([[maybe_unused]] struct DiscordActivity *activity) {
 
     dapp.activities->update_activity(dapp.activities, activity, NULL, NULL);
 #else
-    // not enabled on linux cuz the sdk is broken there
+        // not enabled on linux cuz the sdk is broken there
 #endif
 }
 

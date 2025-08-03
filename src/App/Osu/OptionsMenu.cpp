@@ -2657,14 +2657,14 @@ void OptionsMenu::onLogInClicked(bool left, bool right) {
         // debugLog("DEBUG: manually clicked login, password: {} md5: {}\n", cv::mp_password_temporary.getString(),
         //           cv::mp_password_md5.getString());
         if(this->should_use_oauth_login()) {
-            bancho->endpoint = cv::mp_server.getString().c_str();
+            bancho->endpoint = cv::mp_server.getString();
 
             crypto::rng::get_bytes(&bancho->oauth_challenge[0], 32);
             crypto::hash::sha256(&bancho->oauth_challenge[0], 32, &bancho->oauth_verifier[0]);
 
             auto challenge_b64 = crypto::baseconv::encode64(&bancho->oauth_challenge[0], 32);
             auto scheme = cv::use_https.getBool() ? "https://" : "http://";
-            auto url = fmt::format("{:s}{:s}/connect?challenge={:s}", scheme, bancho->endpoint.toUtf8(),
+            auto url = fmt::format("{:s}{:s}/connect?challenge={}", scheme, bancho->endpoint,
                                    (const char *)challenge_b64.data());
 
             env->openURLInDefaultBrowser(url);

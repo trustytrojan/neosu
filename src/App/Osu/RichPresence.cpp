@@ -39,7 +39,7 @@ void crop_to(const UString& str, char* output, int max_len) {
 }
 
 // output is assumed to be a char[128] string
-void diff2str(DatabaseBeatmap* diff2, char* output, bool  /*include_difficulty*/) {
+void diff2str(DatabaseBeatmap* diff2, char* output, bool /*include_difficulty*/) {
     if(diff2 == NULL) {
         strcpy(output, "No map selected");
         return;
@@ -124,7 +124,7 @@ void RichPresence::onMainMenu() {
     setBanchoStatus("Main Menu", force_not_afk ? IDLE : AFK);
 
     // NOTE: As much as I would like to show "Listening to", the Discord SDK ignores the activity 'type'
-    struct DiscordActivity activity{};
+    struct DiscordActivity activity {};
 
     activity.type = DiscordActivityType_Listening;
 
@@ -140,7 +140,7 @@ void RichPresence::onMainMenu() {
 }
 
 void RichPresence::onSongBrowser() {
-    struct DiscordActivity activity{};
+    struct DiscordActivity activity {};
 
     activity.type = DiscordActivityType_Playing;
     strcpy(activity.details, "Picking a map");
@@ -174,7 +174,7 @@ void RichPresence::onPlayStart() {
                   .count();
     }
 
-    struct DiscordActivity activity{};
+    struct DiscordActivity activity {};
 
     activity.type = DiscordActivityType_Playing;
     activity.timestamps.start = tms;
@@ -242,11 +242,11 @@ void RichPresence::onPlayEnd(bool quit) {
 }
 
 void RichPresence::onMultiplayerLobby() {
-    struct DiscordActivity activity{};
+    struct DiscordActivity activity {};
 
     activity.type = DiscordActivityType_Playing;
 
-    crop_to(bancho->endpoint.toUtf8(), activity.state, 128);
+    crop_to(bancho->endpoint.c_str(), activity.state, 128);
     crop_to(bancho->room.name.toUtf8(), activity.details, 128);
     activity.party.size.current_size = bancho->room.nb_players;
     activity.party.size.max_size = bancho->room.nb_open_slots;

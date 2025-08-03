@@ -61,6 +61,7 @@
 #include "UIUserContextMenu.h"
 #include "UpdateHandler.h"
 #include "UserCard.h"
+#include "UserStatsScreen.h"
 #include "VolumeOverlay.h"
 
 #include "score.h"
@@ -306,6 +307,7 @@ Osu::Osu() {
     this->backgroundImageHandler = new BackgroundImageHandler();
     this->modSelector = new ModSelector();
     this->rankingScreen = new RankingScreen();
+    this->userStats = new UserStatsScreen();
     this->pauseMenu = new PauseMenu();
     this->hud = new HUD();
     this->changelog = new Changelog();
@@ -329,6 +331,7 @@ Osu::Osu() {
     this->screens.push_back(this->notificationOverlay);
     this->screens.push_back(this->optionsMenu);
     this->screens.push_back(this->rankingScreen);
+    this->screens.push_back(this->userStats);
     this->screens.push_back(this->spectatorScreen);
     this->screens.push_back(this->pauseMenu);
     this->screens.push_back(this->hud);
@@ -566,6 +569,7 @@ void Osu::draw() {
         this->mainMenu->draw();
         this->changelog->draw();
         this->rankingScreen->draw();
+        this->userStats->draw();
         this->chat->draw();
         this->user_actions->draw();
         this->optionsMenu->draw();

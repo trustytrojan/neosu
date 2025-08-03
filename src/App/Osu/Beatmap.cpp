@@ -536,7 +536,7 @@ bool Beatmap::spectate() {
 
     FinishedScore score;
     score.client = "peppy-unknown";
-    score.server = bancho->endpoint.toUtf8();
+    score.server = bancho->endpoint;
     score.mods = Replay::Mods::from_legacy(user_info->mods);
     osu->useMods(&score);
 
@@ -2465,7 +2465,8 @@ void Beatmap::update2() {
         if(this->iCurMusicPos + (2 * cv::spec_buffer.getInt()) < this->last_frame_ms) {
             i32 target = this->last_frame_ms - cv::spec_buffer.getInt();
             f32 percent = (f32)target / (f32)this->getLength();
-            debugLog("We're {:d}ms behind, seeking to catch up to player...\n", this->last_frame_ms - this->iCurMusicPos);
+            debugLog("We're {:d}ms behind, seeking to catch up to player...\n",
+                     this->last_frame_ms - this->iCurMusicPos);
             this->seekPercent(percent);
             return;
         }
@@ -3529,7 +3530,7 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
     if(bancho->is_online()) {
         score.player_id = bancho->user_id;
         score.playerName = bancho->username.toUtf8();
-        score.server = bancho->endpoint.toUtf8();
+        score.server = bancho->endpoint;
     } else {
         score.playerName = cv::name.getString();
     }
@@ -3573,7 +3574,7 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
         RichPresence::onPlayEnd(quit);
 
         if(bancho->can_submit_scores() && !isZero && this->vanilla) {
-            score.server = bancho->endpoint.toUtf8();
+            score.server = bancho->endpoint;
             BANCHO::Net::submit_score(score);
             // XXX: Save bancho_score_id after getting submission result
         }

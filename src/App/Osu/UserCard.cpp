@@ -14,10 +14,10 @@
 #include "SongBrowser/SongBrowser.h"
 #include "TooltipOverlay.h"
 #include "UIAvatar.h"
+#include "UIUserContextMenu.h"
+#include "UserStatsScreen.h"
 
-
-
-// NOTE: selected username is stored in m_sText
+// NOTE: selected username is stored in this->sText
 
 UserCard::UserCard(i32 user_id) : CBaseUIButton() {
     this->setID(user_id);
@@ -29,6 +29,12 @@ UserCard::UserCard(i32 user_id) : CBaseUIButton() {
 
     this->fPPDelta = 0.0f;
     this->fPPDeltaAnim = 0.0f;
+
+    // We do not pass mouse events to this->avatar
+    this->setClickCallback([](CBaseUIButton *btn) {
+        auto card = (UserCard *)btn;
+        osu->user_actions->open(card->user_id, card == osu->userButton);
+    });
 }
 
 UserCard::~UserCard() {
@@ -220,19 +226,15 @@ void UserCard::mouse_update(bool *propagate_clicks) {
         }
     }
 
-    if(this->avatar) {
-        this->avatar->mouse_update(propagate_clicks);
-        if(!*propagate_clicks) return;
-    }
-
     CBaseUIButton::mouse_update(propagate_clicks);
 }
 
 void UserCard::updateUserStats() {
     Database::PlayerStats stats;
 
-    if(this->user_id == 0) {
-        stats = db->calculatePlayerStats(this->sText);
+    bool is_self = this->user_id <= 0 || (this->user_id == bancho->user_id);
+    if(is_self && !bancho->can_submit_scores()) {
+        stats = db->calculatePlayerStats(this->sText.toUtf8());
     } else {
         UserInfo *my = BANCHO::User::get_user_info(this->user_id, true);
 

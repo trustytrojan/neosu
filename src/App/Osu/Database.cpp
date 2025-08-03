@@ -257,7 +257,7 @@ void Database::update() {
                 this->importTimer->update();
 
                 debugLog("Refresh finished, added {} beatmaps in {:f} seconds.\n", this->beatmapsets.size(),
-                          this->importTimer->getElapsedTime());
+                         this->importTimer->getElapsedTime());
 
                 load_collections();
 
@@ -478,7 +478,7 @@ std::vector<UString> Database::getPlayerNamesWithScoresForUserSwitcher() {
     return names;
 }
 
-Database::PlayerPPScores Database::getPlayerPPScores(const UString &playerName) {
+Database::PlayerPPScores Database::getPlayerPPScores(std::string playerName) {
     std::scoped_lock lock(this->scores_mtx);
     PlayerPPScores ppScores;
     ppScores.totalScore = 0;
@@ -504,13 +504,11 @@ Database::PlayerPPScores Database::getPlayerPPScores(const UString &playerName) 
         bool foundValidScore = false;
         float prevPP = -1.0f;
         for(auto &score : this->scores[key]) {
-            UString uName = UString(score.playerName.c_str());
-
             auto uses_rx_or_ap = (ModMasks::eq(score.mods.flags, Replay::ModFlags::Relax) ||
                                   (ModMasks::eq(score.mods.flags, Replay::ModFlags::Autopilot)));
             if(uses_rx_or_ap && !cv::user_include_relax_and_autopilot_for_stats.getBool()) continue;
 
-            if(uName != playerName) continue;
+            if(score.playerName != playerName) continue;
 
             foundValidScore = true;
             totalScore += score.score;
@@ -534,8 +532,9 @@ Database::PlayerPPScores Database::getPlayerPPScores(const UString &playerName) 
     return ppScores;
 }
 
-Database::PlayerStats Database::calculatePlayerStats(const UString &playerName) {
-    if(!this->bDidScoresChangeForStats && playerName == this->prevPlayerStats.name) return this->prevPlayerStats;
+Database::PlayerStats Database::calculatePlayerStats(std::string playerName) {
+    if(!this->bDidScoresChangeForStats && playerName == this->prevPlayerStats.name.toUtf8())
+        return this->prevPlayerStats;
 
     const PlayerPPScores ps = this->getPlayerPPScores(playerName);
 
@@ -565,7 +564,7 @@ Database::PlayerStats Database::calculatePlayerStats(const UString &playerName) 
     if(ps.ppScores.size() > 0) acc /= (20.0f * (1.0f - getWeightForIndex(ps.ppScores.size())));
 
     // fill stats
-    this->prevPlayerStats.name = playerName;
+    this->prevPlayerStats.name = playerName.c_str();
     this->prevPlayerStats.pp = pp;
     this->prevPlayerStats.accuracy = acc;
     this->prevPlayerStats.numScoresWithPP = ps.ppScores.size();
@@ -922,8 +921,8 @@ void Database::loadMaps() {
             auto playerName = db.read_string();
             this->iNumBeatmapsToLoad = db.read<u32>();
 
-            debugLog("Database: version = {:d}, folderCount = {:d}, playerName = {:s}, numDiffs = {:d}\n", this->iVersion,
-                     this->iFolderCount, playerName.c_str(), this->iNumBeatmapsToLoad);
+            debugLog("Database: version = {:d}, folderCount = {:d}, playerName = {:s}, numDiffs = {:d}\n",
+                     this->iVersion, this->iFolderCount, playerName.c_str(), this->iNumBeatmapsToLoad);
 
             // hard cap upper db version
             if(this->iVersion > cv::database_version.getInt() && !cv::database_ignore_version.getBool()) {
@@ -1928,7 +1927,8 @@ void Database::loadPeppyScores(const UString &dbPath) {
     for(int b = 0; b < nb_beatmaps; b++) {
         std::string md5hash_str = db.read_string();
         if(md5hash_str.length() < 32) {
-            debugLog("WARNING: Invalid score on beatmap {:d} with md5hash_str.length() = {:d}!\n", b, md5hash_str.length());
+            debugLog("WARNING: Invalid score on beatmap {:d} with md5hash_str.length() = {:d}!\n", b,
+                     md5hash_str.length());
             continue;
         } else if(md5hash_str.length() > 32) {
             debugLog("ERROR: Corrupt score database/entry detected, stopping.\n");

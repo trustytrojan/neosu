@@ -13,7 +13,10 @@ class ScoreButton : public CBaseUIButton {
     static SkinImage *getGradeImage(FinishedScore::Grade grade);
     static UString getModsStringForDisplay(Replay::Mods mods);
 
-    ScoreButton(UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize);
+    enum class STYLE { SONG_BROWSER, TOP_RANKS };
+
+    ScoreButton(UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize,
+                STYLE style = STYLE::SONG_BROWSER);
     ~ScoreButton() override;
 
     void draw() override;
@@ -22,7 +25,7 @@ class ScoreButton : public CBaseUIButton {
     void highlight();
     void resetHighlight();
 
-    void setScore(const FinishedScore &score, DatabaseBeatmap *diff2, int index = 1, const UString& titleString = "",
+    void setScore(const FinishedScore &score, DatabaseBeatmap *diff2, int index = 1, const UString &titleString = "",
                   float weight = 1.0f);
     void setIndex(int index) { this->iScoreIndexNumber = index; }
 
@@ -50,14 +53,15 @@ class ScoreButton : public CBaseUIButton {
     void onFocusStolen() override;
 
     void onRightMouseUpInside();
-    void onContextMenu(const UString& text, int id = -1);
+    void onContextMenu(const UString &text, int id = -1);
     void onUseModsClicked();
     void onDeleteScoreClicked();
-    void onDeleteScoreConfirmed(const UString& text, int id);
+    void onDeleteScoreConfirmed(const UString &text, int id);
 
     bool isContextMenuVisible();
 
     UIContextMenu *contextMenu;
+    STYLE style;
     float fIndexNumberAnim;
     bool bIsPulseAnim;
 
@@ -81,6 +85,12 @@ class ScoreButton : public CBaseUIButton {
     UString sScoreAccuracyFC;
     UString sScoreMods;
     UString sCustom;
+
+    // STYLE::TOP_RANKS
+    UString sScoreTitle;
+    UString sScoreScorePPWeightedPP;
+    UString sScoreScorePPWeightedWeight;
+    UString sScoreWeight;
 
     std::vector<UString> tooltipLines;
     UString sScoreDateTime;

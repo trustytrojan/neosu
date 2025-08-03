@@ -1198,6 +1198,8 @@ CONVAR(ui_scrollview_resistance, "ui_scrollview_resistance", 5.0f, FCVAR_BANCHO_
 CONVAR(ui_scrollview_scrollbarwidth, "ui_scrollview_scrollbarwidth", 15.0f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(ui_textbox_caret_blink_time, "ui_textbox_caret_blink_time", 0.5f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(ui_textbox_text_offset_x, "ui_textbox_text_offset_x", 3, FCVAR_BANCHO_COMPATIBLE);
+CONVAR(ui_top_ranks_max, "ui_top_ranks_max", 200, FCVAR_BANCHO_COMPATIBLE,
+       "maximum number of displayed scores, to keep the ui/scrollbar manageable");
 CONVAR(ui_window_animspeed, "ui_window_animspeed", 0.29f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(ui_window_shadow_radius, "ui_window_shadow_radius", 13.0f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(universal_offset, "osu_universal_offset", 0.0f, FCVAR_BANCHO_COMPATIBLE);

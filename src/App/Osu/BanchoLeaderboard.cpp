@@ -19,7 +19,7 @@ namespace {  // static namespace
 FinishedScore parse_score(char *score_line) {
     FinishedScore score;
     score.client = "peppy-unknown";
-    score.server = bancho->endpoint.toUtf8();
+    score.server = bancho->endpoint;
 
     auto tokens = SString::split(score_line, "|");
     if(tokens.size() < 15) return score;

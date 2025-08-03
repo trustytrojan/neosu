@@ -31,7 +31,7 @@ bool download_avatar(i32 user_id) {
         }
     }
 
-    std::string server_dir = fmt::format(MCENGINE_DATA_DIR "avatars/{:s}", bancho->endpoint.toUtf8());
+    std::string server_dir = fmt::format(MCENGINE_DATA_DIR "avatars/{}", bancho->endpoint);
     if(!env->directoryExists(server_dir)) {
         env->createDirectory(server_dir);
     }
@@ -39,7 +39,7 @@ bool download_avatar(i32 user_id) {
     float progress = -1.f;
     std::vector<u8> data;
     auto scheme = cv::use_https.getBool() ? "https://" : "http://";
-    auto img_url = fmt::format("{:s}a.{:s}/{:d}", scheme, bancho->endpoint.toUtf8(), user_id);
+    auto img_url = fmt::format("{:s}a.{}/{:d}", scheme, bancho->endpoint, user_id);
     int response_code;
     Downloader::download(img_url.c_str(), &progress, data, &response_code);
     if(progress == -1.f) blacklist.push_back(user_id);
@@ -64,7 +64,7 @@ UIAvatar::UIAvatar(i32 player_id, float xPos, float yPos, float xSize, float ySi
     this->player_id = player_id;
 
     this->avatar_path =
-        UString::format(MCENGINE_DATA_DIR "avatars/%s/%d", bancho->endpoint.toUtf8(), player_id).toUtf8();
+        UString::format(MCENGINE_DATA_DIR "avatars/%s/%d", bancho->endpoint.c_str(), player_id).toUtf8();
     this->setClickCallback(SA::MakeDelegate<&UIAvatar::onAvatarClicked>(this));
 
     struct stat attr;

@@ -451,7 +451,7 @@ void Chat::handle_command(const UString &msg) {
 
         UString song_name = UString::format("%s - %s [%s]", diff->getArtist().c_str(), diff->getTitle().c_str(),
                                             diff->getDifficultyName().c_str());
-        UString song_link = UString::format("[https://osu.%s/beatmaps/%d %s]", bancho->endpoint.toUtf8(), diff->getID(),
+        UString song_link = UString::format("[https://osu.%s/beatmaps/%d %s]", bancho->endpoint.c_str(), diff->getID(),
                                             song_name.toUtf8());
 
         UString np_msg;

@@ -21,6 +21,7 @@ class SongBrowser;
 class SpectatorScreen;
 class BackgroundImageHandler;
 class RankingScreen;
+class UserStatsScreen;
 class UpdateHandler;
 class NotificationOverlay;
 class TooltipOverlay;
@@ -226,6 +227,7 @@ class Osu final : public MouseListener, public KeyboardListener {
     BackgroundImageHandler *backgroundImageHandler = NULL;
     ModSelector *modSelector = NULL;
     RankingScreen *rankingScreen = NULL;
+    UserStatsScreen *userStats = NULL;
     PauseMenu *pauseMenu = NULL;
     Skin *skin = NULL;
     HUD *hud = NULL;

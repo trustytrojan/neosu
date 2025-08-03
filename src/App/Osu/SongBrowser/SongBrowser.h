@@ -14,7 +14,6 @@ class SkinImage;
 class UIContextMenu;
 class UISearchOverlay;
 class InfoLabel;
-class UserCard;
 class ScoreButton;
 class Button;
 class SongButton;
@@ -44,7 +43,7 @@ class SongBrowser final : public ScreenBackable {
         GROUP_ARTIST,
         GROUP_BPM,
         GROUP_CREATOR,
-        //GROUP_DATEADDED, // unimpl
+        // GROUP_DATEADDED, // unimpl
         GROUP_DIFFICULTY,
         GROUP_LENGTH,
         GROUP_TITLE,
@@ -76,8 +75,8 @@ class SongBrowser final : public ScreenBackable {
     void onDifficultySelected(DatabaseBeatmap *diff2, bool play = false);
 
     void onScoreContextMenu(ScoreButton *scoreButton, int id);
-    void onSongButtonContextMenu(SongButton *songButton, const UString& text, int id);
-    void onCollectionButtonContextMenu(CollectionButton *collectionButton, const UString& text, int id);
+    void onSongButtonContextMenu(SongButton *songButton, const UString &text, int id);
+    void onCollectionButtonContextMenu(CollectionButton *collectionButton, const UString &text, int id);
 
     void highlightScore(u64 unixTimestamp);
     void selectRandomBeatmap();
@@ -101,7 +100,9 @@ class SongBrowser final : public ScreenBackable {
     void rebuildScoreButtons();
     void updateSongButtonLayout();
 
-    [[nodiscard]] inline const std::vector<CollectionButton *> &getCollectionButtons() const { return this->collectionButtons; }
+    [[nodiscard]] inline const std::vector<CollectionButton *> &getCollectionButtons() const {
+        return this->collectionButtons;
+    }
 
     [[nodiscard]] inline bool isInSearch() const { return this->bInSearch; }
     [[nodiscard]] inline bool isRightClickScrolling() const { return this->bSongBrowserRightClickScrolling; }
@@ -136,7 +137,8 @@ class SongBrowser final : public ScreenBackable {
         int id;
     };
 
-    static bool searchMatcher(const DatabaseBeatmap *databaseBeatmap, const std::vector<std::string> &searchStringTokens);
+    static bool searchMatcher(const DatabaseBeatmap *databaseBeatmap,
+                              const std::vector<std::string> &searchStringTokens);
 
     void updateLayout() override;
     void onBack() override;
@@ -153,16 +155,16 @@ class SongBrowser final : public ScreenBackable {
                                                                        bool doRebuildSongButtons = true);
 
     void onSortScoresClicked(CBaseUIButton *button);
-    void onSortScoresChange(const UString& text, int id = -1);
+    void onSortScoresChange(const UString &text, int id = -1);
     void onWebClicked(CBaseUIButton *button);
 
     void onQuickGroupClicked(CBaseUIButton *button);
     void onGroupClicked(CBaseUIButton *button);
-    void onGroupChange(const UString& text, int id = -1);
+    void onGroupChange(const UString &text, int id = -1);
 
     void onSortClicked(CBaseUIButton *button);
-    void onSortChange(const UString& text, int id = -1);
-    void onSortChangeInt(const UString& text);
+    void onSortChange(const UString &text, int id = -1);
+    void onSortChangeInt(const UString &text);
 
     void rebuildAfterGroupOrSortChange(GROUP group, SORTING_COMPARATOR sortComp = nullptr);
 
@@ -280,6 +282,7 @@ class SongBrowser final : public ScreenBackable {
     bool bInSearch;
     GROUP searchPrevGroup;
     SongBrowserBackgroundSearchMatcher *backgroundSearchMatcher;
-private:
+
+   private:
     std::vector<CollectionButton *> *getCollectionButtonsForGroup(GROUP group);
 };

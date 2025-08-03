@@ -29,7 +29,7 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG v39_03;
     v39_03.title = "39.03";
     v39_03.changes = {
-        R"()",
+        R"(- Re-added local user stats)",
     };
     changelogs.push_back(v39_03);
 

@@ -72,8 +72,8 @@ class Database {
 
     std::vector<UString> getPlayerNamesWithPPScores();
     std::vector<UString> getPlayerNamesWithScoresForUserSwitcher();
-    PlayerPPScores getPlayerPPScores(const UString &playerName);
-    PlayerStats calculatePlayerStats(const UString &playerName);
+    PlayerPPScores getPlayerPPScores(std::string playerName);
+    PlayerStats calculatePlayerStats(std::string playerName);
     static float getWeightForIndex(int i);
     static float getBonusPPForNumScores(size_t numScores);
     static unsigned long long getRequiredScoreForLevel(int level);
