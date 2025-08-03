@@ -317,8 +317,10 @@ std::string UpdateHandler::calculateUpdateHash(const std::string &versionContent
         return "";
     }
 
-    std::string combined_string{versionContent + std::string_view(reinterpret_cast<const char *>(file_hash.data())) +
-                                '\0'};
+    std::array<char, 33> file_hash_str{};
+    memcpy(file_hash_str.data(), file_hash.data(), 32);
+
+    std::string combined_string{versionContent + file_hash_str.data()};
 
     // get sha256 of (version + archive hash)
     std::array<u8, 32> combined_hash{};
