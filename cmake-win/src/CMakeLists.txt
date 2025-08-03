@@ -148,7 +148,7 @@ target_compile_options(neosu PRIVATE
     "/GR"
     "/MP"  # multi-processor compilation
     "/D_UNICODE"
-    "/DUNICODE"
+    "/DUNICODE=1"
     $<$<CONFIG:Debug>:/Zi;/Od;/RTC1>
     $<$<CONFIG:Release>:/O2;/Oi;/Oy;/Gw;/GL;/GS-;/Gy>
     ${BZIP2_STATIC_CFLAGS}
@@ -163,7 +163,7 @@ target_compile_definitions(neosu PRIVATE
     ST_NO_EXCEPTION_HANDLING=1
     SOLOUD_NO_ASSERTS=1
     _UNICODE
-    UNICODE
+    UNICODE=1
     $<$<CONFIG:Release>:NDEBUG>
     $<$<CONFIG:Debug>:_DEBUG>
 )

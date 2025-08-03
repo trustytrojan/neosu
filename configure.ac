@@ -211,8 +211,8 @@ AS_IF([test "x$enable_ime" != "xno"], [
 AC_SUBST([NOIME])
 
 AS_IF([test "$host_os" = "mingw32"], [
-    NEOSU_CPPFLAGS="$NEOSU_CPPFLAGS -D_UNICODE -DUNICODE"
-    NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -D_UNICODE -DUNICODE -municode -fvisibility=hidden"
+    NEOSU_CPPFLAGS="$NEOSU_CPPFLAGS -D_UNICODE -DUNICODE=1"
+    NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -D_UNICODE -DUNICODE=1 -municode -fvisibility=hidden"
     NEOSU_LDFLAGS="$NEOSU_LDFLAGS -municode"
     AS_IF([test "x$enable_clang" = "xyes"], [
         LLVMMINGW=1
