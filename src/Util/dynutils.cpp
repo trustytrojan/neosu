@@ -4,10 +4,17 @@
 
 #include <SDL3/SDL_loadso.h>
 
+#ifdef MCENGINE_PLATFORM_WINDOWS
+#define LPREFIX ""
+#define LSUFFIX ".dll"
+#else
+#define LPREFIX "lib"
+#define LSUFFIX ".so"
+#endif
+
+#define LNAMESTR(lib) fmt::format(LPREFIX "{:s}" LSUFFIX, (lib))
+
 namespace dynutils {
-
-const char *get_error() { return SDL_GetError(); }
-
 namespace detail {
 
 void *load_func_impl(lib_obj *lib, const char *func_name) {
@@ -24,20 +31,11 @@ void *load_func_impl(lib_obj *lib, const char *func_name) {
 
 }  // namespace detail
 
-#ifdef MCENGINE_PLATFORM_WINDOWS
-#define LPREFIX ""
-#define LSUFFIX ".dll"
-#else
-#define LPREFIX "lib"
-#define LSUFFIX ".so"
-#endif
-
-#define LNAMESTR(lib) fmt::format(LPREFIX "{:s}" LSUFFIX, (lib))
-
-void unload_lib(lib_obj *lib) {
+void unload_lib(lib_obj *&lib) {
     if(lib) {
         SDL_UnloadObject(reinterpret_cast<SDL_SharedObject *>(lib));
     }
+    lib = nullptr;
 }
 
 // example usage: load_lib("bass"), load_lib("libbass.so"), load_lib("bass.dll"), load_lib("bass", "lib/")
@@ -45,20 +43,26 @@ void unload_lib(lib_obj *lib) {
 lib_obj *load_lib(const char *c_lib_name, const char *c_search_dir) {
     std::string lib_name{c_lib_name};
     std::string search_dir{c_search_dir};
-
-    if(Environment::getFileExtensionFromFilePath(lib_name).empty()) {
-        lib_name = LNAMESTR(lib_name);
-    }
-    if(!search_dir.empty()) {
-        if(!search_dir.ends_with('/') && search_dir.ends_with('\\')) {
-            search_dir.append(PREF_PATHSEP);
-        }
-        lib_name = search_dir + lib_name;
-    }
     lib_obj *ret = nullptr;
-    ret = reinterpret_cast<lib_obj *>(SDL_LoadObject(lib_name.c_str()));
+    if(!lib_name.empty()) {
+        if(Environment::getFileExtensionFromFilePath(lib_name).empty()) {
+            lib_name = LNAMESTR(lib_name);
+        }
+        if(!search_dir.empty()) {
+            if(!search_dir.ends_with('/') && search_dir.ends_with('\\')) {
+                search_dir.append(PREF_PATHSEP);
+            }
+            lib_name = search_dir + lib_name;
+        }
+        ret = reinterpret_cast<lib_obj *>(SDL_LoadObject(lib_name.c_str()));
+    }
     if(!ret) debugLog("Failed to load library {:s}: {:s}\n", lib_name, get_error());
     return ret;
+}
+
+const char *get_error() {
+    const char *err = SDL_GetError();
+    return err ? err : "<no error>";
 }
 
 #undef LNAME

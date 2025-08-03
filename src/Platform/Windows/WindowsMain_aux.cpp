@@ -39,7 +39,7 @@ bool setup_dpi_win81() {
     auto *shcore_handle =
         reinterpret_cast<lib_obj *>(LoadLibraryEx(TEXT("shcore.dll"), NULL, LOAD_LIBRARY_SEARCH_SYSTEM32));
     if(shcore_handle) {
-        auto spdpi_awareness_func = load_func<decltype(&pSetProcessDpiAwareness)>(shcore_handle, "SetProcessDpiAwareness");
+        auto spdpi_awareness_func = load_func<pSetProcessDpiAwareness>(shcore_handle, "SetProcessDpiAwareness");
         if(spdpi_awareness_func) {
             result = spdpi_awareness_func((PROCESS_DPI_AWARENESS)2);  // 2 == PROCESS_PER_MONITOR_DPI_AWARE
         }
@@ -54,7 +54,7 @@ bool setup_dpi_win81() {
 void setup_dpi_vista() {
     auto *user32_handle = reinterpret_cast<lib_obj *>(GetModuleHandle(TEXT("user32.dll")));
     if(user32_handle) {
-        auto spdpi_aware_func = load_func<decltype(&SetProcessDPIAware)>(user32_handle, "SetProcessDPIAware");
+        auto spdpi_aware_func = load_func<SetProcessDPIAware>(user32_handle, "SetProcessDPIAware");
         if(spdpi_aware_func) {
             spdpi_aware_func();
         }
@@ -73,12 +73,12 @@ HRESULT WindowsMain::Setup::com_init() {
         combase_loaded = true;
     }
 
-    auto coinit_func = load_func<decltype(&CoInitializeEx)>(combase_handle, "CoInitializeEx");
+    auto coinit_func = load_func<CoInitializeEx>(combase_handle, "CoInitializeEx");
 
     if(coinit_func) {
-        hr = coinit_func(NULL, COINIT_APARTMENTTHREADED);
+        hr = coinit_func(nullptr, COINIT_APARTMENTTHREADED);
         if(hr == RPC_E_CHANGED_MODE) {
-            hr = coinit_func(NULL, COINIT_MULTITHREADED);
+            hr = coinit_func(nullptr, COINIT_MULTITHREADED);
         }
         if(hr == S_FALSE) {
             return S_OK;
@@ -90,7 +90,7 @@ HRESULT WindowsMain::Setup::com_init() {
 
 void WindowsMain::Setup::com_uninit(void) {
     if(combase_loaded) {
-        auto couninit_func = load_func<decltype(&CoUninitialize)>(combase_handle, "CoUninitialize");
+        auto couninit_func = load_func<CoUninitialize>(combase_handle, "CoUninitialize");
         if(couninit_func) {
             couninit_func();
         }
@@ -102,7 +102,7 @@ void WindowsMain::Setup::disable_ime() {
     auto *imm32_handle =
         reinterpret_cast<lib_obj *>(LoadLibraryEx(TEXT("imm32.dll"), NULL, LOAD_LIBRARY_SEARCH_SYSTEM32));
     if(imm32_handle) {
-        auto disable_ime_func = load_func<decltype(&pImmDisableIME)>(imm32_handle, "ImmDisableIME");
+        auto disable_ime_func = load_func<pImmDisableIME>(imm32_handle, "ImmDisableIME");
         if(disable_ime_func) disable_ime_func(-1);
         unload_lib(imm32_handle);
     }
@@ -123,7 +123,7 @@ void WindowsMain::Setup::dpi_late(HWND hwnd) {
     if(s_pmdpia_supported) {
         auto *user32_handle = reinterpret_cast<lib_obj *>(GetModuleHandle(TEXT("user32.dll")));
         if(user32_handle) {
-            auto encdpiscale_func = load_func<decltype(&pEnableNonClientDpiScaling)>(user32_handle, "EnableNonClientDpiScaling");
+            auto encdpiscale_func = load_func<pEnableNonClientDpiScaling>(user32_handle, "EnableNonClientDpiScaling");
             if(encdpiscale_func) {
                 encdpiscale_func(hwnd);
             }
@@ -150,7 +150,7 @@ void WindowsMain::handle_osz(const char *osz_path) {
         // path
         auto mapset_name = UString(env->getFileNameFromFilePath(osz_path).c_str());
         const std::vector<UString> tokens = mapset_name.split(" ");
-        for(const auto& token : tokens) {
+        for(const auto &token : tokens) {
             i32 id = token.toInt();
             if(id > 0) set_id = id;
         }
