@@ -422,9 +422,7 @@ void Skin::load() {
 
     // spinner loading has top priority in async
     this->randomizeFilePath();
-    {
-        this->checkLoadImage(&this->loadingSpinner, "loading-spinner", "OSU_SKIN_LOADING_SPINNER");
-    }
+    { this->checkLoadImage(&this->loadingSpinner, "loading-spinner", "OSU_SKIN_LOADING_SPINNER"); }
 
     // and the cursor comes right after that
     this->randomizeFilePath();
@@ -1456,6 +1454,8 @@ void Skin::playSliderSlideSound(float pan) {
 }
 
 void Skin::playSpinnerSpinSound() {
+    if(this->spinnerSpinSound == NULL) return;
+
     if(!this->spinnerSpinSound->isPlaying()) {
         soundEngine->play(this->spinnerSpinSound);
     }
@@ -1477,6 +1477,8 @@ void Skin::stopSliderSlideSound(int sampleSet) {
 }
 
 void Skin::stopSpinnerSpinSound() {
+    if(this->spinnerSpinSound == NULL) return;
+
     if(this->spinnerSpinSound->isPlaying()) soundEngine->stop(this->spinnerSpinSound);
 }
 
