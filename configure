@@ -6819,7 +6819,7 @@ then :
         d3dcompiler_lib="-ld3dcompiler_43"
         ubercompat=on
         with_mimalloc="no"
-        LDFLAGS="$LDFLAGS -m32"
+        LDFLAGS="$LDFLAGS -m32 -Wl,--large-address-aware"
         WINPTHREAD_LDFLAGS="-lwinpthread"
         # vista (winxp should work, but curl's openssl depends on vista+, can be fixed in the future)
         CPPFLAGS="$CPPFLAGS -DWINVER=0x0600 -D_WIN32_WINNT=0x0600 -D_WIN32_WINDOWS=0x0600 -D_WIN32_IE=0x0600"

@@ -1773,17 +1773,14 @@ void OptionsMenu::updateLayout() {
 
     // set all elements to the current convar values, and update the reset button states
     for(auto &element : this->elemContainers) {
-        for(auto &cvm : element->cvars) {
-            auto *cv = cvm.second;
-            if(cv == nullptr) continue;
+        for(auto &[baseElem, cv] : element->cvars) {
+            if(!baseElem || !cv) continue;
             switch(element->type) {
                 case CBX:
-                case CBX_BTN:
-                    for(auto &e : element->baseElems) {
-                        CBaseUICheckbox *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(e);
-                        if(checkboxPointer != NULL) checkboxPointer->setChecked(cv->getBool());
-                    }
-                    break;
+                case CBX_BTN: {
+                    auto *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(baseElem);
+                    if(checkboxPointer != NULL) checkboxPointer->setChecked(cv->getBool());
+                } break;
                 case SLDR:
                     if(element->baseElems.size() == 3) {
                         auto *sliderPointer = dynamic_cast<CBaseUISlider *>(element->baseElems[1]);
