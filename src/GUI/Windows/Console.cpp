@@ -136,7 +136,7 @@ void Console::processCommand(std::string command, bool fromFile) {
     }
 
     // log
-    if(cv::console_logging.getBool()) {
+    if(cv::console_logging.getBool() && !var->isFlagSet(FCVAR_HIDDEN)) {
         std::string logMessage;
 
         bool doLog = false;
