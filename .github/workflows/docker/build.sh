@@ -13,7 +13,7 @@ export CCACHE_COMPILERCHECK="none"
 ./autogen.sh
 cd build-out
 #../configure --disable-system-deps --enable-static --disable-native --with-audio="bass,soloud" --host=$HOST
-../configure --with-audio="bass,soloud" --host=$HOST --disable-strip
+../configure --with-audio="bass,soloud" --host=$HOST
 make install
 
 # symlinks turn into copies in .zip files for GHA artifacts, so we need to make a zip of the zip...
