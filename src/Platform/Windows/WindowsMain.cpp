@@ -356,7 +356,7 @@ WindowsMain::WindowsMain(int argc, char *argv[], const std::vector<UString> &arg
         GetModuleFileNameW(NULL, full_path, MAX_PATH);
         STARTUPINFOW startupInfo{};
         PROCESS_INFORMATION processInfo{};
-        CreateProcessW(full_path, NULL, NULL, NULL, TRUE, NORMAL_PRIORITY_CLASS, NULL, NULL, &startupInfo,
+        CreateProcessW(full_path, GetCommandLineW(), NULL, NULL, TRUE, NORMAL_PRIORITY_CLASS, NULL, NULL, &startupInfo,
                        &processInfo);
     }
 

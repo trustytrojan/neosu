@@ -39,8 +39,6 @@ UserStatsScreen::UserStatsScreen() : ScreenBackable() {
     this->addBaseUIElement(m_scores);
 }
 
-UserStatsScreen::~UserStatsScreen() {}
-
 void UserStatsScreen::draw() {
     if(!this->isVisible()) return;
 

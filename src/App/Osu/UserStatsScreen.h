@@ -11,12 +11,12 @@ class ScoreButton;
 class UserStatsScreen : public ScreenBackable {
    public:
     UserStatsScreen();
-    virtual ~UserStatsScreen();
+    ~UserStatsScreen() override = default;
 
-    virtual void draw();
-    virtual void mouse_update(bool *propagate_clicks);
+    void draw() override;
+    void mouse_update(bool *propagate_clicks) override;
 
-    virtual CBaseUIContainer *setVisible(bool visible);
+    CBaseUIContainer *setVisible(bool visible) override;
 
     void rebuildScoreButtons();
 
