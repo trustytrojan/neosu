@@ -233,6 +233,7 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/App/Osu/neosu-UpdateHandler.$(OBJEXT) \
 	src/App/Osu/neosu-UserCard.$(OBJEXT) \
 	src/App/Osu/neosu-UserCard2.$(OBJEXT) \
+	src/App/Osu/neosu-UserStatsScreen.$(OBJEXT) \
 	src/App/Osu/neosu-VolumeOverlay.$(OBJEXT) \
 	src/App/Osu/neosu-score.$(OBJEXT) \
 	src/Engine/neosu-AnimationHandler.$(OBJEXT) \
@@ -396,6 +397,7 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/App/Osu/$(DEPDIR)/neosu-UpdateHandler.Po \
 	src/App/Osu/$(DEPDIR)/neosu-UserCard.Po \
 	src/App/Osu/$(DEPDIR)/neosu-UserCard2.Po \
+	src/App/Osu/$(DEPDIR)/neosu-UserStatsScreen.Po \
 	src/App/Osu/$(DEPDIR)/neosu-VolumeOverlay.Po \
 	src/App/Osu/$(DEPDIR)/neosu-score.Po \
 	src/App/Osu/SongBrowser/$(DEPDIR)/neosu-BottomBar.Po \
@@ -896,6 +898,7 @@ neosu_SOURCES = \
 	src/App/Osu/UpdateHandler.cpp \
 	src/App/Osu/UserCard.cpp \
 	src/App/Osu/UserCard2.cpp \
+	src/App/Osu/UserStatsScreen.cpp \
 	src/App/Osu/VolumeOverlay.cpp \
 	src/App/Osu/score.cpp \
 	src/Engine/AnimationHandler.cpp \
@@ -1461,6 +1464,9 @@ src/App/Osu/neosu-UserCard.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/neosu-UserCard2.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
+src/App/Osu/neosu-UserStatsScreen.$(OBJEXT):  \
+	src/App/Osu/$(am__dirstamp) \
+	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/neosu-VolumeOverlay.$(OBJEXT):  \
 	src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
@@ -1821,6 +1827,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-UpdateHandler.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-UserCard.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-UserCard2.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-UserStatsScreen.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-VolumeOverlay.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-score.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/SongBrowser/$(DEPDIR)/neosu-BottomBar.Po@am__quote@ # am--include-marker
@@ -3130,6 +3137,20 @@ src/App/Osu/neosu-UserCard2.obj: src/App/Osu/UserCard2.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/UserCard2.cpp' object='src/App/Osu/neosu-UserCard2.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-UserCard2.obj `if test -f 'src/App/Osu/UserCard2.cpp'; then $(CYGPATH_W) 'src/App/Osu/UserCard2.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/UserCard2.cpp'; fi`
+
+src/App/Osu/neosu-UserStatsScreen.o: src/App/Osu/UserStatsScreen.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-UserStatsScreen.o -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-UserStatsScreen.Tpo -c -o src/App/Osu/neosu-UserStatsScreen.o `test -f 'src/App/Osu/UserStatsScreen.cpp' || echo '$(srcdir)/'`src/App/Osu/UserStatsScreen.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/$(DEPDIR)/neosu-UserStatsScreen.Tpo src/App/Osu/$(DEPDIR)/neosu-UserStatsScreen.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/UserStatsScreen.cpp' object='src/App/Osu/neosu-UserStatsScreen.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-UserStatsScreen.o `test -f 'src/App/Osu/UserStatsScreen.cpp' || echo '$(srcdir)/'`src/App/Osu/UserStatsScreen.cpp
+
+src/App/Osu/neosu-UserStatsScreen.obj: src/App/Osu/UserStatsScreen.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-UserStatsScreen.obj -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-UserStatsScreen.Tpo -c -o src/App/Osu/neosu-UserStatsScreen.obj `if test -f 'src/App/Osu/UserStatsScreen.cpp'; then $(CYGPATH_W) 'src/App/Osu/UserStatsScreen.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/UserStatsScreen.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/$(DEPDIR)/neosu-UserStatsScreen.Tpo src/App/Osu/$(DEPDIR)/neosu-UserStatsScreen.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/UserStatsScreen.cpp' object='src/App/Osu/neosu-UserStatsScreen.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-UserStatsScreen.obj `if test -f 'src/App/Osu/UserStatsScreen.cpp'; then $(CYGPATH_W) 'src/App/Osu/UserStatsScreen.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/UserStatsScreen.cpp'; fi`
 
 src/App/Osu/neosu-VolumeOverlay.o: src/App/Osu/VolumeOverlay.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-VolumeOverlay.o -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-VolumeOverlay.Tpo -c -o src/App/Osu/neosu-VolumeOverlay.o `test -f 'src/App/Osu/VolumeOverlay.cpp' || echo '$(srcdir)/'`src/App/Osu/VolumeOverlay.cpp
@@ -4523,6 +4544,7 @@ distclean: distclean-am
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-UpdateHandler.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-UserCard.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-UserCard2.Po
+	-rm -f src/App/Osu/$(DEPDIR)/neosu-UserStatsScreen.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-VolumeOverlay.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-score.Po
 	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-BottomBar.Po
@@ -4728,6 +4750,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-UpdateHandler.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-UserCard.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-UserCard2.Po
+	-rm -f src/App/Osu/$(DEPDIR)/neosu-UserStatsScreen.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-VolumeOverlay.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-score.Po
 	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-BottomBar.Po

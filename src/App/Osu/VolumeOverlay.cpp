@@ -21,6 +21,7 @@
 #include "SoundEngine.h"
 #include "UIContextMenu.h"
 #include "UIVolumeSlider.h"
+#include "UserStatsScreen.h"
 
 VolumeOverlay::VolumeOverlay() : OsuScreen() {
     cv::volume_master.setCallback(SA::MakeDelegate<&VolumeOverlay::onMasterVolumeChange>(this));
@@ -241,6 +242,7 @@ bool VolumeOverlay::canChangeVolume() {
     if(osu->rankingScreen->isVisible()) can_scroll = false;
     if(osu->modSelector->isMouseInScrollView()) can_scroll = false;
     if(osu->chat->isMouseInChat()) can_scroll = false;
+    if(osu->userStats->isVisible()) can_scroll = false;
     if(osu->isInPlayMode() && cv::disable_mousewheel.getBool() && !osu->pauseMenu->isVisible()) can_scroll = false;
 
     if(this->isBusy()) can_scroll = true;

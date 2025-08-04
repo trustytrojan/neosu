@@ -86,6 +86,7 @@ neosu_SOURCES = \
 	src/App/Osu/UpdateHandler.cpp \
 	src/App/Osu/UserCard.cpp \
 	src/App/Osu/UserCard2.cpp \
+	src/App/Osu/UserStatsScreen.cpp \
 	src/App/Osu/VolumeOverlay.cpp \
 	src/App/Osu/score.cpp \
 	src/Engine/AnimationHandler.cpp \
