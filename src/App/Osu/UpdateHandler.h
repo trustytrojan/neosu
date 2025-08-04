@@ -29,7 +29,7 @@ class UpdateHandler {
    private:
     // async operation chain
     void onVersionCheckComplete(const std::string& response, bool success, bool force_update);
-    void onDownloadComplete(const std::string& data, bool success);
+    void onDownloadComplete(const std::string& data, bool success, std::string hash);
 
     // release stream management
     void onBleedingEdgeChanged(float oldVal, float newVal);

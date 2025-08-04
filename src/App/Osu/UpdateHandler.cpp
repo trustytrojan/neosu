@@ -78,9 +78,9 @@ void UpdateHandler::onVersionCheckComplete(const std::string &response, bool suc
     auto lines = SString::split(response, "\n");
     f32 latest_version = strtof(lines[0].c_str(), NULL);
     u64 latest_build_tms = 0;
-    if(lines.size() > 1) {
-        latest_build_tms = std::strtoull(lines[1].c_str(), NULL, 10);
-    }
+    std::string online_update_hash;
+    if(lines.size() > 1) latest_build_tms = std::strtoull(lines[1].c_str(), NULL, 10);
+    if(lines.size() > 2) online_update_hash = lines[2];
     if(latest_version == 0.f && latest_build_tms == 0) {
         this->status = force_update ? STATUS_ERROR : STATUS_IDLE;
         debugLog("UpdateHandler ERROR: Failed to parse version number\n");
@@ -96,6 +96,18 @@ void UpdateHandler::onVersionCheckComplete(const std::string &response, bool suc
         debugLog("UpdateHandler: We're already up to date (current v{:.2f} ({:d}), latest v{:.2f} ({:d}))\n",
                  cv::version.getFloat(), current_build_tms, latest_version, latest_build_tms);
         return;
+    }
+
+    // XXX: Blocking file read
+    if(!online_update_hash.empty() && env->fileExists("update.zip")) {
+        std::array<u8, 32> file_hash{};
+        crypto::hash::sha256_f("update.zip", file_hash.data());
+        auto downloaded_update_hash = crypto::baseconv::encodehex(file_hash);
+        if(downloaded_update_hash == online_update_hash) {
+            debugLog("UpdateHandler: Update already downloaded (hash = {})", downloaded_update_hash);
+            this->status = STATUS_DOWNLOAD_COMPLETE;
+            return;
+        }
     }
 
     UString update_url;
@@ -116,26 +128,38 @@ void UpdateHandler::onVersionCheckComplete(const std::string &response, bool suc
     this->status = STATUS_DOWNLOADING_UPDATE;
     networkHandler->httpRequestAsync(
         update_url,
-        [this](const NetworkHandler::Response &response) { this->onDownloadComplete(response.body, response.success); },
+        [this, online_update_hash](const NetworkHandler::Response &response) {
+            this->onDownloadComplete(response.body, response.success, online_update_hash);
+        },
         options);
 }
 
-void UpdateHandler::onDownloadComplete(const std::string &data, bool success) {
-    if(!success || data.length() < 2) {
-        debugLog("UpdateHandler ERROR: downloaded file is too small or failed ({:d} bytes)!\n", data.length());
+void UpdateHandler::onDownloadComplete(const std::string &data, bool success, std::string hash) {
+    if(!success || data.size() < 2) {
+        debugLog("UpdateHandler ERROR: downloaded file is too small or failed ({:d} bytes)!\n", data.size());
+        this->status = STATUS_ERROR;
+        return;
+    }
+
+    std::array<u8, 32> file_hash{};
+    crypto::hash::sha256(data.data(), data.size(), file_hash.data());
+    auto downloaded_update_hash = crypto::baseconv::encodehex(file_hash);
+    if(!hash.empty() && downloaded_update_hash != hash) {
+        debugLog("UpdateHandler ERROR: downloaded file hash does not match! {} != {}\n", downloaded_update_hash, hash);
         this->status = STATUS_ERROR;
         return;
     }
 
     // write to disk
-    debugLog("UpdateHandler: Downloaded file has {:d} bytes, writing ...\n", data.length());
+    debugLog("UpdateHandler: Downloaded file has {:d} bytes, writing ...\n", data.size());
     std::ofstream file("update.zip", std::ios::out | std::ios::binary);
     if(!file.good()) {
         debugLog("UpdateHandler ERROR: Can't write file!\n");
         this->status = STATUS_ERROR;
+        return;
     }
 
-    file.write(data.data(), static_cast<std::streamsize>(data.length()));
+    file.write(data.data(), static_cast<std::streamsize>(data.size()));
     file.close();
 
     debugLog("UpdateHandler: Update finished successfully.\n");
