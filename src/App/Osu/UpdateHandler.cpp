@@ -27,7 +27,7 @@ UpdateHandler::UpdateHandler() {
 }
 
 void UpdateHandler::onBleedingEdgeChanged(float oldVal, float newVal) {
-    if(this->getStatus() != STATUS_IDLE) {
+    if(this->getStatus() != STATUS_IDLE && this->getStatus() != STATUS_ERROR) {
         debugLog("Can't change release stream while an update is in progress!\n");
         cv::bleedingedge.setValue(oldVal, false);
     }
@@ -40,7 +40,7 @@ void UpdateHandler::onBleedingEdgeChanged(float oldVal, float newVal) {
 }
 
 void UpdateHandler::checkForUpdates(bool force_update) {
-    if(this->getStatus() != STATUS_IDLE) {
+    if(this->getStatus() != STATUS_IDLE && this->getStatus() != STATUS_ERROR) {
         debugLog("We're already updating!\n");
         return;
     }
@@ -116,6 +116,7 @@ void UpdateHandler::onVersionCheckComplete(const std::string &response, bool suc
     } else {
         update_url = UString::format("https://" NEOSU_DOMAIN "/update/" OS_NAME "/v%.2f.zip", latest_version);
     }
+    update_url.append(UString::format("?hash=%s", online_update_hash.c_str()));
 
     debugLog("UpdateHandler: Downloading latest update... (current v{:.2f} ({:d}), latest v{:.2f} ({:d}))\n",
              cv::version.getFloat(), current_build_tms, latest_version, latest_build_tms);

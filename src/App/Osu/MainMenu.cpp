@@ -1012,6 +1012,7 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
             case UpdateHandler::STATUS::STATUS_ERROR:
                 this->updateAvailableButton->setText("Update Error! Click to retry ...");
                 this->updateAvailableButton->setColor(rgb(255, 0, 0));
+                this->updateAvailableButton->setTextColor(0xffffffff);
                 this->updateAvailableButton->setVisible(true);
                 break;
         }
