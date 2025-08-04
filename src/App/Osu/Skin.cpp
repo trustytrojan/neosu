@@ -1626,7 +1626,7 @@ void Skin::checkLoadSound(Sound **addressOfPointer, const std::string &skinEleme
 
     auto try_load_sound = [=](const std::string &base_path, const std::string &filename,
                               const std::string &resource_name, bool loop) {
-        const char *extensions[] = {".wav", ".mp3", ".ogg"};
+        const char *extensions[] = {".wav", ".mp3", ".ogg", ".flac"};
         for(auto &extension : extensions) {
             std::string fn = filename;
             fn.append(extension);
