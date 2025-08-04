@@ -59,6 +59,7 @@ jobs:
           -t neosu-builder .
           docker run --rm \
             -e HOST=${{ matrix.host }} \
+            -e STRIPFLAGS=${{ (github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/dev') && '--disable-strip' || '' }} \
             -e CCACHE_DIR=/src/.ccache \
             --mount type=bind,source="$(pwd)",target=/src \
             --mount type=bind,source="$(pwd)"/build-out,target=/src/build-out \

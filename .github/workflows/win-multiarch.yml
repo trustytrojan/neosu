@@ -63,9 +63,12 @@ jobs:
       - name: Building neosu
         run: |
           MAKEFLAGS="-j$(nproc)" ./autogen.sh
-          cd build-out && MAKEFLAGS="-j$(nproc)" ../configure --with-audio="bass,soloud" --host=${{ matrix.host }} && CCACHE_DIR="${{ env.CCACHE_DIR }}" MAKEFLAGS="-j$(nproc)" make install
+          cd build-out && \
+          MAKEFLAGS="-j$(nproc)" ../configure \
+            ${{ (github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/dev') && '--disable-strip' || '' }} \
+            --with-audio="bass,soloud" --host=${{ matrix.host }} && \
+          CCACHE_DIR="${{ env.CCACHE_DIR }}" MAKEFLAGS="-j$(nproc)" make install
 
-#          ./configure --disable-system-deps --enable-static --disable-native --with-audio="bass,soloud" --host=${{ matrix.host }}
       - uses: actions/upload-artifact@v4
         with:
           name: neosu-win-${{ matrix.arch }}
