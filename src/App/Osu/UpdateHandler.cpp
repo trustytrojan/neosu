@@ -8,6 +8,7 @@
 #include "File.h"
 #include "NetworkHandler.h"
 #include "SString.h"
+#include "OptionsMenu.h"
 #include "Osu.h"
 
 #ifndef _WIN32
@@ -217,6 +218,9 @@ void UpdateHandler::installUpdate() {
             return;
         }
     }
+
+    cv::is_bleedingedge.setValue(cv::bleedingedge.getBool());
+    osu->optionsMenu->save();
 
     // we're done updating; restart the game, since the user already clicked to update
     engine->restart();
