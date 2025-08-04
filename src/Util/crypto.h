@@ -21,7 +21,7 @@ void sha256_f(const UString& file_path, u8* hash);
 void md5_f(const UString& file_path, u8* hash);
 }  // namespace hash
 
-namespace baseconv {
+namespace conv {
 std::vector<u8> encode64(const u8* src, size_t len);
 std::vector<u8> decode64(const u8* src, size_t len);
 
@@ -40,6 +40,6 @@ std::string encodehex(const std::array<u8, N>& src) {
     return out;
 }
 
-}  // namespace baseconv
+}  // namespace conv
 
 }  // namespace crypto

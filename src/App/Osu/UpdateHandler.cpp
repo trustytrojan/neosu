@@ -98,7 +98,7 @@ void UpdateHandler::onVersionCheckComplete(const std::string &response, bool suc
     if(!online_update_hash.empty() && env->fileExists("update.zip")) {
         std::array<u8, 32> file_hash{};
         crypto::hash::sha256_f("update.zip", file_hash.data());
-        auto downloaded_update_hash = crypto::baseconv::encodehex(file_hash);
+        auto downloaded_update_hash = crypto::conv::encodehex(file_hash);
         if(downloaded_update_hash == online_update_hash) {
             debugLog("UpdateHandler: Update already downloaded (hash = {})", downloaded_update_hash);
             this->status = STATUS_DOWNLOAD_COMPLETE;
@@ -140,7 +140,7 @@ void UpdateHandler::onDownloadComplete(const std::string &data, bool success, st
 
     std::array<u8, 32> file_hash{};
     crypto::hash::sha256(data.data(), data.size(), file_hash.data());
-    auto downloaded_update_hash = crypto::baseconv::encodehex(file_hash);
+    auto downloaded_update_hash = crypto::conv::encodehex(file_hash);
     if(!hash.empty() && downloaded_update_hash != hash) {
         debugLog("UpdateHandler ERROR: downloaded file hash does not match! {} != {}\n", downloaded_update_hash, hash);
         this->status = STATUS_ERROR;

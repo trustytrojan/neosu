@@ -2667,7 +2667,7 @@ void OptionsMenu::onLogInClicked(bool left, bool right) {
             crypto::rng::get_bytes(&bancho->oauth_challenge[0], 32);
             crypto::hash::sha256(&bancho->oauth_challenge[0], 32, &bancho->oauth_verifier[0]);
 
-            auto challenge_b64 = crypto::baseconv::encode64(&bancho->oauth_challenge[0], 32);
+            auto challenge_b64 = crypto::conv::encode64(&bancho->oauth_challenge[0], 32);
             auto scheme = cv::use_https.getBool() ? "https://" : "http://";
             auto url = fmt::format("{:s}{:s}/connect?challenge={}", scheme, bancho->endpoint,
                                    (const char *)challenge_b64.data());

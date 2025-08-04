@@ -162,7 +162,7 @@ void md5_f(const UString& file_path, u8* hash) {
 }
 }  // namespace hash
 
-namespace baseconv {
+namespace conv {
 std::vector<u8> encode64(const u8* src, size_t len) {
 #ifdef USE_OPENSSL
     // calculate output size: base64 encoding produces 4 chars for every 3 input bytes
@@ -220,6 +220,6 @@ std::vector<u8> decode64(const u8* src, size_t len) {
 
     return {};
 }
-}  // namespace baseconv
+}  // namespace conv
 
 }  // namespace crypto

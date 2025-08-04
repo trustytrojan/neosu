@@ -91,7 +91,7 @@ void submit_score(FinishedScore score) {
         curl_mime_data(part, osu_version.toUtf8(), osu_version.lengthUtf8());
     }
     {
-        auto iv_b64 = crypto::baseconv::encode64(iv, sizeof(iv));
+        auto iv_b64 = crypto::conv::encode64(iv, sizeof(iv));
         part = curl_mime_addpart(request.mime);
         curl_mime_name(part, "iv");
         curl_mime_data(part, (const char *)iv_b64.data(), CURL_ZERO_TERMINATED);
@@ -100,7 +100,7 @@ void submit_score(FinishedScore score) {
         size_t s_client_hashes_encrypted = 0;
         u8 *client_hashes_encrypted = BANCHO::AES::encrypt(
             iv, (u8 *)bancho->client_hashes.toUtf8(), bancho->client_hashes.lengthUtf8(), &s_client_hashes_encrypted);
-        auto client_hashes_b64 = crypto::baseconv::encode64(client_hashes_encrypted, s_client_hashes_encrypted);
+        auto client_hashes_b64 = crypto::conv::encode64(client_hashes_encrypted, s_client_hashes_encrypted);
         part = curl_mime_addpart(request.mime);
         curl_mime_name(part, "s");
         curl_mime_data(part, (const char *)client_hashes_b64.data(), CURL_ZERO_TERMINATED);
@@ -144,7 +144,7 @@ void submit_score(FinishedScore score) {
         size_t s_score_data_encrypted = 0;
         u8 *score_data_encrypted =
             BANCHO::AES::encrypt(iv, (u8 *)score_data.toUtf8(), score_data.lengthUtf8(), &s_score_data_encrypted);
-        auto score_data_b64 = crypto::baseconv::encode64(score_data_encrypted, s_score_data_encrypted);
+        auto score_data_b64 = crypto::conv::encode64(score_data_encrypted, s_score_data_encrypted);
 
         part = curl_mime_addpart(request.mime);
         curl_mime_name(part, "score");
