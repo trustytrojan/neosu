@@ -314,8 +314,8 @@ void Engine::onUpdate() {
         this->bResolutionChange = false;
 
         if(cv::debug_engine.getBool())
-            debugLog("Engine: executing pending queued resolution change to ({:d}, {:d})\n", (int)this->vNewScreenSize.x,
-                     (int)this->vNewScreenSize.y);
+            debugLog("Engine: executing pending queued resolution change to ({:d}, {:d})\n",
+                     (int)this->vNewScreenSize.x, (int)this->vNewScreenSize.y);
 
         this->onResolutionChange(this->vNewScreenSize);
     }
@@ -619,4 +619,6 @@ void _errortest(void) {
         "This is an error message, fullscreen mode should be disabled and you should be able to read this");
 }
 
-void _dpiinfo(void) { debugLog("env->getDPI() = {:d}, env->getDPIScale() = {:f}\n", env->getDPI(), env->getDPIScale()); }
+void _dpiinfo(void) {
+    debugLog("env->getDPI() = {:d}, env->getDPIScale() = {:f}\n", env->getDPI(), env->getDPIScale());
+}

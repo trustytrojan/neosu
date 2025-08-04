@@ -14,6 +14,7 @@
 #include "SongBrowser/LoudnessCalcThread.h"
 #include "SoundEngine.h"
 #include "SpectatorScreen.h"
+#include "UpdateHandler.h"
 
 #include <algorithm>
 #include <unordered_set>
@@ -510,6 +511,8 @@ void loudness_cb(const UString & /*oldValue*/, const UString & /*newValue*/) {
 }
 
 void _save(void) { db->save(); }
+
+void _update(void) { osu->updateHandler->checkForUpdates(true); }
 
 #undef CONVARDEFS_H
 #define DEFINE_CONVARS

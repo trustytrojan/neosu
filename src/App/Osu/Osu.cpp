@@ -354,7 +354,8 @@ Osu::Osu() {
     // don't auto update if this env var is set to anything other than 0 or empty (if it is set)
     const std::string extUpdater = Environment::getEnvVariable("NEOSU_EXTERNAL_UPDATE_PROVIDER");
     if(cv::auto_update.getBool() && (extUpdater.empty() || strtol(extUpdater.c_str(), nullptr, 10) == 0)) {
-        this->updateHandler->checkForUpdates();
+        bool force_update = cv::bleedingedge.getBool() != cv::is_bleedingedge.getBool();
+        this->updateHandler->checkForUpdates(force_update);
     }
 #endif
 
@@ -1854,9 +1855,7 @@ bool Osu::onShutdown() {
 
     BANCHO::Net::disconnect();
 
-    // the only time where a shutdown could be problematic is while an update is being installed, so we block it here
-    return this->updateHandler == NULL ||
-           this->updateHandler->getStatus() != UpdateHandler::STATUS::STATUS_INSTALLING_UPDATE;
+    return true;
 }
 
 void Osu::onSkinReload() {

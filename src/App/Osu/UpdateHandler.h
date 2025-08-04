@@ -6,14 +6,11 @@
 class UpdateHandler {
    public:
     enum class STATUS : int8_t {
-        STATUS_INITIAL,
-        STATUS_UP_TO_DATE,
+        STATUS_IDLE,
         STATUS_CHECKING_FOR_UPDATE,
         STATUS_DOWNLOADING_UPDATE,
         STATUS_DOWNLOAD_COMPLETE,
-        STATUS_INSTALLING_UPDATE,
-        STATUS_SUCCESS_INSTALLATION,
-        STATUS_ERROR
+        STATUS_ERROR,
     };
 
     UpdateHandler();
@@ -24,34 +21,19 @@ class UpdateHandler {
     UpdateHandler(UpdateHandler&&) = delete;
     UpdateHandler& operator=(UpdateHandler&&) = delete;
 
-    void checkForUpdates();
+    void checkForUpdates(bool force_update);
     void installUpdate();
 
     [[nodiscard]] inline STATUS getStatus() const { return this->status.load(); }
-    UString update_url;
 
    private:
-
     // async operation chain
-    void onVersionCheckComplete(const std::string& response, bool success);
-    void downloadUpdate();
+    void onVersionCheckComplete(const std::string& response, bool success, bool force_update);
     void onDownloadComplete(const std::string& data, bool success);
-
-    // cache management
-    void saveCacheInfo(const std::string& versionContent);
-    bool isCachedUpdateValid(const std::string& versionContent);
-    std::string calculateUpdateHash(const std::string& versionContent);
 
     // release stream management
     void onBleedingEdgeChanged(float oldVal, float newVal);
-    // with bleeding edge identifier
-    static std::string getStreamArchiveName();
-    static std::string getStreamCacheName();
 
     // status
-    std::atomic<STATUS> status;
-    int iNumRetries;
-    std::string updateArchiveName;
-    std::string updateCacheInfoPath;
-    std::string currentVersionContent;  // stored for cache operations
+    std::atomic<STATUS> status = STATUS::STATUS_IDLE;
 };

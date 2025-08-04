@@ -49,6 +49,7 @@ extern void _printsize();
 extern void _toggleresizable();
 extern void _restart();
 extern void _save();
+extern void _update();
 
 #define OSU_VERSION_DATEONLY 0
 
@@ -114,6 +115,7 @@ CONVAR(save, "save", FCVAR_BANCHO_COMPATIBLE, CFUNC(_save));
 CONVAR(showconsolebox, "showconsolebox");
 CONVAR(shutdown, "shutdown", FCVAR_BANCHO_COMPATIBLE, []() -> void { engine ? engine->shutdown() : (void)0; });
 CONVAR(spectate, "spectate", FCVAR_HIDDEN, CFUNC(spectate_by_username));
+CONVAR(update, "update", FCVAR_PRIVATE, CFUNC(_update));
 
 }  // namespace cmd
 
@@ -236,7 +238,8 @@ CONVAR(beatmap_version, "osu_beatmap_version", 128, FCVAR_BANCHO_COMPATIBLE,
        "maximum supported .osu file version, above this will simply not load (this was 14 but got "
        "bumped to 128 due to lazer backports)");
 CONVAR(bleedingedge, "bleedingedge", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
-CONVAR(force_update, "force_update", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_NOSAVE);
+CONVAR(is_bleedingedge, "is_bleedingedge", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_HIDDEN,
+       "used by the updater to tell if it should nag the user to 'update' to the correct release stream");
 CONVAR(bug_flicker_log, "osu_bug_flicker_log", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(chat_auto_hide, "chat_auto_hide", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "automatically hide chat during gameplay");

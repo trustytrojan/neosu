@@ -446,7 +446,7 @@ void MainMenu::draw() {
     if(this->updateAvailableButton != NULL) {
         using enum UpdateHandler::STATUS;
         const auto status = osu->getUpdateHandler()->getStatus();
-        const bool drawAnim = (status == STATUS_SUCCESS_INSTALLATION || status == STATUS_DOWNLOAD_COMPLETE);
+        const bool drawAnim = (status == STATUS_DOWNLOAD_COMPLETE);
         if(drawAnim) {
             g->push3DScene(McRect(this->updateAvailableButton->getPos().x, this->updateAvailableButton->getPos().y,
                                   this->updateAvailableButton->getSize().x, this->updateAvailableButton->getSize().y));
@@ -970,13 +970,12 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
 
     // handle update checker and status text
     if(this->updateAvailableButton != NULL) {
-        switch(osu->getUpdateHandler()->getStatus()) {
-            case UpdateHandler::STATUS::STATUS_INITIAL:
-                std::abort();  // Programmer Error! :^)
-                break;
-            case UpdateHandler::STATUS::STATUS_UP_TO_DATE:
+        using enum UpdateHandler::STATUS;
+        const auto status = osu->getUpdateHandler()->getStatus();
+
+        switch(status) {
+            case UpdateHandler::STATUS::STATUS_IDLE:
                 if(this->updateAvailableButton->isVisible()) {
-                    this->updateAvailableButton->setText("");
                     this->updateAvailableButton->setVisible(false);
                 }
                 break;
@@ -1004,25 +1003,10 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
                     else
                         this->updateAvailableButton->setText("A new version of neosu is ready!");
                 }
-                break;
-            case UpdateHandler::STATUS::STATUS_INSTALLING_UPDATE:
-                this->updateAvailableButton->setText("Installing ...");
-                this->updateAvailableButton->setColor(0x2200ff00);
-                this->updateAvailableButton->setVisible(true);
-                break;
-            case UpdateHandler::STATUS::STATUS_SUCCESS_INSTALLATION:
-                if(engine->getTime() > this->fUpdateButtonTextTime && anim->isAnimating(&this->fUpdateButtonAnim) &&
-                   this->fUpdateButtonAnim > 0.175f) {
-                    this->fUpdateButtonTextTime = this->fUpdateButtonAnimTime;
-
-                    this->updateAvailableButton->setColor(rgb(0, 255, 0));
-                    this->updateAvailableButton->setTextColor(0xffffffff);
-                    this->updateAvailableButton->setVisible(true);
-
-                    if(this->updateAvailableButton->getText().find("installed") != -1)
-                        this->updateAvailableButton->setText("Click here to restart now!");
-                    else
-                        this->updateAvailableButton->setText("Update installed!");
+                if(engine->getTime() > this->fUpdateButtonAnimTime) {
+                    this->fUpdateButtonAnimTime = engine->getTime() + 3.0f;
+                    this->fUpdateButtonAnim = 0.0f;
+                    anim->moveQuadInOut(&this->fUpdateButtonAnim, 1.0f, 0.5f, true);
                 }
                 break;
             case UpdateHandler::STATUS::STATUS_ERROR:
@@ -1030,17 +1014,6 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
                 this->updateAvailableButton->setColor(rgb(255, 0, 0));
                 this->updateAvailableButton->setVisible(true);
                 break;
-        }
-    }
-
-    {
-        using enum UpdateHandler::STATUS;
-        const auto status = osu->getUpdateHandler()->getStatus();
-        if((status == STATUS_SUCCESS_INSTALLATION || status == STATUS_DOWNLOAD_COMPLETE) &&
-           engine->getTime() > this->fUpdateButtonAnimTime) {
-            this->fUpdateButtonAnimTime = engine->getTime() + 3.0f;
-            this->fUpdateButtonAnim = 0.0f;
-            anim->moveQuadInOut(&this->fUpdateButtonAnim, 1.0f, 0.5f, true);
         }
     }
 
@@ -1475,10 +1448,8 @@ void MainMenu::onUpdatePressed() {
 
     if(status == STATUS_DOWNLOAD_COMPLETE)
         updateHandler->installUpdate();
-    else if(status == STATUS_SUCCESS_INSTALLATION)
-        engine->restart();
     else if(status == STATUS_ERROR)
-        updateHandler->checkForUpdates();
+        updateHandler->checkForUpdates(true);
 }
 
 void MainMenu::onVersionPressed() {
