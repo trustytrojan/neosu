@@ -249,6 +249,7 @@ Osu::Osu() {
     cv::mod_doubletime_dummy.setCallback(SA::MakeDelegate<&Osu::onDTPresetChange>(this));
     cv::mod_halftime_dummy.setCallback(SA::MakeDelegate<&Osu::onHTPresetChange>(this));
     cv::draw_songbrowser_thumbnails.setCallback(SA::MakeDelegate<&Osu::onThumbnailsToggle>(this));
+    cv::bleedingedge.setCallback(SA::MakeDelegate<&UpdateHandler::onBleedingEdgeChanged>(this->updateHandler));
 
     // load global resources
     const int baseDPI = 96;

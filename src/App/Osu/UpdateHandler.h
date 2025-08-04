@@ -13,7 +13,7 @@ class UpdateHandler {
         STATUS_ERROR,
     };
 
-    UpdateHandler();
+    UpdateHandler() = default;
     ~UpdateHandler() = default;
 
     UpdateHandler(const UpdateHandler&) = delete;
@@ -26,13 +26,13 @@ class UpdateHandler {
 
     [[nodiscard]] inline STATUS getStatus() const { return this->status.load(); }
 
+    // release stream management
+    void onBleedingEdgeChanged(float oldVal, float newVal);
+
    private:
     // async operation chain
     void onVersionCheckComplete(const std::string& response, bool success, bool force_update);
     void onDownloadComplete(const std::string& data, bool success, std::string hash);
-
-    // release stream management
-    void onBleedingEdgeChanged(float oldVal, float newVal);
 
     // status
     std::atomic<STATUS> status = STATUS::STATUS_IDLE;

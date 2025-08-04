@@ -22,10 +22,6 @@
 
 using enum UpdateHandler::STATUS;
 
-UpdateHandler::UpdateHandler() {
-    cv::bleedingedge.setCallback(SA::MakeDelegate<&UpdateHandler::onBleedingEdgeChanged>(this));
-}
-
 void UpdateHandler::onBleedingEdgeChanged(float oldVal, float newVal) {
     if(this->getStatus() != STATUS_IDLE && this->getStatus() != STATUS_ERROR) {
         debugLog("Can't change release stream while an update is in progress!\n");

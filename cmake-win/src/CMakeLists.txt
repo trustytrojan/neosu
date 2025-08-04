@@ -43,6 +43,7 @@ endif()
 set(PROJECT_TARNAME "neosu")
 set(PROJECT_URL "https://github.com/kiwec/neosu")
 string(TIMESTAMP BUILD_TIMESTAMP %y%m%d%H%M UTC)
+message(STATUS "Build timestamp: ${BUILD_TIMESTAMP}")
 
 # Platform and feature detection
 set(MCENGINE_PLATFORM_WINDOWS ON)
