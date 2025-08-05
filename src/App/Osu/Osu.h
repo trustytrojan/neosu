@@ -103,7 +103,6 @@ class Osu final : public MouseListener, public KeyboardListener {
     }
     [[nodiscard]] inline Skin *getSkin() const { return this->skin; }
     [[nodiscard]] inline HUD *getHUD() const { return this->hud; }
-    [[nodiscard]] inline NotificationOverlay *getNotificationOverlay() const { return this->notificationOverlay; }
     [[nodiscard]] inline TooltipOverlay *getTooltipOverlay() const { return this->tooltipOverlay; }
     [[nodiscard]] inline ModSelector *getModSelector() const { return this->modSelector; }
     [[nodiscard]] inline ModFPoSu *getFPoSu() const { return this->fposu; }

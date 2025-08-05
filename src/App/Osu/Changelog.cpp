@@ -29,7 +29,8 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG v39_03;
     v39_03.title = "39.03";
     v39_03.changes = {
-        R"(- Re-added local user stats)",
+        // R"(- Re-added local user stats)",
+        R"(- Added chat/screenshot/status notifications)",
         R"(- Fixed crash when skin is missing spinner sounds)",
         R"(- Fixed circles not being clickable while spinner is active)",
     };
@@ -587,7 +588,7 @@ void Changelog::onChangeClicked(CBaseUIButton *button) {
 
         debugLog("url = {:s}\n", url.toUtf8());
 
-        osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
+        osu->notificationOverlay->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
         env->openURLInDefaultBrowser(url.toUtf8());
     }
 }

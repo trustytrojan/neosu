@@ -17,6 +17,7 @@ enum Action : uint8_t {
     TESTING2 = 11,  // Was LOBBY but shows as "Testing" in-game
     MULTIPLAYING = 12,
     OSU_DIRECT = 13,
+    NB_ACTIONS
 };
 
 enum Privileges : uint8_t {

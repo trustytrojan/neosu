@@ -22,7 +22,7 @@ ChatLink::ChatLink(float xPos, float yPos, float xSize, float ySize, const UStri
     this->setBackgroundColor(0xff2e3784);
 }
 
-void ChatLink::mouse_update(bool *propagate_clicks) {
+void ChatLink::mouse_update(bool* propagate_clicks) {
     CBaseUILabel::mouse_update(propagate_clicks);
 
     if(this->isMouseInside()) {
@@ -49,7 +49,7 @@ void ChatLink::open_beatmap_link(i32 map_id, i32 set_id) {
     }
 }
 
-void ChatLink::onMouseUpInside(bool  /*left*/, bool  /*right*/) {
+void ChatLink::onMouseUpInside(bool /*left*/, bool /*right*/) {
     std::string link_str = this->link.toUtf8();
     std::smatch match;
 
@@ -66,7 +66,7 @@ void ChatLink::onMouseUpInside(bool  /*left*/, bool  /*right*/) {
     // Detect multiplayer invite links
     if(this->link.startsWith("osump://")) {
         if(osu->room->isVisible()) {
-            osu->getNotificationOverlay()->addNotification("You are already in a multiplayer room.");
+            osu->notificationOverlay->addNotification("You are already in a multiplayer room.");
             return;
         }
 

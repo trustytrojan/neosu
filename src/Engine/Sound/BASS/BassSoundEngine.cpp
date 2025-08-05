@@ -194,8 +194,8 @@ void BassSoundEngine::updateOutputDevices(bool /*printInfo*/) {
         soundDevice.name.append(" [WASAPI]");
         this->outputDevices.push_back(soundDevice);
 
-        debugLog("WASAPI: Device {:d} = \"{:s}\", enabled = {:d}, default = {:d}\n", d, wasapiDeviceInfo.name, (int)isEnabled,
-                 (int)isDefault);
+        debugLog("WASAPI: Device {:d} = \"{:s}\", enabled = {:d}, default = {:d}\n", d, wasapiDeviceInfo.name,
+                 (int)isEnabled, (int)isDefault);
     }
 #endif
 }
@@ -213,7 +213,7 @@ bool BassSoundEngine::init_bass_mixer(const SoundEngine::OUTPUT_DEVICE &device) 
         if(code != BASS_ERROR_ALREADY) {
             this->ready_since = -1.0;
             debugLog("BASS_Init(0) failed.\n");
-            osu->getNotificationOverlay()->addToast(BassManager::getErrorUString());
+            osu->notificationOverlay->addToast(BassManager::getErrorUString(), ERROR_TOAST);
             return false;
         }
     }
@@ -222,7 +222,7 @@ bool BassSoundEngine::init_bass_mixer(const SoundEngine::OUTPUT_DEVICE &device) 
         if(!BASS_Init(device.id, freq, bass_flags | BASS_DEVICE_SOFTWARE, NULL, NULL)) {
             this->ready_since = -1.0;
             debugLog("BASS_Init({:d}) errored out.\n", device.id);
-            osu->getNotificationOverlay()->addToast(BassManager::getErrorUString());
+            osu->notificationOverlay->addToast(BassManager::getErrorUString(), ERROR_TOAST);
             return false;
         }
     }
@@ -233,7 +233,7 @@ bool BassSoundEngine::init_bass_mixer(const SoundEngine::OUTPUT_DEVICE &device) 
     if(this->g_bassOutputMixer == 0) {
         this->ready_since = -1.0;
         debugLog("BASS_Mixer_StreamCreate() failed.\n");
-        osu->getNotificationOverlay()->addToast(BassManager::getErrorUString());
+        osu->notificationOverlay->addToast(BassManager::getErrorUString(), ERROR_TOAST);
         return false;
     }
 
@@ -305,7 +305,7 @@ bool BassSoundEngine::initializeOutputDevice(const SoundEngine::OUTPUT_DEVICE &d
         if(!BASS_ASIO_Init(device.id, 0)) {
             ready_since = -1.0;
             debugLog("BASS_ASIO_Init() failed.\n");
-            osu->getNotificationOverlay()->addToast(BassManager::getErrorUString());
+            osu->notificationOverlay->addToast(BassManager::getErrorUString(), ERROR_TOAST);
             return false;
         }
 
@@ -334,14 +334,14 @@ bool BassSoundEngine::initializeOutputDevice(const SoundEngine::OUTPUT_DEVICE &d
         if(!BASS_ASIO_ChannelEnableBASS(false, 0, g_bassOutputMixer, true)) {
             ready_since = -1.0;
             debugLog("BASS_ASIO_ChannelEnableBASS() failed.\n");
-            osu->getNotificationOverlay()->addToast(BassManager::getErrorUString());
+            osu->notificationOverlay->addToast(BassManager::getErrorUString(), ERROR_TOAST);
             return false;
         }
 
         if(!BASS_ASIO_Start(bufsize, 0)) {
             ready_since = -1.0;
             debugLog("BASS_ASIO_Start() failed.\n");
-            osu->getNotificationOverlay()->addToast(BassManager::getErrorUString());
+            osu->notificationOverlay->addToast(BassManager::getErrorUString(), ERROR_TOAST);
             return false;
         }
 
@@ -394,14 +394,14 @@ bool BassSoundEngine::initializeOutputDevice(const SoundEngine::OUTPUT_DEVICE &d
 #endif
             ready_since = -1.0;
             debugLog("BASS_WASAPI_Init() failed.\n");
-            osu->getNotificationOverlay()->addToast(BassManager::getErrorUString());
+            osu->notificationOverlay->addToast(BassManager::getErrorUString(), ERROR_TOAST);
             return false;
         }
 
         if(!BASS_WASAPI_Start()) {
             ready_since = -1.0;
             debugLog("BASS_WASAPI_Start() failed.\n");
-            osu->getNotificationOverlay()->addToast(BassManager::getErrorUString());
+            osu->notificationOverlay->addToast(BassManager::getErrorUString(), ERROR_TOAST);
             return false;
         }
 

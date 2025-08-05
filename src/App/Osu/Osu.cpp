@@ -1461,6 +1461,8 @@ void Osu::saveScreenshot() {
     const f32 innerHeight = g_vInternalResolution.y;
 
     soundEngine->play(this->skin->getShutter());
+    this->notificationOverlay->addToast(UString::format("Saved screenshot to %s", screenshotFilename.c_str()),
+                                        CHAT_TOAST, [screenshotFilename] { env->openFileBrowser(screenshotFilename); });
 
     // don't need cropping
     if(static_cast<i32>(innerWidth) == static_cast<i32>(outerWidth) &&
@@ -2008,7 +2010,7 @@ void Osu::onRawInputChange(const UString & /*old*/, const UString &newValue) {
     float sens = cv::mouse_sensitivity.getFloat();
     if(!newBool && (sens < 0.999 || sens > 1.001)) {
         cv::mouse_sensitivity.setValue(1.f, false);
-        if(this->notificationOverlay) this->notificationOverlay->addToast("Forced sensitivity to 1 for non-raw input.");
+        this->notificationOverlay->addToast("Forced sensitivity to 1 for non-raw input.", ERROR_TOAST);
     }
 }
 
@@ -2016,8 +2018,7 @@ void Osu::onSensitivityChange(const UString & /*old*/, const UString &newValue) 
     float newFloat = newValue.toFloat();
     if(!cv::mouse_raw_input.getBool() && (newFloat < 0.999 || newFloat > 1.001)) {
         cv::mouse_raw_input.setValue(true, false);
-        if(this->notificationOverlay)
-            this->notificationOverlay->addToast("Raw input is forced on for sensitivities != 1 on Linux.");
+        this->notificationOverlay->addToast("Raw input is forced on for sensitivities != 1 on Linux.", ERROR_TOAST);
     }
 }
 

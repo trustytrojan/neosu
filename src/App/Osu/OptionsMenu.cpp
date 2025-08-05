@@ -430,7 +430,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     cv::options_high_quality_sliders.setCallback(
         SA::MakeDelegate<&OptionsMenu::onHighQualitySlidersConVarChange>(this));
 
-    osu->getNotificationOverlay()->addKeyListener(this);
+    osu->notificationOverlay->addKeyListener(this);
 
     this->waitingKey = NULL;
     this->resolutionLabel = NULL;
@@ -1257,12 +1257,12 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
         loginElement->cvars[keepCbx] = &cv::mp_autologin;
     }
 
-    // this->addSubSection("Alerts");
-    // this->addCheckbox("Notify when friends change status", &cv::notify_friend_status_change);
-    // TODO: show chat message notifications (for dms, i guess?)
-    // TODO: show toast when someone says your name
-    // TODO: play sound when someone says your name
-    // TODO: show toasts during gameplay
+    this->addSubSection("Alerts");
+    this->addCheckbox("Notify when friends change status", &cv::notify_friend_status_change);
+    this->addCheckbox("Notify when receiving a direct message", &cv::chat_notify_on_dm);
+    this->addCheckbox("Notify when mentioned", &cv::chat_notify_on_mention);
+    this->addCheckbox("Ping when mentioned", &cv::chat_ping_on_mention);
+    this->addCheckbox("Show notifications during gameplay", &cv::notify_during_gameplay);
 
     this->addSubSection("In-game chat");
     // this->addCheckbox("Chat ticker", &cv::chat_ticker);
@@ -1477,7 +1477,7 @@ void OptionsMenu::mouse_update(bool *propagate_clicks) {
         this->osuFolderTextbox->setBackgroundColor(0xff000000);
 
     // hack to avoid entering search text while binding keys
-    if(osu->getNotificationOverlay()->isVisible() && osu->getNotificationOverlay()->isWaitingForKey())
+    if(osu->notificationOverlay->isVisible() && osu->notificationOverlay->isWaitingForKey())
         this->fSearchOnCharKeybindHackTime = engine->getTime() + 0.1f;
 
     // highlight active category depending on scroll position
@@ -1727,7 +1727,7 @@ void OptionsMenu::setVisibleInt(bool visible, bool fromOnBack) {
 
         // save even if not closed via onBack(), e.g. if closed via setVisible(false) from outside
         if(!visible && !fromOnBack) {
-            osu->getNotificationOverlay()->stopWaitingForKey();
+            osu->notificationOverlay->stopWaitingForKey();
             this->save();
         }
     }
@@ -2226,7 +2226,7 @@ void OptionsMenu::updateLayout() {
 }
 
 void OptionsMenu::onBack() {
-    osu->getNotificationOverlay()->stopWaitingForKey();
+    osu->notificationOverlay->stopWaitingForKey();
 
     this->save();
 
@@ -2473,7 +2473,7 @@ void OptionsMenu::onSkinSelect() {
             });
         }
     } else {
-        osu->getNotificationOverlay()->addToast("Error: Couldn't find any skins", 0xffff0000);
+        osu->notificationOverlay->addToast("Error: Couldn't find any skins", ERROR_TOAST);
         this->options->scrollToTop();
         this->fOsuFolderTextboxInvalidAnim = engine->getTime() + 3.0f;
     }
@@ -2675,7 +2675,7 @@ void OptionsMenu::onLogInClicked(bool left, bool right) {
 }
 
 void OptionsMenu::onCM360CalculatorLinkClicked() {
-    osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
+    osu->notificationOverlay->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
     env->openURLInDefaultBrowser("https://www.mouse-sensitivity.com/");
 }
 
@@ -2949,8 +2949,8 @@ void OptionsMenu::onKeyBindingButtonPressed(CBaseUIButton *button) {
                     notificationText.append(":");
 
                     const bool waitForKey = true;
-                    osu->getNotificationOverlay()->addNotification(notificationText, 0xffffffff, waitForKey);
-                    osu->getNotificationOverlay()->setDisallowWaitForKeyLeftClick(
+                    osu->notificationOverlay->addNotification(notificationText, 0xffffffff, waitForKey);
+                    osu->notificationOverlay->setDisallowWaitForKeyLeftClick(
                         !(dynamic_cast<OptionsMenuKeyBindButton *>(button)->isLeftMouseClickBindingAllowed()));
                 }
                 break;
@@ -2988,13 +2988,13 @@ void OptionsMenu::onKeyBindingsResetAllPressed(CBaseUIButton * /*button*/) {
             bind->setValue(bind->getDefaultFloat());
         }
 
-        osu->getNotificationOverlay()->addNotification("All key bindings have been reset.", 0xff00ff00);
+        osu->notificationOverlay->addNotification("All key bindings have been reset.", 0xff00ff00);
     } else {
         if(remainingUntilReset > 1)
-            osu->getNotificationOverlay()->addNotification(
+            osu->notificationOverlay->addNotification(
                 UString::format("Press %i more times to confirm.", remainingUntilReset));
         else
-            osu->getNotificationOverlay()->addNotification(
+            osu->notificationOverlay->addNotification(
                 UString::format("Press %i more time to confirm!", remainingUntilReset), 0xffffff00);
     }
 }
@@ -3320,13 +3320,13 @@ void OptionsMenu::onResetEverythingClicked(CBaseUIButton * /*button*/) {
             bind->setValue(bind->getDefaultFloat());
         }
 
-        osu->getNotificationOverlay()->addNotification("All settings have been reset.", 0xff00ff00);
+        osu->notificationOverlay->addNotification("All settings have been reset.", 0xff00ff00);
     } else {
         if(remainingUntilReset > 1)
-            osu->getNotificationOverlay()->addNotification(
+            osu->notificationOverlay->addNotification(
                 UString::format("Press %i more times to confirm.", remainingUntilReset));
         else
-            osu->getNotificationOverlay()->addNotification(
+            osu->notificationOverlay->addNotification(
                 UString::format("Press %i more time to confirm!", remainingUntilReset), 0xffffff00);
     }
 }

@@ -156,7 +156,7 @@ void WindowsMain::handle_osz(const char *osz_path) {
         }
     }
     if(set_id == -1) {
-        osu->getNotificationOverlay()->addToast("Beatmapset doesn't have a valid ID.");
+        osu->notificationOverlay->addToast("Beatmapset doesn't have a valid ID.", ERROR_TOAST);
         return;
     }
 
@@ -167,13 +167,13 @@ void WindowsMain::handle_osz(const char *osz_path) {
         env->createDirectory(mapset_dir);
     }
     if(!Downloader::extract_beatmapset(reinterpret_cast<const u8 *>(osz.readFile()), osz.getFileSize(), mapset_dir)) {
-        osu->getNotificationOverlay()->addToast("Failed to extract beatmapset");
+        osu->notificationOverlay->addToast("Failed to extract beatmapset", ERROR_TOAST);
         return;
     }
 
     db->addBeatmapSet(mapset_dir);
     if(!osu->getSongBrowser()->selectBeatmapset(set_id)) {
-        osu->getNotificationOverlay()->addToast("Failed to import beatmapset");
+        osu->notificationOverlay->addToast("Failed to import beatmapset", ERROR_TOAST);
         return;
     }
 

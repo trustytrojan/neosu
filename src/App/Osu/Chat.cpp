@@ -356,7 +356,7 @@ void Chat::draw() {
 
 void Chat::drawTicker() {
     if(!cv::chat_ticker.getBool()) return;
-    f64 time_elapsed = engine->getTime() - this->ticker_tms;
+    // f64 time_elapsed = engine->getTime() - this->ticker_tms;
     // TODO @kiwec: hide while chat is visible
     // if(this->ticker_tms == 0.0 || time_elapsed > 6.0) return; // DEBUG
 
@@ -367,7 +367,7 @@ void Chat::drawTicker() {
     //     g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_PREMUL_ALPHA);
     // }
 
-    f32 a = std::clamp(6.0 - time_elapsed, 0.0, 1.0);
+    // f32 a = std::clamp(6.0 - time_elapsed, 0.0, 1.0);
     g->setColor(0xdd000000);
     auto pos = this->ticker->ui->getPos();
     auto size = this->ticker->ui->getSize();
@@ -873,6 +873,19 @@ void Chat::addMessage(UString channel_name, const ChatMessage &msg, bool mark_un
     }
     if(should_highlight) {
         // TODO @kiwec: highlight + send toast?
+    }
+
+    bool mentioned = SString::contains_ncase(msg.text.toUtf8(), bancho->username.toUtf8());
+    mentioned &= msg.author_id != bancho->user_id;
+    if(mentioned && cv::chat_notify_on_mention.getBool()) {
+        auto notif = UString::format("You were mentioned in %s", channel_name.toUtf8());
+        osu->notificationOverlay->addToast(notif, CHAT_TOAST,
+                                           [channel_name] { osu->chat->addChannel(channel_name, true); });
+    }
+    if(mentioned && cv::chat_ping_on_mention.getBool()) {
+        // Yes, osu! really does use "match-start.wav" for when you get pinged
+        // XXX: Use it as fallback, allow neosu-targeting skins to have custom ping sound
+        soundEngine->play(osu->getSkin()->matchStart);
     }
 
     bool is_pm = msg.author_id > 0 && channel_name[0] != '#' && msg.author_name != bancho->username;

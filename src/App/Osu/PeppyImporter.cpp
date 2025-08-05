@@ -246,6 +246,8 @@ void import_settings_from_osu_stable() {
             cv::chat_ping_on_mention.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " ChatHighlightName = %i[^\n]", &num) == 1) {
             cv::chat_notify_on_mention.setValue(num == 1);
+        } else if(sscanf(curLine.c_str(), " ChatMessageNotification = %i[^\n]", &num) == 1) {
+            cv::chat_notify_on_dm.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " CursorSize = %f[^\n]", &flt) == 1) {
             cv::cursor_scale.setValue(flt);
         } else if(sscanf(curLine.c_str(), " AutomaticCursorSizing = %i[^\n]", &num) == 1) {

@@ -61,11 +61,10 @@ RoomUIElement::RoomUIElement(Lobby* multi, Room* room, float x, float y, float w
     }
 }
 
-void RoomUIElement::onRoomJoinButtonClick(CBaseUIButton*  /*btn*/) {
+void RoomUIElement::onRoomJoinButtonClick(CBaseUIButton* /*btn*/) {
     if(this->has_password) {
         this->multi->room_to_join = this->room_id;
-        osu->prompt->prompt("Room password:",
-                              SA::MakeDelegate<&Lobby::on_room_join_with_password>(this->multi));
+        osu->prompt->prompt("Room password:", SA::MakeDelegate<&Lobby::on_room_join_with_password>(this->multi));
     } else {
         this->multi->joinRoom(this->room_id, "");
     }
@@ -111,13 +110,13 @@ void Lobby::onKeyDown(KeyboardEvent& key) {
     // XXX: search bar
 }
 
-void Lobby::onKeyUp(KeyboardEvent&  /*key*/) {
+void Lobby::onKeyUp(KeyboardEvent& /*key*/) {
     if(!this->bVisible) return;
 
     // XXX: search bar
 }
 
-void Lobby::onChar(KeyboardEvent&  /*key*/) {
+void Lobby::onChar(KeyboardEvent& /*key*/) {
     if(!this->bVisible) return;
 
     // XXX: search bar
@@ -220,7 +219,7 @@ void Lobby::joinRoom(u32 id, const UString& password) {
     }
 
     debugLog("Joining room #{:d} with password '{:s}'\n", id, password.toUtf8());
-    osu->getNotificationOverlay()->addNotification("Joining room...");
+    osu->notificationOverlay->addNotification("Joining room...");
 }
 
 void Lobby::updateRoom(const Room& room) {
@@ -267,7 +266,7 @@ void Lobby::on_create_room_clicked() {
     bancho->room.pack(&packet);
     BANCHO::Net::send_packet(packet);
 
-    osu->getNotificationOverlay()->addNotification("Creating room...");
+    osu->notificationOverlay->addNotification("Creating room...");
 }
 
 void Lobby::on_room_join_with_password(const UString& password) { this->joinRoom(this->room_to_join, password); }

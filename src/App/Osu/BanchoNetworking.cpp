@@ -138,7 +138,7 @@ void send_bancho_packet_async(Packet outgoing) {
                 std::scoped_lock<std::mutex> lock{auth_mutex};
                 if(auth_header.empty()) {
                     auto errmsg = UString::format("Failed to log in: HTTP %ld", response.responseCode);
-                    osu->getNotificationOverlay()->addToast(errmsg);
+                    osu->notificationOverlay->addToast(errmsg, ERROR_TOAST);
                 }
                 return;
             }
@@ -231,7 +231,7 @@ void handle_api_response(Packet packet) {
         case GET_REPLAY: {
             if(packet.size == 0) {
                 // Most likely, 404
-                osu->notificationOverlay->addToast("Failed to download replay");
+                osu->notificationOverlay->addToast("Failed to download replay", ERROR_TOAST);
                 break;
             }
 
@@ -242,7 +242,7 @@ void handle_api_response(Packet packet) {
             // XXX: this is blocking main thread
             FILE *replay_file = fopen(replay_path.toUtf8(), "wb");
             if(replay_file == NULL) {
-                osu->notificationOverlay->addToast("Failed to save replay");
+                osu->notificationOverlay->addToast("Failed to save replay", ERROR_TOAST);
                 break;
             }
 
@@ -380,7 +380,7 @@ void reconnect() {
     };
     for(const char *endpoint : server_blacklist) {
         if(!strcmp(endpoint, bancho->endpoint.c_str())) {
-            osu->notificationOverlay->addToast("This server does not allow neosu clients.");
+            osu->notificationOverlay->addToast("This server does not allow neosu clients.", ERROR_TOAST);
             return;
         }
     }

@@ -262,7 +262,7 @@ void load_and_watch(FinishedScore score) {
 
             if(score.server.c_str() != bancho->endpoint) {
                 auto msg = UString::format("Please connect to %s to view this replay!", score.server.c_str());
-                osu->notificationOverlay->addToast(msg);
+                osu->notificationOverlay->addToast(msg, ERROR_TOAST);
             }
 
             // Need to allocate with calloc since APIRequests free() the .extra
@@ -285,14 +285,14 @@ void load_and_watch(FinishedScore score) {
 
     // We tried loading from memory, we tried loading from file, we tried loading from server... RIP
     if(score.replay.empty()) {
-        osu->notificationOverlay->addToast("Failed to load replay");
+        osu->notificationOverlay->addToast("Failed to load replay", ERROR_TOAST);
         return;
     }
 
     auto diff = db->getBeatmapDifficulty(score.beatmap_hash);
     if(diff == NULL) {
         // XXX: Auto-download beatmap
-        osu->notificationOverlay->addToast("Missing beatmap for this replay");
+        osu->notificationOverlay->addToast("Missing beatmap for this replay", ERROR_TOAST);
     } else {
         osu->getSongBrowser()->onDifficultySelected(diff, false);
         osu->getSongBrowser()->selectSelectedBeatmapSongButton();

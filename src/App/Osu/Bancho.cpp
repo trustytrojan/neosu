@@ -122,7 +122,7 @@ void Bancho::handle_packet(Packet *packet) {
                     errmsg = "Please contact an administrator of the server.";
                 }
             }
-            osu->getNotificationOverlay()->addToast(errmsg);
+            osu->notificationOverlay->addToast(errmsg, ERROR_TOAST);
         }
     } else if(packet->id == RECV_MESSAGE) {
         UString sender = proto::read_string(packet);
@@ -142,12 +142,28 @@ void Bancho::handle_packet(Packet *packet) {
     } else if(packet->id == USER_STATS) {
         i32 raw_id = proto::read<i32>(packet);
         i32 stats_user_id = abs(raw_id);  // IRC clients are sent with negative IDs, hence the abs()
-        u8 action = proto::read<u8>(packet);
+        auto action = (Action)proto::read<u8>(packet);
 
         UserInfo *user = BANCHO::User::get_user_info(stats_user_id);
+        if(action != user->action) {
+            // TODO @kiwec: i think client is supposed to regularly poll for friend stats
+            if(user->is_friend() && cv::notify_friend_status_change.getBool() && action < NB_ACTIONS) {
+                std::string actions[] = {
+                    "idle",   "afk",     "playing",    "editing", "modding", "in a multiplayer lobby", "spectating",
+                    "vibing", "testing", "submitting", "pausing", "testing", "multiplaying",           "browsing maps",
+                };
+                auto text = UString::format("%s is now %s", user->name.toUtf8(), actions[action].c_str());
+                auto open_dms = [stats_user_id] {
+                    UserInfo *user = BANCHO::User::get_user_info(stats_user_id);
+                    osu->chat->addChannel(user->name, true);
+                };
+                osu->notificationOverlay->addToast(text, CHAT_TOAST, open_dms);
+            }
+        }
+
         user->irc_user = raw_id < 0;
         user->stats_tms = Timing::getTicksMS();
-        user->action = (Action)action;
+        user->action = action;
         user->info_text = proto::read_string(packet);
         user->map_md5 = proto::read_hash(packet);
         user->mods = proto::read<u32>(packet);
@@ -160,9 +176,6 @@ void Bancho::handle_packet(Packet *packet) {
         user->global_rank = proto::read<i32>(packet);
         user->pp = proto::read<u16>(packet);
 
-        if(user->is_friend() && cv::notify_friend_status_change.getBool()) {
-            // TODO @kiwec: waiting for notify_during_gameplay impl
-        }
         if(stats_user_id == this->user_id) {
             osu->userButton->updateUserStats();
         }
@@ -283,7 +296,7 @@ void Bancho::handle_packet(Packet *packet) {
         // (nothing to do)
     } else if(packet->id == NOTIFICATION) {
         UString notification = proto::read_string(packet);
-        osu->getNotificationOverlay()->addToast(notification, 0xffffdd00);
+        osu->notificationOverlay->addToast(notification, INFO_TOAST);
     } else if(packet->id == ROOM_UPDATED) {
         auto room = Room(packet);
         if(osu->lobby->isVisible()) {
@@ -310,7 +323,7 @@ void Bancho::handle_packet(Packet *packet) {
         auto room = Room(packet);
         osu->room->on_room_joined(room);
     } else if(packet->id == ROOM_JOIN_FAIL) {
-        osu->getNotificationOverlay()->addToast("Failed to join room.");
+        osu->notificationOverlay->addToast("Failed to join room.", ERROR_TOAST);
         osu->lobby->on_room_join_failed();
     } else if(packet->id == MATCH_STARTED) {
         auto room = Room(packet);
@@ -365,7 +378,7 @@ void Bancho::handle_packet(Packet *packet) {
     } else if(packet->id == PROTOCOL_VERSION) {
         int protocol_version = proto::read<i32>(packet);
         if(protocol_version != 19) {
-            osu->getNotificationOverlay()->addToast("This server may use an unsupported protocol version.");
+            osu->notificationOverlay->addToast("This server may use an unsupported protocol version.", ERROR_TOAST);
         }
     } else if(packet->id == MAIN_MENU_ICON) {
         UString icon = proto::read_string(packet);
@@ -454,9 +467,9 @@ void Bancho::handle_packet(Packet *packet) {
         // (nothing to do)
     } else if(packet->id == VERSION_UPDATE_FORCED) {
         BANCHO::Net::disconnect();
-        osu->getNotificationOverlay()->addToast("This server requires a newer client version.");
+        osu->notificationOverlay->addToast("This server requires a newer client version.", ERROR_TOAST);
     } else if(packet->id == ACCOUNT_RESTRICTED) {
-        osu->getNotificationOverlay()->addToast("Account restricted.");
+        osu->notificationOverlay->addToast("Account restricted.", ERROR_TOAST);
         BANCHO::Net::disconnect();
     } else if(packet->id == MATCH_ABORT) {
         osu->room->on_match_aborted();

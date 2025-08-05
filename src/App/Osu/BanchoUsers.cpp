@@ -6,6 +6,7 @@
 #include "BanchoNetworking.h"
 #include "Chat.h"
 #include "Engine.h"
+#include "NotificationOverlay.h"
 #include "Osu.h"
 #include "SpectatorScreen.h"
 
@@ -22,12 +23,11 @@ void request_presence(UserInfo* info) {
 
     presence_requests.push_back(info);
 }
-}
+}  // namespace
 
 std::unordered_map<i32, UserInfo*> online_users;
 std::vector<i32> friends;
 std::vector<i32> stats_requests;
-
 
 void request_presence_batch() {
     std::vector<i32> actual_requests;
@@ -55,6 +55,11 @@ void logout_user(i32 user_id) {
             debugLog("{:s} has disconnected.\n", it->second->name.toUtf8());
             if(it->first == bancho->spectated_player_id) {
                 stop_spectating();
+            }
+
+            if(it->second->is_friend() && cv::notify_friend_status_change.getBool()) {
+                auto text = UString::format("%s is now offline", it->second->name.toUtf8());
+                osu->notificationOverlay->addToast(text, CHAT_TOAST);
             }
 
             delete it->second;

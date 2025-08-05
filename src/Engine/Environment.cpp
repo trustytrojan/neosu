@@ -142,14 +142,15 @@ void Environment::openFileBrowser(const std::string &initialpath) noexcept {
     if(pathToOpen.empty())
         pathToOpen = getExeFolder();
     else
+        // XXX: On windows you can also open a folder while having a file selected
+        //      Would be useful for screenshots, for example
         pathToOpen = getFolderFromFilePath(pathToOpen);
 
     namespace fs = std::filesystem;
     std::string encodedPath =
         Env::cfg(OS::WINDOWS) ? fmt::format("file:///{}", pathToOpen) : filesystemPathToURI(fs::path{pathToOpen});
 
-    if(!SDL_OpenURL(encodedPath.c_str()))
-        debugLog("Failed to open file URI {:s}: {:s}\n", encodedPath, SDL_GetError());
+    if(!SDL_OpenURL(encodedPath.c_str())) debugLog("Failed to open file URI {:s}: {:s}\n", encodedPath, SDL_GetError());
 }
 
 std::string Environment::getEnvVariable(const std::string &varToQuery) noexcept {

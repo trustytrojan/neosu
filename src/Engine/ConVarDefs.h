@@ -247,7 +247,14 @@ CONVAR(chat_highlight_words, "chat_highlight_words", "", FCVAR_BANCHO_COMPATIBLE
        "space-separated list of words to treat as a mention");
 CONVAR(chat_ignore_list, "chat_ignore_list", "", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "space-separated list of words to ignore");
+CONVAR(chat_notify_on_dm, "chat_notify_on_dm", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
+CONVAR(chat_notify_on_mention, "chat_notify_on_mention", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
+       "get notified when someone says your name");
+CONVAR(chat_ping_on_mention, "chat_ping_on_mention", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
+       "play a sound when someone says your name");
 CONVAR(chat_ticker, "chat_ticker", true, FCVAR_BANCHO_COMPATIBLE);
+CONVAR(notify_during_gameplay, "notify_during_gameplay", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
+       "show notification popups instantly during gameplay");
 CONVAR(circle_color_saturation, "osu_circle_color_saturation", 1.0f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(circle_fade_out_scale, "osu_circle_fade_out_scale", 0.4f, FCVAR_LOCKED);
 CONVAR(circle_number_rainbow, "osu_circle_number_rainbow", false, FCVAR_BANCHO_COMPATIBLE);
@@ -350,7 +357,8 @@ CONVAR(drain_kill, "osu_drain_kill", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_GAMEP
        "whether to kill the player upon failing");
 CONVAR(drain_kill_notification_duration, "osu_drain_kill_notification_duration", 1.0f, FCVAR_BANCHO_COMPATIBLE,
        "how long to display the \"You have failed, but you can keep playing!\" notification (0 = disabled)");
-CONVAR(save_failed_scores, "osu_save_failed_scores", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_HIDDEN, "(BROKEN) save scores locally, even if there was a fail");
+CONVAR(save_failed_scores, "osu_save_failed_scores", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_HIDDEN,
+       "(BROKEN) save scores locally, even if there was a fail");
 CONVAR(draw_accuracy, "osu_draw_accuracy", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(draw_approach_circles, "osu_draw_approach_circles", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(draw_beatmap_background_image, "osu_draw_beatmap_background_image", true, FCVAR_BANCHO_COMPATIBLE);
@@ -1282,15 +1290,9 @@ CONVAR(allow_mp_invites, "allow_mp_invites", true, FCVAR_BANCHO_COMPATIBLE | FCV
        "allow multiplayer game invites from all users");
 CONVAR(allow_stranger_dms, "allow_stranger_dms", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "allow private messages from non-friends");
-CONVAR(chat_notify_on_mention, "chat_notify_on_mention", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
-       "get notified when someone says your name");
-CONVAR(chat_ping_on_mention, "chat_ping_on_mention", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
-       "play a sound when someone says your name");
 CONVAR(ignore_beatmap_samples, "ignore_beatmap_samples", false, FCVAR_BANCHO_COMPATIBLE, "ignore beatmap hitsounds");
 CONVAR(ignore_beatmap_skins, "ignore_beatmap_skins", false, FCVAR_BANCHO_COMPATIBLE, "ignore beatmap skins");
 CONVAR(language, "language", "en", FCVAR_BANCHO_COMPATIBLE);
-CONVAR(notify_during_gameplay, "notify_during_gameplay", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
-       "show notification popups instantly during gameplay");
 CONVAR(draw_storyboard, "draw_storyboard", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(draw_video, "draw_video", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(SMOKE, "key_smoke", 0, FCVAR_BANCHO_COMPATIBLE);

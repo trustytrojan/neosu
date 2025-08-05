@@ -3,9 +3,16 @@
 #include "KeyboardEvent.h"
 #include "OsuScreen.h"
 
+#define CHAT_TOAST 0xff8a2be2
+#define INFO_TOAST 0xffffdd00
+#define ERROR_TOAST 0xffdd0000
+#define SUCCESS_TOAST 0xff00ff00
+
 class ToastElement : public CBaseUIButton {
    public:
-    ToastElement(const UString& text, Color borderColor_arg);
+    enum class TYPE : uint8_t { PERMANENT, SYSTEM, CHAT };
+
+    ToastElement(const UString &text, Color borderColor_arg, TYPE type);
     ~ToastElement() override { ; }
 
     void draw() override;
@@ -13,7 +20,7 @@ class ToastElement : public CBaseUIButton {
 
     std::vector<UString> lines;
     Color borderColor;
-    f32 alpha = 0.f;
+    TYPE type;
     f32 height = 0.f;
     f64 creationTime;
 };
@@ -37,8 +44,8 @@ class NotificationOverlay : public OsuScreen {
     void onChar(KeyboardEvent &e) override;
 
     using ToastClickCallback = SA::delegate<void()>;
-    void addToast(const UString& text, Color borderColor = 0xffdd0000, const ToastClickCallback& callback = {});
-
+    void addToast(const UString &text, Color borderColor, const ToastClickCallback &callback = {},
+                  ToastElement::TYPE type = ToastElement::TYPE::SYSTEM);
     void addNotification(UString text, Color textColor = 0xffffffff, bool waitForKey = false, float duration = -1.0f);
     void setDisallowWaitForKeyLeftClick(bool disallowWaitForKeyLeftClick) {
         this->bWaitForKeyDisallowsLeftClick = disallowWaitForKeyLeftClick;

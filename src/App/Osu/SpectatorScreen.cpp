@@ -63,7 +63,7 @@ void start_spectating(i32 user_id) {
 
     auto user_info = BANCHO::User::get_user_info(user_id, true);
     auto notif = UString::format("Started spectating %s", user_info->name.toUtf8());
-    osu->getNotificationOverlay()->addToast(notif, 0xffffdd00);
+    osu->notificationOverlay->addToast(notif, SUCCESS_TOAST);
 
     bancho->spectating = true;
     bancho->spectated_player_id = user_id;
@@ -90,7 +90,7 @@ void stop_spectating() {
 
     auto user_info = BANCHO::User::get_user_info(bancho->spectated_player_id, true);
     auto notif = UString::format("Stopped spectating %s", user_info->name.toUtf8());
-    osu->getNotificationOverlay()->addToast(notif, 0xffffdd00);
+    osu->notificationOverlay->addToast(notif, INFO_TOAST);
 
     bancho->spectating = false;
     bancho->spectated_player_id = 0;
@@ -258,7 +258,7 @@ void SpectatorScreen::draw() {
 
 bool SpectatorScreen::isVisible() { return bancho->spectating && !osu->isInPlayMode(); }
 
-CBaseUIElement *SpectatorScreen::setVisible(bool  /*visible*/) {
+CBaseUIElement *SpectatorScreen::setVisible(bool /*visible*/) {
     engine->showMessageError("Programmer Error", "Idiot tried to control spectator screen visibility");
     abort();
     return this;

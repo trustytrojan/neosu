@@ -719,12 +719,12 @@ void Database::scheduleLoadRaw() {
 
         this->bFoundChanges = this->iNumBeatmapsToLoad > 0;
         if(this->bFoundChanges)
-            osu->getNotificationOverlay()->addNotification(
+            osu->notificationOverlay->addNotification(
                 UString::format(this->iNumBeatmapsToLoad == 1 ? "Adding %i new beatmap." : "Adding %i new beatmaps.",
                                 this->iNumBeatmapsToLoad),
                 0xff00ff00);
         else
-            osu->getNotificationOverlay()->addNotification(
+            osu->notificationOverlay->addNotification(
                 UString::format("No new beatmaps detected.", this->iNumBeatmapsToLoad), 0xff00ff00);
     }
 
@@ -926,10 +926,10 @@ void Database::loadMaps() {
 
             // hard cap upper db version
             if(this->iVersion > cv::database_version.getInt() && !cv::database_ignore_version.getBool()) {
-                osu->getNotificationOverlay()->addToast(
+                osu->notificationOverlay->addToast(
                     UString::format("osu!.db version unknown (%i), osu!stable maps will not get loaded.",
                                     this->iVersion),
-                    0xffffff00);
+                    ERROR_TOAST);
                 should_read_peppy_database = false;
             }
         }
@@ -1472,11 +1472,14 @@ bool Database::importDatabase(const std::string &db_path) {
             // We need to do some heuristics to detect whether this is an old neosu or a peppy database.
             u32 nb_beatmaps = score_db.read<u32>();
             for(u32 i = 0; i < nb_beatmaps; i++) {
-                auto _map_md5 = score_db.read_hash();
+                auto map_md5 = score_db.read_hash();
+                (void)map_md5;
                 u32 nb_scores = score_db.read<u32>();
                 for(u32 j = 0; j < nb_scores; j++) {
-                    u8 _gamemode = score_db.read<u8>();         // could check for 0xA9, but better method below
-                    u32 _score_version = score_db.read<u32>();  // useless
+                    u8 gamemode = score_db.read<u8>();
+                    (void)gamemode;  // could check for 0xA9, but better method below
+                    u32 score_version = score_db.read<u32>();
+                    (void)score_version;  // useless
 
                     // Here, neosu stores an int64 timestamp. First 32 bits should be 0 (until 2106).
                     // Meanwhile, peppy stores the beatmap hash, which will NEVER be 0, since
@@ -1514,7 +1517,7 @@ void Database::loadScores(const UString &dbPath) {
     u32 nb_neosu_scores = 0;
     u8 magic_bytes[6] = {0};
     if(db.read_bytes(magic_bytes, 5) != 5 || memcmp(magic_bytes, "NEOSC", 5) != 0) {
-        osu->getNotificationOverlay()->addToast("Failed to load neosu_scores.db!", 0xffff0000);
+        osu->notificationOverlay->addToast("Failed to load neosu_scores.db!", ERROR_TOAST);
         this->bytes_processed += db.total_size;
         return;
     }

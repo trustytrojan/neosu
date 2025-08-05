@@ -9,6 +9,7 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 #include "Osu.h"
+#include "PauseMenu.h"
 #include "ResourceManager.h"
 
 NotificationOverlay::NotificationOverlay() : OsuScreen() {
@@ -25,13 +26,14 @@ static const f64 TOAST_OUTER_Y_MARGIN = 10.0;
 static const f64 TOAST_SCREEN_BOTTOM_MARGIN = 20.0;
 static const f64 TOAST_SCREEN_RIGHT_MARGIN = 10.0;
 
-ToastElement::ToastElement(const UString& text, Color borderColor_arg) : CBaseUIButton(0, 0, 0, 0, "", "") {
+ToastElement::ToastElement(const UString &text, Color borderColor_arg, ToastElement::TYPE type)
+    : CBaseUIButton(0, 0, 0, 0, "", "") {
     this->grabs_clicks = true;
 
     // TODO: animations
     // TODO: ui scaling
 
-    this->alpha = 0.9;  // TODO: fade in/out
+    this->type = type;
     this->borderColor = borderColor_arg;
     this->creationTime = engine->getTime();
 
@@ -50,14 +52,17 @@ void ToastElement::onClicked(bool left, bool right) {
 void ToastElement::draw() {
     const auto font = resourceManager->getFont("FONT_DEFAULT");
 
+    f32 alpha = 0.9;
+    alpha *= std::max(0.0, (this->creationTime + 9.5) - engine->getTime());
+
     // background
     g->setColor(this->isMouseInside() ? 0xff222222 : 0xff111111);
-    g->setAlpha(this->alpha);
+    g->setAlpha(alpha);
     g->fillRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
 
     // border
     g->setColor(this->isMouseInside() ? rgb(255, 255, 255) : this->borderColor);
-    g->setAlpha(this->alpha);
+    g->setAlpha(alpha);
     g->drawRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
 
     // text
@@ -65,7 +70,7 @@ void ToastElement::draw() {
     for(const auto &line : this->lines) {
         y += (font->getHeight() * 1.5);
         g->setColor(0xffffffff);
-        g->setAlpha(this->alpha);
+        g->setAlpha(alpha);
         g->pushTransform();
         g->translate(this->vPos.x + TOAST_INNER_X_MARGIN, y);
         g->drawString(font, line);
@@ -74,20 +79,29 @@ void ToastElement::draw() {
 }
 
 void NotificationOverlay::mouse_update(bool *propagate_clicks) {
-    // HACKHACK: should put all toasts in a container instead
+    bool chat_toasts_visible = cv::notify_during_gameplay.getBool();
+    chat_toasts_visible |= !osu->isInPlayMode();
+    chat_toasts_visible |= osu->pauseMenu->isVisible();
+
     bool a_toast_is_hovered = false;
     Vector2 screen{Osu::g_vInternalResolution};
     f64 bottom_y = screen.y - TOAST_SCREEN_BOTTOM_MARGIN;
     for(auto t : this->toasts) {
+        if(t->type == ToastElement::TYPE::CHAT && !chat_toasts_visible) continue;
+
         bottom_y -= TOAST_OUTER_Y_MARGIN + t->getSize().y;
         t->setPos(screen.x - (TOAST_SCREEN_RIGHT_MARGIN + TOAST_WIDTH), bottom_y);
         t->mouse_update(propagate_clicks);
         a_toast_is_hovered |= t->isMouseInside();
     }
 
-    if(a_toast_is_hovered) {
-        for(auto t : this->toasts) {
-            // Delay toast disappearance
+    // Delay toast disappearance
+    for(auto t : this->toasts) {
+        bool delay_toast = t->type == ToastElement::TYPE::PERMANENT;
+        delay_toast |= t->type == ToastElement::TYPE::CHAT && !chat_toasts_visible;
+        delay_toast |= a_toast_is_hovered;
+
+        if(delay_toast) {
             t->creationTime += engine->getFrameTime();
         }
     }
@@ -242,8 +256,9 @@ void NotificationOverlay::addNotification(UString text, Color textColor, bool wa
     anim->moveQuadOut(&this->notification1.backgroundAnim, 1.0f, 0.15f, 0.0f, true);
 }
 
-void NotificationOverlay::addToast(const UString& text, Color borderColor, const ToastClickCallback& callback) {
-    auto toast = new ToastElement(text, borderColor);
+void NotificationOverlay::addToast(const UString &text, Color borderColor, const ToastClickCallback &callback,
+                                   ToastElement::TYPE type) {
+    auto toast = new ToastElement(text, borderColor, type);
     toast->setClickCallback(callback);
     this->toasts.push_back(toast);
 }

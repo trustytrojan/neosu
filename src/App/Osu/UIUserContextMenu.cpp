@@ -47,9 +47,11 @@ void UIUserContextMenuScreen::open(i32 user_id, bool is_song_browser_button) {
 
     this->menu->begin(is_song_browser_button ? osu->userButton->getSize().x : 0);
 
+    /*
     if(!osu->userStats->isVisible() && (user_id <= 0 || (user_id == bancho->user_id))) {
         this->menu->addButton("View top plays", VIEW_TOP_PLAYS);
     }
+    */
 
     if(user_id > 0) {
         this->menu->addButton("View profile page", VIEW_PROFILE);
@@ -131,7 +133,7 @@ void UIUserContextMenuScreen::on_action(const UString& /*text*/, int user_action
         if(endpoint == "") endpoint = "ppy.sh";
 
         auto url = fmt::format("https://osu.{}/u/{}", endpoint, this->user_id);
-        osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
+        osu->notificationOverlay->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
         env->openURLInDefaultBrowser(url);
     } else if(user_action == UA_ADD_FRIEND) {
         Packet packet;

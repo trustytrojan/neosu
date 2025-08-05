@@ -883,7 +883,7 @@ bool SongBrowser::selectBeatmapset(i32 set_id) {
     }
 
     if(best_diff == NULL) {
-        osu->getNotificationOverlay()->addToast("Beatmapset has no difficulties :/");
+        osu->notificationOverlay->addToast("Beatmapset has no difficulties", ERROR_TOAST);
         return false;
     } else {
         this->onSelectionChange(this->hashToSongButton[best_diff->getMD5Hash()], false);
@@ -972,13 +972,13 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
         auto beatmap = Downloader::download_beatmap(this->map_autodl, this->set_autodl, &progress);
         if(progress == -1.f) {
             auto error_str = UString::format("Failed to download Beatmap #%d :(", this->map_autodl);
-            osu->getNotificationOverlay()->addToast(error_str);
+            osu->notificationOverlay->addToast(error_str, ERROR_TOAST);
             this->map_autodl = 0;
             this->set_autodl = 0;
         } else if(progress < 1.f) {
             // TODO @kiwec: this notification format is jank & laggy
             auto text = UString::format("Downloading... %.2f%%", progress * 100.f);
-            osu->getNotificationOverlay()->addNotification(text);
+            osu->notificationOverlay->addNotification(text);
         } else if(beatmap != NULL) {
             osu->songBrowser2->onDifficultySelected(beatmap, false);
             osu->songBrowser2->selectSelectedBeatmapSongButton();
@@ -994,13 +994,13 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
             Downloader::download_beatmapset(this->set_autodl, &progress);
             if(progress == -1.f) {
                 auto error_str = UString::format("Failed to download Beatmapset #%d :(", this->set_autodl);
-                osu->getNotificationOverlay()->addToast(error_str);
+                osu->notificationOverlay->addToast(error_str, ERROR_TOAST);
                 this->map_autodl = 0;
                 this->set_autodl = 0;
             } else if(progress < 1.f) {
                 // TODO @kiwec: this notification format is jank & laggy
                 auto text = UString::format("Downloading... %.2f%%", progress * 100.f);
-                osu->getNotificationOverlay()->addNotification(text);
+                osu->notificationOverlay->addNotification(text);
             } else {
                 this->selectBeatmapset(this->set_autodl);
 
@@ -3007,7 +3007,7 @@ void SongBrowser::onSortScoresChange(const UString &text, int /*id*/) {
 void SongBrowser::onWebClicked(CBaseUIButton * /*button*/) {
     if(this->songInfo->getBeatmapID() > 0) {
         env->openURLInDefaultBrowser(fmt::format("https://osu.ppy.sh/b/{}", this->songInfo->getBeatmapID()));
-        osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
+        osu->notificationOverlay->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
     }
 }
 
@@ -3201,10 +3201,10 @@ void SongBrowser::rebuildAfterGroupOrSortChange(GROUP group, SORTING_COMPARATOR 
 void SongBrowser::onSelectionMode() {
     if(cv::mod_fposu.getBool()) {
         cv::mod_fposu.setValue(false);
-        osu->getNotificationOverlay()->addToast("Disabled FPoSu mode.", 0xff00ff00);
+        osu->notificationOverlay->addToast("Disabled FPoSu mode.", INFO_TOAST);
     } else {
         cv::mod_fposu.setValue(true);
-        osu->getNotificationOverlay()->addToast("Enabled FPoSu mode.", 0xff00ff00);
+        osu->notificationOverlay->addToast("Enabled FPoSu mode.", SUCCESS_TOAST);
     }
 }
 
