@@ -12,7 +12,7 @@
 #include "Engine.h"
 #include "ConVar.h"
 
-#include "OpenGLHeaders.h"
+#include "SDLGLInterface.h"
 
 OpenGLVertexArrayObject::OpenGLVertexArrayObject(Graphics::PRIMITIVE primitive, Graphics::USAGE_TYPE usage,
                                                  bool keepInSystemMemory)
@@ -102,7 +102,7 @@ void OpenGLVertexArrayObject::init() {
         glGenBuffers(1, &this->iVertexBuffer);
         glBindBuffer(GL_ARRAY_BUFFER, this->iVertexBuffer);
         glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3) * this->vertices.size(), &(this->vertices[0]),
-                     usageToOpenGL(this->usage));
+                     SDLGLInterface::usageToOpenGLMap[this->usage]);
 
         if(cv::r_opengl_legacy_vao_use_vertex_array.getBool()) {
             glEnableVertexAttribArray(vertexAttribArrayIndexCounter);
@@ -121,7 +121,7 @@ void OpenGLVertexArrayObject::init() {
         glGenBuffers(1, &this->iTexcoordBuffer);
         glBindBuffer(GL_ARRAY_BUFFER, this->iTexcoordBuffer);
         glBufferData(GL_ARRAY_BUFFER, sizeof(Vector2) * this->texcoords[0].size(), &(this->texcoords[0][0]),
-                     usageToOpenGL(this->usage));
+                     SDLGLInterface::usageToOpenGLMap[this->usage]);
 
         if(cv::r_opengl_legacy_vao_use_vertex_array.getBool()) {
             if(this->iNumTexcoords > 0) {
@@ -143,7 +143,7 @@ void OpenGLVertexArrayObject::init() {
         glGenBuffers(1, &this->iColorBuffer);
         glBindBuffer(GL_ARRAY_BUFFER, this->iColorBuffer);
         glBufferData(GL_ARRAY_BUFFER, sizeof(Color) * this->colors.size(), &(this->colors[0]),
-                     usageToOpenGL(this->usage));
+                     SDLGLInterface::usageToOpenGLMap[this->usage]);
 
         if(cv::r_opengl_legacy_vao_use_vertex_array.getBool()) {
             if(this->iNumColors > 0) {
@@ -161,7 +161,7 @@ void OpenGLVertexArrayObject::init() {
         glGenBuffers(1, &this->iNormalBuffer);
         glBindBuffer(GL_ARRAY_BUFFER, this->iNormalBuffer);
         glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3) * this->normals.size(), &(this->normals[0]),
-                     usageToOpenGL(this->usage));
+                     SDLGLInterface::usageToOpenGLMap[this->usage]);
 
         if(cv::r_opengl_legacy_vao_use_vertex_array.getBool()) {
             if(this->iNumNormals > 0) {
@@ -229,7 +229,7 @@ void OpenGLVertexArrayObject::draw() {
         glBindVertexArray(this->iVertexArray);
 
         // render it
-        glDrawArrays(primitiveToOpenGL(this->primitive), start,
+        glDrawArrays(SDLGLInterface::primitiveToOpenGLMap[this->primitive], start,
                      end - start);  // (everything is already preconfigured inside the vertexArray)
     } else {
         // set vertices
@@ -261,40 +261,8 @@ void OpenGLVertexArrayObject::draw() {
             glDisableClientState(GL_NORMAL_ARRAY);
 
         // render it
-        glDrawArrays(primitiveToOpenGL(this->primitive), start, end - start);
+        glDrawArrays(SDLGLInterface::primitiveToOpenGLMap[this->primitive], start, end - start);
     }
-}
-
-int OpenGLVertexArrayObject::primitiveToOpenGL(Graphics::PRIMITIVE primitive) {
-    switch(primitive) {
-        case Graphics::PRIMITIVE::PRIMITIVE_LINES:
-            return GL_LINES;
-        case Graphics::PRIMITIVE::PRIMITIVE_LINE_STRIP:
-            return GL_LINE_STRIP;
-        case Graphics::PRIMITIVE::PRIMITIVE_TRIANGLES:
-            return GL_TRIANGLES;
-        case Graphics::PRIMITIVE::PRIMITIVE_TRIANGLE_FAN:
-            return GL_TRIANGLE_FAN;
-        case Graphics::PRIMITIVE::PRIMITIVE_TRIANGLE_STRIP:
-            return GL_TRIANGLE_STRIP;
-        case Graphics::PRIMITIVE::PRIMITIVE_QUADS:
-            return GL_QUADS;
-    }
-
-    return GL_TRIANGLES;
-}
-
-unsigned int OpenGLVertexArrayObject::usageToOpenGL(Graphics::USAGE_TYPE usage) {
-    switch(usage) {
-        case Graphics::USAGE_TYPE::USAGE_STATIC:
-            return GL_STATIC_DRAW;
-        case Graphics::USAGE_TYPE::USAGE_DYNAMIC:
-            return GL_DYNAMIC_DRAW;
-        case Graphics::USAGE_TYPE::USAGE_STREAM:
-            return GL_STREAM_DRAW;
-    }
-
-    return GL_STATIC_DRAW;
 }
 
 #endif

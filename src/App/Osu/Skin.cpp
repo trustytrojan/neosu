@@ -11,7 +11,6 @@
 #include "Environment.h"
 #include "File.h"
 #include "GameRules.h"
-#include "LinuxEnvironment.h"
 #include "NotificationOverlay.h"
 #include "Osu.h"
 #include "ResourceManager.h"

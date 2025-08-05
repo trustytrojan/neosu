@@ -111,6 +111,7 @@ neosu_SOURCES = \
 	src/Engine/Renderer/OpenGL/OpenGLStateCache.cpp \
 	src/Engine/Renderer/OpenGL/OpenGLSync.cpp \
 	src/Engine/Renderer/OpenGL/OpenGLVertexArrayObject.cpp \
+	src/Engine/Renderer/OpenGL/SDLGLInterface.cpp \
 	src/Engine/Resources/AsyncResourceLoader.cpp \
 	src/Engine/Resources/Resource.cpp \
 	src/Engine/Resources/ResourceManager.cpp \
@@ -141,14 +142,6 @@ neosu_SOURCES = \
 	src/GUI/Windows/Console.cpp \
 	src/GUI/Windows/ConsoleBox.cpp \
 	src/GUI/Windows/VisualProfiler.cpp \
-	src/Platform/Linux/LinuxEnvironment.cpp \
-	src/Platform/Linux/LinuxGLLegacyInterface.cpp \
-	src/Platform/Linux/LinuxMain.cpp \
-	src/Platform/Linux/XI2Handler.cpp \
-	src/Platform/Windows/WinEnvironment.cpp \
-	src/Platform/Windows/WinGLLegacyInterface.cpp \
-	src/Platform/Windows/WindowsMain.cpp \
-	src/Platform/Windows/WindowsMain_aux.cpp \
 	src/Platform/main.cpp \
 	src/Util/Quaternion.cpp \
 	src/Util/Rect.cpp \

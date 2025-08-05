@@ -258,6 +258,7 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/Engine/Renderer/OpenGL/neosu-OpenGLStateCache.$(OBJEXT) \
 	src/Engine/Renderer/OpenGL/neosu-OpenGLSync.$(OBJEXT) \
 	src/Engine/Renderer/OpenGL/neosu-OpenGLVertexArrayObject.$(OBJEXT) \
+	src/Engine/Renderer/OpenGL/neosu-SDLGLInterface.$(OBJEXT) \
 	src/Engine/Resources/neosu-AsyncResourceLoader.$(OBJEXT) \
 	src/Engine/Resources/neosu-Resource.$(OBJEXT) \
 	src/Engine/Resources/neosu-ResourceManager.$(OBJEXT) \
@@ -288,14 +289,6 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/GUI/Windows/neosu-Console.$(OBJEXT) \
 	src/GUI/Windows/neosu-ConsoleBox.$(OBJEXT) \
 	src/GUI/Windows/neosu-VisualProfiler.$(OBJEXT) \
-	src/Platform/Linux/neosu-LinuxEnvironment.$(OBJEXT) \
-	src/Platform/Linux/neosu-LinuxGLLegacyInterface.$(OBJEXT) \
-	src/Platform/Linux/neosu-LinuxMain.$(OBJEXT) \
-	src/Platform/Linux/neosu-XI2Handler.$(OBJEXT) \
-	src/Platform/Windows/neosu-WinEnvironment.$(OBJEXT) \
-	src/Platform/Windows/neosu-WinGLLegacyInterface.$(OBJEXT) \
-	src/Platform/Windows/neosu-WindowsMain.$(OBJEXT) \
-	src/Platform/Windows/neosu-WindowsMain_aux.$(OBJEXT) \
 	src/Platform/neosu-main.$(OBJEXT) \
 	src/Util/neosu-Quaternion.$(OBJEXT) \
 	src/Util/neosu-Rect.$(OBJEXT) src/Util/neosu-UString.$(OBJEXT) \
@@ -433,6 +426,7 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLStateCache.Po \
 	src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLSync.Po \
 	src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLVertexArrayObject.Po \
+	src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-SDLGLInterface.Po \
 	src/Engine/Resources/$(DEPDIR)/neosu-AsyncResourceLoader.Po \
 	src/Engine/Resources/$(DEPDIR)/neosu-Resource.Po \
 	src/Engine/Resources/$(DEPDIR)/neosu-ResourceManager.Po \
@@ -462,14 +456,6 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/GUI/Windows/$(DEPDIR)/neosu-ConsoleBox.Po \
 	src/GUI/Windows/$(DEPDIR)/neosu-VisualProfiler.Po \
 	src/Platform/$(DEPDIR)/neosu-main.Po \
-	src/Platform/Linux/$(DEPDIR)/neosu-LinuxEnvironment.Po \
-	src/Platform/Linux/$(DEPDIR)/neosu-LinuxGLLegacyInterface.Po \
-	src/Platform/Linux/$(DEPDIR)/neosu-LinuxMain.Po \
-	src/Platform/Linux/$(DEPDIR)/neosu-XI2Handler.Po \
-	src/Platform/Windows/$(DEPDIR)/neosu-WinEnvironment.Po \
-	src/Platform/Windows/$(DEPDIR)/neosu-WinGLLegacyInterface.Po \
-	src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain.Po \
-	src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain_aux.Po \
 	src/Util/$(DEPDIR)/neosu-Quaternion.Po \
 	src/Util/$(DEPDIR)/neosu-Rect.Po \
 	src/Util/$(DEPDIR)/neosu-UString.Po \
@@ -917,6 +903,7 @@ neosu_SOURCES = \
 	src/Engine/Renderer/OpenGL/OpenGLStateCache.cpp \
 	src/Engine/Renderer/OpenGL/OpenGLSync.cpp \
 	src/Engine/Renderer/OpenGL/OpenGLVertexArrayObject.cpp \
+	src/Engine/Renderer/OpenGL/SDLGLInterface.cpp \
 	src/Engine/Resources/AsyncResourceLoader.cpp \
 	src/Engine/Resources/Resource.cpp \
 	src/Engine/Resources/ResourceManager.cpp \
@@ -947,14 +934,6 @@ neosu_SOURCES = \
 	src/GUI/Windows/Console.cpp \
 	src/GUI/Windows/ConsoleBox.cpp \
 	src/GUI/Windows/VisualProfiler.cpp \
-	src/Platform/Linux/LinuxEnvironment.cpp \
-	src/Platform/Linux/LinuxGLLegacyInterface.cpp \
-	src/Platform/Linux/LinuxMain.cpp \
-	src/Platform/Linux/XI2Handler.cpp \
-	src/Platform/Windows/WinEnvironment.cpp \
-	src/Platform/Windows/WinGLLegacyInterface.cpp \
-	src/Platform/Windows/WindowsMain.cpp \
-	src/Platform/Windows/WindowsMain_aux.cpp \
 	src/Platform/main.cpp \
 	src/Util/Quaternion.cpp \
 	src/Util/Rect.cpp \
@@ -1537,6 +1516,9 @@ src/Engine/Renderer/OpenGL/neosu-OpenGLSync.$(OBJEXT):  \
 src/Engine/Renderer/OpenGL/neosu-OpenGLVertexArrayObject.$(OBJEXT):  \
 	src/Engine/Renderer/OpenGL/$(am__dirstamp) \
 	src/Engine/Renderer/OpenGL/$(DEPDIR)/$(am__dirstamp)
+src/Engine/Renderer/OpenGL/neosu-SDLGLInterface.$(OBJEXT):  \
+	src/Engine/Renderer/OpenGL/$(am__dirstamp) \
+	src/Engine/Renderer/OpenGL/$(DEPDIR)/$(am__dirstamp)
 src/Engine/Resources/$(am__dirstamp):
 	@$(MKDIR_P) src/Engine/Resources
 	@: >>src/Engine/Resources/$(am__dirstamp)
@@ -1649,42 +1631,6 @@ src/GUI/Windows/neosu-ConsoleBox.$(OBJEXT):  \
 src/GUI/Windows/neosu-VisualProfiler.$(OBJEXT):  \
 	src/GUI/Windows/$(am__dirstamp) \
 	src/GUI/Windows/$(DEPDIR)/$(am__dirstamp)
-src/Platform/Linux/$(am__dirstamp):
-	@$(MKDIR_P) src/Platform/Linux
-	@: >>src/Platform/Linux/$(am__dirstamp)
-src/Platform/Linux/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) src/Platform/Linux/$(DEPDIR)
-	@: >>src/Platform/Linux/$(DEPDIR)/$(am__dirstamp)
-src/Platform/Linux/neosu-LinuxEnvironment.$(OBJEXT):  \
-	src/Platform/Linux/$(am__dirstamp) \
-	src/Platform/Linux/$(DEPDIR)/$(am__dirstamp)
-src/Platform/Linux/neosu-LinuxGLLegacyInterface.$(OBJEXT):  \
-	src/Platform/Linux/$(am__dirstamp) \
-	src/Platform/Linux/$(DEPDIR)/$(am__dirstamp)
-src/Platform/Linux/neosu-LinuxMain.$(OBJEXT):  \
-	src/Platform/Linux/$(am__dirstamp) \
-	src/Platform/Linux/$(DEPDIR)/$(am__dirstamp)
-src/Platform/Linux/neosu-XI2Handler.$(OBJEXT):  \
-	src/Platform/Linux/$(am__dirstamp) \
-	src/Platform/Linux/$(DEPDIR)/$(am__dirstamp)
-src/Platform/Windows/$(am__dirstamp):
-	@$(MKDIR_P) src/Platform/Windows
-	@: >>src/Platform/Windows/$(am__dirstamp)
-src/Platform/Windows/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) src/Platform/Windows/$(DEPDIR)
-	@: >>src/Platform/Windows/$(DEPDIR)/$(am__dirstamp)
-src/Platform/Windows/neosu-WinEnvironment.$(OBJEXT):  \
-	src/Platform/Windows/$(am__dirstamp) \
-	src/Platform/Windows/$(DEPDIR)/$(am__dirstamp)
-src/Platform/Windows/neosu-WinGLLegacyInterface.$(OBJEXT):  \
-	src/Platform/Windows/$(am__dirstamp) \
-	src/Platform/Windows/$(DEPDIR)/$(am__dirstamp)
-src/Platform/Windows/neosu-WindowsMain.$(OBJEXT):  \
-	src/Platform/Windows/$(am__dirstamp) \
-	src/Platform/Windows/$(DEPDIR)/$(am__dirstamp)
-src/Platform/Windows/neosu-WindowsMain_aux.$(OBJEXT):  \
-	src/Platform/Windows/$(am__dirstamp) \
-	src/Platform/Windows/$(DEPDIR)/$(am__dirstamp)
 src/Platform/$(am__dirstamp):
 	@$(MKDIR_P) src/Platform
 	@: >>src/Platform/$(am__dirstamp)
@@ -1731,8 +1677,6 @@ mostlyclean-compile:
 	-rm -f src/GUI/*.$(OBJEXT)
 	-rm -f src/GUI/Windows/*.$(OBJEXT)
 	-rm -f src/Platform/*.$(OBJEXT)
-	-rm -f src/Platform/Linux/*.$(OBJEXT)
-	-rm -f src/Platform/Windows/*.$(OBJEXT)
 	-rm -f src/Util/*.$(OBJEXT)
 
 distclean-compile:
@@ -1851,6 +1795,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLStateCache.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLSync.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLVertexArrayObject.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-SDLGLInterface.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Resources/$(DEPDIR)/neosu-AsyncResourceLoader.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Resources/$(DEPDIR)/neosu-Resource.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Resources/$(DEPDIR)/neosu-ResourceManager.Po@am__quote@ # am--include-marker
@@ -1880,14 +1825,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI/Windows/$(DEPDIR)/neosu-ConsoleBox.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI/Windows/$(DEPDIR)/neosu-VisualProfiler.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Platform/$(DEPDIR)/neosu-main.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Platform/Linux/$(DEPDIR)/neosu-LinuxEnvironment.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Platform/Linux/$(DEPDIR)/neosu-LinuxGLLegacyInterface.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Platform/Linux/$(DEPDIR)/neosu-LinuxMain.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Platform/Linux/$(DEPDIR)/neosu-XI2Handler.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Platform/Windows/$(DEPDIR)/neosu-WinEnvironment.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Platform/Windows/$(DEPDIR)/neosu-WinGLLegacyInterface.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain_aux.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Util/$(DEPDIR)/neosu-Quaternion.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Util/$(DEPDIR)/neosu-Rect.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Util/$(DEPDIR)/neosu-UString.Po@am__quote@ # am--include-marker
@@ -3470,6 +3407,20 @@ src/Engine/Renderer/OpenGL/neosu-OpenGLVertexArrayObject.obj: src/Engine/Rendere
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/OpenGL/neosu-OpenGLVertexArrayObject.obj `if test -f 'src/Engine/Renderer/OpenGL/OpenGLVertexArrayObject.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGL/OpenGLVertexArrayObject.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGL/OpenGLVertexArrayObject.cpp'; fi`
 
+src/Engine/Renderer/OpenGL/neosu-SDLGLInterface.o: src/Engine/Renderer/OpenGL/SDLGLInterface.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/OpenGL/neosu-SDLGLInterface.o -MD -MP -MF src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-SDLGLInterface.Tpo -c -o src/Engine/Renderer/OpenGL/neosu-SDLGLInterface.o `test -f 'src/Engine/Renderer/OpenGL/SDLGLInterface.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGL/SDLGLInterface.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-SDLGLInterface.Tpo src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-SDLGLInterface.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGL/SDLGLInterface.cpp' object='src/Engine/Renderer/OpenGL/neosu-SDLGLInterface.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/OpenGL/neosu-SDLGLInterface.o `test -f 'src/Engine/Renderer/OpenGL/SDLGLInterface.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGL/SDLGLInterface.cpp
+
+src/Engine/Renderer/OpenGL/neosu-SDLGLInterface.obj: src/Engine/Renderer/OpenGL/SDLGLInterface.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/OpenGL/neosu-SDLGLInterface.obj -MD -MP -MF src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-SDLGLInterface.Tpo -c -o src/Engine/Renderer/OpenGL/neosu-SDLGLInterface.obj `if test -f 'src/Engine/Renderer/OpenGL/SDLGLInterface.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGL/SDLGLInterface.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGL/SDLGLInterface.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-SDLGLInterface.Tpo src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-SDLGLInterface.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGL/SDLGLInterface.cpp' object='src/Engine/Renderer/OpenGL/neosu-SDLGLInterface.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/OpenGL/neosu-SDLGLInterface.obj `if test -f 'src/Engine/Renderer/OpenGL/SDLGLInterface.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGL/SDLGLInterface.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGL/SDLGLInterface.cpp'; fi`
+
 src/Engine/Resources/neosu-AsyncResourceLoader.o: src/Engine/Resources/AsyncResourceLoader.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Resources/neosu-AsyncResourceLoader.o -MD -MP -MF src/Engine/Resources/$(DEPDIR)/neosu-AsyncResourceLoader.Tpo -c -o src/Engine/Resources/neosu-AsyncResourceLoader.o `test -f 'src/Engine/Resources/AsyncResourceLoader.cpp' || echo '$(srcdir)/'`src/Engine/Resources/AsyncResourceLoader.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Resources/$(DEPDIR)/neosu-AsyncResourceLoader.Tpo src/Engine/Resources/$(DEPDIR)/neosu-AsyncResourceLoader.Po
@@ -3890,118 +3841,6 @@ src/GUI/Windows/neosu-VisualProfiler.obj: src/GUI/Windows/VisualProfiler.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/GUI/Windows/neosu-VisualProfiler.obj `if test -f 'src/GUI/Windows/VisualProfiler.cpp'; then $(CYGPATH_W) 'src/GUI/Windows/VisualProfiler.cpp'; else $(CYGPATH_W) '$(srcdir)/src/GUI/Windows/VisualProfiler.cpp'; fi`
 
-src/Platform/Linux/neosu-LinuxEnvironment.o: src/Platform/Linux/LinuxEnvironment.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Platform/Linux/neosu-LinuxEnvironment.o -MD -MP -MF src/Platform/Linux/$(DEPDIR)/neosu-LinuxEnvironment.Tpo -c -o src/Platform/Linux/neosu-LinuxEnvironment.o `test -f 'src/Platform/Linux/LinuxEnvironment.cpp' || echo '$(srcdir)/'`src/Platform/Linux/LinuxEnvironment.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Platform/Linux/$(DEPDIR)/neosu-LinuxEnvironment.Tpo src/Platform/Linux/$(DEPDIR)/neosu-LinuxEnvironment.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Platform/Linux/LinuxEnvironment.cpp' object='src/Platform/Linux/neosu-LinuxEnvironment.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Platform/Linux/neosu-LinuxEnvironment.o `test -f 'src/Platform/Linux/LinuxEnvironment.cpp' || echo '$(srcdir)/'`src/Platform/Linux/LinuxEnvironment.cpp
-
-src/Platform/Linux/neosu-LinuxEnvironment.obj: src/Platform/Linux/LinuxEnvironment.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Platform/Linux/neosu-LinuxEnvironment.obj -MD -MP -MF src/Platform/Linux/$(DEPDIR)/neosu-LinuxEnvironment.Tpo -c -o src/Platform/Linux/neosu-LinuxEnvironment.obj `if test -f 'src/Platform/Linux/LinuxEnvironment.cpp'; then $(CYGPATH_W) 'src/Platform/Linux/LinuxEnvironment.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Platform/Linux/LinuxEnvironment.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Platform/Linux/$(DEPDIR)/neosu-LinuxEnvironment.Tpo src/Platform/Linux/$(DEPDIR)/neosu-LinuxEnvironment.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Platform/Linux/LinuxEnvironment.cpp' object='src/Platform/Linux/neosu-LinuxEnvironment.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Platform/Linux/neosu-LinuxEnvironment.obj `if test -f 'src/Platform/Linux/LinuxEnvironment.cpp'; then $(CYGPATH_W) 'src/Platform/Linux/LinuxEnvironment.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Platform/Linux/LinuxEnvironment.cpp'; fi`
-
-src/Platform/Linux/neosu-LinuxGLLegacyInterface.o: src/Platform/Linux/LinuxGLLegacyInterface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Platform/Linux/neosu-LinuxGLLegacyInterface.o -MD -MP -MF src/Platform/Linux/$(DEPDIR)/neosu-LinuxGLLegacyInterface.Tpo -c -o src/Platform/Linux/neosu-LinuxGLLegacyInterface.o `test -f 'src/Platform/Linux/LinuxGLLegacyInterface.cpp' || echo '$(srcdir)/'`src/Platform/Linux/LinuxGLLegacyInterface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Platform/Linux/$(DEPDIR)/neosu-LinuxGLLegacyInterface.Tpo src/Platform/Linux/$(DEPDIR)/neosu-LinuxGLLegacyInterface.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Platform/Linux/LinuxGLLegacyInterface.cpp' object='src/Platform/Linux/neosu-LinuxGLLegacyInterface.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Platform/Linux/neosu-LinuxGLLegacyInterface.o `test -f 'src/Platform/Linux/LinuxGLLegacyInterface.cpp' || echo '$(srcdir)/'`src/Platform/Linux/LinuxGLLegacyInterface.cpp
-
-src/Platform/Linux/neosu-LinuxGLLegacyInterface.obj: src/Platform/Linux/LinuxGLLegacyInterface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Platform/Linux/neosu-LinuxGLLegacyInterface.obj -MD -MP -MF src/Platform/Linux/$(DEPDIR)/neosu-LinuxGLLegacyInterface.Tpo -c -o src/Platform/Linux/neosu-LinuxGLLegacyInterface.obj `if test -f 'src/Platform/Linux/LinuxGLLegacyInterface.cpp'; then $(CYGPATH_W) 'src/Platform/Linux/LinuxGLLegacyInterface.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Platform/Linux/LinuxGLLegacyInterface.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Platform/Linux/$(DEPDIR)/neosu-LinuxGLLegacyInterface.Tpo src/Platform/Linux/$(DEPDIR)/neosu-LinuxGLLegacyInterface.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Platform/Linux/LinuxGLLegacyInterface.cpp' object='src/Platform/Linux/neosu-LinuxGLLegacyInterface.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Platform/Linux/neosu-LinuxGLLegacyInterface.obj `if test -f 'src/Platform/Linux/LinuxGLLegacyInterface.cpp'; then $(CYGPATH_W) 'src/Platform/Linux/LinuxGLLegacyInterface.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Platform/Linux/LinuxGLLegacyInterface.cpp'; fi`
-
-src/Platform/Linux/neosu-LinuxMain.o: src/Platform/Linux/LinuxMain.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Platform/Linux/neosu-LinuxMain.o -MD -MP -MF src/Platform/Linux/$(DEPDIR)/neosu-LinuxMain.Tpo -c -o src/Platform/Linux/neosu-LinuxMain.o `test -f 'src/Platform/Linux/LinuxMain.cpp' || echo '$(srcdir)/'`src/Platform/Linux/LinuxMain.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Platform/Linux/$(DEPDIR)/neosu-LinuxMain.Tpo src/Platform/Linux/$(DEPDIR)/neosu-LinuxMain.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Platform/Linux/LinuxMain.cpp' object='src/Platform/Linux/neosu-LinuxMain.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Platform/Linux/neosu-LinuxMain.o `test -f 'src/Platform/Linux/LinuxMain.cpp' || echo '$(srcdir)/'`src/Platform/Linux/LinuxMain.cpp
-
-src/Platform/Linux/neosu-LinuxMain.obj: src/Platform/Linux/LinuxMain.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Platform/Linux/neosu-LinuxMain.obj -MD -MP -MF src/Platform/Linux/$(DEPDIR)/neosu-LinuxMain.Tpo -c -o src/Platform/Linux/neosu-LinuxMain.obj `if test -f 'src/Platform/Linux/LinuxMain.cpp'; then $(CYGPATH_W) 'src/Platform/Linux/LinuxMain.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Platform/Linux/LinuxMain.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Platform/Linux/$(DEPDIR)/neosu-LinuxMain.Tpo src/Platform/Linux/$(DEPDIR)/neosu-LinuxMain.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Platform/Linux/LinuxMain.cpp' object='src/Platform/Linux/neosu-LinuxMain.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Platform/Linux/neosu-LinuxMain.obj `if test -f 'src/Platform/Linux/LinuxMain.cpp'; then $(CYGPATH_W) 'src/Platform/Linux/LinuxMain.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Platform/Linux/LinuxMain.cpp'; fi`
-
-src/Platform/Linux/neosu-XI2Handler.o: src/Platform/Linux/XI2Handler.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Platform/Linux/neosu-XI2Handler.o -MD -MP -MF src/Platform/Linux/$(DEPDIR)/neosu-XI2Handler.Tpo -c -o src/Platform/Linux/neosu-XI2Handler.o `test -f 'src/Platform/Linux/XI2Handler.cpp' || echo '$(srcdir)/'`src/Platform/Linux/XI2Handler.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Platform/Linux/$(DEPDIR)/neosu-XI2Handler.Tpo src/Platform/Linux/$(DEPDIR)/neosu-XI2Handler.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Platform/Linux/XI2Handler.cpp' object='src/Platform/Linux/neosu-XI2Handler.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Platform/Linux/neosu-XI2Handler.o `test -f 'src/Platform/Linux/XI2Handler.cpp' || echo '$(srcdir)/'`src/Platform/Linux/XI2Handler.cpp
-
-src/Platform/Linux/neosu-XI2Handler.obj: src/Platform/Linux/XI2Handler.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Platform/Linux/neosu-XI2Handler.obj -MD -MP -MF src/Platform/Linux/$(DEPDIR)/neosu-XI2Handler.Tpo -c -o src/Platform/Linux/neosu-XI2Handler.obj `if test -f 'src/Platform/Linux/XI2Handler.cpp'; then $(CYGPATH_W) 'src/Platform/Linux/XI2Handler.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Platform/Linux/XI2Handler.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Platform/Linux/$(DEPDIR)/neosu-XI2Handler.Tpo src/Platform/Linux/$(DEPDIR)/neosu-XI2Handler.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Platform/Linux/XI2Handler.cpp' object='src/Platform/Linux/neosu-XI2Handler.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Platform/Linux/neosu-XI2Handler.obj `if test -f 'src/Platform/Linux/XI2Handler.cpp'; then $(CYGPATH_W) 'src/Platform/Linux/XI2Handler.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Platform/Linux/XI2Handler.cpp'; fi`
-
-src/Platform/Windows/neosu-WinEnvironment.o: src/Platform/Windows/WinEnvironment.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Platform/Windows/neosu-WinEnvironment.o -MD -MP -MF src/Platform/Windows/$(DEPDIR)/neosu-WinEnvironment.Tpo -c -o src/Platform/Windows/neosu-WinEnvironment.o `test -f 'src/Platform/Windows/WinEnvironment.cpp' || echo '$(srcdir)/'`src/Platform/Windows/WinEnvironment.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Platform/Windows/$(DEPDIR)/neosu-WinEnvironment.Tpo src/Platform/Windows/$(DEPDIR)/neosu-WinEnvironment.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Platform/Windows/WinEnvironment.cpp' object='src/Platform/Windows/neosu-WinEnvironment.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Platform/Windows/neosu-WinEnvironment.o `test -f 'src/Platform/Windows/WinEnvironment.cpp' || echo '$(srcdir)/'`src/Platform/Windows/WinEnvironment.cpp
-
-src/Platform/Windows/neosu-WinEnvironment.obj: src/Platform/Windows/WinEnvironment.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Platform/Windows/neosu-WinEnvironment.obj -MD -MP -MF src/Platform/Windows/$(DEPDIR)/neosu-WinEnvironment.Tpo -c -o src/Platform/Windows/neosu-WinEnvironment.obj `if test -f 'src/Platform/Windows/WinEnvironment.cpp'; then $(CYGPATH_W) 'src/Platform/Windows/WinEnvironment.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Platform/Windows/WinEnvironment.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Platform/Windows/$(DEPDIR)/neosu-WinEnvironment.Tpo src/Platform/Windows/$(DEPDIR)/neosu-WinEnvironment.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Platform/Windows/WinEnvironment.cpp' object='src/Platform/Windows/neosu-WinEnvironment.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Platform/Windows/neosu-WinEnvironment.obj `if test -f 'src/Platform/Windows/WinEnvironment.cpp'; then $(CYGPATH_W) 'src/Platform/Windows/WinEnvironment.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Platform/Windows/WinEnvironment.cpp'; fi`
-
-src/Platform/Windows/neosu-WinGLLegacyInterface.o: src/Platform/Windows/WinGLLegacyInterface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Platform/Windows/neosu-WinGLLegacyInterface.o -MD -MP -MF src/Platform/Windows/$(DEPDIR)/neosu-WinGLLegacyInterface.Tpo -c -o src/Platform/Windows/neosu-WinGLLegacyInterface.o `test -f 'src/Platform/Windows/WinGLLegacyInterface.cpp' || echo '$(srcdir)/'`src/Platform/Windows/WinGLLegacyInterface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Platform/Windows/$(DEPDIR)/neosu-WinGLLegacyInterface.Tpo src/Platform/Windows/$(DEPDIR)/neosu-WinGLLegacyInterface.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Platform/Windows/WinGLLegacyInterface.cpp' object='src/Platform/Windows/neosu-WinGLLegacyInterface.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Platform/Windows/neosu-WinGLLegacyInterface.o `test -f 'src/Platform/Windows/WinGLLegacyInterface.cpp' || echo '$(srcdir)/'`src/Platform/Windows/WinGLLegacyInterface.cpp
-
-src/Platform/Windows/neosu-WinGLLegacyInterface.obj: src/Platform/Windows/WinGLLegacyInterface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Platform/Windows/neosu-WinGLLegacyInterface.obj -MD -MP -MF src/Platform/Windows/$(DEPDIR)/neosu-WinGLLegacyInterface.Tpo -c -o src/Platform/Windows/neosu-WinGLLegacyInterface.obj `if test -f 'src/Platform/Windows/WinGLLegacyInterface.cpp'; then $(CYGPATH_W) 'src/Platform/Windows/WinGLLegacyInterface.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Platform/Windows/WinGLLegacyInterface.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Platform/Windows/$(DEPDIR)/neosu-WinGLLegacyInterface.Tpo src/Platform/Windows/$(DEPDIR)/neosu-WinGLLegacyInterface.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Platform/Windows/WinGLLegacyInterface.cpp' object='src/Platform/Windows/neosu-WinGLLegacyInterface.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Platform/Windows/neosu-WinGLLegacyInterface.obj `if test -f 'src/Platform/Windows/WinGLLegacyInterface.cpp'; then $(CYGPATH_W) 'src/Platform/Windows/WinGLLegacyInterface.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Platform/Windows/WinGLLegacyInterface.cpp'; fi`
-
-src/Platform/Windows/neosu-WindowsMain.o: src/Platform/Windows/WindowsMain.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Platform/Windows/neosu-WindowsMain.o -MD -MP -MF src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain.Tpo -c -o src/Platform/Windows/neosu-WindowsMain.o `test -f 'src/Platform/Windows/WindowsMain.cpp' || echo '$(srcdir)/'`src/Platform/Windows/WindowsMain.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain.Tpo src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Platform/Windows/WindowsMain.cpp' object='src/Platform/Windows/neosu-WindowsMain.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Platform/Windows/neosu-WindowsMain.o `test -f 'src/Platform/Windows/WindowsMain.cpp' || echo '$(srcdir)/'`src/Platform/Windows/WindowsMain.cpp
-
-src/Platform/Windows/neosu-WindowsMain.obj: src/Platform/Windows/WindowsMain.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Platform/Windows/neosu-WindowsMain.obj -MD -MP -MF src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain.Tpo -c -o src/Platform/Windows/neosu-WindowsMain.obj `if test -f 'src/Platform/Windows/WindowsMain.cpp'; then $(CYGPATH_W) 'src/Platform/Windows/WindowsMain.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Platform/Windows/WindowsMain.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain.Tpo src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Platform/Windows/WindowsMain.cpp' object='src/Platform/Windows/neosu-WindowsMain.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Platform/Windows/neosu-WindowsMain.obj `if test -f 'src/Platform/Windows/WindowsMain.cpp'; then $(CYGPATH_W) 'src/Platform/Windows/WindowsMain.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Platform/Windows/WindowsMain.cpp'; fi`
-
-src/Platform/Windows/neosu-WindowsMain_aux.o: src/Platform/Windows/WindowsMain_aux.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Platform/Windows/neosu-WindowsMain_aux.o -MD -MP -MF src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain_aux.Tpo -c -o src/Platform/Windows/neosu-WindowsMain_aux.o `test -f 'src/Platform/Windows/WindowsMain_aux.cpp' || echo '$(srcdir)/'`src/Platform/Windows/WindowsMain_aux.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain_aux.Tpo src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain_aux.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Platform/Windows/WindowsMain_aux.cpp' object='src/Platform/Windows/neosu-WindowsMain_aux.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Platform/Windows/neosu-WindowsMain_aux.o `test -f 'src/Platform/Windows/WindowsMain_aux.cpp' || echo '$(srcdir)/'`src/Platform/Windows/WindowsMain_aux.cpp
-
-src/Platform/Windows/neosu-WindowsMain_aux.obj: src/Platform/Windows/WindowsMain_aux.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Platform/Windows/neosu-WindowsMain_aux.obj -MD -MP -MF src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain_aux.Tpo -c -o src/Platform/Windows/neosu-WindowsMain_aux.obj `if test -f 'src/Platform/Windows/WindowsMain_aux.cpp'; then $(CYGPATH_W) 'src/Platform/Windows/WindowsMain_aux.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Platform/Windows/WindowsMain_aux.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain_aux.Tpo src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain_aux.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Platform/Windows/WindowsMain_aux.cpp' object='src/Platform/Windows/neosu-WindowsMain_aux.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Platform/Windows/neosu-WindowsMain_aux.obj `if test -f 'src/Platform/Windows/WindowsMain_aux.cpp'; then $(CYGPATH_W) 'src/Platform/Windows/WindowsMain_aux.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Platform/Windows/WindowsMain_aux.cpp'; fi`
-
 src/Platform/neosu-main.o: src/Platform/main.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Platform/neosu-main.o -MD -MP -MF src/Platform/$(DEPDIR)/neosu-main.Tpo -c -o src/Platform/neosu-main.o `test -f 'src/Platform/main.cpp' || echo '$(srcdir)/'`src/Platform/main.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Platform/$(DEPDIR)/neosu-main.Tpo src/Platform/$(DEPDIR)/neosu-main.Po
@@ -4392,10 +4231,6 @@ distclean-generic:
 	-$(am__rm_f) src/GUI/Windows/$(am__dirstamp)
 	-$(am__rm_f) src/Platform/$(DEPDIR)/$(am__dirstamp)
 	-$(am__rm_f) src/Platform/$(am__dirstamp)
-	-$(am__rm_f) src/Platform/Linux/$(DEPDIR)/$(am__dirstamp)
-	-$(am__rm_f) src/Platform/Linux/$(am__dirstamp)
-	-$(am__rm_f) src/Platform/Windows/$(DEPDIR)/$(am__dirstamp)
-	-$(am__rm_f) src/Platform/Windows/$(am__dirstamp)
 	-$(am__rm_f) src/Util/$(DEPDIR)/$(am__dirstamp)
 	-$(am__rm_f) src/Util/$(am__dirstamp)
 
@@ -4523,6 +4358,7 @@ distclean: distclean-am
 	-rm -f src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLStateCache.Po
 	-rm -f src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLSync.Po
 	-rm -f src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLVertexArrayObject.Po
+	-rm -f src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-SDLGLInterface.Po
 	-rm -f src/Engine/Resources/$(DEPDIR)/neosu-AsyncResourceLoader.Po
 	-rm -f src/Engine/Resources/$(DEPDIR)/neosu-Resource.Po
 	-rm -f src/Engine/Resources/$(DEPDIR)/neosu-ResourceManager.Po
@@ -4552,14 +4388,6 @@ distclean: distclean-am
 	-rm -f src/GUI/Windows/$(DEPDIR)/neosu-ConsoleBox.Po
 	-rm -f src/GUI/Windows/$(DEPDIR)/neosu-VisualProfiler.Po
 	-rm -f src/Platform/$(DEPDIR)/neosu-main.Po
-	-rm -f src/Platform/Linux/$(DEPDIR)/neosu-LinuxEnvironment.Po
-	-rm -f src/Platform/Linux/$(DEPDIR)/neosu-LinuxGLLegacyInterface.Po
-	-rm -f src/Platform/Linux/$(DEPDIR)/neosu-LinuxMain.Po
-	-rm -f src/Platform/Linux/$(DEPDIR)/neosu-XI2Handler.Po
-	-rm -f src/Platform/Windows/$(DEPDIR)/neosu-WinEnvironment.Po
-	-rm -f src/Platform/Windows/$(DEPDIR)/neosu-WinGLLegacyInterface.Po
-	-rm -f src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain.Po
-	-rm -f src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain_aux.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-Quaternion.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-Rect.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-UString.Po
@@ -4726,6 +4554,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLStateCache.Po
 	-rm -f src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLSync.Po
 	-rm -f src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLVertexArrayObject.Po
+	-rm -f src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-SDLGLInterface.Po
 	-rm -f src/Engine/Resources/$(DEPDIR)/neosu-AsyncResourceLoader.Po
 	-rm -f src/Engine/Resources/$(DEPDIR)/neosu-Resource.Po
 	-rm -f src/Engine/Resources/$(DEPDIR)/neosu-ResourceManager.Po
@@ -4755,14 +4584,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/GUI/Windows/$(DEPDIR)/neosu-ConsoleBox.Po
 	-rm -f src/GUI/Windows/$(DEPDIR)/neosu-VisualProfiler.Po
 	-rm -f src/Platform/$(DEPDIR)/neosu-main.Po
-	-rm -f src/Platform/Linux/$(DEPDIR)/neosu-LinuxEnvironment.Po
-	-rm -f src/Platform/Linux/$(DEPDIR)/neosu-LinuxGLLegacyInterface.Po
-	-rm -f src/Platform/Linux/$(DEPDIR)/neosu-LinuxMain.Po
-	-rm -f src/Platform/Linux/$(DEPDIR)/neosu-XI2Handler.Po
-	-rm -f src/Platform/Windows/$(DEPDIR)/neosu-WinEnvironment.Po
-	-rm -f src/Platform/Windows/$(DEPDIR)/neosu-WinGLLegacyInterface.Po
-	-rm -f src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain.Po
-	-rm -f src/Platform/Windows/$(DEPDIR)/neosu-WindowsMain_aux.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-Quaternion.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-Rect.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-UString.Po
@@ -5109,7 +4930,6 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source: $(DEPS_CACHE)/curl-$(CUR
 @BUILD_SDL3_TRUE@	$(TAR) xf $(DEPS_CACHE)/SDL3-$(SDL3_VERSION).tar.gz -C $(DEPS_PREFIX)/SDL3 --strip-components=1 && \
 @BUILD_SDL3_TRUE@	$(MKDIR_P) $(DEPS_PREFIX)/SDL3/build
 @BUILD_SDL3_TRUE@	cd $(DEPS_PREFIX)/SDL3 && \
-@BUILD_SDL3_TRUE@	patch -Np1<$(BUILD_MISCDIR)/sdl-c23bool.patch && \
 @BUILD_SDL3_TRUE@	$(if $(SDL3_STATIC),$(SED) -i -e 's|#ifdef SDL_DYNAMIC_API.*|#if 1|' -e 's|#error.*Nope.*|#define SDL_DYNAMIC_API 0|' src/dynapi/SDL_dynapi.h,true) && \
 @BUILD_SDL3_TRUE@	PKG_CONFIG="$(PKG_CONFIG)" \
 @BUILD_SDL3_TRUE@	CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" LDFLAGS="$(LDFLAGS)" $(CMAKE) -S . -B build -G Ninja \

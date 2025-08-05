@@ -3742,7 +3742,7 @@ void OptionsMenu::save() {
         out << "\n";
 
         if(this->fullscreenCheckbox->isChecked()) {
-            out << cv::cmd::fullscreen.getName() << "\n";
+            out << cv::fullscreen.getName() << "\n";
         }
         out << "\n";
 

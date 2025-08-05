@@ -22,8 +22,6 @@ class OpenGLLegacyInterface : public Graphics {
     OpenGLLegacyInterface();
     ~OpenGLLegacyInterface() override;
 
-    void init() override;
-
     // scene
     void beginScene() final;
     void endScene() override;
@@ -86,11 +84,6 @@ class OpenGLLegacyInterface : public Graphics {
 
     // renderer info
     Vector2 getResolution() const final { return this->vResolution; }
-    UString getVendor() override;
-    UString getModel() override;
-    UString getVersion() override;
-    int getVRAMTotal() override;
-    int getVRAMRemaining() override;
 
     // callbacks
     void onResolutionChange(Vector2 newResolution) final;
@@ -110,11 +103,6 @@ class OpenGLLegacyInterface : public Graphics {
     void onTransformUpdate(Matrix4 &projectionMatrix, Matrix4 &worldMatrix) final;
 
    private:
-    static int primitiveToOpenGL(Graphics::PRIMITIVE primitive);
-    static int compareFuncToOpenGL(Graphics::COMPARE_FUNC compareFunc);
-
-    void handleGLErrors();
-
     // renderer
     bool bInScene;
     Vector2 vResolution;

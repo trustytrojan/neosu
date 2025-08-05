@@ -18,8 +18,6 @@
 #include "Timing.h"
 #include "VisualProfiler.h"
 
-Environment *env = NULL;
-
 std::unique_ptr<Mouse> mouse = nullptr;
 std::unique_ptr<Keyboard> keyboard = nullptr;
 std::unique_ptr<App> app = nullptr;
@@ -34,11 +32,8 @@ Engine *engine = NULL;
 Console *Engine::console = NULL;
 ConsoleBox *Engine::consoleBox = NULL;
 
-Engine::Engine(i32 argc, char **argv) {
+Engine::Engine() {
     engine = this;
-
-    this->iArgc = argc;
-    this->sArgv = argv;
 
     this->guiContainer = NULL;
     this->visualProfiler = NULL;

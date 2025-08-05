@@ -348,7 +348,7 @@ class Spinner final : public HitObject {
     Vector2 vRawPos;
     Vector2 vOriginalRawPos;
 
-    bool bClickedOnce;
+    // bool bClickedOnce;
     float fPercent;
 
     float fDrawRot;

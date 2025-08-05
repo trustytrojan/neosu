@@ -20,7 +20,7 @@
 #include "OpenGLVertexArrayObject.h"
 #include "Profiler.h"
 
-#include "OpenGLHeaders.h"
+#include "SDLGLInterface.h"
 #include "OpenGLStateCache.h"
 
 #include <utility>
@@ -37,19 +37,6 @@ OpenGLLegacyInterface::OpenGLLegacyInterface() : Graphics() {
     this->fZ = 1;
 
     this->syncobj = new OpenGLSync();
-}
-
-void OpenGLLegacyInterface::init() {
-    // resolve GL functions
-    if(!gladLoadGL()) {
-        debugLog("gladLoadGL() error\n");
-        engine->showMessageErrorFatal("OpenGL Error", "Couldn't gladLoadGL()!\nThe engine will exit now.");
-        engine->shutdown();
-        return;
-    }
-    debugLog("OpenGL Version: {}\n", reinterpret_cast<const char *>(glGetString(GL_VERSION)));
-
-    // init the synchronization object after we can check the gl version being used
     this->syncobj->init();
 
     // enable
@@ -101,9 +88,6 @@ void OpenGLLegacyInterface::beginScene() {
     // glClearColor(0.9568f, 0.9686f, 0.9882f, 1);
     glClearColor(0, 0, 0, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-    // display any errors of previous frames
-    handleGLErrors();
 }
 
 void OpenGLLegacyInterface::endScene() {
@@ -445,7 +429,7 @@ void OpenGLLegacyInterface::drawVAO(VertexArrayObject *vao) {
     const std::vector<std::vector<Vector2>> &texcoords = vao->getTexcoords();
     const std::vector<Color> &colors = vao->getColors();
 
-    glBegin(primitiveToOpenGL(vao->getPrimitive()));
+    glBegin(SDLGLInterface::primitiveToOpenGLMap[vao->getPrimitive()]);
     for(size_t i = 0; i < vertices.size(); i++) {
         if(i < colors.size()) setColor(colors[i]);
 
@@ -533,7 +517,7 @@ void OpenGLLegacyInterface::setAlphaTesting(bool enabled) {
 }
 
 void OpenGLLegacyInterface::setAlphaTestFunc(COMPARE_FUNC alphaFunc, float ref) {
-    glAlphaFunc(compareFuncToOpenGL(alphaFunc), ref);
+    glAlphaFunc(SDLGLInterface::compareFuncToOpenGLMap[alphaFunc], ref);
 }
 
 void OpenGLLegacyInterface::setBlending(bool enabled) {
@@ -669,107 +653,6 @@ void OpenGLLegacyInterface::onTransformUpdate(Matrix4 &projectionMatrix, Matrix4
 
     glMatrixMode(GL_MODELVIEW);
     glLoadMatrixf(worldMatrix.get());
-}
-
-int OpenGLLegacyInterface::primitiveToOpenGL(Graphics::PRIMITIVE primitive) {
-    switch(primitive) {
-        case Graphics::PRIMITIVE::PRIMITIVE_LINES:
-            return GL_LINES;
-        case Graphics::PRIMITIVE::PRIMITIVE_LINE_STRIP:
-            return GL_LINE_STRIP;
-        case Graphics::PRIMITIVE::PRIMITIVE_TRIANGLES:
-            return GL_TRIANGLES;
-        case Graphics::PRIMITIVE::PRIMITIVE_TRIANGLE_FAN:
-            return GL_TRIANGLE_FAN;
-        case Graphics::PRIMITIVE::PRIMITIVE_TRIANGLE_STRIP:
-            return GL_TRIANGLE_STRIP;
-        case Graphics::PRIMITIVE::PRIMITIVE_QUADS:
-            return GL_QUADS;
-    }
-
-    return GL_TRIANGLES;
-}
-
-int OpenGLLegacyInterface::compareFuncToOpenGL(Graphics::COMPARE_FUNC compareFunc) {
-    switch(compareFunc) {
-        case Graphics::COMPARE_FUNC::COMPARE_FUNC_NEVER:
-            return GL_NEVER;
-        case Graphics::COMPARE_FUNC::COMPARE_FUNC_LESS:
-            return GL_LESS;
-        case Graphics::COMPARE_FUNC::COMPARE_FUNC_EQUAL:
-            return GL_EQUAL;
-        case Graphics::COMPARE_FUNC::COMPARE_FUNC_LESSEQUAL:
-            return GL_LEQUAL;
-        case Graphics::COMPARE_FUNC::COMPARE_FUNC_GREATER:
-            return GL_GREATER;
-        case Graphics::COMPARE_FUNC::COMPARE_FUNC_NOTEQUAL:
-            return GL_NOTEQUAL;
-        case Graphics::COMPARE_FUNC::COMPARE_FUNC_GREATEREQUAL:
-            return GL_GEQUAL;
-        case Graphics::COMPARE_FUNC::COMPARE_FUNC_ALWAYS:
-            return GL_ALWAYS;
-    }
-
-    return GL_ALWAYS;
-}
-
-void OpenGLLegacyInterface::handleGLErrors() {
-    // no
-}
-
-UString OpenGLLegacyInterface::getVendor() {
-    const GLubyte *vendor = glGetString(GL_VENDOR);
-    return reinterpret_cast<const char *>(vendor);
-}
-
-UString OpenGLLegacyInterface::getModel() {
-    const GLubyte *model = glGetString(GL_RENDERER);
-    return reinterpret_cast<const char *>(model);
-}
-
-UString OpenGLLegacyInterface::getVersion() {
-    const GLubyte *version = glGetString(GL_VERSION);
-    return reinterpret_cast<const char *>(version);
-}
-
-#define GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX 0x9047
-#define GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX 0x9048
-#define GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX 0x9049
-#define GPU_MEMORY_INFO_EVICTION_COUNT_NVX 0x904A
-#define GPU_MEMORY_INFO_EVICTED_MEMORY_NVX 0x904B
-
-#define VBO_FREE_MEMORY_ATI 0x87FB
-#define TEXTURE_FREE_MEMORY_ATI 0x87FC
-#define RENDERBUFFER_FREE_MEMORY_ATI 0x87FD
-
-int OpenGLLegacyInterface::getVRAMTotal() {
-    int nvidiaMemory = -1;
-    int atiMemory = -1;
-
-    glGetIntegerv(GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &nvidiaMemory);
-    glGetIntegerv(TEXTURE_FREE_MEMORY_ATI, &atiMemory);
-
-    glGetError();  // clear error state
-
-    if(nvidiaMemory < 1)
-        return atiMemory;
-    else
-        return nvidiaMemory;
-}
-
-int OpenGLLegacyInterface::getVRAMRemaining() {
-    int nvidiaMemory = -1;
-    int atiMemory = -1;
-
-    glGetIntegerv(GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &nvidiaMemory);
-    glGetIntegerv(TEXTURE_FREE_MEMORY_ATI, &atiMemory);
-
-    glGetError();  // clear error state
-
-    if(nvidiaMemory < 1)
-        return atiMemory;
-    else
-        return nvidiaMemory;
 }
 
 #endif

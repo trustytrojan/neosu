@@ -179,8 +179,6 @@ class Osu final : public MouseListener, public KeyboardListener {
     // callbacks
     void onWindowedResolutionChanged(const UString &oldValue, const UString &args);
     void onInternalResolutionChanged(const UString &oldValue, const UString &args);
-    void onSensitivityChange(const UString &oldValue, const UString &newValue);
-    void onRawInputChange(const UString &oldValue, const UString &newValue);
 
     void onSkinReload();
     void onSkinChange(const UString &newValue);

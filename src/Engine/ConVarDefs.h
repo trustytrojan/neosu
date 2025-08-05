@@ -102,8 +102,6 @@ CONVAR(exec, "exec", FCVAR_BANCHO_COMPATIBLE, CFUNC(_exec));
 CONVAR(exit, "exit", FCVAR_BANCHO_COMPATIBLE, []() -> void { engine ? engine->shutdown() : (void)0; });
 CONVAR(find, "find", FCVAR_BANCHO_COMPATIBLE, CFUNC(_find));
 CONVAR(focus, "focus", FCVAR_BANCHO_COMPATIBLE, CFUNC(_focus));
-CONVAR(fullscreen, "fullscreen", FCVAR_BANCHO_COMPATIBLE,
-       []() -> void { engine ? engine->toggleFullscreen() : (void)0; });
 CONVAR(help, "help", FCVAR_BANCHO_COMPATIBLE, CFUNC(_help));
 CONVAR(listcommands, "listcommands", FCVAR_BANCHO_COMPATIBLE, CFUNC(_listcommands));
 CONVAR(maximize, "maximize", FCVAR_BANCHO_COMPATIBLE, CFUNC(_maximize));
@@ -525,6 +523,8 @@ CONVAR(fullscreen_windowed_borderless, "fullscreen_windowed_borderless", false, 
        [](float newValue) -> void {
            env ? env->setFullscreenWindowedBorderless(!!static_cast<int>(newValue)) : (void)0;
        });
+CONVAR(fullscreen, "fullscreen", false, FCVAR_BANCHO_COMPATIBLE,
+       [](float /*newValue*/) -> void { engine ? engine->toggleFullscreen() : (void)0; });
 CONVAR(hiterrorbar_misaims, "osu_hiterrorbar_misaims", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(hiterrorbar_misses, "osu_hiterrorbar_misses", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(hitobject_fade_in_time, "osu_hitobject_fade_in_time", 400, FCVAR_LOCKED | FCVAR_GAMEPLAY, "in milliseconds (!)");
@@ -1255,8 +1255,6 @@ CONVAR(vs_shuffle, "vs_shuffle", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(vs_volume, "vs_volume", 1.0f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(vsync, "vsync", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        [](float on) -> void { g ? g->setVSync(!!static_cast<int>(on)) : (void)0; });
-CONVAR(win_disable_windows_key, "win_disable_windows_key", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
-       "if compiled on Windows, set to 0/1 to disable/enable all windows keys via low level keyboard hook");
 CONVAR(win_disable_windows_key_while_playing, "osu_win_disable_windows_key_while_playing", true,
        FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
 CONVAR(win_ink_workaround, "win_ink_workaround", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);

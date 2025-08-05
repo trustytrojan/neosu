@@ -29,8 +29,8 @@ class Console;
 
 class Engine final : public KeyboardListener {
    public:
-    Engine(i32 argc, char **argv);
-    ~Engine();
+    Engine();
+    ~Engine() override;
 
     // app
     void loadApp();
@@ -129,8 +129,6 @@ class Engine final : public KeyboardListener {
     static Console *console;
 
     // custom
-    i32 iArgc;
-    char **sArgv;
     bool bBlackout;
     bool bDrawing;
 

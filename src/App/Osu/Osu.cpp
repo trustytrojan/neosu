@@ -67,11 +67,11 @@
 #include "score.h"
 
 // HACK: WTF?
-#ifdef _WIN32
-#include "WinEnvironment.h"
-#include "WindowsMain.h"
-extern Main *mainloopPtrHack;
-#endif
+// #ifdef _WIN32
+// #include "WinEnvironment.h"
+// #include "WindowsMain.h"
+// extern Main *mainloopPtrHack;
+// #endif
 
 Osu *osu = NULL;
 
@@ -136,10 +136,6 @@ Osu::Osu() {
     cv::confine_cursor_windowed.setCallback(SA::MakeDelegate<&Osu::updateConfineCursor>(this));
     cv::confine_cursor_fullscreen.setCallback(SA::MakeDelegate<&Osu::updateConfineCursor>(this));
     cv::confine_cursor_never.setCallback(SA::MakeDelegate<&Osu::updateConfineCursor>(this));
-    if constexpr(Env::cfg(OS::LINUX)) {
-        cv::mouse_raw_input.setCallback(SA::MakeDelegate<&Osu::onRawInputChange>(this));
-        cv::mouse_sensitivity.setCallback(SA::MakeDelegate<&Osu::onSensitivityChange>(this));
-    }
 
     // vars
     this->skin = NULL;
@@ -361,12 +357,12 @@ Osu::Osu() {
 #endif
 
 #ifdef _WIN32
-    // Process cmdline args now, after everything has been initialized
-    std::vector<std::string> args;
-    for(i32 i = 0; i < engine->iArgc; i++) {
-        args.push_back(engine->sArgv[i]);
-    }
-    mainloopPtrHack->handle_cmdline_args(args);
+    // // Process cmdline args now, after everything has been initialized
+    // std::vector<std::string> args;
+    // for(i32 i = 0; i < engine->iArgc; i++) {
+    //     args.push_back(engine->sArgv[i]);
+    // }
+    // mainloopPtrHack->handle_cmdline_args(args);
 #endif
 
     // Not the type of shader you want players to tweak or delete, so loading from string
@@ -1732,14 +1728,20 @@ void Osu::updateMouseSettings() {
 
 void Osu::updateWindowsKeyDisable() {
     if(cv::debug.getBool()) debugLog("Osu::updateWindowsKeyDisable()\n");
-
+    const bool isPlayerPlaying =
+        engine->hasFocus() && this->isInPlayMode() &&
+        (!this->getSelectedBeatmap()->isPaused() || this->getSelectedBeatmap()->isRestartScheduled()) &&
+        !cv::mod_autoplay.getBool();
     if(cv::win_disable_windows_key_while_playing.getBool()) {
-        const bool isPlayerPlaying =
-            engine->hasFocus() && this->isInPlayMode() &&
-            (!this->getSelectedBeatmap()->isPaused() || this->getSelectedBeatmap()->isRestartScheduled()) &&
-            !cv::mod_autoplay.getBool();
-        cv::win_disable_windows_key.setValue(isPlayerPlaying ? 1.0f : 0.0f);
+        env->grabKeyboard(isPlayerPlaying);
+    } else {
+        env->grabKeyboard(false);
     }
+
+    // this is kind of a weird place to put this, but we don't care about text input when in gameplay
+    // on some platforms, text input being enabled might result in an on-screen keyboard showing up
+    // TODO: check if this breaks chat while playing
+    env->listenToTextInput(!isPlayerPlaying);
 }
 
 void Osu::fireResolutionChanged() { this->onResolutionChanged(g_vInternalResolution); }
@@ -1838,8 +1840,8 @@ void Osu::onFocusLost() {
     this->updateWindowsKeyDisable();
     this->volumeOverlay->loseFocus();
 
-    // release cursor clip
-    env->setCursorClip(false, McRect());
+	// release cursor clip
+	this->updateConfineCursor();
 }
 
 void Osu::onMinimized() { this->volumeOverlay->loseFocus(); }
@@ -1995,30 +1997,13 @@ void Osu::updateCursorVisibility() {
     // using scaled/offset getMouse()->getPos()
     if(cv::resolution_enabled.getBool()) {
         McRect internalWindow = McRect(0, 0, g_vInternalResolution.x, g_vInternalResolution.y);
-        if(!internalWindow.contains(mouse->getPos())) {
+        if(!internalWindow.contains(mouse->getPos()) && !env->isCursorClipped()) {
             this->bShouldCursorBeVisible = true;
         }
     }
 
-    if(this->bShouldCursorBeVisible != env->isCursorVisible()) {
+    if(env->isCursorVisible() != this->bShouldCursorBeVisible) {
         env->setCursorVisible(this->bShouldCursorBeVisible);
-    }
-}
-
-void Osu::onRawInputChange(const UString & /*old*/, const UString &newValue) {
-    bool newBool = newValue.toBool();
-    float sens = cv::mouse_sensitivity.getFloat();
-    if(!newBool && (sens < 0.999 || sens > 1.001)) {
-        cv::mouse_sensitivity.setValue(1.f, false);
-        this->notificationOverlay->addToast("Forced sensitivity to 1 for non-raw input.", ERROR_TOAST);
-    }
-}
-
-void Osu::onSensitivityChange(const UString & /*old*/, const UString &newValue) {
-    float newFloat = newValue.toFloat();
-    if(!cv::mouse_raw_input.getBool() && (newFloat < 0.999 || newFloat > 1.001)) {
-        cv::mouse_raw_input.setValue(true, false);
-        this->notificationOverlay->addToast("Raw input is forced on for sensitivities != 1 on Linux.", ERROR_TOAST);
     }
 }
 
@@ -2130,7 +2115,10 @@ void Osu::onModFPoSu3DSpheresChange() { this->rebuildRenderTargets(); }
 
 void Osu::onModFPoSu3DSpheresAAChange() { this->rebuildRenderTargets(); }
 
-void Osu::onLetterboxingOffsetChange() { this->updateMouseSettings(); }
+void Osu::onLetterboxingOffsetChange() {
+    this->updateMouseSettings();
+    this->updateConfineCursor();
+}
 
 void Osu::onUserCardChange(const UString &new_username) {
     // NOTE: force update options textbox to avoid shutdown inconsistency

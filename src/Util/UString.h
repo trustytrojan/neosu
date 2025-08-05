@@ -137,6 +137,10 @@ class UString {
     void insert(int offset, wchar_t ch);
     void erase(int offset, int count);
 
+    void pop_back() noexcept {
+        if(!this->isEmpty()) this->erase(length() - 1, 1);
+    }
+
     // actions (non-modifying)
     template <typename T = UString>
     [[nodiscard]] constexpr T substr(int offset, int charCount = -1) const {

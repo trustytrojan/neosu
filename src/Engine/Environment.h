@@ -1,164 +1,240 @@
+//======== Copyright (c) 2015-2018, PG & 2025, WH, All rights reserved. =========//
+//
+// Purpose:		top level interface for native OS calls
+//
+// $NoKeywords: $sdlenv
+//===============================================================================//
+
 #pragma once
+
+#ifndef ENVIRONMENT_H
+#define ENVIRONMENT_H
+
+#include "BaseEnvironment.h"
 
 #include "UString.h"
 #include "Cursors.h"
-#include "Graphics.h"
 #include "KeyboardEvent.h"
 #include "Rect.h"
 
-#ifdef MCENGINE_PLATFORM_WINDOWS  // temp, for isatty
-#include <io.h>
-#else
-#include <unistd.h>  // isatty libc++
-#endif
-
-#include <filesystem>
+#include <map>
 #include <unordered_map>
+#include <vector>
+#include <filesystem>
 #include <functional>
 
-class Environment;
+class Graphics;
+class UString;
+class Engine;
 
-extern Environment *env;
-
-class LinuxMain;
-class LinuxEnvironment;
-class WinEnvironment;
-class WindowsMain;
+typedef struct SDL_Window SDL_Window;
+typedef struct SDL_Cursor SDL_Cursor;
 
 class Environment {
-    friend class LinuxEnvironment;
-    friend class LinuxMain;
-    friend class WinEnvironment;
-    friend class WindowsMain;
-
    public:
-    Environment(const std::vector<UString> &argCmdline,
-                const std::unordered_map<UString, std::optional<UString>> &argMap);
-    virtual ~Environment() { env = NULL; }
+    Environment(int argc, char *argv[]);
+    virtual ~Environment();
 
-    virtual void update() { ; }
+    void update();
 
     // engine/factory
-    virtual Graphics *createRenderer() = 0;
+    Graphics *createRenderer();
 
     // system
-    virtual void shutdown() = 0;
-    virtual void restart() = 0;
+    void shutdown();
+    void restart();
+    [[nodiscard]] inline bool isRunning() const { return m_bRunning; }
 
     // resolved and cached at early startup with argv[0]
     // contains the full canonical path to the current exe
     static const std::string &getPathToSelf(const char *argv0 = nullptr);
 
-    [[nodiscard]] inline const std::unordered_map<UString, std::optional<UString>> &getLaunchArgs() const {
-        return mArgMap;
-    }
-    [[nodiscard]] inline const std::vector<UString> &getCommandLine() const { return vCmdLine; }
-
     // i.e. getenv()
     static std::string getEnvVariable(const std::string &varToQuery) noexcept;
 
     static const std::string &getExeFolder();
-    static void setProcessPriority(float newVal); // != 0.0 : high
-
-    // replace non-alphanum characters in a string to %-encoded ones viable for a URL
-    [[nodiscard]] static std::string encodeStringToURL(const std::string &stringToConvert) noexcept;
+    static void setProcessPriority(float newVal);  // != 0.0 : high
 
     static void openURLInDefaultBrowser(const std::string &url) noexcept;
-    static void openFileBrowser(const std::string &initialpath) noexcept;
+
+    [[nodiscard]] inline const std::unordered_map<UString, std::optional<UString>> &getLaunchArgs() const {
+        return m_mArgMap;
+    }
+    [[nodiscard]] inline const std::vector<UString> &getCommandLine() const { return m_vCmdLine; }
+
+    // returns at least 1
+    static int getLogicalCPUCount();
 
     // user
-    virtual UString getUsername() = 0;
-    static const std::string &getUserDataPath();
+    [[nodiscard]] const UString &getUsername();
+    [[nodiscard]] const std::string &getUserDataPath();
+    [[nodiscard]] const std::string &getLocalDataPath();
 
     // file IO
-    virtual std::vector<UString> getLogicalDrives() = 0;
-
-    static inline bool isaTTY() { return isatty(fileno(stdout)) != 0; }
-
-    // modifies the input filename! (checks case insensitively past the last slash)
-    static bool fileExists(std::string &filename);
-    // modifies the input directoryName! (checks case insensitively past the last slash)
-    static bool directoryExists(std::string &directoryName);
-
-    // same as the above, but for string literals (so we can't check insensitively and modify the input)
-    static bool fileExists(const std::string &filename);
-    static bool directoryExists(const std::string &directoryName);
+    [[nodiscard]] static bool fileExists(std::string &filename);  // passthroughs to McFile
+    [[nodiscard]] static bool directoryExists(std::string &directoryName);
+    [[nodiscard]] static bool fileExists(const std::string &filename);
+    [[nodiscard]] static bool directoryExists(const std::string &directoryName);
+    [[nodiscard]] static inline bool isaTTY() { return s_bIsATTY; }  // is stdout a terminal
 
     static bool createDirectory(const std::string &directoryName);
     static bool renameFile(const std::string &oldFileName, const std::string &newFileName);
     static bool deleteFile(const std::string &filePath);
+    [[nodiscard]] static std::vector<std::string> getFilesInFolder(const std::string &folder) noexcept;
+    [[nodiscard]] static std::vector<std::string> getFoldersInFolder(const std::string &folder) noexcept;
+    [[nodiscard]] static std::vector<UString> getLogicalDrives();
+    // returns an absolute (i.e. fully-qualified) filesystem path
+    [[nodiscard]] static std::string getFolderFromFilePath(const std::string &filepath) noexcept;
+    [[nodiscard]] static std::string getFileExtensionFromFilePath(const std::string &filepath, bool includeDot = false) noexcept;
+    [[nodiscard]] static std::string getFileNameFromFilePath(const std::string &filePath) noexcept;
 
-    static std::string getFolderFromFilePath(const std::string &filepath) noexcept;
-    static std::string getFileExtensionFromFilePath(const std::string &filepath, bool includeDot = false) noexcept;
-    static std::string getFileNameFromFilePath(const std::string &filePath) noexcept;
-
-    // i can't make these as fast as the win32 api version in a generic way
-    virtual std::vector<std::string> getFilesInFolder(const std::string &folder) noexcept;
-    virtual std::vector<std::string> getFoldersInFolder(const std::string &folder) noexcept;
+    [[nodiscard]] static std::string encodeStringToURL(const std::string &unencodedURLString) noexcept;
 
     // clipboard
-    virtual UString getClipBoardText() = 0;
-    virtual void setClipBoardText(UString text) = 0;
+    [[nodiscard]] const UString &getClipBoardText();
+    void setClipBoardText(const UString &text);
 
     // dialogs & message boxes
-    virtual void showMessageInfo(const UString &title, const UString &message);
-    virtual void showMessageWarning(const UString &title, const UString &message);
-    virtual void showMessageError(const UString &title, const UString &message);
-    virtual void showMessageErrorFatal(const UString &title, const UString &message);
+    void showMessageInfo(const UString &title, const UString &message) const;
+    void showMessageWarning(const UString &title, const UString &message) const;
+    void showMessageError(const UString &title, const UString &message) const;
+    void showMessageErrorFatal(const UString &title, const UString &message) const;
 
     using FileDialogCallback = std::function<void(const std::vector<UString> &paths)>;
-    static void openFileWindow(FileDialogCallback callback, const char *filetypefilters, const UString &title,
-                               const UString &initialpath = "");
-    static void openFolderWindow(FileDialogCallback callback, const UString &initialpath = "");
+    void openFileWindow(FileDialogCallback callback, const char *filetypefilters, const UString &title,
+                        const UString &initialpath = "") const;
+    void openFolderWindow(FileDialogCallback callback, const UString &initialpath = "") const;
+    void openFileBrowser(const std::string &initialpath) noexcept;
 
     // window
-    virtual void focus() = 0;
-    virtual void center() = 0;
-    virtual void minimize() = 0;
-    virtual void maximize() = 0;
-    virtual void enableFullscreen() = 0;
-    virtual void disableFullscreen() = 0;
-    virtual void setWindowTitle(UString title) = 0;
-    virtual void setWindowPos(int x, int y) = 0;
-    virtual void setWindowSize(int width, int height) = 0;
-    virtual void setWindowResizable(bool resizable) = 0;
-    virtual void setMonitor(int monitor) = 0;
-    virtual Vector2 getWindowPos() = 0;
-    virtual Vector2 getWindowSize() = 0;
-    virtual int getMonitor() = 0;
-    virtual std::vector<McRect> getMonitors() = 0;
-    virtual Vector2 getNativeScreenSize() = 0;
-    virtual McRect getVirtualScreenRect() = 0;
-    virtual McRect getDesktopRect() = 0;
-    virtual int getDPI() = 0;
-    virtual bool isFullscreen() = 0;
-    virtual bool isWindowResizable() = 0;
+    void focus();
+    void center();
+    void minimize();
+    void maximize();
+    void enableFullscreen();
+    void disableFullscreen();
+    void syncWindow();
+    void setWindowTitle(const UString &title);
+    void setWindowPos(int x, int y);
+    void setWindowSize(int width, int height);
+    void setWindowResizable(bool resizable);
+    void setFullscreenWindowedBorderless(bool fullscreenWindowedBorderless);
+    void setMonitor(int monitor);
+    [[nodiscard]] inline const float &getDisplayRefreshRate() const { return m_fDisplayHz; }
+    [[nodiscard]] inline const float &getDisplayRefreshTime() const { return m_fDisplayHzSecs; }
+    [[nodiscard]] HWND getHwnd() const;
+    [[nodiscard]] Vector2 getWindowPos() const;
+    [[nodiscard]] Vector2 getWindowSize() const;
+    [[nodiscard]] int getMonitor() const;
+    [[nodiscard]] const std::map<unsigned int, McRect> &getMonitors();
+    [[nodiscard]] Vector2 getNativeScreenSize() const;
+    [[nodiscard]] McRect getDesktopRect() const;
+    [[nodiscard]] McRect getWindowRect() const;
+    [[nodiscard]] bool isFullscreenWindowedBorderless() const { return m_bFullscreenWindowedBorderless; }
+    [[nodiscard]] int getDPI() const;
+    [[nodiscard]] float getDPIScale() const { return (float)getDPI() / 96.0f; }
+    [[nodiscard]] inline const bool &isFullscreen() const { return m_bFullscreen; }
+    [[nodiscard]] inline const bool &isWindowResizable() const { return m_bResizable; }
 
     // mouse
-    virtual bool isCursorInWindow() = 0;
-    virtual bool isCursorVisible() = 0;
-    virtual bool isCursorClipped() = 0;
-    virtual Vector2d getMousePos() = 0;
-    virtual McRect getCursorClip() = 0;
-    virtual CURSORTYPE getCursor() = 0;
-    virtual void setCursor(CURSORTYPE cur) = 0;
-    virtual void setCursorVisible(bool visible) = 0;
-    virtual void setMousePos(double x, double y) = 0;
-    virtual void setCursorClip(bool clip, McRect rect) = 0;
+    [[nodiscard]] inline const bool &isCursorInWindow() const { return m_bIsCursorInsideWindow; }
+    [[nodiscard]] inline const bool &isCursorVisible() const { return m_bCursorVisible; }
+    [[nodiscard]] inline const bool &isCursorClipped() const { return m_bCursorClipped; }
+    [[nodiscard]] inline const Vector2 &getMousePos() const { return m_vLastAbsMousePos; }
+    [[nodiscard]] inline const McRect &getCursorClip() const { return m_cursorClip; }
+    [[nodiscard]] inline const CURSORTYPE &getCursor() const { return m_cursorType; }
+    void setCursor(CURSORTYPE cur);
+    void setCursorVisible(bool visible);
+    void setCursorClip(bool clip, McRect rect);
+    void notifyWantRawInput(bool raw);  // enable/disable OS-level rawinput
+    inline void setMousePos(Vector2 pos) {
+        m_vLastAbsMousePos = pos;
+        setOSMousePos();
+    }
+    inline void setMousePos(float x, float y) {
+        m_vLastAbsMousePos.x = x;
+        m_vLastAbsMousePos.y = y;
+        setOSMousePos();
+    }
 
     // keyboard
-    virtual UString keyCodeToString(KEYCODE keyCode) = 0;
+    UString keyCodeToString(KEYCODE keyCode);
+    void listenToTextInput(bool listen);
+    bool grabKeyboard(bool grab);
 
-   public:
-    // window
-    virtual void setFullscreenWindowedBorderless(bool fullscreenWindowedBorderless);
-    virtual bool isFullscreenWindowedBorderless() { return this->bFullscreenWindowedBorderless; }
-    virtual float getDPIScale() { return (float)this->getDPI() / 96.0f; }
+    // debug
+    [[nodiscard]] inline bool envDebug() const { return m_bEnvDebug; }
+    [[nodiscard]] inline bool isWine() const { return s_bIsWine; }
 
    protected:
-    bool bFullscreenWindowedBorderless;
-    std::unordered_map<UString, std::optional<UString>> mArgMap;
-    std::vector<UString> vCmdLine;
+    std::unordered_map<UString, std::optional<UString>> m_mArgMap;
+    std::vector<UString> m_vCmdLine;
+    Engine *initEngine();
+    Engine *m_engine;
+
+    SDL_Window *m_window;
+
+    bool m_bRunning;
+    bool m_bDrawing;
+
+    bool m_bMinimized;  // for fps_max_background
+    bool m_bHasFocus;   // for fps_max_background
+
+    void setOSMousePos() const;
+    void setOSMousePos(Vector2 pos) const;
+
+    // the absolute/relative mouse position from the most recent iteration of the event loop
+    // relative only useful if raw input is enabled, value is undefined/garbage otherwise
+    Vector2 m_vLastAbsMousePos;
+    Vector2 m_vLastRelMousePos;
+
+    // cache
+    UString m_sUsername;
+    std::string m_sProgDataPath;
+    std::string m_sAppDataPath;
+    HWND m_hwnd;
+
+    // logging
+    inline bool envDebug(bool enable) {
+        m_bEnvDebug = enable;
+        return m_bEnvDebug;
+    }
+    void onLogLevelChange(float newval);
+    bool m_bEnvDebug;
+
+    static bool s_bIsATTY;
+
+    // monitors
+    void initMonitors(bool force = false);
+    std::map<unsigned int, McRect> m_mMonitors;
+    float m_fDisplayHz;
+    float m_fDisplayHzSecs;
+
+    // window
+    bool m_bResizable;
+    bool m_bFullscreen;
+    bool m_bFullscreenWindowedBorderless;
+    inline void onFullscreenWindowBorderlessChange(float newValue) {
+        setFullscreenWindowedBorderless(!!static_cast<int>(newValue));
+    }
+    inline void onMonitorChange(float oldValue, float newValue) {
+        if(oldValue != newValue) setMonitor(static_cast<int>(newValue));
+    }
+
+    // mouse
+    bool m_bIsCursorInsideWindow;
+    bool m_bCursorVisible;
+    bool m_bCursorClipped;
+    McRect m_cursorClip;
+    CURSORTYPE m_cursorType;
+    std::map<CURSORTYPE, SDL_Cursor *> m_mCursorIcons;
+
+    // clipboard
+    UString m_sCurrClipboardText;
+
+    // misc
+    void initCursors();
+    static bool s_bIsWine;
 
    private:
     // static callbacks/helpers
@@ -166,7 +242,6 @@ class Environment {
         FileDialogCallback callback;
     };
     static void sdlFileDialogCallback(void *userdata, const char *const *filelist, int filter);
-    static int s_sdl_dialog_opened;
 
     // for getting files in folder/ folders in folder
     static std::vector<std::string> enumerateDirectory(const std::string &pathToEnum,
@@ -178,3 +253,7 @@ class Environment {
     // internal path conversion helper, SDL_URLOpen needs a URL-encoded URI on Unix (because it goes to xdg-open)
     [[nodiscard]] static std::string filesystemPathToURI(const std::filesystem::path &path) noexcept;
 };
+
+extern Environment *env;
+
+#endif
