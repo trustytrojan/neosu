@@ -953,7 +953,7 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
 
     // compute MD5 hash (very slow)
     if(compute_md5) {
-        this->sMD5Hash = MD5Hash{Bancho::md5((u8 *)beatmapFile, beatmapFileSize).hash.data()};
+        this->sMD5Hash = {Bancho::md5((u8 *)beatmapFile, beatmapFileSize)};
     }
 
     // load metadata
