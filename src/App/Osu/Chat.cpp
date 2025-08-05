@@ -875,6 +875,23 @@ void Chat::addMessage(UString channel_name, const ChatMessage &msg, bool mark_un
         // TODO @kiwec: highlight + send toast?
     }
 
+    bool is_pm = msg.author_id > 0 && channel_name[0] != '#' && msg.author_name != bancho->username;
+    if(is_pm) {
+        // If it's a PM, the channel title should be the one who sent the message
+        channel_name = msg.author_name;
+
+        if(cv::chat_notify_on_dm.getBool()) {
+            auto notif = UString::format("%s sent you a message", msg.author_name.toUtf8());
+            osu->notificationOverlay->addToast(notif, CHAT_TOAST,
+                                               [channel_name] { osu->chat->addChannel(channel_name, true); });
+        }
+        if(cv::chat_ping_on_mention.getBool()) {
+            // Yes, osu! really does use "match-start.wav" for when you get pinged
+            // XXX: Use it as fallback, allow neosu-targeting skins to have custom ping sound
+            soundEngine->play(osu->getSkin()->matchStart);
+        }
+    }
+
     bool mentioned = SString::contains_ncase(msg.text.toUtf8(), bancho->username.toUtf8());
     mentioned &= msg.author_id != bancho->user_id;
     if(mentioned && cv::chat_notify_on_mention.getBool()) {
@@ -886,12 +903,6 @@ void Chat::addMessage(UString channel_name, const ChatMessage &msg, bool mark_un
         // Yes, osu! really does use "match-start.wav" for when you get pinged
         // XXX: Use it as fallback, allow neosu-targeting skins to have custom ping sound
         soundEngine->play(osu->getSkin()->matchStart);
-    }
-
-    bool is_pm = msg.author_id > 0 && channel_name[0] != '#' && msg.author_name != bancho->username;
-    if(is_pm) {
-        // If it's a PM, the channel title should be the one who sent the message
-        channel_name = msg.author_name;
     }
 
     this->addChannel(channel_name);

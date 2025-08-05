@@ -7,6 +7,7 @@
 #define INFO_TOAST 0xffffdd00
 #define ERROR_TOAST 0xffdd0000
 #define SUCCESS_TOAST 0xff00ff00
+#define STATUS_TOAST 0xff003bff
 
 class ToastElement : public CBaseUIButton {
    public:

@@ -157,7 +157,7 @@ void Bancho::handle_packet(Packet *packet) {
                     UserInfo *user = BANCHO::User::get_user_info(stats_user_id);
                     osu->chat->addChannel(user->name, true);
                 };
-                osu->notificationOverlay->addToast(text, CHAT_TOAST, open_dms);
+                osu->notificationOverlay->addToast(text, STATUS_TOAST, open_dms);
             }
         }
 
