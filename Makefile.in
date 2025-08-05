@@ -168,14 +168,13 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/App/Osu/neosu-Changelog.$(OBJEXT) \
 	src/App/Osu/neosu-Chat.$(OBJEXT) \
 	src/App/Osu/neosu-ChatLink.$(OBJEXT) \
-	src/App/Osu/neosu-Circle.$(OBJEXT) \
 	src/App/Osu/neosu-Collections.$(OBJEXT) \
 	src/App/Osu/neosu-Database.$(OBJEXT) \
 	src/App/Osu/neosu-DatabaseBeatmap.$(OBJEXT) \
 	src/App/Osu/neosu-DifficultyCalculator.$(OBJEXT) \
 	src/App/Osu/neosu-Downloader.$(OBJEXT) \
 	src/App/Osu/neosu-HUD.$(OBJEXT) \
-	src/App/Osu/neosu-HitObject.$(OBJEXT) \
+	src/App/Osu/neosu-HitObjects.$(OBJEXT) \
 	src/App/Osu/neosu-Icons.$(OBJEXT) \
 	src/App/Osu/neosu-KeyBindings.$(OBJEXT) \
 	src/App/Osu/neosu-LegacyReplay.$(OBJEXT) \
@@ -199,7 +198,6 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/App/Osu/neosu-SimulatedBeatmap.$(OBJEXT) \
 	src/App/Osu/neosu-Skin.$(OBJEXT) \
 	src/App/Osu/neosu-SkinImage.$(OBJEXT) \
-	src/App/Osu/neosu-Slider.$(OBJEXT) \
 	src/App/Osu/neosu-SliderCurves.$(OBJEXT) \
 	src/App/Osu/neosu-SliderRenderer.$(OBJEXT) \
 	src/App/Osu/SongBrowser/neosu-BottomBar.$(OBJEXT) \
@@ -215,7 +213,6 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/App/Osu/SongBrowser/neosu-SongButton.$(OBJEXT) \
 	src/App/Osu/SongBrowser/neosu-SongDifficultyButton.$(OBJEXT) \
 	src/App/Osu/neosu-SpectatorScreen.$(OBJEXT) \
-	src/App/Osu/neosu-Spinner.$(OBJEXT) \
 	src/App/Osu/neosu-TooltipOverlay.$(OBJEXT) \
 	src/App/Osu/neosu-UIAvatar.$(OBJEXT) \
 	src/App/Osu/neosu-UIBackButton.$(OBJEXT) \
@@ -344,14 +341,13 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/App/Osu/$(DEPDIR)/neosu-Changelog.Po \
 	src/App/Osu/$(DEPDIR)/neosu-Chat.Po \
 	src/App/Osu/$(DEPDIR)/neosu-ChatLink.Po \
-	src/App/Osu/$(DEPDIR)/neosu-Circle.Po \
 	src/App/Osu/$(DEPDIR)/neosu-Collections.Po \
 	src/App/Osu/$(DEPDIR)/neosu-Database.Po \
 	src/App/Osu/$(DEPDIR)/neosu-DatabaseBeatmap.Po \
 	src/App/Osu/$(DEPDIR)/neosu-DifficultyCalculator.Po \
 	src/App/Osu/$(DEPDIR)/neosu-Downloader.Po \
 	src/App/Osu/$(DEPDIR)/neosu-HUD.Po \
-	src/App/Osu/$(DEPDIR)/neosu-HitObject.Po \
+	src/App/Osu/$(DEPDIR)/neosu-HitObjects.Po \
 	src/App/Osu/$(DEPDIR)/neosu-Icons.Po \
 	src/App/Osu/$(DEPDIR)/neosu-KeyBindings.Po \
 	src/App/Osu/$(DEPDIR)/neosu-LegacyReplay.Po \
@@ -375,11 +371,9 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/App/Osu/$(DEPDIR)/neosu-SimulatedBeatmap.Po \
 	src/App/Osu/$(DEPDIR)/neosu-Skin.Po \
 	src/App/Osu/$(DEPDIR)/neosu-SkinImage.Po \
-	src/App/Osu/$(DEPDIR)/neosu-Slider.Po \
 	src/App/Osu/$(DEPDIR)/neosu-SliderCurves.Po \
 	src/App/Osu/$(DEPDIR)/neosu-SliderRenderer.Po \
 	src/App/Osu/$(DEPDIR)/neosu-SpectatorScreen.Po \
-	src/App/Osu/$(DEPDIR)/neosu-Spinner.Po \
 	src/App/Osu/$(DEPDIR)/neosu-TooltipOverlay.Po \
 	src/App/Osu/$(DEPDIR)/neosu-UIAvatar.Po \
 	src/App/Osu/$(DEPDIR)/neosu-UIBackButton.Po \
@@ -833,14 +827,13 @@ neosu_SOURCES = \
 	src/App/Osu/Changelog.cpp \
 	src/App/Osu/Chat.cpp \
 	src/App/Osu/ChatLink.cpp \
-	src/App/Osu/Circle.cpp \
 	src/App/Osu/Collections.cpp \
 	src/App/Osu/Database.cpp \
 	src/App/Osu/DatabaseBeatmap.cpp \
 	src/App/Osu/DifficultyCalculator.cpp \
 	src/App/Osu/Downloader.cpp \
 	src/App/Osu/HUD.cpp \
-	src/App/Osu/HitObject.cpp \
+	src/App/Osu/HitObjects.cpp \
 	src/App/Osu/Icons.cpp \
 	src/App/Osu/KeyBindings.cpp \
 	src/App/Osu/LegacyReplay.cpp \
@@ -864,7 +857,6 @@ neosu_SOURCES = \
 	src/App/Osu/SimulatedBeatmap.cpp \
 	src/App/Osu/Skin.cpp \
 	src/App/Osu/SkinImage.cpp \
-	src/App/Osu/Slider.cpp \
 	src/App/Osu/SliderCurves.cpp \
 	src/App/Osu/SliderRenderer.cpp \
 	src/App/Osu/SongBrowser/BottomBar.cpp \
@@ -880,7 +872,6 @@ neosu_SOURCES = \
 	src/App/Osu/SongBrowser/SongButton.cpp \
 	src/App/Osu/SongBrowser/SongDifficultyButton.cpp \
 	src/App/Osu/SpectatorScreen.cpp \
-	src/App/Osu/Spinner.cpp \
 	src/App/Osu/TooltipOverlay.cpp \
 	src/App/Osu/UIAvatar.cpp \
 	src/App/Osu/UIBackButton.cpp \
@@ -1296,8 +1287,6 @@ src/App/Osu/neosu-Chat.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/neosu-ChatLink.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
-src/App/Osu/neosu-Circle.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
-	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/neosu-Collections.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/neosu-Database.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
@@ -1312,7 +1301,7 @@ src/App/Osu/neosu-Downloader.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/neosu-HUD.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
-src/App/Osu/neosu-HitObject.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
+src/App/Osu/neosu-HitObjects.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/neosu-Icons.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
@@ -1366,8 +1355,6 @@ src/App/Osu/neosu-Skin.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/neosu-SkinImage.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
-src/App/Osu/neosu-Slider.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
-	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/neosu-SliderCurves.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/neosu-SliderRenderer.$(OBJEXT):  \
@@ -1417,8 +1404,6 @@ src/App/Osu/SongBrowser/neosu-SongDifficultyButton.$(OBJEXT):  \
 	src/App/Osu/SongBrowser/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/neosu-SpectatorScreen.$(OBJEXT):  \
 	src/App/Osu/$(am__dirstamp) \
-	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
-src/App/Osu/neosu-Spinner.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/neosu-TooltipOverlay.$(OBJEXT):  \
 	src/App/Osu/$(am__dirstamp) \
@@ -1774,14 +1759,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-Changelog.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-Chat.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-ChatLink.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-Circle.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-Collections.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-Database.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-DatabaseBeatmap.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-DifficultyCalculator.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-Downloader.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-HUD.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-HitObject.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-HitObjects.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-Icons.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-KeyBindings.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-LegacyReplay.Po@am__quote@ # am--include-marker
@@ -1805,11 +1789,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-SimulatedBeatmap.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-Skin.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-SkinImage.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-Slider.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-SliderCurves.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-SliderRenderer.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-SpectatorScreen.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-Spinner.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-TooltipOverlay.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-UIAvatar.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-UIBackButton.Po@am__quote@ # am--include-marker
@@ -2228,20 +2210,6 @@ src/App/Osu/neosu-ChatLink.obj: src/App/Osu/ChatLink.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-ChatLink.obj `if test -f 'src/App/Osu/ChatLink.cpp'; then $(CYGPATH_W) 'src/App/Osu/ChatLink.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/ChatLink.cpp'; fi`
 
-src/App/Osu/neosu-Circle.o: src/App/Osu/Circle.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-Circle.o -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-Circle.Tpo -c -o src/App/Osu/neosu-Circle.o `test -f 'src/App/Osu/Circle.cpp' || echo '$(srcdir)/'`src/App/Osu/Circle.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/$(DEPDIR)/neosu-Circle.Tpo src/App/Osu/$(DEPDIR)/neosu-Circle.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/Circle.cpp' object='src/App/Osu/neosu-Circle.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-Circle.o `test -f 'src/App/Osu/Circle.cpp' || echo '$(srcdir)/'`src/App/Osu/Circle.cpp
-
-src/App/Osu/neosu-Circle.obj: src/App/Osu/Circle.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-Circle.obj -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-Circle.Tpo -c -o src/App/Osu/neosu-Circle.obj `if test -f 'src/App/Osu/Circle.cpp'; then $(CYGPATH_W) 'src/App/Osu/Circle.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/Circle.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/$(DEPDIR)/neosu-Circle.Tpo src/App/Osu/$(DEPDIR)/neosu-Circle.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/Circle.cpp' object='src/App/Osu/neosu-Circle.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-Circle.obj `if test -f 'src/App/Osu/Circle.cpp'; then $(CYGPATH_W) 'src/App/Osu/Circle.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/Circle.cpp'; fi`
-
 src/App/Osu/neosu-Collections.o: src/App/Osu/Collections.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-Collections.o -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-Collections.Tpo -c -o src/App/Osu/neosu-Collections.o `test -f 'src/App/Osu/Collections.cpp' || echo '$(srcdir)/'`src/App/Osu/Collections.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/$(DEPDIR)/neosu-Collections.Tpo src/App/Osu/$(DEPDIR)/neosu-Collections.Po
@@ -2326,19 +2294,19 @@ src/App/Osu/neosu-HUD.obj: src/App/Osu/HUD.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-HUD.obj `if test -f 'src/App/Osu/HUD.cpp'; then $(CYGPATH_W) 'src/App/Osu/HUD.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/HUD.cpp'; fi`
 
-src/App/Osu/neosu-HitObject.o: src/App/Osu/HitObject.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-HitObject.o -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-HitObject.Tpo -c -o src/App/Osu/neosu-HitObject.o `test -f 'src/App/Osu/HitObject.cpp' || echo '$(srcdir)/'`src/App/Osu/HitObject.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/$(DEPDIR)/neosu-HitObject.Tpo src/App/Osu/$(DEPDIR)/neosu-HitObject.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/HitObject.cpp' object='src/App/Osu/neosu-HitObject.o' libtool=no @AMDEPBACKSLASH@
+src/App/Osu/neosu-HitObjects.o: src/App/Osu/HitObjects.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-HitObjects.o -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-HitObjects.Tpo -c -o src/App/Osu/neosu-HitObjects.o `test -f 'src/App/Osu/HitObjects.cpp' || echo '$(srcdir)/'`src/App/Osu/HitObjects.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/$(DEPDIR)/neosu-HitObjects.Tpo src/App/Osu/$(DEPDIR)/neosu-HitObjects.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/HitObjects.cpp' object='src/App/Osu/neosu-HitObjects.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-HitObject.o `test -f 'src/App/Osu/HitObject.cpp' || echo '$(srcdir)/'`src/App/Osu/HitObject.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-HitObjects.o `test -f 'src/App/Osu/HitObjects.cpp' || echo '$(srcdir)/'`src/App/Osu/HitObjects.cpp
 
-src/App/Osu/neosu-HitObject.obj: src/App/Osu/HitObject.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-HitObject.obj -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-HitObject.Tpo -c -o src/App/Osu/neosu-HitObject.obj `if test -f 'src/App/Osu/HitObject.cpp'; then $(CYGPATH_W) 'src/App/Osu/HitObject.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/HitObject.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/$(DEPDIR)/neosu-HitObject.Tpo src/App/Osu/$(DEPDIR)/neosu-HitObject.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/HitObject.cpp' object='src/App/Osu/neosu-HitObject.obj' libtool=no @AMDEPBACKSLASH@
+src/App/Osu/neosu-HitObjects.obj: src/App/Osu/HitObjects.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-HitObjects.obj -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-HitObjects.Tpo -c -o src/App/Osu/neosu-HitObjects.obj `if test -f 'src/App/Osu/HitObjects.cpp'; then $(CYGPATH_W) 'src/App/Osu/HitObjects.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/HitObjects.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/$(DEPDIR)/neosu-HitObjects.Tpo src/App/Osu/$(DEPDIR)/neosu-HitObjects.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/HitObjects.cpp' object='src/App/Osu/neosu-HitObjects.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-HitObject.obj `if test -f 'src/App/Osu/HitObject.cpp'; then $(CYGPATH_W) 'src/App/Osu/HitObject.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/HitObject.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-HitObjects.obj `if test -f 'src/App/Osu/HitObjects.cpp'; then $(CYGPATH_W) 'src/App/Osu/HitObjects.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/HitObjects.cpp'; fi`
 
 src/App/Osu/neosu-Icons.o: src/App/Osu/Icons.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-Icons.o -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-Icons.Tpo -c -o src/App/Osu/neosu-Icons.o `test -f 'src/App/Osu/Icons.cpp' || echo '$(srcdir)/'`src/App/Osu/Icons.cpp
@@ -2662,20 +2630,6 @@ src/App/Osu/neosu-SkinImage.obj: src/App/Osu/SkinImage.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-SkinImage.obj `if test -f 'src/App/Osu/SkinImage.cpp'; then $(CYGPATH_W) 'src/App/Osu/SkinImage.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/SkinImage.cpp'; fi`
 
-src/App/Osu/neosu-Slider.o: src/App/Osu/Slider.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-Slider.o -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-Slider.Tpo -c -o src/App/Osu/neosu-Slider.o `test -f 'src/App/Osu/Slider.cpp' || echo '$(srcdir)/'`src/App/Osu/Slider.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/$(DEPDIR)/neosu-Slider.Tpo src/App/Osu/$(DEPDIR)/neosu-Slider.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/Slider.cpp' object='src/App/Osu/neosu-Slider.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-Slider.o `test -f 'src/App/Osu/Slider.cpp' || echo '$(srcdir)/'`src/App/Osu/Slider.cpp
-
-src/App/Osu/neosu-Slider.obj: src/App/Osu/Slider.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-Slider.obj -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-Slider.Tpo -c -o src/App/Osu/neosu-Slider.obj `if test -f 'src/App/Osu/Slider.cpp'; then $(CYGPATH_W) 'src/App/Osu/Slider.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/Slider.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/$(DEPDIR)/neosu-Slider.Tpo src/App/Osu/$(DEPDIR)/neosu-Slider.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/Slider.cpp' object='src/App/Osu/neosu-Slider.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-Slider.obj `if test -f 'src/App/Osu/Slider.cpp'; then $(CYGPATH_W) 'src/App/Osu/Slider.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/Slider.cpp'; fi`
-
 src/App/Osu/neosu-SliderCurves.o: src/App/Osu/SliderCurves.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-SliderCurves.o -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-SliderCurves.Tpo -c -o src/App/Osu/neosu-SliderCurves.o `test -f 'src/App/Osu/SliderCurves.cpp' || echo '$(srcdir)/'`src/App/Osu/SliderCurves.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/$(DEPDIR)/neosu-SliderCurves.Tpo src/App/Osu/$(DEPDIR)/neosu-SliderCurves.Po
@@ -2885,20 +2839,6 @@ src/App/Osu/neosu-SpectatorScreen.obj: src/App/Osu/SpectatorScreen.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/SpectatorScreen.cpp' object='src/App/Osu/neosu-SpectatorScreen.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-SpectatorScreen.obj `if test -f 'src/App/Osu/SpectatorScreen.cpp'; then $(CYGPATH_W) 'src/App/Osu/SpectatorScreen.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/SpectatorScreen.cpp'; fi`
-
-src/App/Osu/neosu-Spinner.o: src/App/Osu/Spinner.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-Spinner.o -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-Spinner.Tpo -c -o src/App/Osu/neosu-Spinner.o `test -f 'src/App/Osu/Spinner.cpp' || echo '$(srcdir)/'`src/App/Osu/Spinner.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/$(DEPDIR)/neosu-Spinner.Tpo src/App/Osu/$(DEPDIR)/neosu-Spinner.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/Spinner.cpp' object='src/App/Osu/neosu-Spinner.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-Spinner.o `test -f 'src/App/Osu/Spinner.cpp' || echo '$(srcdir)/'`src/App/Osu/Spinner.cpp
-
-src/App/Osu/neosu-Spinner.obj: src/App/Osu/Spinner.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-Spinner.obj -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-Spinner.Tpo -c -o src/App/Osu/neosu-Spinner.obj `if test -f 'src/App/Osu/Spinner.cpp'; then $(CYGPATH_W) 'src/App/Osu/Spinner.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/Spinner.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/$(DEPDIR)/neosu-Spinner.Tpo src/App/Osu/$(DEPDIR)/neosu-Spinner.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/Spinner.cpp' object='src/App/Osu/neosu-Spinner.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-Spinner.obj `if test -f 'src/App/Osu/Spinner.cpp'; then $(CYGPATH_W) 'src/App/Osu/Spinner.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/Spinner.cpp'; fi`
 
 src/App/Osu/neosu-TooltipOverlay.o: src/App/Osu/TooltipOverlay.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-TooltipOverlay.o -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-TooltipOverlay.Tpo -c -o src/App/Osu/neosu-TooltipOverlay.o `test -f 'src/App/Osu/TooltipOverlay.cpp' || echo '$(srcdir)/'`src/App/Osu/TooltipOverlay.cpp
@@ -4491,14 +4431,13 @@ distclean: distclean-am
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Changelog.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Chat.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-ChatLink.Po
-	-rm -f src/App/Osu/$(DEPDIR)/neosu-Circle.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Collections.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Database.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-DatabaseBeatmap.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-DifficultyCalculator.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Downloader.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-HUD.Po
-	-rm -f src/App/Osu/$(DEPDIR)/neosu-HitObject.Po
+	-rm -f src/App/Osu/$(DEPDIR)/neosu-HitObjects.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Icons.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-KeyBindings.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-LegacyReplay.Po
@@ -4522,11 +4461,9 @@ distclean: distclean-am
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-SimulatedBeatmap.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Skin.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-SkinImage.Po
-	-rm -f src/App/Osu/$(DEPDIR)/neosu-Slider.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-SliderCurves.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-SliderRenderer.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-SpectatorScreen.Po
-	-rm -f src/App/Osu/$(DEPDIR)/neosu-Spinner.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-TooltipOverlay.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-UIAvatar.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-UIBackButton.Po
@@ -4697,14 +4634,13 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Changelog.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Chat.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-ChatLink.Po
-	-rm -f src/App/Osu/$(DEPDIR)/neosu-Circle.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Collections.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Database.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-DatabaseBeatmap.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-DifficultyCalculator.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Downloader.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-HUD.Po
-	-rm -f src/App/Osu/$(DEPDIR)/neosu-HitObject.Po
+	-rm -f src/App/Osu/$(DEPDIR)/neosu-HitObjects.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Icons.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-KeyBindings.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-LegacyReplay.Po
@@ -4728,11 +4664,9 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-SimulatedBeatmap.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Skin.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-SkinImage.Po
-	-rm -f src/App/Osu/$(DEPDIR)/neosu-Slider.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-SliderCurves.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-SliderRenderer.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-SpectatorScreen.Po
-	-rm -f src/App/Osu/$(DEPDIR)/neosu-Spinner.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-TooltipOverlay.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-UIAvatar.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-UIBackButton.Po

@@ -30,6 +30,8 @@ Changelog::Changelog() : ScreenBackable() {
     v39_03.title = "39.03";
     v39_03.changes = {
         R"(- Re-added local user stats)",
+        R"(- Fixed crash when skin is missing spinner sounds)",
+        R"(- Fixed circles not being clickable while spinner is active)",
     };
     changelogs.push_back(v39_03);
 

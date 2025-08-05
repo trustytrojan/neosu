@@ -7,14 +7,13 @@
 #include "BanchoUsers.h"
 #include "Beatmap.h"
 #include "CBaseUIContainer.h"
-#include "Circle.h"
 #include "ConVar.h"
 #include "Database.h"
 #include "DatabaseBeatmap.h"
 #include "Engine.h"
 #include "Environment.h"
 #include "GameRules.h"
-#include "HitObject.h"
+#include "HitObjects.h"
 #include "Lobby.h"
 #include "ModFPoSu.h"
 #include "Mouse.h"
@@ -302,9 +301,7 @@ void HUD::drawDummy() {
        (cv::draw_scoreboard_mp.getBool() && bancho->is_playing_a_multi_map())) {
         static std::vector<SCORE_ENTRY> scoreEntries;
         scoreEntries.clear();
-        {
-            scoreEntries.push_back(scoreEntry);
-        }
+        { scoreEntries.push_back(scoreEntry); }
     }
 
     this->drawSkip();

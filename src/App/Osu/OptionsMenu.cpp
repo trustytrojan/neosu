@@ -16,13 +16,13 @@
 #include "CBaseUIScrollView.h"
 #include "CBaseUITextbox.h"
 #include "Chat.h"
-#include "Circle.h"
 #include "ConVar.h"
 #include "Database.h"
 #include "Engine.h"
 #include "Environment.h"
 #include "File.h"
 #include "GameRules.h"
+#include "HitObjects.h"
 #include "HUD.h"
 #include "Icons.h"
 #include "KeyBindings.h"
@@ -402,9 +402,7 @@ class OptionsMenuResetButton : public CBaseUIButton {
 
         if(this->isMouseInside()) {
             osu->getTooltipOverlay()->begin();
-            {
-                osu->getTooltipOverlay()->addLine("Reset");
-            }
+            { osu->getTooltipOverlay()->addLine("Reset"); }
             osu->getTooltipOverlay()->end();
         }
     }

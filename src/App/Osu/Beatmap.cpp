@@ -15,7 +15,6 @@
 #include "BanchoUsers.h"
 #include "Beatmap.h"
 #include "Chat.h"
-#include "Circle.h"
 #include "ConVar.h"
 #include "Database.h"
 #include "DatabaseBeatmap.h"
@@ -23,7 +22,7 @@
 #include "Engine.h"
 #include "GameRules.h"
 #include "HUD.h"
-#include "HitObject.h"
+#include "HitObjects.h"
 #include "Keyboard.h"
 #include "LegacyReplay.h"
 #include "MainMenu.h"
@@ -40,12 +39,10 @@
 #include "SimulatedBeatmap.h"
 #include "Skin.h"
 #include "SkinImage.h"
-#include "Slider.h"
 #include "SongBrowser/LeaderboardPPCalcThread.h"
 #include "SongBrowser/SongBrowser.h"
 #include "SoundEngine.h"
 #include "SpectatorScreen.h"
-#include "Spinner.h"
 #include "UIModSelectorModButton.h"
 
 namespace proto = BANCHO::Proto;
@@ -2596,6 +2593,7 @@ void Beatmap::update2() {
     this->iCurrentNumSpinners = 0;
     {
         bool blockNextNotes = false;
+        bool spinner_active = false;
 
         const long pvs = !cv::mod_mafham.getBool()
                              ? this->getPVS()
@@ -2674,6 +2672,15 @@ void Beatmap::update2() {
 
             // main hitobject update
             this->hitobjects[i]->update(this->iCurMusicPosWithOffsets, engine->getFrameTime());
+
+            // spinner visibility detection
+            // XXX: there might be a "better" way to do it?
+            if(isSpinner) {
+                bool spinner_started = this->iCurMusicPos >= this->hitobjects[i]->click_time;
+                bool spinner_ended =
+                    this->iCurMusicPos > this->hitobjects[i]->click_time + this->hitobjects[i]->duration;
+                spinner_active |= (spinner_started && !spinner_ended);
+            }
 
             // note blocking / notelock (1)
             const Slider *currentSliderPointer = dynamic_cast<Slider *>(this->hitobjects[i]);
@@ -2886,8 +2893,10 @@ void Beatmap::update2() {
             if(cv::play_hitsound_on_click_while_playing.getBool()) osu->getSkin()->playHitCircleSound(0, 0.f, 0);
 
             // nightmare mod: extra clicks = sliderbreak
-            if((osu->getModNightmare() || cv::mod_jigsaw1.getBool()) && !this->bIsInSkippableSection &&
-               !this->bInBreak && this->iCurrentHitObjectIndex > 0) {
+            bool break_on_extra_click = (osu->getModNightmare() || cv::mod_jigsaw1.getBool());
+            break_on_extra_click &= !this->bIsInSkippableSection && !this->bInBreak && !spinner_active;
+            break_on_extra_click &= this->iCurrentHitObjectIndex > 0;
+            if(break_on_extra_click) {
                 this->addSliderBreak();
                 this->addHitResult(NULL, LiveScore::HIT::HIT_MISS_SLIDERBREAK, 0, false, true, true, true, true,
                                    false);  // only decrease health

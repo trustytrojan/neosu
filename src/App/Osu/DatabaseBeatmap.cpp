@@ -12,20 +12,17 @@
 #include "SString.h"
 #include "Bancho.h"  // md5
 #include "Beatmap.h"
-#include "Circle.h"
 #include "ConVar.h"
 #include "Database.h"
 #include "Engine.h"
 #include "File.h"
 #include "GameRules.h"
-#include "HitObject.h"
+#include "HitObjects.h"
 #include "NotificationOverlay.h"
 #include "Osu.h"
 #include "Skin.h"
-#include "Slider.h"
 #include "SliderCurves.h"
 #include "SongBrowser/SongBrowser.h"
-#include "Spinner.h"
 namespace {  // static namespace
 
 bool timingPointSortComparator(DatabaseBeatmap::TIMINGPOINT const &a, DatabaseBeatmap::TIMINGPOINT const &b) {
@@ -363,7 +360,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                                 std::vector<UString> tokens = UString(curLineChar).split(",");
                                 if(tokens.size() < 8) {
                                     debugLog("Invalid slider in beatmap: {:s}\n\ncurLine = {:s}\n", osuFilePath,
-                                              curLineChar);
+                                             curLineChar);
                                     continue;
                                     // engine->showMessageError("Error", UString::format("Invalid slider in beatmap:
                                     // %s\n\ncurLine = %s", m_sFilePath.toUtf8(), curLine)); return false;
@@ -374,7 +371,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                                                              // e.g. https://osu.ppy.sh/beatmapsets/791900#osu/1676490
                                 {
                                     debugLog("Invalid slider tokens: {:s}\n\nIn beatmap: {:s}\n", curLineChar,
-                                              osuFilePath);
+                                             osuFilePath);
                                     continue;
                                     // engine->showMessageError("Error", UString::format("Invalid slider tokens:
                                     // %s\n\nIn beatmap: %s", curLineChar, m_sFilePath.toUtf8())); return false;
@@ -393,7 +390,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                                        sliderXY[0].find("e") != -1 || sliderXY[1].find("E") != -1 ||
                                        sliderXY[1].find("e") != -1) {
                                         debugLog("Invalid slider positions: {:s}\n\nIn Beatmap: {:s}\n", curLineChar,
-                                                  osuFilePath);
+                                                 osuFilePath);
                                         continue;
                                         // engine->showMessageError("Error", UString::format("Invalid slider positions:
                                         // %s\n\nIn beatmap: %s", curLine, m_sFilePath.toUtf8())); return false;
@@ -447,7 +444,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                                 auto tokens = UString(curLineChar).split<float>(",");
                                 if(tokens.size() < 6) {
                                     debugLog("Invalid spinner in beatmap: {:s}\n\ncurLine = {:s}\n", osuFilePath,
-                                              curLineChar);
+                                             curLineChar);
                                     continue;
                                     // engine->showMessageError("Error", UString::format("Invalid spinner in beatmap:
                                     // %s\n\ncurLine = %s", m_sFilePath.toUtf8(), curLine)); return false;

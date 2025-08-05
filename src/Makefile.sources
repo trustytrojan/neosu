@@ -21,14 +21,13 @@ neosu_SOURCES = \
 	src/App/Osu/Changelog.cpp \
 	src/App/Osu/Chat.cpp \
 	src/App/Osu/ChatLink.cpp \
-	src/App/Osu/Circle.cpp \
 	src/App/Osu/Collections.cpp \
 	src/App/Osu/Database.cpp \
 	src/App/Osu/DatabaseBeatmap.cpp \
 	src/App/Osu/DifficultyCalculator.cpp \
 	src/App/Osu/Downloader.cpp \
 	src/App/Osu/HUD.cpp \
-	src/App/Osu/HitObject.cpp \
+	src/App/Osu/HitObjects.cpp \
 	src/App/Osu/Icons.cpp \
 	src/App/Osu/KeyBindings.cpp \
 	src/App/Osu/LegacyReplay.cpp \
@@ -52,7 +51,6 @@ neosu_SOURCES = \
 	src/App/Osu/SimulatedBeatmap.cpp \
 	src/App/Osu/Skin.cpp \
 	src/App/Osu/SkinImage.cpp \
-	src/App/Osu/Slider.cpp \
 	src/App/Osu/SliderCurves.cpp \
 	src/App/Osu/SliderRenderer.cpp \
 	src/App/Osu/SongBrowser/BottomBar.cpp \
@@ -68,7 +66,6 @@ neosu_SOURCES = \
 	src/App/Osu/SongBrowser/SongButton.cpp \
 	src/App/Osu/SongBrowser/SongDifficultyButton.cpp \
 	src/App/Osu/SpectatorScreen.cpp \
-	src/App/Osu/Spinner.cpp \
 	src/App/Osu/TooltipOverlay.cpp \
 	src/App/Osu/UIAvatar.cpp \
 	src/App/Osu/UIBackButton.cpp \

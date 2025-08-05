@@ -9,12 +9,10 @@
 #include "Engine.h"
 #include "GameRules.h"
 #include "HUD.h"
-#include "HitObject.h"
+#include "HitObjects.h"
 #include "LegacyReplay.h"
 #include "Osu.h"
 #include "RoomScreen.h"
-
-
 
 LiveScore::LiveScore(bool simulating) {
     this->simulating = simulating;
@@ -168,9 +166,9 @@ void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject * /*hitObject*
     if(!ignoreScore) {
         const int difficultyMultiplier = beatmap->getScoreV1DifficultyMultiplier();
         this->iScoreV1 += hitValue;
-        this->iScoreV1 +=
-            ((hitValue * (u32)((f64)scoreComboMultiplier * (f64)difficultyMultiplier * (f64)this->getScoreMultiplier())) /
-             (u32)25);
+        this->iScoreV1 += ((hitValue * (u32)((f64)scoreComboMultiplier * (f64)difficultyMultiplier *
+                                             (f64)this->getScoreMultiplier())) /
+                           (u32)25);
     }
 
     const float totalHitPoints = this->iNum50s * (1.0f / 6.0f) + this->iNum100s * (2.0f / 6.0f) + this->iNum300s;
@@ -191,10 +189,11 @@ void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject * /*hitObject*
         const double maximumAccurateHits = beatmap->nb_hitobjects;
 
         if(totalNumHits > 0) {
-            this->iScoreV2 = (u64)(((f64)this->iScoreV2ComboPortion / (f64)beatmap->iScoreV2ComboPortionMaximum * 700000.0 +
-                                pow((f64)this->fAccuracy, 10.0) * ((f64)totalNumHits / maximumAccurateHits) * 300000.0 +
-                                (f64)this->iBonusPoints) *
-                               (f64)this->getScoreMultiplier());
+            this->iScoreV2 =
+                (u64)(((f64)this->iScoreV2ComboPortion / (f64)beatmap->iScoreV2ComboPortionMaximum * 700000.0 +
+                       pow((f64)this->fAccuracy, 10.0) * ((f64)totalNumHits / maximumAccurateHits) * 300000.0 +
+                       (f64)this->iBonusPoints) *
+                      (f64)this->getScoreMultiplier());
         }
     }
 
@@ -229,7 +228,8 @@ void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject * /*hitObject*
 
         int customStartIndex = -1;
         if(cv::hud_statistics_hitdelta_chunksize.getInt() >= 0) {
-            customStartIndex += std::max(0, (int)this->hitdeltas.size() - cv::hud_statistics_hitdelta_chunksize.getInt());
+            customStartIndex +=
+                std::max(0, (int)this->hitdeltas.size() - cv::hud_statistics_hitdelta_chunksize.getInt());
         }
 
         for(int i = 0; i < this->hitdeltas.size(); i++) {
@@ -267,8 +267,10 @@ void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject * /*hitObject*
         averageDelta /= (float)this->hitdeltas.size();
         this->fHitErrorAvgMin = (numNegatives > 0 ? this->fHitErrorAvgMin / (float)numNegatives : 0.0f);
         this->fHitErrorAvgMax = (numPositives > 0 ? this->fHitErrorAvgMax / (float)numPositives : 0.0f);
-        this->fHitErrorAvgCustomMin = (numCustomNegatives > 0 ? this->fHitErrorAvgCustomMin / (float)numCustomNegatives : 0.0f);
-        this->fHitErrorAvgCustomMax = (numCustomPositives > 0 ? this->fHitErrorAvgCustomMax / (float)numCustomPositives : 0.0f);
+        this->fHitErrorAvgCustomMin =
+            (numCustomNegatives > 0 ? this->fHitErrorAvgCustomMin / (float)numCustomNegatives : 0.0f);
+        this->fHitErrorAvgCustomMax =
+            (numCustomPositives > 0 ? this->fHitErrorAvgCustomMax / (float)numCustomPositives : 0.0f);
 
         for(int hitdelta : this->hitdeltas) {
             this->fUnstableRate += ((float)hitdelta - averageDelta) * ((float)hitdelta - averageDelta);
@@ -438,7 +440,9 @@ UString LiveScore::getModsStringForRichPresence() {
     return modsString;
 }
 
-unsigned long long LiveScore::getScore() { return ModMasks::eq(this->mods.flags, Replay::ModFlags::ScoreV2) ? this->iScoreV2 : this->iScoreV1; }
+unsigned long long LiveScore::getScore() {
+    return ModMasks::eq(this->mods.flags, Replay::ModFlags::ScoreV2) ? this->iScoreV2 : this->iScoreV1;
+}
 
 void LiveScore::onScoreChange() {
     if(this->simulating || !osu->room) return;

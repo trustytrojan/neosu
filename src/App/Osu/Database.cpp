@@ -1472,11 +1472,11 @@ bool Database::importDatabase(const std::string &db_path) {
             // We need to do some heuristics to detect whether this is an old neosu or a peppy database.
             u32 nb_beatmaps = score_db.read<u32>();
             for(u32 i = 0; i < nb_beatmaps; i++) {
-                auto map_md5 = score_db.read_hash();
+                auto _map_md5 = score_db.read_hash();
                 u32 nb_scores = score_db.read<u32>();
                 for(u32 j = 0; j < nb_scores; j++) {
-                    u8 gamemode = score_db.read<u8>();         // could check for 0xA9, but better method below
-                    u32 score_version = score_db.read<u32>();  // useless
+                    u8 _gamemode = score_db.read<u8>();         // could check for 0xA9, but better method below
+                    u32 _score_version = score_db.read<u32>();  // useless
 
                     // Here, neosu stores an int64 timestamp. First 32 bits should be 0 (until 2106).
                     // Meanwhile, peppy stores the beatmap hash, which will NEVER be 0, since

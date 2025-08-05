@@ -2,13 +2,12 @@
 
 #include <algorithm>
 
-#include "Circle.h"
 #include "DatabaseBeatmap.h"
 #include "DifficultyCalculator.h"
 #include "Engine.h"
 #include "Environment.h"
 #include "GameRules.h"
-#include "HitObject.h"
+#include "HitObjects.h"
 #include "KeyBindings.h"
 #include "Keyboard.h"
 #include "LegacyReplay.h"
@@ -16,10 +15,6 @@
 #include "ModSelector.h"
 #include "Mouse.h"
 #include "ResourceManager.h"
-#include "Slider.h"
-#include "Spinner.h"
-
-
 
 SimulatedBeatmap::SimulatedBeatmap(DatabaseBeatmap *diff2, Replay::Mods mods_) {
     this->selectedDifficulty2 = diff2;
@@ -155,11 +150,12 @@ u32 SimulatedBeatmap::getScoreV1DifficultyMultiplier_full() const {
     // NOTE: We intentionally get CS/HP/OD from beatmap data, not "real" CS/HP/OD
     //       Since this multiplier is only used for ScoreV1
     u32 breakTimeMS = this->getBreakDurationTotal();
-    f32 drainLength = std::max(this->getLengthPlayable() - std::min(breakTimeMS, this->getLengthPlayable()), (u32)1000) / 1000;
-    return std::round((this->selectedDifficulty2->getCS() + this->selectedDifficulty2->getHP() +
-                       this->selectedDifficulty2->getOD() +
-                       std::clamp<f32>((f32)this->selectedDifficulty2->getNumObjects() / drainLength * 8.0f, 0.0f, 16.0f)) /
-                      38.0f * 5.0f);
+    f32 drainLength =
+        std::max(this->getLengthPlayable() - std::min(breakTimeMS, this->getLengthPlayable()), (u32)1000) / 1000;
+    return std::round(
+        (this->selectedDifficulty2->getCS() + this->selectedDifficulty2->getHP() + this->selectedDifficulty2->getOD() +
+         std::clamp<f32>((f32)this->selectedDifficulty2->getNumObjects() / drainLength * 8.0f, 0.0f, 16.0f)) /
+        38.0f * 5.0f);
 }
 
 f32 SimulatedBeatmap::getCS_full() const {
@@ -380,7 +376,8 @@ void SimulatedBeatmap::addHealth(f64 percent, bool isFromHitResult) {
     // handle generic fail state (2)
     const bool isDead = this->fHealth < 0.001;
     if(isDead && !(ModMasks::eq(this->mods.flags, Replay::ModFlags::NoFail))) {
-        if((ModMasks::eq(this->mods.flags, Replay::ModFlags::Easy)) && this->live_score.getNumEZRetries() > 0)  // retries with ez
+        if((ModMasks::eq(this->mods.flags, Replay::ModFlags::Easy)) &&
+           this->live_score.getNumEZRetries() > 0)  // retries with ez
         {
             this->live_score.setNumEZRetries(this->live_score.getNumEZRetries() - 1);
 
@@ -452,6 +449,7 @@ void SimulatedBeatmap::update(f64 frame_time) {
     this->iCurrentNumSpinners = 0;
     {
         bool blockNextNotes = false;
+        bool spinner_active = false;
 
         const long pvs = this->getPVS();
         const int notelockType = this->mods.notelock_type;
@@ -515,6 +513,15 @@ void SimulatedBeatmap::update(f64 frame_time) {
 
             // main hitobject update
             this->hitobjects[i]->update(this->iCurMusicPos, frame_time);
+
+            // spinner visibility detection
+            // XXX: there might be a "better" way to do it?
+            if(isSpinner) {
+                bool spinner_started = this->iCurMusicPos >= this->hitobjects[i]->click_time;
+                bool spinner_ended =
+                    this->iCurMusicPos > this->hitobjects[i]->click_time + this->hitobjects[i]->duration;
+                spinner_active |= (spinner_started && !spinner_ended);
+            }
 
             // note blocking / notelock (1)
             const Slider *currentSliderPointer = dynamic_cast<Slider *>(this->hitobjects[i]);
@@ -663,9 +670,11 @@ void SimulatedBeatmap::update(f64 frame_time) {
         // all remaining clicks which have not been consumed by any hitobjects can safely be deleted
         if(this->clicks.size() > 0) {
             // nightmare mod: extra clicks = sliderbreak
-            bool break_on_extra_click =
-                (ModMasks::eq(this->mods.flags, Replay::ModFlags::Nightmare) || (ModMasks::eq(this->mods.flags, Replay::ModFlags::Jigsaw1)));
-            if(break_on_extra_click && !this->bInBreak && this->iCurrentHitObjectIndex > 0) {
+            bool break_on_extra_click = (ModMasks::eq(this->mods.flags, Replay::ModFlags::Nightmare) ||
+                                         (ModMasks::eq(this->mods.flags, Replay::ModFlags::Jigsaw1)));
+            break_on_extra_click &= !this->bInBreak && !spinner_active;
+            break_on_extra_click &= this->iCurrentHitObjectIndex > 0;
+            if(break_on_extra_click) {
                 this->addSliderBreak();
                 this->addHitResult(NULL, LiveScore::HIT::HIT_MISS_SLIDERBREAK, 0, false, true, true, true, true,
                                    false);  // only decrease health
@@ -762,8 +771,9 @@ Vector2 SimulatedBeatmap::osuCoords2Pixels(Vector2 coords) const {
     }
 
     // if wobble, clamp coordinates
-    
-    if(ModMasks::eq(this->mods.flags, Replay::ModFlags::Wobble1) || ModMasks::eq(this->mods.flags, Replay::ModFlags::Wobble2)) {
+
+    if(ModMasks::eq(this->mods.flags, Replay::ModFlags::Wobble1) ||
+       ModMasks::eq(this->mods.flags, Replay::ModFlags::Wobble2)) {
         coords.x = std::clamp<f32>(coords.x, 0.0f, GameRules::OSU_COORD_WIDTH);
         coords.y = std::clamp<f32>(coords.y, 0.0f, GameRules::OSU_COORD_HEIGHT);
     }
@@ -786,8 +796,9 @@ Vector2 SimulatedBeatmap::osuCoords2LegacyPixels(Vector2 coords) const {
 Vector2 SimulatedBeatmap::getCursorPos() const { return this->interpolatedMousePos; }
 
 Vector2 SimulatedBeatmap::getFirstPersonCursorDelta() const {
-    return this->vPlayfieldCenter -
-           ((ModMasks::eq(this->mods.flags, Replay::ModFlags::Autopilot)) ? this->vAutoCursorPos : this->getCursorPos());
+    return this->vPlayfieldCenter - ((ModMasks::eq(this->mods.flags, Replay::ModFlags::Autopilot))
+                                         ? this->vAutoCursorPos
+                                         : this->getCursorPos());
 }
 
 void SimulatedBeatmap::updateAutoCursorPos() {
@@ -874,7 +885,8 @@ void SimulatedBeatmap::updateHitobjectMetrics() {
 
     const f32 followcircle_size_multiplier = 2.4f;
     const f32 sliderFollowCircleDiameterMultiplier =
-        ((ModMasks::eq(this->mods.flags, Replay::ModFlags::Nightmare) || (ModMasks::eq(this->mods.flags, Replay::ModFlags::Jigsaw2)))
+        ((ModMasks::eq(this->mods.flags, Replay::ModFlags::Nightmare) ||
+          (ModMasks::eq(this->mods.flags, Replay::ModFlags::Jigsaw2)))
              ? (1.0f * (1.0f - this->mods.jigsaw_followcircle_radius_factor) +
                 this->mods.jigsaw_followcircle_radius_factor * followcircle_size_multiplier)
              : followcircle_size_multiplier);

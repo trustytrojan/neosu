@@ -26,7 +26,7 @@
 #include "Environment.h"
 #include "GameRules.h"
 #include "HUD.h"
-#include "HitObject.h"
+#include "HitObjects.h"
 #include "Icons.h"
 #include "KeyBindings.h"
 #include "Keyboard.h"
