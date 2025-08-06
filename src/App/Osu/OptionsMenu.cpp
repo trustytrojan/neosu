@@ -1211,8 +1211,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
         this->logInButton = static_cast<UIButton *>(loginElement->baseElems[LOGINBTN]);
 
         this->logInButton->setHandleRightMouse(true);  // for canceling logins
-        this->logInButton->setClickCallback(
-            [this](CBaseUIButton *btn, bool left, bool right) { this->onLogInClicked(left, right); });
+        this->logInButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onLogInClicked>(this));
         this->logInButton->setColor(0xff00ff00);
         this->logInButton->setTextColor(0xffffffff);
 
