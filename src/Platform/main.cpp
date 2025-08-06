@@ -178,6 +178,9 @@ SDL_AppResult SDL_AppIterate(void *appstate) { return static_cast<SDLMain *>(app
 // actual main/init, called once
 MAIN_FUNC /* int argc, char *argv[] */
 {
+    // if a neosu instance is already running, send it a message then quit
+    Environment::Platform::handle_existing_window(argc, argv);
+
     // improve floating point perf in case this isn't already enabled by the compiler
     SET_FPU_DAZ_FTZ
 
@@ -345,6 +348,12 @@ SDL_AppResult SDLMain::initialize() {
     return SDL_APP_CONTINUE;
 }
 
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+#endif
+
 static_assert(SDL_EVENT_WINDOW_FIRST == SDL_EVENT_WINDOW_SHOWN);
 static_assert(SDL_EVENT_WINDOW_LAST == SDL_EVENT_WINDOW_HDR_STATE_CHANGED);
 
@@ -372,7 +381,6 @@ nocbinline SDL_AppResult SDLMain::handleEvent(SDL_Event *event) {
                 case SDL_EVENT_DROP_TEXT:
                 case SDL_EVENT_DROP_BEGIN:
                 case SDL_EVENT_DROP_COMPLETE:
-
                 case SDL_EVENT_DROP_POSITION:
                 default:
                     if(m_bEnvDebug)
@@ -507,6 +515,10 @@ nocbinline SDL_AppResult SDLMain::handleEvent(SDL_Event *event) {
 
     return SDL_APP_CONTINUE;
 }
+
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
 nocbinline SDL_AppResult SDLMain::iterate() {
     if(!m_bRunning) return SDL_APP_SUCCESS;

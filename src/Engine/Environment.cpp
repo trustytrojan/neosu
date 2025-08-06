@@ -43,6 +43,7 @@ Environment *env = nullptr;
 
 bool Environment::s_bIsATTY = false;
 bool Environment::s_bIsWine = false;
+SDL_Environment *Environment::s_sdlenv = nullptr;
 
 // convar callback
 void Environment::setProcessPriority(float newPrio) {
@@ -81,6 +82,8 @@ Environment::Environment(int argc, char *argv[]) {
 #ifdef MCENGINE_PLATFORM_WINDOWS
     s_bIsWine = !!GetProcAddress(GetModuleHandle(TEXT("ntdll.dll")), "wine_get_version");
 #endif
+
+    s_sdlenv = SDL_GetEnvironment();
 
     m_engine = nullptr;  // will be initialized by the mainloop once setup is complete
     m_window = nullptr;
@@ -387,6 +390,41 @@ const std::string &Environment::getPathToSelf(const char *argv0) {
     return pathStr;
 }
 
+std::string Environment::getEnvVariable(const std::string &varToQuery) noexcept {
+    if(!s_sdlenv) {
+        s_sdlenv = SDL_GetEnvironment();
+    }
+    const char *varVal = nullptr;
+    if(s_sdlenv && !varToQuery.empty()) {
+        varVal = SDL_GetEnvironmentVariable(s_sdlenv, varToQuery.c_str());
+        if(varVal) {
+            return std::string{varVal};
+        }
+    }
+    return {""};
+}
+
+bool Environment::setEnvVariable(const std::string &varToSet, const std::string &varValue, bool overwrite) noexcept {
+    if(!s_sdlenv) {
+        s_sdlenv = SDL_GetEnvironment();
+    }
+    if(s_sdlenv && !varToSet.empty()) {
+        return SDL_SetEnvironmentVariable(s_sdlenv, varToSet.c_str(), varValue.empty() ? "" : varValue.c_str(),
+                                          overwrite);
+    }
+    return false;
+}
+
+bool Environment::unsetEnvVariable(const std::string &varToUnset) noexcept {
+    if(!s_sdlenv) {
+        s_sdlenv = SDL_GetEnvironment();
+    }
+    if(s_sdlenv && !varToUnset.empty()) {
+        return SDL_UnsetEnvironmentVariable(s_sdlenv, varToUnset.c_str());
+    }
+    return false;
+}
+
 std::string Environment::encodeStringToURL(const std::string &stringToConvert) noexcept {
     std::ostringstream escaped;
     escaped.fill('0');
@@ -608,10 +646,9 @@ void Environment::setMonitor(int monitor) {
     } else
         debugLog("WARNING: tried to setMonitor({:d}) to invalid monitor, centering instead\n", monitor);
 
-    if(!success)
-        center();
-    else
-        cv::monitor.setValue(monitor, false);
+    if(!success) center();
+
+    cv::monitor.setValue(getMonitor(), false);
 }
 
 HWND Environment::getHwnd() const {
@@ -906,6 +943,58 @@ std::string Environment::getThingFromPathHelper(const std::string &path, bool fo
     return retPath;
 }
 
+#ifdef MCENGINE_PLATFORM_WINDOWS  // the win32 api is just WAY faster for this
+
+std::vector<std::string> Environment::enumerateDirectory(const std::string &pathToEnum,
+                                                         /* enum SDL_PathType */ unsigned int type) noexcept {
+    // Since we want to avoid wide strings in the codebase as much as possible,
+    // we convert wide paths to UTF-8 (as they fucking should be).
+    // We can't just use FindFirstFileA, because then any path with unicode
+    // characters will fail to open!
+    // Keep in mind that windows can't handle the way too modern 1993 UTF-8, so
+    // you have to use std::filesystem::u8path() or convert it back to a wstring
+    // before using the windows API.
+
+    const bool wantDirs = (type == SDL_PATHTYPE_DIRECTORY);
+
+    std::string folder{pathToEnum};
+    folder.append("*.*");
+    WIN32_FIND_DATAW data;
+    std::wstring buffer;
+    std::vector<std::string> entries;
+
+    int size = MultiByteToWideChar(CP_UTF8, 0, folder.c_str(), folder.length(), NULL, 0);
+    std::wstring wentry(size, 0);
+    MultiByteToWideChar(CP_UTF8, 0, folder.c_str(), folder.length(), (LPWSTR)wentry.c_str(), wentry.length());
+
+    HANDLE handle = FindFirstFileW(wentry.c_str(), &data);
+
+    while(true) {
+        std::wstring filename(data.cFileName);
+        if(filename == buffer) break;
+
+        buffer = filename;
+
+        if(filename.length() > 0 &&
+           (!wantDirs || (wantDirs && (filename.compare(L".") != 0 && filename.compare(L"..") != 0)))) {
+            if(!!(data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == wantDirs) {
+                int size = WideCharToMultiByte(CP_UTF8, 0, filename.c_str(), filename.length(), NULL, 0, NULL, NULL);
+                std::string utf8filename(size, 0);
+                WideCharToMultiByte(CP_UTF8, 0, filename.c_str(), size, (LPSTR)utf8filename.c_str(), size, NULL, NULL);
+                entries.push_back(utf8filename);
+            }
+        }
+
+        FindNextFileW(handle, &data);
+    }
+
+    FindClose(handle);
+
+    return entries;
+}
+
+#else
+
 // for getting files in folder/ folders in folder
 std::vector<std::string> Environment::enumerateDirectory(const std::string &pathToEnum,
                                                          /* enum SDL_PathType */ unsigned int type) noexcept {
@@ -938,3 +1027,5 @@ std::vector<std::string> Environment::enumerateDirectory(const std::string &path
 
     return contents;
 }
+
+#endif

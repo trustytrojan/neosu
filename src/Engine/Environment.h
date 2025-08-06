@@ -29,6 +29,7 @@ class Engine;
 
 typedef struct SDL_Window SDL_Window;
 typedef struct SDL_Cursor SDL_Cursor;
+typedef struct SDL_Environment SDL_Environment;
 
 class Environment;
 extern Environment *env;
@@ -42,6 +43,11 @@ class Environment {
         virtual void handle_cmdline_args(const std::vector<UString> & /*args*/) {}
         void handle_cmdline_args() { env ? handle_cmdline_args(env->getCommandLine()) : (void)0; }
         virtual void register_neosu_file_associations() {}
+        static void handle_existing_window([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
+#ifndef MCENGINE_PLATFORM_WINDOWS
+        { return; } // TODO
+#endif
+;
         virtual ~Platform() = default;
     };
 
@@ -80,6 +86,10 @@ class Environment {
 
     // i.e. getenv()
     static std::string getEnvVariable(const std::string &varToQuery) noexcept;
+    // i.e. setenv()
+    static bool setEnvVariable(const std::string &varToSet, const std::string &varValue, bool overwrite = true) noexcept;
+    // i.e. unsetenv()
+    static bool unsetEnvVariable(const std::string &varToUnset) noexcept;
 
     static const std::string &getExeFolder();
     static void setProcessPriority(float newVal);  // != 0.0 : high
@@ -203,6 +213,7 @@ class Environment {
     Engine *m_engine;
 
     SDL_Window *m_window;
+    static SDL_Environment *s_sdlenv;
 
     bool m_bRunning;
     bool m_bDrawing;

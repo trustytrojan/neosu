@@ -214,4 +214,24 @@ void Environment::PlatformImpl::register_neosu_file_associations() {
     RegCloseKey(osz_key);
 }
 
+#define WM_NEOSU_PROTOCOL (WM_USER + 1)
+
+void Environment::Platform::handle_existing_window(int argc, char *argv[]) {
+    // if a neosu instance is already running, send it a message then quit
+    HWND existing_window = FindWindowW(L"neosu", NULL);
+    if(existing_window) {
+        for(i32 i = 0; i < argc; i++) {
+            COPYDATASTRUCT cds;
+            cds.dwData = WM_NEOSU_PROTOCOL;
+            cds.cbData = strlen(argv[i]) + 1;
+            cds.lpData = argv[i];
+            SendMessage(existing_window, WM_COPYDATA, (WPARAM)NULL, (LPARAM)&cds);
+        }
+
+        SetForegroundWindow(existing_window);
+        std::exit(0);
+    }
+}
+
+
 #endif
