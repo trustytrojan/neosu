@@ -215,7 +215,7 @@ void Environment::PlatformImpl::register_neosu_file_associations() {
 }
 
 #define WM_NEOSU_PROTOCOL (WM_USER + 1)
-
+// TODO SDL: there's no way this works properly
 void Environment::Platform::handle_existing_window(int argc, char *argv[]) {
     // if a neosu instance is already running, send it a message then quit
     HWND existing_window = FindWindowW(L"neosu", NULL);

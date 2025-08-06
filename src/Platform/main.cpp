@@ -105,6 +105,8 @@ class SDLMain final : public Environment {
     int m_iFpsMax;
     int m_iFpsMaxBG;
 
+    std::vector<UString> m_vDroppedData;  // queued data dropped onto window
+
     // set iteration rate for callbacks
     // clang-format off
 	inline void setFgFPS() { if constexpr (Env::cfg(FEAT::MAINCB)) SDL_SetHint(SDL_HINT_MAIN_CALLBACK_RATE, fmt::format("{}", m_iFpsMax).c_str()); else FPSLimiter::reset(); }
@@ -357,6 +359,24 @@ SDL_AppResult SDLMain::initialize() {
 static_assert(SDL_EVENT_WINDOW_FIRST == SDL_EVENT_WINDOW_SHOWN);
 static_assert(SDL_EVENT_WINDOW_LAST == SDL_EVENT_WINDOW_HDR_STATE_CHANGED);
 
+/**
+ * An event used to drop text or request a file open by the system
+ * (event.drop.*)
+ *
+ * \since This struct is available since SDL 3.2.0.
+ */
+// typedef struct SDL_DropEvent
+// {
+//     SDL_EventType type; /**< SDL_EVENT_DROP_BEGIN or SDL_EVENT_DROP_FILE or SDL_EVENT_DROP_TEXT or
+//     SDL_EVENT_DROP_COMPLETE or SDL_EVENT_DROP_POSITION */ Uint32 reserved; Uint64 timestamp;   /**< In nanoseconds,
+//     populated using SDL_GetTicksNS() */ SDL_WindowID windowID;    /**< The window that was dropped on, if any */
+//     float x;            /**< X coordinate, relative to window (not on begin) */
+//     float y;            /**< Y coordinate, relative to window (not on begin) */
+//     const char *source; /**< The source app that sent this drop event, or NULL if that isn't available */
+//     const char *data;   /**< The text for SDL_EVENT_DROP_TEXT and the file name for SDL_EVENT_DROP_FILE, NULL for
+//     other events */
+// } SDL_DropEvent;
+
 nocbinline SDL_AppResult SDLMain::handleEvent(SDL_Event *event) {
     switch(event->type) {
         case SDL_EVENT_QUIT:
@@ -377,10 +397,29 @@ nocbinline SDL_AppResult SDLMain::handleEvent(SDL_Event *event) {
         case SDL_EVENT_DROP_COMPLETE: case SDL_EVENT_DROP_POSITION:
             // clang-format on
             switch(event->drop.type) {
-                case SDL_EVENT_DROP_FILE:
+                case SDL_EVENT_DROP_BEGIN: {
+                    m_vDroppedData.clear();
+                } break;
+                case SDL_EVENT_DROP_COMPLETE: {
+                    this->getPlatform().handle_cmdline_args(m_vDroppedData);
+                    m_vDroppedData.clear();
+                } break;
                 case SDL_EVENT_DROP_TEXT:
-                case SDL_EVENT_DROP_BEGIN:
-                case SDL_EVENT_DROP_COMPLETE:
+                case SDL_EVENT_DROP_FILE: {
+                    UString dropped_data{event->drop.data};
+                    if(dropped_data.length() < 2) {
+                        break;
+                    }
+                    m_vDroppedData.push_back(dropped_data);
+                    if(m_bEnvDebug) {
+                        Engine::logRaw("DEBUG: got SDL drag-drop event {}, current dropped_data queue is ",
+                                       static_cast<int>(event->drop.type));
+                        for(const auto &d : m_vDroppedData) {
+                            Engine::logRaw("{}", d);
+                        }
+                        Engine::logRaw(".\n");
+                    }
+                } break;
                 case SDL_EVENT_DROP_POSITION:
                 default:
                     if(m_bEnvDebug)
