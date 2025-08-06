@@ -1992,7 +1992,9 @@ void Osu::updateCursorVisibility() {
         }
     }
 
-    env->setCursorVisible(this->bShouldCursorBeVisible);
+    if(env->isCursorVisible() != this->bShouldCursorBeVisible) {
+        env->setCursorVisible(this->bShouldCursorBeVisible);
+    }
 }
 
 void Osu::updateConfineCursor() {
