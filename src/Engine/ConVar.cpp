@@ -496,8 +496,6 @@ void spectate_by_username(const UString &username) {
     start_spectating(user->user_id);
 }
 
-void _monitor(const UString & /*oldValue*/, const UString &newValue) { env->setMonitor(newValue.toInt()); }
-
 void _osu_songbrowser_search_hardcoded_filter(const UString & /*oldValue*/, const UString &newValue) {
     if(newValue.length() == 1 && newValue.isWhitespaceOnly()) cv::songbrowser_search_hardcoded_filter.setValue("");
 }

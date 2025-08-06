@@ -23,10 +23,10 @@ struct dummyGraphics {
 };
 dummyGraphics *g{};
 
-struct dummyEnv {
-    inline void setFullscreenWindowedBorderless(bool /**/) { ; }
-};
-dummyEnv *env{};
+// struct dummyEnv {
+//     inline void setFullscreenWindowedBorderless(bool /**/) { ; }
+// };
+// dummyEnv *env{};
 namespace Environment {
 inline void setProcessPriority(float /**/) { ; }
 }  // namespace Environment
@@ -44,7 +44,6 @@ extern void _help();
 extern void _listcommands();
 extern void _maximize();
 extern void _minimize();
-extern void _monitor(const UString &, const UString &);
 extern void _printsize();
 extern void _toggleresizable();
 extern void _restart();
@@ -517,10 +516,7 @@ CONVAR(fps_unlimited, "fps_unlimited", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PR
 CONVAR(
     fps_unlimited_yield, "fps_unlimited_yield", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
     "always release rest of timeslice once per frame (call scheduler via sleep(0)), even if unlimited fps are enabled");
-CONVAR(fullscreen_windowed_borderless, "fullscreen_windowed_borderless", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
-       [](float newValue) -> void {
-           env ? env->setFullscreenWindowedBorderless(!!static_cast<int>(newValue)) : (void)0;
-       });
+CONVAR(fullscreen_windowed_borderless, "fullscreen_windowed_borderless", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
 CONVAR(fullscreen, "fullscreen", false, FCVAR_BANCHO_COMPATIBLE,
        [](float /*newValue*/) -> void { engine ? engine->toggleFullscreen() : (void)0; });
 CONVAR(hiterrorbar_misaims, "osu_hiterrorbar_misaims", true, FCVAR_BANCHO_COMPATIBLE);
@@ -845,7 +841,7 @@ CONVAR(mod_wobble_frequency, "osu_mod_wobble_frequency", 1.0f, FCVAR_BANCHO_COMP
 CONVAR(mod_wobble_rotation_speed, "osu_mod_wobble_rotation_speed", 1.0f, FCVAR_BANCHO_COMPATIBLE | FCVAR_GAMEPLAY);
 CONVAR(mod_wobble_strength, "osu_mod_wobble_strength", 25.0f, FCVAR_BANCHO_COMPATIBLE | FCVAR_GAMEPLAY);
 CONVAR(monitor, "monitor", 0, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
-       "monitor/display device to switch to, 0 = primary monitor", CFUNC(_monitor));
+       "monitor/display device to switch to, 0 = primary monitor");
 CONVAR(mouse_raw_input, "mouse_raw_input", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(mouse_raw_input_absolute_to_window, "mouse_raw_input_absolute_to_window", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(mouse_sensitivity, "mouse_sensitivity", 1.0f, FCVAR_BANCHO_COMPATIBLE);
