@@ -181,7 +181,8 @@ SDL_AppResult SDL_AppIterate(void *appstate) { return static_cast<SDLMain *>(app
 MAIN_FUNC /* int argc, char *argv[] */
 {
     // if a neosu instance is already running, send it a message then quit
-    Environment::Platform::handle_existing_window(argc, argv);
+    // TODO actually test this and make sure it works
+    Environment::Interop::handle_existing_window(argc, argv);
 
     // improve floating point perf in case this isn't already enabled by the compiler
     SET_FPU_DAZ_FTZ
@@ -309,7 +310,7 @@ SDLMain::~SDLMain() {
 }
 
 SDL_AppResult SDLMain::initialize() {
-    this->getPlatform().register_neosu_file_associations();  // only implemented for windows atm
+    this->getEnvInterop().register_file_associations();  // only implemented for windows atm
 
     doEarlyCmdlineOverrides();
     setupLogging();
@@ -359,24 +360,6 @@ SDL_AppResult SDLMain::initialize() {
 static_assert(SDL_EVENT_WINDOW_FIRST == SDL_EVENT_WINDOW_SHOWN);
 static_assert(SDL_EVENT_WINDOW_LAST == SDL_EVENT_WINDOW_HDR_STATE_CHANGED);
 
-/**
- * An event used to drop text or request a file open by the system
- * (event.drop.*)
- *
- * \since This struct is available since SDL 3.2.0.
- */
-// typedef struct SDL_DropEvent
-// {
-//     SDL_EventType type; /**< SDL_EVENT_DROP_BEGIN or SDL_EVENT_DROP_FILE or SDL_EVENT_DROP_TEXT or
-//     SDL_EVENT_DROP_COMPLETE or SDL_EVENT_DROP_POSITION */ Uint32 reserved; Uint64 timestamp;   /**< In nanoseconds,
-//     populated using SDL_GetTicksNS() */ SDL_WindowID windowID;    /**< The window that was dropped on, if any */
-//     float x;            /**< X coordinate, relative to window (not on begin) */
-//     float y;            /**< Y coordinate, relative to window (not on begin) */
-//     const char *source; /**< The source app that sent this drop event, or NULL if that isn't available */
-//     const char *data;   /**< The text for SDL_EVENT_DROP_TEXT and the file name for SDL_EVENT_DROP_FILE, NULL for
-//     other events */
-// } SDL_DropEvent;
-
 nocbinline SDL_AppResult SDLMain::handleEvent(SDL_Event *event) {
     switch(event->type) {
         case SDL_EVENT_QUIT:
@@ -401,7 +384,7 @@ nocbinline SDL_AppResult SDLMain::handleEvent(SDL_Event *event) {
                     m_vDroppedData.clear();
                 } break;
                 case SDL_EVENT_DROP_COMPLETE: {
-                    this->getPlatform().handle_cmdline_args(m_vDroppedData);
+                    this->getEnvInterop().handle_cmdline_args(m_vDroppedData);
                     m_vDroppedData.clear();
                 } break;
                 case SDL_EVENT_DROP_TEXT:
@@ -420,7 +403,7 @@ nocbinline SDL_AppResult SDLMain::handleEvent(SDL_Event *event) {
                         Engine::logRaw(".\n");
                     }
                 } break;
-                case SDL_EVENT_DROP_POSITION:
+                case SDL_EVENT_DROP_POSITION:  // we don't really care
                 default:
                     if(m_bEnvDebug)
                         debugLog("DEBUG: unhandled SDL drag-drop event {}\n", static_cast<int>(event->drop.type));
@@ -633,19 +616,11 @@ bool SDLMain::createWindow() {
     SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_MAXIMIZED_BOOLEAN, false);
     SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_FLAGS_NUMBER, windowFlags);
 
-    const bool shouldBeBorderless = cv::fullscreen_windowed_borderless.getBool();
-    // FIXME: no configs are loaded here yet, so this is pointless (and we don't want to create fullscreen because we
-    // don't want a video mode change)
-    const bool shouldBeFullscreen =
-        !Env::cfg(OS::WINDOWS, REND::DX11) && (cv::fullscreen.getBool() || shouldBeBorderless);
-
-    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_BORDERLESS_BOOLEAN, shouldBeBorderless);
-    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN, shouldBeFullscreen);
-
     if constexpr(Env::cfg(OS::WINDOWS))
         SDL_SetHintWithPriority(SDL_HINT_WINDOWS_RAW_KEYBOARD, "1", SDL_HINT_OVERRIDE);
     else
         SDL_SetHintWithPriority(SDL_HINT_MOUSE_AUTO_CAPTURE, "0", SDL_HINT_OVERRIDE);
+
     SDL_SetHintWithPriority(SDL_HINT_MOUSE_RELATIVE_MODE_CENTER, "0", SDL_HINT_OVERRIDE);
     SDL_SetHintWithPriority(SDL_HINT_TOUCH_MOUSE_EVENTS, "0", SDL_HINT_OVERRIDE);
     SDL_SetHintWithPriority(SDL_HINT_MOUSE_EMULATE_WARP_WITH_RELATIVE, "0", SDL_HINT_OVERRIDE);
@@ -859,13 +834,15 @@ void SDLMain::restart(const std::vector<UString> &args) {
         i++;
     }
 
-    // Engine::logRaw("restart args: ");
-    // for (int i = -1; const auto entry : restartArgsChar) {
-    //     i++;
-    //     if (!entry) continue;
-    //     Engine::logRaw("({}) {} ", i, entry);
-    // }
-    // Engine::logRaw("\n");
+    if(cv::debug_env.getBool()) {
+        Engine::logRaw("restart args: ");
+        for(int i = -1; const auto entry : restartArgsChar) {
+            i++;
+            if(!entry) continue;
+            Engine::logRaw("({}) {} ", i, entry);
+        }
+        Engine::logRaw("\n");
+    }
 
     SDL_SetPointerProperty(restartprops, SDL_PROP_PROCESS_CREATE_ARGS_POINTER, (void *)restartArgsChar.data());
 #ifdef MCENGINE_PLATFORM_WINDOWS

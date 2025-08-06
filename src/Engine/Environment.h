@@ -36,33 +36,16 @@ extern Environment *env;
 
 class Environment {
    public:
-    struct Platform {
-        virtual void handle_osk(const char * /*osk_path*/) {}
-        virtual void handle_osz(const char * /*osz_path*/) {}
-        virtual void handle_neosu_url(const char * /*url*/) {}
-        virtual void handle_cmdline_args(const std::vector<UString> & /*args*/) {}
+    struct Interop {
+        void handle_cmdline_args(const std::vector<UString> & /*args*/);
         void handle_cmdline_args() { env ? handle_cmdline_args(env->getCommandLine()) : (void)0; }
-        virtual void register_neosu_file_associations() {}
-        static void handle_existing_window([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
-#ifndef MCENGINE_PLATFORM_WINDOWS
-        { return; } // TODO
-#endif
-;
-        virtual ~Platform() = default;
+        void register_file_associations();
+        static void handle_existing_window([[maybe_unused]] int argc,
+                                           [[maybe_unused]] char *argv[]);  // this is likely broken ATM
     };
 
    private:
-#ifdef MCENGINE_PLATFORM_WINDOWS  // TODO: other platforms
-    struct PlatformImpl : public Platform {
-        void handle_osk(const char * /*osk_path*/) override;
-        void handle_osz(const char * /*osz_path*/) override;
-        void handle_neosu_url(const char * /*url*/) override;
-        void handle_cmdline_args(const std::vector<UString> & /*args*/) override;
-        void register_neosu_file_associations() override;
-    } m_platform{};
-#else
-    Platform m_platform{};
-#endif
+    Interop m_interop{};
 
    public:
     Environment(int argc, char *argv[]);
@@ -78,7 +61,7 @@ class Environment {
     void restart();
     [[nodiscard]] inline bool isRunning() const { return m_bRunning; }
     [[nodiscard]] inline bool isRestartScheduled() const { return m_bIsRestartScheduled; }
-    [[nodiscard]] inline Platform &getPlatform() { return m_platform; }
+    [[nodiscard]] inline Interop &getEnvInterop() { return m_interop; }
 
     // resolved and cached at early startup with argv[0]
     // contains the full canonical path to the current exe
@@ -87,7 +70,8 @@ class Environment {
     // i.e. getenv()
     static std::string getEnvVariable(const std::string &varToQuery) noexcept;
     // i.e. setenv()
-    static bool setEnvVariable(const std::string &varToSet, const std::string &varValue, bool overwrite = true) noexcept;
+    static bool setEnvVariable(const std::string &varToSet, const std::string &varValue,
+                               bool overwrite = true) noexcept;
     // i.e. unsetenv()
     static bool unsetEnvVariable(const std::string &varToUnset) noexcept;
 

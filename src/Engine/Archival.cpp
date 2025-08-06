@@ -76,14 +76,13 @@ bool Archive::Entry::extractToFile(const std::string& outputPath) const {
         return false;
     }
 
-    if(!this->data.empty()) {
-        file.write(reinterpret_cast<const char*>(this->data.data()), static_cast<std::streamsize>(this->data.size()));
-        if(file.bad()) {
-            debugLog("Archive: failed to write to file {:s}\n", outputPath.c_str());
-            return false;
-        }
-    } else {
-        debugLog("Archive: extracted data for path {:s} is empty, not writing out!\n", outputPath.c_str());
+    if(this->data.empty()) {
+        debugLog("Archive WARNING: extracted data for path {:s} is empty.\n", outputPath.c_str());
+    }
+
+    file.write(reinterpret_cast<const char*>(this->data.data()), static_cast<std::streamsize>(this->data.size()));
+    if(file.bad()) {
+        debugLog("Archive: failed to write to file {:s}\n", outputPath.c_str());
         return false;
     }
 

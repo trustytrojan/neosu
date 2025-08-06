@@ -349,7 +349,7 @@ Osu::Osu() {
     }
 #endif
 
-    env->getPlatform().handle_cmdline_args();
+    env->getEnvInterop().handle_cmdline_args();
 
     // Not the type of shader you want players to tweak or delete, so loading from string
     actual_flashlight_shader = g->createShaderFromSource(

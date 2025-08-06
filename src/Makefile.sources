@@ -26,6 +26,7 @@ neosu_SOURCES = \
 	src/App/Osu/DatabaseBeatmap.cpp \
 	src/App/Osu/DifficultyCalculator.cpp \
 	src/App/Osu/Downloader.cpp \
+	src/App/Osu/EnvironmentInterop.cpp \
 	src/App/Osu/HUD.cpp \
 	src/App/Osu/HitObjects.cpp \
 	src/App/Osu/Icons.cpp \
@@ -142,7 +143,6 @@ neosu_SOURCES = \
 	src/GUI/Windows/Console.cpp \
 	src/GUI/Windows/ConsoleBox.cpp \
 	src/GUI/Windows/VisualProfiler.cpp \
-	src/Platform/Windows/Windows_aux.cpp \
 	src/Platform/main.cpp \
 	src/Util/Quaternion.cpp \
 	src/Util/Rect.cpp \

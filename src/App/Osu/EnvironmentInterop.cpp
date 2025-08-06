@@ -1,9 +1,3 @@
-// these methods need to be factored out somehow to not be 100% tied to the windows main loop, putting them here to
-// avoid bloating main.cpp
-#ifdef _WIN32
-
-#include "Environment.h"
-#include "Engine.h"
 #include "Database.h"
 #include "DatabaseBeatmap.h"
 #include "Downloader.h"  // for extract_beatmapset
@@ -14,11 +8,10 @@
 #include "Skin.h"
 #include "SongBrowser/SongBrowser.h"
 
-#include "WinDebloatDefs.h"
-#include <objbase.h>
+namespace {  // static namespace
 
 // drag-drop/file associations/registry stuff below
-void Environment::PlatformImpl::handle_osk(const char *osk_path) {
+void handle_osk(const char *osk_path) {
     Skin::unpack(osk_path);
 
     auto folder_name = env->getFileNameFromFilePath(osk_path);
@@ -28,7 +21,7 @@ void Environment::PlatformImpl::handle_osk(const char *osk_path) {
     osu->optionsMenu->updateSkinNameLabel();
 }
 
-void Environment::PlatformImpl::handle_osz(const char *osz_path) {
+void handle_osz(const char *osz_path) {
     File osz(osz_path);
     i32 set_id = Downloader::extract_beatmapset_id(reinterpret_cast<const u8 *>(osz.readFile()), osz.getFileSize());
     if(set_id < 0) {
@@ -46,9 +39,9 @@ void Environment::PlatformImpl::handle_osz(const char *osz_path) {
         return;
     }
 
-    std::string mapset_dir = MCENGINE_DATA_DIR "maps\\";
+    std::string mapset_dir = MCENGINE_DATA_DIR "maps" PREF_PATHSEP;
     mapset_dir.append(std::to_string(set_id));
-    mapset_dir.append("\\");
+    mapset_dir.append(PREF_PATHSEP);
     if(!Environment::directoryExists(mapset_dir)) {
         env->createDirectory(mapset_dir);
     }
@@ -68,7 +61,7 @@ void Environment::PlatformImpl::handle_osz(const char *osz_path) {
     SAFE_DELETE(osu->mainMenu->preloaded_beatmapset);
 }
 
-void Environment::PlatformImpl::handle_neosu_url(const char *url) {
+void handle_neosu_url(const char *url) {
     if(strstr(url, "neosu://login/") == url) {
         // Disable autologin, in case there's an error while logging in
         // Will be reenabled after the login succeeds
@@ -111,8 +104,9 @@ void Environment::PlatformImpl::handle_neosu_url(const char *url) {
         return;
     }
 }
+}  // namespace
 
-void Environment::PlatformImpl::handle_cmdline_args(const std::vector<UString> &args) {
+void Environment::Interop::handle_cmdline_args(const std::vector<UString> &args) {
     bool need_to_reload_database = false;
 
     for(auto &arg : args) {
@@ -140,7 +134,16 @@ void Environment::PlatformImpl::handle_cmdline_args(const std::vector<UString> &
     }
 }
 
-void Environment::PlatformImpl::register_neosu_file_associations() {
+// these methods need to be factored out somehow to not be 100% tied to the windows main loop, putting them here to
+// avoid bloating main.cpp
+#ifdef _WIN32
+
+#include "Engine.h"
+
+#include "WinDebloatDefs.h"
+#include <objbase.h>
+
+void Environment::Interop::register_file_associations() {
     wchar_t exePath[MAX_PATH];
     GetModuleFileNameW(NULL, exePath, MAX_PATH);
 
@@ -216,7 +219,7 @@ void Environment::PlatformImpl::register_neosu_file_associations() {
 
 #define WM_NEOSU_PROTOCOL (WM_USER + 1)
 // TODO SDL: there's no way this works properly
-void Environment::Platform::handle_existing_window(int argc, char *argv[]) {
+void Environment::Interop::handle_existing_window(int argc, char *argv[]) {
     // if a neosu instance is already running, send it a message then quit
     HWND existing_window = FindWindowW(L"neosu", NULL);
     if(existing_window) {
@@ -233,5 +236,7 @@ void Environment::Platform::handle_existing_window(int argc, char *argv[]) {
     }
 }
 
-
+#else // not implemented
+void Environment::Interop::register_file_associations() { return; }
+void Environment::Interop::handle_existing_window(int /*argc*/, char **/*argv*/) { return; }
 #endif
