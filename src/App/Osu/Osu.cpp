@@ -1987,12 +1987,13 @@ void Osu::updateCursorVisibility() {
     // using scaled/offset getMouse()->getPos()
     if(cv::resolution_enabled.getBool()) {
         McRect internalWindow = McRect(0, 0, g_vInternalResolution.x, g_vInternalResolution.y);
-        if(!internalWindow.contains(mouse->getPos()) && !env->isCursorClipped()) {
+        if(!internalWindow.contains(mouse->getPos())) {
             this->bShouldCursorBeVisible = true;
         }
     }
 
-    if(env->isCursorVisible() != this->bShouldCursorBeVisible) {
+    if(env->isCursorVisible() != this->bShouldCursorBeVisible ||
+       (this->bShouldCursorBeVisible && env->isCursorClipped())) {
         env->setCursorVisible(this->bShouldCursorBeVisible);
     }
 }

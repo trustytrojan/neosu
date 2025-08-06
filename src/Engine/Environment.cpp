@@ -110,7 +110,6 @@ Environment::Environment(int argc, char *argv[]) {
     m_hwnd = nullptr;
 
     m_bIsCursorInsideWindow = false;
-    m_bCursorVisible = true;
     m_bCursorClipped = false;
     m_cursorType = CURSORTYPE::CURSOR_NORMAL;
 
@@ -767,8 +766,9 @@ void Environment::notifyWantRawInput(bool raw) {
     SDL_SetWindowRelativeMouseMode(m_window, raw);
 }
 
+bool Environment::isCursorVisible() const { return SDL_CursorVisible(); }
+
 void Environment::setCursorVisible(bool visible) {
-    m_bCursorVisible = visible;
     if(visible) {
         // disable rawinput (allow regular mouse movement)
         // TODO: consolidate all this BS transition logic into some onPointerEnter/onPointerLeave handler

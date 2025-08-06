@@ -162,7 +162,7 @@ class Environment {
 
     // mouse
     [[nodiscard]] inline const bool &isCursorInWindow() const { return m_bIsCursorInsideWindow; }
-    [[nodiscard]] inline const bool &isCursorVisible() const { return m_bCursorVisible; }
+    [[nodiscard]] bool isCursorVisible() const;
     [[nodiscard]] inline const bool &isCursorClipped() const { return m_bCursorClipped; }
     [[nodiscard]] inline const Vector2 &getMousePos() const { return m_vLastAbsMousePos; }
     [[nodiscard]] inline const McRect &getCursorClip() const { return m_cursorClip; }
@@ -249,7 +249,6 @@ class Environment {
 
     // mouse
     bool m_bIsCursorInsideWindow;
-    bool m_bCursorVisible;
     bool m_bCursorClipped;
     McRect m_cursorClip;
     CURSORTYPE m_cursorType;
