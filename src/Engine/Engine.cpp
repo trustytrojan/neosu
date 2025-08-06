@@ -94,6 +94,7 @@ Engine::Engine() {
 
         resourceManager = std::make_unique<ResourceManager>();
         runtime_assert(resourceManager.get(), "Resource manager menu failed to initialize!");
+        resourceManager->setSyncLoadMaxBatchSize(512);
 
         SoundEngine::SndEngineType type = Env::cfg(AUD::BASS)     ? SoundEngine::BASS
                                           : Env::cfg(AUD::SOLOUD) ? SoundEngine::SOLOUD
@@ -246,6 +247,7 @@ void Engine::loadApp() {
 
         app = std::make_unique<App>();
         runtime_assert(app.get(), "App failed to initialize!");
+        resourceManager->resetSyncLoadMaxBatchSize();
         // start listening to the default keyboard input
         keyboard->addListener(app.get());
     }

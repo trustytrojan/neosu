@@ -76,7 +76,7 @@ class AsyncResourceLoader::LoaderThread final {
             if(debug) {
                 debugName = std::string{resource->getName()};
                 debugLog("AsyncResourceLoader: Thread #{} loading {:8p} : {:s}\n", this->thread_index,
-                          static_cast<const void *>(resource), debugName);
+                         static_cast<const void *>(resource), debugName);
             }
 
             // prevent child threads from inheriting the name
@@ -89,7 +89,7 @@ class AsyncResourceLoader::LoaderThread final {
 
             if(debug) {
                 debugLog("AsyncResourceLoader: Thread #{} finished async loading {:8p} : {:s}\n", this->thread_index,
-                          static_cast<const void *>(resource), debugName);
+                         static_cast<const void *>(resource), debugName);
             }
 
             work->state.store(AsyncResourceLoader::WorkState::ASYNC_COMPLETE);
@@ -114,6 +114,7 @@ class AsyncResourceLoader::LoaderThread final {
 
 AsyncResourceLoader::AsyncResourceLoader()
     : iMaxThreads(std::clamp<size_t>(std::thread::hardware_concurrency() - 1, 1, HARD_THREADCOUNT_LIMIT)),
+      iLoadsPerUpdate(this->iMaxThreads),
       lastCleanupTime(std::chrono::steady_clock::now()) {
     // pre-create at least a single thread for better startup responsiveness
     std::scoped_lock lock(this->threadsMutex);
@@ -192,20 +193,24 @@ void AsyncResourceLoader::update(bool lowLatency) {
     if(!lowLatency) cleanupIdleThreads();
     const bool debug = cv::debug_rm.getBool();
 
-    const size_t amountToProcess = lowLatency ? 1 : this->iMaxThreads;
+    const size_t amountToProcess = lowLatency ? 1 : this->iLoadsPerUpdate;
 
     // process completed async work
     size_t numProcessed = 0;
 
     while(numProcessed < amountToProcess) {
         auto work = getNextAsyncCompleteWork();
-        if(!work) break;
+        if(!work) {
+            // decay back to default
+            this->iLoadsPerUpdate =
+                std::max(static_cast<size_t>((this->iLoadsPerUpdate) * (3.0 / 4.0)), this->iMaxThreads);
+            break;
+        }
 
         Resource *rs = work->resource;
 
         if(debug)
-            debugLog("AsyncResourceLoader: Sync init for {:s} ({:8p})\n", rs->getName(),
-                      static_cast<const void *>(rs));
+            debugLog("AsyncResourceLoader: Sync init for {:s} ({:8p})\n", rs->getName(), static_cast<const void *>(rs));
 
         rs->load();
 
@@ -249,7 +254,7 @@ void AsyncResourceLoader::update(bool lowLatency) {
     for(Resource *rs : resourcesReadyForDestroy) {
         if(debug)
             debugLog("AsyncResourceLoader: Async destroy of resource {:8p} : {:s}\n", static_cast<const void *>(rs),
-                      rs->getName());
+                     rs->getName());
 
         SAFE_DELETE(rs);
     }
@@ -277,7 +282,7 @@ void AsyncResourceLoader::reloadResources(const std::vector<Resource *> &resourc
 
         if(debug)
             debugLog("AsyncResourceLoader: Async reloading {:8p} : {:s}\n", static_cast<const void *>(rs),
-                      rs->getName());
+                     rs->getName());
 
         bool isBeingLoaded = isLoadingResource(rs);
 
@@ -286,7 +291,7 @@ void AsyncResourceLoader::reloadResources(const std::vector<Resource *> &resourc
             resourcesToReload.push_back(rs);
         } else if(debug) {
             debugLog("AsyncResourceLoader: Resource {:8p} : {:s} is currently being loaded, skipping reload\n",
-                      static_cast<const void *>(rs), rs->getName());
+                     static_cast<const void *>(rs), rs->getName());
         }
     }
 
@@ -318,7 +323,7 @@ void AsyncResourceLoader::ensureThreadAvailable() {
             } else {
                 if(debug)
                     debugLog("AsyncResourceLoader: Created dynamic thread #{} (total: {})\n", idx,
-                              this->threadpool.size() + 1);
+                             this->threadpool.size() + 1);
 
                 this->threadpool[idx] = std::move(loaderThread);
             }

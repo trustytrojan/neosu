@@ -85,7 +85,7 @@ void ResourceManager::destroyResource(Resource *rs) {
     if(this->asyncLoader->isLoadingResource(rs)) {
         if(debug)
             debugLog("Resource Manager: Scheduled async destroy of {:8p} : {:s}\n", static_cast<const void *>(rs),
-                      rs->getName());
+                     rs->getName());
 
         if(cv::rm_interrupt_on_destroy.getBool()) rs->interruptLoad();
 
@@ -151,6 +151,14 @@ void ResourceManager::resetFlags() {
 void ResourceManager::requestNextLoadAsync() { bNextLoadAsync = true; }
 
 void ResourceManager::requestNextLoadUnmanaged() { this->nextLoadUnmanagedStack.push(true); }
+
+size_t ResourceManager::getSyncLoadMaxBatchSize() const { return this->asyncLoader->getMaxPerUpdate(); }
+
+void ResourceManager::resetSyncLoadMaxBatchSize() { this->asyncLoader->resetMaxPerUpdate(); }
+
+void ResourceManager::setSyncLoadMaxBatchSize(size_t resourcesToLoad) {
+    this->asyncLoader->setMaxPerUpdate(resourcesToLoad);
+}
 
 void ResourceManager::reloadResource(Resource *rs, bool async) {
     if(rs == nullptr) {
