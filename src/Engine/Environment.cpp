@@ -87,6 +87,7 @@ Environment::Environment(int argc, char *argv[]) {
 
     m_bRunning = true;
     m_bDrawing = false;
+    m_bIsRestartScheduled = false;
 
     m_bMinimized = false;  // for fps_max_background
     m_bHasFocus = true;    // for fps_max_background
@@ -161,10 +162,8 @@ void Environment::shutdown() {
     SDL_PushEvent(&event);
 }
 
-// TODO
 void Environment::restart() {
-    // SAFE_DELETE(m_engine);
-    // m_engine = new Engine();
+    m_bIsRestartScheduled = true;
     shutdown();
 }
 

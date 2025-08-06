@@ -71,6 +71,7 @@ class Environment {
     void shutdown();
     void restart();
     [[nodiscard]] inline bool isRunning() const { return m_bRunning; }
+    [[nodiscard]] inline bool isRestartScheduled() const { return m_bIsRestartScheduled; }
     [[nodiscard]] inline Platform &getPlatform() { return m_platform; }
 
     // resolved and cached at early startup with argv[0]
@@ -205,6 +206,7 @@ class Environment {
 
     bool m_bRunning;
     bool m_bDrawing;
+    bool m_bIsRestartScheduled;
 
     bool m_bMinimized;  // for fps_max_background
     bool m_bHasFocus;   // for fps_max_background

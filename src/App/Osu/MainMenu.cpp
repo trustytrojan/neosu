@@ -250,13 +250,11 @@ MainMenu::MainMenu() : OsuScreen() {
     this->addBaseUIElement(this->pauseButton);
 
     // TODO @spec: shouldn't this be portable-ish already?
-    if constexpr(Env::cfg(OS::WINDOWS)) {
-        this->updateAvailableButton = new UIButton(0, 0, 0, 0, "", "Checking for updates ...");
-        this->updateAvailableButton->setUseDefaultSkin();
-        this->updateAvailableButton->setClickCallback(SA::MakeDelegate<&MainMenu::onUpdatePressed>(this));
-        this->updateAvailableButton->setColor(0x2200ff00);
-        this->updateAvailableButton->setTextColor(0x22ffffff);
-    }
+    this->updateAvailableButton = new UIButton(0, 0, 0, 0, "", "Checking for updates ...");
+    this->updateAvailableButton->setUseDefaultSkin();
+    this->updateAvailableButton->setClickCallback(SA::MakeDelegate<&MainMenu::onUpdatePressed>(this));
+    this->updateAvailableButton->setColor(0x2200ff00);
+    this->updateAvailableButton->setTextColor(0x22ffffff);
 
     this->versionButton = new CBaseUIButton(0, 0, 0, 0, "", "");
     this->versionButton->setDrawBackground(false);

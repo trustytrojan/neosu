@@ -289,6 +289,7 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/GUI/Windows/neosu-Console.$(OBJEXT) \
 	src/GUI/Windows/neosu-ConsoleBox.$(OBJEXT) \
 	src/GUI/Windows/neosu-VisualProfiler.$(OBJEXT) \
+	src/Platform/Windows/neosu-Windows_aux.$(OBJEXT) \
 	src/Platform/neosu-main.$(OBJEXT) \
 	src/Util/neosu-Quaternion.$(OBJEXT) \
 	src/Util/neosu-Rect.$(OBJEXT) src/Util/neosu-UString.$(OBJEXT) \
@@ -456,6 +457,7 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/GUI/Windows/$(DEPDIR)/neosu-ConsoleBox.Po \
 	src/GUI/Windows/$(DEPDIR)/neosu-VisualProfiler.Po \
 	src/Platform/$(DEPDIR)/neosu-main.Po \
+	src/Platform/Windows/$(DEPDIR)/neosu-Windows_aux.Po \
 	src/Util/$(DEPDIR)/neosu-Quaternion.Po \
 	src/Util/$(DEPDIR)/neosu-Rect.Po \
 	src/Util/$(DEPDIR)/neosu-UString.Po \
@@ -934,6 +936,7 @@ neosu_SOURCES = \
 	src/GUI/Windows/Console.cpp \
 	src/GUI/Windows/ConsoleBox.cpp \
 	src/GUI/Windows/VisualProfiler.cpp \
+	src/Platform/Windows/Windows_aux.cpp \
 	src/Platform/main.cpp \
 	src/Util/Quaternion.cpp \
 	src/Util/Rect.cpp \
@@ -1631,6 +1634,15 @@ src/GUI/Windows/neosu-ConsoleBox.$(OBJEXT):  \
 src/GUI/Windows/neosu-VisualProfiler.$(OBJEXT):  \
 	src/GUI/Windows/$(am__dirstamp) \
 	src/GUI/Windows/$(DEPDIR)/$(am__dirstamp)
+src/Platform/Windows/$(am__dirstamp):
+	@$(MKDIR_P) src/Platform/Windows
+	@: >>src/Platform/Windows/$(am__dirstamp)
+src/Platform/Windows/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) src/Platform/Windows/$(DEPDIR)
+	@: >>src/Platform/Windows/$(DEPDIR)/$(am__dirstamp)
+src/Platform/Windows/neosu-Windows_aux.$(OBJEXT):  \
+	src/Platform/Windows/$(am__dirstamp) \
+	src/Platform/Windows/$(DEPDIR)/$(am__dirstamp)
 src/Platform/$(am__dirstamp):
 	@$(MKDIR_P) src/Platform
 	@: >>src/Platform/$(am__dirstamp)
@@ -1677,6 +1689,7 @@ mostlyclean-compile:
 	-rm -f src/GUI/*.$(OBJEXT)
 	-rm -f src/GUI/Windows/*.$(OBJEXT)
 	-rm -f src/Platform/*.$(OBJEXT)
+	-rm -f src/Platform/Windows/*.$(OBJEXT)
 	-rm -f src/Util/*.$(OBJEXT)
 
 distclean-compile:
@@ -1825,6 +1838,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI/Windows/$(DEPDIR)/neosu-ConsoleBox.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI/Windows/$(DEPDIR)/neosu-VisualProfiler.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Platform/$(DEPDIR)/neosu-main.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/Platform/Windows/$(DEPDIR)/neosu-Windows_aux.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Util/$(DEPDIR)/neosu-Quaternion.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Util/$(DEPDIR)/neosu-Rect.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Util/$(DEPDIR)/neosu-UString.Po@am__quote@ # am--include-marker
@@ -3841,6 +3855,20 @@ src/GUI/Windows/neosu-VisualProfiler.obj: src/GUI/Windows/VisualProfiler.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/GUI/Windows/neosu-VisualProfiler.obj `if test -f 'src/GUI/Windows/VisualProfiler.cpp'; then $(CYGPATH_W) 'src/GUI/Windows/VisualProfiler.cpp'; else $(CYGPATH_W) '$(srcdir)/src/GUI/Windows/VisualProfiler.cpp'; fi`
 
+src/Platform/Windows/neosu-Windows_aux.o: src/Platform/Windows/Windows_aux.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Platform/Windows/neosu-Windows_aux.o -MD -MP -MF src/Platform/Windows/$(DEPDIR)/neosu-Windows_aux.Tpo -c -o src/Platform/Windows/neosu-Windows_aux.o `test -f 'src/Platform/Windows/Windows_aux.cpp' || echo '$(srcdir)/'`src/Platform/Windows/Windows_aux.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Platform/Windows/$(DEPDIR)/neosu-Windows_aux.Tpo src/Platform/Windows/$(DEPDIR)/neosu-Windows_aux.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Platform/Windows/Windows_aux.cpp' object='src/Platform/Windows/neosu-Windows_aux.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Platform/Windows/neosu-Windows_aux.o `test -f 'src/Platform/Windows/Windows_aux.cpp' || echo '$(srcdir)/'`src/Platform/Windows/Windows_aux.cpp
+
+src/Platform/Windows/neosu-Windows_aux.obj: src/Platform/Windows/Windows_aux.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Platform/Windows/neosu-Windows_aux.obj -MD -MP -MF src/Platform/Windows/$(DEPDIR)/neosu-Windows_aux.Tpo -c -o src/Platform/Windows/neosu-Windows_aux.obj `if test -f 'src/Platform/Windows/Windows_aux.cpp'; then $(CYGPATH_W) 'src/Platform/Windows/Windows_aux.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Platform/Windows/Windows_aux.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Platform/Windows/$(DEPDIR)/neosu-Windows_aux.Tpo src/Platform/Windows/$(DEPDIR)/neosu-Windows_aux.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Platform/Windows/Windows_aux.cpp' object='src/Platform/Windows/neosu-Windows_aux.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Platform/Windows/neosu-Windows_aux.obj `if test -f 'src/Platform/Windows/Windows_aux.cpp'; then $(CYGPATH_W) 'src/Platform/Windows/Windows_aux.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Platform/Windows/Windows_aux.cpp'; fi`
+
 src/Platform/neosu-main.o: src/Platform/main.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Platform/neosu-main.o -MD -MP -MF src/Platform/$(DEPDIR)/neosu-main.Tpo -c -o src/Platform/neosu-main.o `test -f 'src/Platform/main.cpp' || echo '$(srcdir)/'`src/Platform/main.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Platform/$(DEPDIR)/neosu-main.Tpo src/Platform/$(DEPDIR)/neosu-main.Po
@@ -4231,6 +4259,8 @@ distclean-generic:
 	-$(am__rm_f) src/GUI/Windows/$(am__dirstamp)
 	-$(am__rm_f) src/Platform/$(DEPDIR)/$(am__dirstamp)
 	-$(am__rm_f) src/Platform/$(am__dirstamp)
+	-$(am__rm_f) src/Platform/Windows/$(DEPDIR)/$(am__dirstamp)
+	-$(am__rm_f) src/Platform/Windows/$(am__dirstamp)
 	-$(am__rm_f) src/Util/$(DEPDIR)/$(am__dirstamp)
 	-$(am__rm_f) src/Util/$(am__dirstamp)
 
@@ -4388,6 +4418,7 @@ distclean: distclean-am
 	-rm -f src/GUI/Windows/$(DEPDIR)/neosu-ConsoleBox.Po
 	-rm -f src/GUI/Windows/$(DEPDIR)/neosu-VisualProfiler.Po
 	-rm -f src/Platform/$(DEPDIR)/neosu-main.Po
+	-rm -f src/Platform/Windows/$(DEPDIR)/neosu-Windows_aux.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-Quaternion.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-Rect.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-UString.Po
@@ -4584,6 +4615,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/GUI/Windows/$(DEPDIR)/neosu-ConsoleBox.Po
 	-rm -f src/GUI/Windows/$(DEPDIR)/neosu-VisualProfiler.Po
 	-rm -f src/Platform/$(DEPDIR)/neosu-main.Po
+	-rm -f src/Platform/Windows/$(DEPDIR)/neosu-Windows_aux.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-Quaternion.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-Rect.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-UString.Po

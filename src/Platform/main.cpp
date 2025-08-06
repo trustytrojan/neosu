@@ -93,6 +93,8 @@ class SDLMain final : public Environment {
     SDL_AppResult handleEvent(SDL_Event *event);
     void shutdown(SDL_AppResult result);
 
+    static void restart(const std::vector<UString> &restartArgs);
+
    private:
     // window and context
     SDL_GLContext m_context;
@@ -140,14 +142,25 @@ void SDL_AppQuit(void *appstate, SDL_AppResult result) {
     fmain->setCursorClip(false, {});  // release input devices
     fmain->grabKeyboard(false);
 
+    const bool restart = fmain->isRestartScheduled();
+    std::vector<UString> restartArgs{};
+    if(restart) {
+        restartArgs = fmain->getCommandLine();
+    }
+
     fmain->shutdown(result);
     SAFE_DELETE(fmain);
 
     printf("[main]: Shutdown success.\n");
 
-    if constexpr(!Env::cfg(FEAT::MAINCB)) {
-        SDL_Quit();
-        std::exit(0);
+    if constexpr(!Env::cfg(OS::WASM)) {
+        if(restart) {
+            SDLMain::restart(restartArgs);
+        }
+        if constexpr(!Env::cfg(FEAT::MAINCB)) {
+            SDL_Quit();
+            std::exit(0);
+        }
     }
 }
 
@@ -203,6 +216,8 @@ MAIN_FUNC /* int argc, char *argv[] */
         SDL_AppQuit(fmain, SDL_APP_FAILURE);
     }
 
+    const auto restartArgs{fmain->getCommandLine()};
+
     constexpr int SIZE_EVENTS = 64;
     std::array<SDL_Event, SIZE_EVENTS> events{};
 
@@ -231,6 +246,11 @@ MAIN_FUNC /* int argc, char *argv[] */
             // engine update + draw + fps limiter
             fmain->iterate();
         }
+    }
+
+    // i don't think this is reachable, but whatever
+    if(fmain->isRestartScheduled()) {
+        SDLMain::restart(restartArgs);
     }
 
     return 0;
@@ -503,7 +523,6 @@ nocbinline SDL_AppResult SDLMain::iterate() {
         const int targetFPS = (m_bMinimized || !m_bHasFocus)
                                   ? m_iFpsMaxBG
                                   : (osu->isInPlayMode() ? m_iFpsMax : cv::fps_max_menu.getInt());
-        debugLog("limiting fps to {}\n", m_iFpsMax);
         FPSLimiter::limit_frames(targetFPS);
     }
 
@@ -764,4 +783,37 @@ void SDLMain::fps_max_background_callback(float newVal) {
     int newFps = static_cast<int>(newVal);
     if(newFps >= 0) m_iFpsMaxBG = newFps;
     if(!m_bHasFocus) setBgFPS();
+}
+
+#include <SDL3/SDL_process.h>
+#include <SDL3/SDL_properties.h>
+
+void SDLMain::restart(const std::vector<UString> &args) {
+    SDL_PropertiesID restartprops = SDL_CreateProperties();
+
+    std::vector<const char *> restartArgsChar(args.size() + 1);
+
+    for(int i = 0; const auto &arg : args) {
+        restartArgsChar[i] = arg.toUtf8();
+        i++;
+    }
+
+    // Engine::logRaw("restart args: ");
+    // for (int i = -1; const auto entry : restartArgsChar) {
+    //     i++;
+    //     if (!entry) continue;
+    //     Engine::logRaw("({}) {} ", i, entry);
+    // }
+    // Engine::logRaw("\n");
+
+    SDL_SetPointerProperty(restartprops, SDL_PROP_PROCESS_CREATE_ARGS_POINTER, (void *)restartArgsChar.data());
+#ifdef MCENGINE_PLATFORM_WINDOWS
+    SDL_SetStringProperty(restartprops, SDL_PROP_PROCESS_CREATE_CMDLINE_STRING, GetCommandLineA());
+#endif
+
+    if(!SDL_CreateProcessWithProperties(restartprops)) {
+        fprintf(stderr, "[restart]: WARNING: couldn't restart!\n");
+    }
+
+    SDL_DestroyProperties(restartprops);
 }

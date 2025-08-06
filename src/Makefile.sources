@@ -142,6 +142,7 @@ neosu_SOURCES = \
 	src/GUI/Windows/Console.cpp \
 	src/GUI/Windows/ConsoleBox.cpp \
 	src/GUI/Windows/VisualProfiler.cpp \
+	src/Platform/Windows/Windows_aux.cpp \
 	src/Platform/main.cpp \
 	src/Util/Quaternion.cpp \
 	src/Util/Rect.cpp \
