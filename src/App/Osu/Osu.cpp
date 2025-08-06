@@ -66,13 +66,6 @@
 
 #include "score.h"
 
-// HACK: WTF?
-// #ifdef _WIN32
-// #include "WinEnvironment.h"
-// #include "WindowsMain.h"
-// extern Main *mainloopPtrHack;
-// #endif
-
 Osu *osu = NULL;
 
 Vector2 Osu::g_vInternalResolution;
@@ -211,7 +204,7 @@ Osu::Osu() {
 
     std::ifstream osuCfgFile(MCENGINE_DATA_DIR "cfg" PREF_PATHSEP "osu.cfg");
     if(!osuCfgFile.good()) {
-        import_settings_from_osu_stable();
+        PeppyImporter::import_settings_from_osu_stable();
     }
 
     // Initialize sound here so we can load the preferred device from config
@@ -356,14 +349,7 @@ Osu::Osu() {
     }
 #endif
 
-#ifdef _WIN32
-    // // Process cmdline args now, after everything has been initialized
-    // std::vector<std::string> args;
-    // for(i32 i = 0; i < engine->iArgc; i++) {
-    //     args.push_back(engine->sArgv[i]);
-    // }
-    // mainloopPtrHack->handle_cmdline_args(args);
-#endif
+    env->getPlatform().handle_cmdline_args();
 
     // Not the type of shader you want players to tweak or delete, so loading from string
     actual_flashlight_shader = g->createShaderFromSource(

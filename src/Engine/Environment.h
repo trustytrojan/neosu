@@ -30,7 +30,34 @@ class Engine;
 typedef struct SDL_Window SDL_Window;
 typedef struct SDL_Cursor SDL_Cursor;
 
+class Environment;
+extern Environment *env;
+
 class Environment {
+   public:
+    struct Platform {
+        virtual void handle_osk(const char * /*osk_path*/) {}
+        virtual void handle_osz(const char * /*osz_path*/) {}
+        virtual void handle_neosu_url(const char * /*url*/) {}
+        virtual void handle_cmdline_args(const std::vector<UString> & /*args*/) {}
+        void handle_cmdline_args() { env ? handle_cmdline_args(env->getCommandLine()) : (void)0; }
+        virtual void register_neosu_file_associations() {}
+        virtual ~Platform() = default;
+    };
+
+   private:
+#ifdef MCENGINE_PLATFORM_WINDOWS  // TODO: other platforms
+    struct PlatformImpl : public Platform {
+        void handle_osk(const char * /*osk_path*/) override;
+        void handle_osz(const char * /*osz_path*/) override;
+        void handle_neosu_url(const char * /*url*/) override;
+        void handle_cmdline_args(const std::vector<UString> & /*args*/) override;
+        void register_neosu_file_associations() override;
+    } m_platform{};
+#else
+    Platform m_platform{};
+#endif
+
    public:
     Environment(int argc, char *argv[]);
     virtual ~Environment();
@@ -44,6 +71,7 @@ class Environment {
     void shutdown();
     void restart();
     [[nodiscard]] inline bool isRunning() const { return m_bRunning; }
+    [[nodiscard]] inline Platform &getPlatform() { return m_platform; }
 
     // resolved and cached at early startup with argv[0]
     // contains the full canonical path to the current exe
@@ -85,7 +113,8 @@ class Environment {
     [[nodiscard]] static std::vector<UString> getLogicalDrives();
     // returns an absolute (i.e. fully-qualified) filesystem path
     [[nodiscard]] static std::string getFolderFromFilePath(const std::string &filepath) noexcept;
-    [[nodiscard]] static std::string getFileExtensionFromFilePath(const std::string &filepath, bool includeDot = false) noexcept;
+    [[nodiscard]] static std::string getFileExtensionFromFilePath(const std::string &filepath,
+                                                                  bool includeDot = false) noexcept;
     [[nodiscard]] static std::string getFileNameFromFilePath(const std::string &filePath) noexcept;
 
     [[nodiscard]] static std::string encodeStringToURL(const std::string &unencodedURLString) noexcept;
@@ -253,7 +282,5 @@ class Environment {
     // internal path conversion helper, SDL_URLOpen needs a URL-encoded URI on Unix (because it goes to xdg-open)
     [[nodiscard]] static std::string filesystemPathToURI(const std::filesystem::path &path) noexcept;
 };
-
-extern Environment *env;
 
 #endif

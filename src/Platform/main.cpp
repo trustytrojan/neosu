@@ -136,6 +136,10 @@ void SDL_AppQuit(void *appstate, SDL_AppResult result) {
     }
 
     auto *fmain = static_cast<SDLMain *>(appstate);
+
+    fmain->setCursorClip(false, {});  // release input devices
+    fmain->grabKeyboard(false);
+
     fmain->shutdown(result);
     SAFE_DELETE(fmain);
 
@@ -279,6 +283,8 @@ SDLMain::~SDLMain() {
 }
 
 SDL_AppResult SDLMain::initialize() {
+    this->getPlatform().register_neosu_file_associations();  // only implemented for windows atm
+
     doEarlyCmdlineOverrides();
     setupLogging();
 
@@ -303,12 +309,12 @@ SDL_AppResult SDLMain::initialize() {
 
     // if we got to this point, all relevant subsystems (input handling, graphics interface, etc.) have been initialized
 
+    // load app
+    m_engine->loadApp();
+
     // make window visible
     SDL_ShowWindow(m_window);
     SDL_RaiseWindow(m_window);
-
-    // load app
-    m_engine->loadApp();
 
     // SDL3 stops listening to text input globally when window is created
     SDL_StartTextInput(m_window);
@@ -494,8 +500,9 @@ nocbinline SDL_AppResult SDLMain::iterate() {
         VPROF_BUDGET("FPSLimiter", VPROF_BUDGETGROUP_SLEEP);
 
         // if minimized or unfocused, use BG fps, otherwise use fps_max (if 0 it's unlimited)
-        const int targetFPS =
-            (m_bMinimized || !m_bHasFocus) ? m_iFpsMaxBG : (osu->isInPlayMode() ? m_iFpsMax : cv::fps_max_menu.getInt());
+        const int targetFPS = (m_bMinimized || !m_bHasFocus)
+                                  ? m_iFpsMaxBG
+                                  : (osu->isInPlayMode() ? m_iFpsMax : cv::fps_max_menu.getInt());
         debugLog("limiting fps to {}\n", m_iFpsMax);
         FPSLimiter::limit_frames(targetFPS);
     }

@@ -1,8 +1,18 @@
+#include "PeppyImporter.h"
+
 #include "ConVar.h"
 #include "Engine.h"
 #include "File.h"
-#include "Keyboard.h"
+#include "KeyboardKeys.h"
 
+#ifdef MCENGINE_PLATFORM_WINDOWS
+#include "WinDebloatDefs.h"
+
+#include <winbase.h>
+#include <winreg.h>
+#endif
+namespace PeppyImporter {
+namespace {  // static namespace
 void try_set_key(const char* str, ConVar* cvar) {
     UString key{UString(str).trim()};
 
@@ -151,7 +161,7 @@ void try_set_key(const char* str, ConVar* cvar) {
     }
 }
 
-static UString get_osu_folder_from_registry() {
+UString get_osu_folder_from_registry() {
 #ifdef _WIN32
     i32 err;
     HKEY key;
@@ -193,6 +203,7 @@ static UString get_osu_folder_from_registry() {
 
     return "";
 }
+}  // namespace
 
 void import_settings_from_osu_stable() {
     UString osu_folder{cv::osu_folder.getString()};
@@ -413,3 +424,4 @@ void import_settings_from_osu_stable() {
         }
     }
 }
+}  // namespace PeppyImporter

@@ -142,10 +142,7 @@ Engine *Environment::initEngine() { return new Engine(); }
 
 // well this doesn't do much atm... called at the end of engine->onUpdate
 void Environment::update() {
-    // Environment::update();
-
-    m_bIsCursorInsideWindow =
-        m_bHasFocus && McRect(0, 0, m_engine->getScreenWidth(), m_engine->getScreenHeight()).contains(getMousePos());
+    m_bIsCursorInsideWindow = m_bHasFocus && m_engine->getScreenRect().contains(getMousePos());
 }
 
 Graphics *Environment::createRenderer() {

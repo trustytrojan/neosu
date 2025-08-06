@@ -1,11 +1,8 @@
 // these methods need to be factored out somehow to not be 100% tied to the windows main loop, putting them here to
-// avoid bloating WindowsMain.cpp
+// avoid bloating main.cpp
 #ifdef _WIN32
-#include "WindowsMain.h"
 
-#include "WinDebloatDefs.h"
-#include <objbase.h>
-
+#include "Environment.h"
 #include "Engine.h"
 #include "Database.h"
 #include "DatabaseBeatmap.h"
@@ -17,8 +14,11 @@
 #include "Skin.h"
 #include "SongBrowser/SongBrowser.h"
 
+#include "WinDebloatDefs.h"
+#include <objbase.h>
+
 // drag-drop/file associations/registry stuff below
-void WindowsMain::handle_osk(const char *osk_path) {
+void Environment::PlatformImpl::handle_osk(const char *osk_path) {
     Skin::unpack(osk_path);
 
     auto folder_name = env->getFileNameFromFilePath(osk_path);
@@ -28,7 +28,7 @@ void WindowsMain::handle_osk(const char *osk_path) {
     osu->optionsMenu->updateSkinNameLabel();
 }
 
-void WindowsMain::handle_osz(const char *osz_path) {
+void Environment::PlatformImpl::handle_osz(const char *osz_path) {
     File osz(osz_path);
     i32 set_id = Downloader::extract_beatmapset_id(reinterpret_cast<const u8 *>(osz.readFile()), osz.getFileSize());
     if(set_id < 0) {
@@ -68,7 +68,7 @@ void WindowsMain::handle_osz(const char *osz_path) {
     SAFE_DELETE(osu->mainMenu->preloaded_beatmapset);
 }
 
-void WindowsMain::handle_neosu_url(const char *url) {
+void Environment::PlatformImpl::handle_neosu_url(const char *url) {
     if(strstr(url, "neosu://login/") == url) {
         // Disable autologin, in case there's an error while logging in
         // Will be reenabled after the login succeeds
@@ -112,24 +112,24 @@ void WindowsMain::handle_neosu_url(const char *url) {
     }
 }
 
-void WindowsMain::handle_cmdline_args(std::vector<std::string> args) {
+void Environment::PlatformImpl::handle_cmdline_args(const std::vector<UString> &args) {
     bool need_to_reload_database = false;
 
     for(auto &arg : args) {
         if(arg[0] == '-') return;
         if(arg.length() < 4) return;
 
-        if(strstr(arg.c_str(), "neosu://") == arg.c_str()) {
-            handle_neosu_url(arg.c_str());
+        if(strstr(arg.toUtf8(), "neosu://") == arg.toUtf8()) {
+            handle_neosu_url(arg.toUtf8());
         } else {
-            auto extension = env->getFileExtensionFromFilePath(arg);
+            auto extension = env->getFileExtensionFromFilePath(arg.toUtf8());
             if(!extension.compare("osz")) {
                 // NOTE: we're assuming db is loaded here?
-                handle_osz(arg.c_str());
+                handle_osz(arg.toUtf8());
             } else if(!extension.compare("osk") || !extension.compare("zip")) {
-                handle_osk(arg.c_str());
+                handle_osk(arg.toUtf8());
             } else if(!extension.compare("db") && !db->isLoading()) {
-                db->dbPathsToImport.push_back(arg);
+                db->dbPathsToImport.emplace_back(arg.toUtf8());
                 need_to_reload_database = true;
             }
         }
@@ -140,7 +140,7 @@ void WindowsMain::handle_cmdline_args(std::vector<std::string> args) {
     }
 }
 
-void WindowsMain::register_neosu_file_associations() {
+void Environment::PlatformImpl::register_neosu_file_associations() {
     wchar_t exePath[MAX_PATH];
     GetModuleFileNameW(NULL, exePath, MAX_PATH);
 

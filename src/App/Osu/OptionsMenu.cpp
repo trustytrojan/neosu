@@ -3296,7 +3296,7 @@ void OptionsMenu::onResetEverythingClicked(CBaseUIButton * /*button*/) {
     }
 }
 
-void OptionsMenu::onImportSettingsFromStable(CBaseUIButton * /*button*/) { import_settings_from_osu_stable(); }
+void OptionsMenu::onImportSettingsFromStable(CBaseUIButton * /*button*/) { PeppyImporter::import_settings_from_osu_stable(); }
 
 void OptionsMenu::addSpacer() {
     auto *e = new OPTIONS_ELEMENT;
