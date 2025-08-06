@@ -541,7 +541,10 @@ void Environment::minimize() {
     m_bHasFocus = false;
 }
 
-void Environment::maximize() { SDL_MaximizeWindow(m_window); }
+void Environment::maximize() {
+    SDL_MaximizeWindow(m_window);
+    m_bHasFocus = true;
+}
 
 // TODO: implement exclusive fullscreen for dx11 backend
 void Environment::enableFullscreen() {

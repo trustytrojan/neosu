@@ -508,8 +508,6 @@ CONVAR(fps_max, "fps_max", 1000.0f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE, "fr
 CONVAR(fps_max_menu, "fps_max_menu", 420.f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE, "framerate limiter, menus");
 CONVAR(fps_max_background, "fps_max_background", 30.0f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "framerate limiter, background");
-CONVAR(fps_max_background_interleaved, "fps_max_background_interleaved", 1, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
-       "experimental, update normally but only draw every n-th frame");
 CONVAR(fps_max_yield, "fps_max_yield", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "always release rest of timeslice once per frame (call scheduler via sleep(0))");
 
@@ -1182,8 +1180,6 @@ CONVAR(start_first_main_menu_song_at_preview_point, "start_first_main_menu_song_
        FCVAR_BANCHO_COMPATIBLE);
 CONVAR(submit_after_pause, "submit_after_pause", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_GAMEPLAY);
 CONVAR(submit_scores, "submit_scores", false, FCVAR_BANCHO_COMPATIBLE);
-CONVAR(tablet_sensitivity_ignore, "tablet_sensitivity_ignore", Env::cfg(OS::WINDOWS) ? false : true,
-       FCVAR_BANCHO_COMPATIBLE);
 CONVAR(timingpoints_force, "osu_timingpoints_force", true, FCVAR_BANCHO_COMPATIBLE,
        "Forces the correct sample type and volume to be used, by getting the active timingpoint "
        "through iteration EVERY TIME a hitsound is played (performance!)");
@@ -1257,10 +1253,6 @@ CONVAR(vsync, "vsync", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        [](float on) -> void { g ? g->setVSync(!!static_cast<int>(on)) : (void)0; });
 CONVAR(win_disable_windows_key_while_playing, "osu_win_disable_windows_key_while_playing", true,
        FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
-CONVAR(win_ink_workaround, "win_ink_workaround", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
-CONVAR(win_mouse_raw_input_buffer, "win_mouse_raw_input_buffer", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
-       "use GetRawInputBuffer() to reduce wndproc event queue overflow stalls on insane "
-       "mouse usb polling rates above 1000 Hz");
 // this is not windows-only anymore, just keeping it with the "win_" prefix to not break old configs
 CONVAR(win_processpriority, "win_processpriority", 1, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "sets the main process priority (0 = normal, 1 = high)", CFUNC(Environment::setProcessPriority));

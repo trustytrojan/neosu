@@ -119,7 +119,6 @@ class SDLMain final : public Environment {
     // callback handlers
     void fps_max_callback(float newVal);
     void fps_max_background_callback(float newVal);
-    void fps_unlimited_callback(float newVal);
 
     void doEarlyCmdlineOverrides();
 };
@@ -165,11 +164,12 @@ MAIN_FUNC /* int argc, char *argv[] */
     // improve floating point perf in case this isn't already enabled by the compiler
     SET_FPU_DAZ_FTZ
 
-    // set the current working directory to the executable directory, so that relative paths
-    // work as expected
-    // this also sets and caches the path in getPathToSelf, so this must be called here
+    // this sets and caches the path in getPathToSelf, so this must be called here
+    const auto &selfpath = Environment::getPathToSelf(argv[0]);
     if constexpr(!Env::cfg(OS::WASM)) {
-        setcwdexe(Environment::getPathToSelf(argv[0]));
+        // set the current working directory to the executable directory, so that relative paths
+        // work as expected
+        setcwdexe(selfpath);
     }
 
     std::string lowerPackageName = PACKAGE_NAME;
@@ -241,7 +241,7 @@ MAIN_FUNC /* int argc, char *argv[] */
 //*******************************//
 
 // window configuration
-static constexpr auto WINDOW_TITLE = "neosu";
+static constexpr auto WINDOW_TITLE = PACKAGE_NAME;
 static constexpr auto WINDOW_WIDTH = 1280L;
 static constexpr auto WINDOW_HEIGHT = 720L;
 static constexpr auto WINDOW_WIDTH_MIN = 100;
@@ -257,7 +257,6 @@ SDLMain::SDLMain(int argc, char *argv[]) : Environment(argc, argv) {
     // setup callbacks
     cv::fps_max.setCallback(SA::MakeDelegate<&SDLMain::fps_max_callback>(this));
     cv::fps_max_background.setCallback(SA::MakeDelegate<&SDLMain::fps_max_background_callback>(this));
-    cv::fps_unlimited.setCallback(SA::MakeDelegate<&SDLMain::fps_unlimited_callback>(this));
 }
 
 SDLMain::~SDLMain() {
@@ -460,12 +459,9 @@ nocbinline SDL_AppResult SDLMain::handleEvent(SDL_Event *event) {
         case SDL_EVENT_MOUSE_MOTION:
             // debugLog("mouse motion on frame {}\n", m_engine->getFrameCount());
             //  cache the position
-            m_vLastRelMousePos.x = event->motion.xrel;
-            m_vLastRelMousePos.y = event->motion.yrel;
-            m_vLastAbsMousePos.x = event->motion.x;
-            m_vLastAbsMousePos.y = event->motion.y;
-            mouse->onMotion(event->motion.x, event->motion.y, event->motion.xrel, event->motion.yrel,
-                            event->motion.which != 0);
+            m_vLastRelMousePos = Vector2{event->motion.xrel, event->motion.yrel};
+            m_vLastAbsMousePos = Vector2{event->motion.x, event->motion.y};
+            mouse->onMotion(m_vLastRelMousePos, m_vLastAbsMousePos, event->motion.which != 0);
             break;
 
         default:
@@ -499,7 +495,8 @@ nocbinline SDL_AppResult SDLMain::iterate() {
 
         // if minimized or unfocused, use BG fps, otherwise use fps_max (if 0 it's unlimited)
         const int targetFPS =
-            m_bMinimized || !m_bHasFocus ? m_iFpsMaxBG : (osu->isInPlayMode() ? m_iFpsMax : cv::fps_max_menu.getInt());
+            (m_bMinimized || !m_bHasFocus) ? m_iFpsMaxBG : (osu->isInPlayMode() ? m_iFpsMax : cv::fps_max_menu.getInt());
+        debugLog("limiting fps to {}\n", m_iFpsMax);
         FPSLimiter::limit_frames(targetFPS);
     }
 
@@ -752,7 +749,7 @@ void SDLMain::shutdown(SDL_AppResult result) {
 // convar change callbacks, to set app iteration rate
 void SDLMain::fps_max_callback(float newVal) {
     int newFps = static_cast<int>(newVal);
-    if((newFps == 0 || newFps >= 30) && !cv::fps_unlimited.getBool()) m_iFpsMax = newFps;
+    if((newFps == 0 || newFps >= 30)) m_iFpsMax = newFps;
     if(m_bHasFocus) setFgFPS();
 }
 
@@ -760,12 +757,4 @@ void SDLMain::fps_max_background_callback(float newVal) {
     int newFps = static_cast<int>(newVal);
     if(newFps >= 0) m_iFpsMaxBG = newFps;
     if(!m_bHasFocus) setBgFPS();
-}
-
-void SDLMain::fps_unlimited_callback(float newVal) {
-    if(newVal > 0.0f)
-        m_iFpsMax = 0;
-    else
-        m_iFpsMax = cv::fps_max.getInt();
-    if(m_bHasFocus) setFgFPS();
 }

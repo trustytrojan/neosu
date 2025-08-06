@@ -31,7 +31,7 @@ class Mouse final : public InputDevice {
 
     // input handling
     void onPosChange(Vector2 pos);
-    void onMotion(float x, float y, float xRel, float yRel, bool preTransformed);
+    void onMotion(Vector2 rel, Vector2 abs, bool preTransformed);
     void onWheelVertical(int delta);
     void onWheelHorizontal(int delta);
     void onButtonChange(ButtonIndex button, bool down);
@@ -39,53 +39,47 @@ class Mouse final : public InputDevice {
     // position/coordinate handling
     void setPos(Vector2 pos);
     void setOffset(Vector2 offset);
-    void setScale(Vector2 scale) { m_vScale = scale; }
-
-    // cursor control
-    CURSORTYPE getCursorType();
-    void setCursorType(CURSORTYPE cursorType);
-    void setCursorVisible(bool cursorVisible);
-    bool isCursorVisible();
+    void setScale(Vector2 scale) { this->vScale = scale; }
 
     // state getters
-    [[nodiscard]] inline const Vector2 &getPos() const { return m_vPos; }
-    [[nodiscard]] inline const Vector2 &getRealPos() const { return m_vPosWithoutOffset; }
-    [[nodiscard]] inline const Vector2 &getActualPos() const { return m_vActualPos; }
-    [[nodiscard]] inline const Vector2 &getDelta() const { return m_vDelta; }
-    [[nodiscard]] inline const Vector2 &getRawDelta() const { return m_vRawDelta; }
+    [[nodiscard]] inline const Vector2 &getPos() const { return this->vPos; }
+    [[nodiscard]] inline const Vector2 &getRealPos() const { return this->vPosWithoutOffsets; }
+    [[nodiscard]] inline const Vector2 &getActualPos() const { return this->vActualPos; }
+    [[nodiscard]] inline const Vector2 &getDelta() const { return this->vDelta; }
+    [[nodiscard]] inline const Vector2 &getRawDelta() const { return this->vRawDelta; }
 
-    [[nodiscard]] inline const Vector2 &getOffset() const { return m_vOffset; }
-    [[nodiscard]] inline const Vector2 &getScale() const { return m_vScale; }
-    [[nodiscard]] inline const float &getSensitivity() const { return m_fSensitivity; }
+    [[nodiscard]] inline const Vector2 &getOffset() const { return this->vOffset; }
+    [[nodiscard]] inline const Vector2 &getScale() const { return this->vScale; }
+    [[nodiscard]] inline const float &getSensitivity() const { return this->fSensitivity; }
 
     // button state accessors
     [[nodiscard]] constexpr bool isLeftDown() const {
-        return m_bMouseButtonDownArray[static_cast<size_t>(ButtonIndex::BUTTON_LEFT)];
+        return this->bMouseButtonDownArray[static_cast<size_t>(ButtonIndex::BUTTON_LEFT)];
     }
     [[nodiscard]] constexpr bool isMiddleDown() const {
-        return m_bMouseButtonDownArray[static_cast<size_t>(ButtonIndex::BUTTON_MIDDLE)];
+        return this->bMouseButtonDownArray[static_cast<size_t>(ButtonIndex::BUTTON_MIDDLE)];
     }
     [[nodiscard]] constexpr bool isRightDown() const {
-        return m_bMouseButtonDownArray[static_cast<size_t>(ButtonIndex::BUTTON_RIGHT)];
+        return this->bMouseButtonDownArray[static_cast<size_t>(ButtonIndex::BUTTON_RIGHT)];
     }
     [[nodiscard]] constexpr bool isButton4Down() const {
-        return m_bMouseButtonDownArray[static_cast<size_t>(ButtonIndex::BUTTON_X1)];
+        return this->bMouseButtonDownArray[static_cast<size_t>(ButtonIndex::BUTTON_X1)];
     }
     [[nodiscard]] constexpr bool isButton5Down() const {
-        return m_bMouseButtonDownArray[static_cast<size_t>(ButtonIndex::BUTTON_X2)];
+        return this->bMouseButtonDownArray[static_cast<size_t>(ButtonIndex::BUTTON_X2)];
     }
 
-    [[nodiscard]] inline const int &getWheelDeltaVertical() const { return m_iWheelDeltaVertical; }
-    [[nodiscard]] inline const int &getWheelDeltaHorizontal() const { return m_iWheelDeltaHorizontal; }
+    [[nodiscard]] inline const int &getWheelDeltaVertical() const { return this->iWheelDeltaVertical; }
+    [[nodiscard]] inline const int &getWheelDeltaHorizontal() const { return this->iWheelDeltaHorizontal; }
 
     void resetWheelDelta();
 
     // input mode control
-    [[nodiscard]] inline const bool &isInAbsoluteMode() const { return m_bAbsolute; }
-    inline void setAbsoluteMode(bool absolute) { m_bAbsolute = absolute; }
+    [[nodiscard]] inline const bool &isInAbsoluteMode() const { return this->bNeedsLock; }
+    inline void setAbsoluteMode(bool absolute) { this->bNeedsLock = absolute; }
 
     [[nodiscard]] inline const bool &isRawInput() const {
-        return m_bIsRawInput;
+        return this->bIsRawInput;
     }  // "desired" rawinput state, NOT actual OS raw input state!
 
    private:
@@ -94,34 +88,34 @@ class Mouse final : public InputDevice {
     void onRawInputChanged(float newVal);
 
     // position state
-    Vector2 m_vPos;               // position with offset applied
-    Vector2 m_vPosWithoutOffset;  // position without offset
-    Vector2 m_vDelta;             // movement delta in the current frame
-    Vector2 m_vRawDelta;   // movement delta in the current frame, without consideration for clipping or sensitivity
-    Vector2 m_vActualPos;  // final cursor position after all transformations
+    Vector2 vPos;                // position with offset applied
+    Vector2 vPosWithoutOffsets;  // position without offset
+    Vector2 vDelta{};              // movement delta in the current frame
+    Vector2 vRawDelta{};   // movement delta in the current frame, without consideration for clipping or sensitivity
+    Vector2 vActualPos;  // final cursor position after all transformations
 
     // mode tracking
-    bool m_bLastFrameHadMotion;  // whether setPos was called in the previous frame
-    bool m_bAbsolute;            // whether using absolute input (tablets)
-    bool m_bVirtualDesktop;      // whether using virtual desktop coordinates
-    bool m_bIsRawInput;          // whether raw input is active
-    float m_fSensitivity;
+    bool bLastFrameHadMotion{false};  // whether setPos was called in the previous frame
+    bool bNeedsLock{false};   // whether we need to manually center the cursor to prevent it from leaving/hitting the
+                              // edges of the window (when raw input is off and sensitivity < 1)
+    bool bIsRawInput{false};  // whether raw input is active
+    float fSensitivity{1.0f};
 
     // button state (using our internal button index)
-    std::array<bool, static_cast<size_t>(ButtonIndex::BUTTON_COUNT)> m_bMouseButtonDownArray{};
+    std::array<bool, static_cast<size_t>(ButtonIndex::BUTTON_COUNT)> bMouseButtonDownArray{};
 
     // wheel state
-    int m_iWheelDeltaVertical;
-    int m_iWheelDeltaHorizontal;
-    int m_iWheelDeltaVerticalActual;
-    int m_iWheelDeltaHorizontalActual;
+    int iWheelDeltaVertical{0};
+    int iWheelDeltaHorizontal{0};
+    int iWheelDeltaVerticalActual{0};
+    int iWheelDeltaHorizontalActual{0};
 
     // listeners
-    std::vector<MouseListener *> m_listeners;
+    std::vector<MouseListener *> listeners;
 
     // transform parameters
-    Vector2 m_vOffset;  // offset applied to coordinates
-    Vector2 m_vScale;   // scale applied to coordinates
+    Vector2 vOffset{0, 0};  // offset applied to coordinates
+    Vector2 vScale{1, 1};   // scale applied to coordinates
 };
 
 #endif

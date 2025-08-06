@@ -128,8 +128,8 @@ void ModFPoSu::draw() {
                             osu->getSkin()->getBackgroundCube()->bind();
                             {
                                 g->setColor(argb(255, std::clamp<int>(cv::fposu_cube_tint_r.getInt(), 0, 255),
-                                                  std::clamp<int>(cv::fposu_cube_tint_g.getInt(), 0, 255),
-                                                  std::clamp<int>(cv::fposu_cube_tint_b.getInt(), 0, 255)));
+                                                 std::clamp<int>(cv::fposu_cube_tint_g.getInt(), 0, 255),
+                                                 std::clamp<int>(cv::fposu_cube_tint_b.getInt(), 0, 255)));
                                 g->drawVAO(this->vaoCube);
                             }
                             osu->getSkin()->getBackgroundCube()->unbind();
@@ -162,7 +162,9 @@ void ModFPoSu::draw() {
 
     // finally, draw that to the screen
     g->setBlending(false);
-    { osu->getSliderFrameBuffer()->draw(0, 0); }
+    {
+        osu->getSliderFrameBuffer()->draw(0, 0);
+    }
     g->setBlending(true);
 }
 
@@ -190,7 +192,8 @@ void ModFPoSu::update() {
         }
 
         // NOTE: slightly move back by default to avoid aliasing with background cube
-        this->modelMatrix.translate(cv::fposu_playfield_position_x.getFloat(), cv::fposu_playfield_position_y.getFloat(),
+        this->modelMatrix.translate(cv::fposu_playfield_position_x.getFloat(),
+                                    cv::fposu_playfield_position_y.getFloat(),
                                     -0.0015f + cv::fposu_playfield_position_z.getFloat());
 
         if(cv::fposu_mod_strafing.getBool()) {
@@ -218,13 +221,11 @@ void ModFPoSu::update() {
         (osu->getModAuto() || osu->getModAutopilot() || osu->getSelectedBeatmap()->is_watching || bancho->spectating);
 
     this->bCrosshairIntersectsScreen = true;
-    if(!cv::fposu_absolute_mode.getBool() && !isAutoCursor)
-    {
+    if(!cv::fposu_absolute_mode.getBool() && !isAutoCursor) {
         // regular mouse position mode
 
         // calculate mouse delta
-        Vector2 rawDelta = mouse->getRawDelta() /
-                           cv::mouse_sensitivity.getFloat();  // HACKHACK: undo engine mouse sensitivity multiplier
+        Vector2 rawDelta = mouse->getRawDelta();
 
         // apply fposu mouse sensitivity multiplier
         const double countsPerCm = (double)cv::fposu_mouse_dpi.getInt() / 2.54;
@@ -235,9 +236,11 @@ void ModFPoSu::update() {
 
         // apply zoom_sensitivity_ratio if zoomed
         if(this->bZoomed && cv::fposu_zoom_sensitivity_ratio.getFloat() > 0.0f)
-            // see https://www.reddit.com/r/GlobalOffensive/comments/3vxkav/how_zoomed_sensitivity_works/
             rawDelta *=
-                (cv::fposu_zoom_fov.getFloat() / cv::fposu_fov.getFloat()) * cv::fposu_zoom_sensitivity_ratio.getFloat();
+                (cv::fposu_zoom_fov.getFloat() / cv::fposu_fov.getFloat()) *
+                cv::fposu_zoom_sensitivity_ratio
+                    .getFloat();  // see
+                                  // https://www.reddit.com/r/GlobalOffensive/comments/3vxkav/how_zoomed_sensitivity_works/
 
         // update camera
         if(rawDelta.x != 0.0f)
@@ -250,13 +253,13 @@ void ModFPoSu::update() {
         const bool osCursorVisible = (env->isCursorVisible() || !env->isCursorInWindow() || !engine->hasFocus());
 
         if(!osCursorVisible) {
-            // special case: force to center of screen if no intersection
-            if(newMousePos.x == 0.0f && newMousePos.y == 0.0f) {
+            if(newMousePos.x != 0.0f || newMousePos.y != 0.0f) {
+                this->setMousePosCompensated(newMousePos);
+            } else {
+                // special case: don't move the cursor if there's no intersection, the OS cursor isn't visible, and the
+                // cursor is to be confined to the window
                 this->bCrosshairIntersectsScreen = false;
-                newMousePos = osu->getScreenSize() / 2;
             }
-
-            this->setMousePosCompensated(newMousePos);
         }
     } else {
         // absolute mouse position mode (or auto)
@@ -395,7 +398,7 @@ void ModFPoSu::setMousePosCompensated(Vector2 newMousePos) {
     newMousePos -= mouse->getOffset();
 
     mouse->onPosChange(newMousePos);
-    env->setMousePos(newMousePos.x, newMousePos.y);
+    // env->setMousePos(newMousePos.x, newMousePos.y);
 }
 
 Vector2 ModFPoSu::intersectRayMesh(Vector3 pos, Vector3 dir) {
@@ -669,8 +672,7 @@ float ModFPoSu::subdivide(std::list<VertexPair> &meshList, const std::list<Verte
                           const std::list<VertexPair>::iterator &end, int n, float edgeDistance) {
     const Vector3 a = Vector3((*begin).a.x, 0.0f, (*begin).a.z);
     const Vector3 b = Vector3((*end).a.x, 0.0f, (*end).a.z);
-    Vector3 middlePoint =
-        Vector3(std::lerp(a.x, b.x, 0.5f), std::lerp(a.y, b.y, 0.5f), std::lerp(a.z, b.z, 0.5f));
+    Vector3 middlePoint = Vector3(std::lerp(a.x, b.x, 0.5f), std::lerp(a.y, b.y, 0.5f), std::lerp(a.z, b.z, 0.5f));
 
     if(cv::fposu_curved.getBool()) middlePoint.setLength(edgeDistance);
 

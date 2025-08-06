@@ -402,7 +402,9 @@ class OptionsMenuResetButton : public CBaseUIButton {
 
         if(this->isMouseInside()) {
             osu->getTooltipOverlay()->begin();
-            { osu->getTooltipOverlay()->addLine("Reset"); }
+            {
+                osu->getTooltipOverlay()->addLine("Reset");
+            }
             osu->getTooltipOverlay()->end();
         }
     }
@@ -863,27 +865,13 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     CBaseUIElement *sectionInput = this->addSection("Input");
 
     this->addSubSection("Mouse", "scroll");
-    if constexpr(Env::cfg(OS::WINDOWS | OS::MAC | OS::LINUX)) {
-        this->addSlider("Sensitivity:", 0.1f, 6.0f, &cv::mouse_sensitivity)->setKeyDelta(0.01f);
+    this->addSlider("Sensitivity:", 0.1f, 6.0f, &cv::mouse_sensitivity)->setKeyDelta(0.01f);
 
-        if constexpr(Env::cfg(OS::MAC)) {
-            this->addLabel("");
-            this->addLabel("WARNING: Set Sensitivity to 1 for tablets!")->setTextColor(0xffff0000);
-            this->addLabel("");
-        }
-    }
-    if constexpr(Env::cfg(OS::WINDOWS | OS::LINUX)) {
-        this->addCheckbox("Raw Input", &cv::mouse_raw_input);
-        if constexpr(Env::cfg(OS::WINDOWS)) {
-            this->addCheckbox("RawInputBuffer",
-                              "Improves performance problems caused by insane mouse usb polling rates above 1000 "
-                              "Hz.\nOnly relevant if \"Raw Input\" is enabled, or if in FPoSu mode (with disabled "
-                              "\"Tablet/Absolute Mode\").",
-                              &cv::win_mouse_raw_input_buffer);
-            this->addCheckbox("Map Absolute Raw Input to Window", &cv::mouse_raw_input_absolute_to_window)
-                ->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onRawInputToAbsoluteWindowChange>(this));
-        }
-    }
+    this->addLabel("");
+    this->addLabel("WARNING: Set Sensitivity to 1 for tablets!")->setTextColor(0xffff0000);
+    this->addLabel("");
+
+    this->addCheckbox("Raw Input", &cv::mouse_raw_input);
     // if constexpr(Env::cfg(OS::LINUX)) {
     //     this->addLabel("Use system settings to change the mouse sensitivity.")->setTextColor(0xff555555);
     //     this->addLabel("");
@@ -897,24 +885,6 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addCheckbox("Disable Mouse Wheel in Play Mode", &cv::disable_mousewheel);
     this->addCheckbox("Disable Mouse Buttons in Play Mode", &cv::disable_mousebuttons);
     this->addCheckbox("Cursor ripples", "The cursor will ripple outwards on clicking.", &cv::draw_cursor_ripples);
-
-    if constexpr(Env::cfg(OS::WINDOWS)) {
-        this->addSubSection("Tablet");
-#ifndef MCENGINE_FEATURE_SDL
-
-        this->addCheckbox(
-            "Windows Ink Workaround",
-            "Enable this if your tablet cursor is stuck in a tiny area on the top left of the screen.\nIf this "
-            "doesn't fix it, use \"Ignore Raw Input/Sensitivity\" below.",
-            &cv::win_ink_workaround);
-#endif
-        this->addCheckbox(
-            "Ignore Raw Input/Sensitivity",
-            "Only use this if nothing else works.\nIf this is enabled, then the in-game sensitivity slider "
-            "will no longer work for tablets!\n(You can then instead use your tablet configuration software to "
-            "change the tablet area.)",
-            &cv::tablet_sensitivity_ignore);
-    }
 
     this->addSpacer();
     const UString keyboardSectionTags = "keyboard keys key bindings binds keybinds keybindings";
@@ -1167,14 +1137,10 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     CBaseUIElement *sectionFposu = this->addSection("FPoSu (3D)");
 
     this->addSubSection("FPoSu - General");
-    this->addCheckbox(
-        "FPoSu",
-        (Env::cfg(OS::WINDOWS)
-             ? "The real 3D FPS mod.\nPlay from a first person shooter perspective in a 3D environment.\nThis "
-               "is only intended for mouse! (Enable \"Tablet/Absolute Mode\" for tablets.)"
-             : "The real 3D FPS mod.\nPlay from a first person shooter perspective in a 3D environment.\nThis "
-               "is only intended for mouse!"),
-        &cv::mod_fposu);
+    this->addCheckbox("FPoSu",
+                      "The real 3D FPS mod.\nPlay from a first person shooter perspective in a 3D environment.\nThis "
+                      "is only intended for mouse! (Enable \"Tablet/Absolute Mode\" for tablets.)",
+                      &cv::mod_fposu);
     this->addLabel("");
     this->addLabel("NOTE: Use CTRL + O during gameplay to get here!")->setTextColor(0xff555555);
     this->addLabel("");
@@ -1196,26 +1162,25 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addSubSection("FPoSu - Playfield");
     this->addCheckbox("Curved play area", &cv::fposu_curved);
     this->addCheckbox("Background cube", &cv::fposu_cube);
-    this->addCheckbox("Skybox", "NOTE: Overrides \"Background cube\".\nSee skybox_example.png for cubemap layout.",
-                      &cv::fposu_skybox);
-    if constexpr(Env::cfg(OS::WINDOWS)) {
-        this->addSubSection("FPoSu - Mouse");
-        UIButton *cm360CalculatorLinkButton = this->addButton("https://www.mouse-sensitivity.com/");
-        cm360CalculatorLinkButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onCM360CalculatorLinkClicked>(this));
-        cm360CalculatorLinkButton->setColor(0xff10667b);
-        this->addLabel("");
-        this->dpiTextbox = this->addTextbox(cv::fposu_mouse_dpi.getString().c_str(), "DPI:", &cv::fposu_mouse_dpi);
-        this->cm360Textbox =
-            this->addTextbox(cv::fposu_mouse_cm_360.getString().c_str(), "cm per 360:", &cv::fposu_mouse_cm_360);
-        this->addLabel("");
-        this->addCheckbox("Invert Vertical", &cv::fposu_invert_vertical);
-        this->addCheckbox("Invert Horizontal", &cv::fposu_invert_horizontal);
-        this->addCheckbox(
-            "Tablet/Absolute Mode (!)",
-            "WARNING: Do NOT enable this if you are using a mouse!\nIf this is enabled, then DPI and cm per "
-            "360 will be ignored!",
-            &cv::fposu_absolute_mode);
-    }
+    this->addCheckbox(
+        "Skybox", "NOTE: Overrides \"Background cube\".\nSee skybox_example.png for cubemap layout. (CURRENTLY BROKEN)",
+        &cv::fposu_skybox);
+
+    this->addSubSection("FPoSu - Mouse");
+    UIButton *cm360CalculatorLinkButton = this->addButton("https://www.mouse-sensitivity.com/");
+    cm360CalculatorLinkButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onCM360CalculatorLinkClicked>(this));
+    cm360CalculatorLinkButton->setColor(0xff10667b);
+    this->addLabel("");
+    this->dpiTextbox = this->addTextbox(cv::fposu_mouse_dpi.getString().c_str(), "DPI:", &cv::fposu_mouse_dpi);
+    this->cm360Textbox =
+        this->addTextbox(cv::fposu_mouse_cm_360.getString().c_str(), "cm per 360:", &cv::fposu_mouse_cm_360);
+    this->addLabel("");
+    this->addCheckbox("Invert Vertical", &cv::fposu_invert_vertical);
+    this->addCheckbox("Invert Horizontal", &cv::fposu_invert_horizontal);
+    this->addCheckbox("Tablet/Absolute Mode (!)",
+                      "WARNING: Do NOT enable this if you are using a mouse!\nIf this is enabled, then DPI and cm per "
+                      "360 will be ignored!",
+                      &cv::fposu_absolute_mode);
 
     //**************************************************************************************************************************//
 
@@ -3738,11 +3703,6 @@ void OptionsMenu::save() {
 
         for(const auto &line : user_lines) {
             out << line.toUtf8() << "\n";
-        }
-        out << "\n";
-
-        if(this->fullscreenCheckbox->isChecked()) {
-            out << cv::fullscreen.getName() << "\n";
         }
         out << "\n";
 

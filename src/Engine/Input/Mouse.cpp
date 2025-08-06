@@ -12,26 +12,7 @@
 #include "Environment.h"
 #include "ResourceManager.h"
 
-Mouse::Mouse() : InputDevice() {
-    m_bMouseButtonDownArray.fill(false);
-
-    m_iWheelDeltaVertical = 0;
-    m_iWheelDeltaHorizontal = 0;
-    m_iWheelDeltaVerticalActual = 0;
-    m_iWheelDeltaHorizontalActual = 0;
-
-    m_bLastFrameHadMotion = false;
-    m_bAbsolute = false;
-    m_bVirtualDesktop = false;
-    m_bIsRawInput = false;
-
-    m_vOffset = Vector2(0, 0);
-    m_vScale = Vector2(1, 1);
-    m_vDelta.zero();
-    m_vRawDelta.zero();
-    m_vActualPos = m_vPosWithoutOffset = m_vPos = env->getMousePos();
-
-    m_fSensitivity = 1.0f;
+Mouse::Mouse() : InputDevice(), vPos(env->getMousePos()), vPosWithoutOffsets(this->vPos), vActualPos(this->vPos) {
     cv::mouse_raw_input.setCallback(SA::MakeDelegate<&Mouse::onRawInputChanged>(this));
     cv::mouse_sensitivity.setCallback(SA::MakeDelegate<&Mouse::onSensitivityChanged>(this));
 }
@@ -39,12 +20,12 @@ Mouse::Mouse() : InputDevice() {
 void Mouse::draw() {
     if(!cv::debug_mouse.getBool()) return;
 
-    drawDebug();
+    this->drawDebug();
 
     // green rect = virtual cursor pos
     g->setColor(0xff00ff00);
     float size = 20.0f;
-    g->drawRect(m_vActualPos.x - size / 2, m_vActualPos.y - size / 2, size, size);
+    g->drawRect(this->vActualPos.x - size / 2, this->vActualPos.y - size / 2, size, size);
 
     // red rect = real cursor pos
     g->setColor(0xffff0000);
@@ -58,14 +39,14 @@ void Mouse::draw() {
     }
 
     // green = scaled & offset virtual area
-    const Vector2 scaledOffset = m_vOffset;
-    const Vector2 scaledEngineScreenSize = engine->getScreenSize() * m_vScale;
+    const Vector2 scaledOffset = this->vOffset;
+    const Vector2 scaledEngineScreenSize = engine->getScreenSize() * this->vScale;
     g->setColor(0xff00ff00);
     g->drawRect(-scaledOffset.x, -scaledOffset.y, scaledEngineScreenSize.x, scaledEngineScreenSize.y);
 }
 
 void Mouse::drawDebug() {
-    Vector2 pos = getPos();
+    Vector2 pos = this->getPos();
 
     g->setColor(0xff000000);
     g->drawLine(pos.x - 1, pos.y - 1, 0 - 1, pos.y - 1);
@@ -106,41 +87,41 @@ void Mouse::drawDebug() {
 }
 
 void Mouse::update() {
-    resetWheelDelta();
+    this->resetWheelDelta();
 
     // if onMotion wasn't called last frame, there is no motion delta
-    if(!m_bLastFrameHadMotion) {
-        m_vDelta.zero();
-        m_vRawDelta.zero();
+    if(!this->bLastFrameHadMotion) {
+        this->vDelta.zero();
+        this->vRawDelta.zero();
     } else {
         // center the OS cursor if it's close to the screen edges, for non-raw input with sensitivity <1.0
         // the reason for trying hard to avoid env->setMousePos is because setting the OS cursor position can take a
         // long time so we try to use the virtual cursor position as much as possible and only update the OS cursor when
         // it's going to go somewhere we don't want
-        if(!m_bAbsolute) {
+        if(this->bNeedsLock) {
             const bool clipped = env->isCursorClipped();
-            const McRect clipRect = clipped ? env->getCursorClip() : McRect{{0, 0}, engine->getScreenSize()};
-            const Vector2 center = clipRect.getCenter();
-            const Vector2 realPosNudgedOut = Vector2{env->getMousePos()}.nudge(center, 10.0f);
+            const McRect clipRect{clipped ? env->getCursorClip() : engine->getScreenRect()};
+            const Vector2 center{clipRect.getCenter()};
+            const Vector2 realPosNudgedOut{Vector2{env->getMousePos()}.nudge(center, 10.0f)};
             if(!clipRect.contains(realPosNudgedOut)) {
                 if(clipped)
                     env->setMousePos(center);
                 else if(!env->isCursorVisible())  // FIXME: this is crazy. for windowed mode, need to "pop out" the OS
                                                   // cursor
-                    env->setMousePos(Vector2{m_vPosWithoutOffset}.nudge(center, 0.1f));
+                    env->setMousePos(Vector2{this->vPosWithoutOffsets}.nudge(center, 0.1f));
             }
         }
 
-        onPosChange(m_vPosWithoutOffset);
+        this->onPosChange(this->vPosWithoutOffsets);
     }
 
-    m_bLastFrameHadMotion = false;
+    this->bLastFrameHadMotion = false;
 }
 
-void Mouse::onMotion(float x, float y, float xRel, float yRel, bool preTransformed) {
-    Vector2 newRel{xRel, yRel}, newAbs{x, y};
+void Mouse::onMotion(Vector2 rel, Vector2 abs, bool preTransformed) {
+    Vector2 newRel{rel}, newAbs{abs};
 
-    m_bAbsolute = true;  // assume we don't have to lock the cursor
+    this->bNeedsLock = false;  // assume we don't have to lock the cursor
 
     const bool osCursorVisible = (env->isCursorVisible() || !env->isCursorInWindow() || !engine->hasFocus());
 
@@ -148,15 +129,17 @@ void Mouse::onMotion(float x, float y, float xRel, float yRel, bool preTransform
     // this entire block may be skipped if: (preTransformed || (sens == 1 && !clipped))
     if(!preTransformed && !osCursorVisible) {
         // need to apply sensitivity
-        if(m_fSensitivity < 0.999f || m_fSensitivity > 1.001f) {
+        if(this->fSensitivity < 0.999f || this->fSensitivity > 1.001f) {
             // need to lock the OS cursor to the center of the screen if rawinput is disabled, otherwise it can exit the
             // screen rect before the virtual cursor does don't do it here because we don't want the event loop to make
             // more external calls than necessary, just set a flag to do it on the engine update loop
-            if(m_fSensitivity < 0.995f) m_bAbsolute = false;
-            newRel *= m_fSensitivity;
+            if(this->fSensitivity < 0.995f) {
+                this->bNeedsLock = true;
+            }
+            newRel *= this->fSensitivity;
             if(newRel.length() > 50.0f)  // don't allow obviously bogus values
                 newRel.zero();
-            newAbs = m_vPosWithoutOffset + newRel;
+            newAbs = this->vPosWithoutOffsets + newRel;
         }
         if(env->isCursorClipped()) {
             const McRect clipRect = env->getCursorClip();
@@ -171,53 +154,53 @@ void Mouse::onMotion(float x, float y, float xRel, float yRel, bool preTransform
     // use Mouse::update always setting m_bLastFrameHadMotion to false as a signal that the deltas need to be reset now
     // this is because onMotion can be called multiple times in a frame, depending on how many mouse motion events were
     // collected but Mouse::update only happens once per frame
-    if(!m_bLastFrameHadMotion) {
-        m_vDelta.zero();
-        m_vRawDelta.zero();
+    if(!this->bLastFrameHadMotion) {
+        this->vDelta.zero();
+        this->vRawDelta.zero();
     }
 
     // rawdelta doesn't include sensitivity or clipping
-    m_vRawDelta += (newRel / m_fSensitivity);
-    m_vDelta += newRel;
+    this->vRawDelta += (newRel / this->fSensitivity);
+    this->vDelta += newRel;
     // for the absolute position, we can just update it directly
-    m_vPosWithoutOffset = newAbs;
+    this->vPosWithoutOffsets = newAbs;
 
-    m_bLastFrameHadMotion = true;
+    this->bLastFrameHadMotion = true;
 
     if(unlikely(cv::debug_mouse.getBool()))
         debugLog(
             "frame: {} rawInput: {} m_vRawDelta: {:.2f},{:.2f} m_vDelta: {:.2f},{:.2f} m_vPosWithoutOffset: "
             "{:.2f},{:.2f}\n",
-            engine->getFrameCount() + 1, preTransformed, m_vRawDelta.x, m_vRawDelta.y, m_vDelta.x, m_vDelta.y,
-            m_vPosWithoutOffset.x, m_vPosWithoutOffset.y);
+            engine->getFrameCount() + 1, preTransformed, this->vRawDelta.x, this->vRawDelta.y, this->vDelta.x,
+            this->vDelta.y, this->vPosWithoutOffsets.x, this->vPosWithoutOffsets.y);
 }
 
 void Mouse::resetWheelDelta() {
-    m_iWheelDeltaVertical = m_iWheelDeltaVerticalActual;
-    m_iWheelDeltaVerticalActual = 0;
+    this->iWheelDeltaVertical = this->iWheelDeltaVerticalActual;
+    this->iWheelDeltaVerticalActual = 0;
 
-    m_iWheelDeltaHorizontal = m_iWheelDeltaHorizontalActual;
-    m_iWheelDeltaHorizontalActual = 0;
+    this->iWheelDeltaHorizontal = this->iWheelDeltaHorizontalActual;
+    this->iWheelDeltaHorizontalActual = 0;
 }
 
 void Mouse::onPosChange(Vector2 pos) {
-    m_vPosWithoutOffset = pos;
-    m_vPos = (m_vOffset + pos);
-    m_vActualPos = m_vPos;
+    this->vPosWithoutOffsets = pos;
+    this->vPos = (this->vOffset + pos);
+    this->vActualPos = this->vPos;
 }
 
 void Mouse::onWheelVertical(int delta) {
-    m_iWheelDeltaVerticalActual += delta;
+    this->iWheelDeltaVerticalActual += delta;
 
-    for(auto &listener : m_listeners) {
+    for(auto &listener : this->listeners) {
         listener->onWheelVertical(delta);
     }
 }
 
 void Mouse::onWheelHorizontal(int delta) {
-    m_iWheelDeltaHorizontalActual += delta;
+    this->iWheelDeltaHorizontalActual += delta;
 
-    for(auto &listener : m_listeners) {
+    for(auto &listener : this->listeners) {
         listener->onWheelHorizontal(delta);
     }
 }
@@ -226,38 +209,30 @@ void Mouse::onButtonChange(ButtonIndex button, bool down) {
     using enum ButtonIndex;
     if(button == BUTTON_NONE || button >= BUTTON_COUNT) return;
 
-    m_bMouseButtonDownArray[static_cast<size_t>(button)] = down;
+    this->bMouseButtonDownArray[static_cast<size_t>(button)] = down;
 
     // notify listeners
-    for(auto &listener : m_listeners) {
+    for(auto &listener : this->listeners) {
         listener->onButtonChange(button, down);
     }
 }
 
 void Mouse::setPos(Vector2 newPos) {
-    m_bLastFrameHadMotion = true;
+    this->bLastFrameHadMotion = true;
 
-    m_vPos = newPos;
+    this->vPos = newPos;
     env->setMousePos(newPos.x, newPos.y);
 }
 
 void Mouse::setOffset(Vector2 offset) {
-    Vector2 oldOffset = m_vOffset;
-    m_vOffset = offset;
+    Vector2 oldOffset = this->vOffset;
+    this->vOffset = offset;
 
     // update position to maintain visual position after offset change
-    Vector2 posAdjustment = m_vOffset - oldOffset;
-    m_vPos += posAdjustment;
-    m_vActualPos += posAdjustment;
+    Vector2 posAdjustment = this->vOffset - oldOffset;
+    this->vPos += posAdjustment;
+    this->vActualPos += posAdjustment;
 }
-
-CURSORTYPE Mouse::getCursorType() { return env->getCursor(); }
-
-void Mouse::setCursorType(CURSORTYPE cursorType) { env->setCursor(cursorType); }
-
-void Mouse::setCursorVisible(bool cursorVisible) { env->setCursorVisible(cursorVisible); }
-
-bool Mouse::isCursorVisible() { return env->isCursorVisible(); }
 
 void Mouse::addListener(MouseListener *mouseListener, bool insertOnTop) {
     if(mouseListener == NULL) {
@@ -266,24 +241,24 @@ void Mouse::addListener(MouseListener *mouseListener, bool insertOnTop) {
     }
 
     if(insertOnTop)
-        m_listeners.insert(m_listeners.begin(), mouseListener);
+        this->listeners.insert(this->listeners.begin(), mouseListener);
     else
-        m_listeners.push_back(mouseListener);
+        this->listeners.push_back(mouseListener);
 }
 
 void Mouse::removeListener(MouseListener *mouseListener) {
-    for(size_t i = 0; i < m_listeners.size(); i++) {
-        if(m_listeners[i] == mouseListener) {
-            m_listeners.erase(m_listeners.begin() + i);
+    for(size_t i = 0; i < this->listeners.size(); i++) {
+        if(this->listeners[i] == mouseListener) {
+            this->listeners.erase(this->listeners.begin() + i);
             i--;
         }
     }
 }
 
 void Mouse::onRawInputChanged(float newval) {
-    m_bIsRawInput = !!static_cast<int>(newval);
-    env->notifyWantRawInput(m_bIsRawInput);  // request environment to change the real OS cursor state (may or may not
-                                             // take effect immediately)
+    this->bIsRawInput = !!static_cast<int>(newval);
+    env->notifyWantRawInput(this->bIsRawInput);  // request environment to change the real OS cursor state (may or may
+                                                 // not take effect immediately)
 }
 
-void Mouse::onSensitivityChanged(float newSens) { m_fSensitivity = newSens; }
+void Mouse::onSensitivityChanged(float newSens) { this->fSensitivity = newSens; }
