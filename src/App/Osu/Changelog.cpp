@@ -26,15 +26,16 @@ Changelog::Changelog() : ScreenBackable() {
 
     std::vector<CHANGELOG> changelogs;
 
-    CHANGELOG v39_03;
-    v39_03.title = "39.03";
-    v39_03.changes = {
+    CHANGELOG v40_00;
+    v40_00.title = "40.00";
+    v40_00.changes = {
         // R"(- Re-added local user stats)",
+        R"(- Switched to SDL3 platform backend)",
         R"(- Added chat/screenshot/status notifications)",
         R"(- Fixed crash when skin is missing spinner sounds)",
         R"(- Fixed circles not being clickable while spinner is active)",
     };
-    changelogs.push_back(v39_03);
+    changelogs.push_back(v40_00);
 
     CHANGELOG v39_02;
     v39_02.title = "39.02 (2025-08-02)";

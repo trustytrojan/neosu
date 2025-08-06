@@ -224,6 +224,13 @@ MainMenu::MainMenu() : OsuScreen() {
                         osu->getOptionsMenu()->save();
                     }
                 }
+                if(version < 40.00) {
+                    for(auto key : KeyBindings::ALL) {
+                        if(key->getFloat() == key->getDefaultFloat()) continue;
+                        key->setValue(KeyBindings::old_keycode_to_sdl_keycode(key->getInt()));
+                    }
+                    osu->getOptionsMenu()->save();
+                }
             } else {
                 this->bDrawVersionNotificationArrow = true;
             }

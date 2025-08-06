@@ -1,16 +1,7 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		state class and listeners (FIFO)
-//
-// $NoKeywords: $key
-//===============================================================================//
-
-#ifndef KEYBOARD_H
-#define KEYBOARD_H
-
+#pragma once
 #include "InputDevice.h"
 #include "KeyboardEvent.h"
-#include "KeyboardKeys.h"
+#include "KeyBindings.h"
 #include "KeyboardListener.h"
 
 class Keyboard final : public InputDevice {
@@ -39,5 +30,3 @@ class Keyboard final : public InputDevice {
 
     std::vector<KeyboardListener *> listeners;
 };
-
-#endif

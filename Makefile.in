@@ -177,7 +177,6 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/App/Osu/neosu-HUD.$(OBJEXT) \
 	src/App/Osu/neosu-HitObjects.$(OBJEXT) \
 	src/App/Osu/neosu-Icons.$(OBJEXT) \
-	src/App/Osu/neosu-KeyBindings.$(OBJEXT) \
 	src/App/Osu/neosu-LegacyReplay.$(OBJEXT) \
 	src/App/Osu/neosu-Lobby.$(OBJEXT) \
 	src/App/Osu/neosu-MainMenu.$(OBJEXT) \
@@ -247,6 +246,7 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/Engine/neosu-Font.$(OBJEXT) \
 	src/Engine/neosu-Graphics.$(OBJEXT) \
 	src/Engine/neosu-Image.$(OBJEXT) \
+	src/Engine/Input/neosu-KeyBindings.$(OBJEXT) \
 	src/Engine/Input/neosu-Keyboard.$(OBJEXT) \
 	src/Engine/Input/neosu-Mouse.$(OBJEXT) \
 	src/Engine/neosu-NetworkHandler.$(OBJEXT) \
@@ -344,7 +344,6 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/App/Osu/$(DEPDIR)/neosu-HUD.Po \
 	src/App/Osu/$(DEPDIR)/neosu-HitObjects.Po \
 	src/App/Osu/$(DEPDIR)/neosu-Icons.Po \
-	src/App/Osu/$(DEPDIR)/neosu-KeyBindings.Po \
 	src/App/Osu/$(DEPDIR)/neosu-LegacyReplay.Po \
 	src/App/Osu/$(DEPDIR)/neosu-Lobby.Po \
 	src/App/Osu/$(DEPDIR)/neosu-MainMenu.Po \
@@ -419,6 +418,7 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/Engine/$(DEPDIR)/neosu-RenderTarget.Po \
 	src/Engine/$(DEPDIR)/neosu-TextureAtlas.Po \
 	src/Engine/$(DEPDIR)/neosu-VertexArrayObject.Po \
+	src/Engine/Input/$(DEPDIR)/neosu-KeyBindings.Po \
 	src/Engine/Input/$(DEPDIR)/neosu-Keyboard.Po \
 	src/Engine/Input/$(DEPDIR)/neosu-Mouse.Po \
 	src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLImage.Po \
@@ -824,7 +824,6 @@ neosu_SOURCES = \
 	src/App/Osu/HUD.cpp \
 	src/App/Osu/HitObjects.cpp \
 	src/App/Osu/Icons.cpp \
-	src/App/Osu/KeyBindings.cpp \
 	src/App/Osu/LegacyReplay.cpp \
 	src/App/Osu/Lobby.cpp \
 	src/App/Osu/MainMenu.cpp \
@@ -894,6 +893,7 @@ neosu_SOURCES = \
 	src/Engine/Font.cpp \
 	src/Engine/Graphics.cpp \
 	src/Engine/Image.cpp \
+	src/Engine/Input/KeyBindings.cpp \
 	src/Engine/Input/Keyboard.cpp \
 	src/Engine/Input/Mouse.cpp \
 	src/Engine/NetworkHandler.cpp \
@@ -1290,8 +1290,6 @@ src/App/Osu/neosu-HitObjects.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/neosu-Icons.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
-src/App/Osu/neosu-KeyBindings.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
-	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/neosu-LegacyReplay.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/neosu-Lobby.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
@@ -1483,6 +1481,9 @@ src/Engine/Input/$(am__dirstamp):
 src/Engine/Input/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) src/Engine/Input/$(DEPDIR)
 	@: >>src/Engine/Input/$(DEPDIR)/$(am__dirstamp)
+src/Engine/Input/neosu-KeyBindings.$(OBJEXT):  \
+	src/Engine/Input/$(am__dirstamp) \
+	src/Engine/Input/$(DEPDIR)/$(am__dirstamp)
 src/Engine/Input/neosu-Keyboard.$(OBJEXT):  \
 	src/Engine/Input/$(am__dirstamp) \
 	src/Engine/Input/$(DEPDIR)/$(am__dirstamp)
@@ -1718,7 +1719,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-HUD.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-HitObjects.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-Icons.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-KeyBindings.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-LegacyReplay.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-Lobby.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-MainMenu.Po@am__quote@ # am--include-marker
@@ -1793,6 +1793,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-RenderTarget.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-TextureAtlas.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-VertexArrayObject.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Input/$(DEPDIR)/neosu-KeyBindings.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Input/$(DEPDIR)/neosu-Keyboard.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Input/$(DEPDIR)/neosu-Mouse.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLImage.Po@am__quote@ # am--include-marker
@@ -2279,20 +2280,6 @@ src/App/Osu/neosu-Icons.obj: src/App/Osu/Icons.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/Icons.cpp' object='src/App/Osu/neosu-Icons.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-Icons.obj `if test -f 'src/App/Osu/Icons.cpp'; then $(CYGPATH_W) 'src/App/Osu/Icons.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/Icons.cpp'; fi`
-
-src/App/Osu/neosu-KeyBindings.o: src/App/Osu/KeyBindings.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-KeyBindings.o -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-KeyBindings.Tpo -c -o src/App/Osu/neosu-KeyBindings.o `test -f 'src/App/Osu/KeyBindings.cpp' || echo '$(srcdir)/'`src/App/Osu/KeyBindings.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/$(DEPDIR)/neosu-KeyBindings.Tpo src/App/Osu/$(DEPDIR)/neosu-KeyBindings.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/KeyBindings.cpp' object='src/App/Osu/neosu-KeyBindings.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-KeyBindings.o `test -f 'src/App/Osu/KeyBindings.cpp' || echo '$(srcdir)/'`src/App/Osu/KeyBindings.cpp
-
-src/App/Osu/neosu-KeyBindings.obj: src/App/Osu/KeyBindings.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-KeyBindings.obj -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-KeyBindings.Tpo -c -o src/App/Osu/neosu-KeyBindings.obj `if test -f 'src/App/Osu/KeyBindings.cpp'; then $(CYGPATH_W) 'src/App/Osu/KeyBindings.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/KeyBindings.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/$(DEPDIR)/neosu-KeyBindings.Tpo src/App/Osu/$(DEPDIR)/neosu-KeyBindings.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/KeyBindings.cpp' object='src/App/Osu/neosu-KeyBindings.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-KeyBindings.obj `if test -f 'src/App/Osu/KeyBindings.cpp'; then $(CYGPATH_W) 'src/App/Osu/KeyBindings.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/KeyBindings.cpp'; fi`
 
 src/App/Osu/neosu-LegacyReplay.o: src/App/Osu/LegacyReplay.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-LegacyReplay.o -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-LegacyReplay.Tpo -c -o src/App/Osu/neosu-LegacyReplay.o `test -f 'src/App/Osu/LegacyReplay.cpp' || echo '$(srcdir)/'`src/App/Osu/LegacyReplay.cpp
@@ -3259,6 +3246,20 @@ src/Engine/neosu-Image.obj: src/Engine/Image.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Image.cpp' object='src/Engine/neosu-Image.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/neosu-Image.obj `if test -f 'src/Engine/Image.cpp'; then $(CYGPATH_W) 'src/Engine/Image.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Image.cpp'; fi`
+
+src/Engine/Input/neosu-KeyBindings.o: src/Engine/Input/KeyBindings.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Input/neosu-KeyBindings.o -MD -MP -MF src/Engine/Input/$(DEPDIR)/neosu-KeyBindings.Tpo -c -o src/Engine/Input/neosu-KeyBindings.o `test -f 'src/Engine/Input/KeyBindings.cpp' || echo '$(srcdir)/'`src/Engine/Input/KeyBindings.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Input/$(DEPDIR)/neosu-KeyBindings.Tpo src/Engine/Input/$(DEPDIR)/neosu-KeyBindings.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Input/KeyBindings.cpp' object='src/Engine/Input/neosu-KeyBindings.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Input/neosu-KeyBindings.o `test -f 'src/Engine/Input/KeyBindings.cpp' || echo '$(srcdir)/'`src/Engine/Input/KeyBindings.cpp
+
+src/Engine/Input/neosu-KeyBindings.obj: src/Engine/Input/KeyBindings.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Input/neosu-KeyBindings.obj -MD -MP -MF src/Engine/Input/$(DEPDIR)/neosu-KeyBindings.Tpo -c -o src/Engine/Input/neosu-KeyBindings.obj `if test -f 'src/Engine/Input/KeyBindings.cpp'; then $(CYGPATH_W) 'src/Engine/Input/KeyBindings.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Input/KeyBindings.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Input/$(DEPDIR)/neosu-KeyBindings.Tpo src/Engine/Input/$(DEPDIR)/neosu-KeyBindings.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Input/KeyBindings.cpp' object='src/Engine/Input/neosu-KeyBindings.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Input/neosu-KeyBindings.obj `if test -f 'src/Engine/Input/KeyBindings.cpp'; then $(CYGPATH_W) 'src/Engine/Input/KeyBindings.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Input/KeyBindings.cpp'; fi`
 
 src/Engine/Input/neosu-Keyboard.o: src/Engine/Input/Keyboard.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Input/neosu-Keyboard.o -MD -MP -MF src/Engine/Input/$(DEPDIR)/neosu-Keyboard.Tpo -c -o src/Engine/Input/neosu-Keyboard.o `test -f 'src/Engine/Input/Keyboard.cpp' || echo '$(srcdir)/'`src/Engine/Input/Keyboard.cpp
@@ -4296,7 +4297,6 @@ distclean: distclean-am
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-HUD.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-HitObjects.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Icons.Po
-	-rm -f src/App/Osu/$(DEPDIR)/neosu-KeyBindings.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-LegacyReplay.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Lobby.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-MainMenu.Po
@@ -4371,6 +4371,7 @@ distclean: distclean-am
 	-rm -f src/Engine/$(DEPDIR)/neosu-RenderTarget.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-TextureAtlas.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-VertexArrayObject.Po
+	-rm -f src/Engine/Input/$(DEPDIR)/neosu-KeyBindings.Po
 	-rm -f src/Engine/Input/$(DEPDIR)/neosu-Keyboard.Po
 	-rm -f src/Engine/Input/$(DEPDIR)/neosu-Mouse.Po
 	-rm -f src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLImage.Po
@@ -4493,7 +4494,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-HUD.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-HitObjects.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Icons.Po
-	-rm -f src/App/Osu/$(DEPDIR)/neosu-KeyBindings.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-LegacyReplay.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Lobby.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-MainMenu.Po
@@ -4568,6 +4568,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/Engine/$(DEPDIR)/neosu-RenderTarget.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-TextureAtlas.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-VertexArrayObject.Po
+	-rm -f src/Engine/Input/$(DEPDIR)/neosu-KeyBindings.Po
 	-rm -f src/Engine/Input/$(DEPDIR)/neosu-Keyboard.Po
 	-rm -f src/Engine/Input/$(DEPDIR)/neosu-Mouse.Po
 	-rm -f src/Engine/Renderer/OpenGL/$(DEPDIR)/neosu-OpenGLImage.Po

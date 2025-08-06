@@ -30,7 +30,6 @@ neosu_SOURCES = \
 	src/App/Osu/HUD.cpp \
 	src/App/Osu/HitObjects.cpp \
 	src/App/Osu/Icons.cpp \
-	src/App/Osu/KeyBindings.cpp \
 	src/App/Osu/LegacyReplay.cpp \
 	src/App/Osu/Lobby.cpp \
 	src/App/Osu/MainMenu.cpp \
@@ -100,6 +99,7 @@ neosu_SOURCES = \
 	src/Engine/Font.cpp \
 	src/Engine/Graphics.cpp \
 	src/Engine/Image.cpp \
+	src/Engine/Input/KeyBindings.cpp \
 	src/Engine/Input/Keyboard.cpp \
 	src/Engine/Input/Mouse.cpp \
 	src/Engine/NetworkHandler.cpp \

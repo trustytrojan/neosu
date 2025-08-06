@@ -3,7 +3,7 @@
 #include "ConVar.h"
 #include "Engine.h"
 #include "File.h"
-#include "KeyboardKeys.h"
+#include "KeyBindings.h"
 
 #ifdef MCENGINE_PLATFORM_WINDOWS
 #include "WinDebloatDefs.h"
