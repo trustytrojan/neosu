@@ -271,12 +271,18 @@ MAIN_FUNC /* int argc, char *argv[] */
 //	SDL CALLBACKS/MAINLOOP ENDS  //
 //*******************************//
 
-// window configuration
-static constexpr auto WINDOW_TITLE = PACKAGE_NAME;
-static constexpr auto WINDOW_WIDTH = 1280L;
-static constexpr auto WINDOW_HEIGHT = 720L;
-static constexpr auto WINDOW_WIDTH_MIN = 100;
-static constexpr auto WINDOW_HEIGHT_MIN = 100;
+// convar change callbacks, to set app iteration rate
+void SDLMain::fps_max_callback(float newVal) {
+    int newFps = static_cast<int>(newVal);
+    if((newFps == 0 || newFps >= 30)) m_iFpsMax = newFps;
+    if(m_bHasFocus) setFgFPS();
+}
+
+void SDLMain::fps_max_background_callback(float newVal) {
+    int newFps = static_cast<int>(newVal);
+    if(newFps >= 0) m_iFpsMaxBG = newFps;
+    if(!m_bHasFocus) setBgFPS();
+}
 
 SDLMain::SDLMain(int argc, char *argv[]) : Environment(argc, argv) {
     m_context = nullptr;
@@ -336,12 +342,12 @@ SDL_AppResult SDLMain::initialize() {
 
     // if we got to this point, all relevant subsystems (input handling, graphics interface, etc.) have been initialized
 
-    // load app
-    m_engine->loadApp();
-
     // make window visible
     SDL_ShowWindow(m_window);
     SDL_RaiseWindow(m_window);
+
+    // load app
+    m_engine->loadApp();
 
     // SDL3 stops listening to text input globally when window is created
     SDL_StartTextInput(m_window);
@@ -572,6 +578,13 @@ nocbinline SDL_AppResult SDLMain::iterate() {
 
     return SDL_APP_CONTINUE;
 }
+
+// window configuration
+static constexpr auto WINDOW_TITLE = PACKAGE_NAME;
+static constexpr auto WINDOW_WIDTH = 1280L;
+static constexpr auto WINDOW_HEIGHT = 720L;
+static constexpr auto WINDOW_WIDTH_MIN = 100;
+static constexpr auto WINDOW_HEIGHT_MIN = 100;
 
 bool SDLMain::createWindow() {
     // pre window-creation settings
@@ -806,19 +819,6 @@ void SDLMain::shutdown(SDL_AppResult result) {
         SDL_StopTextInput(m_window);
 
     Environment::shutdown();
-}
-
-// convar change callbacks, to set app iteration rate
-void SDLMain::fps_max_callback(float newVal) {
-    int newFps = static_cast<int>(newVal);
-    if((newFps == 0 || newFps >= 30)) m_iFpsMax = newFps;
-    if(m_bHasFocus) setFgFPS();
-}
-
-void SDLMain::fps_max_background_callback(float newVal) {
-    int newFps = static_cast<int>(newVal);
-    if(newFps >= 0) m_iFpsMaxBG = newFps;
-    if(!m_bHasFocus) setBgFPS();
 }
 
 #include <SDL3/SDL_process.h>

@@ -1604,18 +1604,22 @@ void Osu::onResolutionChanged(Vector2 newResolution) {
         if(newResolution.x < g_vInternalResolution.x) g_vInternalResolution.x = newResolution.x;
         if(newResolution.y < g_vInternalResolution.y) g_vInternalResolution.y = newResolution.y;
 
-        // disable internal resolution on specific conditions
-        bool windowsBorderlessHackCondition =
-            (Env::cfg(OS::WINDOWS) && env->isFullscreen() && env->isFullscreenWindowedBorderless() &&
-             (int)g_vInternalResolution.y == (int)env->getNativeScreenSize().y);  // HACKHACK
-        if(((int)g_vInternalResolution.x == engine->getScreenWidth() &&
-            (int)g_vInternalResolution.y == engine->getScreenHeight()) ||
-           !env->isFullscreen() || windowsBorderlessHackCondition) {
-            debugLog("Internal resolution == Engine resolution || !Fullscreen, disabling resampler ({:d}, {:d})\n",
-                     (int)(g_vInternalResolution == engine->getScreenSize()), (int)(!env->isFullscreen()));
-            cv::resolution_enabled.setValue(0.0f);
-            g_vInternalResolution = engine->getScreenSize();
-        }
+        // the logic below is way too difficult to understand ATM
+        // breaks leaving/entering fullscreen with letterboxing enabled with the SDL backend
+        // some other solution should be used instead of this shit, if this is even an actual problem
+
+        // // disable internal resolution on specific conditions
+        // bool windowsBorderlessHackCondition =
+        //     (Env::cfg(OS::WINDOWS) && env->isFullscreen() && env->isFullscreenWindowedBorderless() &&
+        //      (int)g_vInternalResolution.y == (int)env->getNativeScreenSize().y);  // HACKHACK
+        // if(((int)g_vInternalResolution.x == engine->getScreenWidth() &&
+        //     (int)g_vInternalResolution.y == engine->getScreenHeight()) ||
+        //    !env->isFullscreen() || windowsBorderlessHackCondition) {
+        //     debugLog("Internal resolution == Engine resolution || !Fullscreen, disabling resampler ({}, {})\n",
+        //              (int)(g_vInternalResolution == engine->getScreenSize()), (int)(!env->isFullscreen()));
+        //     cv::resolution_enabled.setValue(0.0f);
+        //     g_vInternalResolution = engine->getScreenSize();
+        // }
     }
 
     // update dpi specific engine globals
@@ -1826,8 +1830,8 @@ void Osu::onFocusLost() {
     this->updateWindowsKeyDisable();
     this->volumeOverlay->loseFocus();
 
-	// release cursor clip
-	this->updateConfineCursor();
+    // release cursor clip
+    this->updateConfineCursor();
 }
 
 void Osu::onMinimized() { this->volumeOverlay->loseFocus(); }
