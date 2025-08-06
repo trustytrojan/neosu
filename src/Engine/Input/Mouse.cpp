@@ -13,6 +13,8 @@
 #include "ResourceManager.h"
 
 Mouse::Mouse() : InputDevice(), vPos(env->getMousePos()), vPosWithoutOffsets(this->vPos), vActualPos(this->vPos) {
+    this->fSensitivity = cv::mouse_sensitivity.getFloat();
+    this->bIsRawInput = cv::mouse_raw_input.getBool();
     cv::mouse_raw_input.setCallback(SA::MakeDelegate<&Mouse::onRawInputChanged>(this));
     cv::mouse_sensitivity.setCallback(SA::MakeDelegate<&Mouse::onSensitivityChanged>(this));
 }
