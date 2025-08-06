@@ -1057,10 +1057,72 @@ void MainMenu::selectRandomBeatmap() {
         RichPresence::onMainMenu();
     } else {
         // Database is not loaded yet, load a random map and select it
-        auto songs_folder{db->getOsuSongsFolder()};
-        auto mapset_folders =
-            env->directoryExists(songs_folder) ? env->getFoldersInFolder(songs_folder) : std::vector<std::string>{};
-        auto mapset_folders2 = env->getFoldersInFolder(MCENGINE_DATA_DIR "maps/");
+        const auto &db_songs = db->getOsuSongsFolder();
+        auto songs_folder{env->directoryExists(db_songs) ? db_songs : ""};
+
+        struct FolderEnumerator : public Resource {
+            ~FolderEnumerator() override = default;
+            FolderEnumerator(std::string filepath) : Resource(std::move(filepath)) {}
+
+            FolderEnumerator &operator=(const FolderEnumerator &) = delete;
+            FolderEnumerator &operator=(FolderEnumerator &&) = delete;
+            FolderEnumerator(const FolderEnumerator &) = delete;
+            FolderEnumerator(FolderEnumerator &&) = delete;
+
+            [[nodiscard]] inline const std::vector<std::string> &getEntries() const { return this->entries; }
+            [[nodiscard]] inline bool getStarted() const { return this->hasStarted; }
+            [[nodiscard]] inline const std::string &getLastPath() const { return this->sFilePath; }
+
+            inline void rebuild(std::string newFilePath) {
+                this->sFilePath = std::move(newFilePath);
+
+                resourceManager->reloadResource(this, true);
+            };
+
+            // type inspection
+            [[nodiscard]] Type getResType() const final { return APPDEFINED; }
+
+           protected:
+            void init() override { this->bReady = true; }
+            void initAsync() override {
+                this->hasStarted = true;
+                if(!this->sFilePath.empty()) {
+                    this->entries = env->getFoldersInFolder(this->sFilePath);
+                }
+                this->bAsyncReady.store(true);
+            }
+            void destroy() override { ; }
+
+           private:
+            std::vector<std::string> entries{};
+            bool hasStarted{false};
+        };
+
+        static FolderEnumerator enumerator_osu{songs_folder};
+        static FolderEnumerator enumerator_neosu{MCENGINE_DATA_DIR "maps/"};
+
+        std::vector<std::string> mapset_folders{};
+        std::vector<std::string> mapset_folders2{};
+
+        for (const auto &e : {&enumerator_osu, &enumerator_neosu}) {
+            auto &folder_entries = (e == &enumerator_osu) ? mapset_folders : mapset_folders2;
+            const std::string this_folder = (e == &enumerator_osu) ? songs_folder : std::string{MCENGINE_DATA_DIR "maps/"};
+
+            if(!e->getStarted()) {
+                resourceManager->requestNextLoadAsync();
+                resourceManager->loadResource(e);
+            }
+
+            if (e->isAsyncReady()) {
+                folder_entries = e->getEntries();
+            }
+
+            if(folder_entries.empty() && e->isAsyncReady() &&
+            (this_folder != e->getLastPath())) {  // reload if songs_folder changed
+                e->rebuild(this_folder);
+            }
+        }
+
         auto nb_mapsets = mapset_folders.size();
         auto nb_mapsets2 = mapset_folders2.size();
         if(nb_mapsets + nb_mapsets2 == 0) return;

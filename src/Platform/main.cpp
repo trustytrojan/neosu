@@ -353,6 +353,15 @@ SDL_AppResult SDLMain::initialize() {
     SDL_StartTextInput(m_window);
     SDL_SetWindowKeyboardGrab(m_window, false);  // this allows windows key and such to work
 
+    // initialize mouse position
+    {
+        float x, y;
+        SDL_GetGlobalMouseState(&x, &y);
+        m_vLastAbsMousePos = Vector2{x, y};
+        // SDL_GetGlobalMouseState can return 0,0 on some platforms at this point... so just center it
+        mouse->onPosChange({engine->getScreenWidth() / 2, engine->getScreenHeight() / 2});
+    }
+
     // return init success
     return SDL_APP_CONTINUE;
 }
@@ -661,14 +670,6 @@ void SDLMain::postWindowCreationSetup() {
     }
 
     SDL_SetWindowMinimumSize(m_window, WINDOW_WIDTH_MIN, WINDOW_HEIGHT_MIN);
-
-    // initialize mouse position
-    {
-        float x, y;
-        SDL_GetGlobalMouseState(&x, &y);
-        m_vLastAbsMousePos.x = x;
-        m_vLastAbsMousePos.y = y;
-    }
 
     // initialize with the display refresh rate of the current monitor
     m_fDisplayHzSecs = 1.0f / (m_fDisplayHz = queryDisplayHz());
