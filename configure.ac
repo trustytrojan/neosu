@@ -311,11 +311,13 @@ AS_IF([test "x$enable_clang" = "xyes"], [
     CFLAGS="$CFLAGS -Qunused-arguments -fuse-ld=lld"
     LDFLAGS="$LDFLAGS -fuse-ld=lld"
     CLANG=yes
+    _cid="Clang"
     AC_SUBST([CLANG])
 ],[
     CC=gcc
     CXX=g++
     NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -fimplicit-constexpr"
+    _cid="GNU"
 ])
 
 AS_IF([test "$host_cpu" = "x86_64" && test -z "$LLVMMINGW"], [
@@ -332,11 +334,11 @@ esac]])
 AS_IF([test "$host_os" = "linux-gnu"], [
     AS_IF([test "$host_cpu" = "i686"], [
         install -Dm755 /dev/stdin $PWD/build/$target-$CC <<EOF
-#!/usr/bin/env sh
+#!/bin/bash
 $CC -m32 "\$@"
 EOF
         install -Dm755 /dev/stdin $PWD/build/$target-$CXX <<EOF
-#!/usr/bin/env sh
+#!/bin/bash
 $CXX -m32 "\$@"
 EOF
         AS_IF([ "x$enable_clang" = "xyes" ], [
@@ -349,18 +351,18 @@ EOF
         AC_SUBST([NASMOBJ],[elf32])
     ],[
         install -Dm755 /dev/stdin $PWD/build/$target-$CC <<EOF
-#!/usr/bin/env sh
+#!/bin/bash
 $CC "\$@"
 EOF
         install -Dm755 /dev/stdin $PWD/build/$target-$CXX <<EOF
-#!/usr/bin/env sh
+#!/bin/bash
 $CXX "\$@"
 EOF
         AC_SUBST([NASMOBJ],[elf64])
     ])
 
     install -Dm755 /dev/stdin $PWD/build/pkg-config <<__EOF__
-#!/usr/bin/env sh
+#!/bin/bash
 PKG_CONFIG_PATH="$PWD/build/deps/lib/pkgconfig:$PWD/build/deps/lib64/pkgconfig" $PKGCONF --personality=$host_cpu-pc-linux-gnu "$PKGTYPE" "\$@"
 __EOF__
 
@@ -368,6 +370,7 @@ __EOF__
     CXX="$PWD/build/$target-$CXX"
     ac_tool_prefix=
     CMAKE_SYSTEM_NAME="Linux"
+    CMAKE_GEN="Ninja"
     SYSNAME="linux"
     DLLEXT=".so"
     LIBPREFIX="lib"
@@ -379,18 +382,23 @@ __EOF__
         AC_SUBST([PKG_CONFIG_SYSTEM_LIBRARY_PATH],["/usr/$host_cpu-w64-mingw32/lib"])
         AC_SUBST([PKG_CONFIG_SYSTEM_INCLUDE_PATH],["/usr/$host_cpu-w64-mingw32/include"])
         install -Dm755 /dev/stdin $PWD/build/pkg-config <<__EOF__
-#!/usr/bin/env sh
+#!/bin/bash
 PKG_CONFIG_LIBDIR="/usr/$host_cpu-w64-mingw32/lib/pkgconfig" PKG_CONFIG_SYSTEM_INCLUDE_PATH="/usr/$host_cpu-w64-mingw32/include" \
 PKG_CONFIG_SYSTEM_LIBRARY_PATH="/usr/$host_cpu-w64-mingw32/lib" PKG_CONFIG_PATH="$PWD/build/deps/lib/pkgconfig:$PWD/build/deps/lib64/pkgconfig" \
 $PKGCONF --personality=$host_cpu-w64-mingw32 $PKGTYPE "\$@"
 __EOF__
+        CMAKE_GEN="Ninja"
     ], [
         # WIP: building in msys2
         install -Dm755 /dev/stdin $PWD/build/pkg-config <<__EOF__
-#!/usr/bin/env sh
+#!/bin/bash
 PKG_CONFIG_PATH="$PWD/build/deps/lib/pkgconfig:$PWD/build/deps/lib64/pkgconfig" \
-$host_cpu-w64-mingw32-pkg-config $PKGTYPE "\$@"
+$PKGCONF --personality=$host_cpu-w64-mingw32 $PKGTYPE "\$@"
 __EOF__
+        CMAKE_GEN="MSYS Makefiles"
+        CMAKEIDOPT="-DCMAKE_CXX_COMPILER_ID=$_cid -DCMAKE_C_COMPILER_ID=$_cid"
+        CFLAGS="$CFLAGS -UHAVE_SYMLINK" # for some reason libarchive's configure thinks we have it then fails to compile...
+        MSYS2_BUILD=1
     ])
 
     AC_CHECK_TOOL([WINDRES], [windres], [windres])
@@ -429,9 +437,13 @@ __EOF__
 AC_SUBST([WINPTHREAD_LDFLAGS])
 
 PKG_CONFIG="$PWD/build/pkg-config"
+CMAKEPAROPT="--parallel $CPU_COUNT"
 AC_SUBST([PKG_CONFIG])
 AC_SUBST([CMAKE_SYSTEM_NAME])
 AC_SUBST([CMAKERCOPT])
+AC_SUBST([CMAKEIDOPT])
+AC_SUBST([CMAKEPAROPT])
+AC_SUBST([CMAKE_GEN])
 AC_SUBST([SYSNAME])
 AC_SUBST([DLLEXT])
 AC_SUBST([LIBPREFIX])
@@ -460,11 +472,11 @@ AS_IF([test "$host_os" = "linux-gnu"],[
 ])
 
 install -Dm755 /dev/stdin $PWD/build/cc <<EOF
-#!/usr/bin/env sh
+#!/bin/bash
 $CCACHE $CC_REAL "\$@"
 EOF
 install -Dm755 /dev/stdin $PWD/build/cxx <<EOF
-#!/usr/bin/env sh
+#!/bin/bash
 $CCACHE $CXX_REAL "\$@"
 EOF
 
@@ -585,11 +597,13 @@ AS_IF([test "x$enable_lto" != "xno"], [
             CXXFLAGS="$CXXFLAGS -flto=thin -fno-fat-lto-objects -fwhole-program-vtables"
             CFLAGS="$CFLAGS -flto=thin -fno-fat-lto-objects -fwhole-program-vtables"
             LDFLAGS="$LDFLAGS -flto=thin -fno-fat-lto-objects -fwhole-program-vtables"
-            mkdir -p $PWD/.ltocache-clang
-            AX_CHECK_LINK_FLAG([-Wl,--thinlto-cache-dir=$PWD/.ltocache-clang], [
-                CXXFLAGS="$CXXFLAGS -Wl,--thinlto-cache-dir=$PWD/.ltocache-clang"
-                CFLAGS="$CFLAGS -Wl,--thinlto-cache-dir=$PWD/.ltocache-clang"
-                LDFLAGS="$LDFLAGS -Wl,--thinlto-cache-dir=$PWD/.ltocache-clang"
+            AS_IF([test -z "$MSYS2_BUILD"], [
+                mkdir -p $PWD/.ltocache-clang
+                AX_CHECK_LINK_FLAG([-Wl,--thinlto-cache-dir=$PWD/.ltocache-clang], [
+                    CXXFLAGS="$CXXFLAGS -Wl,--thinlto-cache-dir=$PWD/.ltocache-clang"
+                    CFLAGS="$CFLAGS -Wl,--thinlto-cache-dir=$PWD/.ltocache-clang"
+                    LDFLAGS="$LDFLAGS -Wl,--thinlto-cache-dir=$PWD/.ltocache-clang"
+                ])
             ])
         ])], [
         # gcc
@@ -598,10 +612,13 @@ AS_IF([test "x$enable_lto" != "xno"], [
             CFLAGS="$CFLAGS -flto=auto -ffat-lto-objects -fuse-linker-plugin -fdevirtualize-at-ltrans"
             LDFLAGS="$LDFLAGS -flto=auto -ffat-lto-objects -fuse-linker-plugin -fdevirtualize-at-ltrans"
             mkdir -p $PWD/.ltocache-gcc
-            AX_CHECK_LINK_FLAG([-flto-incremental=$PWD/.ltocache-gcc], [
-                CXXFLAGS="$CXXFLAGS -flto-incremental=$PWD/.ltocache-gcc"
-                CFLAGS="$CFLAGS -flto-incremental=$PWD/.ltocache-gcc"
-                LDFLAGS="$LDFLAGS -flto-incremental=$PWD/.ltocache-gcc"
+            AS_IF([test -z "$MSYS2_BUILD"], [ 
+                mkdir -p $PWD/.ltocache-gcc
+                AX_CHECK_LINK_FLAG([-flto-incremental=$PWD/.ltocache-gcc], [
+                    CXXFLAGS="$CXXFLAGS -flto-incremental=$PWD/.ltocache-gcc"
+                    CFLAGS="$CFLAGS -flto-incremental=$PWD/.ltocache-gcc"
+                    LDFLAGS="$LDFLAGS -flto-incremental=$PWD/.ltocache-gcc"
+                ])
             ])
         ])
     ])

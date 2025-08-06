@@ -794,6 +794,9 @@ CXX
 LIBPREFIX
 DLLEXT
 SYSNAME
+CMAKE_GEN
+CMAKEPAROPT
+CMAKEIDOPT
 CMAKERCOPT
 CMAKE_SYSTEM_NAME
 PKG_CONFIG
@@ -6582,6 +6585,7 @@ then :
     CFLAGS="$CFLAGS -Qunused-arguments -fuse-ld=lld"
     LDFLAGS="$LDFLAGS -fuse-ld=lld"
     CLANG=yes
+    _cid="Clang"
 
 
 else case e in #(
@@ -6589,6 +6593,7 @@ else case e in #(
     CC=gcc
     CXX=g++
     NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -fimplicit-constexpr"
+    _cid="GNU"
  ;;
 esac
 fi
@@ -6617,11 +6622,11 @@ then :
 then :
 
         install -Dm755 /dev/stdin $PWD/build/$target-$CC <<EOF
-#!/usr/bin/env sh
+#!/bin/bash
 $CC -m32 "\$@"
 EOF
         install -Dm755 /dev/stdin $PWD/build/$target-$CXX <<EOF
-#!/usr/bin/env sh
+#!/bin/bash
 $CXX -m32 "\$@"
 EOF
         if  "x$enable_clang" = "xyes"
@@ -6643,11 +6648,11 @@ fi
 else case e in #(
   e)
         install -Dm755 /dev/stdin $PWD/build/$target-$CC <<EOF
-#!/usr/bin/env sh
+#!/bin/bash
 $CC "\$@"
 EOF
         install -Dm755 /dev/stdin $PWD/build/$target-$CXX <<EOF
-#!/usr/bin/env sh
+#!/bin/bash
 $CXX "\$@"
 EOF
         NASMOBJ=elf64
@@ -6657,7 +6662,7 @@ esac
 fi
 
     install -Dm755 /dev/stdin $PWD/build/pkg-config <<__EOF__
-#!/usr/bin/env sh
+#!/bin/bash
 PKG_CONFIG_PATH="$PWD/build/deps/lib/pkgconfig:$PWD/build/deps/lib64/pkgconfig" $PKGCONF --personality=$host_cpu-pc-linux-gnu "$PKGTYPE" "\$@"
 __EOF__
 
@@ -6665,6 +6670,7 @@ __EOF__
     CXX="$PWD/build/$target-$CXX"
     ac_tool_prefix=
     CMAKE_SYSTEM_NAME="Linux"
+    CMAKE_GEN="Ninja"
     SYSNAME="linux"
     DLLEXT=".so"
     LIBPREFIX="lib"
@@ -6684,20 +6690,25 @@ then :
         PKG_CONFIG_SYSTEM_INCLUDE_PATH="/usr/$host_cpu-w64-mingw32/include"
 
         install -Dm755 /dev/stdin $PWD/build/pkg-config <<__EOF__
-#!/usr/bin/env sh
+#!/bin/bash
 PKG_CONFIG_LIBDIR="/usr/$host_cpu-w64-mingw32/lib/pkgconfig" PKG_CONFIG_SYSTEM_INCLUDE_PATH="/usr/$host_cpu-w64-mingw32/include" \
 PKG_CONFIG_SYSTEM_LIBRARY_PATH="/usr/$host_cpu-w64-mingw32/lib" PKG_CONFIG_PATH="$PWD/build/deps/lib/pkgconfig:$PWD/build/deps/lib64/pkgconfig" \
 $PKGCONF --personality=$host_cpu-w64-mingw32 $PKGTYPE "\$@"
 __EOF__
+        CMAKE_GEN="Ninja"
 
 else case e in #(
   e)
         # WIP: building in msys2
         install -Dm755 /dev/stdin $PWD/build/pkg-config <<__EOF__
-#!/usr/bin/env sh
+#!/bin/bash
 PKG_CONFIG_PATH="$PWD/build/deps/lib/pkgconfig:$PWD/build/deps/lib64/pkgconfig" \
-$host_cpu-w64-mingw32-pkg-config $PKGTYPE "\$@"
+$PKGCONF --personality=$host_cpu-w64-mingw32 $PKGTYPE "\$@"
 __EOF__
+        CMAKE_GEN="MSYS Makefiles"
+        CMAKEIDOPT="-DCMAKE_CXX_COMPILER_ID=$_cid -DCMAKE_C_COMPILER_ID=$_cid"
+        CFLAGS="$CFLAGS -UHAVE_SYMLINK" # for some reason libarchive's configure thinks we have it then fails to compile...
+        MSYS2_BUILD=1
      ;;
 esac
 fi
@@ -6853,6 +6864,10 @@ fi
 
 
 PKG_CONFIG="$PWD/build/pkg-config"
+CMAKEPAROPT="--parallel $CPU_COUNT"
+
+
+
 
 
 
@@ -8140,11 +8155,11 @@ esac
 fi
 
 install -Dm755 /dev/stdin $PWD/build/cc <<EOF
-#!/usr/bin/env sh
+#!/bin/bash
 $CCACHE $CC_REAL "\$@"
 EOF
 install -Dm755 /dev/stdin $PWD/build/cxx <<EOF
-#!/usr/bin/env sh
+#!/bin/bash
 $CCACHE $CXX_REAL "\$@"
 EOF
 
@@ -8920,8 +8935,11 @@ then :
             CXXFLAGS="$CXXFLAGS -flto=thin -fno-fat-lto-objects -fwhole-program-vtables"
             CFLAGS="$CFLAGS -flto=thin -fno-fat-lto-objects -fwhole-program-vtables"
             LDFLAGS="$LDFLAGS -flto=thin -fno-fat-lto-objects -fwhole-program-vtables"
-            mkdir -p $PWD/.ltocache-clang
-            as_CACHEVAR=`printf "%s\n" "ax_cv_check_ldflags__-Wl,--thinlto-cache-dir=$PWD/.ltocache-clang" | sed "$as_sed_sh"`
+            if test -z "$MSYS2_BUILD"
+then :
+
+                mkdir -p $PWD/.ltocache-clang
+                as_CACHEVAR=`printf "%s\n" "ax_cv_check_ldflags__-Wl,--thinlto-cache-dir=$PWD/.ltocache-clang" | sed "$as_sed_sh"`
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,--thinlto-cache-dir=$PWD/.ltocache-clang" >&5
 printf %s "checking whether the linker accepts -Wl,--thinlto-cache-dir=$PWD/.ltocache-clang... " >&6; }
 if eval test \${$as_CACHEVAR+y}
@@ -8960,15 +8978,17 @@ printf "%s\n" "$ac_res" >&6; }
 if eval test \"x\$"$as_CACHEVAR"\" = x"yes"
 then :
 
-                CXXFLAGS="$CXXFLAGS -Wl,--thinlto-cache-dir=$PWD/.ltocache-clang"
-                CFLAGS="$CFLAGS -Wl,--thinlto-cache-dir=$PWD/.ltocache-clang"
-                LDFLAGS="$LDFLAGS -Wl,--thinlto-cache-dir=$PWD/.ltocache-clang"
+                    CXXFLAGS="$CXXFLAGS -Wl,--thinlto-cache-dir=$PWD/.ltocache-clang"
+                    CFLAGS="$CFLAGS -Wl,--thinlto-cache-dir=$PWD/.ltocache-clang"
+                    LDFLAGS="$LDFLAGS -Wl,--thinlto-cache-dir=$PWD/.ltocache-clang"
 
 else case e in #(
   e) : ;;
 esac
 fi
 
+
+fi
 
 else case e in #(
   e) : ;;
@@ -9019,7 +9039,11 @@ then :
             CFLAGS="$CFLAGS -flto=auto -ffat-lto-objects -fuse-linker-plugin -fdevirtualize-at-ltrans"
             LDFLAGS="$LDFLAGS -flto=auto -ffat-lto-objects -fuse-linker-plugin -fdevirtualize-at-ltrans"
             mkdir -p $PWD/.ltocache-gcc
-            as_CACHEVAR=`printf "%s\n" "ax_cv_check_ldflags__-flto-incremental=$PWD/.ltocache-gcc" | sed "$as_sed_sh"`
+            if test -z "$MSYS2_BUILD"
+then :
+
+                mkdir -p $PWD/.ltocache-gcc
+                as_CACHEVAR=`printf "%s\n" "ax_cv_check_ldflags__-flto-incremental=$PWD/.ltocache-gcc" | sed "$as_sed_sh"`
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -flto-incremental=$PWD/.ltocache-gcc" >&5
 printf %s "checking whether the linker accepts -flto-incremental=$PWD/.ltocache-gcc... " >&6; }
 if eval test \${$as_CACHEVAR+y}
@@ -9058,15 +9082,17 @@ printf "%s\n" "$ac_res" >&6; }
 if eval test \"x\$"$as_CACHEVAR"\" = x"yes"
 then :
 
-                CXXFLAGS="$CXXFLAGS -flto-incremental=$PWD/.ltocache-gcc"
-                CFLAGS="$CFLAGS -flto-incremental=$PWD/.ltocache-gcc"
-                LDFLAGS="$LDFLAGS -flto-incremental=$PWD/.ltocache-gcc"
+                    CXXFLAGS="$CXXFLAGS -flto-incremental=$PWD/.ltocache-gcc"
+                    CFLAGS="$CFLAGS -flto-incremental=$PWD/.ltocache-gcc"
+                    LDFLAGS="$LDFLAGS -flto-incremental=$PWD/.ltocache-gcc"
 
 else case e in #(
   e) : ;;
 esac
 fi
 
+
+fi
 
 else case e in #(
   e) : ;;
