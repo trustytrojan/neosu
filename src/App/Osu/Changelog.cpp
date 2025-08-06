@@ -34,6 +34,7 @@ Changelog::Changelog() : ScreenBackable() {
         R"(- Added chat/screenshot/status notifications)",
         R"(- Fixed crash when skin is missing spinner sounds)",
         R"(- Fixed circles not being clickable while spinner is active)",
+        R"(- Fixed extended chat console flickering)",
     };
     changelogs.push_back(v40_00);
 

@@ -317,8 +317,8 @@ Osu::Osu() {
     this->screens.push_back(this->modSelector);
     this->screens.push_back(this->user_actions);
     this->screens.push_back(this->room);
-    this->screens.push_back(this->chat);
     this->screens.push_back(this->notificationOverlay);
+    this->screens.push_back(this->chat);
     this->screens.push_back(this->optionsMenu);
     this->screens.push_back(this->rankingScreen);
     this->screens.push_back(this->userStats);
@@ -989,8 +989,8 @@ void Osu::onKeyDown(KeyboardEvent &key) {
 
     // F8 toggle chat
     if(key == (KEYCODE)cv::TOGGLE_CHAT.getInt()) {
-        // When options menu is open, instead of toggling chat, close options menu and open chat
-        if(bancho->is_online() && this->optionsMenu->isVisible()) {
+        // When options menu is open, instead of toggling chat, always open chat
+        if(this->optionsMenu->isVisible()) {
             this->optionsMenu->setVisible(false);
             this->chat->user_wants_chat = true;
             this->chat->updateVisibility();
@@ -1002,8 +1002,8 @@ void Osu::onKeyDown(KeyboardEvent &key) {
 
     // F9 toggle extended chat
     if(key == (KEYCODE)cv::TOGGLE_EXTENDED_CHAT.getInt()) {
-        // When options menu is open, instead of toggling chat, close options menu and open chat
-        if(bancho->is_online() && this->optionsMenu->isVisible()) {
+        // When options menu is open, instead of toggling extended chat, always enable it
+        if(this->optionsMenu->isVisible()) {
             this->optionsMenu->setVisible(false);
             this->chat->user_wants_chat = true;
             this->chat->user_list->setVisible(true);

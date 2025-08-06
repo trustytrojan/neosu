@@ -126,7 +126,7 @@ void UIUserContextMenuScreen::on_action(const UString& /*text*/, int user_action
         BANCHO::Net::send_packet(packet);  // kick by locking the slot
         BANCHO::Net::send_packet(packet);  // unlock the slot
     } else if(user_action == START_CHAT) {
-        osu->chat->addChannel(user_info->name, true);
+        osu->chat->openChannel(user_info->name);
     } else if(user_action == VIEW_PROFILE) {
         // Fallback in case we're offline
         auto endpoint = bancho->endpoint;

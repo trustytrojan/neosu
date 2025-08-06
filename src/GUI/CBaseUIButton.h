@@ -15,11 +15,20 @@ class CBaseUIButton : public CBaseUIElement {
 
     void click(bool left = true, bool right = false) { this->onClicked(left, right); }
 
-    // callbacks, either void, with ourself as the argument, or with the held left/right buttons
-    using ButtonClickCallback = SA::auto_callback<CBaseUIButton, bool, bool>;
+    template <typename Callable>
+    CBaseUIButton *setClickCallback(Callable &&cb) {
+        using CBType = std::decay_t<Callable>;
 
-    CBaseUIButton* setClickCallback(auto&& callback) {
-        this->clickCallback = std::forward<decltype(callback)>(callback);
+        if constexpr(std::is_invocable_v<CBType, CBaseUIButton *, bool, bool>) {
+            this->clickCallback = std::forward<Callable>(cb);
+        } else if constexpr(std::is_invocable_v<CBType, CBaseUIButton *>) {
+            this->clickCallback = [cb = std::forward<Callable>(cb)](CBaseUIButton *btn, bool, bool) { cb(btn); };
+        } else if constexpr(std::is_invocable_v<CBType>) {
+            this->clickCallback = [cb = std::forward<Callable>(cb)](CBaseUIButton *btn, bool, bool) { cb(); };
+        } else {
+            static_assert(false, "Programmer Error (bad callback signature)");
+        }
+
         return this;
     }
 
@@ -86,7 +95,6 @@ class CBaseUIButton : public CBaseUIElement {
     [[nodiscard]] inline Color getTextColor() const { return this->textColor; }
     [[nodiscard]] inline UString getText() const { return this->sText; }
     [[nodiscard]] inline McFont *getFont() const { return this->font; }
-    [[nodiscard]] inline const ButtonClickCallback &getClickCallback() const { return this->clickCallback; }
     [[nodiscard]] inline bool isTextLeft() const { return this->bTextLeft; }
 
     // events
@@ -104,7 +112,8 @@ class CBaseUIButton : public CBaseUIElement {
 
     UString sText;
 
-    ButtonClickCallback clickCallback;
+    // callbacks, either void, with ourself as the argument, or with the held left/right buttons
+    std::function<void(CBaseUIButton *, bool, bool)> clickCallback;
 
     McFont *font;
 

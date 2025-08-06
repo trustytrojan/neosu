@@ -49,6 +49,7 @@ class Chat : public OsuScreen {
     void mark_as_read(ChatChannel *chan);
     void switchToChannel(ChatChannel *chan);
     void addChannel(const UString &channel_name, bool switch_to = false);
+    void openChannel(const UString &channel_name);
     void addMessage(UString channel_name, const ChatMessage &msg, bool mark_unread = true);
     void addSystemMessage(UString msg);
     void removeChannel(const UString &channel_name);

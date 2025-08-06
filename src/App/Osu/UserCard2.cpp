@@ -22,13 +22,25 @@ UserCard2::UserCard2(i32 user_id) : CBaseUIButton() {
     this->info = BANCHO::User::get_user_info(user_id, true);
     this->avatar = new UIAvatar(user_id, 0.f, 0.f, 0.f, 0.f);
     this->avatar->on_screen = true;
-    this->setClickCallback(SA::MakeDelegate<&UserCard2::onClick>(this));
+    this->setClickCallback([user_id] { osu->user_actions->open(user_id); });
 }
 
 UserCard2::~UserCard2() { SAFE_DELETE(this->avatar); }
 
 void UserCard2::draw() {
     if(!this->bVisible) return;
+
+    auto screen = osu->getScreenSize();
+    bool is_widescreen = ((i32)(std::max(0, (i32)((screen.x - (screen.y * 4.f / 3.f)) / 2.f))) > 0);
+    f32 global_scale = screen.x / (is_widescreen ? 1366.f : 1024.f);
+    auto card_size = Vector2{global_scale * 325, global_scale * 78};
+    this->setSize(card_size);
+
+    // position user icon
+    const f32 iconHeight = this->vSize.y - AVATAR_MARGIN * 2;
+    const f32 iconWidth = iconHeight;
+    this->avatar->setPos(this->vPos.x + AVATAR_MARGIN, this->vPos.y + AVATAR_MARGIN);
+    this->avatar->setSize(iconWidth, iconHeight);
 
     g->pushClipRect(McRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y));
 
@@ -150,8 +162,8 @@ void UserCard2::draw() {
         const f32 paddingTop = height * paddingTopPercent;
 
         /* TODO: use?
-        * const f32 paddingLeftPercent = (1.0f - usernameScale) * 0.3f;
-        */
+         * const f32 paddingLeftPercent = (1.0f - usernameScale) * 0.3f;
+         */
 
         const f32 scale = height / usernameFont->getHeight() * usernameScale;
 
@@ -183,27 +195,4 @@ void UserCard2::draw() {
     }
 
     g->popClipRect();
-}
-
-void UserCard2::mouse_update(bool *propagate_clicks) {
-    if(!this->bVisible) return;
-
-    auto screen = osu->getScreenSize();
-    bool is_widescreen = ((i32)(std::max(0, (i32)((screen.x - (screen.y * 4.f / 3.f)) / 2.f))) > 0);
-    f32 global_scale = screen.x / (is_widescreen ? 1366.f : 1024.f);
-    auto card_size = Vector2{global_scale * 325, global_scale * 78};
-    this->setSize(card_size);
-
-    // position user icon
-    const f32 iconHeight = this->vSize.y - AVATAR_MARGIN * 2;
-    const f32 iconWidth = iconHeight;
-    this->avatar->setPos(this->vPos.x + AVATAR_MARGIN, this->vPos.y + AVATAR_MARGIN);
-    this->avatar->setSize(iconWidth, iconHeight);
-
-    CBaseUIButton::mouse_update(propagate_clicks);
-}
-
-void UserCard2::onClick(CBaseUIButton *btn) {
-    (void)btn;
-    osu->user_actions->open(this->info->user_id);
 }

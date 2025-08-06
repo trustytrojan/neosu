@@ -809,6 +809,12 @@ void Chat::switchToChannel(ChatChannel *chan) {
     this->updateButtonLayout(this->getSize());
 }
 
+void Chat::openChannel(const UString &channel_name) {
+    this->addChannel(channel_name, true);
+    this->user_wants_chat = true;
+    this->updateVisibility();
+}
+
 void Chat::addChannel(const UString &channel_name, bool switch_to) {
     for(auto chan : this->channels) {
         if(chan->name == channel_name) {
@@ -883,7 +889,7 @@ void Chat::addMessage(UString channel_name, const ChatMessage &msg, bool mark_un
         if(cv::chat_notify_on_dm.getBool()) {
             auto notif = UString::format("%s sent you a message", msg.author_name.toUtf8());
             osu->notificationOverlay->addToast(notif, CHAT_TOAST,
-                                               [channel_name] { osu->chat->addChannel(channel_name, true); });
+                                               [channel_name] { osu->chat->openChannel(channel_name); });
         }
         if(cv::chat_ping_on_mention.getBool()) {
             // Yes, osu! really does use "match-start.wav" for when you get pinged
@@ -896,8 +902,7 @@ void Chat::addMessage(UString channel_name, const ChatMessage &msg, bool mark_un
     mentioned &= msg.author_id != bancho->user_id;
     if(mentioned && cv::chat_notify_on_mention.getBool()) {
         auto notif = UString::format("You were mentioned in %s", channel_name.toUtf8());
-        osu->notificationOverlay->addToast(notif, CHAT_TOAST,
-                                           [channel_name] { osu->chat->addChannel(channel_name, true); });
+        osu->notificationOverlay->addToast(notif, CHAT_TOAST, [channel_name] { osu->chat->openChannel(channel_name); });
     }
     if(mentioned && cv::chat_ping_on_mention.getBool()) {
         // Yes, osu! really does use "match-start.wav" for when you get pinged

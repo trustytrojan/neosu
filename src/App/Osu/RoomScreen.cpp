@@ -583,8 +583,7 @@ void RoomScreen::on_room_joined(Room room) {
 
     RichPresence::setBanchoStatus(room.name.toUtf8(), MULTIPLAYER);
     RichPresence::onMultiplayerLobby();
-    osu->chat->addChannel("#multiplayer");
-    osu->chat->updateVisibility();
+    osu->chat->openChannel("#multiplayer");
 
     osu->previous_mods = Replay::Mods::from_cvars();
 

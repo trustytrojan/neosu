@@ -155,7 +155,7 @@ void Bancho::handle_packet(Packet *packet) {
                 auto text = UString::format("%s is now %s", user->name.toUtf8(), actions[action].c_str());
                 auto open_dms = [stats_user_id] {
                     UserInfo *user = BANCHO::User::get_user_info(stats_user_id);
-                    osu->chat->addChannel(user->name, true);
+                    osu->chat->openChannel(user->name);
                 };
                 osu->notificationOverlay->addToast(text, STATUS_TOAST, open_dms);
             }
