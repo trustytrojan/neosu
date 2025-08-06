@@ -583,15 +583,16 @@ void Environment::maximize() {
 // TODO: implement exclusive fullscreen for dx11 backend
 void Environment::enableFullscreen() {
     if(m_bFullscreen) return;
-    if((m_bFullscreen =
-            SDL_SetWindowFullscreen(m_window, true)))  // NOTE: "fake" fullscreen since we don't want a videomode change
-        return;
-    // if (m_envDebug) debugLog("{:s} {:s}\n", __PRETTY_FUNCTION__, SDL_GetError());
+    m_bFullscreen =
+        SDL_SetWindowFullscreen(m_window, true);  // NOTE: "fake" fullscreen since we don't want a videomode change
+    cv::fullscreen.setValue(m_bFullscreen, false);
+    syncWindow();
 }
 
 void Environment::disableFullscreen() {
-    if(!(m_bFullscreen = !SDL_SetWindowFullscreen(m_window, false))) return;
-    // if (m_envDebug) debugLog("{:s} {:s}\n", __PRETTY_FUNCTION__, SDL_GetError());
+    m_bFullscreen = SDL_SetWindowFullscreen(m_window, false);
+    cv::fullscreen.setValue(m_bFullscreen, false);
+    syncWindow();
 }
 
 void Environment::setFullscreenWindowedBorderless(bool fullscreenWindowedBorderless) {
