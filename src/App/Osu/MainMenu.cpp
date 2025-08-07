@@ -1063,7 +1063,10 @@ void MainMenu::selectRandomBeatmap() {
 
         struct FolderEnumerator : public Resource {
             ~FolderEnumerator() override = default;
-            FolderEnumerator(std::string filepath) : Resource(std::move(filepath)) {}
+            FolderEnumerator(std::string filepath) : Resource(std::move(filepath)) {
+                resourceManager->requestNextLoadAsync();
+                resourceManager->loadResource(this);
+            }
 
             FolderEnumerator &operator=(const FolderEnumerator &) = delete;
             FolderEnumerator &operator=(FolderEnumerator &&) = delete;
@@ -1071,14 +1074,6 @@ void MainMenu::selectRandomBeatmap() {
             FolderEnumerator(FolderEnumerator &&) = delete;
 
             [[nodiscard]] inline const std::vector<std::string> &getEntries() const { return this->entries; }
-            [[nodiscard]] inline bool getStarted() const { return this->hasStarted; }
-            [[nodiscard]] inline const std::string &getLastPath() const { return this->sFilePath; }
-
-            inline void rebuild(std::string newFilePath) {
-                this->sFilePath = std::move(newFilePath);
-
-                resourceManager->reloadResource(this, true);
-            };
 
             // type inspection
             [[nodiscard]] Type getResType() const final { return APPDEFINED; }
@@ -1086,7 +1081,6 @@ void MainMenu::selectRandomBeatmap() {
            protected:
             void init() override { this->bReady = true; }
             void initAsync() override {
-                this->hasStarted = true;
                 if(!this->sFilePath.empty()) {
                     this->entries = env->getFoldersInFolder(this->sFilePath);
                 }
@@ -1096,7 +1090,6 @@ void MainMenu::selectRandomBeatmap() {
 
            private:
             std::vector<std::string> entries{};
-            bool hasStarted{false};
         };
 
         static FolderEnumerator enumerator_osu{songs_folder};
@@ -1105,22 +1098,12 @@ void MainMenu::selectRandomBeatmap() {
         std::vector<std::string> mapset_folders{};
         std::vector<std::string> mapset_folders2{};
 
-        for (const auto &e : {&enumerator_osu, &enumerator_neosu}) {
+        for(const auto &e : {&enumerator_osu, &enumerator_neosu}) {
             auto &folder_entries = (e == &enumerator_osu) ? mapset_folders : mapset_folders2;
-            const std::string this_folder = (e == &enumerator_osu) ? songs_folder : std::string{MCENGINE_DATA_DIR "maps/"};
-
-            if(!e->getStarted()) {
-                resourceManager->requestNextLoadAsync();
-                resourceManager->loadResource(e);
-            }
-
-            if (e->isAsyncReady()) {
+            const std::string this_folder =
+                (e == &enumerator_osu) ? songs_folder : std::string{MCENGINE_DATA_DIR "maps/"};
+            if(e->isAsyncReady()) {
                 folder_entries = e->getEntries();
-            }
-
-            if(folder_entries.empty() && e->isAsyncReady() &&
-            (this_folder != e->getLastPath())) {  // reload if songs_folder changed
-                e->rebuild(this_folder);
             }
         }
 
