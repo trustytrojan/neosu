@@ -3,7 +3,7 @@
 
 namespace FontTypeMap {
 inline const char *getCharacterRangeName(wchar_t ch) {
-    if(ch >= 0x0000 && ch <= 0x007F) return "Basic Latin";
+    if(/*ch >= 0x0000 && */ ch <= 0x007F) return "Basic Latin";
     if(ch >= 0x0080 && ch <= 0x00FF) return "Latin-1 Supplement";
     if(ch >= 0x0100 && ch <= 0x017F) return "Latin Extended-A";
     if(ch >= 0x0180 && ch <= 0x024F) return "Latin Extended-B";
@@ -95,7 +95,7 @@ inline const char *getCharacterRangeName(wchar_t ch) {
     if(ch >= 0xFE50 && ch <= 0xFE6F) return "Small Form Variants";
     if(ch >= 0xFE70 && ch <= 0xFEFF) return "Arabic Presentation Forms-B";
     if(ch >= 0xFF00 && ch <= 0xFFEF) return "Halfwidth and Fullwidth Forms";
-    if(ch >= 0xFFF0 && ch <= 0xFFFF) return "Specials";
+    if(ch >= 0xFFF0 && ch < 0xFFFF) return "Specials";
 #if WCHAR_MAX > 0xFFFF
     // emoji ranges (TODO: requires surrogate pair support)
     if(ch >= 0x1F600 && ch <= 0x1F64F) return "Emoticons";

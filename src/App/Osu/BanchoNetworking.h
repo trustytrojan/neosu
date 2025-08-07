@@ -30,10 +30,10 @@ enum APIRequestType : uint8_t {
 
 struct APIRequest {
     APIRequestType type;
-    UString path = "";
-    curl_mime *mime = NULL;
-    u8 *extra = NULL;
-    i32 extra_int = 0;  // lazy
+    UString path{""};
+    curl_mime *mime{NULL};
+    u8 *extra{NULL};
+    i32 extra_int{0};  // lazy
 };
 
 // unused?

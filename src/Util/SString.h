@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <string>
 #include <vector>
+#include <cassert>
 
 // non-UString-related fast and small string manipulation helpers
 
@@ -55,6 +56,10 @@ inline std::vector<std::string> split(const std::string& s, const std::string_vi
 
 // in-place whitespace trimming
 inline void trim(std::string* str) {
+    assert(str &&
+           "null string passed to SString::trim()");  // since asserts are disabled in release builds, this is
+                                                      // harmless to add a reason for a null deref crash in debug builds
+    if(str->empty()) return;
     str->erase(0, str->find_first_not_of(" \t\r\n"));
     str->erase(str->find_last_not_of(" \t\r\n") + 1);
 }

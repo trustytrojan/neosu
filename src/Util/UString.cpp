@@ -112,14 +112,18 @@ int UString::findChar(const UString &str, int start, bool respectEscapeChars) co
 
     // use fast lookup table for BMP characters, linear search for extended characters
     std::vector<bool> charMap(0x10000, false);  // lookup table for BMP characters (U+0000 to U+FFFF)
-    std::vector<wchar_t> extendedChars;         // for characters outside BMP (U+10000 and above)
+#if WCHAR_MAX > 0xFFFF
+    std::vector<wchar_t> extendedChars;  // for characters outside BMP (U+10000 and above)
+#endif
 
     for(int i = 0; i < strLen; i++) {
         wchar_t ch = str.sUnicode[i];
-        if(ch <= 0xFFFF)
-            charMap[ch] = true;
-        else
+#if WCHAR_MAX > 0xFFFF
+        if(ch > 0xFFFF)
             extendedChars.push_back(ch);
+        else
+#endif
+            charMap[ch] = true;
     }
 
     bool escaped = false;
@@ -129,11 +133,12 @@ int UString::findChar(const UString &str, int start, bool respectEscapeChars) co
         } else {
             wchar_t ch = this->sUnicode[i];
             bool found = false;
-
-            if(ch <= 0xFFFF)
-                found = charMap[ch];
-            else
+#if WCHAR_MAX > 0xFFFF
+            if(ch > 0xFFFF)
                 found = std::ranges::find(extendedChars, ch) != extendedChars.end();
+            else
+#endif
+                found = charMap[ch];
 
             if(!escaped && found) return i;
 
@@ -434,7 +439,10 @@ inline int encode(std::wstring_view unicode, char *utf8) {
         {
             if(utf8 != nullptr) getUtf8(ch, &(utf8[utf8len]), 2, USTRING_VALUE_2BYTE);
             utf8len += 2;
-        } else if(ch <= 0xFFFF)  // 3 bytes
+        } else
+#if WCHAR_MAX > 0xFFFF
+            if(ch <= 0xFFFF)  // 3 bytes
+#endif
         {
             if(utf8 != nullptr) getUtf8(ch, &(utf8[utf8len]), 3, USTRING_VALUE_3BYTE);
             utf8len += 3;

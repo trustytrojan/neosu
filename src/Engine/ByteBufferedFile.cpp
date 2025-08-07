@@ -2,6 +2,7 @@
 
 #include "Engine.h"
 #include <system_error>
+#include <cassert>
 
 ByteBufferedFile::Reader::Reader(const UString &uPath) : buffer(READ_BUFFER_SIZE) {
     auto path = std::filesystem::path(uPath.plat_str());
@@ -61,6 +62,7 @@ MD5Hash ByteBufferedFile::Reader::read_hash() {
         len = 32;
     }
 
+    assert(len <= 32); // shut up gcc PLEASE
     if(this->read_bytes(reinterpret_cast<u8 *>(hash.hash.data()), len) != len) {
         // just continue, don't set error flag
         debugLog("WARNING: failed to read {} bytes to obtain hash.\n", len);

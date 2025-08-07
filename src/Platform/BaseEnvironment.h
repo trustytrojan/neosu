@@ -293,3 +293,11 @@ typedef SSIZE_T ssize_t;
 #endif
 
 #define MCENGINE_DATA_DIR "." PREF_PATHSEP
+
+#if defined(_X86_) || defined(__i386__) || (defined(_WIN32) && !defined(_WIN64))
+#define MC_ARCH64
+#elif defined(_AMD64_) || defined(__x86_64__) || (defined(_WIN64))
+#define MC_ARCH32
+#else
+MC_MESSAGE("WARNING: unknown compilation arch??")
+#endif
