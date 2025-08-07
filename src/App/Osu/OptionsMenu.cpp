@@ -2219,14 +2219,18 @@ void OptionsMenu::askForLoginDetails() {
 void OptionsMenu::updateOsuFolder() {
     this->osuFolderTextbox->stealFocus();
 
-    // automatically insert a slash at the end if the user forgets
-    UString newOsuFolder = this->osuFolderTextbox->getText();
-    newOsuFolder = newOsuFolder.trim();
-    if(newOsuFolder.length() > 0) {
-        if(newOsuFolder[newOsuFolder.length() - 1] != L'/' && newOsuFolder[newOsuFolder.length() - 1] != L'\\') {
-            newOsuFolder.append(PREF_PATHSEP);
-            this->osuFolderTextbox->setText(newOsuFolder);
+    std::string newOsuFolder{this->osuFolderTextbox->getText().utf8View()};
+
+    if(!newOsuFolder.empty()) {
+        SString::trim(&newOsuFolder);
+    }
+    if(!newOsuFolder.empty()) {
+        // automatically insert a slash at the end if the user forgets
+        while(!newOsuFolder.empty() && (newOsuFolder.ends_with('\\') || newOsuFolder.ends_with('/'))) {
+            newOsuFolder.pop_back();
         }
+        newOsuFolder.append(PREF_PATHSEP);
+        this->osuFolderTextbox->setText(newOsuFolder.c_str());
     }
 
     // set convar to new folder
@@ -3297,7 +3301,9 @@ void OptionsMenu::onResetEverythingClicked(CBaseUIButton * /*button*/) {
     }
 }
 
-void OptionsMenu::onImportSettingsFromStable(CBaseUIButton * /*button*/) { PeppyImporter::import_settings_from_osu_stable(); }
+void OptionsMenu::onImportSettingsFromStable(CBaseUIButton * /*button*/) {
+    PeppyImporter::import_settings_from_osu_stable();
+}
 
 void OptionsMenu::addSpacer() {
     auto *e = new OPTIONS_ELEMENT;
