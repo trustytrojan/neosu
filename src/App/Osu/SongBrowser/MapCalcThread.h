@@ -1,4 +1,6 @@
 #pragma once
+// Copyright (c) 2024, kiwec, All rights reserved.
+
 #include <atomic>
 #include <memory>
 #include <mutex>

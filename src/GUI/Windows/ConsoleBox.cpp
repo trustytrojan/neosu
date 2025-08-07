@@ -1,3 +1,4 @@
+// Copyright (c) 2011, PG, All rights reserved.
 #include "ConsoleBox.h"
 
 #include <utility>

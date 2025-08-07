@@ -1,4 +1,5 @@
 #pragma once
+// Copyright (c) 2019, PG, All rights reserved.
 #include "ScreenBackable.h"
 
 class ConVar;

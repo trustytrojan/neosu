@@ -1,11 +1,5 @@
-//================ Copyright (c) 2017, PG, All rights reserved. =================//
-//
-// Purpose:		container for dynamically merging multiple images into one
-//
-// $NoKeywords: $imgtxat
-//===============================================================================//
-
 #pragma once
+// Copyright (c) 2017, PG, All rights reserved.
 #ifndef TEXTUREATLAS_H
 #define TEXTUREATLAS_H
 

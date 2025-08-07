@@ -1,10 +1,4 @@
-//================ Copyright (c) 2017, PG, All rights reserved. =================//
-//
-// Purpose:		OpenGL baking support for vao
-//
-// $NoKeywords: $glvao
-//===============================================================================//
-
+// Copyright (c) 2017, PG, All rights reserved.
 #include "OpenGLVertexArrayObject.h"
 
 #ifdef MCENGINE_FEATURE_OPENGL

@@ -1,10 +1,4 @@
-//================ Copyright (c) 2018, PG, All rights reserved. =================//
-//
-// Purpose:		font awesome icon enum
-//
-// $NoKeywords: $
-//===============================================================================//
-
+// Copyright (c) 2018, PG, All rights reserved.
 #ifndef OSUICONS_H
 #define OSUICONS_H
 

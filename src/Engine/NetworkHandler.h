@@ -1,4 +1,5 @@
 #pragma once
+// Copyright (c) 2015, PG, All rights reserved.
 #include "UString.h"
 #include "templates.h"
 

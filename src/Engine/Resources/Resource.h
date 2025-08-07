@@ -1,11 +1,5 @@
-//================ Copyright (c) 2012, PG, All rights reserved. =================//
-//
-// Purpose:		base class for resources
-//
-// $NoKeywords: $res
-//===============================================================================//
-
 #pragma once
+// Copyright (c) 2012, PG, All rights reserved.
 #ifndef RESOURCE_H
 #define RESOURCE_H
 

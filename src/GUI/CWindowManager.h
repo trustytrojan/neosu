@@ -1,10 +1,4 @@
-//================ Copyright (c) 2014, PG, All rights reserved. =================//
-//
-// Purpose:		handles multiple window interactions
-//
-// $NoKeywords: $
-//===============================================================================//
-
+// Copyright (c) 2014, PG, All rights reserved.
 #ifndef CWINDOWMANAGER_H
 #define CWINDOWMANAGER_H
 

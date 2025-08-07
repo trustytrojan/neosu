@@ -1,10 +1,4 @@
-//================ Copyright (c) 2025, WH, All rights reserved. =================//
-//
-// Purpose:		SDL-based dynamic loading of BASS libraries (workaround linking to broken shared libraries)
-//
-// $NoKeywords: $snd $bass $loader
-//===============================================================================//
-
+// Copyright (c) 2025, WH, All rights reserved.
 #include "BassManager.h"
 
 #if defined(MCENGINE_FEATURE_BASS)

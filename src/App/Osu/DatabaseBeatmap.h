@@ -1,4 +1,5 @@
 #pragma once
+// Copyright (c) 2020, PG, All rights reserved.
 #include <atomic>
 #include <future>
 

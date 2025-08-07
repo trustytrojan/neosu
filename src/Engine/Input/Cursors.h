@@ -1,10 +1,4 @@
-//================ Copyright (c) 2012, PG, All rights reserved. =================//
-//
-// Purpose:		cursor defs, these need to be supported by Environment
-//
-// $NoKeywords: $
-//===============================================================================//
-
+// Copyright (c) 2012, PG, All rights reserved.
 #ifndef CURSORS_H
 #define CURSORS_H
 

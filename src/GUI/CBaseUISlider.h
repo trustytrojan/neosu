@@ -1,4 +1,5 @@
 #pragma once
+// Copyright (c) 2012, PG, All rights reserved.
 
 // TODO: fix vertical sliders
 // TODO: this entire class is a mess

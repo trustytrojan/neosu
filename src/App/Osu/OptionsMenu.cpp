@@ -1,3 +1,4 @@
+// Copyright (c) 2016, PG, All rights reserved.
 #include "OptionsMenu.h"
 
 #include <algorithm>

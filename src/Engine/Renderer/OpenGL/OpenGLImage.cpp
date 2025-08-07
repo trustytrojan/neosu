@@ -1,10 +1,4 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		OpenGL implementation of Image
-//
-// $NoKeywords: $glimg
-//===============================================================================//
-
+// Copyright (c) 2016, PG, All rights reserved.
 #include "OpenGLImage.h"
 
 #include <utility>

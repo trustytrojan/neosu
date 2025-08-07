@@ -1,3 +1,5 @@
+// Copyright (c) 2023, kiwec, All rights reserved.
+
 #ifdef _WIN32
 #include "WinDebloatDefs.h"
 #include <windows.h>

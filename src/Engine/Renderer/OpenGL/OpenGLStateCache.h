@@ -1,11 +1,5 @@
-//================ Copyright (c) 2025, WH, All rights reserved. =================//
-//
-// Purpose:		OpenGL state cache for reducing synchronization points (WIP)
-//
-// $NoKeywords: $glsc
-//===============================================================================//
-
 #pragma once
+// Copyright (c) 2025, WH, All rights reserved.
 #ifndef OPENGLSTATECACHE_H
 #define OPENGLSTATECACHE_H
 

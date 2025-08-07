@@ -1,12 +1,5 @@
-/*
- * CBaseUI.h
- *
- *  Created on: Jun 10, 2017
- *      Author: Psy
- */
-
-#ifndef GUI_CBASEUI_H_
-#define GUI_CBASEUI_H_
+#pragma once
+// Copyright (c) 2017, Psy, All rights reserved.
 
 #include "CBaseUIButton.h"
 #include "CBaseUICheckbox.h"
@@ -30,5 +23,3 @@ typedef CBaseUITextbox Textbox;
 typedef CBaseUITextField TextField;
 typedef CBaseUIWindow Window;
 }  // namespace UI
-
-#endif /* GUI_CBASEUI_H_ */

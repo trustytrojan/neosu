@@ -1,4 +1,5 @@
 #pragma once
+// Copyright (c) 2015, PG & Jeffrey Han (opsu!), All rights reserved.
 
 #include "cbase.h"
 

@@ -1,4 +1,5 @@
 #pragma once
+// Copyright (c) 2015, PG, All rights reserved.
 #include "CBaseUIButton.h"
 
 class CBaseUIImageButton : public CBaseUIButton {

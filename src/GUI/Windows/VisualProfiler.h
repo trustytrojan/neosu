@@ -1,10 +1,4 @@
-//================ Copyright (c) 2020, PG, All rights reserved. =================//
-//
-// Purpose:		vprof gui overlay
-//
-// $NoKeywords: $vprof
-//===============================================================================//
-
+// Copyright (c) 2020, PG, All rights reserved.
 #ifndef VISUALPROFILER_H
 #define VISUALPROFILER_H
 

@@ -1,4 +1,5 @@
 #pragma once
+// Copyright (c) 2016, PG, All rights reserved.
 #include "MD5Hash.h"
 #include "ScreenBackable.h"
 

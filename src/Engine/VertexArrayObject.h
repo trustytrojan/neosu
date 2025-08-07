@@ -1,10 +1,4 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		modern opengl style mesh wrapper (vertices, texcoords, etc.)
-//
-// $NoKeywords: $vao
-//===============================================================================//
-
+// Copyright (c) 2016, PG, All rights reserved.
 #ifndef VERTEXARRAYOBJECT_H
 #define VERTEXARRAYOBJECT_H
 

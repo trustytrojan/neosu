@@ -1,10 +1,4 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		state class and listeners (FIFO)
-//
-// $NoKeywords: $key
-//===============================================================================//
-
+// Copyright (c) 2015, PG, All rights reserved.
 #include "Keyboard.h"
 
 #include "Engine.h"

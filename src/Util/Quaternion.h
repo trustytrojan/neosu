@@ -1,10 +1,4 @@
-//================ Copyright (c) 2013, PG, All rights reserved. =================//
-//
-// Purpose:		a simple quaternion
-//
-// $NoKeywords: $quat
-//===============================================================================//
-
+// Copyright (c) 2013, PG, All rights reserved.
 #ifndef QUATERNION_H
 #define QUATERNION_H
 

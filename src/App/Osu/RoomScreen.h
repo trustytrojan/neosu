@@ -1,4 +1,6 @@
 #pragma once
+// Copyright (c) 2024, kiwec, All rights reserved.
+
 #ifndef _MSC_VER
 #include <unistd.h>
 #endif

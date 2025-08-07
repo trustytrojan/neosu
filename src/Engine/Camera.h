@@ -1,11 +1,5 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		3d quaternion camera system
-//
-// $NoKeywords: $cam
-//===============================================================================//
-
 #pragma once
+// Copyright (c) 2015, PG, All rights reserved.
 #ifndef CAMERA_H
 #define CAMERA_H
 

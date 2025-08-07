@@ -1,10 +1,4 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		3d quaternion camera system
-//
-// $NoKeywords: $cam
-//===============================================================================//
-
+// Copyright (c) 2015, PG, All rights reserved.
 #include "Camera.h"
 
 #include "ConVar.h"

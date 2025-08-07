@@ -1,10 +1,4 @@
-//================ Copyright (c) 2014, PG, All rights reserved. =================//
-//
-// Purpose:		a not so simple textfield
-//
-// $NoKeywords: $
-//===============================================================================//
-
+// Copyright (c) 2014, PG, All rights reserved.
 // TODO: finish this
 
 #include "CBaseUITextField.h"

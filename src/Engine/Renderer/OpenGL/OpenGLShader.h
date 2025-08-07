@@ -1,11 +1,5 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		OpenGL GLSL implementation of Shader
-//
-// $NoKeywords: $glshader
-//===============================================================================//
-
 #pragma once
+// Copyright (c) 2016, PG, All rights reserved.
 #ifndef OPENGLSHADER_H
 #define OPENGLSHADER_H
 

@@ -1,4 +1,5 @@
 #pragma once
+// Copyright (c) 2017, PG, All rights reserved.
 #include "cbase.h"
 
 class Skin;

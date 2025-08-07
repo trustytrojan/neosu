@@ -1,3 +1,4 @@
+// Copyright (c) 2023, kiwec, All rights reserved.
 #include "BanchoLeaderboard.h"
 
 #include "Bancho.h"

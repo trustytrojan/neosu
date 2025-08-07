@@ -1,10 +1,4 @@
-//================ Copyright (c) 2025, WH, All rights reserved. =================//
-//
-// Purpose:		SDL GL abstraction interface
-//
-// $NoKeywords: $sdlgli
-//===============================================================================//
-
+// Copyright (c) 2025, WH, All rights reserved.
 #include "SDLGLInterface.h"
 
 #if defined(MCENGINE_FEATURE_GLES32) || defined(MCENGINE_FEATURE_OPENGL)

@@ -1,10 +1,4 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		OpenGL GLSL implementation of Shader
-//
-// $NoKeywords: $glshader
-//===============================================================================//
-
+// Copyright (c) 2016, PG, All rights reserved.
 #include "OpenGLShader.h"
 
 #ifdef MCENGINE_FEATURE_OPENGL

@@ -1,10 +1,4 @@
-//================ Copyright (c) 2013, PG, All rights reserved. =================//
-//
-// Purpose:		a simple quaternion
-//
-// $NoKeywords: $quat
-//===============================================================================//
-
+// Copyright (c) 2013, PG, All rights reserved.
 #include "Quaternion.h"
 
 void Quaternion::set(float x, float y, float z, float w) {

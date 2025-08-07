@@ -1,3 +1,4 @@
+// Copyright (c) 2024, kiwec, All rights reserved.
 #include "Chat.h"
 
 #include "AnimationHandler.h"

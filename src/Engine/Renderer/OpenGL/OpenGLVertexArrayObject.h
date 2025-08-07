@@ -1,11 +1,5 @@
-//================ Copyright (c) 2017, PG, All rights reserved. =================//
-//
-// Purpose:		OpenGL baking support for vao
-//
-// $NoKeywords: $glvao
-//===============================================================================//
-
 #pragma once
+// Copyright (c) 2017, PG, All rights reserved.
 #ifndef OPENGLVERTEXARRAYOBJECT_H
 #define OPENGLVERTEXARRAYOBJECT_H
 

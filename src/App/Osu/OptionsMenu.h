@@ -1,4 +1,5 @@
 #pragma once
+// Copyright (c) 2016, PG, All rights reserved.
 #include "NotificationOverlay.h"
 #include "ScreenBackable.h"
 #include "VolumeOverlay.h"

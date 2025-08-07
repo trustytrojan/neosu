@@ -1,10 +1,4 @@
-//================ Copyright (c) 2017, PG, All rights reserved. =================//
-//
-// Purpose:		container for dynamically merging multiple images into one
-//
-// $NoKeywords: $imgtxat
-//===============================================================================//
-
+// Copyright (c) 2017, PG, All rights reserved.
 #include "TextureAtlas.h"
 
 #include <algorithm>

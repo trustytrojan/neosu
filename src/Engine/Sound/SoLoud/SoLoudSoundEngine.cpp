@@ -1,10 +1,4 @@
-//================ Copyright (c) 2025, WH, All rights reserved. ==================//
-//
-// Purpose:		handles sounds using SoLoud library
-//
-// $NoKeywords: $snd $soloud
-//================================================================================//
-
+// Copyright (c) 2025, WH, All rights reserved.
 #include "SoLoudSoundEngine.h"
 
 #ifdef MCENGINE_FEATURE_SOLOUD

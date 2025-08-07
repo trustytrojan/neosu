@@ -1,11 +1,5 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		a collection of all necessary OpenGL header files (and related)
-//
-// $NoKeywords: $glh
-//===============================================================================//
-
 #pragma once
+// Copyright (c) 2015, PG, All rights reserved.
 #ifndef OPENGLHEADERS_H
 #define OPENGLHEADERS_H
 

@@ -1,10 +1,4 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		a simple image button
-//
-// $NoKeywords: $
-//===============================================================================//
-
+// Copyright (c) 2015, PG, All rights reserved.
 #include "CBaseUIImageButton.h"
 
 #include <utility>

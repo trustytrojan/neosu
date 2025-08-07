@@ -1,10 +1,4 @@
-//================ Copyright (c) 2018, PG, All rights reserved. =================//
-//
-// Purpose:		slider used for the volume overlay HUD
-//
-// $NoKeywords: $osuvolsl
-//===============================================================================//
-
+// Copyright (c) 2018, PG, All rights reserved.
 #include "UIVolumeSlider.h"
 
 #include <utility>

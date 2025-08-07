@@ -1,11 +1,5 @@
-//================ Copyright (c) 2025, WH, All rights reserved. =================//
-//
-// Purpose:		Build-time configuration detection utilities and definitions
-//
-// $NoKeywords: $env
-//===============================================================================//
-
 #pragma once
+// Copyright (c) 2025, WH, All rights reserved.
 
 #include "config.h"
 

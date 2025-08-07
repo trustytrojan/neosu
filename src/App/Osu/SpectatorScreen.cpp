@@ -1,3 +1,4 @@
+// Copyright (c) 2024, kiwec, All rights reserved.
 #include "SpectatorScreen.h"
 
 #include "Bancho.h"

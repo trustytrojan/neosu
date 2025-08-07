@@ -1,11 +1,5 @@
-//================ Copyright (c) 2025, WH, All rights reserved. ==================//
-//
-// Purpose:		handles sounds using SoLoud library
-//
-// $NoKeywords: $snd $soloud
-//================================================================================//
-
 #pragma once
+// Copyright (c) 2025, WH, All rights reserved.
 #ifndef SOLOUD_SOUNDENGINE_H
 #define SOLOUD_SOUNDENGINE_H
 

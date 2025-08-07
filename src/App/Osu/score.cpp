@@ -1,3 +1,4 @@
+// Copyright (c) 2015, PG, All rights reserved.
 #include "score.h"
 
 #include "Bancho.h"

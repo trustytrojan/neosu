@@ -1,3 +1,4 @@
+// Copyright (c) 2011, PG, All rights reserved.
 #include "CBaseUIContainer.h"
 
 #include <utility>

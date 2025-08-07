@@ -1,11 +1,5 @@
-//================ Copyright (c) 2025, WH, All rights reserved. ==================//
-//
-// Purpose:		SoundTouch filter for independent pitch/speed control (for use with SoLoud)
-//
-// $NoKeywords: $snd $soloud $soundtouch
-//================================================================================//
-
 #pragma once
+// Copyright (c) 2025, WH, All rights reserved.
 #ifndef SOLOUD_FX_H
 #define SOLOUD_FX_H
 

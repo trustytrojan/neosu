@@ -1,3 +1,4 @@
+// Copyright (c) 2014, PG, All rights reserved.
 #include "BassSoundEngine.h"
 
 #ifdef MCENGINE_FEATURE_BASS

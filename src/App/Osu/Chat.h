@@ -1,4 +1,5 @@
 #pragma once
+// Copyright (c) 2024, kiwec, All rights reserved.
 
 #include "CBaseUIScrollView.h"
 #include "CBaseUITextbox.h"

@@ -1,3 +1,4 @@
+// Copyright (c) 2016, PG, All rights reserved.
 #include "BaseEnvironment.h"
 
 #include "AnimationHandler.h"

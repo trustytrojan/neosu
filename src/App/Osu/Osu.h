@@ -1,4 +1,5 @@
 #pragma once
+// Copyright (c) 2015, PG, All rights reserved.
 #include "ConVar.h"
 #include "ModSelector.h"
 #include "MouseListener.h"

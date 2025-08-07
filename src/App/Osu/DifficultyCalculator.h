@@ -1,4 +1,5 @@
 #pragma once
+// Copyright (c) 2019, PG & Francesco149, All rights reserved.
 
 #include "types.h"
 #include "Vectors.h"

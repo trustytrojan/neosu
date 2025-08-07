@@ -1,10 +1,4 @@
-//================ Copyright (c) 2014, PG, All rights reserved. =================//
-//
-// Purpose:		a simple checkbox
-//
-// $NoKeywords: $
-//===============================================================================//
-
+// Copyright (c) 2014, PG, All rights reserved.
 #include "CBaseUICheckbox.h"
 
 #include <utility>

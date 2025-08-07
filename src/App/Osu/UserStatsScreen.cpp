@@ -1,3 +1,4 @@
+// Copyright (c) 2019, PG, All rights reserved.
 #include "UserStatsScreen.h"
 
 #include "Bancho.h"

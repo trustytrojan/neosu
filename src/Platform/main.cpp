@@ -1,10 +1,4 @@
-//================ Copyright (c) 2025, WH, All rights reserved. =================//
-//
-// Purpose:		cross-platform main() entrypoint
-//
-// $NoKeywords: $sdlcallbacks $main
-//===============================================================================//
-
+// Copyright (c) 2025, WH, All rights reserved.
 #include "BaseEnvironment.h"
 
 #include "UString.h"

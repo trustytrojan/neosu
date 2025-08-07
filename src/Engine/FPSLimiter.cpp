@@ -1,10 +1,4 @@
-//================ Copyright (c) 2025, WH, All rights reserved. =================//
-//
-// Purpose:		frame limiter, to be called at the end of a main loop interation
-//
-// $NoKeywords: $fps $limiter
-//===============================================================================//
-
+// Copyright (c) 2025, WH, All rights reserved.
 #include "FPSLimiter.h"
 #include "Timing.h"
 #include "ConVar.h"

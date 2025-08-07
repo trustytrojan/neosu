@@ -1,10 +1,4 @@
-//================ Copyright (c) 2012, PG, All rights reserved. =================//
-//
-// Purpose:		global fps independent animations
-//
-// $NoKeywords: $anim
-//===============================================================================//
-
+// Copyright (c) 2012, PG, All rights reserved.
 #ifndef ANIMATIONHANDLER_H
 #define ANIMATIONHANDLER_H
 

@@ -1,11 +1,5 @@
-//================ Copyright (c) 2025, WH, All rights reserved. ==================//
-//
-// Purpose:		SoLoud-specific sound implementation
-//
-// $NoKeywords: $snd $soloud
-//================================================================================//
-
 #pragma once
+// Copyright (c) 2025, WH, All rights reserved.
 #ifndef SOLOUD_SOUND_H
 #define SOLOUD_SOUND_H
 

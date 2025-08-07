@@ -1,11 +1,5 @@
-//================ Copyright (c) 2025, WH, All rights reserved. =================//
-//
-// Purpose:		SDL-based dynamic loading of BASS libraries (workaround linking to broken shared libraries)
-//
-// $NoKeywords: $snd $bass $loader
-//===============================================================================//
-
 #pragma once
+// Copyright (c) 2025, WH, All rights reserved.
 #ifndef BASS_MANAGER_H
 #define BASS_MANAGER_H
 

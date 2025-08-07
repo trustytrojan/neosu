@@ -1,10 +1,4 @@
-//================ Copyright (c) 2020, PG, All rights reserved. =================//
-//
-// Purpose:		handles thumbnail/background image loading async, cache
-//
-// $NoKeywords: $osubgldr
-//===============================================================================//
-
+// Copyright (c) 2020, PG, All rights reserved.
 #ifndef OSUBACKGROUNDIMAGEHANDLER_H
 #define OSUBACKGROUNDIMAGEHANDLER_H
 

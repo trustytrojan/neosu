@@ -1,10 +1,4 @@
-//================ Copyright (c) 2025, WH, All rights reserved. =================//
-//
-// Purpose:		opengl explicit synchronization implementation
-//
-// $NoKeywords: $gls
-//===============================================================================//
-
+// Copyright (c) 2025, WH, All rights reserved.
 #include "OpenGLSync.h"
 #if defined(MCENGINE_FEATURE_OPENGL) || defined(MCENGINE_FEATURE_GLES32)
 #include "OpenGLHeaders.h"

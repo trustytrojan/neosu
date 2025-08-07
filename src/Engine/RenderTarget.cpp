@@ -1,3 +1,4 @@
+// Copyright (c) 2013, PG, All rights reserved.
 #include "RenderTarget.h"
 
 #include "ConVar.h"

@@ -1,3 +1,4 @@
+// Copyright (c) 2018, PG, All rights reserved.
 #include "UserCard.h"
 
 #include "AnimationHandler.h"

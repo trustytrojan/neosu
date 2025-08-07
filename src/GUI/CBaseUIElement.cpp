@@ -1,3 +1,4 @@
+// Copyright (c) 2013, PG, All rights reserved.
 #include "CBaseUIElement.h"
 
 #include "Engine.h"

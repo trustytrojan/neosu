@@ -1,4 +1,5 @@
 #pragma once
+// Copyright (c) 2020, PG, All rights reserved.
 #define VPROF_MAIN()             \
     g_profCurrentProfile.main(); \
     VPROF("Main")

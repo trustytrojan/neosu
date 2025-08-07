@@ -1,3 +1,4 @@
+// Copyright (c) 2019, Colin Brook & PG, All rights reserved.
 #include "ModFPoSu.h"
 
 #include <cmath>

@@ -1,10 +1,4 @@
-//================ Copyright (c) 2012, PG, All rights reserved. =================//
-//
-// Purpose:		base class for resources
-//
-// $NoKeywords: $res
-//===============================================================================//
-
+// Copyright (c) 2012, PG, All rights reserved.
 #include "Resource.h"
 
 #include <utility>

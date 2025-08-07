@@ -1,3 +1,5 @@
+// Copyright (c) 2024, kiwec, All rights reserved.
+
 // AES with 32-byte key size and 32-byte block size.
 // Full of magic values (as usual in crypto), but this will never get edited again.
 #include <cstring>

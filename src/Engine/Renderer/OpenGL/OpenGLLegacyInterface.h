@@ -1,11 +1,5 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		raw legacy opengl graphics interface
-//
-// $NoKeywords: $lgli
-//===============================================================================//
-
 #pragma once
+// Copyright (c) 2016, PG, All rights reserved.
 #ifndef LEGACYOPENGLINTERFACE_H
 #define LEGACYOPENGLINTERFACE_H
 

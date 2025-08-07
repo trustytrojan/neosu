@@ -1,4 +1,5 @@
 #pragma once
+// Copyright (c) 2013, PG, All rights reserved.
 #include "Resource.h"
 #include "Graphics.h"
 

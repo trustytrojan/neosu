@@ -1,10 +1,4 @@
-//================ Copyright (c) 2025, WH, All rights reserved. =================//
-//
-// Purpose:		asynchronous resource loading system
-//
-// $NoKeywords: $arl
-//===============================================================================//
-
+// Copyright (c) 2025, WH, All rights reserved.
 #include "AsyncResourceLoader.h"
 
 #include <algorithm>

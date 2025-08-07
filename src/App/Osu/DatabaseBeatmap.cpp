@@ -1,3 +1,4 @@
+// Copyright (c) 2020, PG, All rights reserved.
 #include "DatabaseBeatmap.h"
 
 #include <assert.h>

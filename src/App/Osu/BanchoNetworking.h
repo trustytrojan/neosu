@@ -1,4 +1,5 @@
 #pragma once
+// Copyright (c) 2023, kiwec, All rights reserved.
 
 #include "BanchoProtocol.h"
 

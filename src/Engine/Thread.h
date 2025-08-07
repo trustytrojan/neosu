@@ -1,11 +1,5 @@
-//================ Copyright (c) 2025, WH, All rights reserved. =================//
-//
-// Purpose:		thread wrapper
-//
-// $NoKeywords: $thread
-//===============================================================================//
-
 #pragma once
+// Copyright (c) 2025, WH, All rights reserved.
 #ifndef THREAD_H
 #define THREAD_H
 

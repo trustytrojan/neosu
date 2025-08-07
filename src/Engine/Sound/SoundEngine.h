@@ -1,4 +1,5 @@
 #pragma once
+// Copyright (c) 2014, PG, All rights reserved.
 
 #include "Delegate.h"
 #include "UString.h"

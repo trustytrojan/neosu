@@ -1,11 +1,5 @@
-//================ Copyright (c) 2025, WH, All rights reserved. =================//
-//
-// Purpose:		opengl explicit synchronization implementation
-//
-// $NoKeywords: $gls
-//===============================================================================//
-
 #pragma once
+// Copyright (c) 2025, WH, All rights reserved.
 #ifndef OPENGLSYNC_H
 #define OPENGLSYNC_H
 

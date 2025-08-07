@@ -1,3 +1,4 @@
+// Copyright (c) 2015, PG, All rights reserved.
 // TODO: support SHIFT + LEFT/RIGHT selection adjustments
 // TODO: support CTRL + LEFT/RIGHT word caret jumping (to next space)
 // TODO: support both SHIFT + CTRL + LEFT/RIGHT selection word jumping

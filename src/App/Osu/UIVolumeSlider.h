@@ -1,4 +1,5 @@
 #pragma once
+// Copyright (c) 2018, PG, All rights reserved.
 #include "CBaseUISlider.h"
 
 class McFont;

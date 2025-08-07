@@ -1,10 +1,4 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		simple listener class for keyboard events
-//
-// $NoKeywords: $key
-//===============================================================================//
-
+// Copyright (c) 2015, PG, All rights reserved.
 #ifndef KEYBOARDLISTENER_H
 #define KEYBOARDLISTENER_H
 

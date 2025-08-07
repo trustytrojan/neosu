@@ -1,11 +1,5 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		OpenGL implementation of RenderTarget / render to texture
-//
-// $NoKeywords: $glrt
-//===============================================================================//
-
 #pragma once
+// Copyright (c) 2016, PG, All rights reserved.
 #ifndef OPENGLRENDERTARGET_H
 #define OPENGLRENDERTARGET_H
 

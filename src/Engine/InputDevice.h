@@ -1,10 +1,4 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		baseclass for input devices
-//
-// $NoKeywords: $idev
-//===============================================================================//
-
+// Copyright (c) 2015, PG, All rights reserved.
 #ifndef INPUTDEVICE_H
 #define INPUTDEVICE_H
 

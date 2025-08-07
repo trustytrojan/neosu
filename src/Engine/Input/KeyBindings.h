@@ -1,4 +1,5 @@
 #pragma once
+// Copyright (c) 2016, PG, All rights reserved.
 #include <SDL3/SDL_scancode.h>
 #include <vector>
 #include "types.h"

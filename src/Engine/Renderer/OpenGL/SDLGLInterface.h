@@ -1,11 +1,5 @@
-//================ Copyright (c) 2025, WH, All rights reserved. =================//
-//
-// Purpose:		SDL GL abstraction interface
-//
-// $NoKeywords: $sdlgli
-//===============================================================================//
-
 #pragma once
+// Copyright (c) 2025, WH, All rights reserved.
 #ifndef SDLGLINTERFACE_H
 #define SDLGLINTERFACE_H
 

@@ -1,11 +1,5 @@
-//================ Copyright (c) 2025, WH, All rights reserved. =================//
-//
-// Purpose:		colo(u)r conversion helpers
-//
-// $NoKeywords: $color
-//===============================================================================//
-
 #pragma once
+// Copyright (c) 2025, WH, All rights reserved.
 #ifndef COLOR_H
 #define COLOR_H
 

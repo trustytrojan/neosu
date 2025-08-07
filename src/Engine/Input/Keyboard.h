@@ -1,4 +1,5 @@
 #pragma once
+// Copyright (c) 2015, PG, All rights reserved.
 #include "InputDevice.h"
 #include "KeyboardEvent.h"
 #include "KeyBindings.h"

@@ -1,10 +1,4 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		simple listener class for mouse events
-//
-// $NoKeywords: $mouse
-//===============================================================================//
-
+// Copyright (c) 2015, PG, All rights reserved.
 #ifndef MOUSELISTENER_H
 #define MOUSELISTENER_H
 

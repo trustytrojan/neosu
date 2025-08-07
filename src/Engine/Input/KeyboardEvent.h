@@ -1,10 +1,4 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		a wrapper for consumable keyboard events
-//
-// $NoKeywords: $key
-//===============================================================================//
-
+// Copyright (c) 2015, PG, All rights reserved.
 #ifndef KEYBOARDEVENT_H
 #define KEYBOARDEVENT_H
 

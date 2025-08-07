@@ -1,11 +1,5 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		OpenGL implementation of Image
-//
-// $NoKeywords: $glimg
-//===============================================================================//
-
 #pragma once
+// Copyright (c) 2016, PG, All rights reserved.
 #ifndef OPENGLIMAGE_H
 #define OPENGLIMAGE_H
 

@@ -1,3 +1,4 @@
+// Copyright (c) 2013, PG, All rights reserved.
 // TODO: refactor the spaghetti parts, this can be done way more elegantly
 
 #include "CBaseUIScrollView.h"

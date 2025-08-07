@@ -1,4 +1,5 @@
 #pragma once
+// Copyright (c) 2014, PG, All rights reserved.
 #include "CBaseUIScrollView.h"
 
 class CBaseUITextField : public CBaseUIScrollView {

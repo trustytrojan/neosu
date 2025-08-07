@@ -1,4 +1,5 @@
 #pragma once
+// Copyright (c) 2024, kiwec, All rights reserved.
 
 // Important clarification: "Lobby" here refers to the place where you look
 // for rooms. This is the ppy naming; to remember it, think of the #lobby

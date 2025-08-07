@@ -1,4 +1,6 @@
 #pragma once
+// Copyright (c) 2025, kiwec, All rights reserved.
+
 #include "CBaseUIButton.h"
 
 class ConVar;

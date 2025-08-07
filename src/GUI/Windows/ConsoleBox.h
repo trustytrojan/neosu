@@ -1,4 +1,5 @@
 #pragma once
+// Copyright (c) 2011, PG, All rights reserved.
 
 #include "CBaseUIElement.h"
 

@@ -1,3 +1,4 @@
+// Copyright (c) 2025, kiwec, All rights reserved.
 #include "BottomBar.h"
 
 #include "AnimationHandler.h"

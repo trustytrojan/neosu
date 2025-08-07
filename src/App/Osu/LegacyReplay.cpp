@@ -1,3 +1,4 @@
+// Copyright (c) 2016, PG, All rights reserved.
 #include "LegacyReplay.h"
 
 #ifndef LZMA_API_STATIC

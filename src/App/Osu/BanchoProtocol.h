@@ -1,4 +1,6 @@
 #pragma once
+// Copyright (c) 2023, kiwec, All rights reserved.
+
 #include "MD5Hash.h"
 #include "types.h"
 

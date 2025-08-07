@@ -1,3 +1,4 @@
+// Copyright (c) 2025, WH, All rights reserved.
 #include "PlaybackInterpolator.h"
 #include <algorithm>
 #include <cmath>

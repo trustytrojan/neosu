@@ -1,3 +1,4 @@
+// Copyright (c) 2023, kiwec, All rights reserved.
 #include "BanchoUsers.h"
 
 #include <algorithm>

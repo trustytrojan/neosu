@@ -1,11 +1,5 @@
-//================ Copyright (c) 2025, WH, All rights reserved. =================//
-//
-// Purpose:		debug font ranges (TEMP)
-//
-// $NoKeywords: $font
-//===============================================================================//
-
 #pragma once
+// Copyright (c) 2025, WH, All rights reserved.
 
 namespace FontTypeMap {
 inline const char *getCharacterRangeName(wchar_t ch) {

@@ -1,10 +1,12 @@
 #pragma once
+// Copyright (c) 2016, PG, All rights reserved.
+
 #include "Button.h"
 
 class CollectionButton : public Button {
    public:
     CollectionButton(SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu, float xPos,
-                     float yPos, float xSize, float ySize, UString name, const UString& collectionName,
+                     float yPos, float xSize, float ySize, UString name, const UString &collectionName,
                      std::vector<SongButton *> children);
 
     void draw() override;
@@ -20,9 +22,9 @@ class CollectionButton : public Button {
     void onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected) override;
     void onRightMouseUpInside() override;
 
-    void onContextMenu(const UString& text, int id = -1);
-    void onRenameCollectionConfirmed(const UString& text, int id = -1);
-    void onDeleteCollectionConfirmed(const UString& text, int id = -1);
+    void onContextMenu(const UString &text, int id = -1);
+    void onRenameCollectionConfirmed(const UString &text, int id = -1);
+    void onDeleteCollectionConfirmed(const UString &text, int id = -1);
 
     std::string sCollectionName;
 

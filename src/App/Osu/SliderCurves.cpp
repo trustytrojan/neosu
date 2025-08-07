@@ -1,3 +1,4 @@
+// Copyright (c) 2015, PG & Jeffrey Han (opsu!), All rights reserved.
 #include "SliderCurves.h"
 
 #include "ConVar.h"

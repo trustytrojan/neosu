@@ -1,3 +1,4 @@
+// Copyright (c) 2019, PG & Francesco149, All rights reserved.
 #include "DifficultyCalculator.h"
 
 #include <algorithm>

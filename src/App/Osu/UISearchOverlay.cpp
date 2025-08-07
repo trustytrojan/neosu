@@ -1,3 +1,4 @@
+// Copyright (c) 2017, PG, All rights reserved.
 #include "UISearchOverlay.h"
 
 #include <utility>

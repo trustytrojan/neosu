@@ -1,3 +1,4 @@
+// Copyright (c) 2012, PG, All rights reserved.
 #include "CBaseUISlider.h"
 
 #include <utility>
