@@ -770,9 +770,13 @@ void SDLMain::setupLogging() {
 #ifdef MCENGINE_PLATFORM_WINDOWS
 #include <objbase.h>
 #include "dynutils.h"
-extern BOOL WINAPI pImmDisableIME(DWORD);
-enum PROCESS_DPI_AWARENESS {};  // NOLINT
-extern HRESULT WINAPI pSetProcessDpiAwareness(PROCESS_DPI_AWARENESS);
+using pImmDisableIME = BOOL(WINAPI *)(DWORD);
+enum PROCESS_DPI_AWARENESS {
+    PROCESS_DPI_UNAWARE = 0,
+    PROCESS_SYSTEM_DPI_AWARE = 1,
+    PROCESS_PER_MONITOR_DPI_AWARE = 2,
+};
+using pSetProcessDpiAwareness = HRESULT(WINAPI *)(PROCESS_DPI_AWARENESS);
 #endif
 
 void SDLMain::doEarlyCmdlineOverrides() {
@@ -795,9 +799,9 @@ void SDLMain::doEarlyCmdlineOverrides() {
     if(!m_mArgMap.contains("-nodpi")) {
         auto *user32_handle = reinterpret_cast<lib_obj *>(GetModuleHandle(TEXT("user32.dll")));
         if(user32_handle) {
-            auto spdpi_aware_func = load_func<SetProcessDPIAware>(user32_handle, "SetProcessDPIAware");
+            auto spdpi_aware_func = load_func<pSetProcessDpiAwareness>(user32_handle, "SetProcessDPIAware");
             if(spdpi_aware_func) {
-                spdpi_aware_func();
+                spdpi_aware_func(PROCESS_PER_MONITOR_DPI_AWARE);
             }
         }
     }

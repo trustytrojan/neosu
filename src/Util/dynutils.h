@@ -13,9 +13,9 @@ lib_obj *load_lib(const char *c_lib_name, const char *c_search_dir = "");
 void unload_lib(lib_obj *&lib);
 
 // usage: auto func = load_func<func_prototype>(lib_obj_here, func_name_here)
-template <auto &F>
-static inline decltype(&F) load_func(lib_obj *lib, const char *func_name) {
-    return reinterpret_cast<decltype(&F)>(detail::load_func_impl(lib, func_name));
+template <typename F>
+inline F load_func(lib_obj *lib, const char *func_name) {
+    return reinterpret_cast<F>(detail::load_func_impl(lib, func_name));
 }
 
 const char *get_error();
