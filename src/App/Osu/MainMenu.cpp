@@ -1060,7 +1060,14 @@ void MainMenu::selectRandomBeatmap() {
         // Database is not loaded yet, load a random map and select it
         if(!this->songs_enumerator.isAsyncReady()) return;
         auto mapset_folders = this->songs_enumerator.getEntries();
-        if(mapset_folders.empty()) return;
+        if(mapset_folders.empty()) {
+            const auto& current_folder = Database::getOsuSongsFolder();
+            if (this->songs_enumerator.getFolderPath() != current_folder) {
+                this->songs_enumerator.setFolderPath(current_folder);
+                resourceManager->reloadResource(&this->songs_enumerator);
+            }
+            return;
+        }
 
         sb->getSelectedBeatmap()->deselect();
         SAFE_DELETE(this->preloaded_beatmapset);
@@ -1505,12 +1512,12 @@ void MainMenuButton::onMouseInside() {
     }
 }
 
-void SongsFolderEnumerator::initAsync() {
-    const auto &osu_songs_folder_path = db->getOsuSongsFolder();
-    if(env->directoryExists(osu_songs_folder_path)) {
-        auto peppy_mapsets = env->getFoldersInFolder(osu_songs_folder_path);
+void MainMenu::SongsFolderEnumerator::initAsync() {
+    this->folderPath = Database::getOsuSongsFolder();
+    if(env->directoryExists(this->folderPath)) {
+        auto peppy_mapsets = env->getFoldersInFolder(this->folderPath);
         for(const auto &mapset : peppy_mapsets) {
-            this->entries.push_back(osu_songs_folder_path + mapset + "/");
+            this->entries.push_back(this->folderPath + mapset + "/");
         }
     }
 

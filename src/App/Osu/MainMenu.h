@@ -25,32 +25,6 @@ class CBaseUIContainer;
 
 class ConVar;
 
-struct SongsFolderEnumerator : public Resource {
-    ~SongsFolderEnumerator() override = default;
-    SongsFolderEnumerator() : Resource("SONGS_FOLDER_ENUMERATOR") {
-        resourceManager->requestNextLoadAsync();
-        resourceManager->loadResource(this);
-    }
-
-    SongsFolderEnumerator &operator=(const SongsFolderEnumerator &) = delete;
-    SongsFolderEnumerator &operator=(SongsFolderEnumerator &&) = delete;
-    SongsFolderEnumerator(const SongsFolderEnumerator &) = delete;
-    SongsFolderEnumerator(SongsFolderEnumerator &&) = delete;
-
-    [[nodiscard]] inline const std::vector<std::string> &getEntries() const { return this->entries; }
-
-    // type inspection
-    [[nodiscard]] Type getResType() const final { return APPDEFINED; }
-
-   protected:
-    void init() override { this->bReady = true; }
-    void initAsync() override;
-    void destroy() override { ; }
-
-   private:
-    std::vector<std::string> entries{};
-};
-
 class MainMenuPauseButton : public CBaseUIButton {
    public:
     MainMenuPauseButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
@@ -171,6 +145,35 @@ class MainMenu : public OsuScreen, public MouseListener {
 
     Image *logo_img;
     Shader *background_shader = NULL;
+
+    struct SongsFolderEnumerator : public Resource {
+        ~SongsFolderEnumerator() override = default;
+        SongsFolderEnumerator() : Resource() {
+            resourceManager->requestNextLoadAsync();
+            resourceManager->loadResource(this);
+        }
+
+        SongsFolderEnumerator &operator=(const SongsFolderEnumerator &) = delete;
+        SongsFolderEnumerator &operator=(SongsFolderEnumerator &&) = delete;
+        SongsFolderEnumerator(const SongsFolderEnumerator &) = delete;
+        SongsFolderEnumerator(SongsFolderEnumerator &&) = delete;
+
+        [[nodiscard]] inline const std::vector<std::string> &getEntries() const { return this->entries; }
+        [[nodiscard]] inline std::string getFolderPath() const { return this->folderPath; }
+        inline void setFolderPath(std::string path) { this->folderPath = std::move(path); }
+
+        // type inspection
+        [[nodiscard]] Type getResType() const final { return APPDEFINED; }
+
+       protected:
+        void init() override { this->bReady = true; }
+        void initAsync() override;
+        void destroy() override { ; }
+
+       private:
+        std::vector<std::string> entries{};
+        std::string folderPath{""};
+    };
 
     SongsFolderEnumerator songs_enumerator;
 };
