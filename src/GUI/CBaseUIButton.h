@@ -22,12 +22,14 @@ class CBaseUIButton : public CBaseUIElement {
 
         if constexpr(std::is_invocable_v<CBType, CBaseUIButton *, bool, bool>) {
             this->clickCallback = std::forward<Callable>(cb);
+        } else if constexpr(std::is_invocable_v<CBType, bool, bool>) {
+            this->clickCallback = [cb = std::forward<Callable>(cb)](CBaseUIButton *, bool left, bool right) { cb(left, right); };
         } else if constexpr(std::is_invocable_v<CBType, CBaseUIButton *>) {
             this->clickCallback = [cb = std::forward<Callable>(cb)](CBaseUIButton *btn, bool, bool) { cb(btn); };
         } else if constexpr(std::is_invocable_v<CBType>) {
-            this->clickCallback = [cb = std::forward<Callable>(cb)](CBaseUIButton *btn, bool, bool) { cb(); };
+            this->clickCallback = [cb = std::forward<Callable>(cb)](CBaseUIButton *, bool, bool) { cb(); };
         } else {
-            static_assert(false, "Programmer Error (bad callback signature)");
+            static_assert(Env::always_false_v<Callable>, "Programmer Error (bad callback signature)");
         }
 
         return this;

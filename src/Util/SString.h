@@ -10,7 +10,7 @@ namespace SString {
 
 // Since strtok_r SUCKS I'll just make my own
 // Returns the token start, and edits str to after the token end (unless '\0').
-static inline char* strtok_x(char d, char** str) {
+inline char* strtok_x(char d, char** str) {
     char* old = *str;
     while(**str != '\0' && **str != d) {
         (*str)++;
@@ -23,7 +23,7 @@ static inline char* strtok_x(char d, char** str) {
 }
 
 // alphanumeric string comparator that ignores special characters at the start of strings
-static constexpr bool alnum_comp(const std::string& a, const std::string& b) {
+inline bool alnum_comp(const std::string& a, const std::string& b) {
     int i = 0;
     int j = 0;
     while(i < a.length() && j < b.length()) {
@@ -45,7 +45,7 @@ static constexpr bool alnum_comp(const std::string& a, const std::string& b) {
 }
 
 // std string splitting, for if we don't want to create UStrings everywhere (slow and heavy)
-static constexpr forceinline std::vector<std::string> split(const std::string& s, const std::string_view& d) {
+inline std::vector<std::string> split(const std::string& s, const std::string_view& d) {
     std::vector<std::string> r;
     size_t i = 0, j = 0;
     while((j = s.find(d, i)) != s.npos) r.emplace_back(s, i, j - i), i = j + d.size();
@@ -54,27 +54,27 @@ static constexpr forceinline std::vector<std::string> split(const std::string& s
 };
 
 // in-place whitespace trimming
-static constexpr forceinline void trim(std::string* str) {
+inline void trim(std::string* str) {
     str->erase(0, str->find_first_not_of(" \t\r\n"));
     str->erase(str->find_last_not_of(" \t\r\n") + 1);
 }
 
-static constexpr forceinline bool contains_ncase(const std::string& haystack, const std::string& needle) {
+inline bool contains_ncase(const std::string& haystack, const std::string& needle) {
     return !haystack.empty() && !std::ranges::search(haystack, needle, [](char ch1, char ch2) {
                                      return std::tolower(ch1) == std::tolower(ch2);
                                  }).empty();
 }
 
-static constexpr forceinline bool whitespace_only(const std::string& str) {
+inline bool whitespace_only(const std::string& str) {
     return str.empty() || std::ranges::all_of(str, [](char c) { return std::isspace(c) != 0; });
 }
 
-static constexpr forceinline void to_lower(std::string& str) {
+inline void to_lower(std::string& str) {
     if(str.empty()) return;
     std::ranges::transform(str, str.begin(), [](char c) { return std::tolower(c); });
 }
 
-static constexpr forceinline std::string lower(const std::string& str) {
+inline std::string lower(const std::string& str) {
     if(str.empty()) return str;
     auto lstr{str};
     to_lower(lstr);
