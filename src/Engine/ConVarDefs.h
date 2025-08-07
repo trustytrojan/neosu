@@ -516,7 +516,8 @@ CONVAR(fps_unlimited, "fps_unlimited", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PR
 CONVAR(
     fps_unlimited_yield, "fps_unlimited_yield", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
     "always release rest of timeslice once per frame (call scheduler via sleep(0)), even if unlimited fps are enabled");
-CONVAR(fullscreen_windowed_borderless, "fullscreen_windowed_borderless", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
+CONVAR(fullscreen_windowed_borderless, "fullscreen_windowed_borderless", false,
+       FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
 CONVAR(fullscreen, "fullscreen", false, FCVAR_BANCHO_COMPATIBLE,
        [](float /*newValue*/) -> void { engine ? engine->toggleFullscreen() : (void)0; });
 CONVAR(hiterrorbar_misaims, "osu_hiterrorbar_misaims", true, FCVAR_BANCHO_COMPATIBLE);
@@ -942,7 +943,6 @@ CONVAR(relax_offset, "osu_relax_offset", -12, FCVAR_BANCHO_COMPATIBLE | FCVAR_GA
        "osu!relax always hits -12 ms too early, so set this to -12 (note the negative) if you want it to be the same");
 CONVAR(resolution, "osu_resolution", "1280x720", FCVAR_BANCHO_COMPATIBLE);
 CONVAR(windowed_resolution, "windowed_resolution", "1280x720", FCVAR_BANCHO_COMPATIBLE);
-CONVAR(resolution_enabled, "osu_resolution_enabled", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(resolution_keep_aspect_ratio, "osu_resolution_keep_aspect_ratio", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(restart_sound_engine_before_playing, "restart_sound_engine_before_playing", false, FCVAR_BANCHO_COMPATIBLE,
        "jank fix for users who experience sound issues after playing for a while");

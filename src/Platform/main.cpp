@@ -336,12 +336,13 @@ SDL_AppResult SDLMain::initialize() {
 
     // if we got to this point, all relevant subsystems (input handling, graphics interface, etc.) have been initialized
 
-    // make window visible
-    SDL_ShowWindow(m_window);
-    SDL_RaiseWindow(m_window);
-
     // load app
     m_engine->loadApp();
+
+    // make window visible now, after we loaded the config and set the wanted window size & fullscreen state
+    SDL_ShowWindow(m_window);
+    SDL_RaiseWindow(m_window);
+    SDL_SetWindowResizable(m_window, true);
 
     // SDL3 stops listening to text input globally when window is created
     SDL_StartTextInput(m_window);
@@ -577,8 +578,8 @@ nocbinline SDL_AppResult SDLMain::iterate() {
 static constexpr auto WINDOW_TITLE = PACKAGE_NAME;
 static constexpr auto WINDOW_WIDTH = 1280L;
 static constexpr auto WINDOW_HEIGHT = 720L;
-static constexpr auto WINDOW_WIDTH_MIN = 100;
-static constexpr auto WINDOW_HEIGHT_MIN = 100;
+static constexpr auto WINDOW_WIDTH_MIN = 320;
+static constexpr auto WINDOW_HEIGHT_MIN = 240;
 
 bool SDLMain::createWindow() {
     // pre window-creation settings
@@ -599,15 +600,15 @@ bool SDLMain::createWindow() {
         (Env::cfg((REND::GL | REND::GLES32)) ? SDL_WINDOW_OPENGL
                                              : (Env::cfg(OS::LINUX, REND::DX11) ? SDL_WINDOW_VULKAN : 0UL));
 
-    // get default monitor resolution and create the window with that as the starting size
+    // limit default window size so it fits the screen
     long windowCreateWidth = WINDOW_WIDTH;
     long windowCreateHeight = WINDOW_HEIGHT;
     {
         SDL_DisplayID di = SDL_GetPrimaryDisplay();
         const SDL_DisplayMode *dm = nullptr;
         if(di && (dm = SDL_GetDesktopDisplayMode(di))) {
-            windowCreateWidth = dm->w;
-            windowCreateHeight = dm->h;
+            if(dm->w < windowCreateWidth) windowCreateWidth = dm->w;
+            if(dm->h < windowCreateHeight) windowCreateHeight = dm->h;
         }
     }
 

@@ -115,10 +115,11 @@ Osu::Osu() {
     engine->getConsoleBox()->setRequireShiftToActivate(true);
     mouse->addListener(this);
 
-    env->setWindowResizable(false);
+    // set default fullscreen resolution to match primary display
+    auto default_res = env->getNativeScreenSize();
+    cv::resolution.setValue(UString::format("%ix%i", (i32)default_res.x, (i32)default_res.y));
 
     // convar callbacks
-    cv::resolution.setValue(UString::format("%ix%i", engine->getScreenWidth(), engine->getScreenHeight()));
     cv::resolution.setCallback(SA::MakeDelegate<&Osu::onInternalResolutionChanged>(this));
     cv::windowed_resolution.setCallback(SA::MakeDelegate<&Osu::onWindowedResolutionChanged>(this));
     cv::animation_speed_override.setCallback(SA::MakeDelegate<&Osu::onAnimationSpeedChange>(this));
@@ -423,9 +424,10 @@ void Osu::draw() {
     }
 
     // if we are not using the native window resolution, draw into the buffer
-    const bool isBufferedDraw = cv::resolution_enabled.getBool();
-
-    if(isBufferedDraw) this->backBuffer->enable();
+    const bool isBufferedDraw = (g->getResolution() != g_vInternalResolution);
+    if(isBufferedDraw) {
+        this->backBuffer->enable();
+    }
 
     f32 fadingCursorAlpha = 1.f;
 
@@ -1457,7 +1459,7 @@ void Osu::saveScreenshot() {
 
     // need cropping
     f32 offsetXpct = 0, offsetYpct = 0;
-    if(cv::resolution_enabled.getBool() && cv::letterboxing.getBool()) {
+    if((g->getResolution() != g_vInternalResolution) && cv::letterboxing.getBool()) {
         offsetXpct = cv::letterboxing_offset_x.getFloat();
         offsetYpct = cv::letterboxing_offset_y.getFloat();
     }
@@ -1593,10 +1595,8 @@ void Osu::onResolutionChanged(Vector2 newResolution) {
 
     const float prevUIScale = getUIScale();
 
-    if(!cv::resolution_enabled.getBool()) {
-        g_vInternalResolution = newResolution;
-    } else if(!engine->isMinimized()) {  // if we just got minimized, ignore the resolution change (for the internal
-                                         // stuff)
+    // We just force disable letterboxing while windowed.
+    if(cv::letterboxing.getBool() && env->isFullscreen()) {
         // clamp upwards to internal resolution (osu_resolution)
         if(g_vInternalResolution.x < this->vInternalResolution.x) g_vInternalResolution.x = this->vInternalResolution.x;
         if(g_vInternalResolution.y < this->vInternalResolution.y) g_vInternalResolution.y = this->vInternalResolution.y;
@@ -1604,23 +1604,8 @@ void Osu::onResolutionChanged(Vector2 newResolution) {
         // clamp downwards to engine resolution
         if(newResolution.x < g_vInternalResolution.x) g_vInternalResolution.x = newResolution.x;
         if(newResolution.y < g_vInternalResolution.y) g_vInternalResolution.y = newResolution.y;
-
-        // the logic below is way too difficult to understand ATM
-        // breaks leaving/entering fullscreen with letterboxing enabled with the SDL backend
-        // some other solution should be used instead of this shit, if this is even an actual problem
-
-        // // disable internal resolution on specific conditions
-        // bool windowsBorderlessHackCondition =
-        //     (Env::cfg(OS::WINDOWS) && env->isFullscreen() && env->isFullscreenWindowedBorderless() &&
-        //      (int)g_vInternalResolution.y == (int)env->getNativeScreenSize().y);  // HACKHACK
-        // if(((int)g_vInternalResolution.x == engine->getScreenWidth() &&
-        //     (int)g_vInternalResolution.y == engine->getScreenHeight()) ||
-        //    !env->isFullscreen() || windowsBorderlessHackCondition) {
-        //     debugLog("Internal resolution == Engine resolution || !Fullscreen, disabling resampler ({}, {})\n",
-        //              (int)(g_vInternalResolution == engine->getScreenSize()), (int)(!env->isFullscreen()));
-        //     cv::resolution_enabled.setValue(0.0f);
-        //     g_vInternalResolution = engine->getScreenSize();
-        // }
+    } else {
+        g_vInternalResolution = newResolution;
     }
 
     // update dpi specific engine globals
@@ -1695,22 +1680,20 @@ void Osu::updateMouseSettings() {
     // mouse scaling & offset
     Vector2 offset = Vector2(0, 0);
     Vector2 scale = Vector2(1, 1);
-    if(cv::resolution_enabled.getBool()) {
-        if(cv::letterboxing.getBool()) {
-            // special case for osu: since letterboxed raw input absolute to window should mean the 'game' window, and
-            // not the 'engine' window, no offset scaling is necessary
-            if(!Env::cfg(OS::LINUX) && cv::mouse_raw_input_absolute_to_window.getBool())
-                offset = -Vector2((engine->getScreenWidth() / 2 - g_vInternalResolution.x / 2),
-                                  (engine->getScreenHeight() / 2 - g_vInternalResolution.y / 2));
-            else
-                offset = -Vector2((engine->getScreenWidth() / 2 - g_vInternalResolution.x / 2) *
-                                      (1.0f + cv::letterboxing_offset_x.getFloat()),
-                                  (engine->getScreenHeight() / 2 - g_vInternalResolution.y / 2) *
-                                      (1.0f + cv::letterboxing_offset_y.getFloat()));
+    if((g->getResolution() != g_vInternalResolution) && cv::letterboxing.getBool()) {
+        // special case for osu: since letterboxed raw input absolute to window should mean the 'game' window, and
+        // not the 'engine' window, no offset scaling is necessary
+        if(!Env::cfg(OS::LINUX) && cv::mouse_raw_input_absolute_to_window.getBool())
+            offset = -Vector2((engine->getScreenWidth() / 2 - g_vInternalResolution.x / 2),
+                              (engine->getScreenHeight() / 2 - g_vInternalResolution.y / 2));
+        else
+            offset = -Vector2((engine->getScreenWidth() / 2 - g_vInternalResolution.x / 2) *
+                                  (1.0f + cv::letterboxing_offset_x.getFloat()),
+                              (engine->getScreenHeight() / 2 - g_vInternalResolution.y / 2) *
+                                  (1.0f + cv::letterboxing_offset_y.getFloat()));
 
-            scale = Vector2(g_vInternalResolution.x / engine->getScreenWidth(),
-                            g_vInternalResolution.y / engine->getScreenHeight());
-        }
+        scale = Vector2(g_vInternalResolution.x / engine->getScreenWidth(),
+                        g_vInternalResolution.y / engine->getScreenHeight());
     }
 
     mouse->setOffset(offset);
@@ -1790,8 +1773,7 @@ void Osu::onInternalResolutionChanged(const UString & /*oldValue*/, const UStrin
         if(newInternalResolution.y > g->getResolution().y) newInternalResolution.y = g->getResolution().y;
     }
 
-    // enable and store, then force onResolutionChanged()
-    cv::resolution_enabled.setValue(1.0f);
+    // store, then force onResolutionChanged()
     g_vInternalResolution = newInternalResolution;
     this->vInternalResolution = newInternalResolution;
     this->fireResolutionChanged();
@@ -1962,12 +1944,10 @@ void Osu::onUIScaleToDPIChange(const UString &oldValue, const UString &newValue)
 }
 
 void Osu::onLetterboxingChange(const UString &oldValue, const UString &newValue) {
-    if(cv::resolution_enabled.getBool()) {
-        bool oldVal = oldValue.toFloat() > 0.0f;
-        bool newVal = newValue.toFloat() > 0.0f;
+    bool oldVal = oldValue.toFloat() > 0.0f;
+    bool newVal = newValue.toFloat() > 0.0f;
 
-        if(oldVal != newVal) this->bFireResolutionChangedScheduled = true;  // delay
-    }
+    if(oldVal != newVal) this->bFireResolutionChangedScheduled = true;  // delay
 }
 
 // Here, "cursor" is the Windows mouse cursor, not the game cursor
@@ -1986,7 +1966,7 @@ void Osu::updateCursorVisibility() {
     // handle cursor visibility if outside of internal resolution
     // TODO: not a critical bug, but the real cursor gets visible way too early if sensitivity is > 1.0f, due to this
     // using scaled/offset getMouse()->getPos()
-    if(cv::resolution_enabled.getBool()) {
+    if(g->getResolution() != g_vInternalResolution) {
         McRect internalWindow = McRect(0, 0, g_vInternalResolution.x, g_vInternalResolution.y);
         if(!internalWindow.contains(mouse->getPos())) {
             this->bShouldCursorBeVisible = true;
@@ -2002,21 +1982,22 @@ void Osu::updateCursorVisibility() {
 void Osu::updateConfineCursor() {
     if(cv::debug.getBool()) debugLog("Osu::updateConfineCursor()\n");
 
-    if(!cv::confine_cursor_never.getBool() &&
-       ((cv::confine_cursor_fullscreen.getBool() && env->isFullscreen()) ||
-        (cv::confine_cursor_windowed.getBool() && !env->isFullscreen()) ||
-        (this->isInPlayMode() && !this->pauseMenu->isVisible() && !this->getModAuto() && !this->getModAutopilot() &&
-         !this->getSelectedBeatmap()->is_watching && !bancho->spectating))) {
-        McRect clipWindow =
-            (cv::resolution_enabled.getBool() && cv::letterboxing.getBool())
-                ? McRect{static_cast<float>(-mouse->getOffset().x), static_cast<float>(-mouse->getOffset().y),
-                         g_vInternalResolution.x, g_vInternalResolution.y}
-                : McRect{0, 0, static_cast<float>(engine->getScreenWidth()),
-                         static_cast<float>(engine->getScreenHeight())};
-        env->setCursorClip(true, clipWindow);
+    if(cv::confine_cursor_never.getBool()) return env->setCursorClip(false, McRect());
+    if(env->isFullscreen() && !cv::confine_cursor_fullscreen.getBool()) return env->setCursorClip(false, McRect());
+    if(!env->isFullscreen() && !cv::confine_cursor_windowed.getBool()) return env->setCursorClip(false, McRect());
+    if(!this->isInPlayMode() || this->pauseMenu->isVisible()) return env->setCursorClip(false, McRect());
+    if(this->getModAuto() || this->getModAutopilot()) return env->setCursorClip(false, McRect());
+    if(this->getSelectedBeatmap()->is_watching || bancho->spectating) return env->setCursorClip(false, McRect());
+
+    McRect clip;
+    if((g->getResolution() != g_vInternalResolution) && cv::letterboxing.getBool()) {
+        clip = McRect{(f32)(-mouse->getOffset().x), (f32)(-mouse->getOffset().y), g_vInternalResolution.x,
+                      g_vInternalResolution.y};
     } else {
-        env->setCursorClip(false, McRect());
+        clip = McRect{0, 0, (f32)(engine->getScreenWidth()), (f32)(engine->getScreenHeight())};
     }
+
+    env->setCursorClip(true, clip);
 }
 
 void Osu::onKey1Change(bool pressed, bool isMouse) {
@@ -2235,7 +2216,8 @@ void Osu::setupSoloud() {
     soundEngine->setDeviceChangeBeforeCallback(outputChangedBeforeCallback);
     soundEngine->setDeviceChangeAfterCallback(outputChangedAfterCallback);
     soundEngine->initializeOutputDevice(soundEngine->getWantedDevice());
-    soundEngine
-        ->allowInternalCallbacks();  // this sets convar callbacks for things that require a soundengine reinit, do it
-                                     // only after init so config files don't restart it over and over again
+
+    // this sets convar callbacks for things that require a soundengine reinit, do it
+    // only after init so config files don't restart it over and over again
+    soundEngine->allowInternalCallbacks();
 }
