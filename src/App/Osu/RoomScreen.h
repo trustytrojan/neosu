@@ -14,7 +14,7 @@ class CBaseUICheckbox;
 class CBaseUILabel;
 class CBaseUITextbox;
 class DatabaseBeatmap;
-class MainMenuPauseButton;
+class PauseButton;
 class UIButton;
 class UICheckbox;
 class UIContextMenu;
@@ -96,7 +96,7 @@ class RoomScreen : public OsuScreen {
     UIButton *ready_btn = NULL;
     UIContextMenu *contextMenu = NULL;
 
-    MainMenuPauseButton *pauseButton = NULL;
+    PauseButton *pauseButton = NULL;
     McFont *font = NULL;
     McFont *lfont = NULL;
     time_t last_packet_tms = {0};

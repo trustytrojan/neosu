@@ -33,100 +33,72 @@
 #include "UpdateHandler.h"
 #include "VertexArrayObject.h"
 
-static float button_sound_cooldown = 0.f;
-
 UString MainMenu::NEOSU_MAIN_BUTTON_TEXT = UString("neosu");
 UString MainMenu::NEOSU_MAIN_BUTTON_SUBTEXT = UString("Multiplayer Client");
 
-static MainMenu *g_main_menu = NULL;
-
-class MainMenuCubeButton : public CBaseUIButton {
+class MainMenu::CubeButton : public CBaseUIButton {
    public:
-    MainMenuCubeButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text);
+    CubeButton(MainMenu *parent, float xPos, float yPos, float xSize, float ySize, UString name, UString text)
+        : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), std::move(text)), mm_ptr(parent) {}
 
-    void draw() override;
-
-    void onMouseInside() override;
-    void onMouseOutside() override;
-};
-
-class MainMenuButton : public CBaseUIButton {
-   public:
-    MainMenuButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text);
-
-    void onMouseDownInside(bool left = true, bool right = false) override;
-    void onMouseInside() override;
-};
-
-void MainMenuPauseButton::draw() {
-    int third = this->vSize.x / 3;
-
-    g->setColor(0xffffffff);
-
-    if(!this->bIsPaused) {
-        g->fillRect(this->vPos.x, this->vPos.y, third, this->vSize.y + 1);
-        g->fillRect(this->vPos.x + 2 * third, this->vPos.y, third, this->vSize.y + 1);
-    } else {
-        g->setColor(0xffffffff);
-        VertexArrayObject vao;
-
-        const int smoothPixels = 2;
-
-        // center triangle
-        vao.addVertex(this->vPos.x, this->vPos.y + smoothPixels);
-        vao.addColor(0xffffffff);
-        vao.addVertex(this->vPos.x + this->vSize.x, this->vPos.y + this->vSize.y / 2);
-        vao.addColor(0xffffffff);
-        vao.addVertex(this->vPos.x, this->vPos.y + this->vSize.y - smoothPixels);
-        vao.addColor(0xffffffff);
-
-        // top smooth
-        vao.addVertex(this->vPos.x, this->vPos.y + smoothPixels);
-        vao.addColor(0xffffffff);
-        vao.addVertex(this->vPos.x, this->vPos.y);
-        vao.addColor(0x00000000);
-        vao.addVertex(this->vPos.x + this->vSize.x, this->vPos.y + this->vSize.y / 2);
-        vao.addColor(0xffffffff);
-
-        vao.addVertex(this->vPos.x, this->vPos.y);
-        vao.addColor(0x00000000);
-        vao.addVertex(this->vPos.x + this->vSize.x, this->vPos.y + this->vSize.y / 2);
-        vao.addColor(0xffffffff);
-        vao.addVertex(this->vPos.x + this->vSize.x, this->vPos.y + this->vSize.y / 2 - smoothPixels);
-        vao.addColor(0x00000000);
-
-        // bottom smooth
-        vao.addVertex(this->vPos.x, this->vPos.y + this->vSize.y - smoothPixels);
-        vao.addColor(0xffffffff);
-        vao.addVertex(this->vPos.x, this->vPos.y + this->vSize.y);
-        vao.addColor(0x00000000);
-        vao.addVertex(this->vPos.x + this->vSize.x, this->vPos.y + this->vSize.y / 2);
-        vao.addColor(0xffffffff);
-
-        vao.addVertex(this->vPos.x, this->vPos.y + this->vSize.y);
-        vao.addColor(0x00000000);
-        vao.addVertex(this->vPos.x + this->vSize.x, this->vPos.y + this->vSize.y / 2);
-        vao.addColor(0xffffffff);
-        vao.addVertex(this->vPos.x + this->vSize.x, this->vPos.y + this->vSize.y / 2 + smoothPixels);
-        vao.addColor(0x00000000);
-
-        g->drawVAO(&vao);
+    void draw() override {
+        // draw nothing
     }
 
-    // draw hover rects
-    g->setColor(this->frameColor);
-    if(this->bMouseInside && this->bEnabled) {
-        if(!this->bActive && !mouse->isLeftDown())
-            this->drawHoverRect(3);
-        else if(this->bActive)
-            this->drawHoverRect(3);
+    void onMouseInside() override {
+        anim->moveQuadInOut(&this->mm_ptr->fSizeAddAnim, 0.12f, 0.15f, 0.0f, true);
+
+        CBaseUIButton::onMouseInside();
+
+        if(this->mm_ptr->button_sound_cooldown + 0.05f < engine->getTime()) {
+            soundEngine->play(osu->getSkin()->hoverMainMenuCube);
+            this->mm_ptr->button_sound_cooldown = engine->getTime();
+        }
     }
-    if(this->bActive && this->bEnabled) this->drawHoverRect(6);
-}
+
+    void onMouseOutside() override {
+        anim->moveQuadInOut(&this->mm_ptr->fSizeAddAnim, 0.0f, 0.15f, 0.0f, true);
+
+        CBaseUIButton::onMouseOutside();
+    }
+
+   private:
+    MainMenu *mm_ptr;
+};
+
+class MainMenu::MainButton : public CBaseUIButton {
+   public:
+    MainButton(MainMenu *parent, float xPos, float yPos, float xSize, float ySize, UString name, UString text)
+        : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), std::move(text)), mm_ptr(parent) {}
+
+    void onMouseDownInside(bool left = true, bool right = false) override {
+        if(this->mm_ptr->cube->isMouseInside()) return;
+        CBaseUIButton::onMouseDownInside(left, right);
+    }
+    void onMouseInside() override {
+        if(this->mm_ptr->cube->isMouseInside()) return;
+        CBaseUIButton::onMouseInside();
+
+        if(this->mm_ptr->button_sound_cooldown + 0.05f < engine->getTime()) {
+            if(this->getText() == UString("Singleplayer")) {
+                soundEngine->play(osu->getSkin()->hoverSingleplayer);
+            } else if(this->getText() == UString("Multiplayer")) {
+                soundEngine->play(osu->getSkin()->hoverMultiplayer);
+            } else if(this->getText() == UString("Options (CTRL + O)")) {
+                soundEngine->play(osu->getSkin()->hoverOptions);
+            } else if(this->getText() == UString("Exit")) {
+                soundEngine->play(osu->getSkin()->hoverExit);
+            }
+
+            this->mm_ptr->button_sound_cooldown = engine->getTime();
+        }
+    }
+
+   private:
+    MainMenu *mm_ptr;
+};
 
 MainMenu::MainMenu() : OsuScreen() {
-    g_main_menu = this;
-
     // engine settings
     mouse->addListener(this);
 
@@ -242,7 +214,7 @@ MainMenu::MainMenu() : OsuScreen() {
     this->setPos(-1, 0);
     this->setSize(osu->getScreenWidth(), osu->getScreenHeight());
 
-    this->cube = new MainMenuCubeButton(0, 0, 1, 1, "", "");
+    this->cube = new CubeButton(this, 0, 0, 1, 1, "", "");
     this->cube->setClickCallback(SA::MakeDelegate<&MainMenu::onCubePressed>(this));
     this->addBaseUIElement(this->cube);
 
@@ -253,11 +225,10 @@ MainMenu::MainMenu() : OsuScreen() {
         ->setClickCallback(SA::MakeDelegate<&MainMenu::onOptionsButtonPressed>(this));
     this->addMainMenuButton("Exit")->setClickCallback(SA::MakeDelegate<&MainMenu::onExitButtonPressed>(this));
 
-    this->pauseButton = new MainMenuPauseButton(0, 0, 0, 0, "", "");
+    this->pauseButton = new PauseButton(0, 0, 0, 0, "", "");
     this->pauseButton->setClickCallback(SA::MakeDelegate<&MainMenu::onPausePressed>(this));
     this->addBaseUIElement(this->pauseButton);
 
-    // TODO @spec: shouldn't this be portable-ish already?
     this->updateAvailableButton = new UIButton(0, 0, 0, 0, "", "Checking for updates ...");
     this->updateAvailableButton->setUseDefaultSkin();
     this->updateAvailableButton->setClickCallback(SA::MakeDelegate<&MainMenu::onUpdatePressed>(this));
@@ -1062,7 +1033,7 @@ void MainMenu::selectRandomBeatmap() {
         auto mapset_folders = this->songs_enumerator.getEntries();
         if(mapset_folders.empty()) {
             // check if it was loaded with a different path
-            if (this->songs_enumerator.getFolderPath() != Database::getOsuSongsFolder()) {
+            if(this->songs_enumerator.getFolderPath() != Database::getOsuSongsFolder()) {
                 // rebuild will reinit with the current song folder
                 this->songs_enumerator.rebuild();
             }
@@ -1073,7 +1044,7 @@ void MainMenu::selectRandomBeatmap() {
         SAFE_DELETE(this->preloaded_beatmapset);
 
         for(int i = 0; i < 10; i++) {
-            const auto& mapset_folder = mapset_folders[rand() % mapset_folders.size()];
+            const auto &mapset_folder = mapset_folders[rand() % mapset_folders.size()];
             BeatmapSet *set = db->loadRawBeatmap(mapset_folder);
             if(set == NULL) {
                 debugLog("Failed to load beatmap set '{:s}'\n", mapset_folder.c_str());
@@ -1341,8 +1312,8 @@ void MainMenu::writeVersionFile() {
     }
 }
 
-MainMenuButton *MainMenu::addMainMenuButton(UString text) {
-    MainMenuButton *button = new MainMenuButton(this->vSize.x, 0, 1, 1, "", std::move(text));
+MainMenu::MainButton *MainMenu::addMainMenuButton(UString text) {
+    auto *button = new MainButton(this, this->vSize.x, 0, 1, 1, "", std::move(text));
     button->setFont(osu->getSubTitleFont());
     button->setVisible(false);
 
@@ -1461,56 +1432,71 @@ void MainMenu::onVersionPressed() {
     osu->toggleChangelog();
 }
 
-MainMenuCubeButton::MainMenuCubeButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
-    : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), std::move(text)) {}
+void PauseButton::draw() {
+    int third = this->vSize.x / 3;
 
-void MainMenuCubeButton::draw() {
-    // draw nothing
-}
+    g->setColor(0xffffffff);
 
-void MainMenuCubeButton::onMouseInside() {
-    anim->moveQuadInOut(&g_main_menu->fSizeAddAnim, 0.12f, 0.15f, 0.0f, true);
+    if(!this->bIsPaused) {
+        g->fillRect(this->vPos.x, this->vPos.y, third, this->vSize.y + 1);
+        g->fillRect(this->vPos.x + 2 * third, this->vPos.y, third, this->vSize.y + 1);
+    } else {
+        g->setColor(0xffffffff);
+        VertexArrayObject vao;
 
-    CBaseUIButton::onMouseInside();
+        const int smoothPixels = 2;
 
-    if(button_sound_cooldown + 0.05f < engine->getTime()) {
-        soundEngine->play(osu->getSkin()->hoverMainMenuCube);
-        button_sound_cooldown = engine->getTime();
+        // center triangle
+        vao.addVertex(this->vPos.x, this->vPos.y + smoothPixels);
+        vao.addColor(0xffffffff);
+        vao.addVertex(this->vPos.x + this->vSize.x, this->vPos.y + this->vSize.y / 2);
+        vao.addColor(0xffffffff);
+        vao.addVertex(this->vPos.x, this->vPos.y + this->vSize.y - smoothPixels);
+        vao.addColor(0xffffffff);
+
+        // top smooth
+        vao.addVertex(this->vPos.x, this->vPos.y + smoothPixels);
+        vao.addColor(0xffffffff);
+        vao.addVertex(this->vPos.x, this->vPos.y);
+        vao.addColor(0x00000000);
+        vao.addVertex(this->vPos.x + this->vSize.x, this->vPos.y + this->vSize.y / 2);
+        vao.addColor(0xffffffff);
+
+        vao.addVertex(this->vPos.x, this->vPos.y);
+        vao.addColor(0x00000000);
+        vao.addVertex(this->vPos.x + this->vSize.x, this->vPos.y + this->vSize.y / 2);
+        vao.addColor(0xffffffff);
+        vao.addVertex(this->vPos.x + this->vSize.x, this->vPos.y + this->vSize.y / 2 - smoothPixels);
+        vao.addColor(0x00000000);
+
+        // bottom smooth
+        vao.addVertex(this->vPos.x, this->vPos.y + this->vSize.y - smoothPixels);
+        vao.addColor(0xffffffff);
+        vao.addVertex(this->vPos.x, this->vPos.y + this->vSize.y);
+        vao.addColor(0x00000000);
+        vao.addVertex(this->vPos.x + this->vSize.x, this->vPos.y + this->vSize.y / 2);
+        vao.addColor(0xffffffff);
+
+        vao.addVertex(this->vPos.x, this->vPos.y + this->vSize.y);
+        vao.addColor(0x00000000);
+        vao.addVertex(this->vPos.x + this->vSize.x, this->vPos.y + this->vSize.y / 2);
+        vao.addColor(0xffffffff);
+        vao.addVertex(this->vPos.x + this->vSize.x, this->vPos.y + this->vSize.y / 2 + smoothPixels);
+        vao.addColor(0x00000000);
+
+        g->drawVAO(&vao);
     }
-}
 
-void MainMenuCubeButton::onMouseOutside() {
-    anim->moveQuadInOut(&g_main_menu->fSizeAddAnim, 0.0f, 0.15f, 0.0f, true);
-
-    CBaseUIButton::onMouseOutside();
-}
-
-MainMenuButton::MainMenuButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
-    : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), std::move(text)) {}
-
-void MainMenuButton::onMouseDownInside(bool left, bool right) {
-    if(g_main_menu->cube->isMouseInside()) return;
-    CBaseUIButton::onMouseDownInside(left, right);
-}
-
-void MainMenuButton::onMouseInside() {
-    if(g_main_menu->cube->isMouseInside()) return;
-    CBaseUIButton::onMouseInside();
-
-    if(button_sound_cooldown + 0.05f < engine->getTime()) {
-        if(this->getText() == UString("Singleplayer")) {
-            soundEngine->play(osu->getSkin()->hoverSingleplayer);
-        } else if(this->getText() == UString("Multiplayer")) {
-            soundEngine->play(osu->getSkin()->hoverMultiplayer);
-        } else if(this->getText() == UString("Options (CTRL + O)")) {
-            soundEngine->play(osu->getSkin()->hoverOptions);
-        } else if(this->getText() == UString("Exit")) {
-            soundEngine->play(osu->getSkin()->hoverExit);
-        }
-
-        button_sound_cooldown = engine->getTime();
+    // draw hover rects
+    g->setColor(this->frameColor);
+    if(this->bMouseInside && this->bEnabled) {
+        if(!this->bActive && !mouse->isLeftDown())
+            this->drawHoverRect(3);
+        else if(this->bActive)
+            this->drawHoverRect(3);
     }
-}
+    if(this->bActive && this->bEnabled) this->drawHoverRect(6);
+};
 
 void MainMenu::SongsFolderEnumerator::initAsync() {
     this->folderPath = Database::getOsuSongsFolder();

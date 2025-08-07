@@ -107,7 +107,7 @@ RoomScreen::RoomScreen() : OsuScreen() {
     this->font = resourceManager->getFont("FONT_DEFAULT");
     this->lfont = osu->getSubTitleFont();
 
-    this->pauseButton = new MainMenuPauseButton(0, 0, 0, 0, "pause_btn", "");
+    this->pauseButton = new PauseButton(0, 0, 0, 0, "pause_btn", "");
     this->pauseButton->setClickCallback(SA::MakeDelegate<&MainMenu::onPausePressed>(osu->mainMenu));
     this->addBaseUIElement(this->pauseButton);
 

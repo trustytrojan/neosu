@@ -16,27 +16,20 @@ typedef DatabaseBeatmap BeatmapDifficulty;
 typedef DatabaseBeatmap BeatmapSet;
 
 class HitObject;
-
-class MainMenuCubeButton;
-class MainMenuButton;
 class UIButton;
-
 class CBaseUIContainer;
-
 class ConVar;
 
-class MainMenuPauseButton : public CBaseUIButton {
+class PauseButton : public CBaseUIButton {
    public:
-    MainMenuPauseButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
-        : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), std::move(text)) {
-        this->bIsPaused = true;
-    }
+    PauseButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
+        : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), std::move(text)){}
 
     void draw() override;
-    void setPaused(bool paused) { this->bIsPaused = paused; }
+    inline void setPaused(bool paused) { this->bIsPaused = paused; }
 
    private:
-    bool bIsPaused;
+    bool bIsPaused{true};
 };
 
 class MainMenu : public OsuScreen, public MouseListener {
@@ -44,8 +37,6 @@ class MainMenu : public OsuScreen, public MouseListener {
     static UString NEOSU_MAIN_BUTTON_TEXT;
     static UString NEOSU_MAIN_BUTTON_SUBTEXT;
 
-    friend class MainMenuCubeButton;
-    friend class MainMenuButton;
     void onPausePressed();
     void onCubePressed();
 
@@ -68,6 +59,13 @@ class MainMenu : public OsuScreen, public MouseListener {
     CBaseUIContainer *setVisible(bool visible) override;
 
    private:
+    class CubeButton;
+    class MainButton;
+
+    friend class CubeButton;
+    friend class MainButton;
+    float button_sound_cooldown{0.f};
+
     void drawVersionInfo();
     void updateLayout();
 
@@ -78,7 +76,7 @@ class MainMenu : public OsuScreen, public MouseListener {
 
     void writeVersionFile();
 
-    MainMenuButton *addMainMenuButton(UString text);
+    MainButton *addMainMenuButton(UString text);
 
     void onPlayButtonPressed();
     void onMultiplayerButtonPressed();
@@ -103,10 +101,10 @@ class MainMenu : public OsuScreen, public MouseListener {
     bool bMenuElementsVisible;
     float fMainMenuButtonCloseTime = 0.f;
 
-    MainMenuCubeButton *cube;
-    std::vector<MainMenuButton *> menuElements;
+    CubeButton *cube;
+    std::vector<MainButton *> menuElements;
 
-    MainMenuPauseButton *pauseButton;
+    PauseButton *pauseButton;
     UIButton *updateAvailableButton = NULL;
     CBaseUIButton *versionButton;
 
@@ -137,10 +135,10 @@ class MainMenu : public OsuScreen, public MouseListener {
     float fShutdownScheduledTime;
     bool bWasCleanShutdown;
 
-    bool bStartupAnim = true;
-    f32 fStartupAnim = 0.f;
-    f32 fStartupAnim2 = 0.f;
-    float fPrevShuffleTime;
+    bool bStartupAnim{true};
+    f32 fStartupAnim{0.f};
+    f32 fStartupAnim2{0.f};
+    float fPrevShuffleTime{0.f};
     float fBackgroundFadeInTime;
 
     Image *logo_img;

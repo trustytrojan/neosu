@@ -4,7 +4,7 @@
 #include "OsuScreen.h"
 
 class McFont;
-class MainMenuPauseButton;
+class PauseButton;
 class CBaseUILabel;
 class UserCard;
 class CBaseUIScrollView;
@@ -26,7 +26,7 @@ class SpectatorScreen : public OsuScreen {
    private:
     McFont* font = NULL;
     McFont* lfont = NULL;
-    MainMenuPauseButton* pauseButton = NULL;
+    PauseButton* pauseButton = NULL;
     CBaseUIScrollView* background = NULL;
     UIButton* stop_btn = NULL;
     CBaseUILabel* spectating = NULL;
