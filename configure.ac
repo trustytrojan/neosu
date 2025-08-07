@@ -658,7 +658,7 @@ AC_SUBST([AUDIO_LIBS])
 
 # the source file is also added through autogen.sh to Makefile.sources
 BUNDLED_INCLUDES="-I\$(srcdir)/libraries"
-BUNDLED_INCLUDES="$BUNDLED_INCLUDES -I\$(srcdir)/libraries/delegatesv2 -I\$(srcdir)/libraries/glad -I\$(srcdir)/libraries/glad_wgl"
+BUNDLED_INCLUDES="$BUNDLED_INCLUDES -I\$(srcdir)/libraries/delegatesv2 -I\$(srcdir)/libraries/glad"
 AC_SUBST([BUNDLED_INCLUDES])
 
 AC_MSG_CHECKING([for shaders in $srcdir/$ASSETS_DIR/shaders])

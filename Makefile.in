@@ -152,7 +152,6 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	libraries/neosu-cJSON.$(OBJEXT) \
 	libraries/neosu-curl_blob.$(OBJEXT) \
 	libraries/glad/neosu-glad.$(OBJEXT) \
-	libraries/glad_wgl/neosu-glad_wgl.$(OBJEXT) \
 	libraries/neosu-lodepng.$(OBJEXT) \
 	libraries/neosu-sha256.$(OBJEXT) \
 	src/App/Osu/neosu-BackgroundImageHandler.$(OBJEXT) \
@@ -321,7 +320,6 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	libraries/$(DEPDIR)/neosu-lodepng.Po \
 	libraries/$(DEPDIR)/neosu-sha256.Po \
 	libraries/glad/$(DEPDIR)/neosu-glad.Po \
-	libraries/glad_wgl/$(DEPDIR)/neosu-glad_wgl.Po \
 	src/App/Osu/$(DEPDIR)/neosu-BackgroundImageHandler.Po \
 	src/App/Osu/$(DEPDIR)/neosu-Bancho.Po \
 	src/App/Osu/$(DEPDIR)/neosu-BanchoAes.Po \
@@ -803,7 +801,6 @@ neosu_SOURCES = \
 	libraries/cJSON.cpp \
 	libraries/curl_blob.cpp \
 	libraries/glad/glad.cpp \
-	libraries/glad_wgl/glad_wgl.cpp \
 	libraries/lodepng.cpp \
 	libraries/sha256.cpp \
 	src/App/Osu/BackgroundImageHandler.cpp \
@@ -1222,15 +1219,6 @@ libraries/glad/$(DEPDIR)/$(am__dirstamp):
 	@: >>libraries/glad/$(DEPDIR)/$(am__dirstamp)
 libraries/glad/neosu-glad.$(OBJEXT): libraries/glad/$(am__dirstamp) \
 	libraries/glad/$(DEPDIR)/$(am__dirstamp)
-libraries/glad_wgl/$(am__dirstamp):
-	@$(MKDIR_P) libraries/glad_wgl
-	@: >>libraries/glad_wgl/$(am__dirstamp)
-libraries/glad_wgl/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) libraries/glad_wgl/$(DEPDIR)
-	@: >>libraries/glad_wgl/$(DEPDIR)/$(am__dirstamp)
-libraries/glad_wgl/neosu-glad_wgl.$(OBJEXT):  \
-	libraries/glad_wgl/$(am__dirstamp) \
-	libraries/glad_wgl/$(DEPDIR)/$(am__dirstamp)
 libraries/neosu-lodepng.$(OBJEXT): libraries/$(am__dirstamp) \
 	libraries/$(DEPDIR)/$(am__dirstamp)
 libraries/neosu-sha256.$(OBJEXT): libraries/$(am__dirstamp) \
@@ -1675,7 +1663,6 @@ mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 	-rm -f libraries/*.$(OBJEXT)
 	-rm -f libraries/glad/*.$(OBJEXT)
-	-rm -f libraries/glad_wgl/*.$(OBJEXT)
 	-rm -f src/App/Osu/*.$(OBJEXT)
 	-rm -f src/App/Osu/SongBrowser/*.$(OBJEXT)
 	-rm -f src/Engine/*.$(OBJEXT)
@@ -1700,7 +1687,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@libraries/$(DEPDIR)/neosu-lodepng.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@libraries/$(DEPDIR)/neosu-sha256.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@libraries/glad/$(DEPDIR)/neosu-glad.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@libraries/glad_wgl/$(DEPDIR)/neosu-glad_wgl.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-BackgroundImageHandler.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-Bancho.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-BanchoAes.Po@am__quote@ # am--include-marker
@@ -1934,20 +1920,6 @@ libraries/glad/neosu-glad.obj: libraries/glad/glad.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='libraries/glad/glad.cpp' object='libraries/glad/neosu-glad.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o libraries/glad/neosu-glad.obj `if test -f 'libraries/glad/glad.cpp'; then $(CYGPATH_W) 'libraries/glad/glad.cpp'; else $(CYGPATH_W) '$(srcdir)/libraries/glad/glad.cpp'; fi`
-
-libraries/glad_wgl/neosu-glad_wgl.o: libraries/glad_wgl/glad_wgl.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT libraries/glad_wgl/neosu-glad_wgl.o -MD -MP -MF libraries/glad_wgl/$(DEPDIR)/neosu-glad_wgl.Tpo -c -o libraries/glad_wgl/neosu-glad_wgl.o `test -f 'libraries/glad_wgl/glad_wgl.cpp' || echo '$(srcdir)/'`libraries/glad_wgl/glad_wgl.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) libraries/glad_wgl/$(DEPDIR)/neosu-glad_wgl.Tpo libraries/glad_wgl/$(DEPDIR)/neosu-glad_wgl.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='libraries/glad_wgl/glad_wgl.cpp' object='libraries/glad_wgl/neosu-glad_wgl.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o libraries/glad_wgl/neosu-glad_wgl.o `test -f 'libraries/glad_wgl/glad_wgl.cpp' || echo '$(srcdir)/'`libraries/glad_wgl/glad_wgl.cpp
-
-libraries/glad_wgl/neosu-glad_wgl.obj: libraries/glad_wgl/glad_wgl.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT libraries/glad_wgl/neosu-glad_wgl.obj -MD -MP -MF libraries/glad_wgl/$(DEPDIR)/neosu-glad_wgl.Tpo -c -o libraries/glad_wgl/neosu-glad_wgl.obj `if test -f 'libraries/glad_wgl/glad_wgl.cpp'; then $(CYGPATH_W) 'libraries/glad_wgl/glad_wgl.cpp'; else $(CYGPATH_W) '$(srcdir)/libraries/glad_wgl/glad_wgl.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) libraries/glad_wgl/$(DEPDIR)/neosu-glad_wgl.Tpo libraries/glad_wgl/$(DEPDIR)/neosu-glad_wgl.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='libraries/glad_wgl/glad_wgl.cpp' object='libraries/glad_wgl/neosu-glad_wgl.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o libraries/glad_wgl/neosu-glad_wgl.obj `if test -f 'libraries/glad_wgl/glad_wgl.cpp'; then $(CYGPATH_W) 'libraries/glad_wgl/glad_wgl.cpp'; else $(CYGPATH_W) '$(srcdir)/libraries/glad_wgl/glad_wgl.cpp'; fi`
 
 libraries/neosu-lodepng.o: libraries/lodepng.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT libraries/neosu-lodepng.o -MD -MP -MF libraries/$(DEPDIR)/neosu-lodepng.Tpo -c -o libraries/neosu-lodepng.o `test -f 'libraries/lodepng.cpp' || echo '$(srcdir)/'`libraries/lodepng.cpp
@@ -4231,8 +4203,6 @@ distclean-generic:
 	-$(am__rm_f) libraries/$(am__dirstamp)
 	-$(am__rm_f) libraries/glad/$(DEPDIR)/$(am__dirstamp)
 	-$(am__rm_f) libraries/glad/$(am__dirstamp)
-	-$(am__rm_f) libraries/glad_wgl/$(DEPDIR)/$(am__dirstamp)
-	-$(am__rm_f) libraries/glad_wgl/$(am__dirstamp)
 	-$(am__rm_f) src/App/Osu/$(DEPDIR)/$(am__dirstamp)
 	-$(am__rm_f) src/App/Osu/$(am__dirstamp)
 	-$(am__rm_f) src/App/Osu/SongBrowser/$(DEPDIR)/$(am__dirstamp)
@@ -4278,7 +4248,6 @@ distclean: distclean-am
 	-rm -f libraries/$(DEPDIR)/neosu-lodepng.Po
 	-rm -f libraries/$(DEPDIR)/neosu-sha256.Po
 	-rm -f libraries/glad/$(DEPDIR)/neosu-glad.Po
-	-rm -f libraries/glad_wgl/$(DEPDIR)/neosu-glad_wgl.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-BackgroundImageHandler.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Bancho.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-BanchoAes.Po
@@ -4475,7 +4444,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f libraries/$(DEPDIR)/neosu-lodepng.Po
 	-rm -f libraries/$(DEPDIR)/neosu-sha256.Po
 	-rm -f libraries/glad/$(DEPDIR)/neosu-glad.Po
-	-rm -f libraries/glad_wgl/$(DEPDIR)/neosu-glad_wgl.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-BackgroundImageHandler.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Bancho.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-BanchoAes.Po

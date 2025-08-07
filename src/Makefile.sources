@@ -5,7 +5,6 @@ neosu_SOURCES = \
 	libraries/cJSON.cpp \
 	libraries/curl_blob.cpp \
 	libraries/glad/glad.cpp \
-	libraries/glad_wgl/glad_wgl.cpp \
 	libraries/lodepng.cpp \
 	libraries/sha256.cpp \
 	src/App/Osu/BackgroundImageHandler.cpp \
