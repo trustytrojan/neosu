@@ -5,6 +5,8 @@
 #include "CBaseUIButton.h"
 #include "MouseListener.h"
 #include "OsuScreen.h"
+#include "Resource.h"
+#include "ResourceManager.h"
 
 class Image;
 
@@ -22,6 +24,32 @@ class UIButton;
 class CBaseUIContainer;
 
 class ConVar;
+
+struct SongsFolderEnumerator : public Resource {
+    ~SongsFolderEnumerator() override = default;
+    SongsFolderEnumerator() : Resource("SONGS_FOLDER_ENUMERATOR") {
+        resourceManager->requestNextLoadAsync();
+        resourceManager->loadResource(this);
+    }
+
+    SongsFolderEnumerator &operator=(const SongsFolderEnumerator &) = delete;
+    SongsFolderEnumerator &operator=(SongsFolderEnumerator &&) = delete;
+    SongsFolderEnumerator(const SongsFolderEnumerator &) = delete;
+    SongsFolderEnumerator(SongsFolderEnumerator &&) = delete;
+
+    [[nodiscard]] inline const std::vector<std::string> &getEntries() const { return this->entries; }
+
+    // type inspection
+    [[nodiscard]] Type getResType() const final { return APPDEFINED; }
+
+   protected:
+    void init() override { this->bReady = true; }
+    void initAsync() override;
+    void destroy() override { ; }
+
+   private:
+    std::vector<std::string> entries{};
+};
 
 class MainMenuPauseButton : public CBaseUIButton {
    public:
@@ -143,4 +171,6 @@ class MainMenu : public OsuScreen, public MouseListener {
 
     Image *logo_img;
     Shader *background_shader = NULL;
+
+    SongsFolderEnumerator songs_enumerator;
 };

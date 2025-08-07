@@ -1058,71 +1058,15 @@ void MainMenu::selectRandomBeatmap() {
         RichPresence::onMainMenu();
     } else {
         // Database is not loaded yet, load a random map and select it
-        const auto &db_songs = db->getOsuSongsFolder();
-        auto songs_folder{env->directoryExists(db_songs) ? db_songs : ""};
-
-        struct FolderEnumerator : public Resource {
-            ~FolderEnumerator() override = default;
-            FolderEnumerator(std::string filepath) : Resource(std::move(filepath)) {
-                resourceManager->requestNextLoadAsync();
-                resourceManager->loadResource(this);
-            }
-
-            FolderEnumerator &operator=(const FolderEnumerator &) = delete;
-            FolderEnumerator &operator=(FolderEnumerator &&) = delete;
-            FolderEnumerator(const FolderEnumerator &) = delete;
-            FolderEnumerator(FolderEnumerator &&) = delete;
-
-            [[nodiscard]] inline const std::vector<std::string> &getEntries() const { return this->entries; }
-
-            // type inspection
-            [[nodiscard]] Type getResType() const final { return APPDEFINED; }
-
-           protected:
-            void init() override { this->bReady = true; }
-            void initAsync() override {
-                if(!this->sFilePath.empty()) {
-                    this->entries = env->getFoldersInFolder(this->sFilePath);
-                }
-                this->bAsyncReady.store(true);
-            }
-            void destroy() override { ; }
-
-           private:
-            std::vector<std::string> entries{};
-        };
-
-        static FolderEnumerator enumerator_osu{songs_folder};
-        static FolderEnumerator enumerator_neosu{MCENGINE_DATA_DIR "maps/"};
-
-        std::vector<std::string> mapset_folders{};
-        std::vector<std::string> mapset_folders2{};
-
-        for(const auto &e : {&enumerator_osu, &enumerator_neosu}) {
-            auto &folder_entries = (e == &enumerator_osu) ? mapset_folders : mapset_folders2;
-            const std::string this_folder =
-                (e == &enumerator_osu) ? songs_folder : std::string{MCENGINE_DATA_DIR "maps/"};
-            if(e->isAsyncReady()) {
-                folder_entries = e->getEntries();
-            }
-        }
-
-        auto nb_mapsets = mapset_folders.size();
-        auto nb_mapsets2 = mapset_folders2.size();
-        if(nb_mapsets + nb_mapsets2 == 0) return;
+        if(!this->songs_enumerator.isAsyncReady()) return;
+        auto mapset_folders = this->songs_enumerator.getEntries();
+        if(mapset_folders.empty()) return;
 
         sb->getSelectedBeatmap()->deselect();
         SAFE_DELETE(this->preloaded_beatmapset);
 
         for(int i = 0; i < 10; i++) {
-            u32 lucky_number = rand() % (nb_mapsets + nb_mapsets2);
-            bool is_neosu_set = lucky_number > nb_mapsets;
-            if(is_neosu_set) lucky_number -= nb_mapsets;
-
-            auto mapset_folder = is_neosu_set ? MCENGINE_DATA_DIR "maps/" : songs_folder;
-            mapset_folder.append((is_neosu_set ? mapset_folders2 : mapset_folders)[lucky_number]);
-            mapset_folder.append("/");
-
+            auto mapset_folder = mapset_folders[rand() % mapset_folders.size()];
             BeatmapSet *set = db->loadRawBeatmap(mapset_folder);
             if(set == NULL) {
                 debugLog("Failed to load beatmap set '{:s}'\n", mapset_folder.c_str());
@@ -1559,4 +1503,21 @@ void MainMenuButton::onMouseInside() {
 
         button_sound_cooldown = engine->getTime();
     }
+}
+
+void SongsFolderEnumerator::initAsync() {
+    const auto &osu_songs_folder_path = db->getOsuSongsFolder();
+    if(env->directoryExists(osu_songs_folder_path)) {
+        auto peppy_mapsets = env->getFoldersInFolder(osu_songs_folder_path);
+        for(const auto &mapset : peppy_mapsets) {
+            this->entries.push_back(osu_songs_folder_path + mapset + "/");
+        }
+    }
+
+    auto neosu_mapsets = env->getFoldersInFolder(MCENGINE_DATA_DIR "maps/");
+    for(const auto &mapset : neosu_mapsets) {
+        this->entries.push_back(MCENGINE_DATA_DIR "maps/" + mapset + "/");
+    }
+
+    this->bAsyncReady = true;
 }
