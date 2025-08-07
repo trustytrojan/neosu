@@ -100,6 +100,7 @@ class Database {
 
     std::unordered_map<MD5Hash, std::vector<FinishedScore>> online_scores;
     static const std::string &getOsuSongsFolder();
+    static std::string songs_folder;
 
     BeatmapSet *loadRawBeatmap(const std::string &beatmapPath);  // only used for raw loading without db
 

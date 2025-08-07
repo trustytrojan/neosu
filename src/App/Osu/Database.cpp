@@ -657,8 +657,10 @@ DatabaseBeatmap *Database::getBeatmapSet(i32 set_id) {
     return NULL;
 }
 
+std::string Database::songs_folder{};
+
 const std::string &Database::getOsuSongsFolder() {
-    static std::string songs_folder;
+    if(cv::songs_folder.getString() == songs_folder) return songs_folder;
 
     if(cv::songs_folder.getString().find(':') == std::string::npos) {
         // Relative path (yes, the check is Windows-only)
