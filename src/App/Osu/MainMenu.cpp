@@ -1063,8 +1063,8 @@ void MainMenu::selectRandomBeatmap() {
         if(mapset_folders.empty()) {
             // check if it was loaded with a different path
             if (this->songs_enumerator.getFolderPath() != Database::getOsuSongsFolder()) {
-                // reload will use the current song folder
-                this->songs_enumerator.reload();
+                // rebuild will reinit with the current song folder
+                this->songs_enumerator.rebuild();
             }
             return;
         }
@@ -1073,7 +1073,7 @@ void MainMenu::selectRandomBeatmap() {
         SAFE_DELETE(this->preloaded_beatmapset);
 
         for(int i = 0; i < 10; i++) {
-            auto mapset_folder = mapset_folders[rand() % mapset_folders.size()];
+            const auto& mapset_folder = mapset_folders[rand() % mapset_folders.size()];
             BeatmapSet *set = db->loadRawBeatmap(mapset_folder);
             if(set == NULL) {
                 debugLog("Failed to load beatmap set '{:s}'\n", mapset_folder.c_str());
