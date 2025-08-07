@@ -1,14 +1,5 @@
-//================ Copyright (c) 2025, WH, All rights reserved. =================//
-//
-// Purpose:		asynchronous resource loading system
-//
-// $NoKeywords: $arl
-//===============================================================================//
-
 #pragma once
-#ifndef ASYNCRESOURCELOADER_H
-#define ASYNCRESOURCELOADER_H
-
+#include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
@@ -119,5 +110,3 @@ class AsyncResourceLoader final {
     // lifecycle flags
     std::atomic<bool> bShuttingDown{false};
 };
-
-#endif
