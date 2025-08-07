@@ -16,12 +16,18 @@ class CBaseUIButton : public CBaseUIElement {
     void click(bool left = true, bool right = false) { this->onClicked(left, right); }
 
     template <typename Callable>
-    CBaseUIButton *setClickCallback(Callable &&cb)
-        requires(std::is_invocable_v<std::decay_t<Callable>, CBaseUIButton *, bool, bool> ||
-                 std::is_invocable_v<std::decay_t<Callable>, CBaseUIButton *> ||
-                 std::is_invocable_v<std::decay_t<Callable>, bool, bool> || std::is_invocable_v<std::decay_t<Callable>>)
-    {
-        this->clickCallback = std::forward<Callable>(cb);
+    CBaseUIButton *setClickCallback(Callable &&cb) {
+        using CBType = std::decay_t<Callable>;
+
+        if constexpr(std::is_invocable_v<CBType, CBaseUIButton *, bool, bool>) {
+            this->clickCallback = std::forward<Callable>(cb);
+        } else if constexpr(std::is_invocable_v<CBType, CBaseUIButton *>) {
+            this->clickCallback = [cb = std::forward<Callable>(cb)](CBaseUIButton *btn, bool, bool) { cb(btn); };
+        } else if constexpr(std::is_invocable_v<CBType>) {
+            this->clickCallback = [cb = std::forward<Callable>(cb)](CBaseUIButton *btn, bool, bool) { cb(); };
+        } else {
+            static_assert(false, "Programmer Error (bad callback signature)");
+        }
 
         return this;
     }
@@ -107,7 +113,7 @@ class CBaseUIButton : public CBaseUIElement {
     UString sText;
 
     // callbacks, either void, with ourself as the argument, or with the held left/right buttons
-    SA::auto_callback<CBaseUIButton, bool, bool> clickCallback;
+    std::function<void(CBaseUIButton *, bool, bool)> clickCallback;
 
     McFont *font;
 

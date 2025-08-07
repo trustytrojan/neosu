@@ -103,11 +103,7 @@ void CBaseUIButton::drawHoverRect(int distance) {
 
 void CBaseUIButton::onMouseUpInside(bool left, bool right) { this->onClicked(left, right); }
 
-void CBaseUIButton::onClicked(bool left, bool right) {
-    if(clickCallback) {
-        clickCallback(this, left, right);
-    }
-}
+void CBaseUIButton::onClicked(bool left, bool right) { this->clickCallback(this, left, right); }
 
 void CBaseUIButton::updateStringMetrics() {
     if(this->font != NULL) {
