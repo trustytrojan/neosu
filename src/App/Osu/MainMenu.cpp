@@ -1061,10 +1061,10 @@ void MainMenu::selectRandomBeatmap() {
         if(!this->songs_enumerator.isAsyncReady()) return;
         auto mapset_folders = this->songs_enumerator.getEntries();
         if(mapset_folders.empty()) {
-            const auto& current_folder = Database::getOsuSongsFolder();
-            if (this->songs_enumerator.getFolderPath() != current_folder) {
-                this->songs_enumerator.setFolderPath(current_folder);
-                resourceManager->reloadResource(&this->songs_enumerator);
+            // check if it was loaded with a different path
+            if (this->songs_enumerator.getFolderPath() != Database::getOsuSongsFolder()) {
+                // reload will use the current song folder
+                this->songs_enumerator.reload();
             }
             return;
         }

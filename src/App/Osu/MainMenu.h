@@ -160,7 +160,11 @@ class MainMenu : public OsuScreen, public MouseListener {
 
         [[nodiscard]] inline const std::vector<std::string> &getEntries() const { return this->entries; }
         [[nodiscard]] inline std::string getFolderPath() const { return this->folderPath; }
-        inline void setFolderPath(std::string path) { this->folderPath = std::move(path); }
+        inline void rebuild() {
+            this->bAsyncReady.store(false);
+            this->bReady = false;
+            resourceManager->reloadResource(this, true);
+        }
 
         // type inspection
         [[nodiscard]] Type getResType() const final { return APPDEFINED; }
@@ -168,7 +172,7 @@ class MainMenu : public OsuScreen, public MouseListener {
        protected:
         void init() override { this->bReady = true; }
         void initAsync() override;
-        void destroy() override { ; }
+        void destroy() override { this->entries.clear(); }
 
        private:
         std::vector<std::string> entries{};
