@@ -1231,7 +1231,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addCheckbox("Show notifications during gameplay", &cv::notify_during_gameplay);
 
     this->addSubSection("In-game chat");
-    // this->addCheckbox("Chat ticker", &cv::chat_ticker);
+    this->addCheckbox("Chat ticker", &cv::chat_ticker);
     this->addCheckbox("Automatically hide chat during gameplay", &cv::chat_auto_hide);
 
     this->addSpacer();

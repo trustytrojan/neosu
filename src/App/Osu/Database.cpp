@@ -664,7 +664,7 @@ std::string Database::getOsuSongsFolder() {
     if constexpr(Env::cfg(OS::WINDOWS)) {
         relative_path = (songs_dir.find(':') == std::string::npos);
     } else {
-        relative_path = songs_dir.starts_with("/");
+        relative_path = !songs_dir.starts_with("/");
     }
 
     if(relative_path) {
