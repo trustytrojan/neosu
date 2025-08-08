@@ -13,15 +13,13 @@
 #include "ResourceManager.h"
 #include "SoundEngine.h"
 
-
-
-VisualProfiler *vprof = NULL;
+VisualProfiler* vprof = nullptr;
 
 VisualProfiler::VisualProfiler() : CBaseUIElement(0, 0, 0, 0, "") {
     vprof = this;
 
     this->spike.node.depth = -1;
-    this->spike.node.node = NULL;
+    this->spike.node.node = nullptr;
     this->spike.timeLastFrame = 0.0;
 
     this->iPrevVaoWidth = 0;
@@ -48,7 +46,7 @@ VisualProfiler::VisualProfiler() : CBaseUIElement(0, 0, 0, 0, "") {
     this->bRequiresAltShiftKeysToFreeze = false;
 }
 
-VisualProfiler::~VisualProfiler() { vprof = NULL; }
+VisualProfiler::~VisualProfiler() { vprof = nullptr; }
 
 void VisualProfiler::draw() {
     VPROF_BUDGET("VisualProfiler::draw", VPROF_BUDGETGROUP_DRAW);
@@ -236,7 +234,7 @@ void VisualProfiler::draw() {
 
     // draw extended spike details tree (profiler node snapshot)
     if(cv::vprof_spike.getBool() && !cv::debug_vprof.getBool()) {
-        if(this->spike.node.node != NULL) {
+        if(this->spike.node.node != nullptr) {
             if(cv::vprof_spike.getInt() == 2) {
                 VPROF_BUDGET("DebugText", VPROF_BUDGETGROUP_DRAW);
 
@@ -336,7 +334,7 @@ void VisualProfiler::draw() {
 
         // draw top spike text above graph
         if(cv::vprof_spike.getBool() && !cv::debug_vprof.getBool()) {
-            if(this->spike.node.node != NULL) {
+            if(this->spike.node.node != nullptr) {
                 if(cv::vprof_spike.getInt() == 1) {
                     const int margin = 6 * env->getDPIScale();
 
@@ -356,7 +354,7 @@ void VisualProfiler::draw() {
 }
 
 void VisualProfiler::drawStringWithShadow(McFont *font, const UString &string, Color color) {
-    if(font == NULL) return;
+    if(font == nullptr) return;
 
     const int shadowOffset = 1 * env->getDPIScale();
 
@@ -384,7 +382,7 @@ void VisualProfiler::mouse_update(bool *propagate_clicks) {
             SPIKE spike;
             {
                 spike.node.depth = -1;
-                spike.node.node = NULL;
+                spike.node.node = nullptr;
                 spike.timeLastFrame = 0.0;
                 spike.id = this->spikeIDCounter++;
             }
@@ -596,11 +594,11 @@ bool VisualProfiler::isEnabled() { return cv::vprof.getBool(); }
 
 void VisualProfiler::collectProfilerNodesRecursive(const ProfilerNode *node, int depth, std::vector<NODE> &nodes,
                                                    SPIKE &spike) {
-    if(node == NULL) return;
+    if(node == nullptr) return;
 
     // recursive call
     ProfilerNode *child = node->getChild();
-    while(child != NULL) {
+    while(child != nullptr) {
         collectProfilerNodesRecursive(child, depth + 1, nodes, spike);
         child = child->getSibling();
     }
@@ -615,7 +613,7 @@ void VisualProfiler::collectProfilerNodesRecursive(const ProfilerNode *node, int
         nodes.push_back(entry);
 
         const double timeLastFrame = node->getTimeLastFrame();
-        if(spike.node.node == NULL || timeLastFrame > spike.timeLastFrame) {
+        if(spike.node.node == nullptr || timeLastFrame > spike.timeLastFrame) {
             spike.node = entry;
             spike.timeLastFrame = timeLastFrame;
         }
@@ -624,11 +622,11 @@ void VisualProfiler::collectProfilerNodesRecursive(const ProfilerNode *node, int
 
 void VisualProfiler::collectProfilerNodesSpikeRecursive(const ProfilerNode *node, int depth,
                                                         std::vector<SPIKE> &spikeNodes) {
-    if(node == NULL) return;
+    if(node == nullptr) return;
 
     // recursive call
     ProfilerNode *child = node->getChild();
-    while(child != NULL) {
+    while(child != nullptr) {
         collectProfilerNodesSpikeRecursive(child, depth + 1, spikeNodes);
         child = child->getSibling();
     }

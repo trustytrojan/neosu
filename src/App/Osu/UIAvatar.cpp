@@ -48,7 +48,7 @@ bool download_avatar(i32 user_id) {
 
     const auto img_path = fmt::format("{:s}/{:d}", server_dir, user_id);
     FILE *file = fopen(img_path.c_str(), "wb");
-    if(file != NULL) {
+    if(file != nullptr) {
         fwrite(data.data(), data.size(), 1, file);
         fflush(file);
         fclose(file);
@@ -72,7 +72,7 @@ UIAvatar::UIAvatar(i32 player_id, float xPos, float yPos, float xSize, float ySi
     bool exists = (stat(this->avatar_path.c_str(), &attr) == 0);
     if(exists) {
         // File exists, but if it's more than 7 days old assume it's expired
-        time_t now = time(NULL);
+        time_t now = time(nullptr);
         struct tm expiration_date = *localtime(&attr.st_mtime);
         expiration_date.tm_mday += 7;
         if(now > mktime(&expiration_date)) {
@@ -92,7 +92,7 @@ UIAvatar::~UIAvatar() {
 void UIAvatar::draw_avatar(float alpha) {
     if(!this->on_screen) return;  // Comment when you need to debug on_screen logic
 
-    if(this->avatar == NULL) {
+    if(this->avatar == nullptr) {
         // Don't download during gameplay to avoid lagspikes
         if(!osu->isInPlayMode()) {
             if(download_avatar(this->player_id)) {

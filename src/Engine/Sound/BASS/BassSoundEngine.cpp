@@ -209,7 +209,7 @@ bool BassSoundEngine::init_bass_mixer(const SoundEngine::OUTPUT_DEVICE &device) 
 
     // We initialize a "No sound" device for measuring loudness and mixing sounds,
     // regardless of the device we'll use for actual output.
-    if(!BASS_Init(0, freq, bass_flags | BASS_DEVICE_SOFTWARE, NULL, NULL)) {
+    if(!BASS_Init(0, freq, bass_flags | BASS_DEVICE_SOFTWARE, nullptr, nullptr)) {
         auto code = BASS_ErrorGetCode();
         if(code != BASS_ERROR_ALREADY) {
             this->ready_since = -1.0;
@@ -220,7 +220,7 @@ bool BassSoundEngine::init_bass_mixer(const SoundEngine::OUTPUT_DEVICE &device) 
     }
 
     if(device.driver == OutputDriver::BASS) {
-        if(!BASS_Init(device.id, freq, bass_flags | BASS_DEVICE_SOFTWARE, NULL, NULL)) {
+        if(!BASS_Init(device.id, freq, bass_flags | BASS_DEVICE_SOFTWARE, nullptr, nullptr)) {
             this->ready_since = -1.0;
             debugLog("BASS_Init({:d}) errored out.\n", device.id);
             osu->notificationOverlay->addToast(BassManager::getErrorUString(), ERROR_TOAST);
@@ -540,7 +540,7 @@ void BassSoundEngine::pause(Sound *snd) {
 }
 
 void BassSoundEngine::stop(Sound *snd) {
-    if(!this->isReady() || snd == NULL || !snd->isReady()) return;
+    if(!this->isReady() || snd == nullptr || !snd->isReady()) return;
 
     // This will stop all samples, then re-init to be ready for a play()
     resourceManager->reloadResource(snd);
@@ -558,7 +558,7 @@ bool BassSoundEngine::hasExclusiveOutput() {
 void BassSoundEngine::setOutputDevice(const SoundEngine::OUTPUT_DEVICE &device) {
     bool was_playing = false;
     unsigned long prevMusicPositionMS = 0;
-    if(osu->getSelectedBeatmap()->getMusic() != NULL) {
+    if(osu->getSelectedBeatmap()->getMusic() != nullptr) {
         was_playing = osu->getSelectedBeatmap()->getMusic()->isPlaying();
         prevMusicPositionMS = osu->getSelectedBeatmap()->getMusic()->getPositionMS();
     }
@@ -583,7 +583,7 @@ void BassSoundEngine::setOutputDevice(const SoundEngine::OUTPUT_DEVICE &device) 
     osu->optionsMenu->onOutputDeviceResetUpdate();
 
     // start playing music again after audio device changed
-    if(osu->getSelectedBeatmap()->getMusic() != NULL) {
+    if(osu->getSelectedBeatmap()->getMusic() != nullptr) {
         if(osu->isInPlayMode()) {
             osu->getSelectedBeatmap()->unloadMusic();
             osu->getSelectedBeatmap()->loadMusic(false);

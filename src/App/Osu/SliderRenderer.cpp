@@ -19,16 +19,16 @@ namespace SliderRenderer {
 
 namespace {  // static namespace
 
-Shader *s_BLEND_SHADER = NULL;
+Shader* s_BLEND_SHADER = nullptr;
 float s_UNIT_CIRCLE_VAO_DIAMETER = 0.0f;
 
 // base mesh
 float s_MESH_CENTER_HEIGHT = 0.5f;   // Camera::buildMatrixOrtho2D() uses -1 to 1 for zn/zf, so don't make this too high
 int s_UNIT_CIRCLE_SUBDIVISIONS = 0;  // see osu_slider_body_unit_circle_subdivisions now
 std::vector<float> s_UNIT_CIRCLE;
-VertexArrayObject *s_UNIT_CIRCLE_VAO = NULL;
-VertexArrayObject *s_UNIT_CIRCLE_VAO_BAKED = NULL;
-VertexArrayObject *s_UNIT_CIRCLE_VAO_TRIANGLES = NULL;
+VertexArrayObject* s_UNIT_CIRCLE_VAO = nullptr;
+VertexArrayObject* s_UNIT_CIRCLE_VAO_BAKED = nullptr;
+VertexArrayObject* s_UNIT_CIRCLE_VAO_TRIANGLES = nullptr;
 
 // tiny rendering optimization for RenderTarget
 float s_fBoundingBoxMinX = (std::numeric_limits<float>::max)();
@@ -37,8 +37,8 @@ float s_fBoundingBoxMinY = (std::numeric_limits<float>::max)();
 float s_fBoundingBoxMaxY = 0.0f;
 
 // forward decls
-void drawFillSliderBodyPeppy(const std::vector<Vector2> &points, VertexArrayObject *circleMesh, float radius,
-                             int drawFromIndex, int drawUpToIndex, Shader *shader = NULL);
+void drawFillSliderBodyPeppy(const std::vector<Vector2>& points, VertexArrayObject* circleMesh, float radius,
+                             int drawFromIndex, int drawUpToIndex, Shader* shader = nullptr);
 void checkUpdateVars(float hitcircleDiameter);
 void resetRenderTargetBoundingBox();
 
@@ -258,7 +258,7 @@ void draw(VertexArrayObject *vao, const std::vector<Vector2> &alwaysPoints, Vect
           long sliderTimeForRainbow, bool doEnableRenderTarget, bool doDisableRenderTarget,
           bool doDrawSliderFrameBufferToScreen) {
     if((cv::slider_alpha_multiplier.getFloat() <= 0.0f && doDrawSliderFrameBufferToScreen) ||
-       (alpha <= 0.0f && doDrawSliderFrameBufferToScreen) || vao == NULL)
+       (alpha <= 0.0f && doDrawSliderFrameBufferToScreen) || vao == nullptr)
         return;
 
     checkUpdateVars(hitcircleDiameter);
@@ -413,7 +413,7 @@ void checkUpdateVars(float hitcircleDiameter) {
     // static globals
 
     // build shaders and circle mesh
-    if(s_BLEND_SHADER == NULL)  // only do this once
+    if(s_BLEND_SHADER == nullptr)  // only do this once
     {
         // build shaders
         s_BLEND_SHADER = resourceManager->loadShader("slider.vsh", "slider.fsh", "slider");
@@ -462,11 +462,11 @@ void checkUpdateVars(float hitcircleDiameter) {
     }
 
     // build vaos
-    if(s_UNIT_CIRCLE_VAO == NULL)
+    if(s_UNIT_CIRCLE_VAO == nullptr)
         s_UNIT_CIRCLE_VAO = new VertexArrayObject(Graphics::PRIMITIVE::PRIMITIVE_TRIANGLE_FAN);
-    if(s_UNIT_CIRCLE_VAO_BAKED == NULL)
+    if(s_UNIT_CIRCLE_VAO_BAKED == nullptr)
         s_UNIT_CIRCLE_VAO_BAKED = resourceManager->createVertexArrayObject(Graphics::PRIMITIVE::PRIMITIVE_TRIANGLE_FAN);
-    if(s_UNIT_CIRCLE_VAO_TRIANGLES == NULL)
+    if(s_UNIT_CIRCLE_VAO_TRIANGLES == nullptr)
         s_UNIT_CIRCLE_VAO_TRIANGLES = new VertexArrayObject(Graphics::PRIMITIVE::PRIMITIVE_TRIANGLES);
 
     // (re-)generate master circle mesh (centered) if the size changed

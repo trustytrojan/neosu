@@ -408,7 +408,7 @@ CBaseUIContainer *RankingScreen::setVisible(bool visible) {
         this->updateLayout();
     } else {
         // Stop applause sound
-        if(osu->getSkin()->getApplause() != NULL && osu->getSkin()->getApplause()->isPlaying()) {
+        if(osu->getSkin()->getApplause() != nullptr && osu->getSkin()->getApplause()->isPlaying()) {
             soundEngine->stop(osu->getSkin()->getApplause());
         }
 

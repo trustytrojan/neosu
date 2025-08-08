@@ -8,7 +8,7 @@
 
 ProfilerProfile g_profCurrentProfile(true);
 
-ProfilerProfile::ProfilerProfile(bool manualStartViaMain) : root("Root", VPROF_BUDGETGROUP_ROOT, NULL) {
+ProfilerProfile::ProfilerProfile(bool manualStartViaMain) : root("Root", VPROF_BUDGETGROUP_ROOT, nullptr) {
     this->bManualStartViaMain = manualStartViaMain;
 
     this->iEnabled = 0;
@@ -18,7 +18,7 @@ ProfilerProfile::ProfilerProfile(bool manualStartViaMain) : root("Root", VPROF_B
 
     this->iNumGroups = 0;
     for(auto &group : this->groups) {
-        group.name = NULL;
+        group.name = nullptr;
     }
 
     this->iNumNodes = 0;
@@ -36,22 +36,22 @@ ProfilerProfile::ProfilerProfile(bool manualStartViaMain) : root("Root", VPROF_B
 double ProfilerProfile::sumTimes(int groupID) { return this->sumTimes(&this->root, groupID); }
 
 double ProfilerProfile::sumTimes(ProfilerNode *node, int groupID) {
-    if(node == NULL) return 0.0;
+    if(node == nullptr) return 0.0;
 
     double sum = 0.0;
 
     ProfilerNode *sibling = node;
-    while(sibling != NULL) {
+    while(sibling != nullptr) {
         if(sibling->iGroupID == groupID) {
             if(sibling == &this->root)
-                return (this->root.child != NULL
+                return (this->root.child != nullptr
                             ? this->root.child->fTimeLastFrame
                             : this->root.fTimeLastFrame);  // special case: early return for the root group (total
                                                            // duration of the entire frame)
             else
                 return (sum + sibling->fTimeLastFrame);
         } else {
-            if(sibling->child != NULL) sum += this->sumTimes(sibling->child, groupID);
+            if(sibling->child != nullptr) sum += this->sumTimes(sibling->child, groupID);
         }
 
         sibling = sibling->sibling;
@@ -68,7 +68,7 @@ int ProfilerProfile::groupNameToID(const char *group) {
     }
 
     for(int i = 0; i < this->iNumGroups; i++) {
-        if(this->groups[i].name != NULL && group != NULL && strcmp(this->groups[i].name, group) == 0) return i;
+        if(this->groups[i].name != nullptr && group != nullptr && strcmp(this->groups[i].name, group) == 0) return i;
     }
 
     const int newID = this->iNumGroups;
@@ -78,7 +78,7 @@ int ProfilerProfile::groupNameToID(const char *group) {
 
 int ProfilerNode::s_iNodeCounter = 0;
 
-ProfilerNode::ProfilerNode() : ProfilerNode(NULL, NULL, NULL) {}
+ProfilerNode::ProfilerNode() : ProfilerNode(nullptr, nullptr, nullptr) {}
 
 ProfilerNode::ProfilerNode(const char *name, const char *group, ProfilerNode *parent) {
     this->constructor(name, group, parent);
@@ -87,8 +87,8 @@ ProfilerNode::ProfilerNode(const char *name, const char *group, ProfilerNode *pa
 void ProfilerNode::constructor(const char *name, const char *group, ProfilerNode *parent) {
     this->name = name;
     this->parent = parent;
-    this->child = NULL;
-    this->sibling = NULL;
+    this->child = nullptr;
+    this->sibling = nullptr;
 
     this->iNumRecursions = 0;
     this->fTime = 0.0;
@@ -116,7 +116,7 @@ bool ProfilerNode::exitScope() {
 ProfilerNode *ProfilerNode::getSubNode(const char *name, const char *group) {
     // find existing node
     ProfilerNode *child = this->child;
-    while(child != NULL) {
+    while(child != nullptr) {
         if(child->name == name)  // NOTE: pointer comparison
             return child;
 
@@ -127,7 +127,7 @@ ProfilerNode *ProfilerNode::getSubNode(const char *name, const char *group) {
     if(g_profCurrentProfile.iNumNodes >= VPROF_MAX_NUM_NODES) {
         engine->showMessageErrorFatal("Engine", "Increase VPROF_MAX_NUM_NODES");
         engine->shutdown();
-        return NULL;
+        return nullptr;
     }
 
     ProfilerNode *node = &(g_profCurrentProfile.nodes[g_profCurrentProfile.iNumNodes++]);

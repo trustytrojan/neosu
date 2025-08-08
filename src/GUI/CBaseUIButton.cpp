@@ -56,7 +56,7 @@ void CBaseUIButton::draw() {
 }
 
 void CBaseUIButton::drawText() {
-    if(this->font == NULL || !this->isVisible() || !this->isVisibleOnScreen() || this->sText.length() < 1) return;
+    if(this->font == nullptr || !this->isVisible() || !this->isVisibleOnScreen() || this->sText.length() < 1) return;
 
     const int shadowOffset = std::round(1.0f * ((float)this->font->getDPI() / 96.0f));  // NOTE: abusing font dpi
 
@@ -111,7 +111,7 @@ void CBaseUIButton::onClicked(bool left, bool right) {
 }
 
 void CBaseUIButton::updateStringMetrics() {
-    if(this->font != NULL) {
+    if(this->font != nullptr) {
         this->fStringHeight = this->font->getHeight();
 
         if(this->bTextLeft)

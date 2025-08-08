@@ -30,7 +30,7 @@ UIVolumeSlider::UIVolumeSlider(float xPos, float yPos, float xSize, float ySize,
 
 void UIVolumeSlider::drawBlock() {
     // draw icon
-    Image *img = NULL;
+    Image* img = nullptr;
     if(this->getFloat() < 0.01f)
         img = resourceManager->getImage(
             this->type == TYPE::MASTER

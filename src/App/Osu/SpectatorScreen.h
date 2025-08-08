@@ -21,16 +21,16 @@ class SpectatorScreen : public OsuScreen {
     void onKeyDown(KeyboardEvent& e) override;
     void onStopSpectatingClicked();
 
-    UserCard* userCard = NULL;
+    UserCard* userCard = nullptr;
 
    private:
-    McFont* font = NULL;
-    McFont* lfont = NULL;
-    PauseButton* pauseButton = NULL;
-    CBaseUIScrollView* background = NULL;
-    UIButton* stop_btn = NULL;
-    CBaseUILabel* spectating = NULL;
-    CBaseUILabel* status = NULL;
+    McFont* font = nullptr;
+    McFont* lfont = nullptr;
+    PauseButton* pauseButton = nullptr;
+    CBaseUIScrollView* background = nullptr;
+    UIButton* stop_btn = nullptr;
+    CBaseUILabel* spectating = nullptr;
+    CBaseUILabel* status = nullptr;
 };
 
 void start_spectating(i32 user_id);

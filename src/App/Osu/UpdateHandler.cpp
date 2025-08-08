@@ -73,10 +73,10 @@ void UpdateHandler::onVersionCheckComplete(const std::string &response, bool suc
     }
 
     auto lines = SString::split(response, "\n");
-    f32 latest_version = strtof(lines[0].c_str(), NULL);
+    f32 latest_version = strtof(lines[0].c_str(), nullptr);
     u64 latest_build_tms = 0;
     std::string online_update_hash;
-    if(lines.size() > 1) latest_build_tms = std::strtoull(lines[1].c_str(), NULL, 10);
+    if(lines.size() > 1) latest_build_tms = std::strtoull(lines[1].c_str(), nullptr, 10);
     if(lines.size() > 2) online_update_hash = lines[2];
     if(latest_version == 0.f && latest_build_tms == 0) {
         this->status = force_update ? STATUS_ERROR : STATUS_IDLE;

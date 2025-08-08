@@ -83,7 +83,7 @@ void OpenGLSync::manageFrameSyncQueue(bool forceWait) {
     GLint signaled = 0;
 
     GLsync sync = oldestSync.syncObject;
-    glGetSynciv(sync, GL_SYNC_STATUS, sizeof(GLint), NULL, &signaled);
+    glGetSynciv(sync, GL_SYNC_STATUS, sizeof(GLint), nullptr, &signaled);
 
     // if oldest frame is done, we can remove it (and any other completed frames)
     if(signaled == GL_SIGNALED) {
@@ -98,7 +98,7 @@ void OpenGLSync::manageFrameSyncQueue(bool forceWait) {
             signaled = 0;
 
             sync = nextSync.syncObject;
-            glGetSynciv(sync, GL_SYNC_STATUS, sizeof(GLint), NULL, &signaled);
+            glGetSynciv(sync, GL_SYNC_STATUS, sizeof(GLint), nullptr, &signaled);
 
             if(signaled == GL_SIGNALED) {
                 if(debug) debugLog("Frame {:d} also completed\n", nextSync.frameNumber);
@@ -151,7 +151,7 @@ void OpenGLSync::manageFrameSyncQueue(bool forceWait) {
                 signaled = 0;
 
                 sync = nextSync.syncObject;
-                glGetSynciv(sync, GL_SYNC_STATUS, sizeof(GLint), NULL, &signaled);
+                glGetSynciv(sync, GL_SYNC_STATUS, sizeof(GLint), nullptr, &signaled);
 
                 if(signaled == GL_SIGNALED) {
                     if(debug) {
@@ -176,7 +176,7 @@ OpenGLSync::SYNC_RESULT OpenGLSync::waitForSyncObject(GLsync syncObject, uint64_
 
     // do a non-blocking check if already signaled
     GLint signaled = 0;
-    glGetSynciv(sync, GL_SYNC_STATUS, sizeof(GLint), NULL, &signaled);
+    glGetSynciv(sync, GL_SYNC_STATUS, sizeof(GLint), nullptr, &signaled);
 
     if(signaled == GL_SIGNALED) return SYNC_ALREADY_SIGNALED;
 

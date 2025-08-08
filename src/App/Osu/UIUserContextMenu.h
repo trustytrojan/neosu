@@ -30,7 +30,7 @@ class UIUserContextMenuScreen : public OsuScreen {
     void on_action(const UString& text, int user_action);
 
     i32 user_id;
-    UIContextMenu* menu = NULL;
+    UIContextMenu* menu = nullptr;
 };
 
 class UIUserLabel : public CBaseUILabel {

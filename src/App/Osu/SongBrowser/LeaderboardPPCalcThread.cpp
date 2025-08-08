@@ -33,7 +33,7 @@ struct info_cache {
     pp_info info{};
 };
 
-static BeatmapDifficulty* diff = NULL;
+static BeatmapDifficulty* diff = nullptr;
 
 static std::condition_variable cond;
 static std::thread thr;
@@ -103,7 +103,7 @@ static void run_thread() {
 
             // Load hitobjects
             bool found_hitobjects = false;
-            hitobject_cache* computed_ho = NULL;
+            hitobject_cache* computed_ho = nullptr;
             for(auto ho : ho_cache) {
                 if(ho->speed != rqt.speed) continue;
                 if(ho->AR != rqt.AR) continue;
@@ -138,7 +138,7 @@ static void run_thread() {
 
             // Load pp_info
             bool found_info = false;
-            info_cache* computed_info = NULL;
+            info_cache* computed_info = nullptr;
             for(auto info : inf_cache) {
                 if(info->speed != rqt.speed) continue;
                 if(info->AR != rqt.AR) continue;
@@ -183,7 +183,7 @@ static void run_thread() {
                 params.outAimStrains = &aimStrains;
                 params.outSpeedStrains = &speedStrains;
                 computed_info->info.total_stars = DifficultyCalculator::calculateStarDiffForHitObjectsInt(
-                    computed_info->cachedDiffObjects, params, NULL, dead);
+                    computed_info->cachedDiffObjects, params, nullptr, dead);
                 if(dead.load()) {
                     work_mtx.lock();
                     return;
@@ -219,7 +219,7 @@ static void run_thread() {
 void lct_set_map(DatabaseBeatmap* new_diff) {
     if(diff == new_diff) return;
 
-    if(diff != NULL) {
+    if(diff != nullptr) {
         dead = true;
         cond.notify_one();
         thr.join();
@@ -239,7 +239,7 @@ void lct_set_map(DatabaseBeatmap* new_diff) {
     }
 
     diff = new_diff;
-    if(new_diff != NULL) {
+    if(new_diff != nullptr) {
         thr = std::thread(run_thread);
     }
 }

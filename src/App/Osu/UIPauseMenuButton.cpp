@@ -27,7 +27,7 @@ void UIPauseMenuButton::draw() {
 
     // draw image
     Image *image = this->getImageFunc();
-    if(image != NULL) {
+    if(image != nullptr) {
         g->setColor(argb(this->fAlpha, 1.0f, 1.0f, 1.0f));
         g->pushTransform();
         {

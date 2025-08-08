@@ -156,7 +156,7 @@ void SpectatorScreen::mouse_update(bool *propagate_clicks) {
         }
     } else if(user_info->mode == STANDARD && user_info->map_id != current_map_id) {
         auto beatmap = Downloader::download_beatmap(user_info->map_id, user_info->map_md5, &download_progress);
-        if(beatmap != NULL) {
+        if(beatmap != nullptr) {
             current_map_id = user_info->map_id;
             osu->rankingScreen->setVisible(false);
             osu->songBrowser2->onDifficultySelected(beatmap, false);

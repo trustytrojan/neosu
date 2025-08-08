@@ -22,7 +22,7 @@ void CBaseUIImageButton::draw() {
 
     // draw image
     Image *image = resourceManager->getImage(this->sImageResourceName);
-    if(image != NULL) {
+    if(image != nullptr) {
         g->setColor(0xffffffff);
         g->pushTransform();
 
@@ -44,7 +44,7 @@ CBaseUIImageButton *CBaseUIImageButton::setImageResourceName(std::string imageRe
     this->sImageResourceName = std::move(imageResourceName);
 
     Image *image = resourceManager->getImage(this->sImageResourceName);
-    if(image != NULL) this->setSize(Vector2(image->getWidth(), image->getHeight()));
+    if(image != nullptr) this->setSize(Vector2(image->getWidth(), image->getHeight()));
 
     return this;
 }
@@ -53,7 +53,7 @@ void CBaseUIImageButton::onResized() {
     CBaseUIButton::onResized();
 
     Image *image = resourceManager->getImage(this->sImageResourceName);
-    if(this->bScaleToFit && image != NULL) {
+    if(this->bScaleToFit && image != nullptr) {
         if(!this->bKeepAspectRatio) {
             this->vScale = Vector2(this->vSize.x / image->getWidth(), this->vSize.y / image->getHeight());
             this->vSize.x = (int)(image->getWidth() * this->vScale.x);

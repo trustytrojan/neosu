@@ -133,7 +133,7 @@ void Bancho::handle_packet(Packet *packet) {
         i32 sender_id = proto::read<i32>(packet);
 
         auto msg = ChatMessage{
-            .tms = time(NULL),
+            .tms = time(nullptr),
             .author_id = sender_id,
             .author_name = sender,
             .text = text,
@@ -346,7 +346,7 @@ void Bancho::handle_packet(Packet *packet) {
     } else if(packet->id == CHANNEL_JOIN_SUCCESS) {
         UString name = proto::read_string(packet);
         auto msg = ChatMessage{
-            .tms = time(NULL),
+            .tms = time(nullptr),
             .author_id = 0,
             .author_name = UString(""),
             .text = UString("Joined channel."),
@@ -432,7 +432,7 @@ void Bancho::handle_packet(Packet *packet) {
         (void)recipient;
         i32 sender_id = proto::read<i32>(packet);
         auto msg = ChatMessage{
-            .tms = time(NULL),
+            .tms = time(nullptr),
             .author_id = sender_id,
             .author_name = sender,
             .text = text,
@@ -495,7 +495,7 @@ Packet Bancho::build_login_packet() {
     proto::write<u8>(&packet, '|');
 
     // UTC offset
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
     auto gmt = gmtime(&now);
     auto local_time = localtime(&now);
     int utc_offset = difftime(mktime(local_time), mktime(gmt)) / 3600;
@@ -565,7 +565,7 @@ void Bancho::update_channel(const UString &name, const UString &topic, i32 nb_me
 
         if(this->print_new_channels) {
             auto msg = ChatMessage{
-                .tms = time(NULL),
+                .tms = time(nullptr),
                 .author_id = 0,
                 .author_name = UString(""),
                 .text = UString::format("%s: %s", name.toUtf8(), topic.toUtf8()),

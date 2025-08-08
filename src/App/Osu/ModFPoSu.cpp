@@ -47,7 +47,7 @@ ModFPoSu::ModFPoSu() {
     this->vao = resourceManager->createVertexArrayObject();
     this->vaoCube = resourceManager->createVertexArrayObject();
 
-    this->hitcircleShader = NULL;
+    this->hitcircleShader = nullptr;
 
     // convar callbacks
     cv::fposu_curved.setCallback(SA::MakeDelegate<&ModFPoSu::onCurvedChange>(this));

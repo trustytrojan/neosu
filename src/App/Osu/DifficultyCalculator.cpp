@@ -30,7 +30,7 @@ OsuDifficultyHitObject::OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time,
     this->pixelLength = pixelLength;
     this->scoringTimes = std::move(scoringTimes);
 
-    this->curve = NULL;
+    this->curve = nullptr;
     this->scheduledCurveAlloc = false;
     this->scheduledCurveAllocStackOffset = 0.0f;
     this->repeats = repeats;
@@ -92,7 +92,7 @@ OsuDifficultyHitObject::OsuDifficultyHitObject(OsuDifficultyHitObject &&dobj) no
     this->originalPos = dobj.originalPos;
 
     // reset source
-    dobj.curve = NULL;
+    dobj.curve = nullptr;
     dobj.scheduledCurveAlloc = false;
 }
 
@@ -123,7 +123,7 @@ OsuDifficultyHitObject &OsuDifficultyHitObject::operator=(OsuDifficultyHitObject
     this->originalPos = dobj.originalPos;
 
     // completely reset source object to prevent any potential reuse
-    dobj.curve = NULL;
+    dobj.curve = nullptr;
     dobj.scheduledCurveAlloc = false;
     dobj.scheduledCurveAllocControlPoints.clear();
     dobj.type = TYPE::INVALID;
@@ -140,7 +140,7 @@ void OsuDifficultyHitObject::updateStackPosition(f32 stackOffset) {
 }
 
 void OsuDifficultyHitObject::updateCurveStackPosition(f32 stackOffset) {
-    if(this->curve != NULL) this->curve->updateStackPosition(this->stack * stackOffset, false);
+    if(this->curve != nullptr) this->curve->updateStackPosition(this->stack * stackOffset, false);
 }
 
 Vector2 OsuDifficultyHitObject::getOriginalRawPosAt(i32 pos) {
@@ -151,7 +151,7 @@ Vector2 OsuDifficultyHitObject::getOriginalRawPosAt(i32 pos) {
     // the stack algorithm itself (as doing it in here is O(n!) madness) NOTE: to validate the delta, use Acid Rain
     // [Aspire] - Karoo13 (6.76* with slider stacks -> 6.75* without slider stacks)
 
-    if(this->type != TYPE::SLIDER || (this->curve == NULL)) {
+    if(this->type != TYPE::SLIDER || (this->curve == nullptr)) {
         return this->originalPos;
     } else {
         if(pos <= this->time)
@@ -186,7 +186,7 @@ f64 DifficultyCalculator::calculateStarDiffForHitObjects(StarCalcParams &params)
 
 f64 DifficultyCalculator::calculateStarDiffForHitObjects(StarCalcParams &params, const std::atomic<bool> &dead) {
     std::vector<DiffObject> emptyCachedDiffObjects;
-    return calculateStarDiffForHitObjectsInt(emptyCachedDiffObjects, params, NULL, dead);
+    return calculateStarDiffForHitObjectsInt(emptyCachedDiffObjects, params, nullptr, dead);
 }
 
 f64 DifficultyCalculator::calculateStarDiffForHitObjectsInt(std::vector<DiffObject> &cachedDiffObjects,
@@ -237,7 +237,7 @@ f64 DifficultyCalculator::calculateStarDiffForHitObjectsInt(std::vector<DiffObje
     class DistanceCalc {
        public:
         static void computeSliderCursorPosition(DiffObject &slider, f32 circleRadius) {
-            if(slider.lazyCalcFinished || slider.ho->curve == NULL) return;
+            if(slider.lazyCalcFinished || slider.ho->curve == nullptr) return;
 
             // NOTE: lazer won't load sliders above a certain length, but neosu will
             // this isn't entirely accurate to how lazer does it (as that skips loading the object entirely),
@@ -365,7 +365,7 @@ f64 DifficultyCalculator::calculateStarDiffForHitObjectsInt(std::vector<DiffObje
                 // MCKAY:
                 {
                     // delay curve creation to when it's needed (1)
-                    if(prev1.ho->scheduledCurveAlloc && prev1.ho->curve == NULL) {
+                    if(prev1.ho->scheduledCurveAlloc && prev1.ho->curve == nullptr) {
                         prev1.ho->curve = SliderCurve::createCurve(
                             prev1.ho->osuSliderCurveType, prev1.ho->scheduledCurveAllocControlPoints,
                             prev1.ho->pixelLength, starsSliderCurvePointsSeparation);
@@ -448,22 +448,22 @@ f64 DifficultyCalculator::calculateStarDiffForHitObjectsInt(std::vector<DiffObje
     if(!isUsingCachedDiffObjects) {
         for(size_t i = 1; i < numDiffObjects; i++)  // NOTE: start at 1
         {
-            diffObjects[i].calculate_strains(diffObjects[i - 1], (i == numDiffObjects - 1) ? NULL : &diffObjects[i + 1],
-                                             hitWindow300);
+            diffObjects[i].calculate_strains(diffObjects[i - 1],
+                                             (i == numDiffObjects - 1) ? nullptr : &diffObjects[i + 1], hitWindow300);
         }
     }
 
     // calculate final difficulty (weigh strains)
     f64 aimNoSliders =
         DiffObject::calculate_difficulty(Skills::Skill::AIM_NO_SLIDERS, diffObjects, numDiffObjects,
-                                         incremental ? &incremental[(size_t)Skills::Skill::AIM_NO_SLIDERS] : NULL);
+                                         incremental ? &incremental[(size_t)Skills::Skill::AIM_NO_SLIDERS] : nullptr);
     *params.aim =
         DiffObject::calculate_difficulty(Skills::Skill::AIM_SLIDERS, diffObjects, numDiffObjects,
-                                         incremental ? &incremental[(size_t)Skills::Skill::AIM_SLIDERS] : NULL,
+                                         incremental ? &incremental[(size_t)Skills::Skill::AIM_SLIDERS] : nullptr,
                                          params.outAimStrains, params.difficultAimStrains);
     *params.speed =
         DiffObject::calculate_difficulty(Skills::Skill::SPEED, diffObjects, numDiffObjects,
-                                         incremental ? &incremental[(size_t)Skills::Skill::SPEED] : NULL,
+                                         incremental ? &incremental[(size_t)Skills::Skill::SPEED] : nullptr,
                                          params.outSpeedStrains, params.difficultSpeedStrains, params.speedNotes);
 
     static const f64 star_scaling_factor = 0.0675;
@@ -810,7 +810,7 @@ double DifficultyCalculator::DiffObject::calculate_difficulty(const Skills::Skil
         highestStrains.push_back(max_strain);
     }
 
-    if(outStrains != NULL) {
+    if(outStrains != nullptr) {
         (*outStrains) = highestStrains;  // save a copy
     }
 
@@ -1108,7 +1108,7 @@ double DifficultyCalculator::DiffObject::spacing_weight2(const Skills::Skill dif
                             }
                         }
 
-                        if(islandCount != NULL) {
+                        if(islandCount != nullptr) {
                             // only add island to island counts if they're going one after another
                             if(previousIsland.equals(island, deltaDifferenceEpsilon)) islandCount->second++;
 
@@ -1264,7 +1264,7 @@ double DifficultyCalculator::DiffObject::spacing_weight2(const Skills::Skill dif
 
 f64 DifficultyCalculator::DiffObject::get_doubletapness(const DifficultyCalculator::DiffObject *next,
                                                         f64 hitWindow300) const {
-    if(next != NULL) {
+    if(next != nullptr) {
         f64 cur_delta = std::max(1.0, this->delta_time);
         f64 next_delta = std::max(1, next->ho->time - this->ho->time);  // next delta time isn't initialized yet
         f64 delta_diff = std::abs(next_delta - cur_delta);

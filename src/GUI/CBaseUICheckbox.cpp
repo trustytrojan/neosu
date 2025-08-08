@@ -49,7 +49,7 @@ void CBaseUICheckbox::draw() {
 
     // draw text
     const int shadowOffset = std::round(1.0f * dpiScale);
-    if(this->font != NULL && this->sText.length() > 0) {
+    if(this->font != nullptr && this->sText.length() > 0) {
         // g->pushClipRect(McRect(this->vPos.x + 1, this->vPos.y + 1, this->vSize.x - 1, this->vSize.y - 1));
 
         g->setColor(this->textColor);
@@ -87,7 +87,7 @@ CBaseUICheckbox *CBaseUICheckbox::setChecked(bool checked, bool fireChangeEvent)
 
 void CBaseUICheckbox::onPressed() {
     this->bChecked = !this->bChecked;
-    if(this->changeCallback != NULL) this->changeCallback(this);
+    if(this->changeCallback != nullptr) this->changeCallback(this);
 }
 
 CBaseUICheckbox *CBaseUICheckbox::setSizeToContent(int horizontalBorderSize, int verticalBorderSize) {

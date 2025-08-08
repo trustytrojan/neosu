@@ -31,8 +31,8 @@ enum APIRequestType : uint8_t {
 struct APIRequest {
     APIRequestType type;
     UString path{""};
-    curl_mime *mime{NULL};
-    u8 *extra{NULL};
+    curl_mime* mime{nullptr};
+    u8* extra{nullptr};
     i32 extra_int{0};  // lazy
 };
 

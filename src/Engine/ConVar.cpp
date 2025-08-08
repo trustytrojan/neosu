@@ -51,7 +51,7 @@ static ConVar *_getConVar(const ConVarString &name) {
     if(result != _getGlobalConVarMap().end())
         return result->second;
     else
-        return NULL;
+        return nullptr;
 }
 
 ConVarString ConVar::getFancyDefaultValue() {
@@ -95,7 +95,7 @@ void ConVar::exec() {
         auto is_vanilla = convar->isVanilla();
 
         auto beatmap = osu->getSelectedBeatmap();
-        if(beatmap != NULL) {
+        if(beatmap != nullptr) {
             beatmap->vanilla &= is_vanilla;
         }
 
@@ -182,7 +182,7 @@ ConVarHandler *convar = new ConVarHandler();
 
 ConVarHandler::ConVarHandler() { convar = this; }
 
-ConVarHandler::~ConVarHandler() { convar = NULL; }
+ConVarHandler::~ConVarHandler() { convar = nullptr; }
 
 const std::vector<ConVar *> &ConVarHandler::getConVarArray() const { return _getGlobalConVarArray(); }
 
@@ -190,7 +190,7 @@ int ConVarHandler::getNumConVars() const { return _getGlobalConVarArray().size()
 
 ConVar *ConVarHandler::getConVarByName(const ConVarString &name, bool warnIfNotFound) const {
     ConVar *found = _getConVar(name);
-    if(found != NULL && !found->isFlagSet(FCVAR_INTERNAL)) return found;
+    if(found != nullptr && !found->isFlagSet(FCVAR_INTERNAL)) return found;
 
     if(warnIfNotFound) {
         ConVarString errormsg = ConVarString("ENGINE: ConVar \"");
@@ -201,7 +201,7 @@ ConVar *ConVarHandler::getConVarByName(const ConVarString &name, bool warnIfNotF
     }
 
     if(!warnIfNotFound)
-        return NULL;
+        return nullptr;
     else
         return &_emptyDummyConVar;
 }
@@ -280,7 +280,7 @@ bool ConVarHandler::isVanilla() {
     }
 
     // Also check for non-vanilla mod combinations here while we're at it
-    if(osu != NULL) {
+    if(osu != nullptr) {
         // We don't want to submit target scores, even though it's allowed in multiplayer
         if(osu->getModTarget()) return false;
 
@@ -425,7 +425,7 @@ static void _dumpcommands(void) {
     std::ranges::sort(convars, {}, [](const ConVar *v) { return v->getName(); });
 
     FILE *file = fopen("commands.htm", "w");
-    if(file == NULL) {
+    if(file == nullptr) {
         Engine::logRaw("Failed to open commands.htm for writing\n");
         return;
     }
@@ -488,7 +488,7 @@ void _osuOptionsSliderQualityWrapper(float newValue) {
 
 void spectate_by_username(const UString &username) {
     auto user = BANCHO::User::find_user(username);
-    if(user == NULL) {
+    if(user == nullptr) {
         debugLog("Couldn't find user \"{:s}\"!", username.toUtf8());
         return;
     }

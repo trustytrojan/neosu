@@ -351,9 +351,9 @@ SongBrowser::SongBrowser()  // NOLINT(cert-msc51-cpp, cert-msc32-c)
     this->fNextScrollToSongButtonJumpFixOldScrollSizeY = 0.0f;
     this->fNextScrollToSongButtonJumpFixOldRelPosY = 0.0f;
 
-    this->selectionPreviousSongButton = NULL;
-    this->selectionPreviousSongDiffButton = NULL;
-    this->selectionPreviousCollectionButton = NULL;
+    this->selectionPreviousSongButton = nullptr;
+    this->selectionPreviousSongDiffButton = nullptr;
+    this->selectionPreviousCollectionButton = nullptr;
 
     this->bF1Pressed = false;
     this->bF2Pressed = false;
@@ -490,7 +490,7 @@ SongBrowser::SongBrowser()  // NOLINT(cert-msc51-cpp, cert-msc32-c)
 
 SongBrowser::~SongBrowser() {
     sct_abort();
-    lct_set_map(NULL);
+    lct_set_map(nullptr);
     VolNormalization::abort();
     MapCalcThread::abort();
     this->checkHandleKillBackgroundSearchMatcher();
@@ -582,9 +582,9 @@ void SongBrowser::draw() {
         float alpha = 1.0f;
         if(cv::songbrowser_background_fade_in_duration.getFloat() > 0.0f) {
             // handle fadein trigger after handler is finished loading
-            const bool ready = osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL &&
+            const bool ready = osu->getSelectedBeatmap()->getSelectedDifficulty2() != nullptr &&
                                osu->getBackgroundImageHandler()->getLoadBackgroundImage(
-                                   osu->getSelectedBeatmap()->getSelectedDifficulty2()) != NULL &&
+                                   osu->getSelectedBeatmap()->getSelectedDifficulty2()) != nullptr &&
                                osu->getBackgroundImageHandler()
                                    ->getLoadBackgroundImage(osu->getSelectedBeatmap()->getSelectedDifficulty2())
                                    ->isReady();
@@ -603,7 +603,7 @@ void SongBrowser::draw() {
     } else if(cv::draw_songbrowser_menu_background_image.getBool()) {
         // menu-background
         Image *backgroundImage = osu->getSkin()->getMenuBackground();
-        if(backgroundImage != NULL && backgroundImage != osu->getSkin()->getMissingTexture() &&
+        if(backgroundImage != nullptr && backgroundImage != osu->getSkin()->getMissingTexture() &&
            backgroundImage->isReady()) {
             const float scale = Osu::getImageScaleToFillResolution(backgroundImage, osu->getScreenSize());
 
@@ -840,10 +840,10 @@ void SongBrowser::draw() {
 }
 
 void SongBrowser::drawSelectedBeatmapBackgroundImage(float alpha) {
-    if(osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL) {
+    if(osu->getSelectedBeatmap()->getSelectedDifficulty2() != nullptr) {
         Image *backgroundImage = osu->getBackgroundImageHandler()->getLoadBackgroundImage(
             osu->getSelectedBeatmap()->getSelectedDifficulty2());
-        if(backgroundImage != NULL && backgroundImage->isReady()) {
+        if(backgroundImage != nullptr && backgroundImage->isReady()) {
             const float scale = Osu::getImageScaleToFillResolution(backgroundImage, osu->getScreenSize());
 
             g->setColor(0xff999999);
@@ -861,7 +861,7 @@ void SongBrowser::drawSelectedBeatmapBackgroundImage(float alpha) {
 
 bool SongBrowser::selectBeatmapset(i32 set_id) {
     auto beatmapset = db->getBeatmapSet(set_id);
-    if(beatmapset == NULL) {
+    if(beatmapset == nullptr) {
         // Pasted from Downloader::download_beatmap
         auto mapset_path = UString::format(MCENGINE_DATA_DIR "maps/%d/", set_id);
         db->addBeatmapSet(mapset_path.toUtf8());
@@ -870,12 +870,12 @@ bool SongBrowser::selectBeatmapset(i32 set_id) {
         beatmapset = db->getBeatmapSet(set_id);
     }
 
-    if(beatmapset == NULL) {
+    if(beatmapset == nullptr) {
         return false;
     }
 
     // Just picking the hardest diff for now
-    DatabaseBeatmap *best_diff = NULL;
+    DatabaseBeatmap* best_diff = nullptr;
     const std::vector<DatabaseBeatmap *> &diffs = beatmapset->getDifficulties();
     for(auto diff : diffs) {
         if(!best_diff || diff->getStarsNomod() > best_diff->getStarsNomod()) {
@@ -883,7 +883,7 @@ bool SongBrowser::selectBeatmapset(i32 set_id) {
         }
     }
 
-    if(best_diff == NULL) {
+    if(best_diff == nullptr) {
         osu->notificationOverlay->addToast("Beatmapset has no difficulties", ERROR_TOAST);
         return false;
     } else {
@@ -946,7 +946,7 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
     // selected mods pp calc
     auto diff2 = this->beatmap->getSelectedDifficulty2();
     lct_set_map(diff2);
-    if(diff2 != NULL && diff2->pp.pp == -1.0) {
+    if(diff2 != nullptr && diff2->pp.pp == -1.0) {
         auto mods = osu->getScore()->mods;
 
         pp_calc_request request;
@@ -980,7 +980,7 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
             // TODO @kiwec: this notification format is jank & laggy
             auto text = UString::format("Downloading... %.2f%%", progress * 100.f);
             osu->notificationOverlay->addNotification(text);
-        } else if(beatmap != NULL) {
+        } else if(beatmap != nullptr) {
             osu->songBrowser2->onDifficultySelected(beatmap, false);
             osu->songBrowser2->selectSelectedBeatmapSongButton();
             this->map_autodl = 0;
@@ -1193,7 +1193,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
         int selectedIndex = -1;
         for(int i = 0; i < elements.size(); i++) {
             Button *button = dynamic_cast<Button *>(elements[i]);
-            if(button != NULL && button->isSelected()) selectedIndex = i;
+            if(button != nullptr && button->isSelected()) selectedIndex = i;
         }
 
         // select +1
@@ -1201,11 +1201,11 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
             int nextSelectionIndex = selectedIndex + 1;
             Button *nextButton = dynamic_cast<Button *>(elements[nextSelectionIndex]);
             SongButton *songButton = dynamic_cast<SongButton *>(elements[nextSelectionIndex]);
-            if(nextButton != NULL) {
+            if(nextButton != nullptr) {
                 nextButton->select(true, false);
 
                 // if this is a song button, select top child
-                if(songButton != NULL) {
+                if(songButton != nullptr) {
                     const auto &children = songButton->getChildren();
                     if(children.size() > 0 && !children[0]->isSelected()) children[0]->select(true, false, false);
                 }
@@ -1220,7 +1220,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
         int selectedIndex = -1;
         for(int i = 0; i < elements.size(); i++) {
             Button *button = dynamic_cast<Button *>(elements[i]);
-            if(button != NULL && button->isSelected()) selectedIndex = i;
+            if(button != nullptr && button->isSelected()) selectedIndex = i;
         }
 
         // select -1
@@ -1229,7 +1229,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
             Button *nextButton = dynamic_cast<Button *>(elements[nextSelectionIndex]);
             bool isCollectionButton = dynamic_cast<CollectionButton *>(elements[nextSelectionIndex]);
 
-            if(nextButton != NULL) {
+            if(nextButton != nullptr) {
                 nextButton->select();
 
                 // automatically open collection on top of this one and go to bottom child
@@ -1237,7 +1237,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
                     nextSelectionIndex = nextSelectionIndex - 1;
                     CollectionButton *nextCollectionButton =
                         dynamic_cast<CollectionButton *>(elements[nextSelectionIndex]);
-                    if(nextCollectionButton != NULL) {
+                    if(nextCollectionButton != nullptr) {
                         nextCollectionButton->select();
 
                         const auto &children = nextCollectionButton->getChildren();
@@ -1263,18 +1263,18 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
 
             Button *button = dynamic_cast<Button *>(elements[i]);
             const bool isSongDifficultyButtonAndNotIndependent =
-                (diffButtonPointer != NULL && !diffButtonPointer->isIndependentDiffButton());
+                (diffButtonPointer != nullptr && !diffButtonPointer->isIndependentDiffButton());
 
-            if(foundSelected && button != NULL && !button->isSelected() && !isSongDifficultyButtonAndNotIndependent &&
-               (!jumpToNextGroup || collectionButtonPointer != NULL)) {
+            if(foundSelected && button != nullptr && !button->isSelected() &&
+               !isSongDifficultyButtonAndNotIndependent && (!jumpToNextGroup || collectionButtonPointer != nullptr)) {
                 this->bNextScrollToSongButtonJumpFixUseScrollSizeDelta = true;
                 {
                     button->select();
 
-                    if(!jumpToNextGroup || collectionButtonPointer == NULL) {
+                    if(!jumpToNextGroup || collectionButtonPointer == nullptr) {
                         // automatically open collection below and go to bottom child
                         CollectionButton *collectionButton = dynamic_cast<CollectionButton *>(elements[i]);
-                        if(collectionButton != NULL) {
+                        if(collectionButton != nullptr) {
                             const auto &children = collectionButton->getChildren();
                             if(children.size() > 0 && !children[children.size() - 1]->isSelected())
                                 children[children.size() - 1]->select();
@@ -1286,7 +1286,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
                 break;
             }
 
-            if(button != NULL && button->isSelected()) foundSelected = true;
+            if(button != nullptr && button->isSelected()) foundSelected = true;
         }
     }
 
@@ -1301,7 +1301,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
         int selectedIndex = -1;
         for(size_t i = 0; i < elements.size(); i++) {
             Button *button = dynamic_cast<Button *>(elements[i]);
-            if(button != NULL && button->isSelected()) selectedIndex = i;
+            if(button != nullptr && button->isSelected()) selectedIndex = i;
         }
 
         if(selectedIndex > -1) {
@@ -1311,10 +1311,10 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
 
                 Button *button = dynamic_cast<Button *>(elements[i]);
                 const bool isSongDifficultyButtonAndNotIndependent =
-                    (diffButtonPointer != NULL && !diffButtonPointer->isIndependentDiffButton());
+                    (diffButtonPointer != nullptr && !diffButtonPointer->isIndependentDiffButton());
 
-                if(button != NULL && !button->isSelected() && !isSongDifficultyButtonAndNotIndependent &&
-                   (!jumpToNextGroup || collectionButtonPointer != NULL)) {
+                if(button != nullptr && !button->isSelected() && !isSongDifficultyButtonAndNotIndependent &&
+                   (!jumpToNextGroup || collectionButtonPointer != nullptr)) {
                     button->select();
                     break;
                 }
@@ -1335,7 +1335,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
 
             Button *button = dynamic_cast<Button *>(element);
 
-            if(collectionButtonPointer != NULL && button != NULL && button->isSelected()) {
+            if(collectionButtonPointer != nullptr && button != nullptr && button->isSelected()) {
                 button->select();  // deselect
                 this->scrollToSongButton(button);
                 break;
@@ -1398,7 +1398,7 @@ CBaseUIContainer *SongBrowser::setVisible(bool visible) {
         this->updateLayout();
 
         // we have to re-select the current beatmap to start playing music again
-        if(this->beatmap != NULL) this->beatmap->select();
+        if(this->beatmap != nullptr) this->beatmap->select();
 
         this->bHasSelectedAndIsPlaying = false;  // sanity
 
@@ -1416,7 +1416,7 @@ CBaseUIContainer *SongBrowser::setVisible(bool visible) {
         mouse->onButtonChange(ButtonIndex::BUTTON_LEFT, false);
         mouse->onButtonChange(ButtonIndex::BUTTON_RIGHT, false);
 
-        if(this->beatmap != NULL) {
+        if(this->beatmap != nullptr) {
             // For multiplayer: if the host exits song selection without selecting a song, we want to be able to revert
             // to that previous song.
             this->lastSelectedBeatmap = this->beatmap->getSelectedDifficulty2();
@@ -1433,10 +1433,10 @@ CBaseUIContainer *SongBrowser::setVisible(bool visible) {
 }
 
 void SongBrowser::selectSelectedBeatmapSongButton() {
-    if(this->beatmap == NULL) return;
+    if(this->beatmap == nullptr) return;
 
     auto diff = this->beatmap->getSelectedDifficulty2();
-    if(diff == NULL) return;
+    if(diff == nullptr) return;
 
     auto it = this->hashToSongButton.find(diff->getMD5Hash());
     if(it == this->hashToSongButton.end()) {
@@ -1471,18 +1471,18 @@ void SongBrowser::onPlayEnd(bool quit) {
         this->rebuildScoreButtons();
 
         SongDifficultyButton *selectedSongDiffButton = dynamic_cast<SongDifficultyButton *>(this->selectedButton);
-        if(selectedSongDiffButton != NULL) selectedSongDiffButton->updateGrade();
+        if(selectedSongDiffButton != nullptr) selectedSongDiffButton->updateGrade();
     }
 
     // update song info
-    if(this->beatmap != NULL && this->beatmap->getSelectedDifficulty2() != NULL) {
+    if(this->beatmap != nullptr && this->beatmap->getSelectedDifficulty2() != nullptr) {
         this->songInfo->setFromBeatmap(this->beatmap, this->beatmap->getSelectedDifficulty2());
     }
 }
 
 void SongBrowser::onSelectionChange(Button *button, bool rebuild) {
     this->selectedButton = button;
-    if(button == NULL) return;
+    if(button == nullptr) return;
 
     this->contextMenu->setVisible2(false);
 
@@ -1494,15 +1494,15 @@ void SongBrowser::onSelectionChange(Button *button, bool rebuild) {
     SongDifficultyButton *songDiffButtonPointer = dynamic_cast<SongDifficultyButton *>(button);
     CollectionButton *collectionButtonPointer = dynamic_cast<CollectionButton *>(button);
 
-    if(songDiffButtonPointer != NULL) {
-        if(this->selectionPreviousSongDiffButton != NULL &&
+    if(songDiffButtonPointer != nullptr) {
+        if(this->selectionPreviousSongDiffButton != nullptr &&
            this->selectionPreviousSongDiffButton != songDiffButtonPointer)
             this->selectionPreviousSongDiffButton->deselect();
 
         // support individual diffs independent from their parent song button container
         {
             // if the new diff has a parent song button, then update its selection state (select it to stay consistent)
-            if(songDiffButtonPointer->getParentSongButton() != NULL &&
+            if(songDiffButtonPointer->getParentSongButton() != nullptr &&
                !songDiffButtonPointer->getParentSongButton()->isSelected()) {
                 songDiffButtonPointer->getParentSongButton()
                     ->sortChildren();  // NOTE: workaround for disabled callback firing in select()
@@ -1512,33 +1512,33 @@ void SongBrowser::onSelectionChange(Button *button, bool rebuild) {
 
             // if the new diff does not have a parent song button, but the previous diff had, then update the previous
             // diff parent song button selection state (to deselect it)
-            if(songDiffButtonPointer->getParentSongButton() == NULL) {
-                if(this->selectionPreviousSongDiffButton != NULL &&
-                   this->selectionPreviousSongDiffButton->getParentSongButton() != NULL)
+            if(songDiffButtonPointer->getParentSongButton() == nullptr) {
+                if(this->selectionPreviousSongDiffButton != nullptr &&
+                   this->selectionPreviousSongDiffButton->getParentSongButton() != nullptr)
                     this->selectionPreviousSongDiffButton->getParentSongButton()->deselect();
             }
         }
 
         this->selectionPreviousSongDiffButton = songDiffButtonPointer;
-    } else if(songButtonPointer != NULL) {
-        if(this->selectionPreviousSongButton != NULL && this->selectionPreviousSongButton != songButtonPointer)
+    } else if(songButtonPointer != nullptr) {
+        if(this->selectionPreviousSongButton != nullptr && this->selectionPreviousSongButton != songButtonPointer)
             this->selectionPreviousSongButton->deselect();
-        if(this->selectionPreviousSongDiffButton != NULL) this->selectionPreviousSongDiffButton->deselect();
+        if(this->selectionPreviousSongDiffButton != nullptr) this->selectionPreviousSongDiffButton->deselect();
 
         this->selectionPreviousSongButton = songButtonPointer;
-    } else if(collectionButtonPointer != NULL) {
+    } else if(collectionButtonPointer != nullptr) {
         // TODO: maybe expand this logic with per-group-type last-open-collection memory
 
         // logic for allowing collections to be deselected by clicking on the same button (contrary to how beatmaps
         // work)
-        const bool isTogglingCollection = (this->selectionPreviousCollectionButton != NULL &&
+        const bool isTogglingCollection = (this->selectionPreviousCollectionButton != nullptr &&
                                            this->selectionPreviousCollectionButton == collectionButtonPointer);
 
-        if(this->selectionPreviousCollectionButton != NULL) this->selectionPreviousCollectionButton->deselect();
+        if(this->selectionPreviousCollectionButton != nullptr) this->selectionPreviousCollectionButton->deselect();
 
         this->selectionPreviousCollectionButton = collectionButtonPointer;
 
-        if(isTogglingCollection) this->selectionPreviousCollectionButton = NULL;
+        if(isTogglingCollection) this->selectionPreviousCollectionButton = nullptr;
     }
 
     if(rebuild) this->rebuildSongButtons();
@@ -1620,7 +1620,7 @@ void SongBrowser::refreshBeatmaps() {
     // don't pause the music the first time we load the song database
     static bool first_refresh = true;
     if(first_refresh) {
-        this->beatmap->music = NULL;
+        this->beatmap->music = nullptr;
         first_refresh = false;
     }
 
@@ -1634,9 +1634,9 @@ void SongBrowser::refreshBeatmaps() {
     SAFE_DELETE(this->beatmap);
     this->beatmap = new Beatmap();
 
-    this->selectionPreviousSongButton = NULL;
-    this->selectionPreviousSongDiffButton = NULL;
-    this->selectionPreviousCollectionButton = NULL;
+    this->selectionPreviousSongButton = nullptr;
+    this->selectionPreviousSongDiffButton = nullptr;
+    this->selectionPreviousCollectionButton = nullptr;
 
     // delete local database and UI
     this->carousel->getContainer()->invalidate();
@@ -1714,7 +1714,7 @@ void SongBrowser::addBeatmapSet(BeatmapSet *mapset) {
     } else {
         songButton =
             new SongDifficultyButton(this, this->carousel, this->contextMenu, 250, 250 + this->beatmaps.size() * 50,
-                                     200, 50, "", mapset->getDifficulties()[0], NULL);
+                                     200, 50, "", mapset->getDifficulties()[0], nullptr);
     }
 
     this->songButtons.push_back(songButton);
@@ -1788,7 +1788,7 @@ void SongBrowser::addBeatmapSet(BeatmapSet *mapset) {
             for(auto diff_btn : tempChildrenForGroups) {
                 const u32 lengthMS = diff_btn->getDatabaseBeatmap()->getLengthMS();
 
-                std::vector<SongButton *> *children = NULL;
+                std::vector<SongButton*>* children = nullptr;
                 if(lengthMS <= 1000 * 60) {
                     children = &this->lengthCollectionButtons[0]->getChildren();
                 } else if(lengthMS <= 1000 * 60 * 2) {
@@ -1823,7 +1823,7 @@ void SongBrowser::addSongButtonToAlphanumericGroup(SongButton *btn, std::vector<
     const bool isLowerCase = (firstChar >= 'a' && firstChar <= 'z');
     const bool isUpperCase = (firstChar >= 'A' && firstChar <= 'Z');
 
-    std::vector<SongButton *> *children = NULL;
+    std::vector<SongButton*>* children = nullptr;
     if(isNumber) {
         children = &group[0]->getChildren();
     } else if(isLowerCase || isUpperCase) {
@@ -1841,12 +1841,12 @@ void SongBrowser::addSongButtonToAlphanumericGroup(SongButton *btn, std::vector<
 }
 
 void SongBrowser::requestNextScrollToSongButtonJumpFix(SongDifficultyButton *diffButton) {
-    if(diffButton == NULL) return;
+    if(diffButton == nullptr) return;
 
     this->bNextScrollToSongButtonJumpFixScheduled = true;
     this->fNextScrollToSongButtonJumpFixOldRelPosY =
-        (diffButton->getParentSongButton() != NULL ? diffButton->getParentSongButton()->getRelPos().y
-                                                   : diffButton->getRelPos().y);
+        (diffButton->getParentSongButton() != nullptr ? diffButton->getParentSongButton()->getRelPos().y
+                                                      : diffButton->getRelPos().y);
     this->fNextScrollToSongButtonJumpFixOldScrollSizeY = this->carousel->getScrollSize().y;
 }
 
@@ -1897,7 +1897,7 @@ void SongBrowser::scrollToBestButton() {
 }
 
 void SongBrowser::scrollToSongButton(Button *songButton, bool alignOnTop) {
-    if(songButton == NULL || !this->isButtonVisible(songButton)) {
+    if(songButton == nullptr || !this->isButtonVisible(songButton)) {
         return;
     }
 
@@ -1997,12 +1997,12 @@ void SongBrowser::updateSongButtonLayout() {
     for(auto element : elements) {
         Button *songButton = dynamic_cast<Button *>(element);
 
-        if(songButton != NULL) {
+        if(songButton != nullptr) {
             const SongDifficultyButton *diffButtonPointer = dynamic_cast<SongDifficultyButton *>(songButton);
 
             // depending on the object type, layout differently
-            const bool isCollectionButton = dynamic_cast<CollectionButton *>(songButton) != NULL;
-            const bool isDiffButton = diffButtonPointer != NULL;
+            const bool isCollectionButton = dynamic_cast<CollectionButton*>(songButton) != nullptr;
+            const bool isDiffButton = diffButtonPointer != nullptr;
             const bool isIndependentDiffButton = isDiffButton && diffButtonPointer->isIndependentDiffButton();
 
             // give selected items & diffs a bit more spacing, to make them stand out
@@ -2034,7 +2034,7 @@ void SongBrowser::updateSongButtonLayout() {
 
 bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
                                 const std::vector<std::string> &searchStringTokens) {
-    if(databaseBeatmap == NULL) return false;
+    if(databaseBeatmap == nullptr) return false;
 
     const std::vector<const DatabaseBeatmap *> tmpContainer{databaseBeatmap};
     const auto &diffs = databaseBeatmap->getDifficulties().size() > 0
@@ -2501,7 +2501,7 @@ void SongBrowser::rebuildScoreButtons() {
     this->localBestContainer->invalidate();
     this->localBestContainer->setVisible(false);
 
-    const bool validBeatmap = (this->beatmap != NULL && this->beatmap->getSelectedDifficulty2() != NULL);
+    const bool validBeatmap = (this->beatmap != nullptr && this->beatmap->getSelectedDifficulty2() != nullptr);
     bool is_online = cv::songbrowser_scores_sortingtype.getString() == "Online Leaderboard";
 
     std::vector<FinishedScore> scores;
@@ -2820,7 +2820,7 @@ void SongBrowser::onDatabaseLoadingFinished() {
     }
 
     // ok, if we still haven't selected a song, do so now
-    if(this->beatmap->getSelectedDifficulty2() == NULL) {
+    if(this->beatmap->getSelectedDifficulty2() == nullptr) {
         this->selectRandomBeatmap();
     }
 
@@ -2990,14 +2990,14 @@ void SongBrowser::onSortScoresChange(const UString &text, int /*id*/) {
 
     // update grades of all visible songdiffbuttons
     // NOTE(kiwec): why here???? wtf lol
-    if(this->beatmap != NULL) {
+    if(this->beatmap != nullptr) {
         for(auto &visibleSongButton : this->visibleSongButtons) {
             if(visibleSongButton->getDatabaseBeatmap() == this->beatmap->getSelectedDifficulty2()) {
                 SongButton *songButtonPointer = dynamic_cast<SongButton *>(visibleSongButton);
-                if(songButtonPointer != NULL) {
+                if(songButtonPointer != nullptr) {
                     for(Button *diffButton : songButtonPointer->getChildren()) {
                         SongButton *diffButtonPointer = dynamic_cast<SongButton *>(diffButton);
-                        if(diffButtonPointer != NULL) diffButtonPointer->updateGrade();
+                        if(diffButtonPointer != nullptr) diffButtonPointer->updateGrade();
                     }
                 }
             }
@@ -3069,7 +3069,7 @@ void SongBrowser::onGroupChange(const UString &text, int id) {
             break;
         }
     }
-    if(grouping == NULL) return;
+    if(grouping == nullptr) return;
 
     // update group combobox button text
     this->groupButton->setText(grouping->name);
@@ -3225,7 +3225,7 @@ void SongBrowser::onSelectionRandom() {
 void SongBrowser::onSelectionOptions() {
     soundEngine->play(osu->getSkin()->clickButton);
 
-    if(this->selectedButton != NULL) {
+    if(this->selectedButton != nullptr) {
         this->scrollToSongButton(this->selectedButton);
 
         const Vector2 heuristicSongButtonPositionAfterSmoothScrollFinishes =
@@ -3233,9 +3233,9 @@ void SongBrowser::onSelectionOptions() {
 
         SongButton *songButtonPointer = dynamic_cast<SongButton *>(this->selectedButton);
         CollectionButton *collectionButtonPointer = dynamic_cast<CollectionButton *>(this->selectedButton);
-        if(songButtonPointer != NULL) {
+        if(songButtonPointer != nullptr) {
             songButtonPointer->triggerContextMenu(heuristicSongButtonPositionAfterSmoothScrollFinishes);
-        } else if(collectionButtonPointer != NULL) {
+        } else if(collectionButtonPointer != nullptr) {
             collectionButtonPointer->triggerContextMenu(heuristicSongButtonPositionAfterSmoothScrollFinishes);
         }
     }
@@ -3280,7 +3280,7 @@ void SongBrowser::onSongButtonContextMenu(SongButton *songButton, const UString 
                 } else {
                     const DatabaseBeatmap *beatmap =
                         db->getBeatmapDifficulty(songButton->getDatabaseBeatmap()->getMD5Hash());
-                    if(beatmap != NULL) {
+                    if(beatmap != nullptr) {
                         const std::vector<DatabaseBeatmap *> &diffs = beatmap->getDifficulties();
                         for(auto diff : diffs) {
                             beatmapSetHashes.push_back(diff->getMD5Hash());
@@ -3378,7 +3378,7 @@ void SongBrowser::onSongButtonContextMenu(SongButton *songButton, const UString 
     if(updateUIScheduled) {
         const float prevScrollPosY = this->carousel->getRelPosY();  // usability
         const auto previouslySelectedCollectionName =
-            (this->selectionPreviousCollectionButton != NULL
+            (this->selectionPreviousCollectionButton != nullptr
                  ? this->selectionPreviousCollectionButton->getCollectionName()
                  : "");  // usability
         {
@@ -3411,7 +3411,7 @@ void SongBrowser::onCollectionButtonContextMenu(CollectionButton * /*collectionB
                 this->collectionButtons.erase(this->collectionButtons.begin() + i);
 
                 // reset UI state
-                this->selectionPreviousCollectionButton = NULL;
+                this->selectionPreviousCollectionButton = nullptr;
 
                 auto collection = get_or_create_collection(collection_name);
                 collection->delete_collection();
@@ -3440,13 +3440,13 @@ void SongBrowser::highlightScore(u64 unixTimestamp) {
 }
 
 void SongBrowser::recalculateStarsForSelectedBeatmap(bool /*force*/) {
-    if(this->beatmap->getSelectedDifficulty2() == NULL) return;
+    if(this->beatmap->getSelectedDifficulty2() == nullptr) return;
 
     this->beatmap->getSelectedDifficulty2()->pp.pp = -1.0;
 }
 
 void SongBrowser::selectSongButton(Button *songButton) {
-    if(songButton != NULL && !songButton->isSelected()) {
+    if(songButton != nullptr && !songButton->isSelected()) {
         this->contextMenu->setVisible2(false);
         songButton->select();
     }
@@ -3460,8 +3460,8 @@ void SongBrowser::selectRandomBeatmap() {
         SongButton *songButtonPointer = dynamic_cast<SongButton *>(element);
         SongDifficultyButton *songDifficultyButtonPointer = dynamic_cast<SongDifficultyButton *>(element);
 
-        if(songButtonPointer != NULL &&
-           (songDifficultyButtonPointer == NULL ||
+        if(songButtonPointer != nullptr &&
+           (songDifficultyButtonPointer == nullptr ||
             songDifficultyButtonPointer->isIndependentDiffButton()))  // only allow songbuttons or independent diffs
             songButtons.push_back(songButtonPointer);
     }
@@ -3469,8 +3469,8 @@ void SongBrowser::selectRandomBeatmap() {
     if(songButtons.size() < 1) return;
 
     // remember previous
-    if(this->previousRandomBeatmaps.size() == 0 && this->beatmap != NULL &&
-       this->beatmap->getSelectedDifficulty2() != NULL) {
+    if(this->previousRandomBeatmaps.size() == 0 && this->beatmap != nullptr &&
+       this->beatmap->getSelectedDifficulty2() != nullptr) {
         this->previousRandomBeatmaps.push_back(this->beatmap->getSelectedDifficulty2());
     }
 
@@ -3484,7 +3484,7 @@ void SongBrowser::selectRandomBeatmap() {
 void SongBrowser::selectPreviousRandomBeatmap() {
     if(this->previousRandomBeatmaps.size() > 0) {
         DatabaseBeatmap *currentRandomBeatmap = this->previousRandomBeatmaps.back();
-        if(this->previousRandomBeatmaps.size() > 1 && this->beatmap != NULL &&
+        if(this->previousRandomBeatmaps.size() > 1 && this->beatmap != nullptr &&
            this->previousRandomBeatmaps[this->previousRandomBeatmaps.size() - 1] ==
                this->beatmap->getSelectedDifficulty2())
             this->previousRandomBeatmaps.pop_back();  // deletes the current beatmap which may also be at the top (so
@@ -3496,7 +3496,7 @@ void SongBrowser::selectPreviousRandomBeatmap() {
         for(auto element : elements) {
             SongButton *songButtonPointer = dynamic_cast<SongButton *>(element);
 
-            if(songButtonPointer != NULL)  // allow ALL songbuttons
+            if(songButtonPointer != nullptr)  // allow ALL songbuttons
                 songButtons.push_back(songButtonPointer);
         }
 
@@ -3504,7 +3504,8 @@ void SongBrowser::selectPreviousRandomBeatmap() {
         bool foundIt = false;
         const DatabaseBeatmap *previousRandomBeatmap = this->previousRandomBeatmaps.back();
         for(auto &songButton : songButtons) {
-            if(songButton->getDatabaseBeatmap() != NULL && songButton->getDatabaseBeatmap() == previousRandomBeatmap) {
+            if(songButton->getDatabaseBeatmap() != nullptr &&
+               songButton->getDatabaseBeatmap() == previousRandomBeatmap) {
                 this->previousRandomBeatmaps.pop_back();
                 this->selectSongButton(songButton);
                 foundIt = true;
@@ -3533,7 +3534,7 @@ void SongBrowser::playSelectedDifficulty() {
     const std::vector<CBaseUIElement *> &elements = this->carousel->getContainer()->getElements();
     for(auto element : elements) {
         SongDifficultyButton *songDifficultyButton = dynamic_cast<SongDifficultyButton *>(element);
-        if(songDifficultyButton != NULL && songDifficultyButton->isSelected()) {
+        if(songDifficultyButton != nullptr && songDifficultyButton->isSelected()) {
             songDifficultyButton->select();
             break;
         }
@@ -3543,7 +3544,7 @@ void SongBrowser::playSelectedDifficulty() {
 void SongBrowser::recreateCollectionsButtons() {
     // reset
     {
-        this->selectionPreviousCollectionButton = NULL;
+        this->selectionPreviousCollectionButton = nullptr;
         for(auto &collectionButton : this->collectionButtons) {
             delete collectionButton;
         }

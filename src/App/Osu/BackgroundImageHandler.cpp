@@ -29,8 +29,8 @@ void BackgroundImageHandler::update(bool allowEviction) {
            (engine->getTime() >= entry.evictionTime && engine->getFrameCount() >= entry.evictionTimeFrameCount)) {
             if(allowEviction) {
                 if(!this->bFrozen && !engine->isMinimized()) {
-                    if(entry.backgroundImagePathLoader != NULL) entry.backgroundImagePathLoader->interruptLoad();
-                    if(entry.image != NULL) entry.image->interruptLoad();
+                    if(entry.backgroundImagePathLoader != nullptr) entry.backgroundImagePathLoader->interruptLoad();
+                    if(entry.image != nullptr) entry.image->interruptLoad();
 
                     resourceManager->destroyResource(entry.backgroundImagePathLoader);
                     resourceManager->destroyResource(entry.image);
@@ -53,18 +53,18 @@ void BackgroundImageHandler::update(bool allowEviction) {
                     if(entry.backgroundImageFileName.length() < 2) {
                         // if the backgroundImageFileName is not loaded, then we have to create a full
                         // DatabaseBeatmapBackgroundImagePathLoader
-                        entry.image = NULL;
+                        entry.image = nullptr;
                         this->handleLoadPathForEntry(entry);
                     } else {
                         // if backgroundImageFileName is already loaded/valid, then we can directly load the image
-                        entry.backgroundImagePathLoader = NULL;
+                        entry.backgroundImagePathLoader = nullptr;
                         this->handleLoadImageForEntry(entry);
                     }
                 }
             } else {
                 // no load scheduled (potential load-in-progress if it was necessary), handle backgroundImagePathLoader
                 // loading finish
-                if(entry.image == NULL && entry.backgroundImagePathLoader != NULL &&
+                if(entry.image == nullptr && entry.backgroundImagePathLoader != nullptr &&
                    entry.backgroundImagePathLoader->isReady()) {
                     if(entry.backgroundImagePathLoader->getLoadedBackgroundImageFileName().length() > 1) {
                         entry.backgroundImageFileName =
@@ -73,7 +73,7 @@ void BackgroundImageHandler::update(bool allowEviction) {
                     }
 
                     resourceManager->destroyResource(entry.backgroundImagePathLoader);
-                    entry.backgroundImagePathLoader = NULL;
+                    entry.backgroundImagePathLoader = nullptr;
                 }
             }
         }
@@ -105,7 +105,7 @@ void BackgroundImageHandler::handleLoadImageForEntry(ENTRY &entry) {
 }
 
 Image *BackgroundImageHandler::getLoadBackgroundImage(const DatabaseBeatmap *beatmap) {
-    if(beatmap == NULL || !cv::load_beatmap_background_images.getBool() || !beatmap->draw_background) return NULL;
+    if(beatmap == nullptr || !cv::load_beatmap_background_images.getBool() || !beatmap->draw_background) return nullptr;
 
     // NOTE: no references to beatmap are kept anywhere (database can safely be deleted/reloaded without having to
     // notify the BackgroundImageHandler)
@@ -128,7 +128,7 @@ Image *BackgroundImageHandler::getLoadBackgroundImage(const DatabaseBeatmap *bea
             // HACKHACK: to improve future loading speed, if we have already loaded the backgroundImageFileName, force
             // update the database backgroundImageFileName and fullBackgroundImageFilePath this is similar to how it
             // worked before the rework, but 100% safe(r) since we are not async
-            if(i.image != NULL && i.backgroundImageFileName.length() > 1 &&
+            if(i.image != nullptr && i.backgroundImageFileName.length() > 1 &&
                beatmap->getBackgroundImageFileName().length() < 2) {
                 const_cast<DatabaseBeatmap *>(beatmap)->sBackgroundImageFileName = i.backgroundImageFileName;
                 const_cast<DatabaseBeatmap *>(beatmap)->sFullBackgroundImageFilePath = beatmap->getFolder();
@@ -168,11 +168,11 @@ Image *BackgroundImageHandler::getLoadBackgroundImage(const DatabaseBeatmap *bea
             entry.folder = beatmap->getFolder();
             entry.backgroundImageFileName = beatmap->getBackgroundImageFileName();
 
-            entry.backgroundImagePathLoader = NULL;
-            entry.image = NULL;
+            entry.backgroundImagePathLoader = nullptr;
+            entry.image = nullptr;
         }
         if(this->cache.size() < maxCacheEntries) this->cache.push_back(entry);
     }
 
-    return NULL;
+    return nullptr;
 }

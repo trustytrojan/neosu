@@ -639,7 +639,7 @@ bool SDLMain::createWindow() {
     m_window = SDL_CreateWindowWithProperties(props);
     SDL_DestroyProperties(props);
 
-    if(m_window == NULL) {
+    if(m_window == nullptr) {
         debugLog("Couldn't SDL_CreateWindow(): {:s}\n", SDL_GetError());
         return false;
     }

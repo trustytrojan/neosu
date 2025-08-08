@@ -208,7 +208,7 @@ void InfoLabel::mouse_update(bool *propagate_clicks) {
     // detail info tooltip when hovering over diff info
     if(this->isMouseInside() && !osu->getOptionsMenu()->isMouseInside()) {
         Beatmap *beatmap = osu->getSelectedBeatmap();
-        if(beatmap != NULL) {
+        if(beatmap != nullptr) {
             const float speedMultiplierInv = (1.0f / beatmap->getSpeedMultiplier());
 
             const float approachTimeRoundedCompensated = ((int)beatmap->getApproachTime()) * speedMultiplierInv;
@@ -230,7 +230,7 @@ void InfoLabel::mouse_update(bool *propagate_clicks) {
                 osu->getTooltipOverlay()->addLine(
                     UString::format("Hit object radius: %.2f", hitobjectRadiusRoundedCompensated));
 
-                if(beatmap->getSelectedDifficulty2() != NULL) {
+                if(beatmap->getSelectedDifficulty2() != nullptr) {
                     int numObjects = beatmap->getSelectedDifficulty2()->getNumObjects();
                     int numCircles = beatmap->getSelectedDifficulty2()->getNumCircles();
                     int numSliders = beatmap->getSelectedDifficulty2()->getNumSliders();
@@ -317,7 +317,7 @@ UString InfoLabel::buildDiffInfoString() {
     float modPp = 0.f;
 
     Beatmap *beatmap = osu->getSelectedBeatmap();
-    if(beatmap != NULL) {
+    if(beatmap != nullptr) {
         CS = beatmap->getCS();
         AR = beatmap->getApproachRateForSpeedMultiplier();
         OD = beatmap->getOverallDifficultyForSpeedMultiplier();

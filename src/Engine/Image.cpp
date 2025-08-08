@@ -84,7 +84,7 @@ void pngReadFromMemory(png_structp png_ptr, png_bytep outBytes, png_size_t byteC
 bool Image::decodePNGFromMemory(const unsigned char *data, size_t size, std::vector<unsigned char> &outData,
                                 int &outWidth, int &outHeight) {
     garbage_zlib();
-    png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
     if(!png_ptr) {
         debugLog("Image Error: png_create_read_struct failed\n");
         return false;
@@ -92,7 +92,7 @@ bool Image::decodePNGFromMemory(const unsigned char *data, size_t size, std::vec
 
     png_infop info_ptr = png_create_info_struct(png_ptr);
     if(!info_ptr) {
-        png_destroy_read_struct(&png_ptr, NULL, NULL);
+        png_destroy_read_struct(&png_ptr, nullptr, nullptr);
         debugLog("Image Error: png_create_info_struct failed\n");
         return false;
     }
@@ -101,7 +101,7 @@ bool Image::decodePNGFromMemory(const unsigned char *data, size_t size, std::vec
     png_set_error_fn(png_ptr, &err, pngErrorExit, pngWarning);
 
     if(setjmp(&err.setjmp_buffer[0])) {
-        png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+        png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
         return false;
     }
 
@@ -142,7 +142,7 @@ bool Image::decodePNGFromMemory(const unsigned char *data, size_t size, std::vec
 
     // after transformations, we should always have RGBA
     if(outWidth > 8192 || outHeight > 8192) {
-        png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+        png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
         debugLog("Image Error: PNG image size is too big ({} x {})\n", outWidth, outHeight);
         return false;
     }
@@ -159,7 +159,7 @@ bool Image::decodePNGFromMemory(const unsigned char *data, size_t size, std::vec
     png_read_image(png_ptr, row_pointers);
     delete[] row_pointers;
 
-    png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+    png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
     return true;
 }
 
@@ -174,7 +174,7 @@ void Image::saveToImage(unsigned char *data, unsigned int width, unsigned int he
         return;
     }
 
-    png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
     if(!png_ptr) {
         fclose(fp);
         debugLog("PNG error: png_create_write_struct failed\n");
@@ -184,7 +184,7 @@ void Image::saveToImage(unsigned char *data, unsigned int width, unsigned int he
 
     png_infop info_ptr = png_create_info_struct(png_ptr);
     if(!info_ptr) {
-        png_destroy_write_struct(&png_ptr, NULL);
+        png_destroy_write_struct(&png_ptr, nullptr);
         fclose(fp);
         debugLog("PNG error: png_create_info_struct failed\n");
         engine->showMessageError("PNG Error", "png_create_info_struct failed");
@@ -219,7 +219,7 @@ void Image::saveToImage(unsigned char *data, unsigned int width, unsigned int he
     }
     delete[] row;
 
-    png_write_end(png_ptr, NULL);
+    png_write_end(png_ptr, nullptr);
     png_destroy_write_struct(&png_ptr, &info_ptr);
     fclose(fp);
 }
@@ -446,7 +446,7 @@ void Image::setPixel(int x, int y, Color color) {
 }
 
 void Image::setPixels(const char *data, size_t size, TYPE type) {
-    if(data == NULL) return;
+    if(data == nullptr) return;
 
     // TODO: implement remaining types
     switch(type) {

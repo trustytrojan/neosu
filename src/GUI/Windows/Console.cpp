@@ -112,7 +112,7 @@ void Console::processCommand(std::string command, bool fromFile) {
 
     // get convar
     ConVar *var = convar->getConVarByName(commandName, false);
-    if(var == NULL || var->isFlagSet(FCVAR_NOEXEC) || (fromFile && var->isFlagSet(FCVAR_NOLOAD))) {
+    if(var == nullptr || var->isFlagSet(FCVAR_NOEXEC) || (fromFile && var->isFlagSet(FCVAR_NOLOAD))) {
 #ifdef _DEBUG
         if(var) {
             debugLog("not executing {}, flags: {}\n", var->getName(), ConVarHandler::flagsToString(var->getFlags()));

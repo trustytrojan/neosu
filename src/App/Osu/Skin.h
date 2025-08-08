@@ -572,75 +572,75 @@ class Skin {
     Sound *spinnerSpinSound;
 
     // Plays when sending a message in chat
-    Sound *messageSent = NULL;
+    Sound* messageSent = nullptr;
 
     // Plays when deleting text in a message in chat
-    Sound *deletingText = NULL;
+    Sound* deletingText = nullptr;
 
     // Plays when changing the text cursor position
-    Sound *movingTextCursor = NULL;
+    Sound* movingTextCursor = nullptr;
 
     // Plays when pressing a key for chat, search, edit, etc
-    Sound *typing1 = NULL;
-    Sound *typing2 = NULL;
-    Sound *typing3 = NULL;
-    Sound *typing4 = NULL;
+    Sound* typing1 = nullptr;
+    Sound* typing2 = nullptr;
+    Sound* typing3 = nullptr;
+    Sound* typing4 = nullptr;
 
     // Plays when returning to the previous screen
-    Sound *menuBack = NULL;
+    Sound* menuBack = nullptr;
 
     // Plays when closing a chat tab
-    Sound *closeChatTab = NULL;
+    Sound* closeChatTab = nullptr;
 
     // Plays when hovering above all selectable boxes except beatmaps or main screen buttons
-    Sound *hoverButton = NULL;
+    Sound* hoverButton = nullptr;
 
     // Plays when clicking to confirm a button or dropdown option, opening or
     // closing chat, switching between chat tabs, or switching groups
-    Sound *clickButton = NULL;
+    Sound* clickButton = nullptr;
 
     // Main menu sounds
-    Sound *clickMainMenuCube = NULL;
-    Sound *hoverMainMenuCube = NULL;
-    Sound *clickSingleplayer = NULL;
-    Sound *hoverSingleplayer = NULL;
-    Sound *clickMultiplayer = NULL;
-    Sound *hoverMultiplayer = NULL;
-    Sound *clickOptions = NULL;
-    Sound *hoverOptions = NULL;
-    Sound *clickExit = NULL;
-    Sound *hoverExit = NULL;
+    Sound* clickMainMenuCube = nullptr;
+    Sound* hoverMainMenuCube = nullptr;
+    Sound* clickSingleplayer = nullptr;
+    Sound* hoverSingleplayer = nullptr;
+    Sound* clickMultiplayer = nullptr;
+    Sound* hoverMultiplayer = nullptr;
+    Sound* clickOptions = nullptr;
+    Sound* hoverOptions = nullptr;
+    Sound* clickExit = nullptr;
+    Sound* hoverExit = nullptr;
 
     // Pause menu sounds
-    Sound *pauseLoop = NULL;
-    Sound *pauseHover = NULL;
-    Sound *clickPauseBack = NULL;
-    Sound *hoverPauseBack = NULL;
-    Sound *clickPauseContinue = NULL;
-    Sound *hoverPauseContinue = NULL;
-    Sound *clickPauseRetry = NULL;
-    Sound *hoverPauseRetry = NULL;
+    Sound* pauseLoop = nullptr;
+    Sound* pauseHover = nullptr;
+    Sound* clickPauseBack = nullptr;
+    Sound* hoverPauseBack = nullptr;
+    Sound* clickPauseContinue = nullptr;
+    Sound* hoverPauseContinue = nullptr;
+    Sound* clickPauseRetry = nullptr;
+    Sound* hoverPauseRetry = nullptr;
 
     // Back button sounds
-    Sound *backButtonClick = NULL;
-    Sound *backButtonHover = NULL;
+    Sound* backButtonClick = nullptr;
+    Sound* backButtonHover = nullptr;
 
     // Plays when switching into song selection, selecting a beatmap, opening dropdown boxes, opening chat tabs
-    Sound *expand = NULL;
+    Sound* expand = nullptr;
 
     // Plays when selecting a difficulty of a beatmap
-    Sound *selectDifficulty = NULL;
+    Sound* selectDifficulty = nullptr;
 
     // Plays when changing the options via a slider
-    Sound *sliderbar = NULL;
+    Sound* sliderbar = nullptr;
 
     // Multiplayer sounds
-    Sound *matchConfirm = NULL;  // all players are ready
-    Sound *roomJoined = NULL;    // a player joined
-    Sound *roomQuit = NULL;      // a player left
-    Sound *roomNotReady = NULL;  // a player is no longer ready
-    Sound *roomReady = NULL;     // a player is now ready
-    Sound *matchStart = NULL;    // match started
+    Sound* matchConfirm = nullptr;  // all players are ready
+    Sound* roomJoined = nullptr;    // a player joined
+    Sound* roomQuit = nullptr;      // a player left
+    Sound* roomNotReady = nullptr;  // a player is no longer ready
+    Sound* roomReady = nullptr;     // a player is now ready
+    Sound* matchStart = nullptr;    // match started
 
     Sound *combobreak;
     Sound *failsound;

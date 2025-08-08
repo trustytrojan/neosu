@@ -158,7 +158,7 @@ class Beatmap : public BeatmapInterface {
     Vector2 interpolatedMousePos;
     bool is_watching = false;
     long current_frame_idx = 0;
-    SimulatedBeatmap *sim = NULL;
+    SimulatedBeatmap* sim = nullptr;
 
     // getting spectated (live)
     void broadcast_spectator_frames();

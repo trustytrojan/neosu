@@ -17,7 +17,7 @@ void UISlider::draw() {
     if(!this->bVisible) return;
 
     Image *img = osu->getSkin()->getCircleEmpty();
-    if(img == NULL) {
+    if(img == nullptr) {
         CBaseUISlider::draw();
         return;
     }

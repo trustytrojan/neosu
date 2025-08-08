@@ -38,7 +38,7 @@ class ScoreButton : public CBaseUIButton {
     [[nodiscard]] inline int getIndex() const { return this->iScoreIndexNumber; }
 
     bool is_friend = false;
-    UIAvatar *avatar = NULL;
+    UIAvatar* avatar = nullptr;
     MD5Hash map_hash;
 
    private:

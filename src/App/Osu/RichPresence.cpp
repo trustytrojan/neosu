@@ -41,7 +41,7 @@ void crop_to(const UString& str, char* output, int max_len) {
 
 // output is assumed to be a char[128] string
 void diff2str(DatabaseBeatmap* diff2, char* output, bool /*include_difficulty*/) {
-    if(diff2 == NULL) {
+    if(diff2 == nullptr) {
         strcpy(output, "No map selected");
         return;
     }
@@ -60,15 +60,15 @@ void diff2str(DatabaseBeatmap* diff2, char* output, bool /*include_difficulty*/)
 }
 
 void RichPresence::setBanchoStatus(const char* info_text, Action action) {
-    if(osu == NULL) return;
+    if(osu == nullptr) return;
 
     MD5Hash map_md5("");
     i32 map_id = 0;
 
     auto selected_beatmap = osu->getSelectedBeatmap();
-    if(selected_beatmap != NULL) {
+    if(selected_beatmap != nullptr) {
         auto diff = selected_beatmap->getSelectedDifficulty2();
-        if(diff != NULL) {
+        if(diff != nullptr) {
             map_md5 = diff->getMD5Hash();
             map_id = diff->getID();
         }
@@ -96,9 +96,9 @@ void RichPresence::updateBanchoMods() {
     i32 map_id = 0;
 
     auto selected_beatmap = osu->getSelectedBeatmap();
-    if(selected_beatmap != NULL) {
+    if(selected_beatmap != nullptr) {
         auto diff = selected_beatmap->getSelectedDifficulty2();
-        if(diff != NULL) {
+        if(diff != nullptr) {
             map_md5 = diff->getMD5Hash();
             map_id = diff->getID();
         }
@@ -131,7 +131,7 @@ void RichPresence::onMainMenu() {
 
     auto diff2 = osu->getSelectedBeatmap()->getSelectedDifficulty2();
     auto music = osu->getSelectedBeatmap()->getMusic();
-    bool listening = diff2 != NULL && music != NULL && music->isPlaying();
+    bool listening = diff2 != nullptr && music != nullptr && music->isPlaying();
     if(listening) {
         diff2str(diff2, activity.details, false);
     }
@@ -167,7 +167,7 @@ void RichPresence::onSongBrowser() {
 void RichPresence::onPlayStart() {
     auto diff2 = osu->getSelectedBeatmap()->getSelectedDifficulty2();
 
-    static DatabaseBeatmap* last_diff = NULL;
+    static DatabaseBeatmap* last_diff = nullptr;
     static int64_t tms = 0;
     if(tms == 0 || last_diff != diff2) {
         last_diff = diff2;

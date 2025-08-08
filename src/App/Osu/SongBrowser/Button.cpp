@@ -273,7 +273,7 @@ void Button::onMouseInside() {
     bool foundCenter = false;
     for(auto element : elements) {
         Button *b = dynamic_cast<Button *>(element);
-        if(b != NULL)  // sanity
+        if(b != nullptr)  // sanity
         {
             if(b == this) {
                 foundCenter = true;
@@ -296,7 +296,7 @@ void Button::onMouseOutside() {
         const std::vector<CBaseUIElement *> &elements = this->view->getContainer()->getElements();
         for(auto element : elements) {
             Button *b = dynamic_cast<Button *>(element);
-            if(b != NULL)  // sanity check
+            if(b != nullptr)  // sanity check
                 b->setMoveAwayState(MOVE_AWAY_STATE::MOVE_CENTER);
         }
     }

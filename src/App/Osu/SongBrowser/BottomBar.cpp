@@ -151,7 +151,7 @@ void draw_bottombar() {
     SkinImage* base_imgs[4] = {osu->getSkin()->selectionMode, osu->getSkin()->selectionMods,
                                osu->getSkin()->selectionRandom, osu->getSkin()->selectionOptions};
     for(i32 i = 0; i < 4; i++) {
-        if(base_imgs[i] == NULL) continue;
+        if(base_imgs[i] == nullptr) continue;
 
         f32 scale = global_scale * (base_imgs[i]->is_2x ? 0.5f : 1.f);
         g->setColor(0xffffffff);
@@ -185,7 +185,7 @@ void draw_bottombar() {
 
     // mode-osu-small (often used as overlay)
     auto mos_img = osu->getSkin()->mode_osu_small;
-    if(mos_img != NULL) {
+    if(mos_img != nullptr) {
         f32 mos_scale = global_scale * (mos_img->is_2x ? 0.5f : 1.f);
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ADDITIVE);
         g->setColor(0xffffffff);

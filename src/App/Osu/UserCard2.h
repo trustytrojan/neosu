@@ -15,6 +15,6 @@ class UserCard2 : public CBaseUIButton {
 
     void draw() override;
 
-    UserInfo *info = NULL;
-    UIAvatar *avatar = NULL;
+    UserInfo* info = nullptr;
+    UIAvatar* avatar = nullptr;
 };

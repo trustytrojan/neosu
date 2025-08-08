@@ -80,7 +80,7 @@ UserInfo* find_user(const UString& username) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 UserInfo* find_user_starting_with(UString prefix, const UString& last_match) {
@@ -102,7 +102,7 @@ UserInfo* find_user_starting_with(UString prefix, const UString& last_match) {
     }
 
     if(last_match.length() == 0) {
-        return NULL;
+        return nullptr;
     } else {
         return find_user_starting_with(prefix, "");
     }
@@ -118,7 +118,7 @@ UserInfo* try_get_user_info(i32 user_id, bool wants_presence) {
         return it->second;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 UserInfo* get_user_info(i32 user_id, bool wants_presence) {

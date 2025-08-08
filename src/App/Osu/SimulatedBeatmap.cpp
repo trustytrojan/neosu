@@ -439,7 +439,7 @@ void SimulatedBeatmap::update(f64 frame_time) {
     // also handle miss hiterrorbar slots,
     // also calculate nps and nd,
     // also handle note blocking
-    this->currentHitObject = NULL;
+    this->currentHitObject = nullptr;
     this->iNextHitObjectTime = 0;
     this->iPreviousHitObjectTime = 0;
     this->iNPS = 0;
@@ -570,14 +570,14 @@ void SimulatedBeatmap::update(f64 frame_time) {
 
             // click events (this also handles hitsounds!)
             const bool isCurrentHitObjectASliderAndHasItsStartCircleFinishedBeforeClickEvents =
-                (currentSliderPointer != NULL && currentSliderPointer->isStartCircleFinished());
+                (currentSliderPointer != nullptr && currentSliderPointer->isStartCircleFinished());
             const bool isCurrentHitObjectFinishedBeforeClickEvents = this->hitobjects[i]->isFinished();
             {
                 if(this->clicks.size() > 0) this->hitobjects[i]->onClickEvent(this->clicks);
             }
             const bool isCurrentHitObjectFinishedAfterClickEvents = this->hitobjects[i]->isFinished();
             const bool isCurrentHitObjectASliderAndHasItsStartCircleFinishedAfterClickEvents =
-                (currentSliderPointer != NULL && currentSliderPointer->isStartCircleFinished());
+                (currentSliderPointer != nullptr && currentSliderPointer->isStartCircleFinished());
 
             // note blocking / notelock (2.1)
             if(!isCurrentHitObjectASliderAndHasItsStartCircleFinishedBeforeClickEvents &&
@@ -676,7 +676,7 @@ void SimulatedBeatmap::update(f64 frame_time) {
             break_on_extra_click &= this->iCurrentHitObjectIndex > 0;
             if(break_on_extra_click) {
                 this->addSliderBreak();
-                this->addHitResult(NULL, LiveScore::HIT::HIT_MISS_SLIDERBREAK, 0, false, true, true, true, true,
+                this->addHitResult(nullptr, LiveScore::HIT::HIT_MISS_SLIDERBREAK, 0, false, true, true, true, true,
                                    false);  // only decrease health
             }
 
@@ -724,9 +724,9 @@ void SimulatedBeatmap::update(f64 frame_time) {
     if((ModMasks::eq(this->mods.flags, Replay::ModFlags::Autopilot))) this->updateAutoCursorPos();
 
     // spinner detection (used by osu!stable drain, and by HUD for not drawing the hiterrorbar)
-    if(this->currentHitObject != NULL) {
+    if(this->currentHitObject != nullptr) {
         Spinner *spinnerPointer = dynamic_cast<Spinner *>(this->currentHitObject);
-        if(spinnerPointer != NULL && this->iCurMusicPos > this->currentHitObject->click_time &&
+        if(spinnerPointer != nullptr && this->iCurMusicPos > this->currentHitObject->click_time &&
            this->iCurMusicPos < this->currentHitObject->click_time + this->currentHitObject->duration)
             this->bIsSpinnerActive = true;
         else
@@ -920,12 +920,12 @@ void SimulatedBeatmap::calculateStacks() {
 
             HitObject *objectI = this->hitobjects[i];
 
-            bool isSpinner = dynamic_cast<Spinner *>(objectI) != NULL;
+            bool isSpinner = dynamic_cast<Spinner*>(objectI) != nullptr;
 
             if(objectI->getStack() != 0 || isSpinner) continue;
 
-            bool isHitCircle = dynamic_cast<Circle *>(objectI) != NULL;
-            bool isSlider = dynamic_cast<Slider *>(objectI) != NULL;
+            bool isHitCircle = dynamic_cast<Circle*>(objectI) != nullptr;
+            bool isSlider = dynamic_cast<Slider*>(objectI) != nullptr;
 
             if(isHitCircle) {
                 while(--n >= 0) {
@@ -964,7 +964,7 @@ void SimulatedBeatmap::calculateStacks() {
                 while(--n >= 0) {
                     HitObject *objectN = this->hitobjects[n];
 
-                    bool isSpinner = dynamic_cast<Spinner *>(objectN) != NULL;
+                    bool isSpinner = dynamic_cast<Spinner*>(objectN) != nullptr;
 
                     if(isSpinner) continue;
 
@@ -989,7 +989,7 @@ void SimulatedBeatmap::calculateStacks() {
             HitObject *currHitObject = this->hitobjects[i];
             Slider *sliderPointer = dynamic_cast<Slider *>(currHitObject);
 
-            const bool isSlider = (sliderPointer != NULL);
+            const bool isSlider = (sliderPointer != nullptr);
 
             if(currHitObject->getStack() != 0 && !isSlider) continue;
 
@@ -1150,7 +1150,7 @@ void SimulatedBeatmap::computeDrainRate() {
                     testPlayer.decreaseHealth(longObjectDrop);
 
                     // nested hitobjects
-                    if(sliderPointer != NULL) {
+                    if(sliderPointer != nullptr) {
                         // startcircle
                         testPlayer.increaseHealth(LiveScore::getHealthIncrease(
                             LiveScore::HIT::HIT_SLIDER30, HP, testPlayer.hpMultiplierNormal,
@@ -1177,7 +1177,7 @@ void SimulatedBeatmap::computeDrainRate() {
                         testPlayer.increaseHealth(LiveScore::getHealthIncrease(
                             LiveScore::HIT::HIT_SLIDER30, HP, testPlayer.hpMultiplierNormal,
                             testPlayer.hpMultiplierComboEnd, 1.0));  // slider30
-                    } else if(spinnerPointer != NULL) {
+                    } else if(spinnerPointer != nullptr) {
                         const int rotationsNeeded =
                             (int)((f32)spinnerPointer->duration / 1000.0f * GameRules::getSpinnerSpinsPerSecond(this));
                         for(int r = 0; r < rotationsNeeded; r++) {

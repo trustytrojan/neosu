@@ -11,7 +11,7 @@ Keyboard::Keyboard() : InputDevice() {
 }
 
 void Keyboard::addListener(KeyboardListener *keyboardListener, bool insertOnTop) {
-    if(keyboardListener == NULL) {
+    if(keyboardListener == nullptr) {
         engine->showMessageError("Keyboard Error", "addListener(NULL)!");
         return;
     }

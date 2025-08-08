@@ -42,7 +42,7 @@ class Button : public CBaseUIButton {
     [[nodiscard]] inline Vector2 getActualPos() const { return this->vPos + this->getActualOffset(); }
     inline std::vector<SongButton *> &getChildren() { return this->children; }
 
-    [[nodiscard]] virtual DatabaseBeatmap *getDatabaseBeatmap() const { return NULL; }
+    [[nodiscard]] virtual DatabaseBeatmap* getDatabaseBeatmap() const { return nullptr; }
     [[nodiscard]] virtual Color getActiveBackgroundColor() const;
     [[nodiscard]] virtual Color getInactiveBackgroundColor() const;
 

@@ -213,7 +213,7 @@ void Lobby::joinRoom(u32 id, const UString& password) {
 
     for(CBaseUIElement* elm : this->list->getContainer()->getElements()) {
         RoomUIElement* room = dynamic_cast<RoomUIElement*>(elm);
-        if(room == NULL) continue;
+        if(room == nullptr) continue;
         if(room->room_id != id) continue;
         room->join_btn->is_loading = true;
         break;

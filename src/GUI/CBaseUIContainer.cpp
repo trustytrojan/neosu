@@ -22,7 +22,7 @@ void CBaseUIContainer::freeElements() {
 void CBaseUIContainer::invalidate() { this->vElements.clear(); }
 
 CBaseUIContainer *CBaseUIContainer::addBaseUIElement(CBaseUIElement *element, float xPos, float yPos) {
-    if(element == NULL) return this;
+    if(element == nullptr) return this;
 
     element->setRelPos(xPos, yPos);
     element->setPos(this->vPos + element->getRelPos());
@@ -32,7 +32,7 @@ CBaseUIContainer *CBaseUIContainer::addBaseUIElement(CBaseUIElement *element, fl
 }
 
 CBaseUIContainer *CBaseUIContainer::addBaseUIElement(CBaseUIElement *element) {
-    if(element == NULL) return this;
+    if(element == nullptr) return this;
 
     element->setRelPos(element->getPos().x, element->getPos().y);
     element->setPos(this->vPos + element->getRelPos());
@@ -42,7 +42,7 @@ CBaseUIContainer *CBaseUIContainer::addBaseUIElement(CBaseUIElement *element) {
 }
 
 CBaseUIContainer *CBaseUIContainer::addBaseUIElementBack(CBaseUIElement *element, float xPos, float yPos) {
-    if(element == NULL) return this;
+    if(element == nullptr) return this;
 
     element->setRelPos(xPos, yPos);
     element->setPos(this->vPos + element->getRelPos());
@@ -52,7 +52,7 @@ CBaseUIContainer *CBaseUIContainer::addBaseUIElementBack(CBaseUIElement *element
 }
 
 CBaseUIContainer *CBaseUIContainer::addBaseUIElementBack(CBaseUIElement *element) {
-    if(element == NULL) return this;
+    if(element == nullptr) return this;
 
     element->setRelPos(element->getPos().x, element->getPos().y);
     element->setPos(this->vPos + element->getRelPos());
@@ -62,7 +62,7 @@ CBaseUIContainer *CBaseUIContainer::addBaseUIElementBack(CBaseUIElement *element
 }
 
 CBaseUIContainer *CBaseUIContainer::insertBaseUIElement(CBaseUIElement *element, CBaseUIElement *index) {
-    if(element == NULL || index == NULL) return this;
+    if(element == nullptr || index == nullptr) return this;
 
     element->setRelPos(element->getPos().x, element->getPos().y);
     element->setPos(this->vPos + element->getRelPos());
@@ -79,7 +79,7 @@ CBaseUIContainer *CBaseUIContainer::insertBaseUIElement(CBaseUIElement *element,
 }
 
 CBaseUIContainer *CBaseUIContainer::insertBaseUIElementBack(CBaseUIElement *element, CBaseUIElement *index) {
-    if(element == NULL || index == NULL) return this;
+    if(element == nullptr || index == nullptr) return this;
 
     element->setRelPos(element->getPos().x, element->getPos().y);
     element->setPos(this->vPos + element->getRelPos());
@@ -129,7 +129,7 @@ CBaseUIElement *CBaseUIContainer::getBaseUIElement(const UString &name) {
         if(this->vElements[i]->getName() == name) return this->vElements[i];
     }
     debugLog("CBaseUIContainer ERROR: GetBaseUIElement() \"{:s}\" does not exist!!!\n", name.toUtf8());
-    return NULL;
+    return nullptr;
 }
 
 void CBaseUIContainer::draw() {

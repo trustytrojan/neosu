@@ -306,7 +306,7 @@ void VolumeOverlay::onEffectVolumeChange() {
 
 void VolumeOverlay::onMusicVolumeChange() {
     auto music = osu->getSelectedBeatmap()->getMusic();
-    if(music != NULL) {
+    if(music != nullptr) {
         music->setVolume(osu->getSelectedBeatmap()->getIdealVolume());
     }
 }

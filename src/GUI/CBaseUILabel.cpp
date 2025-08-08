@@ -43,7 +43,7 @@ void CBaseUILabel::draw() {
 }
 
 void CBaseUILabel::drawText() {
-    if(this->font != NULL && this->sText.length() > 0) {
+    if(this->font != nullptr && this->sText.length() > 0) {
         float xPosAdd = 0;
         switch(this->textJustification) {
             case TEXT_JUSTIFICATION_LEFT:
@@ -75,7 +75,7 @@ void CBaseUILabel::drawText() {
 void CBaseUILabel::mouse_update(bool *propagate_clicks) { CBaseUIElement::mouse_update(propagate_clicks); }
 
 void CBaseUILabel::updateStringMetrics() {
-    if(this->font != NULL) {
+    if(this->font != nullptr) {
         this->fStringWidth = this->font->getStringWidth(this->sText);
         this->fStringHeight = this->font->getHeight();
     }

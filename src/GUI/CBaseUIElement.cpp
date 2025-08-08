@@ -32,7 +32,7 @@ void CBaseUIElement::mouse_update(bool *propagate_clicks) {
     if(!this->bVisible) return;
 
     if(!this->bEnabled) {
-        if(this->bMouseInside && this->disabled_reason != NULL) {
+        if(this->bMouseInside && this->disabled_reason != nullptr) {
             osu->getTooltipOverlay()->begin();
             osu->getTooltipOverlay()->addLine(this->disabled_reason);
             osu->getTooltipOverlay()->end();

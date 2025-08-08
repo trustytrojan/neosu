@@ -27,7 +27,7 @@ PauseMenu::PauseMenu() : OsuScreen() {
     this->bScheduledVisibility = false;
     this->bScheduledVisibilityChange = false;
 
-    this->selectedButton = NULL;
+    this->selectedButton = nullptr;
     this->fWarningArrowsAnimStartTime = 0.0f;
     this->fWarningArrowsAnimAlpha = 0.0f;
     this->fWarningArrowsAnimX = 0.0f;
@@ -67,7 +67,7 @@ void PauseMenu::draw() {
 
     // draw background image
     if((this->bVisible || isAnimating)) {
-        Image *image = NULL;
+        Image* image = nullptr;
         if(this->bContinueEnabled)
             image = osu->getSkin()->getPauseOverlay();
         else
@@ -95,7 +95,7 @@ void PauseMenu::draw() {
     OsuScreen::draw();
 
     // draw selection arrows
-    if(this->selectedButton != NULL) {
+    if(this->selectedButton != nullptr) {
         const Color arrowColor = argb(255, 0, 114, 255);
         float animation = std::fmod((float)(engine->getTime() - this->fWarningArrowsAnimStartTime) * 3.2f, 2.0f);
         if(animation > 1.0f) animation = 2.0f - animation;
@@ -158,7 +158,7 @@ void PauseMenu::onBackClicked() {
 }
 
 void PauseMenu::onSelectionChange() {
-    if(this->selectedButton != NULL) {
+    if(this->selectedButton != nullptr) {
         if(this->bInitialWarningArrowFlyIn) {
             this->bInitialWarningArrowFlyIn = false;
 
@@ -253,7 +253,7 @@ void PauseMenu::onKeyDown(KeyboardEvent &e) {
             this->onSelectionChange();
         }
 
-        if(this->selectedButton != NULL && (e == KEY_ENTER || e == KEY_NUMPAD_ENTER)) this->selectedButton->click();
+        if(this->selectedButton != nullptr && (e == KEY_ENTER || e == KEY_NUMPAD_ENTER)) this->selectedButton->click();
     }
 
     // consume ALL events, except for a few special binds which are allowed through (e.g. for unpause or changing the
@@ -293,7 +293,7 @@ void PauseMenu::updateLayout() {
     float maxHeight = 0.0f;
     for(auto &button : this->buttons) {
         Image *img = button->getImage();
-        if(img == NULL) img = osu->getSkin()->getMissingTexture();
+        if(img == nullptr) img = osu->getSkin()->getMissingTexture();
 
         const float scale = osu->getUIScale(256) / (411.0f * (osu->getSkin()->isPauseContinue2x() ? 2.0f : 1.0f));
 
@@ -375,7 +375,7 @@ CBaseUIContainer *PauseMenu::setVisible(bool visible) {
     osu->getModSelector()->setVisible(false);
 
     // reset
-    this->selectedButton = NULL;
+    this->selectedButton = nullptr;
     this->bInitialWarningArrowFlyIn = true;
     this->fWarningArrowsAnimAlpha = 0.0f;
     this->bScheduledVisibility = visible;

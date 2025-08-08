@@ -4,14 +4,14 @@
 #include "ConVar.h"
 #include "Engine.h"
 
-AnimationHandler *anim = NULL;
+AnimationHandler* anim = nullptr;
 
 AnimationHandler::AnimationHandler() { anim = this; }
 
 AnimationHandler::~AnimationHandler() {
     this->vAnimations.clear();
 
-    anim = NULL;
+    anim = nullptr;
 }
 
 void AnimationHandler::update() {
@@ -158,7 +158,7 @@ void AnimationHandler::moveSmoothEnd(float *base, float target, float duration, 
 
 void AnimationHandler::addAnimation(float *base, float target, float duration, float delay, bool overrideExisting,
                                     AnimationHandler::ANIMATION_TYPE type, float smoothFactor) {
-    if(base == NULL) return;
+    if(base == nullptr) return;
 
     if(overrideExisting) this->overrideExistingAnimation(base);
 

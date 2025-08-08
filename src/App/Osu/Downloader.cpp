@@ -355,7 +355,7 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, MD5Hash beatmap_md5, float* pr
     static i32 queried_map_id = 0;
 
     auto beatmap = db->getBeatmapDifficulty(beatmap_md5);
-    if(beatmap != NULL) {
+    if(beatmap != nullptr) {
         *progress = 1.f;
         return beatmap;
     }
@@ -366,7 +366,7 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, MD5Hash beatmap_md5, float* pr
         if(queried_map_id == beatmap_id) {
             // We already queried for the beatmapset ID, and are waiting for the response
             *progress = 0.f;
-            return NULL;
+            return nullptr;
         }
 
         APIRequest request;
@@ -379,35 +379,35 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, MD5Hash beatmap_md5, float* pr
         queried_map_id = beatmap_id;
 
         *progress = 0.f;
-        return NULL;
+        return nullptr;
     }
 
     i32 set_id = it->second;
     if(set_id == 0) {
         // Already failed to load the beatmap
         *progress = -1.f;
-        return NULL;
+        return nullptr;
     }
 
     download_beatmapset(set_id, progress);
     if(*progress == -1.f) {
         // Download failed, don't retry
         beatmap_to_beatmapset[beatmap_id] = 0;
-        return NULL;
+        return nullptr;
     }
 
     // Download not finished
-    if(*progress != 1.f) return NULL;
+    if(*progress != 1.f) return nullptr;
 
     auto mapset_path = UString::format(MCENGINE_DATA_DIR "maps/%d/", set_id);
     db->addBeatmapSet(mapset_path.toUtf8(), set_id);
     debugLog("Finished loading beatmapset {:d}.\n", set_id);
 
     beatmap = db->getBeatmapDifficulty(beatmap_md5);
-    if(beatmap == NULL) {
+    if(beatmap == nullptr) {
         beatmap_to_beatmapset[beatmap_id] = 0;
         *progress = -1.f;
-        return NULL;
+        return nullptr;
     }
 
     // Some beatmaps don't provide beatmap/beatmapset IDs in the .osu files
@@ -423,7 +423,7 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, i32 beatmapset_id, float* prog
     static i32 queried_map_id = 0;
 
     auto beatmap = db->getBeatmapDifficulty(beatmap_id);
-    if(beatmap != NULL) {
+    if(beatmap != nullptr) {
         *progress = 1.f;
         return beatmap;
     }
@@ -434,14 +434,14 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, i32 beatmapset_id, float* prog
         if(queried_map_id == beatmap_id) {
             // We already queried for the beatmapset ID, and are waiting for the response
             *progress = 0.f;
-            return NULL;
+            return nullptr;
         }
 
         // We already have the set ID, skip the API request
         if(beatmapset_id != 0) {
             beatmap_to_beatmapset[beatmap_id] = beatmapset_id;
             *progress = 0.f;
-            return NULL;
+            return nullptr;
         }
 
         APIRequest request;
@@ -454,35 +454,35 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, i32 beatmapset_id, float* prog
         queried_map_id = beatmap_id;
 
         *progress = 0.f;
-        return NULL;
+        return nullptr;
     }
 
     i32 set_id = it->second;
     if(set_id == 0) {
         // Already failed to load the beatmap
         *progress = -1.f;
-        return NULL;
+        return nullptr;
     }
 
     download_beatmapset(set_id, progress);
     if(*progress == -1.f) {
         // Download failed, don't retry
         beatmap_to_beatmapset[beatmap_id] = 0;
-        return NULL;
+        return nullptr;
     }
 
     // Download not finished
-    if(*progress != 1.f) return NULL;
+    if(*progress != 1.f) return nullptr;
 
     auto mapset_path = UString::format(MCENGINE_DATA_DIR "maps/%d/", set_id);
     db->addBeatmapSet(mapset_path.toUtf8());
     debugLog("Finished loading beatmapset {:d}.\n", set_id);
 
     beatmap = db->getBeatmapDifficulty(beatmap_id);
-    if(beatmap == NULL) {
+    if(beatmap == nullptr) {
         beatmap_to_beatmapset[beatmap_id] = 0;
         *progress = -1.f;
-        return NULL;
+        return nullptr;
     }
 
     *progress = 1.f;
@@ -500,6 +500,6 @@ void process_beatmapset_info_response(Packet packet) {
     auto tokens = SString::split(std::string{(char*)packet.memory}, "|");
     if(tokens.size() < 13) return;
 
-    beatmap_to_beatmapset[map_id] = static_cast<i32>(strtol(tokens[7].c_str(), NULL, 10));
+    beatmap_to_beatmapset[map_id] = static_cast<i32>(strtol(tokens[7].c_str(), nullptr, 10));
 }
 }  // namespace Downloader

@@ -84,7 +84,7 @@ void CollectionButton::onRightMouseUpInside() { this->triggerContextMenu(mouse->
 void CollectionButton::triggerContextMenu(Vector2 pos) {
     if(osu->getSongBrowser()->getGroupingMode() != SongBrowser::GROUP::GROUP_COLLECTIONS) return;
 
-    if(this->contextMenu != NULL) {
+    if(this->contextMenu != nullptr) {
         this->contextMenu->setPos(pos);
         this->contextMenu->setRelPos(pos);
         this->contextMenu->begin(0, true);

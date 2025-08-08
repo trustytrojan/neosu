@@ -28,7 +28,7 @@
 #include <cstring>
 #include <utility>
 
-Database *db = NULL;
+Database* db = nullptr;
 
 namespace {  // static namespace
 bool sortScoreByScore(FinishedScore const &a, FinishedScore const &b) {
@@ -118,7 +118,7 @@ class DatabaseLoader : public Resource {
 
         // stop threads that rely on database content
         sct_abort();
-        lct_set_map(NULL);
+        lct_set_map(nullptr);
         MapCalcThread::abort();
         VolNormalization::abort();
 
@@ -206,7 +206,7 @@ Database::~Database() {
     SAFE_DELETE(this->importTimer);
 
     sct_abort();
-    lct_set_map(NULL);
+    lct_set_map(nullptr);
     VolNormalization::abort();
     this->loudness_to_calc.clear();
 
@@ -306,7 +306,7 @@ void Database::save() {
 
 BeatmapSet *Database::addBeatmapSet(const std::string &beatmapFolderPath, i32 set_id_override) {
     BeatmapSet *beatmap = this->loadRawBeatmap(beatmapFolderPath);
-    if(beatmap == NULL) return NULL;
+    if(beatmap == nullptr) return nullptr;
 
     // Some beatmaps don't provide beatmap/beatmapset IDs in the .osu files
     // But we know the beatmapset ID because we just downloaded it!
@@ -345,13 +345,13 @@ int Database::addScore(const FinishedScore &score) {
     // @PPV3: use new replay format
 
     // XXX: this is blocking main thread
-    u8 *compressed_replay = NULL;
+    u8* compressed_replay = nullptr;
     size_t s_compressed_replay = 0;
     LegacyReplay::compress_frames(score.replay, &compressed_replay, &s_compressed_replay);
     if(s_compressed_replay > 0) {
         auto replay_path = UString::format(MCENGINE_DATA_DIR "replays/%d.replay.lzma", score.unixTimestamp);
         FILE *replay_file = fopen(replay_path.toUtf8(), "wb");
-        if(replay_file != NULL) {
+        if(replay_file != nullptr) {
             fwrite(compressed_replay, s_compressed_replay, 1, replay_file);
             fclose(replay_file);
         }
@@ -621,19 +621,19 @@ int Database::getLevelForScore(unsigned long long score, int maxLevel) {
 }
 
 DatabaseBeatmap *Database::getBeatmapDifficulty(const MD5Hash &md5hash) {
-    if(this->isLoading()) return NULL;
+    if(this->isLoading()) return nullptr;
 
     std::scoped_lock lock(this->beatmap_difficulties_mtx);
     auto it = this->beatmap_difficulties.find(md5hash);
     if(it == this->beatmap_difficulties.end()) {
-        return NULL;
+        return nullptr;
     } else {
         return it->second;
     }
 }
 
 DatabaseBeatmap *Database::getBeatmapDifficulty(i32 map_id) {
-    if(this->isLoading()) return NULL;
+    if(this->isLoading()) return nullptr;
 
     std::scoped_lock lock(this->beatmap_difficulties_mtx);
     for(auto pair : this->beatmap_difficulties) {
@@ -642,11 +642,11 @@ DatabaseBeatmap *Database::getBeatmapDifficulty(i32 map_id) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 DatabaseBeatmap *Database::getBeatmapSet(i32 set_id) {
-    if(this->isLoading()) return NULL;
+    if(this->isLoading()) return nullptr;
 
     for(auto beatmap : this->beatmapsets) {
         if(beatmap->getSetID() == set_id) {
@@ -654,7 +654,7 @@ DatabaseBeatmap *Database::getBeatmapSet(i32 set_id) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 std::string Database::db_osu_folder{};
@@ -800,7 +800,7 @@ void Database::loadMaps() {
     // read beatmapInfos, and also build two hashmaps (diff hash -> BeatmapDifficulty, diff hash -> Beatmap)
     struct Beatmap_Set {
         int setID;
-        std::vector<DatabaseBeatmap *> *diffs2 = NULL;
+        std::vector<DatabaseBeatmap*>* diffs2 = nullptr;
     };
     std::vector<Beatmap_Set> beatmapSets;
     std::unordered_map<int, size_t> setIDToIndex;
@@ -2186,7 +2186,7 @@ BeatmapSet *Database::loadRawBeatmap(const std::string &beatmapPath) {
         }
     }
 
-    BeatmapSet *set = NULL;
+    BeatmapSet* set = nullptr;
     if(diffs2->empty()) {
         delete diffs2;
     } else {

@@ -72,12 +72,12 @@ class ModSelector : public OsuScreen {
    private:
     struct OVERRIDE_SLIDER {
         OVERRIDE_SLIDER() {
-            this->lock = NULL;
-            this->desc = NULL;
-            this->slider = NULL;
-            this->label = NULL;
-            this->cvar = NULL;
-            this->lockCvar = NULL;
+            this->lock = nullptr;
+            this->desc = nullptr;
+            this->slider = nullptr;
+            this->label = nullptr;
+            this->cvar = nullptr;
+            this->lockCvar = nullptr;
         }
 
         CBaseUICheckbox *lock;
@@ -98,8 +98,8 @@ class ModSelector : public OsuScreen {
                                                std::function<SkinImage *()> getImageFunc);
     UIModSelectorModButton *getModButtonOnGrid(int x, int y);
 
-    OVERRIDE_SLIDER addOverrideSlider(UString text, const UString& labelText, ConVar *cvar, float min, float max,
-                                      UString tooltipText = "", ConVar *lockCvar = NULL);
+    OVERRIDE_SLIDER addOverrideSlider(UString text, const UString& labelText, ConVar* cvar, float min, float max,
+                                      UString tooltipText = "", ConVar* lockCvar = nullptr);
     void onOverrideSliderChange(CBaseUISlider *slider);
     void onOverrideSliderLockChange(CBaseUICheckbox *checkbox);
     void onOverrideARSliderDescClicked(CBaseUIButton *button);
@@ -107,7 +107,7 @@ class ModSelector : public OsuScreen {
     UString getOverrideSliderLabelText(OVERRIDE_SLIDER s, bool active);
 
     CBaseUILabel *addExperimentalLabel(const UString& text);
-    UICheckbox *addExperimentalCheckbox(const UString& text, const UString& tooltipText, ConVar *cvar = NULL);
+    UICheckbox* addExperimentalCheckbox(const UString& text, const UString& tooltipText, ConVar* cvar = nullptr);
     void onCheckboxChange(CBaseUICheckbox *checkbox);
 
     UIButton *addActionButton(const UString& text);

@@ -96,7 +96,7 @@ void UserStatsScreen::rebuildScoreButtons() {
         if(!diff) continue;
 
         UString title = "...";
-        if(diff != NULL) {
+        if(diff != nullptr) {
             title = diff->getArtist().c_str();
             title.append(" - ");
             title.append(diff->getTitle().c_str());

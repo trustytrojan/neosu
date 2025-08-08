@@ -452,7 +452,7 @@ void HitObject::update(long curPos, f64 /*frame_time*/) {
 void HitObject::addHitResult(LiveScore::HIT result, long delta, bool isEndOfCombo, Vector2 posRaw, float targetDelta,
                              float targetAngle, bool ignoreOnHitErrorBar, bool ignoreCombo, bool ignoreHealth,
                              bool addObjectDurationToSkinAnimationTimeStartOffset) {
-    if(this->bm != NULL && osu->getModTarget() && result != LiveScore::HIT::HIT_MISS && targetDelta >= 0.0f) {
+    if(this->bm != nullptr && osu->getModTarget() && result != LiveScore::HIT::HIT_MISS && targetDelta >= 0.0f) {
         const float p300 = cv::mod_target_300_percent.getFloat();
         const float p100 = cv::mod_target_100_percent.getFloat();
         const float p50 = cv::mod_target_50_percent.getFloat();
@@ -471,7 +471,7 @@ void HitObject::addHitResult(LiveScore::HIT result, long delta, bool isEndOfComb
 
     const LiveScore::HIT returnedHit = this->bi->addHitResult(this, result, delta, isEndOfCombo, ignoreOnHitErrorBar,
                                                               false, ignoreCombo, false, ignoreHealth);
-    if(this->bm == NULL) return;
+    if(this->bm == nullptr) return;
 
     HITRESULTANIM hitresultanim;
     {
@@ -1046,7 +1046,7 @@ void Circle::onClickEvent(std::vector<Click> &clicks) {
 
 void Circle::onHit(LiveScore::HIT result, long delta, float targetDelta, float targetAngle) {
     // sound and hit animation
-    if(this->bm != NULL && result != LiveScore::HIT::HIT_MISS) {
+    if(this->bm != nullptr && result != LiveScore::HIT::HIT_MISS) {
         if(cv::timingpoints_force.getBool()) this->bm->updateTimingPoints(this->click_time);
 
         const Vector2 osuCoords = this->bm->pixels2OsuCoords(this->bm->osuCoords2Pixels(this->vRawPos));
@@ -1068,7 +1068,7 @@ void Circle::onReset(long curPos) {
     this->bWaiting = false;
     this->fShakeAnimation = 0.0f;
 
-    if(this->bm != NULL) {
+    if(this->bm != nullptr) {
         anim->deleteExistingAnimation(&this->fHitAnimation);
     }
 
@@ -1185,7 +1185,7 @@ Slider::Slider(char stype, int repeat, float pixelLength, std::vector<Vector2> p
     this->bInReverse = false;
     this->bHideNumberAfterFirstRepeatHit = false;
 
-    this->vao = NULL;
+    this->vao = nullptr;
 }
 
 Slider::~Slider() {
@@ -1631,7 +1631,7 @@ void Slider::drawBody(float alpha, float from, float to) {
 void Slider::update(long curPos, f64 frame_time) {
     HitObject::update(curPos, frame_time);
 
-    if(this->bm != NULL) {
+    if(this->bm != nullptr) {
         // stop slide sound while paused
         if(this->bm->isPaused() || !this->bm->isPlaying() || this->bm->hasFailed()) {
             this->bm->getSkin()->stopSliderSlideSound();
@@ -1947,7 +1947,7 @@ void Slider::update(long curPos, f64 frame_time) {
         }
 
         // handle sliderslide sound
-        if(this->bm != NULL) {
+        if(this->bm != nullptr) {
             bool sliding = this->bStartFinished && !this->bEndFinished && this->bCursorInside && this->iDelta <= 0;
             sliding &= (this->isClickHeldSlider() || (this->bm->getModsLegacy() & LegacyFlags::Autoplay) ||
                         (this->bm->getModsLegacy() & LegacyFlags::Relax));
@@ -2008,7 +2008,7 @@ void Slider::updateAnimations(long curPos) {
 }
 
 void Slider::updateStackPosition(float stackOffset) {
-    if(this->curve != NULL)
+    if(this->curve != nullptr)
         this->curve->updateStackPosition(this->iStack * stackOffset,
                                          (this->bi->getModsLegacy() & LegacyFlags::HardRock));
 }
@@ -2056,7 +2056,7 @@ void Slider::miss(long curPos) {
 }
 
 Vector2 Slider::getRawPosAt(long pos) const {
-    if(this->curve == NULL) return Vector2(0, 0);
+    if(this->curve == nullptr) return Vector2(0, 0);
 
     if(pos <= this->click_time)
         return this->curve->pointAt(0.0f);
@@ -2070,7 +2070,7 @@ Vector2 Slider::getRawPosAt(long pos) const {
 }
 
 Vector2 Slider::getOriginalRawPosAt(long pos) const {
-    if(this->curve == NULL) return Vector2(0, 0);
+    if(this->curve == nullptr) return Vector2(0, 0);
 
     if(pos <= this->click_time)
         return this->curve->originalPointAt(0.0f);
@@ -2132,7 +2132,7 @@ void Slider::onHit(LiveScore::HIT result, long delta, bool startOrEnd, float tar
     {
         if(result == LiveScore::HIT::HIT_MISS) {
             if(!isEndResultFromStrictTrackingMod) this->onSliderBreak();
-        } else if(this->bm != NULL) {
+        } else if(this->bm != nullptr) {
             if(cv::timingpoints_force.getBool())
                 this->bm->updateTimingPoints(this->click_time + (!startOrEnd ? 0 : this->duration));
 
@@ -2158,7 +2158,7 @@ void Slider::onHit(LiveScore::HIT result, long delta, bool startOrEnd, float tar
         }
 
         // end body fadeout
-        if(this->bm != NULL && startOrEnd) {
+        if(this->bm != nullptr && startOrEnd) {
             this->fEndSliderBodyFadeAnimation = 0.001f;  // quickfix for 1 frame missing images
             anim->moveQuadOut(&this->fEndSliderBodyFadeAnimation, 1.0f,
                               GameRules::getFadeOutTime(this->bm) * cv::slider_body_fade_out_time_multiplier.getFloat(),
@@ -2254,7 +2254,7 @@ void Slider::onRepeatHit(bool successful, bool sliderend) {
     // sound and hit animation
     if(!successful) {
         this->onSliderBreak();
-    } else if(this->bm != NULL) {
+    } else if(this->bm != nullptr) {
         if(cv::timingpoints_force.getBool())
             this->bm->updateTimingPoints(this->click_time + (long)((float)this->duration * this->fActualSlidePercent));
 
@@ -2313,7 +2313,7 @@ void Slider::onTickHit(bool successful, int tickIndex) {
     // sound and hit animation
     if(!successful) {
         this->onSliderBreak();
-    } else if(this->bm != NULL) {
+    } else if(this->bm != nullptr) {
         if(cv::timingpoints_force.getBool())
             this->bm->updateTimingPoints(this->click_time + (long)((float)this->duration * this->fActualSlidePercent));
 
@@ -2349,7 +2349,7 @@ void Slider::onSliderBreak() { this->bi->addSliderBreak(); }
 void Slider::onReset(long curPos) {
     HitObject::onReset(curPos);
 
-    if(this->bm != NULL) {
+    if(this->bm != nullptr) {
         this->bm->getSkin()->stopSliderSlideSound();
 
         anim->deleteExistingAnimation(&this->fFollowCircleTickAnimationScale);
@@ -2485,7 +2485,7 @@ Spinner::~Spinner() {
     this->onReset(0);
 
     delete[] this->storedDeltaAngles;
-    this->storedDeltaAngles = NULL;
+    this->storedDeltaAngles = nullptr;
 }
 
 void Spinner::draw() {
@@ -2692,7 +2692,7 @@ void Spinner::update(long curPos, f64 frame_time) {
 
     // stop spinner sound and don't update() while paused
     if(this->bi->isPaused() || !this->bi->isPlaying() || (this->bm && this->bm->hasFailed())) {
-        if(this->bm != NULL) {
+        if(this->bm != nullptr) {
             this->bm->getSkin()->stopSpinnerSpinSound();
         }
         return;
@@ -2786,7 +2786,7 @@ void Spinner::update(long curPos, f64 frame_time) {
 void Spinner::onReset(long curPos) {
     HitObject::onReset(curPos);
 
-    if(this->bm != NULL) {
+    if(this->bm != nullptr) {
         this->bm->getSkin()->stopSpinnerSpinSound();
     }
 
@@ -2825,7 +2825,7 @@ void Spinner::onHit() {
         result = LiveScore::HIT::HIT_MISS;
 
     // sound
-    if(this->bm != NULL && result != LiveScore::HIT::HIT_MISS) {
+    if(this->bm != nullptr && result != LiveScore::HIT::HIT_MISS) {
         if(cv::timingpoints_force.getBool()) this->bm->updateTimingPoints(this->click_time + this->duration);
 
         const Vector2 osuCoords = this->bm->pixels2OsuCoords(this->bm->osuCoords2Pixels(this->vRawPos));
@@ -2837,7 +2837,7 @@ void Spinner::onHit() {
     this->addHitResult(result, 0, this->is_end_of_combo, this->vRawPos, -1.0f);
     this->bFinished = true;
 
-    if(this->bm != NULL) {
+    if(this->bm != nullptr) {
         this->bm->getSkin()->stopSpinnerSpinSound();
     }
 }
@@ -2852,7 +2852,7 @@ void Spinner::rotate(float rad) {
     if(std::floor(newRotations / 360.0f) > this->fRotations / 360.0f) {
         if((int)(newRotations / 360.0f) > (int)(this->fRotationsNeeded) + 1) {
             // extra rotations and bonus sound
-            if(this->bm != NULL) {
+            if(this->bm != nullptr) {
                 this->bm->getSkin()->playSpinnerBonusSound();
             }
             this->bi->addHitResult(this, LiveScore::HIT::HIT_SPINNERBONUS, 0, false, true, true, true, true,
@@ -2871,7 +2871,7 @@ void Spinner::rotate(float rad) {
     }
 
     // spinner sound
-    if(this->bm != NULL) {
+    if(this->bm != nullptr) {
         this->bm->getSkin()->playSpinnerSpinSound();
 
         const float frequency = 20000.0f + (int)(std::clamp<float>(this->fRatio, 0.0f, 2.5f) * 40000.0f);

@@ -63,9 +63,9 @@ Beatmap::Beatmap() {
     this->iContinueMusicPos = 0;
     this->fWaitTime = 0.0f;
 
-    this->selectedDifficulty2 = NULL;
+    this->selectedDifficulty2 = nullptr;
 
-    this->music = NULL;
+    this->music = nullptr;
 
     this->fMusicFrequencyBackup = 0.f;
     this->iCurMusicPos = 0;
@@ -89,7 +89,7 @@ Beatmap::Beatmap() {
 
     this->fBreakBackgroundFade = 0.0f;
     this->bInBreak = false;
-    this->currentHitObject = NULL;
+    this->currentHitObject = nullptr;
     this->iNextHitObjectTime = 0;
     this->iPreviousHitObjectTime = 0;
     this->iPreviousSectionPassFailTime = -1;
@@ -137,8 +137,8 @@ Beatmap::Beatmap() {
     this->bIsPreLoading = true;
     this->iPreLoadingIndex = 0;
 
-    this->mafhamActiveRenderTarget = NULL;
-    this->mafhamFinishedRenderTarget = NULL;
+    this->mafhamActiveRenderTarget = nullptr;
+    this->mafhamFinishedRenderTarget = nullptr;
     this->bMafhamRenderScheduled = true;
     this->iMafhamHitObjectRenderIndex = 0;
     this->iMafhamPrevHitObjectIndex = 0;
@@ -178,7 +178,7 @@ void Beatmap::drawBackground() {
     // draw beatmap background image
     {
         Image *backgroundImage = osu->getBackgroundImageHandler()->getLoadBackgroundImage(this->selectedDifficulty2);
-        if(cv::draw_beatmap_background_image.getBool() && backgroundImage != NULL &&
+        if(cv::draw_beatmap_background_image.getBool() && backgroundImage != nullptr &&
            (cv::background_dim.getFloat() < 1.0f || this->fBreakBackgroundFade > 0.0f)) {
             const f32 scale = Osu::getImageScaleToFillResolution(backgroundImage, osu->getScreenSize());
             const Vector2 centerTrans = (osu->getScreenSize() / 2);
@@ -420,7 +420,7 @@ void Beatmap::keyReleased2(bool /*mouse*/) {
 
 void Beatmap::select() {
     // if possible, continue playing where we left off
-    if(this->music != NULL && (this->music->isPlaying())) this->iContinueMusicPos = this->music->getPositionMS();
+    if(this->music != nullptr && (this->music->isPlaying())) this->iContinueMusicPos = this->music->getPositionMS();
 
     this->selectDifficulty2(this->selectedDifficulty2);
 
@@ -431,7 +431,7 @@ void Beatmap::select() {
 void Beatmap::selectDifficulty2(DatabaseBeatmap *difficulty2) {
     lct_set_map(difficulty2);
 
-    if(difficulty2 != NULL) {
+    if(difficulty2 != nullptr) {
         this->selectedDifficulty2 = difficulty2;
 
         this->nb_hitobjects = difficulty2->getNumObjects();
@@ -446,7 +446,7 @@ void Beatmap::selectDifficulty2(DatabaseBeatmap *difficulty2) {
 
 void Beatmap::deselect() {
     this->iContinueMusicPos = 0;
-    this->selectedDifficulty2 = NULL;
+    this->selectedDifficulty2 = nullptr;
     this->unloadObjects();
 }
 
@@ -557,7 +557,7 @@ bool Beatmap::spectate() {
 }
 
 bool Beatmap::start() {
-    if(this->selectedDifficulty2 == NULL) return false;
+    if(this->selectedDifficulty2 == nullptr) return false;
 
     osu->should_pause_background_threads = true;
 
@@ -788,7 +788,7 @@ void Beatmap::actualRestart() {
 }
 
 void Beatmap::pause(bool quitIfWaiting) {
-    if(this->selectedDifficulty2 == NULL) return;
+    if(this->selectedDifficulty2 == nullptr) return;
     if(bancho->spectating) {
         stop_spectating();
         return;
@@ -815,10 +815,10 @@ void Beatmap::pause(bool quitIfWaiting) {
             // case 1: the beatmap is already "finished", jump to the ranking screen if some small amount of time past
             //         the last objects endTime
             // case 2: in the middle somewhere, pause as usual
-            HitObject *lastHitObject = this->hitobjectsSortedByEndTime.size() > 0
+            HitObject* lastHitObject = this->hitobjectsSortedByEndTime.size() > 0
                                            ? this->hitobjectsSortedByEndTime[this->hitobjectsSortedByEndTime.size() - 1]
-                                           : NULL;
-            if(lastHitObject != NULL && lastHitObject->isFinished() &&
+                                           : nullptr;
+            if(lastHitObject != nullptr && lastHitObject->isFinished() &&
                (this->iCurMusicPos >
                 lastHitObject->click_time + lastHitObject->duration + (long)cv::end_skip_time.getInt()) &&
                cv::end_skip.getBool()) {
@@ -868,7 +868,7 @@ void Beatmap::pause(bool quitIfWaiting) {
 }
 
 void Beatmap::pausePreviewMusic(bool toggle) {
-    if(this->music != NULL) {
+    if(this->music != nullptr) {
         if(this->music->isPlaying())
             soundEngine->pause(this->music);
         else if(toggle)
@@ -877,13 +877,13 @@ void Beatmap::pausePreviewMusic(bool toggle) {
 }
 
 bool Beatmap::isPreviewMusicPlaying() {
-    if(this->music != NULL) return this->music->isPlaying();
+    if(this->music != nullptr) return this->music->isPlaying();
 
     return false;
 }
 
 void Beatmap::stop(bool quit) {
-    if(this->selectedDifficulty2 == NULL) return;
+    if(this->selectedDifficulty2 == nullptr) return;
 
     if(this->getSkin()->getFailsound()->isPlaying()) soundEngine->stop(this->getSkin()->getFailsound());
 
@@ -969,13 +969,13 @@ void Beatmap::cancelFailing() {
     anim->deleteExistingAnimation(&this->fFailAnim);
     this->fFailAnim = 1.0f;
 
-    if(this->music != NULL) this->music->setFrequency(0.0f);
+    if(this->music != nullptr) this->music->setFrequency(0.0f);
 
     if(this->getSkin()->getFailsound()->isPlaying()) soundEngine->stop(this->getSkin()->getFailsound());
 }
 
 f32 Beatmap::getIdealVolume() {
-    if(this->music == NULL) return 1.f;
+    if(this->music == nullptr) return 1.f;
 
     f32 volume = cv::volume_music.getFloat();
     f32 modifier = 1.f;
@@ -992,11 +992,11 @@ f32 Beatmap::getIdealVolume() {
 }
 
 void Beatmap::setSpeed(f32 speed) {
-    if(this->music != NULL) this->music->setSpeed(speed);
+    if(this->music != nullptr) this->music->setSpeed(speed);
 }
 
 void Beatmap::seekPercent(f64 percent) {
-    if(this->selectedDifficulty2 == NULL || this->music == NULL || this->bFailed) return;
+    if(this->selectedDifficulty2 == nullptr || this->music == nullptr || this->bFailed) return;
 
     this->bWasSeekFrame = true;
     this->fWaitTime = 0.0f;
@@ -1042,7 +1042,7 @@ void Beatmap::seekPercent(f64 percent) {
 }
 
 void Beatmap::seekPercentPlayable(f64 percent) {
-    if(this->selectedDifficulty2 == NULL || (!this->bIsPlaying && !this->bIsPaused) || this->music == NULL ||
+    if(this->selectedDifficulty2 == nullptr || (!this->bIsPlaying && !this->bIsPaused) || this->music == nullptr ||
        this->bFailed)
         return;
 
@@ -1060,7 +1060,7 @@ void Beatmap::seekPercentPlayable(f64 percent) {
 }
 
 u32 Beatmap::getTime() const {
-    if(this->music != NULL && this->music->isAsyncReady())
+    if(this->music != nullptr && this->music->isAsyncReady())
         return this->music->getPositionMS();
     else
         return 0;
@@ -1074,9 +1074,9 @@ u32 Beatmap::getStartTimePlayable() const {
 }
 
 u32 Beatmap::getLength() const {
-    if(this->music != NULL && this->music->isAsyncReady())
+    if(this->music != nullptr && this->music->isAsyncReady())
         return this->music->getLengthMS();
-    else if(this->selectedDifficulty2 != NULL)
+    else if(this->selectedDifficulty2 != nullptr)
         return this->selectedDifficulty2->getLengthMS();
     else
         return 0;
@@ -1092,7 +1092,7 @@ u32 Beatmap::getLengthPlayable() const {
 }
 
 f32 Beatmap::getPercentFinished() const {
-    if(this->music != NULL)
+    if(this->music != nullptr)
         return (f32)this->iCurMusicPos / (f32)this->music->getLengthMS();
     else
         return 0.0f;
@@ -1110,8 +1110,8 @@ f32 Beatmap::getPercentFinishedPlayable() const {
 }
 
 int Beatmap::getMostCommonBPM() const {
-    if(this->selectedDifficulty2 != NULL) {
-        if(this->music != NULL)
+    if(this->selectedDifficulty2 != nullptr) {
+        if(this->music != nullptr)
             return (int)(this->selectedDifficulty2->getMostCommonBPM() * this->music->getSpeed());
         else
             return (int)(this->selectedDifficulty2->getMostCommonBPM() * this->getSpeedMultiplier());
@@ -1142,13 +1142,13 @@ u32 Beatmap::getScoreV1DifficultyMultiplier_full() const {
 }
 
 f32 Beatmap::getRawAR_full() const {
-    if(this->selectedDifficulty2 == NULL) return 5.0f;
+    if(this->selectedDifficulty2 == nullptr) return 5.0f;
 
     return std::clamp<f32>(this->selectedDifficulty2->getAR() * osu->getDifficultyMultiplier(), 0.0f, 10.0f);
 }
 
 f32 Beatmap::getAR_full() const {
-    if(this->selectedDifficulty2 == NULL) return 5.0f;
+    if(this->selectedDifficulty2 == nullptr) return 5.0f;
 
     f32 AR = this->getRawAR();
 
@@ -1159,7 +1159,7 @@ f32 Beatmap::getAR_full() const {
     if(cv::ar_override_lock.getBool())
         AR = GameRules::getRawConstantApproachRateForSpeedMultiplier(
             GameRules::getRawApproachTime(AR),
-            (this->music != NULL && this->bIsPlaying ? this->getSpeedMultiplier() : this->getSpeedMultiplier()));
+            (this->music != nullptr && this->bIsPlaying ? this->getSpeedMultiplier() : this->getSpeedMultiplier()));
 
     if(cv::mod_artimewarp.getBool() && this->hitobjects.size() > 0) {
         const f32 percent =
@@ -1178,7 +1178,7 @@ f32 Beatmap::getAR_full() const {
 }
 
 f32 Beatmap::getCS_full() const {
-    if(this->selectedDifficulty2 == NULL) return 5.0f;
+    if(this->selectedDifficulty2 == nullptr) return 5.0f;
 
     f32 CS = std::clamp<f32>(this->selectedDifficulty2->getCS() * osu->getCSDifficultyMultiplier(), 0.0f, 10.0f);
 
@@ -1203,7 +1203,7 @@ f32 Beatmap::getCS_full() const {
 }
 
 f32 Beatmap::getHP_full() const {
-    if(this->selectedDifficulty2 == NULL) return 5.0f;
+    if(this->selectedDifficulty2 == nullptr) return 5.0f;
 
     f32 HP = std::clamp<f32>(this->selectedDifficulty2->getHP() * osu->getDifficultyMultiplier(), 0.0f, 10.0f);
     if(cv::hp_override.getFloat() >= 0.0f) HP = cv::hp_override.getFloat();
@@ -1212,7 +1212,7 @@ f32 Beatmap::getHP_full() const {
 }
 
 f32 Beatmap::getRawOD_full() const {
-    if(this->selectedDifficulty2 == NULL) return 5.0f;
+    if(this->selectedDifficulty2 == nullptr) return 5.0f;
 
     return std::clamp<f32>(this->selectedDifficulty2->getOD() * osu->getDifficultyMultiplier(), 0.0f, 10.0f);
 }
@@ -1225,7 +1225,7 @@ f32 Beatmap::getOD_full() const {
     if(cv::od_override_lock.getBool())
         OD = GameRules::getRawConstantOverallDifficultyForSpeedMultiplier(
             GameRules::getRawHitWindow300(OD),
-            (this->music != NULL && this->bIsPlaying ? this->getSpeedMultiplier() : this->getSpeedMultiplier()));
+            (this->music != nullptr && this->bIsPlaying ? this->getSpeedMultiplier() : this->getSpeedMultiplier()));
 
     return OD;
 }
@@ -1249,14 +1249,14 @@ bool Beatmap::isKey2Down() const {
 bool Beatmap::isClickHeld() const { return this->isKey1Down() || this->isKey2Down(); }
 
 std::string Beatmap::getTitle() const {
-    if(this->selectedDifficulty2 != NULL)
+    if(this->selectedDifficulty2 != nullptr)
         return this->selectedDifficulty2->getTitle();
     else
         return "NULL";
 }
 
 std::string Beatmap::getArtist() const {
-    if(this->selectedDifficulty2 != NULL)
+    if(this->selectedDifficulty2 != nullptr)
         return this->selectedDifficulty2->getArtist();
     else
         return "NULL";
@@ -1489,7 +1489,7 @@ long Beatmap::getPVS() {
 
 bool Beatmap::canDraw() {
     if(!this->bIsPlaying && !this->bIsPaused && !this->bContinueScheduled && !this->bIsWaiting) return false;
-    if(this->selectedDifficulty2 == NULL || this->music == NULL)  // sanity check
+    if(this->selectedDifficulty2 == nullptr || this->music == nullptr)  // sanity check
         return false;
 
     return true;
@@ -1498,9 +1498,9 @@ bool Beatmap::canDraw() {
 bool Beatmap::canUpdate() { return this->bIsPlaying || this->bIsPaused || this->bContinueScheduled; }
 
 void Beatmap::handlePreviewPlay() {
-    if(this->music == NULL) return;
+    if(this->music == nullptr) return;
 
-    if((!this->music->isPlaying() || this->music->getPosition() > 0.95f) && this->selectedDifficulty2 != NULL) {
+    if((!this->music->isPlaying() || this->music->getPosition() > 0.95f) && this->selectedDifficulty2 != nullptr) {
         // this is an assumption, but should be good enough for most songs
         // reset playback position when the song has nearly reached the end (when the user switches back to the results
         // screen or the songbrowser after playing)
@@ -1546,8 +1546,8 @@ void Beatmap::loadMusic(bool stream) {
     this->iResourceLoadUpdateDelayHack = 0;
 
     // load the song (again)
-    if(this->selectedDifficulty2 != NULL &&
-       (this->music == NULL || this->selectedDifficulty2->getFullSoundFilePath() != this->music->getFilePath() ||
+    if(this->selectedDifficulty2 != nullptr &&
+       (this->music == nullptr || this->selectedDifficulty2->getFullSoundFilePath() != this->music->getFilePath() ||
         !this->music->isReady())) {
         this->unloadMusic();
 
@@ -1564,11 +1564,11 @@ void Beatmap::loadMusic(bool stream) {
 
 void Beatmap::unloadMusic() {
     resourceManager->destroyResource(this->music);
-    this->music = NULL;
+    this->music = nullptr;
 }
 
 void Beatmap::unloadObjects() {
-    this->currentHitObject = NULL;
+    this->currentHitObject = nullptr;
     for(auto &hitobject : this->hitobjects) {
         delete hitobject;
     }
@@ -1815,7 +1815,7 @@ void Beatmap::drawFollowPoints() {
 
         // ignore future spinners
         Spinner *spinnerPointer = dynamic_cast<Spinner *>(this->hitobjects[index]);
-        if(spinnerPointer != NULL && !followPointsConnectSpinners)  // if this is a spinner
+        if(spinnerPointer != nullptr && !followPointsConnectSpinners)  // if this is a spinner
         {
             lastObjectIndex = -1;
             continue;
@@ -1823,14 +1823,15 @@ void Beatmap::drawFollowPoints() {
 
         const bool isCurrentHitObjectNewCombo =
             (lastObjectIndex >= 0 ? this->hitobjects[lastObjectIndex]->is_end_of_combo : false);
-        const bool isCurrentHitObjectSpinner = (lastObjectIndex >= 0 && followPointsConnectSpinners
-                                                    ? dynamic_cast<Spinner *>(this->hitobjects[lastObjectIndex]) != NULL
-                                                    : false);
+        const bool isCurrentHitObjectSpinner =
+            (lastObjectIndex >= 0 && followPointsConnectSpinners
+                 ? dynamic_cast<Spinner*>(this->hitobjects[lastObjectIndex]) != nullptr
+                 : false);
         if(lastObjectIndex >= 0 && (!isCurrentHitObjectNewCombo || followPointsConnectCombos ||
                                     (isCurrentHitObjectSpinner && followPointsConnectSpinners))) {
             // ignore previous spinners
             spinnerPointer = dynamic_cast<Spinner *>(this->hitobjects[lastObjectIndex]);
-            if(spinnerPointer != NULL && !followPointsConnectSpinners)  // if this is a spinner
+            if(spinnerPointer != nullptr && !followPointsConnectSpinners)  // if this is a spinner
             {
                 lastObjectIndex = -1;
                 continue;
@@ -1972,9 +1973,9 @@ void Beatmap::drawHitObjects() {
     } else {
         const int mafhamRenderLiveSize = cv::mod_mafham_render_livesize.getInt();
 
-        if(this->mafhamActiveRenderTarget == NULL) this->mafhamActiveRenderTarget = osu->getFrameBuffer();
+        if(this->mafhamActiveRenderTarget == nullptr) this->mafhamActiveRenderTarget = osu->getFrameBuffer();
 
-        if(this->mafhamFinishedRenderTarget == NULL) this->mafhamFinishedRenderTarget = osu->getFrameBuffer2();
+        if(this->mafhamFinishedRenderTarget == nullptr) this->mafhamFinishedRenderTarget = osu->getFrameBuffer2();
 
         // if we have a chunk to render into the scene buffer
         const bool shouldDrawBuffer =
@@ -2135,7 +2136,7 @@ void Beatmap::update() {
                 break;
             } else {
                 Slider *sliderPointer = dynamic_cast<Slider *>(this->hitobjects[this->iPreLoadingIndex]);
-                if(sliderPointer != NULL) sliderPointer->rebuildVertexBuffer();
+                if(sliderPointer != nullptr) sliderPointer->rebuildVertexBuffer();
             }
 
             this->iPreLoadingIndex++;
@@ -2233,7 +2234,7 @@ void Beatmap::update() {
     if(osu->getModAuto() || osu->getModAutopilot()) this->updateAutoCursorPos();
 
     // spinner detection (used by osu!stable drain, and by HUD for not drawing the hiterrorbar)
-    if(this->currentHitObject != NULL) {
+    if(this->currentHitObject != nullptr) {
         this->bIsSpinnerActive = this->currentHitObject->type == HitObjectType::SPINNER;
         this->bIsSpinnerActive &= this->iCurMusicPosWithOffsets > this->currentHitObject->click_time;
         this->bIsSpinnerActive &=
@@ -2582,7 +2583,7 @@ void Beatmap::update2() {
     // also handle miss hiterrorbar slots,
     // also calculate nps and nd,
     // also handle note blocking
-    this->currentHitObject = NULL;
+    this->currentHitObject = nullptr;
     this->iNextHitObjectTime = 0;
     this->iPreviousHitObjectTime = 0;
     this->iPreviousFollowPointObjectIndex = 0;
@@ -2700,7 +2701,7 @@ void Beatmap::update2() {
                         // NOTE: this will still unlock some simultaneous/2b patterns too early
                         //       (slider slider circle [circle]), but nobody from that niche has complained so far
                         {
-                            const bool isSlider = (currentSliderPointer != NULL);
+                            const bool isSlider = (currentSliderPointer != nullptr);
                             const bool isSpinner = (!isSlider && !isCircle);
 
                             if(isSlider || isSpinner) {
@@ -2717,7 +2718,7 @@ void Beatmap::update2() {
                 } else if(notelockType == 3)  // osu!lazer 2020
                 {
                     if(!this->hitobjects[i]->isFinished()) {
-                        const bool isSlider = (currentSliderPointer != NULL);
+                        const bool isSlider = (currentSliderPointer != nullptr);
                         const bool isSpinner = (!isSlider && !isCircle);
 
                         if(!isSpinner)  // spinners are completely ignored (transparent)
@@ -2727,7 +2728,7 @@ void Beatmap::update2() {
                             // sliders are "finished" after their startcircle
                             {
                                 // sliders with finished startcircles do not block
-                                if(currentSliderPointer != NULL && currentSliderPointer->isStartCircleFinished())
+                                if(currentSliderPointer != nullptr && currentSliderPointer->isStartCircleFinished())
                                     blockNextNotes = false;
                             }
                         }
@@ -2738,14 +2739,14 @@ void Beatmap::update2() {
 
             // click events (this also handles hitsounds!)
             const bool isCurrentHitObjectASliderAndHasItsStartCircleFinishedBeforeClickEvents =
-                (currentSliderPointer != NULL && currentSliderPointer->isStartCircleFinished());
+                (currentSliderPointer != nullptr && currentSliderPointer->isStartCircleFinished());
             const bool isCurrentHitObjectFinishedBeforeClickEvents = this->hitobjects[i]->isFinished();
             {
                 if(this->clicks.size() > 0) this->hitobjects[i]->onClickEvent(this->clicks);
             }
             const bool isCurrentHitObjectFinishedAfterClickEvents = this->hitobjects[i]->isFinished();
             const bool isCurrentHitObjectASliderAndHasItsStartCircleFinishedAfterClickEvents =
-                (currentSliderPointer != NULL && currentSliderPointer->isStartCircleFinished());
+                (currentSliderPointer != nullptr && currentSliderPointer->isStartCircleFinished());
 
             // note blocking / notelock (2.1)
             if(!isCurrentHitObjectASliderAndHasItsStartCircleFinishedBeforeClickEvents &&
@@ -2784,7 +2785,7 @@ void Beatmap::update2() {
                         if(!this->hitobjects[m]->isFinished()) {
                             const Slider *sliderPointer = dynamic_cast<Slider *>(this->hitobjects[m]);
 
-                            const bool isSlider = (sliderPointer != NULL);
+                            const bool isSlider = (sliderPointer != nullptr);
                             const bool isSpinner = (!isSlider && !isCircle);
 
                             if(!isSpinner)  // spinners are completely ignored (transparent)
@@ -2810,7 +2811,7 @@ void Beatmap::update2() {
                         if(!this->hitobjects[m]->isFinished()) {
                             const Slider *sliderPointer = dynamic_cast<Slider *>(this->hitobjects[m]);
 
-                            const bool isSlider = (sliderPointer != NULL);
+                            const bool isSlider = (sliderPointer != nullptr);
                             const bool isSpinner = (!isSlider && !isCircle);
 
                             if(!isSpinner)  // spinners are completely ignored (transparent)
@@ -2852,7 +2853,7 @@ void Beatmap::update2() {
         // range and could be clicked
         if(cv::hiterrorbar_misaims.getBool()) {
             this->misaimObjects.clear();
-            HitObject *lastUnfinishedHitObject = NULL;
+            HitObject* lastUnfinishedHitObject = nullptr;
             const long hitWindow50 = (long)this->getHitWindow50();
             for(auto &hitobject : this->hitobjects)  // this shouldn't hurt performance too much, since no
                                                      // expensive operations are happening within the loop
@@ -2866,7 +2867,7 @@ void Beatmap::update2() {
                         break;
                 }
             }
-            if(lastUnfinishedHitObject != NULL &&
+            if(lastUnfinishedHitObject != nullptr &&
                std::abs(lastUnfinishedHitObject->click_time - this->iCurMusicPosWithOffsets) < hitWindow50)
                 this->misaimObjects.insert(this->misaimObjects.begin(), lastUnfinishedHitObject);
 
@@ -2898,7 +2899,7 @@ void Beatmap::update2() {
             break_on_extra_click &= this->iCurrentHitObjectIndex > 0;
             if(break_on_extra_click) {
                 this->addSliderBreak();
-                this->addHitResult(NULL, LiveScore::HIT::HIT_MISS_SLIDERBREAK, 0, false, true, true, true, true,
+                this->addHitResult(nullptr, LiveScore::HIT::HIT_MISS_SLIDERBREAK, 0, false, true, true, true, true,
                                    false);  // only decrease health
             }
 
@@ -3185,7 +3186,7 @@ void Beatmap::onModUpdate(bool rebuildSliderVertexBuffers, bool recomputeDrainRa
 
     if(recomputeDrainRate) this->computeDrainRate();
 
-    if(this->music != NULL) {
+    if(this->music != nullptr) {
         // Updates not just speed but also nightcore state
         this->music->setSpeed(this->getSpeedMultiplier());
     }
@@ -3259,10 +3260,10 @@ bool Beatmap::isBuffering() {
             this->is_buffering = false;
         }
     } else {
-        HitObject *lastHitObject = this->hitobjectsSortedByEndTime.size() > 0
+        HitObject* lastHitObject = this->hitobjectsSortedByEndTime.size() > 0
                                        ? this->hitobjectsSortedByEndTime[this->hitobjectsSortedByEndTime.size() - 1]
-                                       : NULL;
-        bool is_finished = lastHitObject != NULL && lastHitObject->isFinished();
+                                       : nullptr;
+        bool is_finished = lastHitObject != nullptr && lastHitObject->isFinished();
 
         if(leeway < 0 && !is_finished) {
             debugLog("PAUSING: leeway: {:d}, last_event: {:d}, last_frame: {:d}\n", leeway, this->iCurMusicPos,
@@ -3658,7 +3659,7 @@ void Beatmap::updateAutoCursorPos() {
                 if(o->duration > 0 && curMusicPos - o->click_time <= o->duration) {
                     if(cv::auto_cursordance.getBool()) {
                         Slider *sliderPointer = dynamic_cast<Slider *>(o);
-                        if(sliderPointer != NULL) {
+                        if(sliderPointer != nullptr) {
                             const std::vector<Slider::SLIDERCLICK> &clicks = sliderPointer->getClicks();
 
                             // start
@@ -3844,7 +3845,7 @@ void Beatmap::updateSliderVertexBuffers() {
 
     for(auto &hitobject : this->hitobjects) {
         Slider *sliderPointer = dynamic_cast<Slider *>(hitobject);
-        if(sliderPointer != NULL) sliderPointer->rebuildVertexBuffer();
+        if(sliderPointer != nullptr) sliderPointer->rebuildVertexBuffer();
     }
 }
 
@@ -3875,12 +3876,12 @@ void Beatmap::calculateStacks() {
 
             HitObject *objectI = this->hitobjects[i];
 
-            bool isSpinner = dynamic_cast<Spinner *>(objectI) != NULL;
+            bool isSpinner = dynamic_cast<Spinner*>(objectI) != nullptr;
 
             if(objectI->getStack() != 0 || isSpinner) continue;
 
-            bool isHitCircle = dynamic_cast<Circle *>(objectI) != NULL;
-            bool isSlider = dynamic_cast<Slider *>(objectI) != NULL;
+            bool isHitCircle = dynamic_cast<Circle*>(objectI) != nullptr;
+            bool isSlider = dynamic_cast<Slider*>(objectI) != nullptr;
 
             if(isHitCircle) {
                 while(--n >= 0) {
@@ -3919,7 +3920,7 @@ void Beatmap::calculateStacks() {
                 while(--n >= 0) {
                     HitObject *objectN = this->hitobjects[n];
 
-                    bool isSpinner = dynamic_cast<Spinner *>(objectN) != NULL;
+                    bool isSpinner = dynamic_cast<Spinner*>(objectN) != nullptr;
 
                     if(isSpinner) continue;
 
@@ -3944,7 +3945,7 @@ void Beatmap::calculateStacks() {
             HitObject *currHitObject = this->hitobjects[i];
             Slider *sliderPointer = dynamic_cast<Slider *>(currHitObject);
 
-            const bool isSlider = (sliderPointer != NULL);
+            const bool isSlider = (sliderPointer != nullptr);
 
             if(currHitObject->getStack() != 0 && !isSlider) continue;
 
@@ -3989,7 +3990,7 @@ void Beatmap::computeDrainRate() {
     this->fHpMultiplierNormal = 1.0;
     this->fHpMultiplierComboEnd = 1.0;
 
-    if(this->hitobjects.size() < 1 || this->selectedDifficulty2 == NULL) return;
+    if(this->hitobjects.size() < 1 || this->selectedDifficulty2 == nullptr) return;
 
     debugLog("Beatmap: Calculating drain ...\n");
 
@@ -4105,7 +4106,7 @@ void Beatmap::computeDrainRate() {
                     testPlayer.decreaseHealth(longObjectDrop);
 
                     // nested hitobjects
-                    if(sliderPointer != NULL) {
+                    if(sliderPointer != nullptr) {
                         // startcircle
                         testPlayer.increaseHealth(LiveScore::getHealthIncrease(
                             LiveScore::HIT::HIT_SLIDER30, HP, testPlayer.hpMultiplierNormal,
@@ -4132,7 +4133,7 @@ void Beatmap::computeDrainRate() {
                         testPlayer.increaseHealth(LiveScore::getHealthIncrease(
                             LiveScore::HIT::HIT_SLIDER30, HP, testPlayer.hpMultiplierNormal,
                             testPlayer.hpMultiplierComboEnd, 1.0));  // slider30
-                    } else if(spinnerPointer != NULL) {
+                    } else if(spinnerPointer != nullptr) {
                         const int rotationsNeeded =
                             (int)((f32)spinnerPointer->duration / 1000.0f * GameRules::getSpinnerSpinsPerSecond(this));
                         for(int r = 0; r < rotationsNeeded; r++) {

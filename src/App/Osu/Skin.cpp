@@ -24,7 +24,7 @@
 #define OSU_BITMASK_HITFINISH 0x4
 #define OSU_BITMASK_HITCLAP 0x8
 
-Image *Skin::m_missingTexture = NULL;
+Image* Skin::m_missingTexture = nullptr;
 
 void Skin::unpack(const char *filepath) {
     auto skin_name = env->getFileNameFromFilePath(filepath);
@@ -94,7 +94,7 @@ Skin::Skin(const UString &name, std::string filepath, bool isDefaultSkin) {
 
     this->bReady = false;
 
-    if(m_missingTexture == NULL) m_missingTexture = resourceManager->getImage("MISSING_TEXTURE");
+    if(m_missingTexture == nullptr) m_missingTexture = resourceManager->getImage("MISSING_TEXTURE");
 
     // vars
     this->hitCircle = m_missingTexture;
@@ -211,46 +211,46 @@ Skin::Skin(const UString &name, std::string filepath, bool isDefaultSkin) {
     this->menuBackground = m_missingTexture;
     this->skybox = m_missingTexture;
 
-    this->normalHitNormal = NULL;
-    this->normalHitWhistle = NULL;
-    this->normalHitFinish = NULL;
-    this->normalHitClap = NULL;
+    this->normalHitNormal = nullptr;
+    this->normalHitWhistle = nullptr;
+    this->normalHitFinish = nullptr;
+    this->normalHitClap = nullptr;
 
-    this->normalSliderTick = NULL;
-    this->normalSliderSlide = NULL;
-    this->normalSliderWhistle = NULL;
+    this->normalSliderTick = nullptr;
+    this->normalSliderSlide = nullptr;
+    this->normalSliderWhistle = nullptr;
 
-    this->softHitNormal = NULL;
-    this->softHitWhistle = NULL;
-    this->softHitFinish = NULL;
-    this->softHitClap = NULL;
+    this->softHitNormal = nullptr;
+    this->softHitWhistle = nullptr;
+    this->softHitFinish = nullptr;
+    this->softHitClap = nullptr;
 
-    this->softSliderTick = NULL;
-    this->softSliderSlide = NULL;
-    this->softSliderWhistle = NULL;
+    this->softSliderTick = nullptr;
+    this->softSliderSlide = nullptr;
+    this->softSliderWhistle = nullptr;
 
-    this->drumHitNormal = NULL;
-    this->drumHitWhistle = NULL;
-    this->drumHitFinish = NULL;
-    this->drumHitClap = NULL;
+    this->drumHitNormal = nullptr;
+    this->drumHitWhistle = nullptr;
+    this->drumHitFinish = nullptr;
+    this->drumHitClap = nullptr;
 
-    this->drumSliderTick = NULL;
-    this->drumSliderSlide = NULL;
-    this->drumSliderWhistle = NULL;
+    this->drumSliderTick = nullptr;
+    this->drumSliderSlide = nullptr;
+    this->drumSliderWhistle = nullptr;
 
-    this->spinnerBonus = NULL;
-    this->spinnerSpinSound = NULL;
+    this->spinnerBonus = nullptr;
+    this->spinnerSpinSound = nullptr;
 
-    this->combobreak = NULL;
-    this->failsound = NULL;
-    this->applause = NULL;
-    this->menuHit = NULL;
-    this->menuHover = NULL;
-    this->checkOn = NULL;
-    this->checkOff = NULL;
-    this->shutter = NULL;
-    this->sectionPassSound = NULL;
-    this->sectionFailSound = NULL;
+    this->combobreak = nullptr;
+    this->failsound = nullptr;
+    this->applause = nullptr;
+    this->menuHit = nullptr;
+    this->menuHover = nullptr;
+    this->checkOn = nullptr;
+    this->checkOff = nullptr;
+    this->shutter = nullptr;
+    this->sectionPassSound = nullptr;
+    this->sectionFailSound = nullptr;
 
     this->spinnerApproachCircleColor = 0xffffffff;
     this->sliderBorderColor = 0xffffffff;
@@ -962,117 +962,120 @@ void Skin::load() {
     this->checkLoadSound(&this->hoverPauseRetry, "pause-retry-hover", "OSU_HOVER_RETRY_SONG_SND", true, true, false,
                          false);
 
-    if(this->clickButton == NULL) this->clickButton = this->menuHit;
-    if(this->hoverButton == NULL) this->hoverButton = this->menuHover;
-    if(this->pauseHover == NULL) this->pauseHover = this->hoverButton;
-    if(this->selectDifficulty == NULL) this->selectDifficulty = this->clickButton;
-    if(this->typing2 == NULL) this->typing2 = this->typing1;
-    if(this->typing3 == NULL) this->typing3 = this->typing2;
-    if(this->typing4 == NULL) this->typing4 = this->typing3;
-    if(this->backButtonClick == NULL) this->backButtonClick = this->clickButton;
-    if(this->backButtonHover == NULL) this->backButtonHover = this->hoverButton;
-    if(this->menuBack == NULL) this->menuBack = this->clickButton;
-    if(this->closeChatTab == NULL) this->closeChatTab = this->clickButton;
-    if(this->clickMainMenuCube == NULL) this->clickMainMenuCube = this->clickButton;
-    if(this->hoverMainMenuCube == NULL) this->hoverMainMenuCube = this->menuHover;
-    if(this->clickSingleplayer == NULL) this->clickSingleplayer = this->clickButton;
-    if(this->hoverSingleplayer == NULL) this->hoverSingleplayer = this->menuHover;
-    if(this->clickMultiplayer == NULL) this->clickMultiplayer = this->clickButton;
-    if(this->hoverMultiplayer == NULL) this->hoverMultiplayer = this->menuHover;
-    if(this->clickOptions == NULL) this->clickOptions = this->clickButton;
-    if(this->hoverOptions == NULL) this->hoverOptions = this->menuHover;
-    if(this->clickExit == NULL) this->clickExit = this->clickButton;
-    if(this->hoverExit == NULL) this->hoverExit = this->menuHover;
-    if(this->clickPauseBack == NULL) this->clickPauseBack = this->clickButton;
-    if(this->hoverPauseBack == NULL) this->hoverPauseBack = this->pauseHover;
-    if(this->clickPauseContinue == NULL) this->clickPauseContinue = this->clickButton;
-    if(this->hoverPauseContinue == NULL) this->hoverPauseContinue = this->pauseHover;
-    if(this->clickPauseRetry == NULL) this->clickPauseRetry = this->clickButton;
-    if(this->hoverPauseRetry == NULL) this->hoverPauseRetry = this->pauseHover;
+    if(this->clickButton == nullptr) this->clickButton = this->menuHit;
+    if(this->hoverButton == nullptr) this->hoverButton = this->menuHover;
+    if(this->pauseHover == nullptr) this->pauseHover = this->hoverButton;
+    if(this->selectDifficulty == nullptr) this->selectDifficulty = this->clickButton;
+    if(this->typing2 == nullptr) this->typing2 = this->typing1;
+    if(this->typing3 == nullptr) this->typing3 = this->typing2;
+    if(this->typing4 == nullptr) this->typing4 = this->typing3;
+    if(this->backButtonClick == nullptr) this->backButtonClick = this->clickButton;
+    if(this->backButtonHover == nullptr) this->backButtonHover = this->hoverButton;
+    if(this->menuBack == nullptr) this->menuBack = this->clickButton;
+    if(this->closeChatTab == nullptr) this->closeChatTab = this->clickButton;
+    if(this->clickMainMenuCube == nullptr) this->clickMainMenuCube = this->clickButton;
+    if(this->hoverMainMenuCube == nullptr) this->hoverMainMenuCube = this->menuHover;
+    if(this->clickSingleplayer == nullptr) this->clickSingleplayer = this->clickButton;
+    if(this->hoverSingleplayer == nullptr) this->hoverSingleplayer = this->menuHover;
+    if(this->clickMultiplayer == nullptr) this->clickMultiplayer = this->clickButton;
+    if(this->hoverMultiplayer == nullptr) this->hoverMultiplayer = this->menuHover;
+    if(this->clickOptions == nullptr) this->clickOptions = this->clickButton;
+    if(this->hoverOptions == nullptr) this->hoverOptions = this->menuHover;
+    if(this->clickExit == nullptr) this->clickExit = this->clickButton;
+    if(this->hoverExit == nullptr) this->hoverExit = this->menuHover;
+    if(this->clickPauseBack == nullptr) this->clickPauseBack = this->clickButton;
+    if(this->hoverPauseBack == nullptr) this->hoverPauseBack = this->pauseHover;
+    if(this->clickPauseContinue == nullptr) this->clickPauseContinue = this->clickButton;
+    if(this->hoverPauseContinue == nullptr) this->hoverPauseContinue = this->pauseHover;
+    if(this->clickPauseRetry == nullptr) this->clickPauseRetry = this->clickButton;
+    if(this->hoverPauseRetry == nullptr) this->hoverPauseRetry = this->pauseHover;
 
     // scaling
     // HACKHACK: this is pure cancer
-    if(this->cursor != NULL && this->cursor->getFilePath().find("@2x") != -1) this->bCursor2x = true;
-    if(this->cursorTrail != NULL && this->cursorTrail->getFilePath().find("@2x") != -1) this->bCursorTrail2x = true;
-    if(this->cursorRipple != NULL && this->cursorRipple->getFilePath().find("@2x") != -1) this->bCursorRipple2x = true;
-    if(this->approachCircle != NULL && this->approachCircle->getFilePath().find("@2x") != -1)
+    if(this->cursor != nullptr && this->cursor->getFilePath().find("@2x") != -1) this->bCursor2x = true;
+    if(this->cursorTrail != nullptr && this->cursorTrail->getFilePath().find("@2x") != -1) this->bCursorTrail2x = true;
+    if(this->cursorRipple != nullptr && this->cursorRipple->getFilePath().find("@2x") != -1)
+        this->bCursorRipple2x = true;
+    if(this->approachCircle != nullptr && this->approachCircle->getFilePath().find("@2x") != -1)
         this->bApproachCircle2x = true;
-    if(this->reverseArrow != NULL && this->reverseArrow->getFilePath().find("@2x") != -1) this->bReverseArrow2x = true;
-    if(this->hitCircle != NULL && this->hitCircle->getFilePath().find("@2x") != -1) this->bHitCircle2x = true;
-    if(this->default0 != NULL && this->default0->getFilePath().find("@2x") != -1) this->bIsDefault02x = true;
-    if(this->default1 != NULL && this->default1->getFilePath().find("@2x") != -1) this->bIsDefault12x = true;
-    if(this->score0 != NULL && this->score0->getFilePath().find("@2x") != -1) this->bIsScore02x = true;
-    if(this->combo0 != NULL && this->combo0->getFilePath().find("@2x") != -1) this->bIsCombo02x = true;
-    if(this->spinnerApproachCircle != NULL && this->spinnerApproachCircle->getFilePath().find("@2x") != -1)
+    if(this->reverseArrow != nullptr && this->reverseArrow->getFilePath().find("@2x") != -1)
+        this->bReverseArrow2x = true;
+    if(this->hitCircle != nullptr && this->hitCircle->getFilePath().find("@2x") != -1) this->bHitCircle2x = true;
+    if(this->default0 != nullptr && this->default0->getFilePath().find("@2x") != -1) this->bIsDefault02x = true;
+    if(this->default1 != nullptr && this->default1->getFilePath().find("@2x") != -1) this->bIsDefault12x = true;
+    if(this->score0 != nullptr && this->score0->getFilePath().find("@2x") != -1) this->bIsScore02x = true;
+    if(this->combo0 != nullptr && this->combo0->getFilePath().find("@2x") != -1) this->bIsCombo02x = true;
+    if(this->spinnerApproachCircle != nullptr && this->spinnerApproachCircle->getFilePath().find("@2x") != -1)
         this->bSpinnerApproachCircle2x = true;
-    if(this->spinnerBottom != NULL && this->spinnerBottom->getFilePath().find("@2x") != -1)
+    if(this->spinnerBottom != nullptr && this->spinnerBottom->getFilePath().find("@2x") != -1)
         this->bSpinnerBottom2x = true;
-    if(this->spinnerCircle != NULL && this->spinnerCircle->getFilePath().find("@2x") != -1)
+    if(this->spinnerCircle != nullptr && this->spinnerCircle->getFilePath().find("@2x") != -1)
         this->bSpinnerCircle2x = true;
-    if(this->spinnerTop != NULL && this->spinnerTop->getFilePath().find("@2x") != -1) this->bSpinnerTop2x = true;
-    if(this->spinnerMiddle != NULL && this->spinnerMiddle->getFilePath().find("@2x") != -1)
+    if(this->spinnerTop != nullptr && this->spinnerTop->getFilePath().find("@2x") != -1) this->bSpinnerTop2x = true;
+    if(this->spinnerMiddle != nullptr && this->spinnerMiddle->getFilePath().find("@2x") != -1)
         this->bSpinnerMiddle2x = true;
-    if(this->spinnerMiddle2 != NULL && this->spinnerMiddle2->getFilePath().find("@2x") != -1)
+    if(this->spinnerMiddle2 != nullptr && this->spinnerMiddle2->getFilePath().find("@2x") != -1)
         this->bSpinnerMiddle22x = true;
-    if(this->sliderScorePoint != NULL && this->sliderScorePoint->getFilePath().find("@2x") != -1)
+    if(this->sliderScorePoint != nullptr && this->sliderScorePoint->getFilePath().find("@2x") != -1)
         this->bSliderScorePoint2x = true;
-    if(this->sliderStartCircle != NULL && this->sliderStartCircle->getFilePath().find("@2x") != -1)
+    if(this->sliderStartCircle != nullptr && this->sliderStartCircle->getFilePath().find("@2x") != -1)
         this->bSliderStartCircle2x = true;
-    if(this->sliderEndCircle != NULL && this->sliderEndCircle->getFilePath().find("@2x") != -1)
+    if(this->sliderEndCircle != nullptr && this->sliderEndCircle->getFilePath().find("@2x") != -1)
         this->bSliderEndCircle2x = true;
 
-    if(this->circularmetre != NULL && this->circularmetre->getFilePath().find("@2x") != -1)
+    if(this->circularmetre != nullptr && this->circularmetre->getFilePath().find("@2x") != -1)
         this->bCircularmetre2x = true;
 
-    if(this->pauseContinue != NULL && this->pauseContinue->getFilePath().find("@2x") != -1)
+    if(this->pauseContinue != nullptr && this->pauseContinue->getFilePath().find("@2x") != -1)
         this->bPauseContinue2x = true;
 
-    if(this->menuButtonBackground != NULL && this->menuButtonBackground->getFilePath().find("@2x") != -1)
+    if(this->menuButtonBackground != nullptr && this->menuButtonBackground->getFilePath().find("@2x") != -1)
         this->bMenuButtonBackground2x = true;
-    if(this->star != NULL && this->star->getFilePath().find("@2x") != -1) this->bStar2x = true;
-    if(this->rankingPanel != NULL && this->rankingPanel->getFilePath().find("@2x") != -1) this->bRankingPanel2x = true;
-    if(this->rankingMaxCombo != NULL && this->rankingMaxCombo->getFilePath().find("@2x") != -1)
+    if(this->star != nullptr && this->star->getFilePath().find("@2x") != -1) this->bStar2x = true;
+    if(this->rankingPanel != nullptr && this->rankingPanel->getFilePath().find("@2x") != -1)
+        this->bRankingPanel2x = true;
+    if(this->rankingMaxCombo != nullptr && this->rankingMaxCombo->getFilePath().find("@2x") != -1)
         this->bRankingMaxCombo2x = true;
-    if(this->rankingAccuracy != NULL && this->rankingAccuracy->getFilePath().find("@2x") != -1)
+    if(this->rankingAccuracy != nullptr && this->rankingAccuracy->getFilePath().find("@2x") != -1)
         this->bRankingAccuracy2x = true;
-    if(this->rankingA != NULL && this->rankingA->getFilePath().find("@2x") != -1) this->bRankingA2x = true;
-    if(this->rankingB != NULL && this->rankingB->getFilePath().find("@2x") != -1) this->bRankingB2x = true;
-    if(this->rankingC != NULL && this->rankingC->getFilePath().find("@2x") != -1) this->bRankingC2x = true;
-    if(this->rankingD != NULL && this->rankingD->getFilePath().find("@2x") != -1) this->bRankingD2x = true;
-    if(this->rankingS != NULL && this->rankingS->getFilePath().find("@2x") != -1) this->bRankingS2x = true;
-    if(this->rankingSH != NULL && this->rankingSH->getFilePath().find("@2x") != -1) this->bRankingSH2x = true;
-    if(this->rankingX != NULL && this->rankingX->getFilePath().find("@2x") != -1) this->bRankingX2x = true;
-    if(this->rankingXH != NULL && this->rankingXH->getFilePath().find("@2x") != -1) this->bRankingXH2x = true;
+    if(this->rankingA != nullptr && this->rankingA->getFilePath().find("@2x") != -1) this->bRankingA2x = true;
+    if(this->rankingB != nullptr && this->rankingB->getFilePath().find("@2x") != -1) this->bRankingB2x = true;
+    if(this->rankingC != nullptr && this->rankingC->getFilePath().find("@2x") != -1) this->bRankingC2x = true;
+    if(this->rankingD != nullptr && this->rankingD->getFilePath().find("@2x") != -1) this->bRankingD2x = true;
+    if(this->rankingS != nullptr && this->rankingS->getFilePath().find("@2x") != -1) this->bRankingS2x = true;
+    if(this->rankingSH != nullptr && this->rankingSH->getFilePath().find("@2x") != -1) this->bRankingSH2x = true;
+    if(this->rankingX != nullptr && this->rankingX->getFilePath().find("@2x") != -1) this->bRankingX2x = true;
+    if(this->rankingXH != nullptr && this->rankingXH->getFilePath().find("@2x") != -1) this->bRankingXH2x = true;
 
     // HACKHACK: all of the <>2 loads are temporary fixes until I fix the checkLoadImage() function logic
 
     // custom
     Image *defaultCursor = resourceManager->getImage("OSU_SKIN_CURSOR_DEFAULT");
     Image *defaultCursor2 = this->cursor;
-    if(defaultCursor != NULL)
+    if(defaultCursor != nullptr)
         this->defaultCursor = defaultCursor;
-    else if(defaultCursor2 != NULL)
+    else if(defaultCursor2 != nullptr)
         this->defaultCursor = defaultCursor2;
 
     Image *defaultButtonLeft = resourceManager->getImage("OSU_SKIN_BUTTON_LEFT_DEFAULT");
     Image *defaultButtonLeft2 = this->buttonLeft;
-    if(defaultButtonLeft != NULL)
+    if(defaultButtonLeft != nullptr)
         this->defaultButtonLeft = defaultButtonLeft;
-    else if(defaultButtonLeft2 != NULL)
+    else if(defaultButtonLeft2 != nullptr)
         this->defaultButtonLeft = defaultButtonLeft2;
 
     Image *defaultButtonMiddle = resourceManager->getImage("OSU_SKIN_BUTTON_MIDDLE_DEFAULT");
     Image *defaultButtonMiddle2 = this->buttonMiddle;
-    if(defaultButtonMiddle != NULL)
+    if(defaultButtonMiddle != nullptr)
         this->defaultButtonMiddle = defaultButtonMiddle;
-    else if(defaultButtonMiddle2 != NULL)
+    else if(defaultButtonMiddle2 != nullptr)
         this->defaultButtonMiddle = defaultButtonMiddle2;
 
     Image *defaultButtonRight = resourceManager->getImage("OSU_SKIN_BUTTON_RIGHT_DEFAULT");
     Image *defaultButtonRight2 = this->buttonRight;
-    if(defaultButtonRight != NULL)
+    if(defaultButtonRight != nullptr)
         this->defaultButtonRight = defaultButtonRight;
-    else if(defaultButtonRight2 != NULL)
+    else if(defaultButtonRight2 != nullptr)
         this->defaultButtonRight = defaultButtonRight2;
 
     // print some debug info
@@ -1458,7 +1461,7 @@ void Skin::playSliderSlideSound(float pan) {
 }
 
 void Skin::playSpinnerSpinSound() {
-    if(this->spinnerSpinSound == NULL) return;
+    if(this->spinnerSpinSound == nullptr) return;
 
     if(!this->spinnerSpinSound->isPlaying()) {
         soundEngine->play(this->spinnerSpinSound);
@@ -1481,7 +1484,7 @@ void Skin::stopSliderSlideSound(int sampleSet) {
 }
 
 void Skin::stopSpinnerSpinSound() {
-    if(this->spinnerSpinSound == NULL) return;
+    if(this->spinnerSpinSound == nullptr) return;
 
     if(this->spinnerSpinSound->isPlaying()) soundEngine->stop(this->spinnerSpinSound);
 }
@@ -1620,7 +1623,7 @@ void Skin::checkLoadImage(Image **addressOfPointer, const std::string &skinEleme
 void Skin::checkLoadSound(Sound **addressOfPointer, const std::string &skinElementName, std::string resourceName,
                           bool isOverlayable, bool isSample, bool loop, bool fallback_to_default,
                           float hardcodedVolumeMultiplier) {
-    if(*addressOfPointer != NULL) return;  // we are already loaded
+    if(*addressOfPointer != nullptr) return;  // we are already loaded
 
     // NOTE: only the default skin is loaded with a resource name (it must never be unloaded by other instances), and it
     // is NOT added to the resources vector
@@ -1647,7 +1650,7 @@ void Skin::checkLoadSound(Sound **addressOfPointer, const std::string &skinEleme
             }
         }
 
-        return (Sound *)NULL;
+        return (Sound*)nullptr;
     };
 
     // load default skin
@@ -1659,22 +1662,22 @@ void Skin::checkLoadSound(Sound **addressOfPointer, const std::string &skinEleme
     }
 
     // load user skin
-    Sound *skin_sound = NULL;
+    Sound* skin_sound = nullptr;
     if(cv::skin_use_skin_hitsounds.getBool() || !isSample) {
         skin_sound = try_load_sound(this->sFilePath, skinElementName, "", loop);
-        if(skin_sound != NULL) {
+        if(skin_sound != nullptr) {
             *addressOfPointer = skin_sound;
         }
     }
 
     Sound *sound = *addressOfPointer;
-    if(sound == NULL) {
+    if(sound == nullptr) {
         debugLog("Skin Warning: NULL sound {:s}!\n", skinElementName.c_str());
         return;
     }
 
     // force reload default skin sound anyway if the custom skin does not include it (e.g. audio device change)
-    if(skin_sound == NULL) {
+    if(skin_sound == nullptr) {
         resourceManager->reloadResource(sound, cv::skin_async.getBool());
     } else {
         this->resources.push_back(sound);

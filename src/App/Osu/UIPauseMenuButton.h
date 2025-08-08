@@ -17,7 +17,7 @@ class UIPauseMenuButton : public CBaseUIButton {
     void setBaseScale(float xScale, float yScale);
     void setAlpha(float alpha) { this->fAlpha = alpha; }
 
-    Image *getImage() { return this->getImageFunc != NULL ? this->getImageFunc() : NULL; }
+    Image* getImage() { return this->getImageFunc != nullptr ? this->getImageFunc() : nullptr; }
 
    private:
     Vector2 vScale;

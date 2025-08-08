@@ -33,8 +33,8 @@ class VolumeOverlay : public OsuScreen {
     bool bVolumeInactiveToActiveScheduled = false;
     float fVolumeInactiveToActiveAnim = 0.f;
 
-    CBaseUIContainer *volumeSliderOverlayContainer = NULL;
-    UIVolumeSlider *volumeMaster = NULL;
-    UIVolumeSlider *volumeEffects = NULL;
-    UIVolumeSlider *volumeMusic = NULL;
+    CBaseUIContainer* volumeSliderOverlayContainer = nullptr;
+    UIVolumeSlider* volumeMaster = nullptr;
+    UIVolumeSlider* volumeEffects = nullptr;
+    UIVolumeSlider* volumeMusic = nullptr;
 };

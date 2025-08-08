@@ -154,10 +154,10 @@ enum OutgoingPackets : uint8_t {
 
 struct Packet {
     u16 id{0};
-    u8 *memory{NULL};
+    u8* memory{nullptr};
     size_t size{0};
     size_t pos{0};
-    u8 *extra{NULL};
+    u8* extra{nullptr};
     i32 extra_int{0};  // lazy
 
     void reserve(u32 newsize) {

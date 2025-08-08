@@ -237,7 +237,7 @@ void Mouse::setOffset(Vector2 offset) {
 }
 
 void Mouse::addListener(MouseListener *mouseListener, bool insertOnTop) {
-    if(mouseListener == NULL) {
+    if(mouseListener == nullptr) {
         engine->showMessageError("Mouse Error", "addListener(NULL)!");
         return;
     }

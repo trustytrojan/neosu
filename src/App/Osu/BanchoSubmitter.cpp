@@ -21,7 +21,7 @@ void submit_score(FinishedScore score) {
     debugLog("Submitting score...\n");
     constexpr auto GRADES = std::array{"XH", "SH", "X", "S", "A", "B", "C", "D", "F", "N"};
 
-    u8 *compressed_data = NULL;
+    u8* compressed_data = nullptr;
 
     char score_time[80];
     struct tm *timeinfo = localtime((const time_t *)&score.unixTimestamp);
@@ -42,7 +42,7 @@ void submit_score(FinishedScore score) {
 
     // NOTE: cURL docs say it's ok to curl_mime_init on a curl handle
     //       different from the one used to send the request :)
-    curl_mimepart *part = NULL;
+    curl_mimepart* part = nullptr;
     request.mime = curl_mime_init(curl);
 
     {

@@ -95,7 +95,7 @@ void CBaseUITextbox::draw() {
 
     // draw text
 
-    if(this->font == NULL) return;
+    if(this->font == nullptr) return;
 
     g->pushClipRect(McRect(this->vPos.x + 1, this->vPos.y + 1, this->vSize.x - 1, this->vSize.y));
     {

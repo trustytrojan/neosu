@@ -268,7 +268,7 @@ void MainMenu::draw() {
     if(!this->bVisible) return;
 
     // load server icon
-    if(bancho->is_online() && bancho->server_icon_url.length() > 0 && bancho->server_icon == NULL) {
+    if(bancho->is_online() && bancho->server_icon_url.length() > 0 && bancho->server_icon == nullptr) {
         std::string icon_path = fmt::format(MCENGINE_DATA_DIR "avatars/{}", bancho->endpoint);
         if(!env->directoryExists(icon_path)) {
             env->createDirectory(icon_path);
@@ -282,7 +282,7 @@ void MainMenu::draw() {
         if(progress == -1.f) bancho->server_icon_url = "";
         if(!data.empty()) {
             FILE *file = fopen(icon_path.c_str(), "wb");
-            if(file != NULL) {
+            if(file != nullptr) {
                 fwrite(data.data(), data.size(), 1, file);
                 fflush(file);
                 fclose(file);
@@ -295,7 +295,7 @@ void MainMenu::draw() {
     // menu-background
     if(cv::draw_menu_background.getBool()) {
         Image *backgroundImage = osu->getSkin()->getMenuBackground();
-        if(backgroundImage != NULL && backgroundImage != osu->getSkin()->getMissingTexture() &&
+        if(backgroundImage != nullptr && backgroundImage != osu->getSkin()->getMissingTexture() &&
            backgroundImage->isReady()) {
             const float scale = Osu::getImageScaleToFillResolution(backgroundImage, osu->getScreenSize());
 
@@ -315,9 +315,9 @@ void MainMenu::draw() {
     float alpha = 1.0f;
     if(cv::songbrowser_background_fade_in_duration.getFloat() > 0.0f) {
         // handle fadein trigger after handler is finished loading
-        const bool ready = osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL &&
+        const bool ready = osu->getSelectedBeatmap()->getSelectedDifficulty2() != nullptr &&
                            osu->getBackgroundImageHandler()->getLoadBackgroundImage(
-                               osu->getSelectedBeatmap()->getSelectedDifficulty2()) != NULL &&
+                               osu->getSelectedBeatmap()->getSelectedDifficulty2()) != nullptr &&
                            osu->getBackgroundImageHandler()
                                ->getLoadBackgroundImage(osu->getSelectedBeatmap()->getSelectedDifficulty2())
                                ->isReady();
@@ -342,8 +342,8 @@ void MainMenu::draw() {
     bool haveTimingpoints = false;
     const float div = 1.25f;
     float pulse = 0.0f;
-    if(osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL && osu->getSelectedBeatmap()->getMusic() != NULL &&
-       osu->getSelectedBeatmap()->getMusic()->isPlaying()) {
+    if(osu->getSelectedBeatmap()->getSelectedDifficulty2() != nullptr &&
+       osu->getSelectedBeatmap()->getMusic() != nullptr && osu->getSelectedBeatmap()->getMusic()->isPlaying()) {
         haveTimingpoints = true;
 
         const long curMusicPos =
@@ -420,7 +420,7 @@ void MainMenu::draw() {
     OsuScreen::draw();
 
     // draw update check button
-    if(this->updateAvailableButton != NULL) {
+    if(this->updateAvailableButton != nullptr) {
         using enum UpdateHandler::STATUS;
         const auto status = osu->getUpdateHandler()->getStatus();
         const bool drawAnim = (status == STATUS_DOWNLOAD_COMPLETE);
@@ -743,7 +743,8 @@ void MainMenu::draw() {
     // neosu/server logo
     {
         auto logo = this->logo_img;
-        if(bancho->server_icon != NULL && bancho->server_icon->isReady() && cv::main_menu_use_server_logo.getBool()) {
+        if(bancho->server_icon != nullptr && bancho->server_icon->isReady() &&
+           cv::main_menu_use_server_logo.getBool()) {
             logo = bancho->server_icon;
         }
 
@@ -866,7 +867,7 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
     // update and focus handling
     OsuScreen::mouse_update(propagate_clicks);
 
-    if(this->updateAvailableButton != NULL) {
+    if(this->updateAvailableButton != nullptr) {
         this->updateAvailableButton->mouse_update(propagate_clicks);
     }
 
@@ -946,7 +947,7 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
     }
 
     // handle update checker and status text
-    if(this->updateAvailableButton != NULL) {
+    if(this->updateAvailableButton != nullptr) {
         using enum UpdateHandler::STATUS;
         const auto status = osu->getUpdateHandler()->getStatus();
 
@@ -1001,7 +1002,7 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
     if(soundEngine->isReady()) {
         auto diff2 = osu->getSelectedBeatmap()->getSelectedDifficulty2();
         auto music = osu->getSelectedBeatmap()->getMusic();
-        if(music == NULL) {
+        if(music == nullptr) {
             this->selectRandomBeatmap();
         } else {
             if(music->isFinished()) {
@@ -1046,7 +1047,7 @@ void MainMenu::selectRandomBeatmap() {
         for(int i = 0; i < 10; i++) {
             const auto &mapset_folder = mapset_folders[rand() % mapset_folders.size()];
             BeatmapSet *set = db->loadRawBeatmap(mapset_folder);
-            if(set == NULL) {
+            if(set == nullptr) {
                 debugLog("Failed to load beatmap set '{:s}'\n", mapset_folder.c_str());
                 continue;
             }
@@ -1167,7 +1168,7 @@ void MainMenu::updateLayout() {
     this->pauseButton->setRelPos(osu->getScreenWidth() - this->pauseButton->getSize().x * 2 - 10 * dpiScale,
                                  this->pauseButton->getSize().y + 10 * dpiScale);
 
-    if(this->updateAvailableButton != NULL) {
+    if(this->updateAvailableButton != nullptr) {
         this->updateAvailableButton->setSize(375 * dpiScale, 50 * dpiScale);
         this->updateAvailableButton->setPos(
             osu->getScreenWidth() / 2 - this->updateAvailableButton->getSize().x / 2,
@@ -1409,7 +1410,7 @@ void MainMenu::onPausePressed() {
         osu->getSelectedBeatmap()->pausePreviewMusic();
     } else {
         auto music = osu->getSelectedBeatmap()->getMusic();
-        if(music != NULL) {
+        if(music != nullptr) {
             soundEngine->play(music);
         }
     }

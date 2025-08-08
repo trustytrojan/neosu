@@ -238,7 +238,7 @@ int OpenGLShader::createShaderFromString(const std::string &shaderSource, int sh
 
     // compile shader
     const char *shaderSourceChar = shaderSource.c_str();
-    glShaderSourceARB(shader, 1, &shaderSourceChar, NULL);
+    glShaderSourceARB(shader, 1, &shaderSourceChar, nullptr);
     glCompileShaderARB(shader);
 
     int returnValue = GL_TRUE;

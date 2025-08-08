@@ -183,7 +183,7 @@ class DatabaseBeatmap final {
         requires(std::is_same_v<std::remove_cv_t<T>, DatabaseBeatmap>)
     {
         static std::vector<T *> empty;
-        return this->difficulties == NULL ? empty : reinterpret_cast<const std::vector<T *> &>(*this->difficulties);
+        return this->difficulties == nullptr ? empty : reinterpret_cast<const std::vector<T*>&>(*this->difficulties);
     }
 
     [[nodiscard]] inline const MD5Hash &getMD5Hash() const { return this->sMD5Hash; }
@@ -345,7 +345,7 @@ class DatabaseBeatmap final {
         int beatmapVersion, std::vector<SLIDER> &sliders, zarray<DatabaseBeatmap::TIMINGPOINT> &timingpoints,
         float sliderMultiplier, float sliderTickRate, const std::atomic<bool> &dead);
 
-    std::vector<DatabaseBeatmap *> *difficulties = NULL;
+    std::vector<DatabaseBeatmap*>* difficulties = nullptr;
     BeatmapType type;
 
     MD5Hash sMD5Hash;

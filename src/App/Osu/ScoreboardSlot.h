@@ -11,7 +11,7 @@ struct ScoreboardSlot {
     void draw();
     void updateIndex(int new_index, bool animate);
 
-    UIAvatar *avatar = NULL;
+    UIAvatar* avatar = nullptr;
     SCORE_ENTRY score;
     int index;
     float y = 0.f;

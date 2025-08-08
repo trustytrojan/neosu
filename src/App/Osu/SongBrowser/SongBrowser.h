@@ -215,12 +215,12 @@ class SongBrowser final : public ScreenBackable {
     CBaseUIElement *scoreBrowserNoRecordsYetElement;
     CBaseUIContainer *localBestContainer;
     CBaseUILabel *localBestLabel;
-    ScoreButton *localBestButton = NULL;
+    ScoreButton* localBestButton = nullptr;
     bool score_resort_scheduled = false;
 
     // song carousel
     CBaseUIScrollView *carousel;
-    Button *selectedButton = NULL;
+    Button* selectedButton = nullptr;
     bool bSongBrowserRightClickScrollCheck;
     bool bSongBrowserRightClickScrolling;
     bool bNextScrollToSongButtonJumpFixScheduled;
@@ -263,7 +263,7 @@ class SongBrowser final : public ScreenBackable {
     bool bPreviousRandomBeatmapScheduled;
 
     // behaviour
-    DatabaseBeatmap *lastSelectedBeatmap = NULL;
+    DatabaseBeatmap* lastSelectedBeatmap = nullptr;
     Beatmap *beatmap;
     bool bHasSelectedAndIsPlaying;
     float fPulseAnimation;

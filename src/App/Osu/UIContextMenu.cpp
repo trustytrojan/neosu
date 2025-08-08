@@ -107,7 +107,7 @@ void UIContextMenu::mouse_update(bool *propagate_clicks) {
     if(!this->bVisible2) return;
     CBaseUIScrollView::mouse_update(propagate_clicks);
 
-    if(this->containedTextbox != NULL) {
+    if(this->containedTextbox != nullptr) {
         if(this->containedTextbox->hitEnter()) this->onHitEnter(this->containedTextbox);
     }
 
@@ -138,7 +138,7 @@ void UIContextMenu::onKeyDown(KeyboardEvent &e) {
 
     // also force ENTER event if context menu textbox has lost focus (but context menu is still visible, e.g. if the
     // user clicks inside the context menu but outside the textbox)
-    if(this->containedTextbox != NULL) {
+    if(this->containedTextbox != nullptr) {
         if(e == KEY_ENTER || e == KEY_NUMPAD_ENTER) {
             e.consume();
             this->onHitEnter(this->containedTextbox);
@@ -183,7 +183,7 @@ void UIContextMenu::begin(int minWidth, bool bigStyle) {
 
     this->freeElements();
 
-    this->containedTextbox = NULL;
+    this->containedTextbox = nullptr;
 }
 
 UIContextMenuButton *UIContextMenu::addButton(const UString &text, int id) {
@@ -292,7 +292,7 @@ void UIContextMenu::setVisible2(bool visible2) {
 
     if(!this->bVisible2) this->setSize(1, 1);  // reset size
 
-    if(this->parent != NULL) this->parent->setScrollSizeToContent();  // and update parent scroll size
+    if(this->parent != nullptr) this->parent->setScrollSizeToContent();  // and update parent scroll size
 }
 
 void UIContextMenu::onMouseDownOutside(bool /*left*/, bool /*right*/) { this->setVisible2(false); }
@@ -300,9 +300,9 @@ void UIContextMenu::onMouseDownOutside(bool /*left*/, bool /*right*/) { this->se
 void UIContextMenu::onClick(CBaseUIButton *button) {
     this->setVisible2(false);
 
-    if(this->clickCallback != NULL) {
+    if(this->clickCallback != nullptr) {
         // special case: if text input exists, then override with its text
-        if(this->containedTextbox != NULL)
+        if(this->containedTextbox != nullptr)
             this->clickCallback(this->containedTextbox->getText(), ((UIContextMenuButton *)button)->getID());
         else
             this->clickCallback(button->getName(), ((UIContextMenuButton *)button)->getID());
@@ -312,7 +312,7 @@ void UIContextMenu::onClick(CBaseUIButton *button) {
 void UIContextMenu::onHitEnter(UIContextMenuTextbox *textbox) {
     this->setVisible2(false);
 
-    if(this->clickCallback != NULL) this->clickCallback(textbox->getText(), textbox->getID());
+    if(this->clickCallback != nullptr) this->clickCallback(textbox->getText(), textbox->getID());
 }
 
 void UIContextMenu::clampToBottomScreenEdge(UIContextMenu *menu) {

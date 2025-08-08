@@ -42,7 +42,7 @@ SongButton::SongButton(SongBrowser *songBrowser, CBaseUIScrollView *view, UICont
     this->fGradeScale = 0.45f;
 
     // build children
-    if(this->databaseBeatmap != NULL) {
+    if(this->databaseBeatmap != nullptr) {
         const std::vector<DatabaseBeatmap *> &difficulties = this->databaseBeatmap->getDifficulties();
 
         // and add them
@@ -72,7 +72,7 @@ void SongButton::draw() {
 
     // draw background image
     this->sortChildren();
-    if(this->databaseBeatmap != NULL && this->children.size() > 0) {
+    if(this->databaseBeatmap != nullptr && this->children.size() > 0) {
         // use the bottom child (hardest diff, assuming default sorting, and respecting the current search matches)
         for(int i = this->children.size() - 1; i >= 0; i--) {
             // NOTE: if no search is active, then all search matches return true by default
@@ -101,7 +101,7 @@ void SongButton::drawBeatmapBackgroundThumbnail(Image *image) {
 
     float alpha = 1.0f;
     if(cv::songbrowser_thumbnail_fade_in_duration.getFloat() > 0.0f) {
-        if(image == NULL || !image->isReady())
+        if(image == nullptr || !image->isReady())
             this->fThumbnailFadeInTime = engine->getTime();
         else if(this->fThumbnailFadeInTime > 0.0f && engine->getTime() > this->fThumbnailFadeInTime) {
             alpha = std::clamp<float>((engine->getTime() - this->fThumbnailFadeInTime) /
@@ -111,7 +111,7 @@ void SongButton::drawBeatmapBackgroundThumbnail(Image *image) {
         }
     }
 
-    if(image == NULL || !image->isReady()) return;
+    if(image == nullptr || !image->isReady()) return;
 
     // scaling
     const Vector2 pos = this->getActualPos();
@@ -268,12 +268,12 @@ void SongButton::onSelected(bool wasSelected, bool autoSelectBottomMostChild, bo
 void SongButton::onRightMouseUpInside() { this->triggerContextMenu(mouse->getPos()); }
 
 void SongButton::triggerContextMenu(Vector2 pos) {
-    if(this->contextMenu != NULL) {
+    if(this->contextMenu != nullptr) {
         this->contextMenu->setPos(pos);
         this->contextMenu->setRelPos(pos);
         this->contextMenu->begin(0, true);
         {
-            if(this->databaseBeatmap != NULL && this->databaseBeatmap->getDifficulties().size() < 1)
+            if(this->databaseBeatmap != nullptr && this->databaseBeatmap->getDifficulties().size() < 1)
                 this->contextMenu->addButton("[+]         Add to Collection", 1);
 
             this->contextMenu->addButton("[+Set]   Add to Collection", 2);
@@ -285,7 +285,7 @@ void SongButton::triggerContextMenu(Vector2 pos) {
                 spacer->setTextColor(0xff888888);
                 spacer->setTextDarkColor(0xff000000);
 
-                if(this->databaseBeatmap == NULL || this->databaseBeatmap->getDifficulties().size() < 1) {
+                if(this->databaseBeatmap == nullptr || this->databaseBeatmap->getDifficulties().size() < 1) {
                     this->contextMenu->addButton("[-]          Remove from Collection", 3);
                 }
 

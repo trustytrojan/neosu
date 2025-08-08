@@ -219,7 +219,7 @@ void ChatChannel::add_message(ChatMessage msg) {
             float char_width = chat_font->getGlyphMetrics(fragment_text[i]).advance_x;
             if(line_width + char_width + 20 >= this->ui->getSize().x) {
                 ChatLink *link_fragment = dynamic_cast<ChatLink *>(fragment);
-                if(link_fragment == NULL) {
+                if(link_fragment == nullptr) {
                     CBaseUILabel *text = new CBaseUILabel(x, this->y_total, line_width - x, line_height, "", text_str);
                     text->setDrawFrame(false);
                     text->setDrawBackground(false);
@@ -244,7 +244,7 @@ void ChatChannel::add_message(ChatMessage msg) {
         }
 
         ChatLink *link_fragment = dynamic_cast<ChatLink *>(fragment);
-        if(link_fragment == NULL) {
+        if(link_fragment == nullptr) {
             CBaseUILabel *text = new CBaseUILabel(x, this->y_total, line_width - x, line_height, "", text_str);
             text->setDrawFrame(false);
             text->setDrawBackground(false);
@@ -334,7 +334,7 @@ void Chat::draw() {
     this->button_container->draw();
 
     OsuScreen::draw();
-    if(this->selected_channel != NULL) {
+    if(this->selected_channel != nullptr) {
         this->selected_channel->ui->draw();
     }
 
@@ -445,7 +445,7 @@ void Chat::handle_command(const UString &msg) {
 
     if(msg == "/np") {
         auto diff = osu->getSelectedBeatmap()->getSelectedDifficulty2();
-        if(diff == NULL) {
+        if(diff == nullptr) {
             this->addSystemMessage("You are not listening to anything.");
             return;
         }
@@ -628,7 +628,7 @@ void Chat::onKeyDown(KeyboardEvent &key) {
     }
 
     if(key.getKeyCode() == KEY_PAGEUP) {
-        if(this->selected_channel != NULL) {
+        if(this->selected_channel != nullptr) {
             key.consume();
             this->selected_channel->ui->scrollY(this->getSize().y - this->input_box_height);
             return;
@@ -636,7 +636,7 @@ void Chat::onKeyDown(KeyboardEvent &key) {
     }
 
     if(key.getKeyCode() == KEY_PAGEDOWN) {
-        if(this->selected_channel != NULL) {
+        if(this->selected_channel != nullptr) {
             key.consume();
             this->selected_channel->ui->scrollY(-(this->getSize().y - this->input_box_height));
             return;
@@ -656,7 +656,7 @@ void Chat::onKeyDown(KeyboardEvent &key) {
     // Return: send message
     if(key.getKeyCode() == KEY_ENTER || key.getKeyCode() == KEY_NUMPAD_ENTER) {
         key.consume();
-        if(this->selected_channel != NULL && this->input_box->getText().length() > 0) {
+        if(this->selected_channel != nullptr && this->input_box->getText().length() > 0) {
             if(this->input_box->getText()[0] == L'/') {
                 this->handle_command(this->input_box->getText());
             } else {
@@ -674,7 +674,7 @@ void Chat::onKeyDown(KeyboardEvent &key) {
     // Ctrl+W: Close current channel
     if(keyboard->isControlDown() && key.getKeyCode() == KEY_W) {
         key.consume();
-        if(this->selected_channel != NULL) {
+        if(this->selected_channel != nullptr) {
             this->leave(this->selected_channel->name);
         }
         return;
@@ -684,7 +684,7 @@ void Chat::onKeyDown(KeyboardEvent &key) {
     // KEY_TAB doesn't work on Linux
     if(keyboard->isControlDown() && (key.getKeyCode() == 65056 || key.getKeyCode() == KEY_TAB)) {
         key.consume();
-        if(this->selected_channel == NULL) return;
+        if(this->selected_channel == nullptr) return;
         int chan_index = this->channels.size();
         for(auto chan : this->channels) {
             if(chan == this->selected_channel) {
@@ -792,7 +792,7 @@ void Chat::mark_as_read(ChatChannel *chan) {
     request.type = MARK_AS_READ;
     request.path = UString::format("/web/osu-markasread.php?u=%s&h=%s&channel=%s", bancho->username.toUtf8(),
                                    bancho->pw_md5.hash.data(), channel_urlencoded);
-    request.mime = NULL;
+    request.mime = nullptr;
 
     BANCHO::Net::send_api_request(request);
 
@@ -829,7 +829,7 @@ void Chat::addChannel(const UString &channel_name, bool switch_to) {
     ChatChannel *chan = new ChatChannel(this, channel_name);
     this->channels.push_back(chan);
 
-    if(this->selected_channel == NULL && this->channels.size() == 1) {
+    if(this->selected_channel == nullptr && this->channels.size() == 1) {
         this->switchToChannel(chan);
     } else if(channel_name == "#multiplayer" || channel_name == "#lobby") {
         this->switchToChannel(chan);
@@ -952,7 +952,7 @@ void Chat::addMessage(UString channel_name, const ChatMessage &msg, bool mark_un
 
         // Server doesn't echo the message back
         this->addMessage(channel_name, ChatMessage{
-                                           .tms = time(NULL),
+                                           .tms = time(nullptr),
                                            .author_id = bancho->user_id,
                                            .author_name = bancho->username,
                                            .text = this->away_msg,
@@ -962,7 +962,7 @@ void Chat::addMessage(UString channel_name, const ChatMessage &msg, bool mark_un
 
 void Chat::addSystemMessage(UString msg) {
     this->addMessage(this->selected_channel->name, ChatMessage{
-                                                       .tms = time(NULL),
+                                                       .tms = time(nullptr),
                                                        .author_id = 0,
                                                        .author_name = "",
                                                        .text = std::move(msg),
@@ -970,7 +970,7 @@ void Chat::addSystemMessage(UString msg) {
 }
 
 void Chat::removeChannel(const UString &channel_name) {
-    ChatChannel *chan = NULL;
+    ChatChannel* chan = nullptr;
     for(auto c : this->channels) {
         if(c->name == channel_name) {
             chan = c;
@@ -978,12 +978,12 @@ void Chat::removeChannel(const UString &channel_name) {
         }
     }
 
-    if(chan == NULL) return;
+    if(chan == nullptr) return;
 
     auto it = std::ranges::find(this->channels, chan);
     this->channels.erase(it);
     if(this->selected_channel == chan) {
-        this->selected_channel = NULL;
+        this->selected_channel = nullptr;
         if(!this->channels.empty()) {
             this->switchToChannel(this->channels[0]);
         }
@@ -1019,7 +1019,7 @@ void Chat::updateLayout(Vector2 newResolution) {
     this->input_box->setPos(Vector2{0.f, chat_y + chat_h});
     this->input_box->setSize(Vector2{chat_w, this->input_box_height});
 
-    if(this->selected_channel == NULL && !this->channels.empty()) {
+    if(this->selected_channel == nullptr && !this->channels.empty()) {
         this->selected_channel = this->channels[0];
         this->selected_channel->read = true;
     }
@@ -1192,7 +1192,7 @@ void Chat::send_message(const UString &msg) {
 
     // Server doesn't echo the message back
     this->addMessage(this->selected_channel->name, ChatMessage{
-                                                       .tms = time(NULL),
+                                                       .tms = time(nullptr),
                                                        .author_id = bancho->user_id,
                                                        .author_name = bancho->username,
                                                        .text = msg,
@@ -1210,7 +1210,7 @@ void Chat::onDisconnect() {
     }
     bancho->chat_channels.clear();
 
-    this->selected_channel = NULL;
+    this->selected_channel = nullptr;
     this->updateLayout(osu->getScreenSize());
 
     this->updateVisibility();
@@ -1219,7 +1219,7 @@ void Chat::onDisconnect() {
 void Chat::onResolutionChange(Vector2 newResolution) { this->updateLayout(newResolution); }
 
 bool Chat::isSmallChat() {
-    if(osu->room == NULL || osu->lobby == NULL || osu->songBrowser2 == NULL) return false;
+    if(osu->room == nullptr || osu->lobby == nullptr || osu->songBrowser2 == nullptr) return false;
     bool sitting_in_room =
         osu->room->isVisible() && !osu->songBrowser2->isVisible() && !bancho->is_playing_a_multi_map();
     bool sitting_in_lobby = osu->lobby->isVisible();
@@ -1238,9 +1238,9 @@ bool Chat::isVisibilityForced() {
 
 void Chat::updateVisibility() {
     auto selected_beatmap = osu->getSelectedBeatmap();
-    bool can_skip = (selected_beatmap != NULL) && (selected_beatmap->isInSkippableSection());
+    bool can_skip = (selected_beatmap != nullptr) && (selected_beatmap->isInSkippableSection());
     bool is_spectating = cv::mod_autoplay.getBool() || (cv::mod_autopilot.getBool() && cv::mod_relax.getBool()) ||
-                         (selected_beatmap != NULL && selected_beatmap->is_watching) || bancho->spectating;
+                         (selected_beatmap != nullptr && selected_beatmap->is_watching) || bancho->spectating;
     bool is_clicking_circles = osu->isInPlayMode() && !can_skip && !is_spectating && !osu->pauseMenu->isVisible();
     if(bancho->is_playing_a_multi_map() && !bancho->room.all_players_loaded) {
         is_clicking_circles = false;
@@ -1273,7 +1273,7 @@ CBaseUIContainer *Chat::setVisible(bool visible) {
         osu->optionsMenu->setVisible(false);
         anim->moveQuartOut(&this->fAnimation, 1.0f, 0.25f * (1.0f - this->fAnimation), true);
 
-        if(this->selected_channel != NULL && !this->selected_channel->read) {
+        if(this->selected_channel != nullptr && !this->selected_channel->read) {
             this->mark_as_read(this->selected_channel);
         }
 
@@ -1289,7 +1289,7 @@ CBaseUIContainer *Chat::setVisible(bool visible) {
 
 bool Chat::isMouseInChat() {
     if(!this->isVisible()) return false;
-    if(this->selected_channel == NULL) return false;
+    if(this->selected_channel == nullptr) return false;
     return this->input_box->isMouseInside() || this->selected_channel->ui->isMouseInside();
 }
 

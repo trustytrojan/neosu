@@ -60,7 +60,7 @@ class ModSelectorOverrideSliderDescButton : public CBaseUIButton {
 
    private:
     void drawText() override {
-        if(this->font != NULL && this->sText.length() > 0) {
+        if(this->font != nullptr && this->sText.length() > 0) {
             float xPosAdd = this->vSize.x / 2.0f - this->fStringWidth / 2.0f;
 
             // g->pushClipRect(McRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y));
@@ -145,7 +145,7 @@ ModSelector::ModSelector() : OsuScreen() {
     this->bWaitForSpeedChangeFinished = false;
     this->bWaitForHPChangeFinished = false;
 
-    this->speedSlider = NULL;
+    this->speedSlider = nullptr;
     this->bShowOverrideSliderALTHint = true;
 
     // build mod grid buttons
@@ -397,9 +397,9 @@ void ModSelector::updateScoreMultiplierLabelText() {
 void ModSelector::updateExperimentalButtons() {
     for(auto &experimentalMod : this->experimentalMods) {
         ConVar *cvar = experimentalMod.cvar;
-        if(cvar != NULL) {
+        if(cvar != nullptr) {
             CBaseUICheckbox *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(experimentalMod.element);
-            if(checkboxPointer != NULL) {
+            if(checkboxPointer != nullptr) {
                 if(cvar->getBool() != checkboxPointer->isChecked()) checkboxPointer->setChecked(cvar->getBool(), false);
             }
         }
@@ -601,7 +601,7 @@ void ModSelector::mouse_update(bool *propagate_clicks) {
         bool experimentalModEnabled = false;
         for(auto &experimentalMod : this->experimentalMods) {
             CBaseUICheckbox *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(experimentalMod.element);
-            if(checkboxPointer != NULL && checkboxPointer->isChecked()) {
+            if(checkboxPointer != nullptr && checkboxPointer->isChecked()) {
                 experimentalModEnabled = true;
                 break;
             }
@@ -626,7 +626,7 @@ void ModSelector::mouse_update(bool *propagate_clicks) {
     // delayed onModUpdate() triggers when changing some values
     {
         // handle dynamic CS and slider vertex buffer updates
-        if(this->CSSlider != NULL && (this->CSSlider->isActive() || this->CSSlider->hasChanged())) {
+        if(this->CSSlider != nullptr && (this->CSSlider->isActive() || this->CSSlider->hasChanged())) {
             this->bWaitForCSChangeFinished = true;
         } else if(this->bWaitForCSChangeFinished) {
             this->bWaitForCSChangeFinished = false;
@@ -640,7 +640,7 @@ void ModSelector::mouse_update(bool *propagate_clicks) {
         }
 
         // handle dynamic live pp calculation updates (when CS or Speed/BPM changes)
-        if(this->speedSlider != NULL && (this->speedSlider->isActive() || this->speedSlider->hasChanged())) {
+        if(this->speedSlider != nullptr && (this->speedSlider->isActive() || this->speedSlider->hasChanged())) {
             this->bWaitForSpeedChangeFinished = true;
         } else if(this->bWaitForSpeedChangeFinished) {
             this->bWaitForCSChangeFinished = false;
@@ -654,7 +654,7 @@ void ModSelector::mouse_update(bool *propagate_clicks) {
         }
 
         // handle dynamic HP drain updates
-        if(this->HPSlider != NULL && (this->HPSlider->isActive() || this->HPSlider->hasChanged())) {
+        if(this->HPSlider != nullptr && (this->HPSlider->isActive() || this->HPSlider->hasChanged())) {
             this->bWaitForHPChangeFinished = true;
         } else if(this->bWaitForHPChangeFinished) {
             this->bWaitForCSChangeFinished = false;
@@ -717,7 +717,7 @@ CBaseUIContainer *ModSelector::setVisible(bool visible) {
         bool experimentalModEnabled = false;
         for(auto &experimentalMod : this->experimentalMods) {
             CBaseUICheckbox *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(experimentalMod.element);
-            if(checkboxPointer != NULL && checkboxPointer->isChecked()) {
+            if(checkboxPointer != nullptr && checkboxPointer->isChecked()) {
                 experimentalModEnabled = true;
                 break;
             }
@@ -767,7 +767,7 @@ bool ModSelector::isMouseInside() {
 
     bool isMouseInsideAnyOverrideSliders = false;
     for(auto &overrideSlider : this->overrideSliders) {
-        if((overrideSlider.lock != NULL && overrideSlider.lock->isMouseInside()) ||
+        if((overrideSlider.lock != nullptr && overrideSlider.lock->isMouseInside()) ||
            overrideSlider.desc->isMouseInside() || overrideSlider.slider->isMouseInside() ||
            overrideSlider.label->isMouseInside()) {
             isMouseInsideAnyOverrideSliders = true;
@@ -799,7 +799,7 @@ void ModSelector::updateLayout() {
             for(int y = 0; y < this->iGridHeight; y++) {
                 UIModSelectorModButton *button = this->getModButtonOnGrid(x, y);
 
-                if(button != NULL) {
+                if(button != nullptr) {
                     button->setPos(start + Vector2(size.x * x + offset.x * x, size.y * y + offset.y * y));
                     button->setBaseScale(1.0f * uiScale, 1.0f * uiScale);
                     button->setSize(size);
@@ -832,7 +832,7 @@ void ModSelector::updateLayout() {
                 this->overrideSliders[i].slider->getPos().x - this->overrideSliders[i].desc->getSize().x - margin,
                 this->overrideSliders[i].slider->getPos().y);
 
-            if(this->overrideSliders[i].lock != NULL && this->overrideSliders.size() > 1) {
+            if(this->overrideSliders[i].lock != nullptr && this->overrideSliders.size() > 1) {
                 this->overrideSliders[i].lock->setPos(this->overrideSliders[1].desc->getPos().x -
                                                           this->overrideSliders[i].lock->getSize().x - margin -
                                                           3 * dpiScale,
@@ -892,7 +892,7 @@ void ModSelector::updateLayout() {
             for(int y = 0; y < this->iGridHeight; y++) {
                 UIModSelectorModButton *button = this->getModButtonOnGrid(x, y);
 
-                if(button != NULL) {
+                if(button != nullptr) {
                     button->setPos(start + Vector2(blockSize.x * x + offset.x * x, blockSize.y * y + offset.y * y));
                     button->setBaseScale(1 * uiScale, 1 * uiScale);
                     button->setSize(blockSize);
@@ -918,7 +918,7 @@ void ModSelector::updateLayout() {
                 this->overrideSliders[i].slider->getPos().x - this->overrideSliders[i].desc->getSize().x - margin,
                 this->overrideSliders[i].slider->getPos().y);
 
-            if(this->overrideSliders[i].lock != NULL && this->overrideSliders.size() > 1) {
+            if(this->overrideSliders[i].lock != nullptr && this->overrideSliders.size() > 1) {
                 this->overrideSliders[i].lock->setPos(this->overrideSliders[1].desc->getPos().x -
                                                           this->overrideSliders[i].lock->getSize().x - margin -
                                                           3 * dpiScale,
@@ -960,13 +960,13 @@ void ModSelector::updateExperimentalLayout() {
         // custom
         {
             CBaseUICheckbox *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(e);
-            if(checkboxPointer != NULL) {
+            if(checkboxPointer != nullptr) {
                 checkboxPointer->onResized();
                 checkboxPointer->setWidthToContent(0);
             }
 
             CBaseUILabel *labelPointer = dynamic_cast<CBaseUILabel *>(e);
-            if(labelPointer != NULL) {
+            if(labelPointer != nullptr) {
                 labelPointer->onResized();
                 labelPointer->setWidthToContent(0);
             }
@@ -1008,7 +1008,7 @@ UIModSelectorModButton *ModSelector::setModButtonOnGrid(int x, int y, int state,
                                                         std::function<SkinImage *()> getImageFunc) {
     UIModSelectorModButton *modButton = this->getModButtonOnGrid(x, y);
 
-    if(modButton != NULL) {
+    if(modButton != nullptr) {
         modButton->setState(state, initialState, modCvar, std::move(modName), tooltipText, std::move(getImageFunc));
         modButton->setVisible(true);
     }
@@ -1022,7 +1022,7 @@ UIModSelectorModButton *ModSelector::getModButtonOnGrid(int x, int y) {
     if(index < this->modButtons.size())
         return this->modButtons[index];
     else
-        return NULL;
+        return nullptr;
 }
 
 ModSelector::OVERRIDE_SLIDER ModSelector::addOverrideSlider(UString text, const UString& labelText, ConVar *cvar, float min,
@@ -1030,7 +1030,7 @@ ModSelector::OVERRIDE_SLIDER ModSelector::addOverrideSlider(UString text, const 
     int height = 25;
 
     OVERRIDE_SLIDER os;
-    if(lockCvar != NULL) {
+    if(lockCvar != nullptr) {
         os.lock = new ModSelectorOverrideSliderLockButton(0, 0, height, height, "", "");
         os.lock->setChangeCallback(SA::MakeDelegate<&ModSelector::onOverrideSliderLockChange>(this));
     }
@@ -1047,7 +1047,7 @@ ModSelector::OVERRIDE_SLIDER ModSelector::addOverrideSlider(UString text, const 
     os.slider->setDrawBackground(false);
     os.slider->setFrameColor(0xff777777);
     // os.desc->setTextJustification(CBaseUILabel::TEXT_JUSTIFICATION::TEXT_JUSTIFICATION_CENTERED);
-    os.desc->setEnabled(lockCvar != NULL);
+    os.desc->setEnabled(lockCvar != nullptr);
     os.desc->setDrawFrame(debugDrawFrame);
     os.desc->setDrawBackground(false);
     os.desc->setTextColor(0xff777777);
@@ -1060,9 +1060,9 @@ ModSelector::OVERRIDE_SLIDER ModSelector::addOverrideSlider(UString text, const 
     os.slider->setLiveUpdate(true);
     os.slider->setAllowMouseWheel(false);
 
-    if(os.cvar != NULL) os.slider->setValue(os.cvar->getFloat() + 1.0f, false);
+    if(os.cvar != nullptr) os.slider->setValue(os.cvar->getFloat() + 1.0f, false);
 
-    if(os.lock != NULL) this->overrideSliderContainer->addBaseUIElement(os.lock);
+    if(os.lock != nullptr) this->overrideSliderContainer->addBaseUIElement(os.lock);
 
     this->overrideSliderContainer->addBaseUIElement(os.desc);
     this->overrideSliderContainer->addBaseUIElement(os.slider);
@@ -1090,7 +1090,7 @@ CBaseUILabel *ModSelector::addExperimentalLabel(const UString& text) {
 
     EXPERIMENTAL_MOD em;
     em.element = label;
-    em.cvar = NULL;
+    em.cvar = nullptr;
     this->experimentalMods.push_back(em);
 
     return label;
@@ -1100,7 +1100,7 @@ UICheckbox *ModSelector::addExperimentalCheckbox(const UString& text, const UStr
     UICheckbox *checkbox = new UICheckbox(0, 0, 0, 35, text, text);
     checkbox->setTooltipText(tooltipText);
     checkbox->setWidthToContent(0);
-    if(cvar != NULL) {
+    if(cvar != nullptr) {
         checkbox->setChecked(cvar->getBool());
         checkbox->setChangeCallback(SA::MakeDelegate<&ModSelector::onCheckboxChange>(this));
     }
@@ -1151,7 +1151,7 @@ void ModSelector::resetMods() {
     // cv::mod_fposu.setValue(false);  // intentionally commented out so people can play it in multi
 
     for(auto &overrideSlider : this->overrideSliders) {
-        if(overrideSlider.lock != NULL) overrideSlider.lock->setChecked(false);
+        if(overrideSlider.lock != nullptr) overrideSlider.lock->setChecked(false);
     }
 
     for(auto &overrideSlider : this->overrideSliders) {
@@ -1169,11 +1169,11 @@ void ModSelector::resetMods() {
     for(auto &experimentalMod : this->experimentalMods) {
         ConVar *cvar = experimentalMod.cvar;
         CBaseUICheckbox *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(experimentalMod.element);
-        if(checkboxPointer != NULL) {
+        if(checkboxPointer != nullptr) {
             // HACKHACK: we update both just in case because if the mod selector was not yet visible after a convar
             // change (e.g. because of "Use mods") then the checkbox has not yet updated its internal state
             checkboxPointer->setChecked(false);
-            if(cvar != NULL) cvar->setValue(0.0f);
+            if(cvar != nullptr) cvar->setValue(0.0f);
         }
     }
 }
@@ -1237,7 +1237,7 @@ void ModSelector::onOverrideSliderChange(CBaseUISlider *slider) {
                 overrideSlider.label->setWidthToContent(0);
 
                 // HACKHACK: dirty
-                if(osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL) {
+                if(osu->getSelectedBeatmap()->getSelectedDifficulty2() != nullptr) {
                     if(overrideSlider.label->getName().find("BPM") != -1) {
                         // reset AR and OD override sliders if the bpm slider was reset
                         if(!this->ARLock->isChecked()) this->ARSlider->setValue(0.0f, false);
@@ -1247,7 +1247,7 @@ void ModSelector::onOverrideSliderChange(CBaseUISlider *slider) {
 
                 // usability: auto disable lock if override slider is fully set to -1.0f (disabled)
                 if(rawSliderValue == 0.0f) {
-                    if(overrideSlider.lock != NULL && overrideSlider.lock->isChecked())
+                    if(overrideSlider.lock != nullptr && overrideSlider.lock->isChecked())
                         overrideSlider.lock->setChecked(false);
                 }
             } else {
@@ -1258,7 +1258,7 @@ void ModSelector::onOverrideSliderChange(CBaseUISlider *slider) {
                 }
 
                 // HACKHACK: dirty
-                if(osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL) {
+                if(osu->getSelectedBeatmap()->getSelectedDifficulty2() != nullptr) {
                     if(overrideSlider.label->getName().find("BPM") != -1) {
                         // HACKHACK: force BPM slider to have a min value of 0.05 instead of 0 (because that's the
                         // minimum for BASS) note that the BPM slider is just a 'fake' slider, it directly controls the
@@ -1343,7 +1343,7 @@ void ModSelector::updateOverrideSliderLabels() {
 
     for(auto &overrideSlider : this->overrideSliders) {
         const float convarValue = overrideSlider.cvar->getFloat();
-        const bool isLocked = (overrideSlider.lock != NULL && overrideSlider.lock->isChecked());
+        const bool isLocked = (overrideSlider.lock != nullptr && overrideSlider.lock->isChecked());
 
         // update colors
         if(convarValue < 0.0f && !isLocked) {
@@ -1363,7 +1363,7 @@ void ModSelector::updateOverrideSliderLabels() {
         overrideSlider.label->setWidthToContent(0);
 
         // update lock checkbox
-        if(overrideSlider.lock != NULL && overrideSlider.lockCvar != NULL &&
+        if(overrideSlider.lock != nullptr && overrideSlider.lockCvar != nullptr &&
            overrideSlider.lock->isChecked() != overrideSlider.lockCvar->getBool())
             overrideSlider.lock->setChecked(overrideSlider.lockCvar->getBool());
     }
@@ -1373,7 +1373,7 @@ UString ModSelector::getOverrideSliderLabelText(ModSelector::OVERRIDE_SLIDER s, 
     float convarValue = s.cvar->getFloat();
 
     UString newLabelText = s.label->getName();
-    if(osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL) {
+    if(osu->getSelectedBeatmap()->getSelectedDifficulty2() != nullptr) {
         // for relevant values (AR/OD), any non-1.0x speed multiplier should show the fractional parts caused by such a
         // speed multiplier (same for non-1.0x difficulty multiplier)
         const bool forceDisplayTwoDecimalDigits =
@@ -1480,7 +1480,7 @@ void ModSelector::toggleAuto() { this->modButtonAuto->click(); }
 void ModSelector::onCheckboxChange(CBaseUICheckbox *checkbox) {
     for(auto &experimentalMod : this->experimentalMods) {
         if(experimentalMod.element == checkbox) {
-            if(experimentalMod.cvar != NULL) experimentalMod.cvar->setValue(checkbox->isChecked());
+            if(experimentalMod.cvar != nullptr) experimentalMod.cvar->setValue(checkbox->isChecked());
 
             // force mod update
             {

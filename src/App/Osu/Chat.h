@@ -74,7 +74,7 @@ class Chat : public OsuScreen {
     void askWhatChannelToJoin(CBaseUIButton *btn);
     UIButton *join_channel_btn;
 
-    ChatChannel *selected_channel = NULL;
+    ChatChannel* selected_channel = nullptr;
     std::vector<ChatChannel *> channels;
     CBaseUIContainer *button_container;
     CBaseUITextbox *input_box;
@@ -92,6 +92,6 @@ class Chat : public OsuScreen {
     UString tab_completion_prefix;
     UString tab_completion_match;
 
-    ChatChannel *ticker = NULL;
+    ChatChannel* ticker = nullptr;
     f64 ticker_tms = 0.0;
 };

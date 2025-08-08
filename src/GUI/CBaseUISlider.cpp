@@ -189,7 +189,7 @@ void CBaseUISlider::onKeyDown(KeyboardEvent &e) {
 }
 
 void CBaseUISlider::fireChangeCallback() {
-    if(this->sliderChangeCallback != NULL) this->sliderChangeCallback(this);
+    if(this->sliderChangeCallback != nullptr) this->sliderChangeCallback(this);
 }
 
 void CBaseUISlider::updateBlockPos() {
@@ -231,7 +231,7 @@ CBaseUISlider *CBaseUISlider::setValue(float value, bool animate, bool call_call
             this->vBlockPos.x = (this->vSize.x - this->vBlockSize.x) * percent;
     }
 
-    if(call_callback && changeCallbackCheck && this->sliderChangeCallback != NULL) {
+    if(call_callback && changeCallbackCheck && this->sliderChangeCallback != nullptr) {
         this->sliderChangeCallback(this);
 
         if(this->bHasChanged) {
@@ -284,13 +284,13 @@ void CBaseUISlider::onFocusStolen() { this->bBusy = false; }
 void CBaseUISlider::onMouseUpInside(bool  /*left*/, bool  /*right*/) {
     this->bBusy = false;
 
-    if(this->fCurValue != this->fPrevValue && this->sliderChangeCallback != NULL) this->sliderChangeCallback(this);
+    if(this->fCurValue != this->fPrevValue && this->sliderChangeCallback != nullptr) this->sliderChangeCallback(this);
 }
 
 void CBaseUISlider::onMouseUpOutside(bool  /*left*/, bool  /*right*/) {
     this->bBusy = false;
 
-    if(this->fCurValue != this->fPrevValue && this->sliderChangeCallback != NULL) this->sliderChangeCallback(this);
+    if(this->fCurValue != this->fPrevValue && this->sliderChangeCallback != nullptr) this->sliderChangeCallback(this);
 }
 
 void CBaseUISlider::onMouseDownInside(bool  /*left*/, bool  /*right*/) {

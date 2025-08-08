@@ -28,20 +28,20 @@ std::unique_ptr<ResourceManager> resourceManager = nullptr;
 std::unique_ptr<NetworkHandler> networkHandler = nullptr;
 std::unique_ptr<AnimationHandler> animationHandler = nullptr;
 
-Engine *engine = NULL;
+Engine* engine = nullptr;
 
-Console *Engine::console = NULL;
-ConsoleBox *Engine::consoleBox = NULL;
+Console* Engine::console = nullptr;
+ConsoleBox* Engine::consoleBox = nullptr;
 
 Engine::Engine() {
     engine = this;
 
-    this->guiContainer = NULL;
-    this->visualProfiler = NULL;
+    this->guiContainer = nullptr;
+    this->visualProfiler = nullptr;
 
     // disable output buffering (else we get multithreading issues due to blocking)
-    setvbuf(stdout, NULL, _IONBF, 0);
-    setvbuf(stderr, NULL, _IONBF, 0);
+    setvbuf(stdout, nullptr, _IONBF, 0);
+    setvbuf(stderr, nullptr, _IONBF, 0);
 
     // print debug information
     debugLog("-= Engine Startup =-\n");
@@ -133,12 +133,13 @@ Engine::~Engine() {
     debugLog("Engine: Freeing app...\n");
     app.reset();
 
-    if(this->console != NULL) showMessageErrorFatal("Engine Error", "this->console not set to NULL before shutdown!");
+    if(this->console != nullptr)
+        showMessageErrorFatal("Engine Error", "this->console not set to NULL before shutdown!");
 
     debugLog("Engine: Freeing engine GUI...\n");
     {
-        this->console = NULL;
-        this->consoleBox = NULL;
+        this->console = nullptr;
+        this->consoleBox = nullptr;
     }
     SAFE_DELETE(this->guiContainer);
 
@@ -184,7 +185,7 @@ Engine::~Engine() {
 
     debugLog("Engine: Goodbye.\n");
 
-    engine = NULL;
+    engine = nullptr;
 }
 
 void Engine::loadApp() {
@@ -269,12 +270,12 @@ void Engine::onPaint() {
 
         // middle
         {
-            if(app != NULL) {
+            if(app != nullptr) {
                 VPROF_BUDGET("App::draw", VPROF_BUDGETGROUP_DRAW);
                 app->draw();
             }
 
-            if(this->guiContainer != NULL) this->guiContainer->draw();
+            if(this->guiContainer != nullptr) this->guiContainer->draw();
 
             // debug input devices
             for(auto &inputDevice : this->inputDevices) {
@@ -346,7 +347,7 @@ void Engine::onUpdate() {
             VPROF_BUDGET("GUI::update", VPROF_BUDGETGROUP_UPDATE);
             // update gui
             bool propagate_clicks = true;
-            if(this->guiContainer != NULL) this->guiContainer->mouse_update(&propagate_clicks);
+            if(this->guiContainer != nullptr) this->guiContainer->mouse_update(&propagate_clicks);
 
             // execute queued commands
             // TODO: this is shit
@@ -360,7 +361,7 @@ void Engine::onUpdate() {
     }
 
     // update app
-    if(app != NULL) {
+    if(app != nullptr) {
         VPROF_BUDGET("App::update", VPROF_BUDGETGROUP_UPDATE);
         app->update();
     }
@@ -380,7 +381,7 @@ void Engine::onFocusGained() {
 
     if(cv::debug_engine.getBool()) debugLog("Engine: got focus\n");
 
-    if(app != NULL) app->onFocusGained();
+    if(app != nullptr) app->onFocusGained();
 }
 
 void Engine::onFocusLost() {
@@ -392,7 +393,7 @@ void Engine::onFocusLost() {
         keyboard->reset();
     }
 
-    if(app != NULL) app->onFocusLost();
+    if(app != nullptr) app->onFocusLost();
 
     // auto minimize on certain conditions
     if(env->isFullscreen() || env->isFullscreenWindowedBorderless()) {
@@ -410,7 +411,7 @@ void Engine::onMinimized() {
 
     if(cv::debug_engine.getBool()) debugLog("Engine: window minimized\n");
 
-    if(app != NULL) app->onMinimized();
+    if(app != nullptr) app->onMinimized();
 }
 
 void Engine::onMaximized() {
@@ -424,7 +425,7 @@ void Engine::onRestored() {
 
     if(cv::debug_engine.getBool()) debugLog("Engine: window restored\n");
 
-    if(app != NULL) app->onRestored();
+    if(app != nullptr) app->onRestored();
 }
 
 void Engine::onResolutionChange(Vector2 newResolution) {
@@ -443,23 +444,23 @@ void Engine::onResolutionChange(Vector2 newResolution) {
     this->bResolutionChange = false;
     this->vNewScreenSize = newResolution;
 
-    if(this->guiContainer != NULL) this->guiContainer->setSize(newResolution.x, newResolution.y);
-    if(this->consoleBox != NULL) Engine::consoleBox->onResolutionChange(newResolution);
+    if(this->guiContainer != nullptr) this->guiContainer->setSize(newResolution.x, newResolution.y);
+    if(this->consoleBox != nullptr) Engine::consoleBox->onResolutionChange(newResolution);
 
     // update everything
     this->vScreenSize = newResolution;
-    if(g != NULL) g->onResolutionChange(newResolution);
-    if(app != NULL) app->onResolutionChanged(newResolution);
+    if(g != nullptr) g->onResolutionChange(newResolution);
+    if(app != nullptr) app->onResolutionChanged(newResolution);
 }
 
 void Engine::onDPIChange() {
     debugLog(0xff00ff00, "Engine: DPI changed to {:d}\n", env->getDPI());
 
-    if(app != NULL) app->onDPIChanged();
+    if(app != nullptr) app->onDPIChanged();
 }
 
 void Engine::onShutdown() {
-    if(this->bBlackout || (app != NULL && !app->onShutdown())) return;
+    if(this->bBlackout || (app != nullptr && !app->onShutdown())) return;
 
     this->bBlackout = true;
     soundEngine->shutdown();

@@ -56,7 +56,7 @@ CBaseUITextField::TextObject::TextObject(float xPos, float yPos, float xSize, fl
 }
 
 void CBaseUITextField::TextObject::draw() {
-    if(this->font == NULL || this->sText.length() == 0) return;
+    if(this->font == nullptr || this->sText.length() == 0) return;
 
     // g->setColor(0xffffffff);
     // g->drawRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
@@ -94,7 +94,7 @@ void CBaseUITextField::TextObject::draw() {
 }
 
 void CBaseUITextField::TextObject::updateStringMetrics() {
-    if(this->font == NULL) return;
+    if(this->font == nullptr) return;
 
     this->fStringHeight = this->font->getHeight();
 }

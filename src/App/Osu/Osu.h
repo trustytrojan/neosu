@@ -213,31 +213,31 @@ class Osu final : public MouseListener, public KeyboardListener {
     void setupSoloud();
 
     // interfaces
-    VolumeOverlay *volumeOverlay = NULL;
-    MainMenu *mainMenu = NULL;
-    OptionsMenu *optionsMenu = NULL;
-    Chat *chat = NULL;
-    Lobby *lobby = NULL;
-    RoomScreen *room = NULL;
-    PromptScreen *prompt = NULL;
-    UIUserContextMenuScreen *user_actions = NULL;
-    SongBrowser *songBrowser2 = NULL;
-    BackgroundImageHandler *backgroundImageHandler = NULL;
-    ModSelector *modSelector = NULL;
-    RankingScreen *rankingScreen = NULL;
-    UserStatsScreen *userStats = NULL;
-    PauseMenu *pauseMenu = NULL;
-    Skin *skin = NULL;
-    HUD *hud = NULL;
-    TooltipOverlay *tooltipOverlay = NULL;
-    NotificationOverlay *notificationOverlay = NULL;
-    LiveScore *score = NULL;
-    Changelog *changelog = NULL;
-    UpdateHandler *updateHandler = NULL;
-    ModFPoSu *fposu = NULL;
-    SpectatorScreen *spectatorScreen = NULL;
+    VolumeOverlay* volumeOverlay = nullptr;
+    MainMenu* mainMenu = nullptr;
+    OptionsMenu* optionsMenu = nullptr;
+    Chat* chat = nullptr;
+    Lobby* lobby = nullptr;
+    RoomScreen* room = nullptr;
+    PromptScreen* prompt = nullptr;
+    UIUserContextMenuScreen* user_actions = nullptr;
+    SongBrowser* songBrowser2 = nullptr;
+    BackgroundImageHandler* backgroundImageHandler = nullptr;
+    ModSelector* modSelector = nullptr;
+    RankingScreen* rankingScreen = nullptr;
+    UserStatsScreen* userStats = nullptr;
+    PauseMenu* pauseMenu = nullptr;
+    Skin* skin = nullptr;
+    HUD* hud = nullptr;
+    TooltipOverlay* tooltipOverlay = nullptr;
+    NotificationOverlay* notificationOverlay = nullptr;
+    LiveScore* score = nullptr;
+    Changelog* changelog = nullptr;
+    UpdateHandler* updateHandler = nullptr;
+    ModFPoSu* fposu = nullptr;
+    SpectatorScreen* spectatorScreen = nullptr;
 
-    UserCard *userButton = NULL;
+    UserCard* userButton = nullptr;
 
     std::vector<OsuScreen *> screens;
 

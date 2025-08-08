@@ -21,10 +21,10 @@
 #include "SoundEngine.h"
 #include "Timing.h"
 
-SongDifficultyButton::SongDifficultyButton(SongBrowser *songBrowser, CBaseUIScrollView *view,
-                                           UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize,
-                                           UString name, DatabaseBeatmap *diff2, SongButton *parentSongButton)
-    : SongButton(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, std::move(name), NULL) {
+SongDifficultyButton::SongDifficultyButton(SongBrowser* songBrowser, CBaseUIScrollView* view,
+                                           UIContextMenu* contextMenu, float xPos, float yPos, float xSize, float ySize,
+                                           UString name, DatabaseBeatmap* diff2, SongButton* parentSongButton)
+    : SongButton(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, std::move(name), nullptr) {
     this->databaseBeatmap = diff2;  // NOTE: can't use parent constructor for passing this argument, as it would
                                     // otherwise try to build a full button (and not just a diff button)
     this->parentSongButton = parentSongButton;
@@ -33,7 +33,7 @@ SongDifficultyButton::SongDifficultyButton(SongBrowser *songBrowser, CBaseUIScro
     this->sDiff = this->databaseBeatmap->getDifficultyName();
 
     this->fDiffScale = 0.18f;
-    this->fOffsetPercentAnim = (this->parentSongButton != NULL ? 1.0f : 0.0f);
+    this->fOffsetPercentAnim = (this->parentSongButton != nullptr ? 1.0f : 0.0f);
 
     this->bUpdateGradeScheduled = true;
     this->bPrevOffsetPercentSelectionState = this->isIndependentDiffButton();
@@ -175,7 +175,7 @@ void SongDifficultyButton::onClicked(bool left, bool right) {
 void SongDifficultyButton::onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected) {
     Button::onSelected(wasSelected, autoSelectBottomMostChild, wasParentSelected);
 
-    const bool wasParentActuallySelected = (this->parentSongButton != NULL && wasParentSelected);
+    const bool wasParentActuallySelected = (this->parentSongButton != nullptr && wasParentSelected);
 
     this->updateGrade();
 
@@ -197,7 +197,7 @@ void SongDifficultyButton::updateGrade() {
         if(score.grade < this->grade) {
             this->grade = score.grade;
 
-            if(this->parentSongButton != NULL && this->parentSongButton->grade > this->grade) {
+            if(this->parentSongButton != nullptr && this->parentSongButton->grade > this->grade) {
                 this->parentSongButton->grade = this->grade;
             }
         }
@@ -205,7 +205,7 @@ void SongDifficultyButton::updateGrade() {
 }
 
 bool SongDifficultyButton::isIndependentDiffButton() const {
-    return (this->parentSongButton == NULL || !this->parentSongButton->isSelected());
+    return (this->parentSongButton == nullptr || !this->parentSongButton->isSelected());
 }
 
 Color SongDifficultyButton::getInactiveBackgroundColor() const {

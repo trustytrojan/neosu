@@ -17,7 +17,7 @@ NotificationOverlay::NotificationOverlay() : OsuScreen() {
     this->bWaitForKey = false;
     this->bWaitForKeyDisallowsLeftClick = false;
     this->bConsumeNextChar = false;
-    this->keyListener = NULL;
+    this->keyListener = nullptr;
 }
 
 static const f64 TOAST_WIDTH = 350.0;
@@ -188,7 +188,7 @@ void NotificationOverlay::onKeyDown(KeyboardEvent &e) {
 
             debugLog("keyCode = {:d}\n", e.getKeyCode());
 
-            if(this->keyListener != NULL) this->keyListener->onKey(e);
+            if(this->keyListener != nullptr) this->keyListener->onKey(e);
         }
 
         e.consume();

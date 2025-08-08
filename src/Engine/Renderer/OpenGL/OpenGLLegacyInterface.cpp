@@ -324,7 +324,7 @@ void OpenGLLegacyInterface::drawQuad(Vector2 topLeft, Vector2 topRight, Vector2 
 }
 
 void OpenGLLegacyInterface::drawImage(Image *image, AnchorPoint anchor) {
-    if(image == NULL) {
+    if(image == nullptr) {
         debugLog("WARNING: Tried to draw image with NULL texture!\n");
         return;
     }
@@ -388,7 +388,7 @@ void OpenGLLegacyInterface::drawImage(Image *image, AnchorPoint anchor) {
 }
 
 void OpenGLLegacyInterface::drawString(McFont *font, const UString &text) {
-    if(font == NULL || text.length() < 1 || !font->isReady()) return;
+    if(font == nullptr || text.length() < 1 || !font->isReady()) return;
 
     updateTransform();
 
@@ -403,7 +403,7 @@ void OpenGLLegacyInterface::drawString(McFont *font, const UString &text) {
 }
 
 void OpenGLLegacyInterface::drawVAO(VertexArrayObject *vao) {
-    if(vao == NULL) return;
+    if(vao == nullptr) return;
 
     updateTransform();
 

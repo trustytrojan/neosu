@@ -119,7 +119,7 @@ Mods Mods::from_cvars() {
     }
 
     auto beatmap = osu->getSelectedBeatmap();
-    if(beatmap != NULL) {
+    if(beatmap != nullptr) {
         mods.speed = beatmap->getSpeedMultiplier();
     }
 

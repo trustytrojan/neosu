@@ -17,7 +17,7 @@ CBaseUIImage::CBaseUIImage(std::string imageResourceName, float xPos, float yPos
     this->vScale.y = 1.0f;
 
     // if our image is null, autosize to the element size
-    if(this->image == NULL) {
+    if(this->image == nullptr) {
         this->vSize.x = xSize;
         this->vSize.y = ySize;
     }
@@ -40,7 +40,7 @@ void CBaseUIImage::draw() {
     }
 
     // draw image
-    if(this->image != NULL) {
+    if(this->image != nullptr) {
         g->setColor(this->color);
         g->pushTransform();
 
@@ -68,7 +68,7 @@ void CBaseUIImage::draw() {
 void CBaseUIImage::setImage(Image *img) {
     this->image = img;
 
-    if(this->image != NULL) {
+    if(this->image != nullptr) {
         if(this->bScaleToFit) {
             this->vSize.x = this->image->getWidth();
             this->vSize.y = this->image->getHeight();

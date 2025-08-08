@@ -20,7 +20,7 @@ class UserCard : public CBaseUIButton {
     i32 user_id = 0;
 
    private:
-    UIAvatar *avatar = NULL;
+    UIAvatar* avatar = nullptr;
 
     float fPP;
     float fAcc;

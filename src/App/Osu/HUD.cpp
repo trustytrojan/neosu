@@ -70,7 +70,7 @@ HUD::~HUD() {}
 
 void HUD::draw() {
     Beatmap *beatmap = osu->getSelectedBeatmap();
-    if(beatmap == NULL) return;  // sanity check
+    if(beatmap == nullptr) return;  // sanity check
 
     if(cv::draw_hud.getBool()) {
         if(cv::draw_inputoverlay.getBool()) {
@@ -116,7 +116,7 @@ void HUD::draw() {
         // NOTE: moved to draw behind hitobjects in Beatmap::draw()
         if(cv::mod_fposu.getBool()) {
             if(cv::draw_hiterrorbar.getBool() &&
-               (beatmap == NULL ||
+               (beatmap == nullptr ||
                 (!beatmap->isSpinnerActive() || !cv::hud_hiterrorbar_hide_during_spinner.getBool())) &&
                !beatmap->isLoading()) {
                 this->drawHitErrorBar(beatmap->getHitWindow300(), beatmap->getHitWindow100(), beatmap->getHitWindow50(),
@@ -146,7 +146,7 @@ void HUD::draw() {
         // NOTE: moved to draw behind hitobjects in Beatmap::draw()
         if(cv::mod_fposu.getBool()) {
             if(cv::draw_hiterrorbar.getBool() &&
-               (beatmap == NULL ||
+               (beatmap == nullptr ||
                 (!beatmap->isSpinnerActive() || !cv::hud_hiterrorbar_hide_during_spinner.getBool())) &&
                !beatmap->isLoading()) {
                 this->drawHitErrorBar(beatmap->getHitWindow300(), beatmap->getHitWindow100(), beatmap->getHitWindow50(),
@@ -230,7 +230,7 @@ void HUD::draw() {
 void HUD::mouse_update(bool * /*propagate_clicks*/) {
     Beatmap *beatmap = osu->getSelectedBeatmap();
 
-    if(beatmap != NULL) {
+    if(beatmap != nullptr) {
         // health anim
         const double currentHealth = beatmap->getHealth();
         const double elapsedMS = engine->getFrameTime() * 1000.0;
@@ -1055,7 +1055,7 @@ void HUD::drawHPBar(double health, float alpha, float breakAnim) {
 
     // draw ki
     {
-        SkinImage *ki = NULL;
+        SkinImage* ki = nullptr;
 
         if(useNewDefault)
             ki = osu->getSkin()->getScorebarMarker();
@@ -1069,7 +1069,7 @@ void HUD::drawHPBar(double health, float alpha, float breakAnim) {
                 ki = osu->getSkin()->getScorebarKi();
         }
 
-        if(ki != NULL && !ki->isMissingTexture()) {
+        if(ki != nullptr && !ki->isMissingTexture()) {
             if(!useNewDefault || health >= 0.2) {
                 ki->draw((markerOffset * scale) + (breakAnimOffset * scale), scale * this->fKiScaleAnim);
             }
@@ -1248,7 +1248,7 @@ std::vector<SCORE_ENTRY> HUD::getCurrentScores() {
             if(slot->has_quit()) {
                 slot->current_hp = 0;
                 scoreEntry.name = UString::format("%s [quit]", user_info->name.toUtf8());
-            } else if(beatmap != NULL && beatmap->isInSkippableSection() && beatmap->iCurrentHitObjectIndex < 1) {
+            } else if(beatmap != nullptr && beatmap->isInSkippableSection() && beatmap->iCurrentHitObjectIndex < 1) {
                 if(slot->skipped) {
                     // XXX: Draw pretty "Skip" image instead
                     scoreEntry.name = UString::format("%s [skip]", user_info->name.toUtf8());
@@ -1328,12 +1328,12 @@ std::vector<SCORE_ENTRY> HUD::getCurrentScores() {
 
 void HUD::resetScoreboard() {
     Beatmap *beatmap = osu->getSelectedBeatmap();
-    if(beatmap == NULL) return;
+    if(beatmap == nullptr) return;
     DatabaseBeatmap *diff2 = beatmap->getSelectedDifficulty2();
-    if(diff2 == NULL) return;
+    if(diff2 == nullptr) return;
 
     this->beatmap_md5 = diff2->getMD5Hash();
-    this->player_slot = NULL;
+    this->player_slot = nullptr;
     for(auto slot : this->slots) {
         delete slot;
     }
@@ -1356,9 +1356,9 @@ void HUD::resetScoreboard() {
 
 void HUD::updateScoreboard(bool animate) {
     Beatmap *beatmap = osu->getSelectedBeatmap();
-    if(beatmap == NULL) return;
+    if(beatmap == nullptr) return;
     DatabaseBeatmap *diff2 = beatmap->getSelectedDifficulty2();
-    if(diff2 == NULL) return;
+    if(diff2 == nullptr) return;
 
     if(!cv::scoreboard_animations.getBool()) {
         animate = false;

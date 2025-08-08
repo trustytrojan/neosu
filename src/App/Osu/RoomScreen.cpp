@@ -229,7 +229,7 @@ void RoomScreen::draw() {
             this->map_title->setText(text.toUtf8());
             this->map_title->setSizeToContent(0, 0);
             this->ready_btn->is_loading = true;
-        } else if(beatmap != NULL) {
+        } else if(beatmap != nullptr) {
             current_map_id = bancho->room.map_id;
             this->on_map_change();
         }
@@ -524,7 +524,7 @@ void RoomScreen::on_map_change() {
         this->ready_btn->is_loading = true;
     } else {
         auto beatmap = db->getBeatmapDifficulty(bancho->room.map_md5);
-        if(beatmap != NULL) {
+        if(beatmap != nullptr) {
             osu->songBrowser2->onDifficultySelected(beatmap, false);
             this->map_title->setText(bancho->room.map_name);
             this->map_title->setSizeToContent(0, 0);
@@ -613,14 +613,14 @@ void RoomScreen::on_room_updated(Room room) {
     bool map_changed = bancho->room.map_id != room.map_id;
     bancho->room = room;
 
-    Slot *player_slot = NULL;
+    Slot* player_slot = nullptr;
     for(auto &slot : bancho->room.slots) {
         if(slot.player_id == bancho->user_id) {
             player_slot = &slot;
             break;
         }
     }
-    if(player_slot == NULL) {
+    if(player_slot == nullptr) {
         // Player got kicked
         this->ragequit();
         return;
@@ -648,12 +648,12 @@ void RoomScreen::on_room_updated(Room room) {
 
 void RoomScreen::on_match_started(Room room) {
     bancho->room = std::move(room);
-    if(osu->getSelectedBeatmap() == NULL) {
+    if(osu->getSelectedBeatmap() == nullptr) {
         debugLog("We received MATCH_STARTED without being ready, wtf!\n");
         return;
     }
 
-    this->last_packet_tms = time(NULL);
+    this->last_packet_tms = time(nullptr);
 
     if(osu->getSelectedBeatmap()->play()) {
         this->bVisible = false;
@@ -774,7 +774,7 @@ void RoomScreen::onClientScoreChange(bool force) {
     if(!bancho->is_playing_a_multi_map()) return;
 
     // Update at most once every 250ms
-    bool should_update = difftime(time(NULL), this->last_packet_tms) > 0.25;
+    bool should_update = difftime(time(nullptr), this->last_packet_tms) > 0.25;
     if(!should_update && !force) return;
 
     Packet packet;
@@ -782,7 +782,7 @@ void RoomScreen::onClientScoreChange(bool force) {
     BANCHO::Proto::write<ScoreFrame>(&packet, ScoreFrame::get());
     BANCHO::Net::send_packet(packet);
 
-    this->last_packet_tms = time(NULL);
+    this->last_packet_tms = time(nullptr);
 }
 
 void RoomScreen::onReadyButtonClick() {

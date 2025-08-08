@@ -69,7 +69,7 @@ void send_api_request_async(const APIRequest &api_out) {
         options.headers["token"] = cho_token.toUtf8();
     }
 
-    if(api_out.mime != NULL) {
+    if(api_out.mime != nullptr) {
         options.mimeData = api_out.mime;
     }
 
@@ -129,7 +129,7 @@ void send_bancho_packet_async(Packet outgoing) {
     auto scheme = cv::use_https.getBool() ? "https://" : "http://";
     auto query_url = UString::format("%sc.%s/", scheme, bancho->endpoint.c_str());
 
-    last_packet_tms = time(NULL);
+    last_packet_tms = time(nullptr);
 
     networkHandler->httpRequestAsync(
         query_url,
@@ -162,10 +162,10 @@ void send_bancho_packet_async(Packet outgoing) {
 
             auto features_it = response.headers.find("x-mcosu-features");
             if(features_it != response.headers.end()) {
-                if(strstr(features_it->second.c_str(), "submit=0") != NULL) {
+                if(strstr(features_it->second.c_str(), "submit=0") != nullptr) {
                     bancho->score_submission_policy = ServerPolicy::NO;
                     Engine::logRaw("[httpRequestAsync] Server doesn't want score submission. :(\n");
-                } else if(strstr(features_it->second.c_str(), "submit=1") != NULL) {
+                } else if(strstr(features_it->second.c_str(), "submit=1") != nullptr) {
                     bancho->score_submission_policy = ServerPolicy::YES;
                     Engine::logRaw("[httpRequestAsync] Server wants score submission! :D\n");
                 }
@@ -252,7 +252,7 @@ void handle_api_response(Packet packet) {
 
             // XXX: this is blocking main thread
             FILE *replay_file = fopen(replay_path.toUtf8(), "wb");
-            if(replay_file == NULL) {
+            if(replay_file == nullptr) {
                 osu->notificationOverlay->addToast("Failed to save replay", ERROR_TOAST);
                 break;
             }
@@ -349,9 +349,9 @@ void disconnect() {
     bancho->spectators.clear();
     bancho->fellow_spectators.clear();
     bancho->server_icon_url = "";
-    if(bancho->server_icon != NULL) {
+    if(bancho->server_icon != nullptr) {
         resourceManager->destroyResource(bancho->server_icon);
-        bancho->server_icon = NULL;
+        bancho->server_icon = nullptr;
     }
 
     bancho->score_submission_policy = ServerPolicy::NO_PREFERENCE;
@@ -443,7 +443,7 @@ void update_networking() {
     // Initialize last_packet_tms on first call
     static bool initialized = false;
     if(!initialized) {
-        last_packet_tms = time(NULL);
+        last_packet_tms = time(nullptr);
         initialized = true;
     }
 
@@ -463,7 +463,7 @@ void update_networking() {
     if(osu && osu->lobby->isVisible()) seconds_between_pings = 1;
     if(bancho->spectating) seconds_between_pings = 1;
     if(bancho->is_in_a_multi_room() && seconds_between_pings > 3) seconds_between_pings = 3;
-    bool should_ping = difftime(time(NULL), last_packet_tms) > seconds_between_pings;
+    bool should_ping = difftime(time(nullptr), last_packet_tms) > seconds_between_pings;
     if(bancho->user_id <= 0) should_ping = false;
 
     // Handle login and outgoing packet processing
@@ -560,7 +560,7 @@ void send_packet(Packet &packet) {
     if(bancho->user_id <= 0) {
         // Don't queue any packets until we're logged in
         free(packet.memory);
-        packet.memory = NULL;
+        packet.memory = nullptr;
         packet.size = 0;
         return;
     }
@@ -579,7 +579,7 @@ void send_packet(Packet &packet) {
     proto::write_bytes(&outgoing, packet.memory, packet.pos);
 
     free(packet.memory);
-    packet.memory = NULL;
+    packet.memory = nullptr;
     packet.size = 0;
 }
 

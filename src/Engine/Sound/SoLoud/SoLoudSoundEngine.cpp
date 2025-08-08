@@ -45,7 +45,7 @@ SoLoudSoundEngine::SoLoudSoundEngine() : SoundEngine() {
 void SoLoudSoundEngine::restart() { this->setOutputDeviceInt(this->getWantedDevice(), true); }
 
 bool SoLoudSoundEngine::play(Sound *snd, float pan, float pitch) {
-    if(!this->isReady() || snd == NULL || !snd->isReady()) return false;
+    if(!this->isReady() || snd == nullptr || !snd->isReady()) return false;
 
     // MC_MESSAGE(
     //     "FIXME: audio pitch may be inaccurate! need to convert caller's pitch properly like old McOsu for SoLoud")
@@ -197,7 +197,7 @@ unsigned int SoLoudSoundEngine::playDirectSound(SoLoudSound *soloudSound, float 
 }
 
 void SoLoudSoundEngine::pause(Sound *snd) {
-    if(!this->isReady() || snd == NULL || !snd->isReady()) return;
+    if(!this->isReady() || snd == nullptr || !snd->isReady()) return;
 
     auto *soloudSound = snd->as<SoLoudSound>();
     if(!soloudSound || soloudSound->handle == 0) return;
@@ -207,7 +207,7 @@ void SoLoudSoundEngine::pause(Sound *snd) {
 }
 
 void SoLoudSoundEngine::stop(Sound *snd) {
-    if(!this->isReady() || snd == NULL || !snd->isReady()) return;
+    if(!this->isReady() || snd == nullptr || !snd->isReady()) return;
 
     auto *soloudSound = snd->as<SoLoudSound>();
     if(!soloudSound || soloudSound->handle == 0) return;

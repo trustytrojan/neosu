@@ -15,6 +15,6 @@ class UIAvatar : public CBaseUIButton {
 
     i32 player_id;
     std::string avatar_path;
-    Image *avatar = NULL;
+    Image* avatar = nullptr;
     bool on_screen = false;
 };

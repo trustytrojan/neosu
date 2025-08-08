@@ -32,7 +32,7 @@ UIModSelectorModButton::UIModSelectorModButton(ModSelector *osuModSelector, floa
     this->bAvailable = true;
     this->bOn = false;
 
-    this->getActiveImageFunc = NULL;
+    this->getActiveImageFunc = nullptr;
 
     this->bFocusStolenDelay = false;
 }
@@ -40,7 +40,7 @@ UIModSelectorModButton::UIModSelectorModButton(ModSelector *osuModSelector, floa
 void UIModSelectorModButton::draw() {
     if(!this->bVisible) return;
 
-    if(this->getActiveImageFunc != NULL && this->getActiveImageFunc()) {
+    if(this->getActiveImageFunc != nullptr && this->getActiveImageFunc()) {
         g->pushTransform();
         {
             g->scale(this->vScale.x, this->vScale.y);
@@ -241,7 +241,7 @@ void UIModSelectorModButton::setState(int state) {
     this->iState = state;
 
     // update image
-    if(this->iState < this->states.size() && this->states[this->iState].getImageFunc != NULL) {
+    if(this->iState < this->states.size() && this->states[this->iState].getImageFunc != nullptr) {
         this->getActiveImageFunc = this->states[this->iState].getImageFunc;
     }
 }
@@ -251,7 +251,7 @@ void UIModSelectorModButton::setState(unsigned int state, bool initialState, Con
     // dynamically add new state
     while(this->states.size() < state + 1) {
         STATE t{};
-        t.getImageFunc = NULL;
+        t.getImageFunc = nullptr;
         this->states.push_back(t);
     }
     this->states[state].cvar = cvar;

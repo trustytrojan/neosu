@@ -67,17 +67,17 @@
 
 #include "score.h"
 
-Osu *osu = NULL;
+Osu* osu = nullptr;
 
 Vector2 Osu::g_vInternalResolution;
 
-Shader *actual_flashlight_shader = NULL;
-Shader *flashlight_shader = NULL;
+Shader* actual_flashlight_shader = nullptr;
+Shader* flashlight_shader = nullptr;
 
 Osu::Osu() {
     osu = this;
 
-    srand(time(NULL));
+    srand(time(nullptr));
 
     bancho->neosu_version = UString::fmt("{:.2f}-" NEOSU_STREAM, cv::version.getFloat());
     bancho->user_agent = UString::format("Mozilla/5.0 (compatible; neosu/%s; +https://" NEOSU_DOMAIN "/)",
@@ -133,10 +133,10 @@ Osu::Osu() {
     cv::confine_cursor_never.setCallback(SA::MakeDelegate<&Osu::updateConfineCursor>(this));
 
     // vars
-    this->skin = NULL;
-    this->backgroundImageHandler = NULL;
-    this->modSelector = NULL;
-    this->updateHandler = NULL;
+    this->skin = nullptr;
+    this->backgroundImageHandler = nullptr;
+    this->modSelector = nullptr;
+    this->updateHandler = nullptr;
 
     this->bF1 = false;
     this->bUIToggleCheck = false;
@@ -169,7 +169,7 @@ Osu::Osu() {
     this->bWasBossKeyPaused = false;
     this->bSkinLoadScheduled = false;
     this->bSkinLoadWasReload = false;
-    this->skinScheduledToLoad = NULL;
+    this->skinScheduledToLoad = nullptr;
     this->bFontReloadScheduled = false;
     this->bFireResolutionChangedScheduled = false;
     this->bFireDelayedFontReloadAndResolutionChangeToFixDesyncedUIScaleScheduled = false;
@@ -283,7 +283,7 @@ Osu::Osu() {
         skinFolder.append(cv::osu_folder_sub_skins.getString());
         skinFolder.append(cv::skin.getString());
         skinFolder.append("/");
-        if(this->skin == NULL)  // the skin may already be loaded by Console::execConfigFile() above
+        if(this->skin == nullptr)  // the skin may already be loaded by Console::execConfigFile() above
             this->onSkinChange(cv::skin.getString().c_str());
 
         // enable async skin loading for user-action skin changes (but not during startup)
@@ -396,7 +396,7 @@ Osu::Osu() {
 
 Osu::~Osu() {
     sct_abort();
-    lct_set_map(NULL);
+    lct_set_map(nullptr);
     VolNormalization::shutdown();
     MapCalcThread::shutdown();
     BANCHO::Net::cleanup_networking();
@@ -412,11 +412,11 @@ Osu::~Osu() {
     SAFE_DELETE(this->skin);
     SAFE_DELETE(this->backgroundImageHandler);
 
-    osu = NULL;
+    osu = nullptr;
 }
 
 void Osu::draw() {
-    if(this->skin == NULL || flashlight_shader == NULL)  // sanity check
+    if(this->skin == nullptr || flashlight_shader == nullptr)  // sanity check
     {
         g->setColor(0xff000000);
         g->fillRect(0, 0, this->getScreenWidth(), this->getScreenHeight());
@@ -551,7 +551,7 @@ void Osu::draw() {
         this->lobby->draw();
         this->room->draw();
 
-        if(this->songBrowser2 != NULL) this->songBrowser2->draw();
+        if(this->songBrowser2 != nullptr) this->songBrowser2->draw();
 
         this->mainMenu->draw();
         this->changelog->draw();
@@ -624,7 +624,7 @@ void Osu::draw() {
 }
 
 void Osu::update() {
-    if(this->skin != NULL) this->skin->update();
+    if(this->skin != nullptr) this->skin->update();
 
     if(this->isInPlayMode() && cv::mod_fposu.getBool()) this->fposu->update();
 
@@ -634,7 +634,7 @@ void Osu::update() {
     }
 
     if(this->music_unpause_scheduled && soundEngine->isReady()) {
-        if(this->getSelectedBeatmap()->getMusic() != NULL) {
+        if(this->getSelectedBeatmap()->getMusic() != nullptr) {
             soundEngine->play(this->getSelectedBeatmap()->getMusic());
         }
         this->music_unpause_scheduled = false;
@@ -763,7 +763,7 @@ void Osu::update() {
 
         if(bancho->is_in_a_multi_room()) {
             this->room->setVisible(!this->modSelector->isVisible());
-        } else if(!this->isInPlayMode() && this->songBrowser2 != NULL) {
+        } else if(!this->isInPlayMode() && this->songBrowser2 != nullptr) {
             this->songBrowser2->setVisible(!this->modSelector->isVisible());
         }
     }
@@ -811,14 +811,14 @@ void Osu::update() {
 
     // skin async loading
     if(this->bSkinLoadScheduled) {
-        if(this->skinScheduledToLoad != NULL && this->skinScheduledToLoad->isReady()) {
+        if(this->skinScheduledToLoad != nullptr && this->skinScheduledToLoad->isReady()) {
             this->bSkinLoadScheduled = false;
 
             if(this->skin != this->skinScheduledToLoad) SAFE_DELETE(this->skin);
 
             this->skin = this->skinScheduledToLoad;
 
-            this->skinScheduledToLoad = NULL;
+            this->skinScheduledToLoad = nullptr;
 
             // force layout update after all skin elements have been loaded
             this->fireResolutionChanged();
@@ -859,7 +859,7 @@ void Osu::update() {
 
 bool Osu::isInCriticalInteractiveSession() {
     // is in play mode and not paused
-    return isInPlayMode() && !(getSelectedBeatmap() != NULL && getSelectedBeatmap()->isPaused());
+    return isInPlayMode() && !(getSelectedBeatmap() != nullptr && getSelectedBeatmap()->isPaused());
 }
 
 void Osu::useMods(FinishedScore *score) { Replay::Mods::use(score->mods); }
@@ -916,7 +916,7 @@ void Osu::updateMods() {
     osu->getScore()->mods = Replay::Mods::from_cvars();
     osu->getScore()->setCheated();
 
-    if(this->songBrowser2 != NULL) {
+    if(this->songBrowser2 != nullptr) {
         // Update pp/stars display for current map
         this->songBrowser2->recalculateStarsForSelectedBeatmap(true);
     }
@@ -948,9 +948,9 @@ void Osu::onKeyDown(KeyboardEvent &key) {
         Shader *cursorTrailShader = resourceManager->getShader("cursortrail");
         Shader *hitcircle3DShader = resourceManager->getShader("hitcircle3D");
 
-        if(sliderShader != NULL) sliderShader->reload();
-        if(cursorTrailShader != NULL) cursorTrailShader->reload();
-        if(hitcircle3DShader != NULL) hitcircle3DShader->reload();
+        if(sliderShader != nullptr) sliderShader->reload();
+        if(cursorTrailShader != nullptr) cursorTrailShader->reload();
+        if(hitcircle3DShader != nullptr) hitcircle3DShader->reload();
 
         key.consume();
     }
@@ -1388,7 +1388,7 @@ void Osu::toggleSongBrowser() {
     if(bancho->is_in_a_multi_room()) {
         // We didn't select a map; revert to previously selected one
         auto diff2 = this->songBrowser2->lastSelectedBeatmap;
-        if(diff2 != NULL) {
+        if(diff2 != nullptr) {
             bancho->room.map_name = UString::format("%s - %s [%s]", diff2->getArtist().c_str(),
                                                     diff2->getTitle().c_str(), diff2->getDifficultyName().c_str());
             bancho->room.map_md5 = diff2->getMD5Hash();
@@ -1505,7 +1505,7 @@ void Osu::onPlayEnd(FinishedScore score, bool quit, bool /*aborted*/) {
 
     this->iMultiplayerClientNumEscPresses = 0;
 
-    if(this->songBrowser2 != NULL) this->songBrowser2->onPlayEnd(quit);
+    if(this->songBrowser2 != nullptr) this->songBrowser2->onPlayEnd(quit);
 
     // When playing in multiplayer, screens are toggled in Room
     if(!bancho->is_playing_a_multi_map()) {
@@ -1521,9 +1521,9 @@ void Osu::onPlayEnd(FinishedScore score, bool quit, bool /*aborted*/) {
 }
 
 Beatmap *Osu::getSelectedBeatmap() {
-    if(this->songBrowser2 != NULL) return this->songBrowser2->getSelectedBeatmap();
+    if(this->songBrowser2 != nullptr) return this->songBrowser2->getSelectedBeatmap();
 
-    return NULL;
+    return nullptr;
 }
 
 float Osu::getDifficultyMultiplier() {
@@ -1579,7 +1579,7 @@ float Osu::getAnimationSpeedMultiplier() {
     return animationSpeedMultiplier;
 }
 
-bool Osu::isInPlayMode() { return (this->songBrowser2 != NULL && this->songBrowser2->bHasSelectedAndIsPlaying); }
+bool Osu::isInPlayMode() { return (this->songBrowser2 != nullptr && this->songBrowser2->bHasSelectedAndIsPlaying); }
 
 bool Osu::shouldFallBackToLegacySliderRenderer() {
     return cv::force_legacy_slider_renderer.getBool() || cv::mod_wobble.getBool() || cv::mod_wobble2.getBool() ||
@@ -1842,8 +1842,8 @@ void Osu::onSkinReload() {
 }
 
 void Osu::onSkinChange(const UString &newValue) {
-    if(this->skin != NULL) {
-        if(this->bSkinLoadScheduled || this->skinScheduledToLoad != NULL) return;
+    if(this->skin != nullptr) {
+        if(this->bSkinLoadScheduled || this->skinScheduledToLoad != nullptr) return;
         if(newValue.length() < 1) return;
     }
 
@@ -1851,7 +1851,7 @@ void Osu::onSkinChange(const UString &newValue) {
 
     if(newString == "default") {
         this->skinScheduledToLoad = new Skin(newString.c_str(), MCENGINE_DATA_DIR "materials/default/", true);
-        if(this->skin == NULL) this->skin = this->skinScheduledToLoad;
+        if(this->skin == nullptr) this->skin = this->skinScheduledToLoad;
         this->bSkinLoadScheduled = true;
         return;
     }
@@ -1872,13 +1872,13 @@ void Osu::onSkinChange(const UString &newValue) {
     }
 
     // initial load
-    if(this->skin == NULL) this->skin = this->skinScheduledToLoad;
+    if(this->skin == nullptr) this->skin = this->skinScheduledToLoad;
 
     this->bSkinLoadScheduled = true;
 }
 
 void Osu::updateAnimationSpeed() {
-    if(this->getSkin() != NULL) {
+    if(this->getSkin() != nullptr) {
         float speed = this->getAnimationSpeedMultiplier() / this->getSelectedBeatmap()->getSpeedMultiplier();
         this->getSkin()->setAnimationSpeed(speed >= 0.0f ? speed : 0.0f);
     }
@@ -2156,7 +2156,7 @@ float Osu::getUIScale(float osuResolutionRatio) {
 }
 
 float Osu::getUIScale() {
-    if(osu != NULL) {
+    if(osu != nullptr) {
         if(osu->getScreenWidth() < cv::ui_scale_to_dpi_minimum_width.getInt() ||
            osu->getScreenHeight() < cv::ui_scale_to_dpi_minimum_height.getInt())
             return cv::ui_scale.getFloat();

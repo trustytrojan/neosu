@@ -99,7 +99,7 @@ class SimulatedBeatmap : public BeatmapInterface {
     // breaks
     std::vector<DatabaseBeatmap::BREAK> breaks;
     bool bInBreak = false;
-    HitObject *currentHitObject = NULL;
+    HitObject* currentHitObject = nullptr;
     i32 iNextHitObjectTime = 0;
     i32 iPreviousHitObjectTime = 0;
 

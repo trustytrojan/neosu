@@ -189,7 +189,7 @@ class DifficultyCalculator {
             if(foo < 0) foo = 0;  // msvc
             return (this->objects.size() > 0 && this->prevObjectIndex - backwardsIdx < (int)this->objects.size()
                         ? &this->objects[foo]
-                        : NULL);
+                        : nullptr);
         }
         [[nodiscard]] inline f64 get_strain(Skills::Skill type) const {
             return this->strains[Skills::skillToIndex(type)] * (type == Skills::Skill::SPEED ? this->rhythm : 1.0);
@@ -202,9 +202,9 @@ class DifficultyCalculator {
         void calculate_strains(const DiffObject &prev, const DiffObject *next, double hitWindow300);
         void calculate_strain(const DiffObject &prev, const DiffObject *next, double hitWindow300,
                               const Skills::Skill dtype);
-        static f64 calculate_difficulty(const Skills::Skill type, const DiffObject *dobjects, size_t dobjectCount,
-                                        IncrementalState *incremental, std::vector<f64> *outStrains = NULL,
-                                        f64 *outDifficultStrains = NULL, f64 *outRelevantNotes = NULL);
+        static f64 calculate_difficulty(const Skills::Skill type, const DiffObject* dobjects, size_t dobjectCount,
+                                        IncrementalState* incremental, std::vector<f64>* outStrains = nullptr,
+                                        f64* outDifficultStrains = nullptr, f64* outRelevantNotes = nullptr);
         static double spacing_weight1(const double distance, const Skills::Skill diff_type);
         double spacing_weight2(const Skills::Skill diff_type, const DiffObject &prev, const DiffObject *next,
                                double hitWindow300);
@@ -225,8 +225,8 @@ class DifficultyCalculator {
         f64 *speedNotes;
         f64 *difficultSpeedStrains;
         i32 upToObjectIndex = -1;
-        std::vector<f64> *outAimStrains = NULL;
-        std::vector<f64> *outSpeedStrains = NULL;
+        std::vector<f64>* outAimStrains = nullptr;
+        std::vector<f64>* outSpeedStrains = nullptr;
     };
 
     struct RhythmIsland {

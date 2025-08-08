@@ -93,8 +93,8 @@ class HitObject {
     HITRESULTANIM hitresultanim2;
 
    protected:
-    BeatmapInterface *bi = NULL;
-    Beatmap *bm = NULL;  // NULL when simulating
+    BeatmapInterface* bi = nullptr;
+    Beatmap* bm = nullptr;  // NULL when simulating
 
     long iDelta;  // this must be signed
     long iApproachTime;

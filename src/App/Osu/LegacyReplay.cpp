@@ -88,16 +88,16 @@ std::vector<Frame> get_frames(u8* replay_data, i32 replay_size) {
             Frame frame;
 
             char* ms = SString::strtok_x('|', &line);
-            frame.milliseconds_since_last_frame = strtoll(ms, NULL, 10);
+            frame.milliseconds_since_last_frame = strtoll(ms, nullptr, 10);
 
             char* x = SString::strtok_x('|', &line);
-            frame.x = strtof(x, NULL);
+            frame.x = strtof(x, nullptr);
 
             char* y = SString::strtok_x('|', &line);
-            frame.y = strtof(y, NULL);
+            frame.y = strtof(y, nullptr);
 
             char* flags = SString::strtok_x(',', &line);
-            frame.key_flags = strtoul(flags, NULL, 10);
+            frame.key_flags = strtoul(flags, nullptr, 10);
 
             if(frame.milliseconds_since_last_frame != -12345) {
                 cur_music_pos += frame.milliseconds_since_last_frame;
@@ -120,7 +120,7 @@ void compress_frames(const std::vector<Frame>& frames, u8** compressed, size_t* 
     lzma_ret ret = lzma_alone_encoder(&stream, &options);
     if(ret != LZMA_OK) {
         debugLog("Failed to initialize lzma encoder: error {:d}\n", static_cast<unsigned int>(ret));
-        *compressed = NULL;
+        *compressed = nullptr;
         *s_compressed = 0;
         return;
     }
@@ -151,7 +151,7 @@ void compress_frames(const std::vector<Frame>& frames, u8** compressed, size_t* 
             stream.next_out = *compressed + stream.total_out;
         } else if(ret != LZMA_STREAM_END) {
             debugLog("Error while compressing replay: error {:d}\n", static_cast<unsigned int>(ret));
-            *compressed = NULL;
+            *compressed = nullptr;
             *s_compressed = 0;
             lzma_end(&stream);
             return;
@@ -209,7 +209,7 @@ bool load_from_disk(FinishedScore* score, bool update_db) {
                                     score->peppy_replay_tms);
 
         FILE* replay_file = fopen(path.toUtf8(), "rb");
-        if(replay_file == NULL) return false;
+        if(replay_file == nullptr) return false;
 
         fseek(replay_file, 0, SEEK_END);
         size_t s_full_replay = ftell(replay_file);
@@ -226,7 +226,7 @@ bool load_from_disk(FinishedScore* score, bool update_db) {
                                     score->unixTimestamp);
 
         FILE* replay_file = fopen(path.toUtf8(), "rb");
-        if(replay_file == NULL) return false;
+        if(replay_file == nullptr) return false;
 
         fseek(replay_file, 0, SEEK_END);
         size_t s_compressed_replay = ftell(replay_file);
@@ -275,7 +275,7 @@ void load_and_watch(FinishedScore score) {
             request.type = GET_REPLAY;
             request.path = UString::format("/web/osu-getreplay.php?u=%s&h=%s&m=0&c=%d", bancho->username.toUtf8(),
                                            bancho->pw_md5.hash.data(), score.bancho_score_id);
-            request.mime = NULL;
+            request.mime = nullptr;
             request.extra = (u8*)score_cpy;
             BANCHO::Net::send_api_request(request);
 
@@ -291,7 +291,7 @@ void load_and_watch(FinishedScore score) {
     }
 
     auto diff = db->getBeatmapDifficulty(score.beatmap_hash);
-    if(diff == NULL) {
+    if(diff == nullptr) {
         // XXX: Auto-download beatmap
         osu->notificationOverlay->addToast("Missing beatmap for this replay", ERROR_TOAST);
     } else {

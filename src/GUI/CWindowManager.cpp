@@ -112,7 +112,7 @@ int CWindowManager::getTopMouseWindowIndex() {
 }
 
 void CWindowManager::addWindow(CBaseUIWindow *window) {
-    if(window == NULL) engine->showMessageError("Window Manager Error", "addWindow(NULL), you maggot!");
+    if(window == nullptr) engine->showMessageError("Window Manager Error", "addWindow(NULL), you maggot!");
 
     this->windows.insert(this->windows.begin(), window);
 
@@ -129,7 +129,7 @@ void CWindowManager::onResolutionChange(Vector2 newResolution) {
 }
 
 void CWindowManager::setFocus(CBaseUIWindow *window) {
-    if(window == NULL) engine->showMessageError("Window Manager Error", "setFocus(NULL), you noodle!");
+    if(window == nullptr) engine->showMessageError("Window Manager Error", "setFocus(NULL), you noodle!");
 
     for(int i = 0; i < this->windows.size(); i++) {
         if(this->windows[i] == window && i != 0) {

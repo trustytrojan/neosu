@@ -100,7 +100,7 @@ void OpenGLVertexArrayObject::init() {
 
         if(cv::r_opengl_legacy_vao_use_vertex_array.getBool()) {
             glEnableVertexAttribArray(vertexAttribArrayIndexCounter);
-            glVertexAttribPointer(vertexAttribArrayIndexCounter, 3, GL_FLOAT, GL_FALSE, 0, (char*)NULL);
+            glVertexAttribPointer(vertexAttribArrayIndexCounter, 3, GL_FLOAT, GL_FALSE, 0, (char*)nullptr);
             vertexAttribArrayIndexCounter++;
         } else {
             // NOTE: this state will persist engine-wide forever
@@ -120,7 +120,7 @@ void OpenGLVertexArrayObject::init() {
         if(cv::r_opengl_legacy_vao_use_vertex_array.getBool()) {
             if(this->iNumTexcoords > 0) {
                 glEnableVertexAttribArray(vertexAttribArrayIndexCounter);
-                glVertexAttribPointer(vertexAttribArrayIndexCounter, 2, GL_FLOAT, GL_FALSE, 0, (char*)NULL);
+                glVertexAttribPointer(vertexAttribArrayIndexCounter, 2, GL_FLOAT, GL_FALSE, 0, (char*)nullptr);
                 vertexAttribArrayIndexCounter++;
             }
         }
@@ -142,7 +142,7 @@ void OpenGLVertexArrayObject::init() {
         if(cv::r_opengl_legacy_vao_use_vertex_array.getBool()) {
             if(this->iNumColors > 0) {
                 glEnableVertexAttribArray(vertexAttribArrayIndexCounter);
-                glVertexAttribPointer(vertexAttribArrayIndexCounter, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, (char*)NULL);
+                glVertexAttribPointer(vertexAttribArrayIndexCounter, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, (char*)nullptr);
                 vertexAttribArrayIndexCounter++;
             }
         }
@@ -160,7 +160,7 @@ void OpenGLVertexArrayObject::init() {
         if(cv::r_opengl_legacy_vao_use_vertex_array.getBool()) {
             if(this->iNumNormals > 0) {
                 glEnableVertexAttribArray(vertexAttribArrayIndexCounter);
-                glVertexAttribPointer(vertexAttribArrayIndexCounter, 3, GL_FLOAT, GL_FALSE, 0, (char*)NULL);
+                glVertexAttribPointer(vertexAttribArrayIndexCounter, 3, GL_FLOAT, GL_FALSE, 0, (char*)nullptr);
                 vertexAttribArrayIndexCounter++;
             }
         }
@@ -228,13 +228,13 @@ void OpenGLVertexArrayObject::draw() {
     } else {
         // set vertices
         glBindBuffer(GL_ARRAY_BUFFER, this->iVertexBuffer);
-        glVertexPointer(3, GL_FLOAT, 0, (char*)NULL);  // set vertex pointer to vertex buffer
+        glVertexPointer(3, GL_FLOAT, 0, (char*)nullptr);  // set vertex pointer to vertex buffer
 
         // set texture0
         if(this->iNumTexcoords > 0) {
             glEnableClientState(GL_TEXTURE_COORD_ARRAY);
             glBindBuffer(GL_ARRAY_BUFFER, this->iTexcoordBuffer);
-            glTexCoordPointer(2, GL_FLOAT, 0, (char*)NULL);  // set first texcoord pointer to texcoord buffer
+            glTexCoordPointer(2, GL_FLOAT, 0, (char*)nullptr);  // set first texcoord pointer to texcoord buffer
         } else
             glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
@@ -242,7 +242,7 @@ void OpenGLVertexArrayObject::draw() {
         if(this->iNumColors > 0) {
             glEnableClientState(GL_COLOR_ARRAY);
             glBindBuffer(GL_ARRAY_BUFFER, this->iColorBuffer);
-            glColorPointer(4, GL_UNSIGNED_BYTE, 0, (char*)NULL);  // set color pointer to color buffer
+            glColorPointer(4, GL_UNSIGNED_BYTE, 0, (char*)nullptr);  // set color pointer to color buffer
         } else
             glDisableClientState(GL_COLOR_ARRAY);
 
@@ -250,7 +250,7 @@ void OpenGLVertexArrayObject::draw() {
         if(this->iNumNormals > 0) {
             glEnableClientState(GL_NORMAL_ARRAY);
             glBindBuffer(GL_ARRAY_BUFFER, this->iNormalBuffer);
-            glNormalPointer(GL_FLOAT, 0, (char*)NULL);  // set normal pointer to normal buffer
+            glNormalPointer(GL_FLOAT, 0, (char*)nullptr);  // set normal pointer to normal buffer
         } else
             glDisableClientState(GL_NORMAL_ARRAY);
 

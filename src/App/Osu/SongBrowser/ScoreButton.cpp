@@ -560,7 +560,7 @@ void ScoreButton::onFocusStolen() {
 void ScoreButton::onRightMouseUpInside() {
     const Vector2 pos = mouse->getPos();
 
-    if(this->contextMenu != NULL) {
+    if(this->contextMenu != nullptr) {
         this->contextMenu->setPos(pos);
         this->contextMenu->setRelPos(pos);
         this->contextMenu->begin(0, true);
@@ -629,7 +629,7 @@ void ScoreButton::onUseModsClicked() {
 }
 
 void ScoreButton::onDeleteScoreClicked() {
-    if(this->contextMenu != NULL) {
+    if(this->contextMenu != nullptr) {
         this->contextMenu->begin(0, true);
         {
             this->contextMenu->addButton("Really delete score?")->setEnabled(false);
@@ -711,7 +711,7 @@ void ScoreButton::setScore(const FinishedScore &score, DatabaseBeatmap *diff2, i
         UString::format((score.perfect ? "PFC %.2f%%" : (fullCombo ? "FC %.2f%%" : "%.2f%%")), accuracy);
     this->sScoreMods = getModsStringForDisplay(score.mods);
     this->sCustom = (score.mods.speed != 1.0f ? UString::format("Spd: %gx", score.mods.speed) : UString(""));
-    if(diff2 != NULL) {
+    if(diff2 != nullptr) {
         const LegacyReplay::BEATMAP_VALUES beatmapValuesForModsLegacy = LegacyReplay::getBeatmapValuesForModsLegacy(
             score.mods.to_legacy(), diff2->getAR(), diff2->getCS(), diff2->getOD(), diff2->getHP());
         if(AR == -1.f) AR = beatmapValuesForModsLegacy.AR;
@@ -824,7 +824,7 @@ void ScoreButton::setScore(const FinishedScore &score, DatabaseBeatmap *diff2, i
     this->updateElapsedTimeString();
 }
 
-bool ScoreButton::isContextMenuVisible() { return (this->contextMenu != NULL && this->contextMenu->isVisible()); }
+bool ScoreButton::isContextMenuVisible() { return (this->contextMenu != nullptr && this->contextMenu->isVisible()); }
 
 SkinImage *ScoreButton::getGradeImage(FinishedScore::Grade grade) {
     switch(grade) {
