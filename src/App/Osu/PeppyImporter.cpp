@@ -335,8 +335,8 @@ void import_settings_from_osu_stable() {
             cv::draw_video.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " RawInput = %i[^\n]", &num) == 1) {
             cv::mouse_raw_input.setValue(num == 1);
-        } else if(sscanf(curLine.c_str(), " AbsoluteToOsuWindow = %i[^\n]", &num) == 1) {
-            cv::mouse_raw_input_absolute_to_window.setValue(num == 1);
+        // } else if(sscanf(curLine.c_str(), " AbsoluteToOsuWindow = %i[^\n]", &num) == 1) {
+        //     cv::mouse_raw_input_absolute_to_window.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " ConfineMouse = %1023[^\n]", str) == 1) {
             if(!strcmp(str, "Never")) {
                 cv::confine_cursor_fullscreen.setValue(false);
