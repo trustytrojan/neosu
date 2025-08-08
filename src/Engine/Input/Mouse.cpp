@@ -11,8 +11,10 @@
 #include "Engine.h"
 #include "Environment.h"
 #include "ResourceManager.h"
+#include "SDL3/SDL_mouse.h"
 
-Mouse::Mouse() : InputDevice(), vPos(env->getMousePos()), vPosWithoutOffsets(this->vPos), vActualPos(this->vPos) {
+Mouse::Mouse()
+    : InputDevice(), vPos(env->getMousePos()), vPosWithoutOffsets(this->vPos), vActualPos(this->vPos), mcbdata(this) {
     this->fSensitivity = cv::mouse_sensitivity.getFloat();
     this->bIsRawInput = cv::mouse_raw_input.getBool();
     cv::mouse_raw_input.setCallback(SA::MakeDelegate<&Mouse::onRawInputChanged>(this));
@@ -88,7 +90,25 @@ void Mouse::drawDebug() {
     g->popTransform();
 }
 
+// need to check this here (at the start of update()), since onMotion won't be getting called during the event loop
+// (due to SDL_SetEventEnabled(SDL_EVENT_MOUSE_MOTION, !raw))
+void Mouse::raw_update_tick() {
+    Vector2 cb_rel = this->mcbdata.consume();
+    if(cb_rel.length() > 0) {
+        Vector2 abs = this->vPosWithoutOffsets + cb_rel;
+
+        if(cv::debug_mouse.getBool()) {
+            debugLog("calling onMotion from callback data with rel {}, {} abs {}, {}\n", cb_rel.x, cb_rel.y,
+                     abs.x, abs.y);
+        }
+
+        this->onMotion(cb_rel, abs, true);
+        env->updateCachedMousePos(cb_rel, abs + this->vOffset);
+    }
+}
+
 void Mouse::update() {
+    this->raw_update_tick();
     this->resetWheelDelta();
 
     // if onMotion wasn't called last frame, there is no motion delta
@@ -100,8 +120,8 @@ void Mouse::update() {
         // the reason for trying hard to avoid env->setMousePos is because setting the OS cursor position can take a
         // long time so we try to use the virtual cursor position as much as possible and only update the OS cursor when
         // it's going to go somewhere we don't want
+        const bool clipped = env->isCursorClipped();
         if(this->bNeedsLock) {
-            const bool clipped = env->isCursorClipped();
             const McRect clipRect{clipped ? env->getCursorClip() : engine->getScreenRect()};
             const Vector2 center{clipRect.getCenter()};
             const Vector2 realPosNudgedOut{Vector2{env->getMousePos()}.nudge(center, 10.0f)};
@@ -111,6 +131,20 @@ void Mouse::update() {
                 else if(!env->isCursorVisible())  // FIXME: this is crazy. for windowed mode, need to "pop out" the OS
                                                   // cursor
                     env->setMousePos(Vector2{this->vPosWithoutOffsets}.nudge(center, 0.1f));
+            }
+        } else if(!clipped && !engine->getScreenRect().contains(this->getRealPos())) {
+            const Vector2 testPoint = this->getRealPos() + env->getWindowPos();
+            if(env->isPointValid(testPoint)) {
+                // if we aren't clipping the cursor, we need to manually check to see if the virtual cursor left the
+                // screen
+                // otherwise, moving the cursor into the edge of a monitor would send a "mouse leave" event, even
+                // though the cursor didn't actually have anywhere to go
+                env->notifyMouseEvent(false);
+            } else {
+                // if it was an invalid point, clamp the absolute position to the window rect bounds
+                this->vPosWithoutOffsets =
+                    Vector2{std::clamp<float>(this->vPosWithoutOffsets.x, 1, engine->getScreenWidth() - 1.f),
+                            std::clamp<float>(this->vPosWithoutOffsets.y, 1, engine->getScreenHeight() - 1.f)};
             }
         }
 
@@ -127,29 +161,27 @@ void Mouse::onMotion(Vector2 rel, Vector2 abs, bool preTransformed) {
 
     const bool osCursorVisible = (env->isCursorVisible() || !env->isCursorInWindow() || !engine->hasFocus());
 
-    // rawinput has sensitivity pre-applied
-    // this entire block may be skipped if: (preTransformed || (sens == 1 && !clipped))
-    if(!preTransformed && !osCursorVisible) {
-        // need to apply sensitivity
-        if(this->fSensitivity < 0.999f || this->fSensitivity > 1.001f) {
+    // rawinput has sensitivity pre-applied, otherwise we have to multiply the sensitivity here
+    if((!preTransformed && !osCursorVisible) && (this->fSensitivity < 0.999f || this->fSensitivity > 1.001f)) {
+        if(this->fSensitivity < 0.995f) {
             // need to lock the OS cursor to the center of the screen if rawinput is disabled, otherwise it can exit the
-            // screen rect before the virtual cursor does don't do it here because we don't want the event loop to make
+            // screen rect before the virtual cursor does
+            // don't do it here because we don't want the event loop to make
             // more external calls than necessary, just set a flag to do it on the engine update loop
-            if(this->fSensitivity < 0.995f) {
-                this->bNeedsLock = true;
-            }
-            newRel *= this->fSensitivity;
-            if(newRel.length() > 50.0f)  // don't allow obviously bogus values
-                newRel.zero();
-            newAbs = this->vPosWithoutOffsets + newRel;
+            this->bNeedsLock = true;
         }
-        if(env->isCursorClipped()) {
-            const McRect clipRect = env->getCursorClip();
+        newRel *= this->fSensitivity;
+        if(newRel.length() > 50.0f)  // don't allow obviously bogus values
+            newRel.zero();
+        newAbs = this->vPosWithoutOffsets + newRel;
+    }
 
-            // clamp the final position to the clip rect
-            newAbs.x = std::clamp<float>(newAbs.x, clipRect.getMinX(), clipRect.getMaxX());
-            newAbs.y = std::clamp<float>(newAbs.y, clipRect.getMinY(), clipRect.getMaxY());
-        }
+    if(env->isCursorClipped()) {
+        const McRect clipRect = env->getCursorClip();
+
+        // clamp the final position to the clip rect
+        newAbs.x = std::clamp<float>(newAbs.x, clipRect.getMinX(), clipRect.getMaxX());
+        newAbs.y = std::clamp<float>(newAbs.y, clipRect.getMinY(), clipRect.getMaxY());
     }
 
     // we have to accumulate all motion collected in this frame, then reset it at the start of the next frame
@@ -264,3 +296,44 @@ void Mouse::onRawInputChanged(float newval) {
 }
 
 void Mouse::onSensitivityChanged(float newSens) { this->fSensitivity = newSens; }
+
+// release (during Mouse::update())
+Vector2 Mouse::MotionCBData::consume() {
+    Vector2d ret;  // use doubles to maintain precision until the final cast back to floats (avoid drift)
+    for(u32 i = 0; auto &motion_data : this->accum_vec) {
+        if(i >= this->count) break;
+        ret += motion_data;
+        i++;
+    }
+
+    // reset
+    this->count = 0;
+    this->accum_vec = {};
+
+    // multiply to get the final delta over all frames
+    ret *= get_current_sens();
+
+    return ret;
+}
+
+void Mouse::raw_motion_cb(void *userdata, uint64_t ts, SDL_Window *window, uint32_t mouseid, float *x, float *y) {
+    // we don't care about non-raw motion (which is mouseid 0), or motion for other windows/with no window
+    if(mouseid == 0 || !window || !(window == env->m_window)) {
+        return;
+    }
+
+    auto *mouse_data{static_cast<MotionCBData *>(userdata)};
+
+    if(cv::debug_mouse.getBool()) {
+        debugLog("got movement: accum_count {} ts {} mouseid {} x {} y {}\n", mouse_data->getCount(), ts, mouseid, *x,
+                 *y);
+    }
+
+    // add unadulterated data to the accumulator, then multiply it when consuming
+    mouse_data->add(x, y);
+
+    // transform the data within SDL internally as well
+    const float sensitivity = mouse_data->get_current_sens();
+    *x *= sensitivity;
+    *y *= sensitivity;
+}

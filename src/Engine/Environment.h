@@ -161,9 +161,12 @@ class Environment {
     [[nodiscard]] inline const bool &isFullscreen() const { return m_bFullscreen; }
     [[nodiscard]] inline const bool &isWindowResizable() const { return m_bResizable; }
 
+    bool isPointValid(Vector2 point);  // whether an x,y coordinate lands on an actual display
+
     // mouse
     [[nodiscard]] inline const bool &isCursorInWindow() const { return m_bIsCursorInsideWindow; }
-    [[nodiscard]] bool isCursorVisible() const;
+    [[nodiscard]] inline const bool &canChangeCursorVisibility() const { return m_bAllowCursorVisibilityChanges; }
+    [[nodiscard]] inline const bool &isCursorVisible() const { return m_bCursorVisible; }
     [[nodiscard]] inline const bool &isCursorClipped() const { return m_bCursorClipped; }
     [[nodiscard]] inline const Vector2 &getMousePos() const { return m_vLastAbsMousePos; }
     [[nodiscard]] inline const McRect &getCursorClip() const { return m_cursorClip; }
@@ -215,6 +218,16 @@ class Environment {
     Vector2 m_vLastAbsMousePos;
     Vector2 m_vLastRelMousePos;
 
+    // for when raw input is enabled, Mouse::update() needs a way to update the cached mouse position from the
+    // accumulated data since we ignore SDL_EVENT_MOUSE_MOTION when it's disabled
+    friend class Mouse;
+    inline void updateCachedMousePos(Vector2 rel, Vector2 abs) {
+        m_vLastRelMousePos = rel;
+        m_vLastAbsMousePos = abs;
+    }
+    // send an SDL_EVENT_WINDOW_MOUSE_(ENTER/LEAVE), to be called from Mouse
+    void notifyMouseEvent(bool inside);
+
     // cache
     UString m_sUsername;
     std::string m_sProgDataPath;
@@ -234,6 +247,7 @@ class Environment {
     // monitors
     void initMonitors(bool force = false);
     std::map<unsigned int, McRect> m_mMonitors;
+    Vector2 m_vDesktopDisplayBounds;
     float m_fDisplayHz;
     float m_fDisplayHzSecs;
 
@@ -250,7 +264,9 @@ class Environment {
 
     // mouse
     bool m_bIsCursorInsideWindow;
+    bool m_bAllowCursorVisibilityChanges;
     bool m_bCursorClipped;
+    bool m_bCursorVisible;
     McRect m_cursorClip;
     CURSORTYPE m_cursorType;
     std::map<CURSORTYPE, SDL_Cursor *> m_mCursorIcons;

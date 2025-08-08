@@ -104,8 +104,10 @@ Environment::Environment(int argc, char *argv[]) {
     m_sAppDataPath = {};
     m_hwnd = nullptr;
 
-    m_bIsCursorInsideWindow = false;
+    m_bIsCursorInsideWindow = true;
+    m_bAllowCursorVisibilityChanges = true;
     m_bCursorClipped = false;
+    m_bCursorVisible = false;
     m_cursorType = CURSORTYPE::CURSOR_NORMAL;
 
     // lazy init
@@ -117,6 +119,8 @@ Environment::Environment(int argc, char *argv[]) {
     m_sCurrClipboardText = {};
     // lazy init
     m_mMonitors = {};
+    // lazy init (with initMonitors)
+    m_vDesktopDisplayBounds = Vector2{};
 
     // setup callbacks
     cv::debug_env.setCallback(SA::MakeDelegate<&Environment::onLogLevelChange>(this));
@@ -174,10 +178,11 @@ const std::string &Environment::getExeFolder() {
     // sdl caches this internally, but we'll cache a std::string representation of it
     const char *path = SDL_GetBasePath();
     if(path) {
-        return path;
+        pathStr = path;
     } else {
-        return "";
+        pathStr = "./";
     }
+    return pathStr;
 }
 
 void Environment::openURLInDefaultBrowser(const std::string &url) noexcept {
@@ -749,6 +754,18 @@ McRect Environment::getDesktopRect() const { return {{0, 0}, getNativeScreenSize
 
 McRect Environment::getWindowRect() const { return {getWindowPos(), getWindowSize()}; }
 
+bool Environment::isPointValid(Vector2 point) {  // whether an x,y coordinate lands on an actual display
+    if(m_vDesktopDisplayBounds.length() == 0) initMonitors();
+    const bool withinBounds = point < m_vDesktopDisplayBounds;
+    if(!withinBounds) {
+        return false;
+    }
+    for(const auto &[_, dp] : m_mMonitors) {
+        if(dp.contains(point)) return true;
+    }
+    return false;
+}
+
 int Environment::getDPI() const {
     float dpi = SDL_GetWindowDisplayScale(m_window) * 96;
 
@@ -763,46 +780,53 @@ void Environment::setCursor(CURSORTYPE cur) {
     }
 }
 
-namespace {  // static namespace
-void sensTransformFunc(void *userdata, Uint64 /*timestamp*/, SDL_Window * /*window*/, SDL_MouseID /*mouseid*/, float *x,
-                       float *y) {
-    const float sensitivity = *static_cast<float *>(userdata);
-    *x *= sensitivity;
-    *y *= sensitivity;
-}
-}  // namespace
-
 void Environment::notifyWantRawInput(bool raw) {
+    const SDL_Rect clipRect{.x = static_cast<int>(m_cursorClip.getX()),
+                            .y = static_cast<int>(m_cursorClip.getY()),
+                            .w = static_cast<int>(m_cursorClip.getWidth()),
+                            .h = static_cast<int>(m_cursorClip.getHeight())};
+    const SDL_Rect *existingRect = nullptr;
+
+    if((raw == SDL_GetWindowRelativeMouseMode(m_window)) &&
+       (!isCursorClipped() || ((existingRect = SDL_GetWindowMouseRect(m_window)) &&
+                               !std::memcmp(existingRect, &clipRect, sizeof(SDL_Rect))))) {
+        return;  // nothing to do
+    }
+
+    // with rawinput, we handle the movement data in Mouse::rawMotionCB instead of through the event queue
+    SDL_SetEventEnabled(SDL_EVENT_MOUSE_MOTION, !raw);
+
     if(raw) {
-        setOSMousePos(
-            mouse->getRealPos());  // when enabling, we need to make sure we start from the virtual cursor position
-        if(m_bCursorClipped) {
-            const SDL_Rect clipRect{.x = static_cast<int>(m_cursorClip.getX()),
-                                    .y = static_cast<int>(m_cursorClip.getY()),
-                                    .w = static_cast<int>(m_cursorClip.getWidth()),
-                                    .h = static_cast<int>(m_cursorClip.getHeight())};
+        assert(mouse && "mouse was not initialized yet (or was destroyed already)");
+        // when enabling, we need to make sure we start from the virtual cursor position
+        setOSMousePos(mouse->getRealPos());
+
+        if(isCursorClipped()) {
             SDL_SetWindowMouseRect(m_window, &clipRect);
         }
+        SDL_SetRelativeMouseTransform(Mouse::raw_motion_cb, (void *)mouse->getMotionCallbackData());
     } else {
         // let the mouse handler clip the cursor as it sees fit
         // this is because SDL has no equivalent of sensTransformFunc for non-relative mouse mode
         SDL_SetWindowMouseRect(m_window, nullptr);
+        SDL_SetRelativeMouseTransform(nullptr, nullptr);
     }
-    static constexpr const float default_sens{1.0f};
-    SDL_SetRelativeMouseTransform(raw ? sensTransformFunc : nullptr,
-                                  mouse ? (void *)&mouse->getSensitivity() : (void *)(&default_sens));
     SDL_SetWindowRelativeMouseMode(m_window, raw);
 }
 
-bool Environment::isCursorVisible() const { return SDL_CursorVisible(); }
-
 void Environment::setCursorVisible(bool visible) {
+    if(!m_bAllowCursorVisibilityChanges) {
+        return;
+    }
+
+    m_bCursorVisible = visible;
+
     if(visible) {
         // disable rawinput (allow regular mouse movement)
         // TODO: consolidate all this BS transition logic into some onPointerEnter/onPointerLeave handler
         if(mouse->isRawInput()) {
-            notifyWantRawInput(false);
             setOSMousePos(Vector2{getMousePos()}.nudge(getWindowSize() / 2.0f, 1.0f));  // nudge it outwards
+            notifyWantRawInput(false);
         } else  // snap the OS cursor to virtual cursor position
             setOSMousePos(Vector2{mouse->getRealPos()}.nudge(getWindowSize() / 2.0f, 1.0f));  // nudge it outwards
         SDL_ShowCursor();
@@ -812,6 +836,9 @@ void Environment::setCursorVisible(bool visible) {
         if(mouse->isRawInput())  // re-enable rawinput
             notifyWantRawInput(true);
     }
+
+    // sanity
+    m_bCursorVisible = SDL_CursorVisible();
 }
 
 void Environment::setCursorClip(bool clip, McRect rect) {
@@ -856,6 +883,12 @@ void Environment::listenToTextInput(bool listen) {
 //	internal helpers/callbacks  //
 //******************************//
 
+void Environment::notifyMouseEvent(bool inside) {
+    SDL_Event event;
+    event.type = inside ? SDL_EVENT_WINDOW_MOUSE_ENTER : SDL_EVENT_WINDOW_MOUSE_LEAVE;
+    SDL_PushEvent(&event);
+}
+
 void Environment::setOSMousePos() const { SDL_WarpMouseInWindow(m_window, m_vLastAbsMousePos.x, m_vLastAbsMousePos.y); }
 void Environment::setOSMousePos(Vector2 pos) const { SDL_WarpMouseInWindow(m_window, pos.x, pos.y); }
 
@@ -880,15 +913,33 @@ void Environment::initMonitors(bool force) {
     int count = -1;
     const SDL_DisplayID *displays = SDL_GetDisplays(&count);
 
+    m_vDesktopDisplayBounds = Vector2{};
     for(int i = 0; i < count; i++) {
         const SDL_DisplayID di = displays[i];
-        m_mMonitors.try_emplace(di, McRect{0, 0, static_cast<float>(SDL_GetDesktopDisplayMode(di)->w),
-                                           static_cast<float>(SDL_GetDesktopDisplayMode(di)->h)});
+
+        McRect displayRect{};
+        Vector2 size{};
+        SDL_Rect sdlDisplayRect{};
+
+        if(!SDL_GetDisplayBounds(di, &sdlDisplayRect)) {
+            // fallback
+            size = Vector2{static_cast<float>(SDL_GetDesktopDisplayMode(di)->w),
+                           static_cast<float>(SDL_GetDesktopDisplayMode(di)->h)};
+            displayRect = McRect{{}, size};
+        } else {
+            displayRect.setSize(Vector2{sdlDisplayRect.w, sdlDisplayRect.h});
+            displayRect.setPos(Vector2{sdlDisplayRect.x, sdlDisplayRect.y});
+            size = displayRect.getSize();
+        }
+
+        m_vDesktopDisplayBounds += size;
+        m_mMonitors.try_emplace(di, displayRect);
     }
     if(count < 1) {
         debugLog("WARNING: No monitors found! Adding default monitor ...\n");
         const Vector2 windowSize = getWindowSize();
-        m_mMonitors.try_emplace(1, McRect{0, 0, windowSize.x, windowSize.y});
+        m_vDesktopDisplayBounds += windowSize;
+        m_mMonitors.try_emplace(1, McRect{{}, windowSize});
     }
 }
 

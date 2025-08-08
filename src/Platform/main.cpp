@@ -444,6 +444,17 @@ nocbinline SDL_AppResult SDLMain::handleEvent(SDL_Event *event) {
                     setFgFPS();
                     break;
 
+                case SDL_EVENT_WINDOW_MOUSE_ENTER:
+                    m_bIsCursorInsideWindow = true;
+                    m_bAllowCursorVisibilityChanges = true;
+                    break;
+
+                case SDL_EVENT_WINDOW_MOUSE_LEAVE:
+                    m_bIsCursorInsideWindow = false;
+                    setCursorVisible(true);
+                    m_bAllowCursorVisibilityChanges = false;
+                    break;
+
                 case SDL_EVENT_WINDOW_MINIMIZED:
                     m_bMinimized = true;
                     m_bHasFocus = false;

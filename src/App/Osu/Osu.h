@@ -285,9 +285,6 @@ class Osu final : public MouseListener, public KeyboardListener {
     bool bToggleChangelogScheduled;
     bool bToggleEditorScheduled;
 
-    // cursor
-    bool bShouldCursorBeVisible;
-
     // global resources
     std::vector<McFont *> fonts;
     McFont *titleFont;

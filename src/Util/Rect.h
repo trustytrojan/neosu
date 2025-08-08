@@ -12,11 +12,11 @@ class McRect {
         this->set(pos, size, isCentered);
     }
 
-    [[nodiscard]] inline bool contains(const Vector2 &point) const {
+    [[nodiscard]] inline bool contains(const Vector2 &point, float lenience = 0.f) const {
         Vector2 max = this->vMin + this->vSize;
-        return glm::all(glm::greaterThanEqual(static_cast<const glm::vec2 &>(point),
+        return glm::all(glm::greaterThanEqual(static_cast<const glm::vec2 &>(point + lenience),
                                               static_cast<const glm::vec2 &>(this->vMin))) &&
-               glm::all(glm::lessThanEqual(static_cast<const glm::vec2 &>(point), static_cast<const glm::vec2 &>(max)));
+               glm::all(glm::lessThanEqual(static_cast<const glm::vec2 &>(point - lenience), static_cast<const glm::vec2 &>(max)));
     }
 
     [[nodiscard]] McRect intersect(const McRect &rect) const;

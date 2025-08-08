@@ -111,8 +111,6 @@ Osu::Osu() {
 
     env->setWindowTitle("neosu");
 
-    this->bShouldCursorBeVisible = false;
-
     engine->getConsoleBox()->setRequireShiftToActivate(true);
     mouse->addListener(this);
 
@@ -393,16 +391,7 @@ Osu::Osu() {
     resourceManager->loadResource(actual_flashlight_shader);
     resourceManager->loadResource(flashlight_shader);
 
-    bool finalCursorVisible = this->bShouldCursorBeVisible;
-
-    McRect internalWindow = McRect(0, 0, g_vInternalResolution.x, g_vInternalResolution.y);
-    if(!internalWindow.contains(mouse->getPos())) {
-        this->bShouldCursorBeVisible = true;
-    }
-
-    this->bShouldCursorBeVisible = finalCursorVisible;
-
-    env->setCursorVisible(this->bShouldCursorBeVisible);
+    env->setCursorVisible(!McRect{{}, g_vInternalResolution}.contains(mouse->getPos()));
 }
 
 Osu::~Osu() {
@@ -1958,29 +1947,29 @@ void Osu::onLetterboxingChange(const UString &oldValue, const UString &newValue)
 
 // Here, "cursor" is the Windows mouse cursor, not the game cursor
 void Osu::updateCursorVisibility() {
-    this->bShouldCursorBeVisible = false;
-
-    if(this->isInPlayMode()) {
-        if(cv::mod_autoplay.getBool() || cv::mod_autopilot.getBool() || bancho->spectating) {
-            this->bShouldCursorBeVisible = true;
-        }
-        if(this->getSelectedBeatmap()->is_watching) {
-            this->bShouldCursorBeVisible = true;
-        }
+    if(!env->canChangeCursorVisibility() || !env->isCursorInWindow()) {
+        return;  // don't do anything
     }
 
-    // handle cursor visibility if outside of internal resolution
-    // TODO: not a critical bug, but the real cursor gets visible way too early if sensitivity is > 1.0f, due to this
-    // using scaled/offset getMouse()->getPos()
-    if(g->getResolution() != g_vInternalResolution) {
-        McRect internalWindow = McRect(0, 0, g_vInternalResolution.x, g_vInternalResolution.y);
-        if(!internalWindow.contains(mouse->getPos())) {
-            this->bShouldCursorBeVisible = true;
-        }
+    const bool currently_visible = env->isCursorVisible();
+    bool forced_visible = false;
+
+    if(this->isInPlayMode() && (cv::mod_autoplay.getBool() || cv::mod_autopilot.getBool() ||
+                                this->getSelectedBeatmap()->is_watching || bancho->spectating)) {
+        forced_visible = true;
     }
 
-    if(env->isCursorVisible() != this->bShouldCursorBeVisible) {
-        env->setCursorVisible(this->bShouldCursorBeVisible);
+    bool desired_vis = forced_visible;
+
+    // if it's not forced visible, check whether it's inside the internal window
+    if(!forced_visible) {
+        const bool internal_contains_mouse = McRect{{}, g_vInternalResolution}.contains(mouse->getPos());
+        desired_vis = !internal_contains_mouse;
+    }
+
+    // only change if it's different from the current mouse state
+    if(desired_vis != currently_visible) {
+        env->setCursorVisible(desired_vis);
     }
 }
 

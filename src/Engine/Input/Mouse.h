@@ -17,6 +17,42 @@
 
 class Mouse final : public InputDevice {
    public:
+    // callback for SDL's raw mouse motion (see Environment.cpp)
+    static void raw_motion_cb(void *userdata, uint64_t ts, SDL_Window *window, uint32_t mouseid, float *x, float *y);
+
+   private:
+    // helper struct for the rawMotionCB, per-mouse (like we're ever gonna add support for more...)
+    struct MotionCBData {
+        MotionCBData(Mouse *mouse_instance) : mouse_ptr(mouse_instance) {}
+        ~MotionCBData() = default;
+
+        MotionCBData &operator=(const MotionCBData &) = delete;
+        MotionCBData &operator=(MotionCBData &&) = delete;
+        MotionCBData(const MotionCBData &) = delete;
+        MotionCBData(MotionCBData &&) = delete;
+
+        // accumulate
+        // += to handle overflowing/wrapping the array, which could happen if there's a lagspike
+        inline void add(float *x, float *y) { this->accum_vec[this->count++] += Vector2{*x, *y}; }
+
+        // release (during Mouse::update())
+        Vector2 consume();
+
+        // get
+        [[nodiscard]] inline const float &get_current_sens() const {
+            return static_cast<const float &>(this->mouse_ptr->fSensitivity);
+        }
+
+        // debugging
+        [[nodiscard]] inline u8 getCount() const { return this->count; }
+
+       private:
+        std::array<Vector2, UINT8_MAX> accum_vec{};
+        Mouse *mouse_ptr;
+        u8 count{0};  // event counter until the data has been consumed
+    };
+
+   public:
     Mouse();
     ~Mouse() override { ; }
 
@@ -82,17 +118,21 @@ class Mouse final : public InputDevice {
         return this->bIsRawInput;
     }  // "desired" rawinput state, NOT actual OS raw input state!
 
+    [[nodiscard]] inline const MotionCBData *getMotionCallbackData() const { return &this->mcbdata; }
+
    private:
     // callbacks
     void onSensitivityChanged(float newSens);
     void onRawInputChanged(float newVal);
 
+    void raw_update_tick();
+
     // position state
     Vector2 vPos;                // position with offset applied
     Vector2 vPosWithoutOffsets;  // position without offset
-    Vector2 vDelta{};              // movement delta in the current frame
-    Vector2 vRawDelta{};   // movement delta in the current frame, without consideration for clipping or sensitivity
-    Vector2 vActualPos;  // final cursor position after all transformations
+    Vector2 vDelta{};            // movement delta in the current frame
+    Vector2 vRawDelta{};  // movement delta in the current frame, without consideration for clipping or sensitivity
+    Vector2 vActualPos;   // final cursor position after all transformations
 
     // mode tracking
     bool bLastFrameHadMotion{false};  // whether setPos was called in the previous frame
@@ -116,6 +156,8 @@ class Mouse final : public InputDevice {
     // transform parameters
     Vector2 vOffset{0, 0};  // offset applied to coordinates
     Vector2 vScale{1, 1};   // scale applied to coordinates
+
+    MotionCBData mcbdata;
 };
 
 #endif
