@@ -28,7 +28,7 @@
 #include <cstring>
 #include <utility>
 
-Database* db = nullptr;
+Database *db = nullptr;
 
 namespace {  // static namespace
 bool sortScoreByScore(FinishedScore const &a, FinishedScore const &b) {
@@ -345,7 +345,7 @@ int Database::addScore(const FinishedScore &score) {
     // @PPV3: use new replay format
 
     // XXX: this is blocking main thread
-    u8* compressed_replay = nullptr;
+    u8 *compressed_replay = nullptr;
     size_t s_compressed_replay = 0;
     LegacyReplay::compress_frames(score.replay, &compressed_replay, &s_compressed_replay);
     if(s_compressed_replay > 0) {
@@ -661,7 +661,9 @@ std::string Database::db_osu_folder{};
 const std::string &Database::getOsuFolder(std::string new_folder) {
     std::string current_folder = std::move(new_folder);
 
-    if(current_folder == db_osu_folder) return db_osu_folder;
+    if(current_folder == db_osu_folder) {
+        return db_osu_folder;
+    }
 
     if(!current_folder.empty()) {
         SString::trim(&current_folder);
@@ -669,12 +671,17 @@ const std::string &Database::getOsuFolder(std::string new_folder) {
 
     db_osu_folder = current_folder;
 
-    // remove duplicate slashes
-    while(!db_osu_folder.empty() && (db_osu_folder.ends_with('\\') || db_osu_folder.ends_with('/'))) {
-        db_osu_folder.pop_back();
+    if(!db_osu_folder.ends_with(PREF_PATHSEP)) {
+        db_osu_folder.append(PREF_PATHSEP);
     }
 
-    db_osu_folder.append(PREF_PATHSEP);  // end with the correct separator
+    // use std::filesystem lexically_normal to clean up the path (it doesn't make sure it exists, purely transforms it)
+    {
+        UString uPath{db_osu_folder};
+        std::filesystem::path temp_fspath{uPath.plat_view()};
+        uPath = UString{temp_fspath.lexically_normal().generic_string()};
+        db_osu_folder = uPath.toUtf8();
+    }
 
     cv::osu_folder.setValue(db_osu_folder, false);
 
@@ -685,31 +692,46 @@ std::string Database::db_songs_folder{};
 const std::string &Database::getOsuSongsFolder() {
     std::string current_folder = cv::songs_folder.getString();
 
-    if(current_folder == db_songs_folder) return db_songs_folder;
+    if(!current_folder.empty() && (current_folder == db_songs_folder)) {
+        return db_songs_folder;
+    }
 
     if(!current_folder.empty()) {
         SString::trim(&current_folder);
     }
 
-    if(current_folder.find(':') == std::string::npos) {
-        // Relative path (yes, the check is Windows-only)
-        db_songs_folder = Database::getOsuFolder();
-        while(!db_songs_folder.empty() && (db_songs_folder.ends_with('\\') || db_songs_folder.ends_with('/'))) {
-            db_songs_folder.pop_back();
-        }
-        db_songs_folder.append(PREF_PATHSEP);
+    std::string current_osu_folder = Database::getOsuFolder();
+
+    if(current_folder.find(':') == std::string::npos ||
+       !(current_folder.starts_with('/') || current_folder.starts_with('\\'))) {
+        // Relative path
+        db_songs_folder = current_osu_folder;  // ends with a slash
         db_songs_folder.append(current_folder);
     } else {
         // Absolute path
         db_songs_folder = current_folder;
     }
 
-    // remove duplicate slashes
-    while(!db_songs_folder.empty() && (db_songs_folder.ends_with('\\') || db_songs_folder.ends_with('/'))) {
-        db_songs_folder.pop_back();
+    // if we ended up with an empty string somehow, or the db_songs_folder we got doesn't exist and the osu folder does
+    // exist, then reset the db_songs_folder to the default "Songs/" subfolder within the osu folder
+    {
+        using enum File::FILETYPE;
+        if(db_songs_folder.empty() || ((File::exists(current_osu_folder) == FOLDER) &&
+                                       !(File::existsCaseInsensitive(db_songs_folder) == FOLDER))) {
+            db_songs_folder = fmt::format("{}{}", current_osu_folder, cv::songs_folder.getDefaultString());
+        }
     }
 
-    db_songs_folder.append(PREF_PATHSEP);
+    if(!db_songs_folder.ends_with(PREF_PATHSEP)) {
+        db_songs_folder.append(PREF_PATHSEP);
+    }
+
+    {
+        UString uPath{db_songs_folder};
+        std::filesystem::path temp_fspath{uPath.plat_view()};
+        uPath = UString{temp_fspath.lexically_normal().generic_string()};
+        db_songs_folder = uPath.toUtf8();
+    }
 
     cv::songs_folder.setValue(db_songs_folder, false);
 
@@ -717,14 +739,7 @@ const std::string &Database::getOsuSongsFolder() {
 }
 
 void Database::scheduleLoadRaw() {
-    this->sRawBeatmapLoadOsuSongFolder = Database::getOsuFolder();
-    {
-        const std::string &customBeatmapDirectory = Database::getOsuSongsFolder();
-        if(customBeatmapDirectory.length() < 1)
-            this->sRawBeatmapLoadOsuSongFolder.append("Songs" PREF_PATHSEP);
-        else
-            this->sRawBeatmapLoadOsuSongFolder = customBeatmapDirectory;
-    }
+    this->sRawBeatmapLoadOsuSongFolder = Database::getOsuSongsFolder();
 
     debugLog("Database: sRawBeatmapLoadOsuSongFolder = {:s}\n", this->sRawBeatmapLoadOsuSongFolder);
 
@@ -800,7 +815,7 @@ void Database::loadMaps() {
     // read beatmapInfos, and also build two hashmaps (diff hash -> BeatmapDifficulty, diff hash -> Beatmap)
     struct Beatmap_Set {
         int setID;
-        std::vector<DatabaseBeatmap*>* diffs2 = nullptr;
+        std::vector<DatabaseBeatmap *> *diffs2 = nullptr;
     };
     std::vector<Beatmap_Set> beatmapSets;
     std::unordered_map<int, size_t> setIDToIndex;
@@ -2186,7 +2201,7 @@ BeatmapSet *Database::loadRawBeatmap(const std::string &beatmapPath) {
         }
     }
 
-    BeatmapSet* set = nullptr;
+    BeatmapSet *set = nullptr;
     if(diffs2->empty()) {
         delete diffs2;
     } else {

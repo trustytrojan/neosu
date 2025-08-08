@@ -16,7 +16,7 @@ AnimationHandler::~AnimationHandler() {
 
 void AnimationHandler::update() {
     const auto curFrameTime = static_cast<float>(engine->getTime());
-    for(size_t i = 0; i < this->vAnimations.size(); i++) {
+    for(sSz i = 0; i < this->vAnimations.size(); i++) {
         // start animation
         Animation &animation = this->vAnimations[i];
         if(curFrameTime < animation.fStartTime)
@@ -177,7 +177,7 @@ void AnimationHandler::addAnimation(float *base, float target, float duration, f
 void AnimationHandler::overrideExistingAnimation(float *base) { this->deleteExistingAnimation(base); }
 
 void AnimationHandler::deleteExistingAnimation(float *base) {
-    for(size_t i = 0; i < this->vAnimations.size(); i++) {
+    for(sSz i = 0; i < this->vAnimations.size(); i++) {
         if(this->vAnimations[i].fBase == base) {
             this->vAnimations.erase(this->vAnimations.begin() + i);
             i--;
