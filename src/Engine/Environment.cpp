@@ -159,7 +159,8 @@ Graphics *Environment::createRenderer() {
 }
 
 void Environment::shutdown() {
-    // need to disable this since sensTransformFunc accesses &mouse->getSensitivity(), which will become invalidated when the mouse device is free'd on engine shutdown
+    // need to disable this since sensTransformFunc accesses &mouse->getSensitivity(), which will become invalidated
+    // when the mouse device is free'd on engine shutdown
     notifyWantRawInput(false);
 
     SDL_Event event;
@@ -748,14 +749,16 @@ void Environment::setCursor(CURSORTYPE cur) {
     }
 }
 
-void Environment::notifyWantRawInput(bool raw) {
-    static auto sensTransformFunc = [](void *userdata, Uint64 /*timestamp*/, SDL_Window * /*window*/, SDL_MouseID /*mouseid*/, float *x,
-                        float *y) -> void {
-        const float sensitivity = *static_cast<float *>(userdata);
-        *x *= sensitivity;
-        *y *= sensitivity;
-    };
+namespace {  // static namespace
+void sensTransformFunc(void *userdata, Uint64 /*timestamp*/, SDL_Window * /*window*/, SDL_MouseID /*mouseid*/, float *x,
+                       float *y) {
+    const float sensitivity = *static_cast<float *>(userdata);
+    *x *= sensitivity;
+    *y *= sensitivity;
+}
+}  // namespace
 
+void Environment::notifyWantRawInput(bool raw) {
     if(raw) {
         setOSMousePos(
             mouse->getRealPos());  // when enabling, we need to make sure we start from the virtual cursor position

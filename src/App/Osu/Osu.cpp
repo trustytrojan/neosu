@@ -1989,16 +1989,17 @@ void Osu::updateConfineCursor() {
     bool effectivelyFS = env->isFullscreen() || env->isFullscreenWindowedBorderless();
 
     // clang-format off
-    if( /* disablers */    (false
-        || !(cv::confine_cursor_never.getBool()
-        || this->getModAuto()
-        || this->getModAutopilot()
-        || (this->getSelectedBeatmap() && this->getSelectedBeatmap()->is_watching)
-        || bancho->spectating))
-        /* enablers  */ && (false
-        || ((effectivelyFS && cv::confine_cursor_fullscreen.getBool())
-        || (!effectivelyFS && cv::confine_cursor_windowed.getBool())
-        || (this->isInPlayMode() && !(this->pauseMenu && this->pauseMenu->isVisible())))))
+    if(      /* disablers */ (true
+            && !(cv::confine_cursor_never.getBool())
+            && !(this->getModAuto())
+            && !(this->getModAutopilot())
+            && !(this->getSelectedBeatmap() && this->getSelectedBeatmap()->is_watching)
+            && !(bancho->spectating)
+        ) && /* enablers */  (false
+            || ((effectivelyFS && cv::confine_cursor_fullscreen.getBool())
+            || (!effectivelyFS && cv::confine_cursor_windowed.getBool())
+            || (this->isInPlayMode() && !(this->pauseMenu && this->pauseMenu->isVisible())))
+        ))
     {   // disablers take precedence over enablers
         // clang-format on
         shouldConfine = true;
