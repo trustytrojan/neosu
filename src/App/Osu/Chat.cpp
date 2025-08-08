@@ -44,9 +44,6 @@ namespace proto = BANCHO::Proto;
 
 static McFont *chat_font = nullptr;
 
-// Temporarily disabled since it's broken
-static constexpr bool ENABLE_CHAT_TICKER = false;
-
 ChatChannel::ChatChannel(Chat *chat, UString name_arg) {
     this->chat = chat;
     this->name = std::move(name_arg);
@@ -282,8 +279,11 @@ void ChatChannel::updateLayout(Vector2 pos, Vector2 size) {
 Chat::Chat() : OsuScreen() {
     chat_font = resourceManager->getFont("FONT_DEFAULT");
 
-    this->button_container = new CBaseUIContainer(0, 0, 0, 0, "");
     this->ticker = new ChatChannel(nullptr, "");
+    this->ticker->ui->setVerticalScrolling(false);
+    this->ticker->ui->setDrawScrollbars(false);
+
+    this->button_container = new CBaseUIContainer(0, 0, 0, 0, "");
 
     this->join_channel_btn = new UIButton(0, 0, 0, 0, "button", "+");
     this->join_channel_btn->setUseDefaultSkin();
@@ -315,11 +315,13 @@ Chat::~Chat() {
         SAFE_DELETE(chan);
     }
     SAFE_DELETE(this->button_container);
+    SAFE_DELETE(this->ticker);
 }
 
 void Chat::draw() {
+    this->drawTicker();
+
     const bool isAnimating = anim->isAnimating(&this->fAnimation);
-    if(ENABLE_CHAT_TICKER) this->drawTicker();
     if(!this->bVisible && !isAnimating) return;
 
     if(isAnimating) {
@@ -357,42 +359,31 @@ void Chat::draw() {
 
 void Chat::drawTicker() {
     if(!cv::chat_ticker.getBool()) return;
-    // f64 time_elapsed = engine->getTime() - this->ticker_tms;
-    // TODO @kiwec: hide while chat is visible
-    // if(this->ticker_tms == 0.0 || time_elapsed > 6.0) return; // DEBUG
 
-    // const bool isAnimating = anim->isAnimating(&this->fAnimation);
-    // if(isAnimating) {
-    //     // XXX: Setting BLEND_MODE_PREMUL_ALPHA is not enough, transparency is still incorrect
-    //     osu->getSliderFrameBuffer()->enable();
-    //     g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_PREMUL_ALPHA);
-    // }
+    f64 time_elapsed = engine->getTime() - this->ticker_tms;
+    if(this->ticker_tms == 0.0 || time_elapsed > 6.0) return;
 
-    // f32 a = std::clamp(6.0 - time_elapsed, 0.0, 1.0);
-    g->setColor(0xdd000000);
-    auto pos = this->ticker->ui->getPos();
-    auto size = this->ticker->ui->getSize();
-    g->fillRect(pos.x, pos.y, size.x, size.y);
+    f32 a = std::clamp(6.0 - time_elapsed, 0.0, 1.0);
+    auto ticker_size = this->ticker->ui->getSize();
+    if(!anim->isAnimating(&this->fAnimation)) {
+        this->fAnimation = 0.f;
+        if(this->isVisible()) return;  // don't draw ticker while chat is visible
+    }
+
+    // XXX: Setting BLEND_MODE_PREMUL_ALPHA is not enough, transparency is still incorrect
+    osu->getSliderFrameBuffer()->enable();
+    g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_PREMUL_ALPHA);
     this->ticker->ui->draw();
+    osu->getSliderFrameBuffer()->disable();
 
-    // if(isAnimating) {
-    //     osu->getSliderFrameBuffer()->disable();
-
-    //     g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ALPHA);
-    //     g->push3DScene(McRect(0, 0, this->getSize().x, this->getSize().y));
-    //     {
-    //         g->rotate3DScene(-(1.0f - this->fAnimation) * 90, 0, 0);
-    //         g->translate3DScene(0, -(1.0f - this->fAnimation) * this->getSize().y * 1.25f,
-    //                             -(1.0f - this->fAnimation) * 700);
-
-    //         osu->getSliderFrameBuffer()->setColor(argb(1.f - this->fAnimation, 1.0f, 1.0f, 1.0f));
-    //         osu->getSliderFrameBuffer()->draw(0, 0);
-    //     }
-    //     g->pop3DScene();
-    // } else {
-    //     f32 a = std::clamp(6.0 - time_elapsed, 0.0, 1.0);
-    //     osu->getSliderFrameBuffer()->setColor(argb(a, 1.0f, 1.0f, 1.0f));
-    // }
+    g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ALPHA);
+    g->push3DScene(McRect(0, 0, ticker_size.x, ticker_size.y));
+    {
+        g->rotate3DScene(this->fAnimation * 90, 0, 0);
+        osu->getSliderFrameBuffer()->setColor(argb(a * (1.f - this->fAnimation), 1.f, 1.f, 1.f));
+        osu->getSliderFrameBuffer()->draw(0, 0);
+    }
+    g->pop3DScene();
 }
 
 void Chat::mouse_update(bool *propagate_clicks) {
@@ -920,15 +911,15 @@ void Chat::addMessage(UString channel_name, const ChatMessage &msg, bool mark_un
         if(mark_unread) {
             chan->read = false;
             if(chan == this->selected_channel) {
+                this->mark_as_read(chan);
+
                 // Update ticker
                 auto screen = osu->getScreenSize();
                 this->ticker_tms = engine->getTime();
-                this->ticker->ui->setPos(Vector2{0.f, screen.y});
-                this->ticker->ui->setSize(screen);
                 this->ticker->messages.clear();
+                this->ticker->messages.push_back(msg);
                 this->ticker->add_message(msg);
-
-                this->mark_as_read(chan);
+                this->updateTickerLayout(screen);
             } else {
                 this->updateButtonLayout(this->getSize());
             }
@@ -970,7 +961,7 @@ void Chat::addSystemMessage(UString msg) {
 }
 
 void Chat::removeChannel(const UString &channel_name) {
-    ChatChannel* chan = nullptr;
+    ChatChannel *chan = nullptr;
     for(auto c : this->channels) {
         if(c->name == channel_name) {
             chan = c;
@@ -994,7 +985,7 @@ void Chat::removeChannel(const UString &channel_name) {
 }
 
 void Chat::updateLayout(Vector2 newResolution) {
-    if(ENABLE_CHAT_TICKER) this->updateTickerLayout(newResolution);
+    this->updateTickerLayout(newResolution);
 
     // We don't want to update while the chat is hidden, to avoid lagspikes during gameplay
     if(!this->bVisible) {
@@ -1089,12 +1080,12 @@ void Chat::updateButtonLayout(Vector2 screen) {
     this->updateUserList();
 }
 
-void Chat::updateTickerLayout(Vector2 /*screen*/) {
-    // TODO @kiwec
-    // this->ticker->updateLayout(Vector2{0.f, 0.f}, screen);
-    // f32 h = this->ticker->ui->getScrollSize().y;
-    // this->ticker->ui->setPos(Vector2{0.f, screen.y - h});
-    // this->ticker->ui->setSize(Vector2{screen.x, h});
+void Chat::updateTickerLayout(Vector2 screen) {
+    this->ticker->updateLayout(Vector2{0.f, 0.f}, screen);
+
+    f32 h = this->ticker->ui->getScrollSize().y + 5;
+    this->ticker->ui->setPos(Vector2{0.f, screen.y - h});
+    this->ticker->ui->setSize(Vector2{screen.x, h});
 }
 
 void Chat::updateUserList() {

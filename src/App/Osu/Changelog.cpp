@@ -31,6 +31,7 @@ Changelog::Changelog() : ScreenBackable() {
     v40_00.title = "40.00";
     v40_00.changes = {
         // R"(- Re-added local user stats)",
+        R"(- Added chat ticker)",
         R"(- Switched to SDL3 platform backend)",
         R"(- Added chat/screenshot/status notifications)",
         R"(- Fixed crash when skin is missing spinner sounds)",
