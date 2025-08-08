@@ -659,17 +659,24 @@ DatabaseBeatmap *Database::getBeatmapSet(i32 set_id) {
 
 std::string Database::db_osu_folder{};
 const std::string &Database::getOsuFolder(std::string new_folder) {
-    std::string current_folder = std::move(new_folder);
+    std::string current_osu_folder = std::move(new_folder);
 
-    if(current_folder == db_osu_folder) {
+    if(current_osu_folder == db_osu_folder) {
         return db_osu_folder;
     }
 
-    if(!current_folder.empty()) {
-        SString::trim(&current_folder);
+    if(!current_osu_folder.empty()) {
+        SString::trim(&current_osu_folder);
     }
 
-    db_osu_folder = current_folder;
+    db_osu_folder = current_osu_folder;
+
+    if constexpr(!Env::cfg(OS::WINDOWS)) {
+        // remove drive letter prefix if switching to linux
+        if(!db_osu_folder.empty() && db_osu_folder.find(':') == 1) {
+            db_osu_folder.erase(0, 2);
+        }
+    }
 
     if(!db_osu_folder.ends_with(PREF_PATHSEP)) {
         db_osu_folder.append(PREF_PATHSEP);
@@ -690,26 +697,35 @@ const std::string &Database::getOsuFolder(std::string new_folder) {
 
 std::string Database::db_songs_folder{};
 const std::string &Database::getOsuSongsFolder() {
-    std::string current_folder = cv::songs_folder.getString();
+    std::string current_songs_folder = cv::songs_folder.getString();
 
-    if(!current_folder.empty() && (current_folder == db_songs_folder)) {
+    if(!current_songs_folder.empty() && (current_songs_folder == db_songs_folder)) {
         return db_songs_folder;
     }
 
-    if(!current_folder.empty()) {
-        SString::trim(&current_folder);
+    if(!current_songs_folder.empty()) {
+        SString::trim(&current_songs_folder);
     }
 
     std::string current_osu_folder = Database::getOsuFolder();
 
-    if(current_folder.find(':') == std::string::npos ||
-       !(current_folder.starts_with('/') || current_folder.starts_with('\\'))) {
-        // Relative path
-        db_songs_folder = current_osu_folder;  // ends with a slash
-        db_songs_folder.append(current_folder);
+    bool relative_path = false;
+    if constexpr(Env::cfg(OS::WINDOWS)) {
+        relative_path = (current_songs_folder.find(':') == std::string::npos) &&
+                        !(current_songs_folder.starts_with('/') || current_songs_folder.starts_with('\\'));
     } else {
-        // Absolute path
-        db_songs_folder = current_folder;
+        // remove drive letter prefix if switching to linux
+        if(!current_songs_folder.empty() && current_songs_folder.find(':') == 1) {
+            current_songs_folder.erase(0, 2);
+        }
+        relative_path = !(current_songs_folder.starts_with('/') || current_songs_folder.starts_with('\\'));
+    }
+
+    if(relative_path) {
+        // current_osu_folder is guaranteed to end with a slash
+        db_songs_folder = fmt::format("{}{}", current_osu_folder, current_songs_folder);
+    } else {  // absolute
+        db_songs_folder = current_songs_folder;
     }
 
     // if we ended up with an empty string somehow, or the db_songs_folder we got doesn't exist and the osu folder does
