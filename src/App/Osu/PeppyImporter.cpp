@@ -5,6 +5,7 @@
 #include "Engine.h"
 #include "File.h"
 #include "KeyBindings.h"
+#include "Database.h"
 
 #ifdef MCENGINE_PLATFORM_WINDOWS
 #include "WinDebloatDefs.h"
@@ -207,7 +208,7 @@ UString get_osu_folder_from_registry() {
 }  // namespace
 
 void import_settings_from_osu_stable() {
-    UString osu_folder{cv::osu_folder.getString()};
+    UString osu_folder{Database::getOsuFolder()};
     if(osu_folder.isWhitespaceOnly()) {
         osu_folder = get_osu_folder_from_registry();
         if(!osu_folder.isWhitespaceOnly()) {

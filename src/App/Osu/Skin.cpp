@@ -11,7 +11,7 @@
 #include "Engine.h"
 #include "Environment.h"
 #include "File.h"
-#include "GameRules.h"
+#include "Database.h"
 #include "NotificationOverlay.h"
 #include "Osu.h"
 #include "ResourceManager.h"
@@ -393,7 +393,7 @@ void Skin::load() {
 
             // regular skins
             {
-                std::string skinFolder = cv::osu_folder.getString();
+                std::string skinFolder = Database::getOsuFolder();
                 skinFolder.append("/");
                 skinFolder.append(cv::osu_folder_sub_skins.getString());
                 std::vector<std::string> skinFolders = env->getFoldersInFolder(skinFolder);

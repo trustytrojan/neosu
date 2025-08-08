@@ -278,7 +278,7 @@ Osu::Osu() {
 
     // load skin
     {
-        std::string skinFolder{cv::osu_folder.getString()};
+        std::string skinFolder{Database::getOsuFolder()};
         skinFolder.append("/");
         skinFolder.append(cv::osu_folder_sub_skins.getString());
         skinFolder.append(cv::skin.getString());
@@ -1862,7 +1862,7 @@ void Osu::onSkinChange(const UString &newValue) {
     if(env->directoryExists(neosuSkinFolder)) {
         this->skinScheduledToLoad = new Skin(newString.c_str(), neosuSkinFolder, false);
     } else {
-        std::string ppySkinFolder{cv::osu_folder.getString()};
+        std::string ppySkinFolder{Database::getOsuFolder()};
         ppySkinFolder.append("/");
         ppySkinFolder.append(cv::osu_folder_sub_skins.getString());
         ppySkinFolder.append(newString);

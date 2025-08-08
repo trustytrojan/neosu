@@ -516,7 +516,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addLabel("2) osu! > Options > \"Open osu! folder\"")->setTextColor(0xff666666);
     this->addLabel("3) Copy paste the full path into the textbox:")->setTextColor(0xff666666);
     this->addLabel("");
-    this->osuFolderTextbox = this->addTextbox(cv::osu_folder.getString().c_str(), &cv::osu_folder);
+    this->osuFolderTextbox = this->addTextbox(Database::getOsuFolder().c_str(), &cv::osu_folder);
     this->addSpacer();
     this->addCheckbox(
         "Use osu!.db database (read-only)",
@@ -2219,22 +2219,9 @@ void OptionsMenu::askForLoginDetails() {
 void OptionsMenu::updateOsuFolder() {
     this->osuFolderTextbox->stealFocus();
 
-    std::string newOsuFolder{this->osuFolderTextbox->getText().utf8View()};
-
-    if(!newOsuFolder.empty()) {
-        SString::trim(&newOsuFolder);
-    }
-    if(!newOsuFolder.empty()) {
-        // automatically insert a slash at the end if the user forgets
-        while(!newOsuFolder.empty() && (newOsuFolder.ends_with('\\') || newOsuFolder.ends_with('/'))) {
-            newOsuFolder.pop_back();
-        }
-        newOsuFolder.append(PREF_PATHSEP);
-        this->osuFolderTextbox->setText(newOsuFolder.c_str());
-    }
-
-    // set convar to new folder
-    cv::osu_folder.setValue(newOsuFolder);
+    // running Database::getOsuFolder() here to make sure the path separator is correct
+    // also updates the cv::osu_folder string with the textbox contents
+    this->osuFolderTextbox->setText(UString{Database::getOsuFolder(this->osuFolderTextbox->getText().toUtf8())});
 }
 
 void OptionsMenu::updateFposuDPI() {
@@ -2371,7 +2358,7 @@ void OptionsMenu::openCurrentSkinFolder() {
             env->openFileBrowser(neosuSkinFolder);
         } else {
             std::string currentSkinFolder =
-                fmt::format("{}/{}{}", cv::osu_folder.getString(), cv::osu_folder_sub_skins.getString(), current_skin);
+                fmt::format("{}/{}{}", Database::getOsuFolder(), cv::osu_folder_sub_skins.getString(), current_skin);
             env->openFileBrowser(currentSkinFolder);
         }
     }
@@ -2390,7 +2377,7 @@ void OptionsMenu::onSkinSelect() {
 
     if(osu->isSkinLoading()) return;
 
-    std::string skinFolder{cv::osu_folder.getString()};
+    std::string skinFolder{Database::getOsuFolder()};
     skinFolder.append("/");
     skinFolder.append(cv::osu_folder_sub_skins.getString());
 

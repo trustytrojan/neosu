@@ -204,7 +204,7 @@ Info from_bytes(u8* data, int s_data) {
 
 bool load_from_disk(FinishedScore* score, bool update_db) {
     if(score->peppy_replay_tms > 0) {
-        auto osu_folder = cv::osu_folder.getString();
+        auto osu_folder = Database::getOsuFolder();
         auto path = UString::format("%s/Data/r/%s-%llu.osr", osu_folder, score->beatmap_hash.hash.data(),
                                     score->peppy_replay_tms);
 

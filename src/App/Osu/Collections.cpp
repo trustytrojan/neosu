@@ -208,7 +208,7 @@ bool load_collections() {
 
     unload_collections();
 
-    std::string peppy_collections_path = cv::osu_folder.getString();
+    std::string peppy_collections_path = Database::getOsuFolder();
     peppy_collections_path.append(PREF_PATHSEP "collection.db");
     const auto& peppy_collections = db->database_files[peppy_collections_path];
     load_peppy_collections(peppy_collections);

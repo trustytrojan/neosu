@@ -137,7 +137,7 @@ class DatabaseLoader : public Resource {
 
         this->db->openDatabases();
 
-        std::string peppy_scores_path = cv::osu_folder.getString();
+        std::string peppy_scores_path = Database::getOsuFolder();
         peppy_scores_path.append(PREF_PATHSEP "scores.db");
         this->db->scores_to_convert.clear();
         this->db->loadScores(this->db->database_files["neosu_scores.db"]);
@@ -153,7 +153,7 @@ class DatabaseLoader : public Resource {
         }
         this->db->dbPathsToImport.clear();
 
-        this->bNeedRawLoad = (!env->fileExists(fmt::format("{}" PREF_PATHSEP "osu!.db", cv::osu_folder.getString())) ||
+        this->bNeedRawLoad = (!env->fileExists(fmt::format("{}" PREF_PATHSEP "osu!.db", Database::getOsuFolder())) ||
                               !cv::database_enabled.getBool());
 
         if(!this->bNeedRawLoad) {
@@ -657,37 +657,69 @@ DatabaseBeatmap *Database::getBeatmapSet(i32 set_id) {
     return NULL;
 }
 
-std::string Database::songs_folder{};
+std::string Database::db_osu_folder{};
+const std::string &Database::getOsuFolder(std::string new_folder) {
+    std::string current_folder = std::move(new_folder);
 
+    if(current_folder == db_osu_folder) return db_osu_folder;
+
+    if(!current_folder.empty()) {
+        SString::trim(&current_folder);
+    }
+
+    db_osu_folder = current_folder;
+
+    // remove duplicate slashes
+    while(!db_osu_folder.empty() && (db_osu_folder.ends_with('\\') || db_osu_folder.ends_with('/'))) {
+        db_osu_folder.pop_back();
+    }
+
+    db_osu_folder.append(PREF_PATHSEP);  // end with the correct separator
+
+    cv::osu_folder.setValue(db_osu_folder, false);
+
+    return db_osu_folder;
+}
+
+std::string Database::db_songs_folder{};
 const std::string &Database::getOsuSongsFolder() {
-    if(cv::songs_folder.getString() == songs_folder) return songs_folder;
+    std::string current_folder = cv::songs_folder.getString();
 
-    if(cv::songs_folder.getString().find(':') == std::string::npos) {
+    if(current_folder == db_songs_folder) return db_songs_folder;
+
+    if(!current_folder.empty()) {
+        SString::trim(&current_folder);
+    }
+
+    if(current_folder.find(':') == std::string::npos) {
         // Relative path (yes, the check is Windows-only)
-        songs_folder = cv::osu_folder.getString();
-        while(!songs_folder.empty() && (songs_folder.ends_with('\\') || songs_folder.ends_with('/'))) {
-            songs_folder.pop_back();
+        db_songs_folder = Database::getOsuFolder();
+        while(!db_songs_folder.empty() && (db_songs_folder.ends_with('\\') || db_songs_folder.ends_with('/'))) {
+            db_songs_folder.pop_back();
         }
-        songs_folder.append(PREF_PATHSEP);
-        songs_folder.append(cv::songs_folder.getString());
+        db_songs_folder.append(PREF_PATHSEP);
+        db_songs_folder.append(current_folder);
     } else {
         // Absolute path
-        songs_folder = cv::songs_folder.getString();
+        db_songs_folder = current_folder;
     }
 
     // remove duplicate slashes
-    while(!songs_folder.empty() && (songs_folder.ends_with('\\') || songs_folder.ends_with('/'))) {
-        songs_folder.pop_back();
+    while(!db_songs_folder.empty() && (db_songs_folder.ends_with('\\') || db_songs_folder.ends_with('/'))) {
+        db_songs_folder.pop_back();
     }
-    songs_folder.append(PREF_PATHSEP);
 
-    return songs_folder;
+    db_songs_folder.append(PREF_PATHSEP);
+
+    cv::songs_folder.setValue(db_songs_folder, false);
+
+    return db_songs_folder;
 }
 
 void Database::scheduleLoadRaw() {
-    this->sRawBeatmapLoadOsuSongFolder = cv::osu_folder.getString();
+    this->sRawBeatmapLoadOsuSongFolder = Database::getOsuFolder();
     {
-        const std::string &customBeatmapDirectory = this->getOsuSongsFolder();
+        const std::string &customBeatmapDirectory = Database::getOsuSongsFolder();
         if(customBeatmapDirectory.length() < 1)
             this->sRawBeatmapLoadOsuSongFolder.append("Songs" PREF_PATHSEP);
         else
@@ -751,12 +783,12 @@ void Database::loadMaps() {
     std::scoped_lock lock(this->beatmap_difficulties_mtx);
     this->peppy_overrides_mtx.lock();
 
-    std::string peppy_maps_path = cv::osu_folder.getString();
+    std::string peppy_maps_path = Database::getOsuFolder();
     peppy_maps_path.append(PREF_PATHSEP "osu!.db");
     const auto &peppy_db_path = this->database_files[peppy_maps_path];
     const auto &neosu_maps_path = this->database_files["neosu_maps.db"];
 
-    const std::string &songFolder = this->getOsuSongsFolder();
+    const std::string &songFolder = Database::getOsuSongsFolder();
     debugLog("Database: songFolder = {:s}\n", songFolder.c_str());
 
     this->importTimer->start();
@@ -1410,18 +1442,18 @@ void Database::openDatabases() {
     this->total_bytes = 0;
     this->database_files.clear();
 
-    std::string peppy_scores_path = cv::osu_folder.getString();
+    std::string peppy_scores_path = Database::getOsuFolder();
     peppy_scores_path.append(PREF_PATHSEP "scores.db");
     this->database_files.emplace(peppy_scores_path, UString(peppy_scores_path));
     this->database_files.emplace("neosu_scores.db", UString("neosu_scores.db"));
     this->database_files.emplace("scores.db", UString("scores.db"));  // mcneosu database
 
-    std::string peppy_maps_path = cv::osu_folder.getString();
+    std::string peppy_maps_path = Database::getOsuFolder();
     peppy_maps_path.append(PREF_PATHSEP "osu!.db");
     this->database_files.emplace(peppy_maps_path, UString(peppy_maps_path));
     this->database_files.emplace("neosu_maps.db", UString("neosu_maps.db"));
 
-    std::string peppy_collections_path = cv::osu_folder.getString();
+    std::string peppy_collections_path = Database::getOsuFolder();
     peppy_collections_path.append(PREF_PATHSEP "collection.db");
     this->database_files.emplace(peppy_collections_path, UString(peppy_collections_path));
     this->database_files.emplace("collections.db", UString("collections.db"));
