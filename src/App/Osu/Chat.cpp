@@ -16,6 +16,7 @@
 #include "Keyboard.h"
 #include "Lobby.h"
 #include "ModSelector.h"
+#include "Mouse.h"
 #include "OptionsMenu.h"
 #include "Osu.h"
 #include "PauseMenu.h"
@@ -335,8 +336,14 @@ void Chat::draw() {
                 this->button_container->getSize().x, this->button_container->getSize().y);
     this->button_container->draw();
 
-    OsuScreen::draw();
-    if(this->selected_channel != nullptr) {
+    if(this->selected_channel == nullptr) {
+        f32 chat_h = round(this->getSize().y * 0.3f);
+        f32 chat_y = this->getSize().y - chat_h;
+        f32 chat_w = this->isSmallChat() ? round(this->getSize().x * 0.6) : this->getSize().x;
+        g->setColor(argb(150, 0, 0, 0));
+        g->fillRect(0, chat_y, chat_w, chat_h);
+    } else {
+        OsuScreen::draw();
         this->selected_channel->ui->draw();
     }
 
@@ -411,6 +418,25 @@ void Chat::mouse_update(bool *propagate_clicks) {
     this->button_container->mouse_update(propagate_clicks);
     if(this->selected_channel) {
         this->selected_channel->ui->mouse_update(propagate_clicks);
+    }
+
+    // HACKHACK: MOUSE3 handling
+    static bool was_M3_down = false;
+    bool is_M3_down = mouse->isMiddleDown();
+    if(is_M3_down != was_M3_down) {
+        if(is_M3_down) {
+            auto mpos = mouse->getPos();
+
+            // Try to close hovered channel
+            for(auto &chan : this->channels) {
+                if(chan->btn->getRect().contains(mpos)) {
+                    this->leave(chan->name);
+                    break;
+                }
+            }
+        }
+
+        was_M3_down = is_M3_down;
     }
 
     // Focus without placing the cursor at the end of the field

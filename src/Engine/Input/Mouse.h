@@ -1,10 +1,4 @@
-//========== Copyright (c) 2015, PG & 2025, WH, All rights reserved. ============//
-//
-// Purpose:		mouse wrapper
-//
-// $NoKeywords: $mouse
-//===============================================================================//
-
+// Copyright (c) 2015, PG & 2025, WH, All rights reserved.
 #pragma once
 #ifndef MOUSE_H
 #define MOUSE_H

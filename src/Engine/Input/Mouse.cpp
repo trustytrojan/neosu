@@ -1,10 +1,4 @@
-//========== Copyright (c) 2015, PG & 2025, WH, All rights reserved. ============//
-//
-// Purpose:		mouse wrapper
-//
-// $NoKeywords: $mouse
-//===============================================================================//
-
+// Copyright (c) 2015, PG & 2025, WH, All rights reserved.
 #include "Mouse.h"
 
 #include "ConVar.h"
@@ -98,8 +92,8 @@ void Mouse::raw_update_tick() {
         Vector2 abs = this->vPosWithoutOffsets + cb_rel;
 
         if(cv::debug_mouse.getBool()) {
-            debugLog("calling onMotion from callback data with rel {}, {} abs {}, {}\n", cb_rel.x, cb_rel.y,
-                     abs.x, abs.y);
+            debugLog("calling onMotion from callback data with rel {}, {} abs {}, {}\n", cb_rel.x, cb_rel.y, abs.x,
+                     abs.y);
         }
 
         this->onMotion(cb_rel, abs, true);
