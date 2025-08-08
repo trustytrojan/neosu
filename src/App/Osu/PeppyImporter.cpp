@@ -6,6 +6,7 @@
 #include "File.h"
 #include "KeyBindings.h"
 #include "Database.h"
+#include "OptionsMenu.h"
 
 #ifdef MCENGINE_PLATFORM_WINDOWS
 #include "WinDebloatDefs.h"
@@ -163,7 +164,7 @@ void try_set_key(const char* str, ConVar* cvar) {
     }
 }
 
-UString get_osu_folder_from_registry() {
+void update_osu_folder_from_registry() {
 #ifdef _WIN32
     i32 err;
     HKEY key;
@@ -177,7 +178,7 @@ UString get_osu_folder_from_registry() {
     }
     if(err != ERROR_SUCCESS) {
         debugLog("osu!stable not found in registry!\n");
-        return "";
+        return;
     }
 
     DWORD dwType = REG_SZ;
@@ -187,7 +188,7 @@ UString get_osu_folder_from_registry() {
     RegCloseKey(key);
     if(err != ERROR_SUCCESS) {
         debugLog("Failed to get path of osu:// protocol handler.\n");
-        return "";
+        return;
     }
 
     // The path is in format: "C:\Path\To\osu!.exe" "%1"
@@ -199,22 +200,18 @@ UString get_osu_folder_from_registry() {
     WCHAR* lastBackslash = wcsrchr(path, L'\\');
     if(lastBackslash) {
         *lastBackslash = L'\0';
-        return path;
+        UString new_osu_folder{path};
+        debugLog("Found osu! folder from registry: {:s}\n", new_osu_folder.toUtf8());
+        cv::osu_folder.setValue(new_osu_folder.toUtf8());
+        return;
     }
 #endif
-
-    return "";
 }
 }  // namespace
 
 void import_settings_from_osu_stable() {
-    UString osu_folder{Database::getOsuFolder()};
-    if(osu_folder.isWhitespaceOnly()) {
-        osu_folder = get_osu_folder_from_registry();
-        if(!osu_folder.isWhitespaceOnly()) {
-            debugLog("Found osu! folder from registry: {:s}\n", osu_folder.toUtf8());
-            cv::osu_folder.setValue(osu_folder);
-        }
+    if(cv::osu_folder.getString().empty()) {
+        update_osu_folder_from_registry();
     }
 
     auto username = env->getUsername();
@@ -223,7 +220,7 @@ void import_settings_from_osu_stable() {
         return;
     }
 
-    std::string cfg_path = osu_folder.toUtf8();
+    std::string cfg_path = cv::osu_folder.getString();
     cfg_path.append(PREF_PATHSEP "osu!.");
     cfg_path.append(username.toUtf8());
     cfg_path.append(".cfg");
@@ -335,8 +332,8 @@ void import_settings_from_osu_stable() {
             cv::draw_video.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " RawInput = %i[^\n]", &num) == 1) {
             cv::mouse_raw_input.setValue(num == 1);
-        // } else if(sscanf(curLine.c_str(), " AbsoluteToOsuWindow = %i[^\n]", &num) == 1) {
-        //     cv::mouse_raw_input_absolute_to_window.setValue(num == 1);
+            // } else if(sscanf(curLine.c_str(), " AbsoluteToOsuWindow = %i[^\n]", &num) == 1) {
+            //     cv::mouse_raw_input_absolute_to_window.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " ConfineMouse = %1023[^\n]", str) == 1) {
             if(!strcmp(str, "Never")) {
                 cv::confine_cursor_fullscreen.setValue(false);

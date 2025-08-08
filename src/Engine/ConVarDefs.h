@@ -434,7 +434,7 @@ CONVAR(flashlight_always_hard, "flashlight_always_hard", false, FCVAR_BANCHO_COM
 CONVAR(flashlight_follow_delay, "flashlight_follow_delay", 0.120f, FCVAR_LOCKED | FCVAR_GAMEPLAY);
 CONVAR(flashlight_radius, "flashlight_radius", 100.f, FCVAR_LOCKED | FCVAR_GAMEPLAY);
 
-CONVAR(osu_folder, "osu_folder", "", FCVAR_BANCHO_COMPATIBLE);
+CONVAR(osu_folder, "osu_folder", "", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
 CONVAR(songs_folder, "osu_songs_folder", "Songs/", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
 
 CONVAR(osu_folder_sub_skins, "osu_folder_sub_skins", "Skins/", FCVAR_BANCHO_COMPATIBLE);

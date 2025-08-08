@@ -516,7 +516,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addLabel("2) osu! > Options > \"Open osu! folder\"")->setTextColor(0xff666666);
     this->addLabel("3) Copy paste the full path into the textbox:")->setTextColor(0xff666666);
     this->addLabel("");
-    this->osuFolderTextbox = this->addTextbox(Database::getOsuFolder().c_str(), &cv::osu_folder);
+    this->osuFolderTextbox = this->addTextbox(cv::osu_folder.getString().c_str(), &cv::osu_folder);
     this->addSpacer();
     this->addCheckbox(
         "Use osu!.db database (read-only)",
@@ -1534,7 +1534,7 @@ void OptionsMenu::mouse_update(bool *propagate_clicks) {
     }
 
     // apply textbox changes on enter key
-    if(this->osuFolderTextbox->hitEnter()) this->updateOsuFolder();
+    if(this->osuFolderTextbox->hitEnter()) osu->updateOsuFolder();
 
     cv::name.setValue(this->nameTextbox->getText());
     cv::mp_password_temporary.setValue(this->passwordTextbox->getText());
@@ -2216,14 +2216,6 @@ void OptionsMenu::askForLoginDetails() {
     this->nameTextbox->focus();
 }
 
-void OptionsMenu::updateOsuFolder() {
-    this->osuFolderTextbox->stealFocus();
-
-    // running Database::getOsuFolder() here to make sure the path separator is correct
-    // also updates the cv::osu_folder string with the textbox contents
-    this->osuFolderTextbox->setText(UString{Database::getOsuFolder(this->osuFolderTextbox->getText().toUtf8())});
-}
-
 void OptionsMenu::updateFposuDPI() {
     if(this->dpiTextbox == nullptr) return;
 
@@ -2358,7 +2350,7 @@ void OptionsMenu::openCurrentSkinFolder() {
             env->openFileBrowser(neosuSkinFolder);
         } else {
             std::string currentSkinFolder =
-                fmt::format("{}/{}{}", Database::getOsuFolder(), cv::osu_folder_sub_skins.getString(), current_skin);
+                fmt::format("{}{}{}", cv::osu_folder.getString(), cv::osu_folder_sub_skins.getString(), current_skin);
             env->openFileBrowser(currentSkinFolder);
         }
     }
@@ -2373,11 +2365,11 @@ void OptionsMenu::onSkinSelect() {
         return;
     }
 
-    this->updateOsuFolder();
+    osu->updateOsuFolder();
 
     if(osu->isSkinLoading()) return;
 
-    std::string skinFolder{Database::getOsuFolder()};
+    std::string skinFolder{cv::osu_folder.getString()};
     skinFolder.append("/");
     skinFolder.append(cv::osu_folder_sub_skins.getString());
 
@@ -3653,7 +3645,7 @@ void OptionsMenu::save() {
         return;
     }
 
-    this->updateOsuFolder();
+    osu->updateOsuFolder();
     this->updateFposuDPI();
     this->updateFposuCMper360();
 

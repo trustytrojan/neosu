@@ -2,4 +2,6 @@ BasedOnStyle: Google
 IndentWidth: 4
 ColumnLimit: 120
 SpaceBeforeParens: Never
-SortIncludes: Never # Otherwise breakage ensues when headers must be included in a specific order
+SortIncludes: Never           # Otherwise breakage ensues when headers must be included in a specific order
+DerivePointerAlignment: True  # some files are already right-aligned
+PointerAlignment: Left

@@ -1,15 +1,10 @@
-//========== Copyright (c) 2018, PG & 2025, WH, All rights reserved. ============//
-//
-// Purpose:		top level interface for native OS calls
-//
-// $NoKeywords: $env
-//===============================================================================//
-
+// Copyright (c) 2018, PG & 2025, WH, All rights reserved.
 #include "Environment.h"
 
 #include "Engine.h"
 #include "Mouse.h"
 #include "File.h"
+#include "SString.h"
 
 // #include "DirectX11Interface.h" TODO
 #include "SDLGLInterface.h"
@@ -178,12 +173,11 @@ const std::string &Environment::getExeFolder() {
     if(!pathStr.empty()) return pathStr;
     // sdl caches this internally, but we'll cache a std::string representation of it
     const char *path = SDL_GetBasePath();
-
-    if(!path)
-        pathStr = "." PREF_PATHSEP;
-    else
-        pathStr = path;
-    return pathStr;
+    if(path) {
+        return path;
+    } else {
+        return "";
+    }
 }
 
 void Environment::openURLInDefaultBrowser(const std::string &url) noexcept {
@@ -304,6 +298,26 @@ std::vector<std::string> Environment::getFoldersInFolder(const std::string &fold
 
 std::string Environment::getFileNameFromFilePath(const std::string &filepath) noexcept {
     return getThingFromPathHelper(filepath, false);
+}
+
+std::string Environment::normalizeDirectory(std::string dirPath) noexcept {
+    SString::trim(&dirPath);
+    if(dirPath.empty()) return dirPath;
+
+    while(dirPath.ends_with("\\") || dirPath.ends_with("/")) {
+        dirPath.pop_back();
+    }
+    dirPath.append(PREF_PATHSEP);
+
+    // use std::filesystem lexically_normal to clean up the path (it doesn't make sure it exists, purely transforms it)
+    std::filesystem::path fspath{dirPath};
+    dirPath = fspath.lexically_normal().generic_string();
+
+    if(dirPath == "." PREF_PATHSEP) {
+        return "";
+    } else {
+        return dirPath;
+    }
 }
 
 std::string Environment::getFolderFromFilePath(const std::string &filepath) noexcept {

@@ -111,6 +111,7 @@ class Environment {
     [[nodiscard]] static std::string getFileExtensionFromFilePath(const std::string &filepath,
                                                                   bool includeDot = false) noexcept;
     [[nodiscard]] static std::string getFileNameFromFilePath(const std::string &filePath) noexcept;
+    [[nodiscard]] static std::string normalizeDirectory(std::string dirPath) noexcept;
 
     [[nodiscard]] static std::string encodeStringToURL(const std::string &unencodedURLString) noexcept;
 

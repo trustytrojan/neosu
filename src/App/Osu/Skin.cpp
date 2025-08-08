@@ -398,8 +398,7 @@ void Skin::load() {
 
             // regular skins
             {
-                std::string skinFolder = Database::getOsuFolder();
-                skinFolder.append("/");
+                std::string skinFolder = cv::osu_folder.getString();
                 skinFolder.append(cv::osu_folder_sub_skins.getString());
                 std::vector<std::string> skinFolders = env->getFoldersInFolder(skinFolder);
 

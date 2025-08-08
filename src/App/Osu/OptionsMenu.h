@@ -61,7 +61,7 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     // "illegal", used by BassSoundEngine, can easily be turned into callbacks like for SoLoud instead
     void scheduleLayoutUpdate() { this->bSearchLayoutUpdateScheduled = true; }
     void onOutputDeviceResetUpdate();
-    CBaseUISlider* asioBufferSizeSlider = nullptr;
+    CBaseUISlider *asioBufferSizeSlider = nullptr;
     CBaseUILabel *outputDeviceLabel;
 
     // used by Osu
@@ -76,6 +76,8 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
 
     // used by WindowsMain for osk handling (this needs to be moved...)
     void updateSkinNameLabel();
+
+    CBaseUITextbox *osuFolderTextbox;
 
    private:
     enum class RenderCondition : uint8_t {
@@ -126,7 +128,6 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     void setVisibleInt(bool visible, bool fromOnBack = false);
     void scheduleSearchUpdate();
 
-    void updateOsuFolder();
     void updateFposuDPI();
     void updateFposuCMper360();
     void updateNotelockSelectLabel();
@@ -206,12 +207,12 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
                                           bool withResetButton = false);
     OptionsMenuKeyBindButton *addKeyBindButton(const UString &text, ConVar *cvar);
     CBaseUICheckbox *addCheckbox(const UString &text, ConVar *cvar);
-    CBaseUICheckbox* addCheckbox(const UString& text, const UString& tooltipText = "", ConVar* cvar = nullptr);
+    CBaseUICheckbox *addCheckbox(const UString &text, const UString &tooltipText = "", ConVar *cvar = nullptr);
     OPTIONS_ELEMENT *addButtonCheckbox(const UString &buttontext, const UString &cbxtooltip);
-    UISlider* addSlider(const UString& text, float min = 0.0f, float max = 1.0f, ConVar* cvar = nullptr,
+    UISlider *addSlider(const UString &text, float min = 0.0f, float max = 1.0f, ConVar *cvar = nullptr,
                         float label1Width = 0.0f, bool allowOverscale = false, bool allowUnderscale = false);
-    CBaseUITextbox* addTextbox(UString text, ConVar* cvar = nullptr);
-    CBaseUITextbox* addTextbox(UString text, const UString& labelText, ConVar* cvar = nullptr);
+    CBaseUITextbox *addTextbox(UString text, ConVar *cvar = nullptr);
+    CBaseUITextbox *addTextbox(UString text, const UString &labelText, ConVar *cvar = nullptr);
     CBaseUIElement *addSkinPreview();
     CBaseUIElement *addSliderPreview();
 
@@ -251,7 +252,6 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     CBaseUIElement *skinSelectLocalButton;
     CBaseUIButton *resolutionSelectButton;
     CBaseUILabel *resolutionLabel;
-    CBaseUITextbox *osuFolderTextbox;
     CBaseUIButton *outputDeviceSelectButton;
     OptionsMenuResetButton *outputDeviceResetButton;
     CBaseUISlider *wasapiBufferSizeSlider;
@@ -283,7 +283,7 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     CBaseUITextbox *passwordTextbox;
     UIButton *logInButton;
 
-    ConVar* waitingKey = nullptr;
+    ConVar *waitingKey = nullptr;
 
     float fOsuFolderTextboxInvalidAnim;
     float fVibrationStrengthExampleTimer;

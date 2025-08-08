@@ -132,6 +132,7 @@ Osu::Osu() {
     cv::confine_cursor_windowed.setCallback(SA::MakeDelegate<&Osu::updateConfineCursor>(this));
     cv::confine_cursor_fullscreen.setCallback(SA::MakeDelegate<&Osu::updateConfineCursor>(this));
     cv::confine_cursor_never.setCallback(SA::MakeDelegate<&Osu::updateConfineCursor>(this));
+    cv::osu_folder.setCallback(SA::MakeDelegate<&Osu::updateOsuFolder>(this));
 
     // vars
     this->skin = nullptr;
@@ -277,7 +278,7 @@ Osu::Osu() {
 
     // load skin
     {
-        std::string skinFolder{Database::getOsuFolder()};
+        std::string skinFolder{cv::osu_folder.getString()};
         skinFolder.append("/");
         skinFolder.append(cv::osu_folder_sub_skins.getString());
         skinFolder.append(cv::skin.getString());
@@ -1867,7 +1868,7 @@ void Osu::onSkinChange(const UString &newValue) {
     if(env->directoryExists(neosuSkinFolder)) {
         this->skinScheduledToLoad = new Skin(newString.c_str(), neosuSkinFolder, false);
     } else {
-        std::string ppySkinFolder{Database::getOsuFolder()};
+        std::string ppySkinFolder{cv::osu_folder.getString()};
         ppySkinFolder.append("/");
         ppySkinFolder.append(cv::osu_folder_sub_skins.getString());
         ppySkinFolder.append(newString);
@@ -1985,27 +1986,20 @@ void Osu::updateCursorVisibility() {
 
 void Osu::updateConfineCursor() {
     McRect clip{};
-    bool shouldConfine = false;
     bool effectivelyFS = env->isFullscreen() || env->isFullscreenWindowedBorderless();
 
-    // clang-format off
-    if(      /* disablers */ (true
-            && !(cv::confine_cursor_never.getBool())
-            && !(this->getModAuto())
-            && !(this->getModAutopilot())
-            && !(this->getSelectedBeatmap() && this->getSelectedBeatmap()->is_watching)
-            && !(bancho->spectating)
-        ) && /* enablers */  (false
-            || ((effectivelyFS && cv::confine_cursor_fullscreen.getBool())
-            || (!effectivelyFS && cv::confine_cursor_windowed.getBool())
-            || (this->isInPlayMode() && !(this->pauseMenu && this->pauseMenu->isVisible())))
-        ))
-    {   // disablers take precedence over enablers
-        // clang-format on
-        shouldConfine = true;
-    }
+    bool might_confine = (effectivelyFS && cv::confine_cursor_fullscreen.getBool()) ||                  //
+                         (!effectivelyFS && cv::confine_cursor_windowed.getBool()) ||                   //
+                         (this->isInPlayMode() && !(this->pauseMenu && this->pauseMenu->isVisible()));  //
 
-    if(shouldConfine) {
+    bool force_no_confine = cv::confine_cursor_never.getBool() ||                                       //
+                            this->getModAuto() ||                                                       //
+                            this->getModAutopilot() ||                                                  //
+                            (this->getSelectedBeatmap() && this->getSelectedBeatmap()->is_watching) ||  //
+                            bancho->spectating;                                                         //
+
+    bool confine_cursor = might_confine && !force_no_confine;
+    if(confine_cursor) {
         if((g->getResolution() != g_vInternalResolution) && cv::letterboxing.getBool()) {
             clip = McRect{(f32)(-mouse->getOffset().x), (f32)(-mouse->getOffset().y), g_vInternalResolution.x,
                           g_vInternalResolution.y};
@@ -2015,10 +2009,19 @@ void Osu::updateConfineCursor() {
     }
 
     if(cv::debug_mouse.getBool())
-        debugLog("confined: {}, cliprect: {},{},{},{}\n", shouldConfine, clip.getMinX(), clip.getMinY(), clip.getMaxX(),
-                 clip.getMaxY());
+        debugLog("confined: {}, cliprect: {},{},{},{}\n", confine_cursor, clip.getMinX(), clip.getMinY(),
+                 clip.getMaxX(), clip.getMaxY());
 
-    env->setCursorClip(shouldConfine, clip);
+    env->setCursorClip(confine_cursor, clip);
+}
+
+void Osu::updateOsuFolder() {
+    cv::osu_folder.setValue(env->normalizeDirectory(cv::osu_folder.getString()), false);
+
+    if(this->optionsMenu) {
+        this->optionsMenu->osuFolderTextbox->stealFocus();
+        this->optionsMenu->osuFolderTextbox->setText(UString{cv::osu_folder.getString()});
+    }
 }
 
 void Osu::onKey1Change(bool pressed, bool isMouse) {

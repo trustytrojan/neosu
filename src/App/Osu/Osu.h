@@ -162,6 +162,7 @@ class Osu final : public MouseListener, public KeyboardListener {
     void updateMods();
     void updateCursorVisibility();
     void updateConfineCursor();
+    void updateOsuFolder();
     void updateMouseSettings();
     void updateWindowsKeyDisable();
 
@@ -213,31 +214,31 @@ class Osu final : public MouseListener, public KeyboardListener {
     void setupSoloud();
 
     // interfaces
-    VolumeOverlay* volumeOverlay = nullptr;
-    MainMenu* mainMenu = nullptr;
-    OptionsMenu* optionsMenu = nullptr;
-    Chat* chat = nullptr;
-    Lobby* lobby = nullptr;
-    RoomScreen* room = nullptr;
-    PromptScreen* prompt = nullptr;
-    UIUserContextMenuScreen* user_actions = nullptr;
-    SongBrowser* songBrowser2 = nullptr;
-    BackgroundImageHandler* backgroundImageHandler = nullptr;
-    ModSelector* modSelector = nullptr;
-    RankingScreen* rankingScreen = nullptr;
-    UserStatsScreen* userStats = nullptr;
-    PauseMenu* pauseMenu = nullptr;
-    Skin* skin = nullptr;
-    HUD* hud = nullptr;
-    TooltipOverlay* tooltipOverlay = nullptr;
-    NotificationOverlay* notificationOverlay = nullptr;
-    LiveScore* score = nullptr;
-    Changelog* changelog = nullptr;
-    UpdateHandler* updateHandler = nullptr;
-    ModFPoSu* fposu = nullptr;
-    SpectatorScreen* spectatorScreen = nullptr;
+    VolumeOverlay *volumeOverlay = nullptr;
+    MainMenu *mainMenu = nullptr;
+    OptionsMenu *optionsMenu = nullptr;
+    Chat *chat = nullptr;
+    Lobby *lobby = nullptr;
+    RoomScreen *room = nullptr;
+    PromptScreen *prompt = nullptr;
+    UIUserContextMenuScreen *user_actions = nullptr;
+    SongBrowser *songBrowser2 = nullptr;
+    BackgroundImageHandler *backgroundImageHandler = nullptr;
+    ModSelector *modSelector = nullptr;
+    RankingScreen *rankingScreen = nullptr;
+    UserStatsScreen *userStats = nullptr;
+    PauseMenu *pauseMenu = nullptr;
+    Skin *skin = nullptr;
+    HUD *hud = nullptr;
+    TooltipOverlay *tooltipOverlay = nullptr;
+    NotificationOverlay *notificationOverlay = nullptr;
+    LiveScore *score = nullptr;
+    Changelog *changelog = nullptr;
+    UpdateHandler *updateHandler = nullptr;
+    ModFPoSu *fposu = nullptr;
+    SpectatorScreen *spectatorScreen = nullptr;
 
-    UserCard* userButton = nullptr;
+    UserCard *userButton = nullptr;
 
     std::vector<OsuScreen *> screens;
 

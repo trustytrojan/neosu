@@ -137,7 +137,7 @@ class DatabaseLoader : public Resource {
 
         this->db->openDatabases();
 
-        std::string peppy_scores_path = Database::getOsuFolder();
+        std::string peppy_scores_path = cv::osu_folder.getString();
         peppy_scores_path.append(PREF_PATHSEP "scores.db");
         this->db->scores_to_convert.clear();
         this->db->loadScores(this->db->database_files["neosu_scores.db"]);
@@ -153,7 +153,7 @@ class DatabaseLoader : public Resource {
         }
         this->db->dbPathsToImport.clear();
 
-        this->bNeedRawLoad = (!env->fileExists(fmt::format("{}" PREF_PATHSEP "osu!.db", Database::getOsuFolder())) ||
+        this->bNeedRawLoad = (!env->fileExists(fmt::format("{}" PREF_PATHSEP "osu!.db", cv::osu_folder.getString())) ||
                               !cv::database_enabled.getBool());
 
         if(!this->bNeedRawLoad) {
@@ -657,101 +657,21 @@ DatabaseBeatmap *Database::getBeatmapSet(i32 set_id) {
     return nullptr;
 }
 
-std::string Database::db_osu_folder{};
-const std::string &Database::getOsuFolder(std::string new_folder) {
-    std::string current_osu_folder = std::move(new_folder);
+std::string Database::getOsuSongsFolder() {
+    std::string songs_dir = env->normalizeDirectory(cv::songs_folder.getString());
 
-    if(current_osu_folder == db_osu_folder) {
-        return db_osu_folder;
-    }
-
-    if(!current_osu_folder.empty()) {
-        SString::trim(&current_osu_folder);
-    }
-
-    db_osu_folder = current_osu_folder;
-
-    if constexpr(!Env::cfg(OS::WINDOWS)) {
-        // remove drive letter prefix if switching to linux
-        if(!db_osu_folder.empty() && db_osu_folder.find(':') == 1) {
-            db_osu_folder.erase(0, 2);
-        }
-    }
-
-    if(!db_osu_folder.ends_with(PREF_PATHSEP)) {
-        db_osu_folder.append(PREF_PATHSEP);
-    }
-
-    // use std::filesystem lexically_normal to clean up the path (it doesn't make sure it exists, purely transforms it)
-    {
-        UString uPath{db_osu_folder};
-        std::filesystem::path temp_fspath{uPath.plat_view()};
-        uPath = UString{temp_fspath.lexically_normal().generic_string()};
-        db_osu_folder = uPath.toUtf8();
-    }
-
-    cv::osu_folder.setValue(db_osu_folder, false);
-
-    return db_osu_folder;
-}
-
-std::string Database::db_songs_folder{};
-const std::string &Database::getOsuSongsFolder() {
-    std::string current_songs_folder = cv::songs_folder.getString();
-
-    if(!current_songs_folder.empty() && (current_songs_folder == db_songs_folder)) {
-        return db_songs_folder;
-    }
-
-    if(!current_songs_folder.empty()) {
-        SString::trim(&current_songs_folder);
-    }
-
-    std::string current_osu_folder = Database::getOsuFolder();
-
-    bool relative_path = false;
+    bool relative_path;
     if constexpr(Env::cfg(OS::WINDOWS)) {
-        relative_path = (current_songs_folder.find(':') == std::string::npos) &&
-                        !(current_songs_folder.starts_with('/') || current_songs_folder.starts_with('\\'));
+        relative_path = (songs_dir.find(':') == std::string::npos);
     } else {
-        // remove drive letter prefix if switching to linux
-        if(!current_songs_folder.empty() && current_songs_folder.find(':') == 1) {
-            current_songs_folder.erase(0, 2);
-        }
-        relative_path = !(current_songs_folder.starts_with('/') || current_songs_folder.starts_with('\\'));
+        relative_path = songs_dir.starts_with("/");
     }
 
     if(relative_path) {
-        // current_osu_folder is guaranteed to end with a slash
-        db_songs_folder = fmt::format("{}{}", current_osu_folder, current_songs_folder);
-    } else {  // absolute
-        db_songs_folder = current_songs_folder;
+        songs_dir = cv::osu_folder.getString() + songs_dir;
     }
 
-    // if we ended up with an empty string somehow, or the db_songs_folder we got doesn't exist and the osu folder does
-    // exist, then reset the db_songs_folder to the default "Songs/" subfolder within the osu folder
-    {
-        using enum File::FILETYPE;
-        if(db_songs_folder.empty() || ((File::exists(current_osu_folder) == FOLDER) &&
-                                       !(File::existsCaseInsensitive(db_songs_folder) == FOLDER))) {
-            db_songs_folder = fmt::format("{}{}", current_osu_folder, cv::songs_folder.getDefaultString());
-        }
-    }
-
-    if(!db_songs_folder.ends_with(PREF_PATHSEP)) {
-        db_songs_folder.append(PREF_PATHSEP);
-    }
-
-    {
-        UString uPath{db_songs_folder};
-        std::filesystem::path temp_fspath{uPath.plat_view()};
-        uPath = UString{temp_fspath.lexically_normal().generic_string()};
-        db_songs_folder = uPath.toUtf8();
-    }
-
-    cv::songs_folder.setValue(db_songs_folder, false);
-
-    return db_songs_folder;
+    return songs_dir;
 }
 
 void Database::scheduleLoadRaw() {
@@ -814,7 +734,7 @@ void Database::loadMaps() {
     std::scoped_lock lock(this->beatmap_difficulties_mtx);
     this->peppy_overrides_mtx.lock();
 
-    std::string peppy_maps_path = Database::getOsuFolder();
+    std::string peppy_maps_path = cv::osu_folder.getString();
     peppy_maps_path.append(PREF_PATHSEP "osu!.db");
     const auto &peppy_db_path = this->database_files[peppy_maps_path];
     const auto &neosu_maps_path = this->database_files["neosu_maps.db"];
@@ -1473,18 +1393,18 @@ void Database::openDatabases() {
     this->total_bytes = 0;
     this->database_files.clear();
 
-    std::string peppy_scores_path = Database::getOsuFolder();
+    std::string peppy_scores_path = cv::osu_folder.getString();
     peppy_scores_path.append(PREF_PATHSEP "scores.db");
     this->database_files.emplace(peppy_scores_path, UString(peppy_scores_path));
     this->database_files.emplace("neosu_scores.db", UString("neosu_scores.db"));
     this->database_files.emplace("scores.db", UString("scores.db"));  // mcneosu database
 
-    std::string peppy_maps_path = Database::getOsuFolder();
+    std::string peppy_maps_path = cv::osu_folder.getString();
     peppy_maps_path.append(PREF_PATHSEP "osu!.db");
     this->database_files.emplace(peppy_maps_path, UString(peppy_maps_path));
     this->database_files.emplace("neosu_maps.db", UString("neosu_maps.db"));
 
-    std::string peppy_collections_path = Database::getOsuFolder();
+    std::string peppy_collections_path = cv::osu_folder.getString();
     peppy_collections_path.append(PREF_PATHSEP "collection.db");
     this->database_files.emplace(peppy_collections_path, UString(peppy_collections_path));
     this->database_files.emplace("collections.db", UString("collections.db"));
