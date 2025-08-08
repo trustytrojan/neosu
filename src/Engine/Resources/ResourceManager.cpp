@@ -254,7 +254,7 @@ Image *ResourceManager::loadImageAbsUnnamed(std::string absoluteFilepath, bool m
     return img;
 }
 
-Image *ResourceManager::createImage(unsigned int width, unsigned int height, bool mipmapped, bool keepInSystemMemory) {
+Image *ResourceManager::createImage(i32 width, i32 height, bool mipmapped, bool keepInSystemMemory) {
     if(width > 8192 || height > 8192) {
         engine->showMessageError(
             "Resource Manager Error",

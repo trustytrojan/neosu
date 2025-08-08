@@ -168,6 +168,8 @@ std::unique_ptr<DirectoryCache> File::s_directoryCache;
 //------------------------------------------------------------------------------
 // public
 File::FILETYPE File::existsCaseInsensitive(std::string &filePath) {
+    if (filePath.empty()) return FILETYPE::NONE;
+
     UString filePathUStr{filePath};
     auto fsPath = fs::path(filePathUStr.plat_str());
 
@@ -175,6 +177,8 @@ File::FILETYPE File::existsCaseInsensitive(std::string &filePath) {
 }
 
 File::FILETYPE File::exists(const std::string &filePath) {
+    if (filePath.empty()) return FILETYPE::NONE;
+
     UString filePathUStr{filePath};
     const auto fsPath = fs::path(filePathUStr.plat_str());
     return exists(filePath, fsPath);
@@ -323,10 +327,10 @@ bool File::openForWriting() {
     return true;
 }
 
-void File::write(const char *buffer, size_t size) {
+void File::write(const u8 *buffer, size_t size) {
     if(!canWrite()) return;
 
-    this->ofstream->write(buffer, static_cast<std::streamsize>(size));
+    this->ofstream->write(reinterpret_cast<const char*>(buffer), static_cast<std::streamsize>(size));
 }
 
 bool File::writeLine(const std::string &line, bool insertNewline) {
@@ -358,10 +362,10 @@ std::string File::readString() {
     const auto size = getFileSize();
     if(size < 1) return "";
 
-    return {readFile(), size};
+    return {reinterpret_cast<const char*>(readFile()), size};
 }
 
-const char *File::readFile() {
+const u8 *File::readFile() {
     if(cv::debug_file.getBool()) debugLog("File::readFile() on {:s}\n", this->sFilePath);
 
     // return cached buffer if already read
@@ -374,13 +378,13 @@ const char *File::readFile() {
 
     // read entire file
     this->ifstream->seekg(0, std::ios::beg);
-    if(this->ifstream->read(this->vFullBuffer.data(), static_cast<std::streamsize>(this->iFileSize)))
+    if(this->ifstream->read(reinterpret_cast<char*>(this->vFullBuffer.data()), static_cast<std::streamsize>(this->iFileSize)))
         return this->vFullBuffer.data();
 
     return nullptr;
 }
 
-std::vector<char> File::takeFileBuffer() {
+std::vector<u8> File::takeFileBuffer() {
     if(cv::debug_file.getBool()) debugLog("File::takeFileBuffer() on {:s}\n", this->sFilePath);
 
     // if buffer is already populated, move it out
@@ -393,7 +397,7 @@ std::vector<char> File::takeFileBuffer() {
 
     // read entire file
     this->ifstream->seekg(0, std::ios::beg);
-    if(this->ifstream->read(this->vFullBuffer.data(), static_cast<std::streamsize>(this->iFileSize)))
+    if(this->ifstream->read(reinterpret_cast<char*>(this->vFullBuffer.data()), static_cast<std::streamsize>(this->iFileSize)))
         return std::move(this->vFullBuffer);
 
     // read failed, clear buffer and return empty vector

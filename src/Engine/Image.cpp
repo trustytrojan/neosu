@@ -22,6 +22,7 @@
 #include "File.h"
 
 namespace {
+#if defined(ZLIBNG_VERNUM) && ZLIBNG_VERNUM < 0x020205F0L
 // this is complete bullshit and a bug in zlib-ng (probably, less likely libpng)
 // need to prevent zlib from lazy-initializing the crc tables, otherwise data race galore
 // literally causes insane lags/issues in completely unrelated places for async loading
@@ -29,12 +30,13 @@ std::mutex zlib_init_mutex;
 std::atomic<bool> zlib_initialized{false};
 
 void garbage_zlib() {
+    // otherwise we need to do this song and dance
     if(zlib_initialized.load(std::memory_order_acquire)) return;
     std::scoped_lock lock(zlib_init_mutex);
     if(zlib_initialized.load(std::memory_order_relaxed)) return;
     uLong dummy_crc = crc32(0L, Z_NULL, 0);
-    const char test_data[] = "shit";
-    dummy_crc = crc32(dummy_crc, reinterpret_cast<const Bytef *>(test_data), 4);
+    std::array<const u8, 5> test_data{"shit"};
+    dummy_crc = crc32(dummy_crc, reinterpret_cast<const Bytef *>(test_data.data()), 4);
     z_stream strm;
     strm.zalloc = Z_NULL;
     strm.zfree = Z_NULL;
@@ -45,9 +47,12 @@ void garbage_zlib() {
     (void)dummy_crc;
     zlib_initialized.store(true, std::memory_order_release);
 }
+#else
+#define garbage_zlib()
+#endif
 
 struct pngErrorManager {
-    jmp_buf setjmp_buffer;
+    jmp_buf setjmp_buffer{};
 };
 
 void pngErrorExit(png_structp png_ptr, png_const_charp error_msg) {
@@ -56,16 +61,16 @@ void pngErrorExit(png_structp png_ptr, png_const_charp error_msg) {
     longjmp(&err->setjmp_buffer[0], 1);
 }
 
-void pngWarning(png_structp, [[maybe_unused]] png_const_charp warning_msg) {
+void pngWarning(png_structp /*unused*/, [[maybe_unused]] png_const_charp warning_msg) {
 #ifdef _DEBUG
     debugLog("PNG Warning: {:s}\n", warning_msg);
 #endif
 }
 
 struct pngMemoryReader {
-    const unsigned char *data;
-    size_t size;
-    size_t offset;
+    const u8 *pdata{nullptr};
+    u64 size{0};
+    u64 offset{0};
 };
 
 void pngReadFromMemory(png_structp png_ptr, png_bytep outBytes, png_size_t byteCountToRead) {
@@ -76,13 +81,12 @@ void pngReadFromMemory(png_structp png_ptr, png_bytep outBytes, png_size_t byteC
         return;
     }
 
-    memcpy(outBytes, reader->data + reader->offset, byteCountToRead);
+    memcpy(outBytes, reader->pdata + reader->offset, byteCountToRead);
     reader->offset += byteCountToRead;
 }
 }  // namespace
 
-bool Image::decodePNGFromMemory(const unsigned char *data, size_t size, std::vector<unsigned char> &outData,
-                                int &outWidth, int &outHeight) {
+bool Image::decodePNGFromMemory(const u8 *data, u64 size, std::vector<u8> &outData, i32 &outWidth, i32 &outHeight) {
     garbage_zlib();
     png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
     if(!png_ptr) {
@@ -106,16 +110,24 @@ bool Image::decodePNGFromMemory(const unsigned char *data, size_t size, std::vec
     }
 
     // Set up memory reading
-    pngMemoryReader reader;
-    reader.data = data;
-    reader.size = size;
-    reader.offset = 0;
+    pngMemoryReader reader{.pdata = data, .size = size, .offset = 0};
+
     png_set_read_fn(png_ptr, &reader, pngReadFromMemory);
 
     png_read_info(png_ptr, info_ptr);
 
-    outWidth = static_cast<int>(png_get_image_width(png_ptr, info_ptr));
-    outHeight = static_cast<int>(png_get_image_height(png_ptr, info_ptr));
+    u32 tempOutWidth = png_get_image_width(png_ptr, info_ptr);
+    u32 tempOutHeight = png_get_image_height(png_ptr, info_ptr);
+
+    if(tempOutWidth > 8192 || tempOutHeight > 8192) {
+        png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
+        debugLog("Image Error: PNG image size is too big ({} x {})\n", tempOutWidth, tempOutHeight);
+        return false;
+    }
+
+    outWidth = static_cast<i32>(tempOutWidth);
+    outHeight = static_cast<i32>(tempOutHeight);
+
     png_byte color_type = png_get_color_type(png_ptr, info_ptr);
     png_byte bit_depth = png_get_bit_depth(png_ptr, info_ptr);
     png_byte interlace_type = png_get_interlace_type(png_ptr, info_ptr);
@@ -140,30 +152,23 @@ bool Image::decodePNGFromMemory(const unsigned char *data, size_t size, std::vec
 
     png_read_update_info(png_ptr, info_ptr);
 
-    // after transformations, we should always have RGBA
-    if(outWidth > 8192 || outHeight > 8192) {
-        png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
-        debugLog("Image Error: PNG image size is too big ({} x {})\n", outWidth, outHeight);
-        return false;
-    }
-
     // allocate memory for the image
-    outData.resize(static_cast<long>(outWidth * outHeight) * Image::iNumChannels);
+    outData.resize(static_cast<u64>(outWidth) * outHeight * Image::NUM_CHANNELS);
 
-    // read it
-    auto *row_pointers = new png_bytep[outHeight];
-    for(int y = 0; y < outHeight; y++) {
-        row_pointers[y] = &outData[static_cast<long>(y * outWidth * Image::iNumChannels)];
+    for(sSz y = 0; y < outHeight; y++) {
+        png_read_row(png_ptr, &outData[y * outWidth * Image::NUM_CHANNELS], nullptr);
     }
-
-    png_read_image(png_ptr, row_pointers);
-    delete[] row_pointers;
 
     png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
     return true;
 }
 
-void Image::saveToImage(unsigned char *data, unsigned int width, unsigned int height, std::string filepath) {
+void Image::saveToImage(const u8 *data, i32 width, i32 height, u8 channels, std::string filepath) {
+    if(channels != 3 && channels != 4) {
+        debugLog("PNG Error: Can only save 3 or 4 channel image data.\n");
+        return;
+    }
+
     garbage_zlib();
     debugLog("Saving image to {:s} ...\n", filepath);
 
@@ -201,23 +206,18 @@ void Image::saveToImage(unsigned char *data, unsigned int width, unsigned int he
 
     png_init_io(png_ptr, fp);
 
-    // write header (8 bit colour depth, RGB)
-    png_set_IHDR(png_ptr, info_ptr, width, height, 8, PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
-                 PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
+    // write header (8 bit colour depth, RGB(A))
+    const int pngChannelType = (channels == 4 ? PNG_COLOR_TYPE_RGBA : PNG_COLOR_TYPE_RGB);
+
+    png_set_IHDR(png_ptr, info_ptr, width, height, 8, pngChannelType, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
+                 PNG_FILTER_TYPE_DEFAULT);
 
     png_write_info(png_ptr, info_ptr);
 
-    // write image data
-    auto row = new png_byte[3L * width];
-    for(unsigned int y = 0; y < height; y++) {
-        for(unsigned int x = 0; x < width; x++) {
-            row[x * 3 + 0] = data[(y * width + x) * 3 + 0];
-            row[x * 3 + 1] = data[(y * width + x) * 3 + 1];
-            row[x * 3 + 2] = data[(y * width + x) * 3 + 2];
-        }
-        png_write_row(png_ptr, row);
+    // write row by row directly from the RGB(A) data
+    for(sSz y = 0; y < height; y++) {
+        png_write_row(png_ptr, &data[y * width * channels]);
     }
-    delete[] row;
 
     png_write_end(png_ptr, nullptr);
     png_destroy_write_struct(&png_ptr, &info_ptr);
@@ -237,7 +237,7 @@ Image::Image(std::string filepath, bool mipmapped, bool keepInSystemMemory) : Re
     this->bCreatedImage = false;
 }
 
-Image::Image(int width, int height, bool mipmapped, bool keepInSystemMemory) : Resource() {
+Image::Image(i32 width, i32 height, bool mipmapped, bool keepInSystemMemory) : Resource() {
     this->bMipmapped = mipmapped;
     this->bKeepInSystemMemory = keepInSystemMemory;
 
@@ -250,8 +250,8 @@ Image::Image(int width, int height, bool mipmapped, bool keepInSystemMemory) : R
     this->bCreatedImage = true;
 
     // reserve and fill with pink pixels
-    this->rawImage.resize(static_cast<long>(this->iWidth * this->iHeight * Image::iNumChannels));
-    for(int i = 0; i < this->iWidth * this->iHeight; i++) {
+    this->rawImage.resize(static_cast<u64>(this->iWidth) * this->iHeight * Image::NUM_CHANNELS);
+    for(u64 i = 0; i < static_cast<u64>(this->iWidth) * this->iHeight; i++) {
         this->rawImage.push_back(255);
         this->rawImage.push_back(0);
         this->rawImage.push_back(255);
@@ -279,7 +279,7 @@ bool Image::loadRawImage() {
             return false;
 
         // load entire file
-        std::vector<char> fileBuffer;
+        std::vector<u8> fileBuffer;
         size_t fileSize{0};
         {
             File file(this->sFilePath);
@@ -306,23 +306,14 @@ bool Image::loadRawImage() {
         if(this->bInterrupted)  // cancellation point
             return false;
 
-        const char *data{fileBuffer.data()};
-
         // determine file type by magic number (png/jpg)
         bool isJPEG = false;
         bool isPNG = false;
         {
-            const int numBytes = 4;
-
-            unsigned char buf[numBytes];
-
-            for(int i = 0; i < numBytes; i++) {
-                buf[i] = (unsigned char)data[i];
-            }
-
-            if(buf[0] == 0xff && buf[1] == 0xD8 && buf[2] == 0xff)  // 0xFFD8FF
+            if(fileBuffer.at(0) == 0xff && fileBuffer.at(1) == 0xD8 && fileBuffer.at(2) == 0xff)  // 0xFFD8FF
                 isJPEG = true;
-            else if(buf[0] == 0x89 && buf[1] == 0x50 && buf[2] == 0x4E && buf[3] == 0x47)  // 0x89504E47 (%PNG)
+            else if(fileBuffer.at(0) == 0x89 && fileBuffer.at(1) == 0x50 && fileBuffer.at(2) == 0x4E &&
+                    fileBuffer.at(3) == 0x47)  // 0x89504E47 (%PNG)
                 isPNG = true;
         }
 
@@ -337,9 +328,9 @@ bool Image::loadRawImage() {
                 return false;
             }
 
-            if(tj3DecompressHeader(tjInstance, (unsigned char *)data, fileSize) < 0) {
+            if(tj3DecompressHeader(tjInstance, fileBuffer.data(), fileSize) < 0) {
                 debugLog("Image Error: tj3DecompressHeader failed: {:s} in file {:s}\n", tj3GetErrorStr(tjInstance),
-                          this->sFilePath);
+                         this->sFilePath);
                 tj3Destroy(tjInstance);
                 return false;
             }
@@ -355,7 +346,7 @@ bool Image::loadRawImage() {
 
             if(this->iWidth > 8192 || this->iHeight > 8192) {
                 debugLog("Image Error: JPEG image size is too big ({} x {}) in file {:s}\n", this->iWidth,
-                          this->iHeight, this->sFilePath);
+                         this->iHeight, this->sFilePath);
                 tj3Destroy(tjInstance);
                 return false;
             }
@@ -367,13 +358,13 @@ bool Image::loadRawImage() {
             }
 
             // preallocate
-            this->rawImage.resize(static_cast<long>(this->iWidth * this->iHeight * Image::iNumChannels));
+            this->rawImage.resize(static_cast<u64>(this->iWidth) * this->iHeight * Image::NUM_CHANNELS);
 
             // always convert to RGBA for consistency with PNG
             // decompress directly to RGBA
-            if(tj3Decompress8(tjInstance, (unsigned char *)data, fileSize, &this->rawImage[0], 0, TJPF_RGBA) < 0) {
+            if(tj3Decompress8(tjInstance, fileBuffer.data(), fileSize, &this->rawImage[0], 0, TJPF_RGBA) < 0) {
                 debugLog("Image Error: tj3Decompress8 failed: {:s} in file {:s}\n", tj3GetErrorStr(tjInstance),
-                          this->sFilePath);
+                         this->sFilePath);
                 tj3Destroy(tjInstance);
                 return false;
             }
@@ -383,8 +374,7 @@ bool Image::loadRawImage() {
             this->type = Image::TYPE::TYPE_PNG;
 
             // decode png using libpng
-            if(!decodePNGFromMemory((const unsigned char *)data, fileSize, this->rawImage, this->iWidth,
-                                    this->iHeight)) {
+            if(!decodePNGFromMemory(fileBuffer.data(), fileSize, this->rawImage, this->iWidth, this->iHeight)) {
                 debugLog("Image Error: PNG decoding failed in file {:s}\n", this->sFilePath);
                 return false;
             }
@@ -400,9 +390,9 @@ bool Image::loadRawImage() {
     // error checking
 
     // size sanity check
-    if(this->rawImage.size() < static_cast<long>(this->iWidth * this->iHeight * Image::iNumChannels)) {
-        debugLog("Image Error: Loaded image has only {}/{} bytes in file {:s}\n", (unsigned long)this->rawImage.size(),
-                  this->iWidth * this->iHeight * Image::iNumChannels, this->sFilePath);
+    if(this->rawImage.size() < static_cast<u64>(this->iWidth) * this->iHeight * Image::NUM_CHANNELS) {
+        debugLog("Image Error: Loaded image has only {}/{} bytes in file {:s}\n", this->rawImage.size(),
+                 this->iWidth * this->iHeight * Image::NUM_CHANNELS, this->sFilePath);
         // engine->showMessageError("Image Error", UString::format("Loaded image has only %i/%i bytes in file %s",
         // rawImage.size(), iWidth*iHeight*iNumChannels, this->sFilePath));
         return false;
@@ -418,12 +408,11 @@ bool Image::loadRawImage() {
     return true;
 }
 
-Color Image::getPixel(int x, int y) const {
-    const int indexBegin = Image::iNumChannels * y * this->iWidth + Image::iNumChannels * x;
-    const int indexEnd = Image::iNumChannels * y * this->iWidth + Image::iNumChannels * x + Image::iNumChannels;
+Color Image::getPixel(i32 x, i32 y) const {
+    const u64 indexBegin = Image::NUM_CHANNELS * y * this->iWidth + Image::NUM_CHANNELS * x;
+    const u64 indexEnd = Image::NUM_CHANNELS * y * this->iWidth + Image::NUM_CHANNELS * x + Image::NUM_CHANNELS;
 
-    if(this->rawImage.size() < 1 || x < 0 || y < 0 || indexEnd < 0 || indexEnd > this->rawImage.size())
-        return 0xffffff00;
+    if(this->rawImage.size() < 1 || x < 0 || y < 0 || indexEnd > this->rawImage.size()) return 0xffffff00;
 
     Channel r = this->rawImage[indexBegin + 0];
     Channel g = this->rawImage[indexBegin + 1];
@@ -433,11 +422,11 @@ Color Image::getPixel(int x, int y) const {
     return argb(a, r, g, b);
 }
 
-void Image::setPixel(int x, int y, Color color) {
-    const int indexBegin = Image::iNumChannels * y * this->iWidth + Image::iNumChannels * x;
-    const int indexEnd = Image::iNumChannels * y * this->iWidth + Image::iNumChannels * x + Image::iNumChannels;
+void Image::setPixel(i32 x, i32 y, Color color) {
+    const u64 indexBegin = Image::NUM_CHANNELS * y * this->iWidth + Image::NUM_CHANNELS * x;
+    const u64 indexEnd = Image::NUM_CHANNELS * y * this->iWidth + Image::NUM_CHANNELS * x + Image::NUM_CHANNELS;
 
-    if(this->rawImage.size() < 1 || x < 0 || y < 0 || indexEnd < 0 || indexEnd > this->rawImage.size()) return;
+    if(this->rawImage.size() < 1 || x < 0 || y < 0 || indexEnd > this->rawImage.size()) return;
 
     this->rawImage[indexBegin + 0] = color.R();
     this->rawImage[indexBegin + 1] = color.G();
@@ -445,13 +434,13 @@ void Image::setPixel(int x, int y, Color color) {
     this->rawImage[indexBegin + 3] = color.A();
 }
 
-void Image::setPixels(const char *data, size_t size, TYPE type) {
+void Image::setPixels(const u8 *data, u64 size, TYPE type) {
     if(data == nullptr) return;
 
     // TODO: implement remaining types
     switch(type) {
         case TYPE::TYPE_PNG: {
-            if(!decodePNGFromMemory((const unsigned char *)data, size, this->rawImage, this->iWidth, this->iHeight)) {
+            if(!decodePNGFromMemory(data, size, this->rawImage, this->iWidth, this->iHeight)) {
                 debugLog("Image Error: PNG decoding failed in setPixels\n");
             }
         } break;
@@ -462,8 +451,8 @@ void Image::setPixels(const char *data, size_t size, TYPE type) {
     }
 }
 
-void Image::setPixels(const std::vector<unsigned char> &pixels) {
-    if(pixels.size() < static_cast<long>(this->iWidth * this->iHeight * Image::iNumChannels)) {
+void Image::setPixels(const std::vector<u8> &pixels) {
+    if(pixels.size() < static_cast<u64>(this->iWidth) * this->iHeight * Image::NUM_CHANNELS) {
         debugLog("Image Error: setPixels() supplied array is too small!\n");
         return;
     }
@@ -472,14 +461,14 @@ void Image::setPixels(const std::vector<unsigned char> &pixels) {
 }
 
 // internal
-bool Image::canHaveTransparency(const unsigned char *data, size_t size) {
+bool Image::canHaveTransparency(const u8 *data, u64 size) {
     if(size < 33)  // not enough data for IHDR, so just assume true
         return true;
 
     // PNG IHDR chunk starts at offset 16 (8 bytes signature + 8 bytes chunk header)
     // color type is at offset 25 (16 + 4 width + 4 height + 1 bit depth)
     if(size > 25) {
-        unsigned char colorType = data[25];
+        u8 colorType = data[25];
         return colorType != 2;  // RGB without alpha
     }
 
@@ -489,15 +478,15 @@ bool Image::canHaveTransparency(const unsigned char *data, size_t size) {
 bool Image::isCompletelyTransparent() const {
     if(this->rawImage.empty()) return false;
 
-    const size_t alphaOffset = 3;
-    const size_t totalPixels = this->iWidth * this->iHeight;
+    const i64 alphaOffset = 3;
+    const i64 totalPixels = static_cast<i64>(this->iWidth) * this->iHeight;
 
-    for(size_t i = 0; i < totalPixels; ++i) {
+    for(i64 i = 0; i < totalPixels; ++i) {
         if(this->bInterrupted)  // cancellation point
             return false;
 
         // check alpha channel directly
-        if(this->rawImage[i * Image::iNumChannels + alphaOffset] > 0) return false;  // non-transparent pixel
+        if(this->rawImage[i * Image::NUM_CHANNELS + alphaOffset] > 0) return false;  // non-transparent pixel
     }
 
     return true;  // all pixels are transparent

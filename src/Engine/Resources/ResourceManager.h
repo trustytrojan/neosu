@@ -66,7 +66,7 @@ class ResourceManager final {
     Image *loadImageAbs(std::string absoluteFilepath, std::string resourceName, bool mipmapped = false,
                         bool keepInSystemMemory = false);
     Image *loadImageAbsUnnamed(std::string absoluteFilepath, bool mipmapped = false, bool keepInSystemMemory = false);
-    Image *createImage(unsigned int width, unsigned int height, bool mipmapped = false,
+    Image *createImage(i32 width, i32 height, bool mipmapped = false,
                        bool keepInSystemMemory = false);
 
     // fonts

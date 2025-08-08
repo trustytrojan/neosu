@@ -43,8 +43,7 @@ void SoLoudSound::initAsync() {
     }
 
     // load file into memory first to handle unicode paths properly (windows shenanigans)
-    std::vector<char> fileBuffer;
-    const char *fileData{nullptr};
+    std::vector<u8> fileBuffer;
     size_t fileSize{0};
 
     if constexpr(Env::cfg(OS::WINDOWS)) {
@@ -62,8 +61,7 @@ void SoLoudSound::initAsync() {
         }
 
         fileBuffer = file.takeFileBuffer();
-        fileData = fileBuffer.data();
-        if(!fileData) {
+        if(fileBuffer.empty()) {
             debugLog("Sound Error: Failed to read file data {:s}\n", this->sFilePath);
             return;
         }
@@ -78,7 +76,7 @@ void SoLoudSound::initAsync() {
 
         // use loadToMem for streaming to handle unicode paths on windows
         if constexpr(Env::cfg(OS::WINDOWS))
-            result = stream->loadMem(reinterpret_cast<const unsigned char *>(fileData), fileSize, true, false);
+            result = stream->loadMem(reinterpret_cast<const u8*>(fileBuffer.data()), fileSize, true, false);
         else
             result = stream->load(this->sFilePath.c_str());
 
@@ -105,7 +103,7 @@ void SoLoudSound::initAsync() {
         auto *wav = new SoLoud::Wav(cv::snd_soloud_prefer_ffmpeg.getInt() > 1);
 
         if constexpr(Env::cfg(OS::WINDOWS))
-            result = wav->loadMem(reinterpret_cast<const unsigned char *>(fileData), fileSize, true, false);
+            result = wav->loadMem(reinterpret_cast<const u8*>(fileBuffer.data()), fileSize, true, false);
         else
             result = wav->load(this->sFilePath.c_str());
 

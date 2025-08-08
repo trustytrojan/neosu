@@ -10,6 +10,7 @@
 #define FILE_H
 
 #include "BaseEnvironment.h"
+#include "types.h"
 
 #include <filesystem>
 #include <fstream>
@@ -41,15 +42,15 @@ class File {
         return this->bReady && this->ofstream && this->ofstream->good() && this->fileType == TYPE::WRITE;
     }
 
-    void write(const char *buffer, size_t size);
+    void write(const u8 *buffer, size_t size);
     bool writeLine(const std::string &line, bool insertNewline = true);
 
     std::string readLine();
     std::string readString();
 
-    const char *readFile();  // WARNING: this is NOT a null-terminated string! DO NOT USE THIS with UString/std::string!
+    const u8 *readFile();  // WARNING: this is NOT a null-terminated string! DO NOT USE THIS with UString/std::string!
 
-    [[nodiscard]] std::vector<char>
+    [[nodiscard]] std::vector<u8>
     takeFileBuffer();  // moves the file buffer out, allowing immediate destruction of the file object
 
     [[nodiscard]] constexpr size_t getFileSize() const { return this->iFileSize; }
@@ -71,7 +72,7 @@ class File {
     std::unique_ptr<std::ofstream> ofstream;
 
     // buffer for full file reading
-    std::vector<char> vFullBuffer;
+    std::vector<u8> vFullBuffer;
 
     // private implementation helpers
     bool openForReading();

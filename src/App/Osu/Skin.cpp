@@ -24,7 +24,7 @@
 #define OSU_BITMASK_HITFINISH 0x4
 #define OSU_BITMASK_HITCLAP 0x8
 
-Image* Skin::m_missingTexture = nullptr;
+Image *Skin::m_missingTexture = nullptr;
 
 void Skin::unpack(const char *filepath) {
     auto skin_name = env->getFileNameFromFilePath(filepath);
@@ -35,13 +35,19 @@ void Skin::unpack(const char *filepath) {
     skin_root.append(skin_name);
     skin_root.append("/");
 
-    File file(filepath);
-    if(!file.canRead()) {
-        debugLog("Failed to read skin file {:s}\n", filepath);
-        return;
+    std::vector<u8> fileBuffer;
+    size_t fileSize{0};
+    {
+        File file(filepath);
+        if(!file.canRead() || !(fileSize = file.getFileSize())) {
+            debugLog("Failed to read skin file {:s}\n", filepath);
+            return;
+        }
+        fileBuffer = file.takeFileBuffer();
+        // close the file here
     }
 
-    Archive archive(reinterpret_cast<const u8 *>(file.readFile()), file.getFileSize());
+    Archive archive(fileBuffer.data(), fileSize);
     if(!archive.isValid()) {
         debugLog("Failed to open .osk file\n");
         return;
@@ -383,7 +389,6 @@ bool Skin::isReady() {
 }
 
 void Skin::load() {
-
     resourceManager->setSyncLoadMaxBatchSize(512);
     // random skins
     {
@@ -424,7 +429,9 @@ void Skin::load() {
 
     // spinner loading has top priority in async
     this->randomizeFilePath();
-    { this->checkLoadImage(&this->loadingSpinner, "loading-spinner", "OSU_SKIN_LOADING_SPINNER"); }
+    {
+        this->checkLoadImage(&this->loadingSpinner, "loading-spinner", "OSU_SKIN_LOADING_SPINNER");
+    }
 
     // and the cursor comes right after that
     this->randomizeFilePath();
@@ -1108,34 +1115,31 @@ void Skin::reloadSounds() {
 }
 
 bool Skin::parseSkinINI(std::string filepath) {
-    File file(filepath);
-    if(!file.canRead()) {
-        debugLog("OsuSkin Error: Couldn't load {:s}\n", filepath);
-        return false;
+    std::vector<u8> rawData;
+    size_t fileSize{0};
+    {
+        File file(filepath);
+        if(!file.canRead() || !(fileSize = file.getFileSize())) {
+            debugLog("OsuSkin Error: Couldn't load {:s}\n", filepath);
+            return false;
+        }
+        rawData = file.takeFileBuffer();
+        // close the file here
     }
 
     UString fileContent;
-    const char *rawData = file.readFile();
-    size_t fileSize = file.getFileSize();
-
-    if(!rawData || fileSize == 0) {
-        debugLog("OsuSkin Error: Empty or unreadable file {:s}\n", filepath);
-        return false;
-    }
 
     // check for UTF-16 LE BOM and convert if needed
-    if(fileSize >= 2 && static_cast<unsigned char>(rawData[0]) == 0xFF &&
-       static_cast<unsigned char>(rawData[1]) == 0xFE) {
+    if(fileSize >= 2 && rawData[0] == 0xFF && rawData[1] == 0xFE) {
         // convert UTF-16 LE to UTF-8
         std::string utf8Result;
         utf8Result.reserve(fileSize);
 
         size_t utf16Size = fileSize - 2;  // skip BOM
-        const char *utf16Data = rawData + 2;
+        const u8 *utf16Data = rawData.data() + 2;
 
         for(size_t i = 0; i < utf16Size - 1; i += 2) {
-            uint16_t utf16Char =
-                static_cast<unsigned char>(utf16Data[i]) | (static_cast<unsigned char>(utf16Data[i + 1]) << 8);
+            uint16_t utf16Char = utf16Data[i] | (utf16Data[i + 1] << 8);
 
             if(utf16Char < 0x80)
                 utf8Result += static_cast<char>(utf16Char);
@@ -1152,7 +1156,7 @@ bool Skin::parseSkinINI(std::string filepath) {
         fileContent = UString(utf8Result.c_str());
     } else {
         // assume UTF-8/ASCII
-        fileContent = UString(rawData, static_cast<int>(fileSize));
+        fileContent = UString(reinterpret_cast<char *>(rawData.data()), static_cast<int>(fileSize));
     }
 
     // process content line by line, handling different line endings
@@ -1650,7 +1654,7 @@ void Skin::checkLoadSound(Sound **addressOfPointer, const std::string &skinEleme
             }
         }
 
-        return (Sound*)nullptr;
+        return (Sound *)nullptr;
     };
 
     // load default skin
@@ -1662,7 +1666,7 @@ void Skin::checkLoadSound(Sound **addressOfPointer, const std::string &skinEleme
     }
 
     // load user skin
-    Sound* skin_sound = nullptr;
+    Sound *skin_sound = nullptr;
     if(cv::skin_use_skin_hitsounds.getBool() || !isSample) {
         skin_sound = try_load_sound(this->sFilePath, skinElementName, "", loop);
         if(skin_sound != nullptr) {

@@ -14,13 +14,13 @@
 
 class Image : public Resource {
    public:
-    static void saveToImage(unsigned char *data, unsigned int width, unsigned int height, std::string filepath);
+    static void saveToImage(const u8 *data, i32 width, i32 height, u8 channels, std::string filepath);
 
     enum class TYPE : uint8_t { TYPE_RGBA, TYPE_PNG, TYPE_JPG };
 
    public:
     Image(std::string filepath, bool mipmapped = false, bool keepInSystemMemory = false);
-    Image(int width, int height, bool mipmapped = false, bool keepInSystemMemory = false);
+    Image(i32 width, i32 height, bool mipmapped = false, bool keepInSystemMemory = false);
 
     virtual void bind(unsigned int textureUnit = 0) = 0;
     virtual void unbind() = 0;
@@ -28,16 +28,15 @@ class Image : public Resource {
     virtual inline void setFilterMode(Graphics::FILTER_MODE filterMode) { this->filterMode = filterMode; };
     virtual inline void setWrapMode(Graphics::WRAP_MODE wrapMode) { this->wrapMode = wrapMode; };
 
-    void setPixel(int x, int y, Color color);
-    void setPixels(const char *data, size_t size, TYPE type);
-    void setPixels(const std::vector<unsigned char> &pixels);
+    void setPixel(i32 x, i32 y, Color color);
+    void setPixels(const u8 *data, u64 size, TYPE type);
+    void setPixels(const std::vector<u8> &pixels);
 
-    [[nodiscard]] Color getPixel(int x, int y) const;
+    [[nodiscard]] Color getPixel(i32 x, i32 y) const;
 
     [[nodiscard]] inline Image::TYPE getType() const { return this->type; }
-    [[nodiscard]] constexpr int getNumChannels() const { return Image::iNumChannels; }
-    [[nodiscard]] inline int getWidth() const { return this->iWidth; }
-    [[nodiscard]] inline int getHeight() const { return this->iHeight; }
+    [[nodiscard]] inline i32 getWidth() const { return this->iWidth; }
+    [[nodiscard]] inline i32 getHeight() const { return this->iHeight; }
     [[nodiscard]] inline Vector2 getSize() const {
         return Vector2{static_cast<float>(this->iWidth), static_cast<float>(this->iHeight)};
     }
@@ -50,20 +49,20 @@ class Image : public Resource {
     Image *asImage() final { return this; }
     [[nodiscard]] const Image *asImage() const final { return this; }
 
-   protected:
     // all images are converted to RGBA
-    static constexpr const int iNumChannels{4};
+    static constexpr const u8 NUM_CHANNELS{4};
 
+   protected:
     void init() override = 0;
     void initAsync() override = 0;
     void destroy() override = 0;
 
     bool loadRawImage();
 
-    std::vector<unsigned char> rawImage;
+    std::vector<u8> rawImage;
 
-    int iWidth;
-    int iHeight;
+    i32 iWidth;
+    i32 iHeight;
 
     Graphics::WRAP_MODE wrapMode;
     Image::TYPE type;
@@ -75,10 +74,10 @@ class Image : public Resource {
 
    private:
     [[nodiscard]] bool isCompletelyTransparent() const;
-    static bool canHaveTransparency(const unsigned char *data, size_t size);
+    static bool canHaveTransparency(const u8 *data, u64 size);
 
-    static bool decodePNGFromMemory(const unsigned char *data, size_t size, std::vector<unsigned char> &outData,
-                                    int &outWidth, int &outHeight);
+    static bool decodePNGFromMemory(const u8 *data, u64 size, std::vector<u8> &outData,
+                                    i32 &outWidth, i32 &outHeight);
 };
 
 #endif

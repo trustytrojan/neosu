@@ -17,6 +17,7 @@
 #include "SDLGLInterface.h"
 #include "OpenGLStateCache.h"
 
+#include <cstddef>
 #include <utility>
 
 OpenGLLegacyInterface::OpenGLLegacyInterface() : Graphics() {
@@ -569,10 +570,10 @@ void OpenGLLegacyInterface::setWireframe(bool enabled) {
 
 void OpenGLLegacyInterface::flush() { glFlush(); }
 
-std::vector<unsigned char> OpenGLLegacyInterface::getScreenshot() {
-    std::vector<unsigned char> result;
-    unsigned int width = this->vResolution.x;
-    unsigned int height = this->vResolution.y;
+std::vector<u8> OpenGLLegacyInterface::getScreenshot(bool withAlpha) {
+    std::vector<u8> result;
+    i32 width = this->vResolution.x;
+    i32 height = this->vResolution.y;
 
     // sanity check
     if(width > 65535 || height > 65535 || width < 1 || height < 1) {
@@ -580,14 +581,25 @@ std::vector<unsigned char> OpenGLLegacyInterface::getScreenshot() {
         return result;
     }
 
-    unsigned int numElements = width * height * 3;
+    const u8 numChannels = withAlpha ? 4 : 3;
+    const u32 numElements = width * height * numChannels;
+    const GLenum glFormat = withAlpha ? GL_RGBA : GL_RGB;
 
     // take screenshot
-    unsigned char *pixels = new unsigned char[numElements];
+    u8 *pixels = new u8[numElements];
     glFinish();
-    for(int y = 0; std::cmp_less(y, height); y++)  // flip it while reading
+    for(sSz y = 0; y < height; y++)  // flip it while reading
     {
-        glReadPixels(0, (height - (y + 1)), width, 1, GL_RGB, GL_UNSIGNED_BYTE, &(pixels[y * width * 3]));
+        glReadPixels(0, (height - (y + 1)), width, 1, glFormat, GL_UNSIGNED_BYTE,
+                     &(pixels[y * width * numChannels]));
+    }
+
+    // fix alpha channel (set all pixels to fully opaque)
+    // TODO: allow proper transparent screenshots
+    if (withAlpha) {
+        for(u32 i = 3; i < numElements; i += numChannels) {
+            pixels[i] = 255;
+        }
     }
 
     // copy to vector
@@ -618,7 +630,7 @@ Image *OpenGLLegacyInterface::createImage(std::string filePath, bool mipmapped, 
     return new OpenGLImage(filePath, mipmapped, keepInSystemMemory);
 }
 
-Image *OpenGLLegacyInterface::createImage(int width, int height, bool mipmapped, bool keepInSystemMemory) {
+Image *OpenGLLegacyInterface::createImage(i32 width, i32 height, bool mipmapped, bool keepInSystemMemory) {
     return new OpenGLImage(width, height, mipmapped, keepInSystemMemory);
 }
 

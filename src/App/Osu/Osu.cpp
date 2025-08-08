@@ -67,12 +67,12 @@
 
 #include "score.h"
 
-Osu* osu = nullptr;
+Osu *osu = nullptr;
 
 Vector2 Osu::g_vInternalResolution;
 
-Shader* actual_flashlight_shader = nullptr;
-Shader* flashlight_shader = nullptr;
+Shader *actual_flashlight_shader = nullptr;
+Shader *flashlight_shader = nullptr;
 
 Osu::Osu() {
     osu = this;
@@ -1430,7 +1430,8 @@ void Osu::saveScreenshot() {
 
     const auto screenshotFilename{fmt::format("screenshots/screenshot{}.png", screenshotNumber)};
 
-    std::vector<u8> pixels = g->getScreenshot();
+    constexpr u8 screenshotChannels{3};
+    std::vector<u8> pixels = g->getScreenshot(false);
 
     if(pixels.empty()) {
         static uint8_t once = 0;
@@ -1452,8 +1453,8 @@ void Osu::saveScreenshot() {
     // don't need cropping
     if(static_cast<i32>(innerWidth) == static_cast<i32>(outerWidth) &&
        static_cast<i32>(innerHeight) == static_cast<i32>(outerHeight)) {
-        Image::saveToImage(pixels.data(), static_cast<u32>(innerWidth), static_cast<u32>(innerHeight),
-                           screenshotFilename);
+        Image::saveToImage(pixels.data(), static_cast<i32>(innerWidth), static_cast<i32>(innerHeight),
+                           screenshotChannels, screenshotFilename);
         return;
     }
 
@@ -1469,17 +1470,17 @@ void Osu::saveScreenshot() {
     const i32 startY = std::clamp<i32>(static_cast<i32>((outerHeight - innerHeight) * (1 + offsetYpct) / 2), 0,
                                        static_cast<i32>(outerHeight - innerHeight));
 
-    std::vector<u8> croppedPixels(static_cast<size_t>(innerWidth * innerHeight * 3));
+    std::vector<u8> croppedPixels(static_cast<size_t>(innerWidth * innerHeight * screenshotChannels));
 
-    for(ssize_t y = 0; y < static_cast<ssize_t>(innerHeight); ++y) {
-        auto srcRowStart = pixels.begin() + ((startY + y) * static_cast<ssize_t>(outerWidth) + startX) * 3;
-        auto destRowStart = croppedPixels.begin() + (y * static_cast<ssize_t>(innerWidth)) * 3;
+    for(sSz y = 0; y < static_cast<sSz>(innerHeight); ++y) {
+        auto srcRowStart = pixels.begin() + ((startY + y) * static_cast<sSz>(outerWidth) + startX) * screenshotChannels;
+        auto destRowStart = croppedPixels.begin() + (y * static_cast<sSz>(innerWidth)) * screenshotChannels;
         // copy the entire row
-        std::ranges::copy_n(srcRowStart, static_cast<ssize_t>(innerWidth) * 3, destRowStart);
+        std::ranges::copy_n(srcRowStart, static_cast<sSz>(innerWidth) * screenshotChannels, destRowStart);
     }
 
-    Image::saveToImage(croppedPixels.data(), static_cast<u32>(innerWidth), static_cast<u32>(innerHeight),
-                       screenshotFilename);
+    Image::saveToImage(croppedPixels.data(), static_cast<i32>(innerWidth), static_cast<i32>(innerHeight),
+                       screenshotChannels, screenshotFilename);
 }
 
 void Osu::onPlayEnd(FinishedScore score, bool quit, bool /*aborted*/) {

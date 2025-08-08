@@ -74,7 +74,7 @@ class OpenGLLegacyInterface : public Graphics {
 
     // renderer actions
     void flush() final;
-    std::vector<unsigned char> getScreenshot() final;
+    std::vector<u8> getScreenshot(bool withAlpha = false) final;
 
     // renderer info
     Vector2 getResolution() const final { return this->vResolution; }
@@ -84,7 +84,7 @@ class OpenGLLegacyInterface : public Graphics {
 
     // factory
     Image *createImage(std::string filePath, bool mipmapped, bool keepInSystemMemory) final;
-    Image *createImage(int width, int height, bool mipmapped, bool keepInSystemMemory) final;
+    Image *createImage(i32 width, i32 height, bool mipmapped, bool keepInSystemMemory) final;
     RenderTarget *createRenderTarget(int x, int y, int width, int height,
                                      Graphics::MULTISAMPLE_TYPE multiSampleType) final;
     Shader *createShaderFromFile(std::string vertexShaderFilePath,

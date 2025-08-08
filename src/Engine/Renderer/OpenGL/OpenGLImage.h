@@ -11,7 +11,7 @@ class OpenGLImage final : public Image
 {
 public:
 	OpenGLImage(std::string filepath, bool mipmapped = false, bool keepInSystemMemory = false);
-	OpenGLImage(int width, int height, bool mipmapped = false, bool keepInSystemMemory = false);
+	OpenGLImage(i32 width, i32 height, bool mipmapped = false, bool keepInSystemMemory = false);
 	~OpenGLImage() override {destroy();}
 
 	void bind(unsigned int textureUnit = 0) override;

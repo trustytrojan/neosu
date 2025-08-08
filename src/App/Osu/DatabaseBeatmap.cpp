@@ -933,8 +933,8 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
 
     if(cv::debug.getBool()) debugLog("DatabaseBeatmap::loadMetadata() : {:s}\n", this->sFilePath.c_str());
 
-    std::vector<char> fileBuffer;
-    const u8 *beatmapFile{nullptr};
+    std::vector<u8> fileBuffer;
+    u8 *beatmapFile{nullptr};
     size_t beatmapFileSize{0};
 
     {
@@ -942,7 +942,7 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
         if(file.canRead()) {
             beatmapFileSize = file.getFileSize();
             fileBuffer = file.takeFileBuffer();
-            beatmapFile = reinterpret_cast<const u8 *>(fileBuffer.data());
+            beatmapFile = fileBuffer.data();
         }
         // close the file here
     }
@@ -954,7 +954,7 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
 
     // compute MD5 hash (very slow)
     if(compute_md5) {
-        this->sMD5Hash = {Bancho::md5((u8 *)beatmapFile, beatmapFileSize)};
+        this->sMD5Hash = {Bancho::md5(beatmapFile, beatmapFileSize)};
     }
 
     // load metadata
