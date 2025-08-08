@@ -113,13 +113,14 @@ class DownloadManager {
                 }
                 if(response.responseCode == 429) {
                     // rate limited, retry after 5 seconds
+                    // TODO: read headers and if the usual retry-after are set, follow those
+                    // TODO: per-domain rate limits
                     request->progress.store(0.0f);
                     request->retry_after = std::chrono::steady_clock::now() + std::chrono::seconds(5);
 
                     // re-queue for retry
                     std::scoped_lock lock(this->queue_mutex);
                     this->download_queue.push(request);
-                    return;
                 } else {
                     request->progress.store(-1.0f);
                     request->completed.store(true);
@@ -159,6 +160,11 @@ class DownloadManager {
         // check if already downloading or cached
         auto it = this->active_downloads.find(url);
         if(it != this->active_downloads.end()) {
+            // if we have been rate limited, we might need to resume downloads manually
+            if(!this->currently_downloading.load()) {
+                this->checkAndStartNextDownload();
+            }
+
             return it->second;
         }
 
