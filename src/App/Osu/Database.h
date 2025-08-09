@@ -114,6 +114,7 @@ class Database {
     std::vector<FinishedScore> scores_to_convert;
 
     std::mutex scores_mtx;
+    std::atomic<bool> bDidScoresChangeForStats = true;
     std::unordered_map<MD5Hash, std::vector<FinishedScore>> scores;
 
     // should only be accessed from database loader thread!
@@ -162,7 +163,6 @@ class Database {
     // scores.db (legacy and custom)
     bool bScoresLoaded = false;
 
-    bool bDidScoresChangeForStats;
     PlayerStats prevPlayerStats;
     std::array<SCORE_SORTING_METHOD, 6> scoreSortingMethods;
 

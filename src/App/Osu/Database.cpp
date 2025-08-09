@@ -104,11 +104,7 @@ class DatabaseLoader : public Resource {
         this->bReady = true;
         if(this->bNeedRawLoad) {
             this->db->scheduleLoadRaw();
-        } else {
-            MapCalcThread::start_calc(this->db->maps_to_recalc);
-            VolNormalization::start_calc(this->db->loudness_to_calc);
         }
-        sct_calc(this->db->scores_to_convert);
 
         resourceManager->destroyResource(this);  // commit sudoku
     }
@@ -163,6 +159,13 @@ class DatabaseLoader : public Resource {
         // signal that we are done
         this->db->fLoadingProgress = 1.0f;
         this->bAsyncReady = true;
+
+        // XXX: Is it bad to start a new thread from outside the main thread?
+        if(!this->bNeedRawLoad) {
+            MapCalcThread::start_calc(this->db->maps_to_recalc);
+            VolNormalization::start_calc(this->db->loudness_to_calc);
+            sct_calc(this->db->scores_to_convert);
+        }
     }
 
     void destroy() override { ; }
@@ -184,8 +187,6 @@ Database::Database() {
 
     this->iVersion = 0;
     this->iFolderCount = 0;
-
-    this->bDidScoresChangeForStats = true;
 
     this->prevPlayerStats.pp = 0.0f;
     this->prevPlayerStats.accuracy = 0.0f;
@@ -270,9 +271,12 @@ void Database::update() {
                         }
                     }
                 }
-                // TODO: loudness calc/overrides?
-                MapCalcThread::start_calc(this->maps_to_recalc);
+
                 this->fLoadingProgress = 1.0f;
+
+                MapCalcThread::start_calc(this->maps_to_recalc);
+                VolNormalization::start_calc(this->loudness_to_calc);
+                sct_calc(this->scores_to_convert);
 
                 break;
             }
@@ -534,7 +538,7 @@ Database::PlayerPPScores Database::getPlayerPPScores(std::string playerName) {
 }
 
 Database::PlayerStats Database::calculatePlayerStats(std::string playerName) {
-    if(!this->bDidScoresChangeForStats && playerName == this->prevPlayerStats.name.toUtf8())
+    if(!this->bDidScoresChangeForStats.load() && playerName == this->prevPlayerStats.name.toUtf8())
         return this->prevPlayerStats;
 
     const PlayerPPScores ps = this->getPlayerPPScores(playerName);

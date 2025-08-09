@@ -30,15 +30,15 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG v40_00;
     v40_00.title = "40.00";
     v40_00.changes = {
-        // R"(- Re-added local user stats)",
-        R"(- Re-added FPoSu 3D skybox support)",
         R"(- Added chat ticker)",
-        R"(- Switched to SDL3 platform backend)",
         R"(- Added chat/screenshot/status notifications)",
+        R"(- Re-added local user stats)",
+        R"(- Re-added FPoSu 3D skybox support)",
         R"(- Fixed avatar downloads getting stuck)",
         R"(- Fixed crash when skin is missing spinner sounds)",
         R"(- Fixed circles not being clickable while spinner is active)",
         R"(- Fixed extended chat console flickering)",
+        R"(- Switched to SDL3 platform backend)",
     };
     changelogs.push_back(v40_00);
 
