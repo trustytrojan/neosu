@@ -253,7 +253,7 @@ void Engine::loadApp() {
         // start listening to the default keyboard input
         keyboard->addListener(app.get());
     }
-    debugLog("Engine: Loading app done.");
+    debugLog("Engine: Loading app done.\n");
 }
 
 void Engine::onPaint() {

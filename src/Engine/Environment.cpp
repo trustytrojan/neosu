@@ -1189,4 +1189,4 @@ std::vector<std::string> Environment::enumerateDirectory(const std::string &path
     return contents;
 }
 
-#endif
+#endif // MCENGINE_PLATFORM_WINDOWS
