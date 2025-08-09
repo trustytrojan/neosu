@@ -659,21 +659,9 @@ DatabaseBeatmap *Database::getBeatmapSet(i32 set_id) {
 
 std::string Database::getOsuSongsFolder() {
     std::string songs_dir = Environment::normalizeDirectory(cv::songs_folder.getString());
-
-    bool relative_path = false;
-    if constexpr(Env::cfg(OS::WINDOWS)) {
-        relative_path = (songs_dir.find(':') == std::string::npos) && !songs_dir.starts_with('/');
-    } else {
-        // remove drive letter prefix if switching to linux
-        if(!songs_dir.empty() && songs_dir.find(':') == 1) {
-            songs_dir.erase(0, 2);
-        }
-        relative_path = !(songs_dir.starts_with('/'));
-    }
-
-    if(relative_path) {
-        // remove duplicate slashes and shit again
-        songs_dir = Environment::normalizeDirectory(cv::osu_folder.getString() + songs_dir);
+    if(!env->isAbsolutePath(songs_dir)) {
+        // cv::osu_folder is already normalized, so just concatenating is fine
+        songs_dir = cv::osu_folder.getString() + songs_dir;
     }
 
     return songs_dir;

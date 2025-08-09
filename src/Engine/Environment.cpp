@@ -309,6 +309,11 @@ std::string Environment::normalizeDirectory(std::string dirPath) noexcept {
     SString::trim(&dirPath);
     if(dirPath.empty()) return dirPath;
 
+    // remove drive letter prefix if switching to linux
+    if constexpr(!Env::cfg(OS::WINDOWS) && (dirPath.find(':') == 1)) {
+        dirPath.erase(0, 2);
+    }
+
     while(dirPath.ends_with("\\") || dirPath.ends_with("/")) {
         dirPath.pop_back();
     }
@@ -323,6 +328,17 @@ std::string Environment::normalizeDirectory(std::string dirPath) noexcept {
     } else {
         return dirPath;
     }
+}
+
+bool Environment::isAbsolutePath(const std::string &filePath) noexcept {
+    bool is_absolute_path = filePath.starts_with('/');
+
+    if constexpr(Env::cfg(OS::WINDOWS)) {
+        // On Wine, linux paths are also valid, hence the OR
+        is_absolute_path |= (filePath.find(':') == 1);
+    }
+
+    return is_absolute_path;
 }
 
 std::string Environment::getFolderFromFilePath(const std::string &filepath) noexcept {

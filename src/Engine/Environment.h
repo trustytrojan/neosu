@@ -1,10 +1,4 @@
-//======== Copyright (c) 2015-2018, PG & 2025, WH, All rights reserved. =========//
-//
-// Purpose:		top level interface for native OS calls
-//
-// $NoKeywords: $sdlenv
-//===============================================================================//
-
+// Copyright (c) 2015-2018, PG & 2025, WH, All rights reserved.
 #pragma once
 
 #ifndef ENVIRONMENT_H
@@ -114,6 +108,7 @@ class Environment {
                                                                   bool includeDot = false) noexcept;
     [[nodiscard]] static std::string getFileNameFromFilePath(const std::string &filePath) noexcept;
     [[nodiscard]] static std::string normalizeDirectory(std::string dirPath) noexcept;
+    [[nodiscard]] static bool isAbsolutePath(const std::string &filePath) noexcept;
 
     [[nodiscard]] static std::string encodeStringToURL(const std::string &unencodedURLString) noexcept;
 
