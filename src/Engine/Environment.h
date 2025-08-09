@@ -17,13 +17,14 @@
 #include <filesystem>
 #include <functional>
 
-class Graphics;
-class UString;
-class Engine;
-
 typedef struct SDL_Window SDL_Window;
 typedef struct SDL_Cursor SDL_Cursor;
 typedef struct SDL_Environment SDL_Environment;
+typedef struct SDL_Rect SDL_Rect;
+
+class Graphics;
+class UString;
+class Engine;
 
 class Environment;
 extern Environment *env;
@@ -31,7 +32,7 @@ extern Environment *env;
 class Environment {
    public:
     struct Interop {
-        void handle_cmdline_args(const std::vector<UString> & /*args*/);
+        void handle_cmdline_args(const std::vector<UString> &args);
         void handle_cmdline_args() { env ? handle_cmdline_args(env->getCommandLine()) : (void)0; }
         void register_file_associations();
         static void handle_existing_window([[maybe_unused]] int argc,
@@ -157,7 +158,7 @@ class Environment {
     [[nodiscard]] inline const bool &isWindowResizable() const { return m_bResizable; }
     [[nodiscard]] inline bool hasFocus() const { return m_bHasFocus; }
 
-    bool isPointValid(Vector2 point);  // whether an x,y coordinate lands on an actual display
+    [[nodiscard]] bool isPointValid(Vector2 point) const;  // whether an x,y coordinate lands on an actual display
 
     // mouse
     [[nodiscard]] inline const bool &isCursorInWindow() const { return m_bIsCursorInsideWindow; }
@@ -238,12 +239,14 @@ class Environment {
     void onLogLevelChange(float newval);
     bool m_bEnvDebug;
 
-    static bool s_bIsATTY;
+    static bool s_bIsATTY;  // to determine whether we should log with colours to stdout/stderr
 
     // monitors
-    void initMonitors(bool force = false);
-    std::map<unsigned int, McRect> m_mMonitors;
-    McRect m_fullDesktopBoundingBox;
+    void initMonitors(bool force = false) const;
+    // mutable due to lazy init
+    mutable std::map<unsigned int, McRect> m_mMonitors;
+    mutable McRect m_fullDesktopBoundingBox;
+
     float m_fDisplayHz;
     float m_fDisplayHzSecs;
 
@@ -294,6 +297,9 @@ class Environment {
 
     // internal path conversion helper, SDL_URLOpen needs a URL-encoded URI on Unix (because it goes to xdg-open)
     [[nodiscard]] static std::string filesystemPathToURI(const std::filesystem::path &path) noexcept;
+
+    static SDL_Rect McRectToSDLRect(const McRect &mcrect) noexcept;
+    static McRect SDLRectToMcRect(const SDL_Rect &sdlrect) noexcept;
 };
 
 #endif

@@ -1,4 +1,5 @@
 // Copyright (c) 2018, PG & 2025, WH, All rights reserved.
+
 #include "Environment.h"
 
 #include "Engine.h"
@@ -8,8 +9,6 @@
 
 // #include "DirectX11Interface.h" TODO
 #include "SDLGLInterface.h"
-
-#include <SDL3/SDL.h>
 
 #include <algorithm>
 #include <cassert>
@@ -34,27 +33,13 @@
 // TODO
 #endif
 
+#include <SDL3/SDL.h>
+
 Environment *env = nullptr;
 bool Environment::s_bIsWine = false;
 
 SDL_Environment *Environment::s_sdlenv = SDL_GetEnvironment();
 bool Environment::s_bIsATTY = (isatty(fileno(stdout)) != 0);
-
-// convenience conversion utilities (fwd decl.)
-// not static members, because mingw-gcc 32-bit breaks (ugly)
-namespace {
-SDL_Rect McRectToSDLRect(const McRect &mcrect) {
-    return {.x = static_cast<int>(mcrect.getX()),
-            .y = static_cast<int>(mcrect.getY()),
-            .w = static_cast<int>(mcrect.getWidth()),
-            .h = static_cast<int>(mcrect.getHeight())};
-}
-
-McRect SDLRectToMcRect(const SDL_Rect &sdlrect) {
-    return {static_cast<float>(sdlrect.x), static_cast<float>(sdlrect.y), static_cast<float>(sdlrect.w),
-            static_cast<float>(sdlrect.h)};
-}
-}  // namespace
 
 Environment::Environment(int argc, char *argv[]) {
     env = this;
@@ -807,7 +792,7 @@ McRect Environment::getDesktopRect() const { return {{}, getNativeScreenSize()};
 
 McRect Environment::getWindowRect() const { return {getWindowPos(), getWindowSize()}; }
 
-bool Environment::isPointValid(Vector2 point) {  // whether an x,y coordinate lands on an actual display
+bool Environment::isPointValid(Vector2 point) const {  // whether an x,y coordinate lands on an actual display
     if(m_mMonitors.size() < 1) initMonitors();
     // check for the trivial case first
     const bool withinMinMaxBounds = m_fullDesktopBoundingBox.contains(point);
@@ -950,6 +935,30 @@ void Environment::setProcessPriority(float newPrio) {
     SDL_SetCurrentThreadPriority(!!static_cast<int>(newPrio) ? SDL_THREAD_PRIORITY_HIGH : SDL_THREAD_PRIORITY_NORMAL);
 }
 
+// convar callback
+void Environment::onLogLevelChange(float newval) {
+    const bool enable = !!static_cast<int>(newval);
+    if(enable && !m_bEnvDebug) {
+        envDebug(true);
+        SDL_SetLogPriorities(SDL_LOG_PRIORITY_TRACE);
+    } else if(!enable && m_bEnvDebug) {
+        envDebug(false);
+        SDL_ResetLogPriorities();
+    }
+}
+
+SDL_Rect Environment::McRectToSDLRect(const McRect &mcrect) noexcept {
+    return {.x = static_cast<int>(mcrect.getX()),
+            .y = static_cast<int>(mcrect.getY()),
+            .w = static_cast<int>(mcrect.getWidth()),
+            .h = static_cast<int>(mcrect.getHeight())};
+}
+
+McRect Environment::SDLRectToMcRect(const SDL_Rect &sdlrect) noexcept {
+    return {static_cast<float>(sdlrect.x), static_cast<float>(sdlrect.y), static_cast<float>(sdlrect.w),
+            static_cast<float>(sdlrect.h)};
+}
+
 void Environment::notifyMouseEvent(bool inside) {
     SDL_Event event;
     event.type = inside ? SDL_EVENT_WINDOW_MOUSE_ENTER : SDL_EVENT_WINDOW_MOUSE_LEAVE;
@@ -971,7 +980,7 @@ void Environment::initCursors() {
     };
 }
 
-void Environment::initMonitors(bool force) {
+void Environment::initMonitors(bool force) const {
     if(!force && !m_mMonitors.empty())
         return;
     else if(force)  // refresh
@@ -1018,17 +1027,6 @@ void Environment::initMonitors(bool force) {
     // make sure this is also valid
     if(m_fullDesktopBoundingBox.getSize() == Vector2{0, 0}) {
         m_fullDesktopBoundingBox = getWindowRect();
-    }
-}
-
-void Environment::onLogLevelChange(float newval) {
-    const bool enable = !!static_cast<int>(newval);
-    if(enable && !m_bEnvDebug) {
-        envDebug(true);
-        SDL_SetLogPriorities(SDL_LOG_PRIORITY_TRACE);
-    } else if(!enable && m_bEnvDebug) {
-        envDebug(false);
-        SDL_ResetLogPriorities();
     }
 }
 
