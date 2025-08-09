@@ -157,6 +157,7 @@ class Environment {
     [[nodiscard]] float getDPIScale() const { return (float)getDPI() / 96.0f; }
     [[nodiscard]] inline const bool &isFullscreen() const { return m_bFullscreen; }
     [[nodiscard]] inline const bool &isWindowResizable() const { return m_bResizable; }
+    [[nodiscard]] inline bool hasFocus() const { return m_bHasFocus; }
 
     bool isPointValid(Vector2 point);  // whether an x,y coordinate lands on an actual display
 

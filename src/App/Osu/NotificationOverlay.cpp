@@ -101,6 +101,7 @@ void NotificationOverlay::mouse_update(bool *propagate_clicks) {
         bool delay_toast = t->type == ToastElement::TYPE::PERMANENT;
         delay_toast |= t->type == ToastElement::TYPE::CHAT && !chat_toasts_visible;
         delay_toast |= a_toast_is_hovered;
+        delay_toast |= !env->hasFocus();
 
         if(delay_toast) {
             t->creationTime += engine->getFrameTime();
