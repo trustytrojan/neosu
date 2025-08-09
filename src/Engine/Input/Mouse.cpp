@@ -164,9 +164,10 @@ void Mouse::onMotion(Vector2 rel, Vector2 abs, bool preTransformed) {
         if(this->fSensitivity < 0.999f || this->fSensitivity > 1.001f) {
             newRel *= this->fSensitivity;
         }
-        if(newRel.length() > 50.0f) {  // don't allow obviously bogus values
-            // debugLog("got bogus relative motion with length {} (new pos would be {},{})\n", newRel.length(),
-            //          Vector2{this->vPosWithoutOffsets + newRel}.x, Vector2{this->vPosWithoutOffsets + newRel}.y);
+        // don't allow obviously bogus values (this should not normally be reachable with a mouse)
+        if(std::fabs(newRel.length()) > std::fabs(engine->getScreenSize().length())) {
+            debugLog("got bogus relative motion with length {} (new pos would be {},{})\n", newRel.length(),
+                     Vector2{this->vPosWithoutOffsets + newRel}.x, Vector2{this->vPosWithoutOffsets + newRel}.y);
             newRel.zero();
         }
         newAbs = this->vPosWithoutOffsets + newRel;
