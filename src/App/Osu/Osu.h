@@ -61,7 +61,7 @@ class Osu final : public MouseListener, public KeyboardListener {
 
     void draw();
     void update();
-    bool isInCriticalInteractiveSession();
+    bool isInPlayModeAndNotPaused();
 
     void onKeyDown(KeyboardEvent &e) override;
     void onKeyUp(KeyboardEvent &e) override;

@@ -66,7 +66,7 @@ class Mouse final : public InputDevice {
 
     // input handling
     void onPosChange(Vector2 pos);
-    void onMotion(Vector2 rel, Vector2 abs, bool preTransformed);
+    void onMotion(Vector2 rel, Vector2 abs, bool raw);
     void onWheelVertical(int delta);
     void onWheelHorizontal(int delta);
     void onButtonChange(ButtonIndex button, bool down);

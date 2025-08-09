@@ -857,8 +857,7 @@ void Osu::update() {
     }
 }
 
-bool Osu::isInCriticalInteractiveSession() {
-    // is in play mode and not paused
+bool Osu::isInPlayModeAndNotPaused() {
     return isInPlayMode() && !(getSelectedBeatmap() != nullptr && getSelectedBeatmap()->isPaused());
 }
 

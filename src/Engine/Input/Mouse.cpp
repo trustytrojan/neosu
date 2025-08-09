@@ -168,30 +168,30 @@ void Mouse::update() {
     this->bLastFrameHadMotion = false;
 }
 
-void Mouse::onMotion(Vector2 origRel, Vector2 origAbs, bool preTransformed) {
+void Mouse::onMotion(Vector2 origRel, Vector2 origAbs, bool raw) {
     Vector2 newRel{origRel}, newAbs{origAbs};
 
-    const bool osCursorVisible = (env->isCursorVisible() || !env->isCursorInWindow() || !engine->hasFocus());
+    this->bNeedsCursorLock = false;  // assume the cursor won't need to be locked
 
-    // need to lock the OS cursor to the center of the screen if rawinput is disabled (aka preTransformed),
-    // otherwise it can exit the screen rect before the virtual cursor does
-    // don't do it here because we don't want the event loop to make more external calls than necessary,
-    // just set bNeedsCursorLock as a signal to do it on the engine update loop
-    this->bNeedsCursorLock = !preTransformed && !osCursorVisible;
+    if(!raw && !(env->isCursorVisible() || !env->isCursorInWindow() || !engine->hasFocus())) {
+        const bool couldCursorEscapeWindow =
+            this->fSensitivity < 0.995f || ((cv::mod_fposu.getBool() && !cv::fposu_absolute_mode.getBool()) &&
+                                            (osu && osu->isInPlayModeAndNotPaused()));
 
-    if(!preTransformed && !osCursorVisible) {
+        this->bNeedsCursorLock = couldCursorEscapeWindow;
+
         // rawinput has sensitivity pre-applied, otherwise we have to multiply the sensitivity here
         if(this->fSensitivity < 0.999f || this->fSensitivity > 1.001f) {
             newRel *= this->fSensitivity;
+            // ignore completely impossible relative deltas
+            if(std::fabs(newRel.length()) > std::fabs(engine->getScreenSize().length())) {
+                newRel.zero();
+            }
+            // without raw input, we can't rely on origAbs, because that's where the OS cursor is,
+            // which our virtual cursor is decoupled from
+            // so newAbs is just the last absolute position + the relative delta
+            newAbs = this->vPosWithoutOffsets + newRel;
         }
-        // ignore completely impossible relative deltas
-        if(std::fabs(newRel.length()) > std::fabs(engine->getScreenSize().length())) {
-            newRel.zero();
-        }
-        // without raw input, we can't rely on origAbs, because that's where the OS cursor is,
-        // which our virtual cursor is decoupled from
-        // so newAbs is just the last absolute position + the relative delta
-        newAbs = this->vPosWithoutOffsets + newRel;
     }
 
     // apply clipping
@@ -226,7 +226,7 @@ void Mouse::onMotion(Vector2 origRel, Vector2 origAbs, bool preTransformed) {
             "frame: {} rel: {:.2f},{:.2f} abs: {:.2f},{:.2f} rawInput: {} m_vRawDelta: {:.2f},{:.2f} m_vDelta: "
             "{:.2f},{:.2f} m_vPosWithoutOffset: "
             "{:.2f},{:.2f}\n",
-            engine->getFrameCount() + 1, origRel.x, origRel.y, origAbs.x, origAbs.y, preTransformed, this->vRawDelta.x,
+            engine->getFrameCount() + 1, origRel.x, origRel.y, origAbs.x, origAbs.y, raw, this->vRawDelta.x,
             this->vRawDelta.y, this->vDelta.x, this->vDelta.y, this->vPosWithoutOffsets.x, this->vPosWithoutOffsets.y);
 }
 
