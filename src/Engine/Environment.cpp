@@ -40,10 +40,21 @@ bool Environment::s_bIsWine = false;
 SDL_Environment *Environment::s_sdlenv = SDL_GetEnvironment();
 bool Environment::s_bIsATTY = (isatty(fileno(stdout)) != 0);
 
-// convar callback
-void Environment::setProcessPriority(float newPrio) {
-    SDL_SetCurrentThreadPriority(!!static_cast<int>(newPrio) ? SDL_THREAD_PRIORITY_HIGH : SDL_THREAD_PRIORITY_NORMAL);
+// convenience conversion utilities (fwd decl.)
+// not static members, because mingw-gcc 32-bit breaks (ugly)
+namespace {
+SDL_Rect McRectToSDLRect(const McRect &mcrect) {
+    return {.x = static_cast<int>(mcrect.getX()),
+            .y = static_cast<int>(mcrect.getY()),
+            .w = static_cast<int>(mcrect.getWidth()),
+            .h = static_cast<int>(mcrect.getHeight())};
 }
+
+McRect SDLRectToMcRect(const SDL_Rect &sdlrect) {
+    return {static_cast<float>(sdlrect.x), static_cast<float>(sdlrect.y), static_cast<float>(sdlrect.w),
+            static_cast<float>(sdlrect.h)};
+}
+}  // namespace
 
 Environment::Environment(int argc, char *argv[]) {
     env = this;
@@ -785,7 +796,10 @@ int Environment::getMonitor() const {
     return display == 0 ? -1 : display;  // 0 == invalid, according to SDL
 }
 
-Vector2 Environment::getNativeScreenSize() const { return SDLDisplayIDToSizeVec(0); }
+Vector2 Environment::getNativeScreenSize() const {
+    SDL_DisplayID di = SDL_GetDisplayForWindow(m_window);
+    return {static_cast<float>(SDL_GetDesktopDisplayMode(di)->w), static_cast<float>(SDL_GetDesktopDisplayMode(di)->h)};
+}
 
 McRect Environment::getDesktopRect() const { return {{}, getNativeScreenSize()}; }
 
@@ -929,6 +943,11 @@ void Environment::listenToTextInput(bool listen) {
 //	internal helpers/callbacks  //
 //******************************//
 
+// convar callback
+void Environment::setProcessPriority(float newPrio) {
+    SDL_SetCurrentThreadPriority(!!static_cast<int>(newPrio) ? SDL_THREAD_PRIORITY_HIGH : SDL_THREAD_PRIORITY_NORMAL);
+}
+
 void Environment::notifyMouseEvent(bool inside) {
     SDL_Event event;
     event.type = inside ? SDL_EVENT_WINDOW_MOUSE_ENTER : SDL_EVENT_WINDOW_MOUSE_LEAVE;
@@ -970,7 +989,8 @@ void Environment::initMonitors(bool force) {
 
         if(!SDL_GetDisplayBounds(di, &sdlDisplayRect)) {
             // fallback
-            size = SDLDisplayIDToSizeVec(di);
+            size = Vector2{static_cast<float>(SDL_GetDesktopDisplayMode(di)->w),
+                           static_cast<float>(SDL_GetDesktopDisplayMode(di)->h)};
             displayRect = McRect{{}, size};
             // expand the display bounds, we just have to assume that the displays are placed left-to-right, with Y
             // coordinates at 0 (in this fallback path)
@@ -1162,39 +1182,6 @@ std::vector<std::string> Environment::enumerateDirectory(const std::string &path
     }
 
     return contents;
-}
-
-SDL_Rect Environment::McRectToSDLRect(const McRect &mcrect) {
-    return {.x = static_cast<int>(mcrect.getX()),
-            .y = static_cast<int>(mcrect.getY()),
-            .w = static_cast<int>(mcrect.getWidth()),
-            .h = static_cast<int>(mcrect.getHeight())};
-}
-
-McRect Environment::SDLRectToMcRect(const SDL_Rect &sdlrect) {
-    return {static_cast<float>(sdlrect.x), static_cast<float>(sdlrect.y), static_cast<float>(sdlrect.w),
-            static_cast<float>(sdlrect.h)};
-}
-
-Vector2 Environment::SDLDisplayIDToSizeVec(SDL_DisplayID sdldisp) const {
-    if(!sdldisp) {
-        if(m_bEnvDebug) {
-            debugLog("Using current window display for SDL_DisplayID 0\n");
-        }
-        sdldisp = SDL_GetDisplayForWindow(m_window);
-        if(!sdldisp) {
-            debugLog("Failed to obtain SDL_DisplayID for window: {:s}\n", SDL_GetError());
-            return {};
-        }
-    }
-
-    const SDL_DisplayMode *dm = SDL_GetDesktopDisplayMode(sdldisp);
-    if(!dm) {
-        debugLog("Failed to SDL_GetDesktopDisplayMode({}): {:s}\n", sdldisp, SDL_GetError());
-        return {};
-    }
-
-    return {static_cast<float>(dm->w), static_cast<float>(dm->h)};
 }
 
 #endif

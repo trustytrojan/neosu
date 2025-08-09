@@ -24,8 +24,6 @@ class Engine;
 typedef struct SDL_Window SDL_Window;
 typedef struct SDL_Cursor SDL_Cursor;
 typedef struct SDL_Environment SDL_Environment;
-typedef struct SDL_Rect SDL_Rect;
-typedef uint32_t SDL_DisplayID;
 
 class Environment;
 extern Environment *env;
@@ -296,13 +294,6 @@ class Environment {
 
     // internal path conversion helper, SDL_URLOpen needs a URL-encoded URI on Unix (because it goes to xdg-open)
     [[nodiscard]] static std::string filesystemPathToURI(const std::filesystem::path &path) noexcept;
-
-    // convenience conversion utilities
-    static SDL_Rect McRectToSDLRect(const McRect &mcrect);
-    static McRect SDLRectToMcRect(const SDL_Rect &sdlrect);
-
-    // sdldisp = 0 to use the display the window is currently on
-    Vector2 SDLDisplayIDToSizeVec(SDL_DisplayID sdldisp) const;
 };
 
 #endif
