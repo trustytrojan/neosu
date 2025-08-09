@@ -844,6 +844,8 @@ void SDLMain::restart(const std::vector<UString> &args) {
 
     std::vector<const char *> restartArgsChar(args.size() + 1);
 
+    restartArgsChar.back() = nullptr;
+
     for(int i = 0; const auto &arg : args) {
         restartArgsChar[i] = arg.toUtf8();
         i++;
