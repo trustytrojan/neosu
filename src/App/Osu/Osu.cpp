@@ -1596,6 +1596,14 @@ void Osu::onResolutionChanged(Vector2 newResolution) {
 
     const float prevUIScale = getUIScale();
 
+    // save setting
+    auto res_str = UString::format("%ix%i", (i32)newResolution.x, (i32)newResolution.y);
+    if(env->isFullscreen()) {
+        cv::resolution.setValue(res_str, false);
+    } else {
+        cv::windowed_resolution.setValue(res_str, false);
+    }
+
     // We just force disable letterboxing while windowed.
     if(cv::letterboxing.getBool() && env->isFullscreen()) {
         // clamp upwards to internal resolution (osu_resolution)

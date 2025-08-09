@@ -633,6 +633,10 @@ void Environment::enableFullscreen() {
 
     m_bFullscreen = true;
     cv::fullscreen.setValue(m_bFullscreen, false);
+
+    auto res = cv::resolution.getString().c_str();
+    osu->onInternalResolutionChanged(res, res);
+
     syncWindow();
 }
 
@@ -644,6 +648,10 @@ void Environment::disableFullscreen() {
 
     m_bFullscreen = false;
     cv::fullscreen.setValue(m_bFullscreen, false);
+
+    auto res = cv::windowed_resolution.getString().c_str();
+    osu->onWindowedResolutionChanged(res, res);
+
     syncWindow();
 }
 
