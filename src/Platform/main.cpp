@@ -377,8 +377,8 @@ nocbinline SDL_AppResult SDLMain::handleEvent(SDL_Event *event) {
             }
             break;
 
-        // drag-drop events
-        // clang-format off
+            // drag-drop events
+            // clang-format off
         case SDL_EVENT_DROP_FILE: case SDL_EVENT_DROP_TEXT: case SDL_EVENT_DROP_BEGIN:
         case SDL_EVENT_DROP_COMPLETE: case SDL_EVENT_DROP_POSITION:
             // clang-format on
@@ -414,8 +414,8 @@ nocbinline SDL_AppResult SDLMain::handleEvent(SDL_Event *event) {
             }
             break;
 
-        // window events (i hate you msvc ffs)
-        // clang-format off
+            // window events (i hate you msvc ffs)
+            // clang-format off
         case SDL_EVENT_WINDOW_SHOWN:				 case SDL_EVENT_WINDOW_HIDDEN:			  case SDL_EVENT_WINDOW_EXPOSED:
         case SDL_EVENT_WINDOW_MOVED:				 case SDL_EVENT_WINDOW_RESIZED:			  case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
         case SDL_EVENT_WINDOW_METAL_VIEW_RESIZED:	 case SDL_EVENT_WINDOW_MINIMIZED:		  case SDL_EVENT_WINDOW_MAXIMIZED:
@@ -537,8 +537,6 @@ nocbinline SDL_AppResult SDLMain::handleEvent(SDL_Event *event) {
             break;
 
         case SDL_EVENT_MOUSE_MOTION:
-            // debugLog("mouse motion on frame {}\n", m_engine->getFrameCount());
-            //  cache the position
             m_vLastRelMousePos = Vector2{event->motion.xrel, event->motion.yrel};
             m_vLastAbsMousePos = Vector2{event->motion.x, event->motion.y};
             mouse->onMotion(m_vLastRelMousePos, m_vLastAbsMousePos, event->motion.which != 0);

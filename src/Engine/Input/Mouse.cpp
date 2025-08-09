@@ -84,8 +84,26 @@ void Mouse::drawDebug() {
     g->popTransform();
 }
 
+// collect data (during Mouse::raw_update_tick())
+Vector2 Mouse::MotionCBData::consume() {
+    if(this->count < 1) return {};
+
+    Vector2d ret{this->accumulated_motion};
+
+    // multiply to get the final delta over all frames
+    ret *= this->get_current_sens();
+
+    // reset
+    this->accumulated_motion.zero();
+    this->count = 0;
+
+    return ret;
+}
+
 // need to check this here (at the start of update()), since onMotion won't be getting called during the event loop
 // (due to SDL_SetEventEnabled(SDL_EVENT_MOUSE_MOTION, !raw))
+// this is basically all onMotion events that would normally be called for each mouse event coalesced into 1 call
+// which is much more efficient and precise
 void Mouse::raw_update_tick() {
     Vector2 cb_rel = this->mcbdata.consume();
     if(cb_rel.length() > 0) {
@@ -110,28 +128,31 @@ void Mouse::update() {
         this->vDelta.zero();
         this->vRawDelta.zero();
     } else {
-        // center the OS cursor if it's close to the screen edges, for non-raw input
-        // the reason for trying hard to avoid env->setMousePos is because setting the OS cursor position can take a
-        // long time so we try to use the virtual cursor position as much as possible and only update the OS cursor when
-        // it's going to go somewhere we don't want
         const bool clipped{env->isCursorClipped()};
-        if(this->bNeedsLock) {
+        if(this->bNeedsCursorLock) {
+            // center the OS cursor if it's close to the screen edges, for non-raw input
+            // setting the OS cursor position can take an indefinite amount of time,
+            // so we try to use the virtual cursor position as much as possible,
+            // and only update the OS cursor (env->setMousePos) when it's going to go somewhere we don't want
             const McRect clipRect{clipped ? env->getCursorClip() : engine->getScreenRect()};
             const Vector2 center{clipRect.getCenter()};
             if(!clipRect.contains(env->getMousePos(), -10.f)) {
-                if(clipped)
+                if(clipped) {
                     env->setMousePos(center);
-                else if(!env->isCursorVisible())  // FIXME: this is crazy. for windowed mode, need to "pop out" the OS
-                                                  // cursor
+                } else if(!env->isCursorVisible()) {
+                    // because of the fuzzy/imprecise/unknowable position state inaccuracies around window border
+                    // conditions for cursor visibility checks, we need to "pop out" the OS cursor so
+                    // it doesn't get stuck along the boundary (due to scattered logic)
                     env->setMousePos(Vector2{this->vPosWithoutOffsets}.nudge(center, 0.1f));
+                }
             }
         } else if(!clipped && !engine->getScreenRect().contains(this->getRealPos())) {
+            // this block handles unconfined rawinput, with the virtual cursor no longer being inside the screen rect
             const Vector2 testPoint{this->getRealPos() + env->getWindowPos()};
             if(env->isPointValid(testPoint)) {
-                // if we aren't clipping the cursor, we need to manually check to see if the virtual cursor left the
-                // screen
-                // otherwise, moving the cursor into the edge of a monitor would send a "mouse leave" event, even
-                // though the cursor didn't actually have anywhere to go
+                // if we aren't clipping the cursor, we need to manually check to see if the virtual cursor left the screen.
+                // otherwise, moving the cursor into the edge of a monitor would send a "mouse leave" event, even though
+                // the cursor didn't actually have anywhere to go
                 env->notifyMouseEvent(false);
             } else {
                 // if it was an invalid point, clamp the absolute position to the window rect bounds
@@ -147,63 +168,66 @@ void Mouse::update() {
     this->bLastFrameHadMotion = false;
 }
 
-void Mouse::onMotion(Vector2 rel, Vector2 abs, bool preTransformed) {
-    Vector2 newRel{rel}, newAbs{abs};
-
-    this->bNeedsLock = false;  // assume we don't have to lock the cursor
+void Mouse::onMotion(Vector2 origRel, Vector2 origAbs, bool preTransformed) {
+    Vector2 newRel{origRel}, newAbs{origAbs};
 
     const bool osCursorVisible = (env->isCursorVisible() || !env->isCursorInWindow() || !engine->hasFocus());
 
-    // rawinput has sensitivity pre-applied, otherwise we have to multiply the sensitivity here
+    // need to lock the OS cursor to the center of the screen if rawinput is disabled (aka preTransformed),
+    // otherwise it can exit the screen rect before the virtual cursor does
+    // don't do it here because we don't want the event loop to make more external calls than necessary,
+    // just set bNeedsCursorLock as a signal to do it on the engine update loop
+    this->bNeedsCursorLock = !preTransformed && !osCursorVisible;
+
     if(!preTransformed && !osCursorVisible) {
-        // need to lock the OS cursor to the center of the screen if rawinput is disabled, otherwise it can exit the
-        // screen rect before the virtual cursor does
-        // don't do it here because we don't want the event loop to make
-        // more external calls than necessary, just set a flag to do it on the engine update loop
-        this->bNeedsLock = true;
+        // rawinput has sensitivity pre-applied, otherwise we have to multiply the sensitivity here
         if(this->fSensitivity < 0.999f || this->fSensitivity > 1.001f) {
             newRel *= this->fSensitivity;
         }
-        // don't allow obviously bogus values (this should not normally be reachable with a mouse)
+        // ignore completely impossible relative deltas
         if(std::fabs(newRel.length()) > std::fabs(engine->getScreenSize().length())) {
-            debugLog("got bogus relative motion with length {} (new pos would be {},{})\n", newRel.length(),
-                     Vector2{this->vPosWithoutOffsets + newRel}.x, Vector2{this->vPosWithoutOffsets + newRel}.y);
             newRel.zero();
         }
+        // without raw input, we can't rely on origAbs, because that's where the OS cursor is,
+        // which our virtual cursor is decoupled from
+        // so newAbs is just the last absolute position + the relative delta
         newAbs = this->vPosWithoutOffsets + newRel;
     }
 
+    // apply clipping
     if(env->isCursorClipped()) {
         const McRect clipRect = env->getCursorClip();
 
         // clamp the final position to the clip rect
-        newAbs.x = std::clamp<float>(newAbs.x, clipRect.getMinX(), clipRect.getMaxX());
-        newAbs.y = std::clamp<float>(newAbs.y, clipRect.getMinY(), clipRect.getMaxY());
+        newAbs = Vector2{std::clamp<float>(newAbs.x, clipRect.getMinX(), clipRect.getMaxX()),
+                         std::clamp<float>(newAbs.y, clipRect.getMinY(), clipRect.getMaxY())};
     }
 
-    // we have to accumulate all motion collected in this frame, then reset it at the start of the next frame
-    // use Mouse::update always setting m_bLastFrameHadMotion to false as a signal that the deltas need to be reset now
-    // this is because onMotion can be called multiple times in a frame, depending on how many mouse motion events were
-    // collected but Mouse::update only happens once per frame
+    // Mouse::onMotion can be called multiple times in a frame (for non-raw input), depending on
+    // how many mouse motion events were collected during the event loop
+    // so, we have to accumulate the delta from each onMotion call this frame, then reset it at the start of the next frame
+    // Mouse::update (which happens once per frame) always sets bLastFrameHadMotion to false at the end
     if(!this->bLastFrameHadMotion) {
         this->vDelta.zero();
         this->vRawDelta.zero();
     }
 
-    // rawdelta doesn't include sensitivity or clipping
-    this->vRawDelta += (newRel / this->fSensitivity);
+    // vRawDelta doesn't include sensitivity or clipping, which is useful for fposu
+    this->vRawDelta += origRel;
+    // vDelta accumulates post-transformation deltas
     this->vDelta += newRel;
-    // for the absolute position, we can just update it directly
+    // vPosWithoutOffsets should always match the post-transformation newAbs
     this->vPosWithoutOffsets = newAbs;
 
     this->bLastFrameHadMotion = true;
 
     if(unlikely(cv::debug_mouse.getBool()))
         debugLog(
-            "frame: {} rawInput: {} m_vRawDelta: {:.2f},{:.2f} m_vDelta: {:.2f},{:.2f} m_vPosWithoutOffset: "
+            "frame: {} rel: {:.2f},{:.2f} abs: {:.2f},{:.2f} rawInput: {} m_vRawDelta: {:.2f},{:.2f} m_vDelta: "
+            "{:.2f},{:.2f} m_vPosWithoutOffset: "
             "{:.2f},{:.2f}\n",
-            engine->getFrameCount() + 1, preTransformed, this->vRawDelta.x, this->vRawDelta.y, this->vDelta.x,
-            this->vDelta.y, this->vPosWithoutOffsets.x, this->vPosWithoutOffsets.y);
+            engine->getFrameCount() + 1, origRel.x, origRel.y, origAbs.x, origAbs.y, preTransformed, this->vRawDelta.x,
+            this->vRawDelta.y, this->vDelta.x, this->vDelta.y, this->vPosWithoutOffsets.x, this->vPosWithoutOffsets.y);
 }
 
 void Mouse::resetWheelDelta() {
@@ -295,22 +319,6 @@ void Mouse::onRawInputChanged(float newval) {
 void Mouse::onSensitivityChanged(float newSens) {
     this->fSensitivity = newSens;
     this->mcbdata.set_current_sens(this->fSensitivity);
-}
-
-// release (during Mouse::update())
-Vector2 Mouse::MotionCBData::consume() {
-    if(this->count < 1) return {};
-
-    Vector2d ret{this->accumulated_motion};
-
-    // multiply to get the final delta over all frames
-    ret *= this->get_current_sens();
-
-    // reset
-    this->accumulated_motion.zero();
-    this->count = 0;
-
-    return ret;
 }
 
 void Mouse::raw_motion_cb(void *userdata, uint64_t ts, SDL_Window *window, uint32_t mouseid, float *x, float *y) {

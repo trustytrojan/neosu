@@ -1972,11 +1972,19 @@ void Osu::updateCursorVisibility() {
     // if it's not forced visible, check whether it's inside the internal window
     if(!forced_visible) {
         const bool internal_contains_mouse = McRect{{}, g_vInternalResolution}.contains(mouse->getPos());
-        desired_vis = !internal_contains_mouse;
+        if(internal_contains_mouse) {
+            desired_vis = false;
+        } else if(!env->isCursorClipped()) {
+            // don't allow making the cursor visible (i.e. exiting internal res) if it's clipped, that makes no sense
+            desired_vis = true;
+        }
     }
 
     // only change if it's different from the current mouse state
     if(desired_vis != currently_visible) {
+        if(cv::debug_mouse.getBool()) {
+            debugLog("current: {} desired: {}\n", currently_visible, desired_vis);
+        }
         env->setCursorVisible(desired_vis);
     }
 }
@@ -1989,7 +1997,7 @@ void Osu::updateConfineCursor() {
                          (!effectivelyFS && cv::confine_cursor_windowed.getBool()) ||                   //
                          (this->isInPlayMode() && !(this->pauseMenu && this->pauseMenu->isVisible()));  //
 
-    bool force_no_confine = !engine->hasFocus() ||                                                       //
+    bool force_no_confine = !engine->hasFocus() ||                                                      //
                             cv::confine_cursor_never.getBool() ||                                       //
                             this->getModAuto() ||                                                       //
                             this->getModAutopilot() ||                                                  //

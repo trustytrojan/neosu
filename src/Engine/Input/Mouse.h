@@ -110,8 +110,8 @@ class Mouse final : public InputDevice {
     void resetWheelDelta();
 
     // input mode control
-    [[nodiscard]] inline const bool &isInAbsoluteMode() const { return this->bNeedsLock; }
-    inline void setAbsoluteMode(bool absolute) { this->bNeedsLock = absolute; }
+    [[nodiscard]] inline const bool &isInAbsoluteMode() const { return this->bNeedsCursorLock; }
+    inline void setAbsoluteMode(bool absolute) { this->bNeedsCursorLock = absolute; }
 
     [[nodiscard]] inline const bool &isRawInput() const {
         return this->bIsRawInput;
@@ -135,7 +135,7 @@ class Mouse final : public InputDevice {
 
     // mode tracking
     bool bLastFrameHadMotion{false};  // whether setPos was called in the previous frame
-    bool bNeedsLock{false};   // whether we need to manually center the cursor to prevent it from leaving/hitting the
+    bool bNeedsCursorLock{false};   // whether we need to manually center the cursor to prevent it from leaving/hitting the
                               // edges of the window (when raw input is off and sensitivity < 1)
     bool bIsRawInput{false};  // whether raw input is active
     float fSensitivity{1.0f};

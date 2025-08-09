@@ -1,5 +1,5 @@
 AC_PREREQ([2.69])
-AC_INIT([neosu], [[40.00]], [], [], [https://github.com/kiwec/neosu]) # don't report bugs to McKay :)
+AC_INIT([neosu], [[40.01]], [], [], [https://github.com/kiwec/neosu]) # don't report bugs to McKay :)
 AC_CONFIG_SRCDIR([src/Engine/Engine.cpp])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_HEADERS([src/config.h])
@@ -734,7 +734,7 @@ AS_IF([test "$renderer" != "dx11"], [
 ])
 
 SDL3_MIN_VERSION=3.4.0 # needs SDL_SetRelativeMouseTransform, not in any current (3.2.x) releases
-SDL3_BUILD_VERSION=90a023007fd8aef3e7e61ab6051c4ab8e36639e3 # git
+SDL3_BUILD_VERSION=d4819db5e6abc992128c38356fae6453652a8fc4 # git
 FREETYPE2_MIN_VERSION=2.10.0
 FREETYPE2_BUILD_VERSION=2.13.3
 LIBJPEG_MIN_VERSION=3.0.0

@@ -174,12 +174,12 @@ class Environment {
     void notifyWantRawInput(bool raw);  // enable/disable OS-level rawinput
     inline void setMousePos(Vector2 pos) {
         m_vLastAbsMousePos = pos;
-        setOSMousePos();
+        setOSMousePos(m_vLastAbsMousePos);
     }
     inline void setMousePos(float x, float y) {
         m_vLastAbsMousePos.x = x;
         m_vLastAbsMousePos.y = y;
-        setOSMousePos();
+        setOSMousePos(m_vLastAbsMousePos);
     }
 
     // keyboard
@@ -198,6 +198,8 @@ class Environment {
     Engine *m_engine;
 
     SDL_Window *m_window;
+    std::string m_sdldriver;
+    bool m_bIsX11;
     static SDL_Environment *s_sdlenv;
 
     bool m_bRunning;
@@ -207,7 +209,6 @@ class Environment {
     bool m_bMinimized;  // for fps_max_background
     bool m_bHasFocus;   // for fps_max_background
 
-    void setOSMousePos() const;
     void setOSMousePos(Vector2 pos) const;
 
     // the absolute/relative mouse position from the most recent iteration of the event loop

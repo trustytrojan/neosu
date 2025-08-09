@@ -118,6 +118,9 @@ Environment::Environment(int argc, char *argv[]) {
     m_vLastKnownWindowPos = Vector2{};
     m_vLastKnownWindowSize = Vector2{320, 240};
 
+    m_sdldriver = SDL_GetCurrentVideoDriver();
+    m_bIsX11 = (m_sdldriver == "x11");
+
     // setup callbacks
     cv::debug_env.setCallback(SA::MakeDelegate<&Environment::onLogLevelChange>(this));
     cv::fullscreen_windowed_borderless.setCallback(
@@ -982,8 +985,28 @@ void Environment::notifyMouseEvent(bool inside) {
     SDL_PushEvent(&event);
 }
 
-void Environment::setOSMousePos() const { SDL_WarpMouseInWindow(m_window, m_vLastAbsMousePos.x, m_vLastAbsMousePos.y); }
-void Environment::setOSMousePos(Vector2 pos) const { SDL_WarpMouseInWindow(m_window, pos.x, pos.y); }
+void Environment::setOSMousePos(Vector2 pos) const {
+    SDL_WarpMouseInWindow(m_window, pos.x, pos.y);
+    if constexpr(Env::cfg(OS::LINUX)) {
+        if((mouse && !mouse->isRawInput()) && m_bIsX11) {
+            static std::array<SDL_Event, 3> BSEventQ{};
+            SDL_PumpEvents();
+            int count = SDL_PeepEvents(BSEventQ.data(), 3, SDL_GETEVENT, SDL_EVENT_MOUSE_MOTION, SDL_EVENT_MOUSE_MOTION);
+            for(int i = 0; i < count; ++i) {
+                if(static_cast<int>(BSEventQ[i].motion.x) == static_cast<int>(pos.x) &&
+                   static_cast<int>(BSEventQ[i].motion.y) == static_cast<int>(pos.y)) {
+                    // throw away the synthetic motion event
+                    if(cv::debug_mouse.getBool()) {
+                        debugLog("found bullshit event as event num {}\n", i);
+                    }
+                } else {
+                    // otherwise put it back in the queue so we don't lose any real motion data (SDL_GETEVENT removes from the queue)
+                    SDL_PushEvent(&BSEventQ[i]);
+                }
+            }
+        }
+    }
+}
 
 void Environment::initCursors() {
     m_mCursorIcons = {
