@@ -110,16 +110,15 @@ void Mouse::update() {
         this->vDelta.zero();
         this->vRawDelta.zero();
     } else {
-        // center the OS cursor if it's close to the screen edges, for non-raw input with sensitivity <1.0
+        // center the OS cursor if it's close to the screen edges, for non-raw input
         // the reason for trying hard to avoid env->setMousePos is because setting the OS cursor position can take a
         // long time so we try to use the virtual cursor position as much as possible and only update the OS cursor when
         // it's going to go somewhere we don't want
-        const bool clipped = env->isCursorClipped();
+        const bool clipped{env->isCursorClipped()};
         if(this->bNeedsLock) {
             const McRect clipRect{clipped ? env->getCursorClip() : engine->getScreenRect()};
             const Vector2 center{clipRect.getCenter()};
-            const Vector2 realPosNudgedOut{Vector2{env->getMousePos()}.nudge(center, 10.0f)};
-            if(!clipRect.contains(realPosNudgedOut)) {
+            if(!clipRect.contains(env->getMousePos(), 10.f)) {
                 if(clipped)
                     env->setMousePos(center);
                 else if(!env->isCursorVisible())  // FIXME: this is crazy. for windowed mode, need to "pop out" the OS
@@ -127,7 +126,7 @@ void Mouse::update() {
                     env->setMousePos(Vector2{this->vPosWithoutOffsets}.nudge(center, 0.1f));
             }
         } else if(!clipped && !engine->getScreenRect().contains(this->getRealPos())) {
-            const Vector2 testPoint = this->getRealPos() + env->getWindowPos();
+            const Vector2 testPoint{this->getRealPos() + env->getWindowPos()};
             if(env->isPointValid(testPoint)) {
                 // if we aren't clipping the cursor, we need to manually check to see if the virtual cursor left the
                 // screen
@@ -156,17 +155,18 @@ void Mouse::onMotion(Vector2 rel, Vector2 abs, bool preTransformed) {
     const bool osCursorVisible = (env->isCursorVisible() || !env->isCursorInWindow() || !engine->hasFocus());
 
     // rawinput has sensitivity pre-applied, otherwise we have to multiply the sensitivity here
-    if((!preTransformed && !osCursorVisible) && (this->fSensitivity < 0.999f || this->fSensitivity > 1.001f)) {
-        if(this->fSensitivity < 0.995f) {
-            // need to lock the OS cursor to the center of the screen if rawinput is disabled, otherwise it can exit the
-            // screen rect before the virtual cursor does
-            // don't do it here because we don't want the event loop to make
-            // more external calls than necessary, just set a flag to do it on the engine update loop
-            this->bNeedsLock = true;
+    if(!preTransformed && !osCursorVisible) {
+        // need to lock the OS cursor to the center of the screen if rawinput is disabled, otherwise it can exit the
+        // screen rect before the virtual cursor does
+        // don't do it here because we don't want the event loop to make
+        // more external calls than necessary, just set a flag to do it on the engine update loop
+        this->bNeedsLock = true;
+        if(this->fSensitivity < 0.999f || this->fSensitivity > 1.001f) {
+            newRel *= this->fSensitivity;
         }
-        newRel *= this->fSensitivity;
-        if(newRel.length() > 50.0f)  // don't allow obviously bogus values
+        if(newRel.length() > 50.0f) {  // don't allow obviously bogus values
             newRel.zero();
+        }
         newAbs = this->vPosWithoutOffsets + newRel;
     }
 
