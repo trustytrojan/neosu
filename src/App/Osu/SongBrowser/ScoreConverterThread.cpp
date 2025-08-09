@@ -27,8 +27,6 @@ static void update_ppv2(const FinishedScore& score) {
     auto diff = db->getBeatmapDifficulty(score.beatmap_hash);
     if(!diff) return;
 
-    debugLog("Updating ppv2 for score {}\n", score.unixTimestamp);
-
     f32 AR = diff->getAR();
     if(score.mods.ar_override != -1.f) AR = score.mods.ar_override;
     f32 CS = diff->getCS();

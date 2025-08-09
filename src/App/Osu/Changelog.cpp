@@ -28,7 +28,7 @@ Changelog::Changelog() : ScreenBackable() {
     std::vector<CHANGELOG> changelogs;
 
     CHANGELOG v40_00;
-    v40_00.title = "40.00";
+    v40_00.title = "40.00 (2025-08-09)";
     v40_00.changes = {
         R"(- Added chat ticker)",
         R"(- Added chat/screenshot/status notifications)",

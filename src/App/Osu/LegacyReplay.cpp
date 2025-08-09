@@ -199,6 +199,16 @@ Info from_bytes(u8* data, int s_data) {
     info.frames = get_frames(replay_data, replay_size);
     delete[] replay_data;
 
+    // https://github.com/ppy/osu/blob/a0e300c3/osu.Game/Scoring/Legacy/LegacyScoreDecoder.cs
+    if(info.osu_version >= 20140721) {
+        info.bancho_score_id = proto::read<i64>(&replay);
+    } else if(info.osu_version >= 20121008) {
+        info.bancho_score_id = proto::read<i32>(&replay);
+    }
+
+    // XXX: handle lazer replay data (versions 30000001 to 30000016)
+    // XXX: handle neosu replay data (versions 40000000+?)
+
     return info;
 }
 

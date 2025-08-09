@@ -53,6 +53,7 @@ struct Info {
     UString life_bar_graph;
     i64 timestamp;
     std::vector<Frame> frames;
+    i64 bancho_score_id = 0;
 };
 
 BEATMAP_VALUES getBeatmapValuesForModsLegacy(u32 modsLegacy, float legacyAR, float legacyCS, float legacyOD,
