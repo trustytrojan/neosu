@@ -97,7 +97,7 @@ void Mouse::raw_update_tick() {
         }
 
         this->onMotion(cb_rel, abs, true);
-        env->updateCachedMousePos(cb_rel, abs + this->vOffset);
+        env->updateCachedMousePos(cb_rel, abs);
     }
 }
 

@@ -796,6 +796,11 @@ void Environment::notifyWantRawInput(bool raw) {
     // with rawinput, we handle the movement data in Mouse::rawMotionCB instead of through the event queue
     SDL_SetEventEnabled(SDL_EVENT_MOUSE_MOTION, !raw);
 
+    // SetRelativeMouseTransform can only be called with relative mode disabled, so disable it before setting the transform
+    // (and re-enable it after, if we want raw input)
+    // see SDL_mouse.c:1177
+    SDL_SetWindowRelativeMouseMode(m_window, false);
+
     if(raw) {
         assert(mouse && "mouse was not initialized yet (or was destroyed already)");
         // when enabling, we need to make sure we start from the virtual cursor position
@@ -804,14 +809,15 @@ void Environment::notifyWantRawInput(bool raw) {
         if(isCursorClipped()) {
             SDL_SetWindowMouseRect(m_window, &clipRect);
         }
+
         SDL_SetRelativeMouseTransform(Mouse::raw_motion_cb, (void *)mouse->getMotionCallbackData());
+        SDL_SetWindowRelativeMouseMode(m_window, true);
     } else {
         // let the mouse handler clip the cursor as it sees fit
         // this is because SDL has no equivalent of sensTransformFunc for non-relative mouse mode
         SDL_SetWindowMouseRect(m_window, nullptr);
         SDL_SetRelativeMouseTransform(nullptr, nullptr);
     }
-    SDL_SetWindowRelativeMouseMode(m_window, raw);
 }
 
 void Environment::setCursorVisible(bool visible) {
