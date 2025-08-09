@@ -16,10 +16,16 @@ TooltipOverlay::TooltipOverlay() : OsuScreen() {
 TooltipOverlay::~TooltipOverlay() {}
 
 void TooltipOverlay::draw() {
+    if(this->bDelayFadeout) {
+        this->bDelayFadeout = false;
+    } else if(this->fAnim > 0.f) {
+        anim->moveLinear(&this->fAnim, 0.f, (this->fAnim) * cv::tooltip_anim_duration.getFloat(), true);
+    }
+
     if(this->fAnim > 0.0f) {
         const float dpiScale = Osu::getUIScale();
 
-        McFont *font = resourceManager->getFont("FONT_DEFAULT");
+        McFont* font = resourceManager->getFont("FONT_DEFAULT");
 
         const Vector2 offset = Vector2(10, 10) * dpiScale;
         const int margin = 5 * dpiScale;
@@ -31,7 +37,8 @@ void TooltipOverlay::draw() {
             float lineWidth = font->getStringWidth(line);
             if(lineWidth > width) width = lineWidth;
         }
-        const int height = font->getHeight() * this->lines.size() + lineSpacing * (this->lines.size() - 1) + 3 * dpiScale;
+        const int height =
+            font->getHeight() * this->lines.size() + lineSpacing * (this->lines.size() - 1) + 3 * dpiScale;
 
         Vector2 cursorPos = mouse->getPos();
 
@@ -71,13 +78,6 @@ void TooltipOverlay::draw() {
         g->setAlpha(alpha);
         g->drawRect((int)cursorPos.x + offset.x, (int)cursorPos.y + offset.y, width + 2 * margin, height + 2 * margin);
     }
-}
-
-void TooltipOverlay::mouse_update(bool * /*propagate_clicks*/) {
-    if(this->bDelayFadeout)
-        this->bDelayFadeout = false;
-    else if(this->fAnim > 0.0f)
-        anim->moveLinear(&this->fAnim, 0.0f, (this->fAnim)*cv::tooltip_anim_duration.getFloat(), true);
 }
 
 void TooltipOverlay::begin() {

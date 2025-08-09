@@ -1541,7 +1541,6 @@ void OptionsMenu::mouse_update(bool *propagate_clicks) {
     cv::mp_password_temporary.setValue(this->passwordTextbox->getText());
     cv::mp_server.setValue(this->serverTextbox->getText());
     if(this->nameTextbox->hitEnter()) {
-        cv::name.setValue(this->nameTextbox->getText());
         this->nameTextbox->stealFocus();
         this->passwordTextbox->focus();
     }

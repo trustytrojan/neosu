@@ -71,7 +71,6 @@ class Database {
     void deleteScore(MD5Hash beatmapMD5Hash, u64 scoreUnixTimestamp);
     void sortScoresInPlace(std::vector<FinishedScore> &scores);
     void sortScores(MD5Hash beatmapMD5Hash);
-    void forceScoreUpdateOnNextCalculatePlayerStats() { this->bDidScoresChangeForStats = true; }
 
     std::vector<UString> getPlayerNamesWithPPScores();
     std::vector<UString> getPlayerNamesWithScoresForUserSwitcher();

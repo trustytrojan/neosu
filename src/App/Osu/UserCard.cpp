@@ -223,9 +223,16 @@ void UserCard::mouse_update(bool *propagate_clicks) {
         static i64 total_score = 0;
         if(total_score != my->total_score) {
             total_score = my->total_score;
-            this->updateUserStats();
         }
+    } else {
+        this->sText = cv::name.getString().c_str();
     }
+
+    // calculatePlayerStats() does nothing unless username changed or scores changed
+    // so this should not be an expensive operation
+    // calling this on each update loop allows us to just set db->bDidScoresChangeForStats = true
+    // to recalculate local user stats
+    this->updateUserStats();
 
     CBaseUIButton::mouse_update(propagate_clicks);
 }
@@ -285,11 +292,7 @@ void UserCard::setID(u32 new_id) {
 
     this->user_id = new_id;
     if(this->user_id > 0) {
-        UserInfo *my = BANCHO::User::get_user_info(this->user_id, true);
         this->avatar = new UIAvatar(this->user_id, 0.f, 0.f, 0.f, 0.f);
         this->avatar->on_screen = true;
-        this->sText = my->name;
-    } else {
-        this->sText = cv::name.getString().c_str();
     }
 }

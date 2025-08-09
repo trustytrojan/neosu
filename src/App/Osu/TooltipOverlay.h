@@ -8,7 +8,6 @@ class TooltipOverlay : public OsuScreen {
     ~TooltipOverlay() override;
 
     void draw() override;
-    void mouse_update(bool *propagate_clicks) override;
 
     void begin();
     void addLine(const UString& text);
