@@ -321,8 +321,10 @@ std::string Environment::normalizeDirectory(std::string dirPath) noexcept {
     if(dirPath.empty()) return dirPath;
 
     // remove drive letter prefix if switching to linux
-    if constexpr(!Env::cfg(OS::WINDOWS) && (dirPath.find(':') == 1)) {
-        dirPath.erase(0, 2);
+    if constexpr(!Env::cfg(OS::WINDOWS)) {
+        if(dirPath.find(':') == 1) {
+            dirPath.erase(0, 2);
+        }
     }
 
     while(dirPath.ends_with("\\") || dirPath.ends_with("/")) {
