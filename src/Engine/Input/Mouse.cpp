@@ -118,7 +118,7 @@ void Mouse::update() {
         if(this->bNeedsLock) {
             const McRect clipRect{clipped ? env->getCursorClip() : engine->getScreenRect()};
             const Vector2 center{clipRect.getCenter()};
-            if(!clipRect.contains(env->getMousePos(), 10.f)) {
+            if(!clipRect.contains(env->getMousePos(), -10.f)) {
                 if(clipped)
                     env->setMousePos(center);
                 else if(!env->isCursorVisible())  // FIXME: this is crazy. for windowed mode, need to "pop out" the OS
@@ -165,6 +165,8 @@ void Mouse::onMotion(Vector2 rel, Vector2 abs, bool preTransformed) {
             newRel *= this->fSensitivity;
         }
         if(newRel.length() > 50.0f) {  // don't allow obviously bogus values
+            // debugLog("got bogus relative motion with length {} (new pos would be {},{})\n", newRel.length(),
+            //          Vector2{this->vPosWithoutOffsets + newRel}.x, Vector2{this->vPosWithoutOffsets + newRel}.y);
             newRel.zero();
         }
         newAbs = this->vPosWithoutOffsets + newRel;
