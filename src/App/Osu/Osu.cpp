@@ -1989,7 +1989,8 @@ void Osu::updateConfineCursor() {
                          (!effectivelyFS && cv::confine_cursor_windowed.getBool()) ||                   //
                          (this->isInPlayMode() && !(this->pauseMenu && this->pauseMenu->isVisible()));  //
 
-    bool force_no_confine = cv::confine_cursor_never.getBool() ||                                       //
+    bool force_no_confine = !engine->hasFocus() ||                                                       //
+                            cv::confine_cursor_never.getBool() ||                                       //
                             this->getModAuto() ||                                                       //
                             this->getModAutopilot() ||                                                  //
                             (this->getSelectedBeatmap() && this->getSelectedBeatmap()->is_watching) ||  //

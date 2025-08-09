@@ -17,7 +17,7 @@ class Mouse final : public InputDevice {
    private:
     // helper struct for the rawMotionCB, per-mouse
     struct MotionCBData {
-        MotionCBData(Mouse *mouse_instance) : mouse_ptr(mouse_instance) {}
+        MotionCBData() = default;
         ~MotionCBData() = default;
 
         MotionCBData &operator=(const MotionCBData &) = delete;
@@ -27,25 +27,28 @@ class Mouse final : public InputDevice {
 
         // accumulate
         // += to handle overflowing/wrapping the array, which could happen if there's a lagspike
-        inline void add(float *x, float *y) { this->accum_array[this->count++] += Vector2{*x, *y}; }
+        inline void add(float *x, float *y) {
+            this->count++;
+            this->accumulated_motion += Vector2d{*x, *y};
+        }
 
         // release (during Mouse::update())
         Vector2 consume();
 
         // get
-        [[nodiscard]] inline const float &get_current_sens() const {
-            return static_cast<const float &>(this->mouse_ptr->fSensitivity);
-        }
+        [[nodiscard]] inline double get_current_sens() const { return this->current_sensitivity; }
+
+        // set (by Mouse)
+        inline void set_current_sens(float sens) { this->current_sensitivity = sens; }
 
         // debugging
-        [[nodiscard]] inline u8 getCount() const { return this->count; }
+        [[nodiscard]] inline u16 get_count() const { return this->count; }
 
        private:
-        // this is an array in order to eventually support saving full timestamps and separate device IDs per motion
-        // event, but this is currently not implemented
-        std::array<Vector2, UINT8_MAX> accum_array{};
-        Mouse *mouse_ptr;
-        u8 count{0};  // event counter until the data has been consumed
+        // use doubles to maintain precision until the final cast back to floats (avoid drift)
+        Vector2d accumulated_motion{};
+        double current_sensitivity{1.};
+        u16 count{0};  // event counter until the data has been consumed
     };
 
    public:

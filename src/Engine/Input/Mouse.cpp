@@ -7,8 +7,9 @@
 #include "ResourceManager.h"
 
 Mouse::Mouse()
-    : InputDevice(), vPos(env->getMousePos()), vPosWithoutOffsets(this->vPos), vActualPos(this->vPos), mcbdata(this) {
+    : InputDevice(), vPos(env->getMousePos()), vPosWithoutOffsets(this->vPos), vActualPos(this->vPos), mcbdata() {
     this->fSensitivity = cv::mouse_sensitivity.getFloat();
+    this->mcbdata.set_current_sens(this->fSensitivity);
     this->bIsRawInput = cv::mouse_raw_input.getBool();
     cv::mouse_raw_input.setCallback(SA::MakeDelegate<&Mouse::onRawInputChanged>(this));
     cv::mouse_sensitivity.setCallback(SA::MakeDelegate<&Mouse::onSensitivityChanged>(this));
@@ -288,45 +289,45 @@ void Mouse::onRawInputChanged(float newval) {
                                                  // not take effect immediately)
 }
 
-void Mouse::onSensitivityChanged(float newSens) { this->fSensitivity = newSens; }
+void Mouse::onSensitivityChanged(float newSens) {
+    this->fSensitivity = newSens;
+    this->mcbdata.set_current_sens(this->fSensitivity);
+}
 
 // release (during Mouse::update())
 Vector2 Mouse::MotionCBData::consume() {
-    Vector2d ret;  // use doubles to maintain precision until the final cast back to floats (avoid drift)
-    for(u32 i = 0; auto &motion_data : this->accum_array) {
-        if(i >= this->count) break;
-        ret += motion_data;
-        i++;
-    }
+    if(this->count < 1) return {};
 
-    // reset
-    this->count = 0;
-    this->accum_array = {};
+    Vector2d ret{this->accumulated_motion};
 
     // multiply to get the final delta over all frames
-    ret *= get_current_sens();
+    ret *= this->get_current_sens();
+
+    // reset
+    this->accumulated_motion.zero();
+    this->count = 0;
 
     return ret;
 }
 
 void Mouse::raw_motion_cb(void *userdata, uint64_t ts, SDL_Window *window, uint32_t mouseid, float *x, float *y) {
     // we don't care about non-raw motion (which is mouseid 0), or motion for other windows/with no window
-    if(mouseid == 0 || !window || !(window == env->m_window)) {
+    if(!userdata || mouseid == 0 || !window || !(window == env->m_window)) {
         return;
     }
 
-    auto *mouse_data{static_cast<MotionCBData *>(userdata)};
+    auto *mouse_data{reinterpret_cast<MotionCBData *>(userdata)};
 
     if(cv::debug_mouse.getBool()) {
-        debugLog("got movement: accum_count {} ts {} mouseid {} x {} y {}\n", mouse_data->getCount(), ts, mouseid, *x,
-                 *y);
+        debugLog("got movement: sens {} accum_count {} ts {} mouseid {} x {} y {}\n", mouse_data->get_current_sens(),
+                 mouse_data->get_count(), ts, mouseid, *x, *y);
     }
 
     // add unadulterated data to the accumulator, then multiply it when consuming
     mouse_data->add(x, y);
 
     // transform the data within SDL internally as well
-    const float sensitivity = mouse_data->get_current_sens();
+    const double sensitivity = mouse_data->get_current_sens();
     *x *= sensitivity;
     *y *= sensitivity;
 }

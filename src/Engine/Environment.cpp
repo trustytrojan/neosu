@@ -845,6 +845,8 @@ void Environment::notifyWantRawInput(bool raw) {
     // transform (and re-enable it after, if we want raw input) see SDL_mouse.c:1177
     SDL_SetWindowRelativeMouseMode(m_window, false);
 
+    syncWindow();
+
     if(raw) {
         assert(mouse && "mouse was not initialized yet (or was destroyed already)");
         // when enabling, we need to make sure we start from the virtual cursor position
