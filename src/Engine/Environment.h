@@ -30,6 +30,8 @@ class Engine;
 typedef struct SDL_Window SDL_Window;
 typedef struct SDL_Cursor SDL_Cursor;
 typedef struct SDL_Environment SDL_Environment;
+typedef struct SDL_Rect SDL_Rect;
+typedef uint32_t SDL_DisplayID;
 
 class Environment;
 extern Environment *env;
@@ -140,8 +142,8 @@ class Environment {
     void disableFullscreen();
     void syncWindow();
     void setWindowTitle(const UString &title);
-    void setWindowPos(int x, int y);
-    void setWindowSize(int width, int height);
+    bool setWindowPos(int x, int y);
+    bool setWindowSize(int width, int height);
     void setWindowResizable(bool resizable);
     void setFullscreenWindowedBorderless(bool fullscreenWindowedBorderless);
     void setMonitor(int monitor);
@@ -169,7 +171,7 @@ class Environment {
     [[nodiscard]] inline const bool &isCursorVisible() const { return m_bCursorVisible; }
     [[nodiscard]] inline const bool &isCursorClipped() const { return m_bCursorClipped; }
     [[nodiscard]] inline const Vector2 &getMousePos() const { return m_vLastAbsMousePos; }
-    [[nodiscard]] inline const McRect &getCursorClip() const { return m_cursorClip; }
+    [[nodiscard]] inline const McRect &getCursorClip() const { return m_cursorClipRect; }
     [[nodiscard]] inline const CURSORTYPE &getCursor() const { return m_cursorType; }
     void setCursor(CURSORTYPE cur);
     void setCursorVisible(bool visible);
@@ -247,7 +249,7 @@ class Environment {
     // monitors
     void initMonitors(bool force = false);
     std::map<unsigned int, McRect> m_mMonitors;
-    Vector2 m_vDesktopDisplayBounds;
+    McRect m_fullDesktopBoundingBox;
     float m_fDisplayHz;
     float m_fDisplayHzSecs;
 
@@ -262,12 +264,16 @@ class Environment {
         if(oldValue != newValue) setMonitor(static_cast<int>(newValue));
     }
 
+    // save the last position obtained from SDL so that we can return something sensible if the SDL API fails
+    mutable Vector2 m_vLastKnownWindowSize;
+    mutable Vector2 m_vLastKnownWindowPos;
+
     // mouse
     bool m_bIsCursorInsideWindow;
     bool m_bAllowCursorVisibilityChanges;
     bool m_bCursorClipped;
     bool m_bCursorVisible;
-    McRect m_cursorClip;
+    McRect m_cursorClipRect;
     CURSORTYPE m_cursorType;
     std::map<CURSORTYPE, SDL_Cursor *> m_mCursorIcons;
 
@@ -294,6 +300,13 @@ class Environment {
 
     // internal path conversion helper, SDL_URLOpen needs a URL-encoded URI on Unix (because it goes to xdg-open)
     [[nodiscard]] static std::string filesystemPathToURI(const std::filesystem::path &path) noexcept;
+
+    // convenience conversion utilities
+    static SDL_Rect McRectToSDLRect(const McRect &mcrect);
+    static McRect SDLRectToMcRect(const SDL_Rect &sdlrect);
+
+    // sdldisp = 0 to use the display the window is currently on
+    Vector2 SDLDisplayIDToSizeVec(SDL_DisplayID sdldisp) const;
 };
 
 #endif

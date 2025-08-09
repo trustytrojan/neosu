@@ -16,7 +16,8 @@ class McRect {
         Vector2 max = this->vMin + this->vSize;
         return glm::all(glm::greaterThanEqual(static_cast<const glm::vec2 &>(point + lenience),
                                               static_cast<const glm::vec2 &>(this->vMin))) &&
-               glm::all(glm::lessThanEqual(static_cast<const glm::vec2 &>(point - lenience), static_cast<const glm::vec2 &>(max)));
+               glm::all(glm::lessThanEqual(static_cast<const glm::vec2 &>(point - lenience),
+                                           static_cast<const glm::vec2 &>(max)));
     }
 
     [[nodiscard]] McRect intersect(const McRect &rect) const;
@@ -55,6 +56,8 @@ class McRect {
     inline void setSize(const Vector2 &size) { this->vSize = size; }
     inline void setWidth(float width) { this->vSize.x = width; }
     inline void setHeight(float height) { this->vSize.y = height; }
+
+    bool operator==(const McRect &rhs) const { return (this->vMin == rhs.vMin) && (this->vSize == rhs.vSize); }
 
    private:
     constexpr void set(float x, float y, float width, float height, bool isCentered = false) {

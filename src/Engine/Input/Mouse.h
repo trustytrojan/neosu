@@ -15,7 +15,7 @@ class Mouse final : public InputDevice {
     static void raw_motion_cb(void *userdata, uint64_t ts, SDL_Window *window, uint32_t mouseid, float *x, float *y);
 
    private:
-    // helper struct for the rawMotionCB, per-mouse (like we're ever gonna add support for more...)
+    // helper struct for the rawMotionCB, per-mouse
     struct MotionCBData {
         MotionCBData(Mouse *mouse_instance) : mouse_ptr(mouse_instance) {}
         ~MotionCBData() = default;
@@ -27,7 +27,7 @@ class Mouse final : public InputDevice {
 
         // accumulate
         // += to handle overflowing/wrapping the array, which could happen if there's a lagspike
-        inline void add(float *x, float *y) { this->accum_vec[this->count++] += Vector2{*x, *y}; }
+        inline void add(float *x, float *y) { this->accum_array[this->count++] += Vector2{*x, *y}; }
 
         // release (during Mouse::update())
         Vector2 consume();
@@ -41,7 +41,9 @@ class Mouse final : public InputDevice {
         [[nodiscard]] inline u8 getCount() const { return this->count; }
 
        private:
-        std::array<Vector2, UINT8_MAX> accum_vec{};
+        // this is an array in order to eventually support saving full timestamps and separate device IDs per motion
+        // event, but this is currently not implemented
+        std::array<Vector2, UINT8_MAX> accum_array{};
         Mouse *mouse_ptr;
         u8 count{0};  // event counter until the data has been consumed
     };

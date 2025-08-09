@@ -5,7 +5,6 @@
 #include "Engine.h"
 #include "Environment.h"
 #include "ResourceManager.h"
-#include "SDL3/SDL_mouse.h"
 
 Mouse::Mouse()
     : InputDevice(), vPos(env->getMousePos()), vPosWithoutOffsets(this->vPos), vActualPos(this->vPos), mcbdata(this) {
@@ -294,7 +293,7 @@ void Mouse::onSensitivityChanged(float newSens) { this->fSensitivity = newSens; 
 // release (during Mouse::update())
 Vector2 Mouse::MotionCBData::consume() {
     Vector2d ret;  // use doubles to maintain precision until the final cast back to floats (avoid drift)
-    for(u32 i = 0; auto &motion_data : this->accum_vec) {
+    for(u32 i = 0; auto &motion_data : this->accum_array) {
         if(i >= this->count) break;
         ret += motion_data;
         i++;
@@ -302,7 +301,7 @@ Vector2 Mouse::MotionCBData::consume() {
 
     // reset
     this->count = 0;
-    this->accum_vec = {};
+    this->accum_array = {};
 
     // multiply to get the final delta over all frames
     ret *= get_current_sens();

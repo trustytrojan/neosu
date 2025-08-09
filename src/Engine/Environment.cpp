@@ -35,10 +35,10 @@
 #endif
 
 Environment *env = nullptr;
-
-bool Environment::s_bIsATTY = false;
 bool Environment::s_bIsWine = false;
-SDL_Environment *Environment::s_sdlenv = nullptr;
+
+SDL_Environment *Environment::s_sdlenv = SDL_GetEnvironment();
+bool Environment::s_bIsATTY = (isatty(fileno(stdout)) != 0);
 
 // convar callback
 void Environment::setProcessPriority(float newPrio) {
@@ -73,12 +73,9 @@ Environment::Environment(int argc, char *argv[]) {
     // simple vector representation of the whole cmdline including the program name (as the first element)
     m_vCmdLine = std::vector<UString>(argv, argv + argc);
 
-    s_bIsATTY = ::isatty(fileno(stdout)) != 0;
 #ifdef MCENGINE_PLATFORM_WINDOWS
     s_bIsWine = !!GetProcAddress(GetModuleHandle(TEXT("ntdll.dll")), "wine_get_version");
 #endif
-
-    s_sdlenv = SDL_GetEnvironment();
 
     m_engine = nullptr;  // will be initialized by the mainloop once setup is complete
     m_window = nullptr;
@@ -96,7 +93,7 @@ Environment::Environment(int argc, char *argv[]) {
 
     m_bEnvDebug = false;
 
-    m_bResizable = false;
+    m_bResizable = false;  // window is created non-resizable
     m_bFullscreen = false;
 
     m_sUsername = {};
@@ -120,7 +117,10 @@ Environment::Environment(int argc, char *argv[]) {
     // lazy init
     m_mMonitors = {};
     // lazy init (with initMonitors)
-    m_vDesktopDisplayBounds = Vector2{};
+    m_fullDesktopBoundingBox = McRect{};
+
+    m_vLastKnownWindowPos = Vector2{};
+    m_vLastKnownWindowSize = Vector2{320, 240};
 
     // setup callbacks
     cv::debug_env.setCallback(SA::MakeDelegate<&Environment::onLogLevelChange>(this));
@@ -413,9 +413,6 @@ const std::string &Environment::getPathToSelf(const char *argv0) {
 }
 
 std::string Environment::getEnvVariable(const std::string &varToQuery) noexcept {
-    if(!s_sdlenv) {
-        s_sdlenv = SDL_GetEnvironment();
-    }
     const char *varVal = nullptr;
     if(s_sdlenv && !varToQuery.empty()) {
         varVal = SDL_GetEnvironmentVariable(s_sdlenv, varToQuery.c_str());
@@ -427,9 +424,6 @@ std::string Environment::getEnvVariable(const std::string &varToQuery) noexcept 
 }
 
 bool Environment::setEnvVariable(const std::string &varToSet, const std::string &varValue, bool overwrite) noexcept {
-    if(!s_sdlenv) {
-        s_sdlenv = SDL_GetEnvironment();
-    }
     if(s_sdlenv && !varToSet.empty()) {
         return SDL_SetEnvironmentVariable(s_sdlenv, varToSet.c_str(), varValue.empty() ? "" : varValue.c_str(),
                                           overwrite);
@@ -438,9 +432,6 @@ bool Environment::setEnvVariable(const std::string &varToSet, const std::string 
 }
 
 bool Environment::unsetEnvVariable(const std::string &varToUnset) noexcept {
-    if(!s_sdlenv) {
-        s_sdlenv = SDL_GetEnvironment();
-    }
     if(s_sdlenv && !varToUnset.empty()) {
         return SDL_UnsetEnvironmentVariable(s_sdlenv, varToUnset.c_str());
     }
@@ -582,23 +573,36 @@ void Environment::openFileBrowser(const std::string &initialpath) noexcept {
 }
 
 void Environment::focus() {
-    SDL_RaiseWindow(m_window);
+    if(!SDL_RaiseWindow(m_window)) {
+        debugLog("Failed to focus window: {:s}\n", SDL_GetError());
+        return;
+    }
     m_bHasFocus = true;
 }
 
 void Environment::center() {
     syncWindow();
     const SDL_DisplayID di = SDL_GetDisplayForWindow(m_window);
-    SDL_SetWindowPosition(m_window, SDL_WINDOWPOS_CENTERED_DISPLAY(di), SDL_WINDOWPOS_CENTERED_DISPLAY(di));
+    if(!di) {
+        debugLog("Failed to obtain SDL_DisplayID for window: {:s}\n", SDL_GetError());
+        return;
+    }
+    setWindowPos(SDL_WINDOWPOS_CENTERED_DISPLAY(di), SDL_WINDOWPOS_CENTERED_DISPLAY(di));
 }
 
 void Environment::minimize() {
-    SDL_MinimizeWindow(m_window);
+    if(!SDL_MinimizeWindow(m_window)) {
+        debugLog("Failed to minimize window: {:s}\n", SDL_GetError());
+        return;
+    }
     m_bHasFocus = false;
 }
 
 void Environment::maximize() {
-    SDL_MaximizeWindow(m_window);
+    if(!SDL_MaximizeWindow(m_window)) {
+        debugLog("Failed to maximize window: {:s}\n", SDL_GetError());
+        return;
+    }
     m_bHasFocus = true;
 }
 
@@ -611,7 +615,7 @@ void Environment::enableFullscreen() {
         return;
     }
 
-    this->m_bFullscreen = true;
+    m_bFullscreen = true;
     cv::fullscreen.setValue(m_bFullscreen, false);
     syncWindow();
 }
@@ -622,7 +626,7 @@ void Environment::disableFullscreen() {
         return;
     }
 
-    this->m_bFullscreen = false;
+    m_bFullscreen = false;
     cv::fullscreen.setValue(m_bFullscreen, false);
     syncWindow();
 }
@@ -642,12 +646,18 @@ void Environment::syncWindow() {
     if(m_window) SDL_SyncWindow(m_window);
 }
 
-void Environment::setWindowPos(int x, int y) { SDL_SetWindowPosition(m_window, x, y); }
+bool Environment::setWindowPos(int x, int y) { return SDL_SetWindowPosition(m_window, x, y); }
 
-void Environment::setWindowSize(int width, int height) { SDL_SetWindowSize(m_window, width, height); }
+bool Environment::setWindowSize(int width, int height) { return SDL_SetWindowSize(m_window, width, height); }
 
+// NOTE: the SDL header states:
+// "You can't change the resizable state of a fullscreen window."
 void Environment::setWindowResizable(bool resizable) {
-    SDL_SetWindowResizable(m_window, resizable);
+    if(!SDL_SetWindowResizable(m_window, resizable)) {
+        debugLog("Failed to set window {:s} (currently {:s}): {:s}\n", resizable ? "resizable" : "non-resizable",
+                 m_bResizable ? "resizable" : "non-resizable", SDL_GetError());
+        return;
+    }
     m_bResizable = resizable;
 }
 
@@ -663,13 +673,11 @@ void Environment::setMonitor(int monitor) {
         if(m_bFullscreen || m_bFullscreenWindowedBorderless) {
             disableFullscreen();
             syncWindow();
-            success = SDL_SetWindowPosition(m_window, SDL_WINDOWPOS_CENTERED_DISPLAY(monitor),
-                                            SDL_WINDOWPOS_CENTERED_DISPLAY(monitor));
+            success = setWindowPos(SDL_WINDOWPOS_CENTERED_DISPLAY(monitor), SDL_WINDOWPOS_CENTERED_DISPLAY(monitor));
             syncWindow();
             enableFullscreen();
         } else
-            success = SDL_SetWindowPosition(m_window, SDL_WINDOWPOS_CENTERED_DISPLAY(monitor),
-                                            SDL_WINDOWPOS_CENTERED_DISPLAY(monitor));
+            success = setWindowPos(SDL_WINDOWPOS_CENTERED_DISPLAY(monitor), SDL_WINDOWPOS_CENTERED_DISPLAY(monitor));
 
         if(!success)
             debugLog("WARNING: failed to setMonitor({:d}), centering instead. SDL error: {:s}\n", monitor,
@@ -721,17 +729,25 @@ HWND Environment::getHwnd() const {
 }
 
 Vector2 Environment::getWindowPos() const {
-    int x = 0;
-    int y = 0;
-    SDL_GetWindowPosition(m_window, &x, &y);
-    return {static_cast<float>(x), static_cast<float>(y)};
+    int x{0}, y{0};
+    if(!SDL_GetWindowPosition(m_window, &x, &y)) {
+        debugLog("Failed to get window position (returning cached {},{}): {:s}\n", m_vLastKnownWindowPos.x,
+                 m_vLastKnownWindowPos.y, SDL_GetError());
+    } else {
+        m_vLastKnownWindowPos = Vector2{static_cast<float>(x), static_cast<float>(y)};
+    }
+    return m_vLastKnownWindowPos;
 }
 
 Vector2 Environment::getWindowSize() const {
-    int width = 100;
-    int height = 100;
-    SDL_GetWindowSize(m_window, &width, &height);
-    return {static_cast<float>(width), static_cast<float>(height)};
+    int width{320}, height{240};
+    if(!SDL_GetWindowSize(m_window, &width, &height)) {
+        debugLog("Failed to get window size (returning cached {},{}): {:s}\n", m_vLastKnownWindowSize.x,
+                 m_vLastKnownWindowSize.y, SDL_GetError());
+    } else {
+        m_vLastKnownWindowSize = Vector2{static_cast<float>(width), static_cast<float>(height)};
+    }
+    return m_vLastKnownWindowSize;
 }
 
 const std::map<unsigned int, McRect> &Environment::getMonitors() {
@@ -745,21 +761,21 @@ int Environment::getMonitor() const {
     return display == 0 ? -1 : display;  // 0 == invalid, according to SDL
 }
 
-Vector2 Environment::getNativeScreenSize() const {
-    SDL_DisplayID di = SDL_GetDisplayForWindow(m_window);
-    return {static_cast<float>(SDL_GetDesktopDisplayMode(di)->w), static_cast<float>(SDL_GetDesktopDisplayMode(di)->h)};
-}
+Vector2 Environment::getNativeScreenSize() const { return SDLDisplayIDToSizeVec(0); }
 
-McRect Environment::getDesktopRect() const { return {{0, 0}, getNativeScreenSize()}; }
+McRect Environment::getDesktopRect() const { return {{}, getNativeScreenSize()}; }
 
 McRect Environment::getWindowRect() const { return {getWindowPos(), getWindowSize()}; }
 
 bool Environment::isPointValid(Vector2 point) {  // whether an x,y coordinate lands on an actual display
-    if(m_vDesktopDisplayBounds.length() == 0) initMonitors();
-    const bool withinBounds = point < m_vDesktopDisplayBounds;
-    if(!withinBounds) {
+    if(m_mMonitors.size() < 1) initMonitors();
+    // check for the trivial case first
+    const bool withinMinMaxBounds = m_fullDesktopBoundingBox.contains(point);
+    if(!withinMinMaxBounds) {
         return false;
     }
+    // if it's within the full min/max bounds, make sure it actually lands inside of a display rect within the
+    // coordinate space (not in some empty space between/around, like with different monitor orientations)
     for(const auto &[_, dp] : m_mMonitors) {
         if(dp.contains(point)) return true;
     }
@@ -781,24 +797,22 @@ void Environment::setCursor(CURSORTYPE cur) {
 }
 
 void Environment::notifyWantRawInput(bool raw) {
-    const SDL_Rect clipRect{.x = static_cast<int>(m_cursorClip.getX()),
-                            .y = static_cast<int>(m_cursorClip.getY()),
-                            .w = static_cast<int>(m_cursorClip.getWidth()),
-                            .h = static_cast<int>(m_cursorClip.getHeight())};
-    const SDL_Rect *existingRect = nullptr;
-
-    if((raw == SDL_GetWindowRelativeMouseMode(m_window)) &&
-       (!isCursorClipped() || ((existingRect = SDL_GetWindowMouseRect(m_window)) &&
-                               !std::memcmp(existingRect, &clipRect, sizeof(SDL_Rect))))) {
-        return;  // nothing to do
+    {
+        // first check if we actually need to do anything
+        const SDL_Rect *existingClipRect = nullptr;
+        if((raw == SDL_GetWindowRelativeMouseMode(m_window)) &&
+           (!isCursorClipped() || ((existingClipRect = SDL_GetWindowMouseRect(m_window)) &&
+                                   m_cursorClipRect == SDLRectToMcRect(*existingClipRect)))) {
+            // if we already have raw input and the clip rect didn't change, there's nothing to do
+            return;
+        }
     }
 
     // with rawinput, we handle the movement data in Mouse::rawMotionCB instead of through the event queue
     SDL_SetEventEnabled(SDL_EVENT_MOUSE_MOTION, !raw);
 
-    // SetRelativeMouseTransform can only be called with relative mode disabled, so disable it before setting the transform
-    // (and re-enable it after, if we want raw input)
-    // see SDL_mouse.c:1177
+    // SetRelativeMouseTransform can only be called with relative mode disabled, so disable it before setting the
+    // transform (and re-enable it after, if we want raw input) see SDL_mouse.c:1177
     SDL_SetWindowRelativeMouseMode(m_window, false);
 
     if(raw) {
@@ -807,7 +821,8 @@ void Environment::notifyWantRawInput(bool raw) {
         setOSMousePos(mouse->getRealPos());
 
         if(isCursorClipped()) {
-            SDL_SetWindowMouseRect(m_window, &clipRect);
+            const SDL_Rect sdlClip = McRectToSDLRect(m_cursorClipRect);
+            SDL_SetWindowMouseRect(m_window, &sdlClip);
         }
 
         SDL_SetRelativeMouseTransform(Mouse::raw_motion_cb, (void *)mouse->getMotionCallbackData());
@@ -822,6 +837,10 @@ void Environment::notifyWantRawInput(bool raw) {
 
 void Environment::setCursorVisible(bool visible) {
     if(!m_bAllowCursorVisibilityChanges) {
+        if(m_bEnvDebug) {
+            debugLog("Tried to set cursor {}, but cursor visibility changes are disallowed\n",
+                     visible ? "visible" : "invisible");
+        }
         return;
     }
 
@@ -848,14 +867,11 @@ void Environment::setCursorVisible(bool visible) {
 }
 
 void Environment::setCursorClip(bool clip, McRect rect) {
-    m_cursorClip = rect;
+    m_cursorClipRect = rect;
     if(clip) {
         if(mouse->isRawInput()) {
-            const SDL_Rect clipRect{.x = static_cast<int>(rect.getX()),
-                                    .y = static_cast<int>(rect.getY()),
-                                    .w = static_cast<int>(rect.getWidth()),
-                                    .h = static_cast<int>(rect.getHeight())};
-            SDL_SetWindowMouseRect(m_window, &clipRect);
+            const SDL_Rect sdlClip = McRectToSDLRect(rect);
+            SDL_SetWindowMouseRect(m_window, &sdlClip);
         }
         SDL_SetWindowMouseGrab(m_window, true);
         m_bCursorClipped = true;
@@ -919,7 +935,8 @@ void Environment::initMonitors(bool force) {
     int count = -1;
     const SDL_DisplayID *displays = SDL_GetDisplays(&count);
 
-    m_vDesktopDisplayBounds = Vector2{};
+    m_fullDesktopBoundingBox = {};  // the min/max coordinates, for "valid point" lookups (checked first before
+                                    // iterating through actual monitor rects)
     for(int i = 0; i < count; i++) {
         const SDL_DisplayID di = displays[i];
 
@@ -929,23 +946,32 @@ void Environment::initMonitors(bool force) {
 
         if(!SDL_GetDisplayBounds(di, &sdlDisplayRect)) {
             // fallback
-            size = Vector2{static_cast<float>(SDL_GetDesktopDisplayMode(di)->w),
-                           static_cast<float>(SDL_GetDesktopDisplayMode(di)->h)};
+            size = SDLDisplayIDToSizeVec(di);
             displayRect = McRect{{}, size};
+            // expand the display bounds, we just have to assume that the displays are placed left-to-right, with Y
+            // coordinates at 0 (in this fallback path)
+            if(size.y > m_fullDesktopBoundingBox.getHeight()) {
+                m_fullDesktopBoundingBox.setHeight(size.y);
+            }
+            m_fullDesktopBoundingBox.setWidth(m_fullDesktopBoundingBox.getWidth() + size.x);
         } else {
-            displayRect.setSize(Vector2{sdlDisplayRect.w, sdlDisplayRect.h});
-            displayRect.setPos(Vector2{sdlDisplayRect.x, sdlDisplayRect.y});
+            displayRect = SDLRectToMcRect(sdlDisplayRect);
             size = displayRect.getSize();
+            // otherwise we can get the min/max bounding box accurately
+            m_fullDesktopBoundingBox = m_fullDesktopBoundingBox.Union(displayRect);
         }
-
-        m_vDesktopDisplayBounds += size;
         m_mMonitors.try_emplace(di, displayRect);
     }
+
     if(count < 1) {
         debugLog("WARNING: No monitors found! Adding default monitor ...\n");
         const Vector2 windowSize = getWindowSize();
-        m_vDesktopDisplayBounds += windowSize;
         m_mMonitors.try_emplace(1, McRect{{}, windowSize});
+    }
+
+    // make sure this is also valid
+    if(m_fullDesktopBoundingBox.getSize() == Vector2{0, 0}) {
+        m_fullDesktopBoundingBox = getWindowRect();
     }
 }
 
@@ -1112,6 +1138,39 @@ std::vector<std::string> Environment::enumerateDirectory(const std::string &path
     }
 
     return contents;
+}
+
+SDL_Rect Environment::McRectToSDLRect(const McRect &mcrect) {
+    return {.x = static_cast<int>(mcrect.getX()),
+            .y = static_cast<int>(mcrect.getY()),
+            .w = static_cast<int>(mcrect.getWidth()),
+            .h = static_cast<int>(mcrect.getHeight())};
+}
+
+McRect Environment::SDLRectToMcRect(const SDL_Rect &sdlrect) {
+    return {static_cast<float>(sdlrect.x), static_cast<float>(sdlrect.y), static_cast<float>(sdlrect.w),
+            static_cast<float>(sdlrect.h)};
+}
+
+Vector2 Environment::SDLDisplayIDToSizeVec(SDL_DisplayID sdldisp) const {
+    if(!sdldisp) {
+        if(m_bEnvDebug) {
+            debugLog("Using current window display for SDL_DisplayID 0\n");
+        }
+        sdldisp = SDL_GetDisplayForWindow(m_window);
+        if(!sdldisp) {
+            debugLog("Failed to obtain SDL_DisplayID for window: {:s}\n", SDL_GetError());
+            return {};
+        }
+    }
+
+    const SDL_DisplayMode *dm = SDL_GetDesktopDisplayMode(sdldisp);
+    if(!dm) {
+        debugLog("Failed to SDL_GetDesktopDisplayMode({}): {:s}\n", sdldisp, SDL_GetError());
+        return {};
+    }
+
+    return {static_cast<float>(dm->w), static_cast<float>(dm->h)};
 }
 
 #endif

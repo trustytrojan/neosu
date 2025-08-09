@@ -111,7 +111,6 @@ class SDLMain final : public Environment {
     void setupLogging();
     bool createWindow();
     void configureEvents();
-    void postWindowCreationSetup();
     float queryDisplayHz();
 
     // callback handlers
@@ -320,9 +319,8 @@ SDL_AppResult SDLMain::initialize() {
         return SDL_APP_FAILURE;
     }
 
-    // create and make gl context current
+    // disable (filter) some SDL events we don't care about
     configureEvents();
-    postWindowCreationSetup();
 
     // init timing
     m_deltaTimer = new Timer(false);
@@ -342,7 +340,11 @@ SDL_AppResult SDLMain::initialize() {
     // make window visible now, after we loaded the config and set the wanted window size & fullscreen state
     SDL_ShowWindow(m_window);
     SDL_RaiseWindow(m_window);
-    SDL_SetWindowResizable(m_window, true);
+
+    // initialize mouse position (SDL_GetMouse* functions don't work at this stage, just center it)
+    m_vLastAbsMousePos = getWindowSize() / 2.f;
+
+    setWindowResizable(true);
 
     // SDL3 stops listening to text input globally when window is created
     SDL_StartTextInput(m_window);
@@ -623,6 +625,9 @@ bool SDLMain::createWindow() {
         }
     }
 
+    // set this size as the initial fallback window size (for Environment::getWindowSize())
+    m_vLastKnownWindowSize = Vector2{static_cast<float>(windowCreateWidth), static_cast<float>(windowCreateHeight)};
+
     SDL_PropertiesID props = SDL_CreateProperties();
     // if constexpr (Env::cfg(REND::DX11))
     // 	SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_EXTERNAL_GRAPHICS_CONTEXT_BOOLEAN, true);
@@ -657,13 +662,17 @@ bool SDLMain::createWindow() {
 
     cv::monitor.setValue(SDL_GetDisplayForWindow(m_window), false);
 
-    return true;
-}
-
-void SDLMain::postWindowCreationSetup() {
+    // create gl context
     if constexpr(Env::cfg((REND::GL | REND::GLES32), !REND::DX11)) {
         m_context = SDL_GL_CreateContext(m_window);
-        SDL_GL_MakeCurrent(m_window, m_context);
+        if(!m_context) {
+            debugLog("Couldn't create OpenGL context: {:s}\n", SDL_GetError());
+            return false;
+        }
+        if(!SDL_GL_MakeCurrent(m_window, m_context)) {
+            debugLog("Couldn't make OpenGL context current: {:s}\n", SDL_GetError());
+            return false;
+        }
     }
 
     SDL_SetWindowMinimumSize(m_window, WINDOW_WIDTH_MIN, WINDOW_HEIGHT_MIN);
@@ -680,12 +689,7 @@ void SDLMain::postWindowCreationSetup() {
         cv::fps_max_menu.setValue(m_fDisplayHz);
     }
 
-    // initialize mouse position
-    {
-        float x, y;
-        SDL_GetGlobalMouseState(&x, &y);
-        m_vLastAbsMousePos = Vector2{x, y} - getWindowPos();
-    }
+    return true;
 }
 
 void SDLMain::configureEvents() {
