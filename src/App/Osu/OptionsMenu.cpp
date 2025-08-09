@@ -1163,9 +1163,10 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addSubSection("FPoSu - Playfield");
     this->addCheckbox("Curved play area", &cv::fposu_curved);
     this->addCheckbox("Background cube", &cv::fposu_cube);
-    this->addCheckbox(
-        "Skybox", "NOTE: Overrides \"Background cube\".\nSee skybox_example.png for cubemap layout.",
-        &cv::fposu_skybox);
+    this->addCheckbox("Skybox", "NOTE: Overrides \"Background cube\".\nSee skybox_example.png for cubemap layout.",
+                      &cv::fposu_skybox);
+    this->addSlider("Background Opacity", 0.0f, 1.0f, &cv::background_alpha)
+        ->setChangeCallback(SA::MakeDelegate<&OptionsMenu::onSliderChangePercent>(this));
 
     this->addSubSection("FPoSu - Mouse");
     UIButton *cm360CalculatorLinkButton = this->addButton("https://www.mouse-sensitivity.com/");

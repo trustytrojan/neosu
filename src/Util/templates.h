@@ -1,5 +1,5 @@
 #pragma once
-// Copyright (c) 2012, PG, All rights reserved.
+// Copyright (c) 2023, kiwec & 2025, WH, All rights reserved.
 
 // miscellaneous templates
 #include <cstddef>

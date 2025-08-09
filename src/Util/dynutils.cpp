@@ -1,3 +1,4 @@
+// Copyright (c) 2025, WH, All rights reserved.
 #include "dynutils.h"
 
 #include "Engine.h"

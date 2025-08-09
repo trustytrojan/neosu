@@ -1,3 +1,4 @@
+// Copyright (c) 2025, WH & 2025, kiwec, All rights reserved.
 #include "crypto.h"
 #include "sha256.h"            // vendored library
 #include "base64.h"            // vendored library

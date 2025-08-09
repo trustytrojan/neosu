@@ -1,3 +1,4 @@
+// Copyright (c) 2025, WH & 2025, kiwec, All rights reserved.
 #pragma once
 
 #include "types.h"

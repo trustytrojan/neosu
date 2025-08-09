@@ -180,17 +180,15 @@ void Beatmap::drawBackground() {
         Image *backgroundImage = osu->getBackgroundImageHandler()->getLoadBackgroundImage(this->selectedDifficulty2);
         if(cv::draw_beatmap_background_image.getBool() && backgroundImage != nullptr &&
            (cv::background_dim.getFloat() < 1.0f || this->fBreakBackgroundFade > 0.0f)) {
-            const f32 scale = Osu::getImageScaleToFillResolution(backgroundImage, osu->getScreenSize());
-            const Vector2 centerTrans = (osu->getScreenSize() / 2);
+            const float scale = Osu::getImageScaleToFillResolution(backgroundImage, osu->getScreenSize());
+            const Vector2 centerTrans = (osu->getScreenSize() / 2.0f);
 
-            const f32 backgroundFadeDimMultiplier =
-                std::clamp<f32>(1.0f - (cv::background_dim.getFloat() - 0.3f), 0.0f, 1.0f);
-            const short dim = std::clamp<f32>((1.0f - cv::background_dim.getFloat()) +
-                                                  this->fBreakBackgroundFade * backgroundFadeDimMultiplier,
-                                              0.0f, 1.0f) *
-                              255.0f;
+            const float backgroundFadeDimMultiplier = 1.0f - (cv::background_dim.getFloat() - 0.3f);
+            const auto dim =
+                (1.0f - cv::background_dim.getFloat()) + this->fBreakBackgroundFade * backgroundFadeDimMultiplier;
+            const auto alpha = cv::mod_fposu.getBool() ? cv::background_alpha.getFloat() : 1.0f;
 
-            g->setColor(argb(255, dim, dim, dim));
+            g->setColor(argb(alpha, dim, dim, dim));
             g->pushTransform();
             {
                 g->scale(scale, scale);
@@ -203,11 +201,14 @@ void Beatmap::drawBackground() {
 
     // draw background
     if(cv::background_brightness.getFloat() > 0.0f) {
-        const f32 brightness = cv::background_brightness.getFloat();
-        const short red = std::clamp<f32>(brightness * cv::background_color_r.getFloat(), 0.0f, 255.0f);
-        const short green = std::clamp<f32>(brightness * cv::background_color_g.getFloat(), 0.0f, 255.0f);
-        const short blue = std::clamp<f32>(brightness * cv::background_color_b.getFloat(), 0.0f, 255.0f);
-        const short alpha = std::clamp<f32>(1.0f - this->fBreakBackgroundFade, 0.0f, 1.0f) * 255.0f;
+        const auto brightness = cv::background_brightness.getFloat();
+
+        const auto red = brightness * cv::background_color_r.getFloat();
+        const auto green = brightness * cv::background_color_g.getFloat();
+        const auto blue = brightness * cv::background_color_b.getFloat();
+        const auto alpha =
+            (1.0f - this->fBreakBackgroundFade) * (cv::mod_fposu.getBool() ? cv::background_alpha.getFloat() : 1.0f);
+
         g->setColor(argb(alpha, red, green, blue));
         g->fillRect(0, 0, osu->getScreenWidth(), osu->getScreenHeight());
     }
@@ -815,7 +816,7 @@ void Beatmap::pause(bool quitIfWaiting) {
             // case 1: the beatmap is already "finished", jump to the ranking screen if some small amount of time past
             //         the last objects endTime
             // case 2: in the middle somewhere, pause as usual
-            HitObject* lastHitObject = this->hitobjectsSortedByEndTime.size() > 0
+            HitObject *lastHitObject = this->hitobjectsSortedByEndTime.size() > 0
                                            ? this->hitobjectsSortedByEndTime[this->hitobjectsSortedByEndTime.size() - 1]
                                            : nullptr;
             if(lastHitObject != nullptr && lastHitObject->isFinished() &&
@@ -1825,7 +1826,7 @@ void Beatmap::drawFollowPoints() {
             (lastObjectIndex >= 0 ? this->hitobjects[lastObjectIndex]->is_end_of_combo : false);
         const bool isCurrentHitObjectSpinner =
             (lastObjectIndex >= 0 && followPointsConnectSpinners
-                 ? dynamic_cast<Spinner*>(this->hitobjects[lastObjectIndex]) != nullptr
+                 ? dynamic_cast<Spinner *>(this->hitobjects[lastObjectIndex]) != nullptr
                  : false);
         if(lastObjectIndex >= 0 && (!isCurrentHitObjectNewCombo || followPointsConnectCombos ||
                                     (isCurrentHitObjectSpinner && followPointsConnectSpinners))) {
@@ -2048,7 +2049,9 @@ void Beatmap::drawHitObjects() {
         // draw scene buffer
         if(shouldDrawBuffer) {
             g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_PREMUL_COLOR);
-            { this->mafhamFinishedRenderTarget->draw(0, 0); }
+            {
+                this->mafhamFinishedRenderTarget->draw(0, 0);
+            }
             g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ALPHA);
         }
 
@@ -2853,7 +2856,7 @@ void Beatmap::update2() {
         // range and could be clicked
         if(cv::hiterrorbar_misaims.getBool()) {
             this->misaimObjects.clear();
-            HitObject* lastUnfinishedHitObject = nullptr;
+            HitObject *lastUnfinishedHitObject = nullptr;
             const long hitWindow50 = (long)this->getHitWindow50();
             for(auto &hitobject : this->hitobjects)  // this shouldn't hurt performance too much, since no
                                                      // expensive operations are happening within the loop
@@ -3260,7 +3263,7 @@ bool Beatmap::isBuffering() {
             this->is_buffering = false;
         }
     } else {
-        HitObject* lastHitObject = this->hitobjectsSortedByEndTime.size() > 0
+        HitObject *lastHitObject = this->hitobjectsSortedByEndTime.size() > 0
                                        ? this->hitobjectsSortedByEndTime[this->hitobjectsSortedByEndTime.size() - 1]
                                        : nullptr;
         bool is_finished = lastHitObject != nullptr && lastHitObject->isFinished();
@@ -3876,12 +3879,12 @@ void Beatmap::calculateStacks() {
 
             HitObject *objectI = this->hitobjects[i];
 
-            bool isSpinner = dynamic_cast<Spinner*>(objectI) != nullptr;
+            bool isSpinner = dynamic_cast<Spinner *>(objectI) != nullptr;
 
             if(objectI->getStack() != 0 || isSpinner) continue;
 
-            bool isHitCircle = dynamic_cast<Circle*>(objectI) != nullptr;
-            bool isSlider = dynamic_cast<Slider*>(objectI) != nullptr;
+            bool isHitCircle = dynamic_cast<Circle *>(objectI) != nullptr;
+            bool isSlider = dynamic_cast<Slider *>(objectI) != nullptr;
 
             if(isHitCircle) {
                 while(--n >= 0) {
@@ -3920,7 +3923,7 @@ void Beatmap::calculateStacks() {
                 while(--n >= 0) {
                     HitObject *objectN = this->hitobjects[n];
 
-                    bool isSpinner = dynamic_cast<Spinner*>(objectN) != nullptr;
+                    bool isSpinner = dynamic_cast<Spinner *>(objectN) != nullptr;
 
                     if(isSpinner) continue;
 

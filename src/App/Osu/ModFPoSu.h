@@ -10,6 +10,8 @@ class Image;
 class Shader;
 class VertexArrayObject;
 
+class ModFPoSu3DModel;
+
 class ModFPoSu {
    public:
     static constexpr const float SIZEDIV3D = 1.0f / 512.0f;  // 1.0f / (float)GameRules::OSU_COORD_WIDTH
@@ -45,6 +47,7 @@ class ModFPoSu {
 
     void makePlayfield();
     void makeBackgroundCube();
+    void handleLazyLoad3DModels();
 
     void onCurvedChange();
     void onDistanceChange();
@@ -89,5 +92,23 @@ class ModFPoSu {
     float fEdgeDistance;
     bool bCrosshairIntersectsScreen;
 
+    ModFPoSu3DModel *skyboxModel;
+
     Shader *hitcircleShader;
+};
+
+class ModFPoSu3DModel {
+   public:
+    ModFPoSu3DModel(const UString &objFilePath, Image *texture = nullptr)
+        : ModFPoSu3DModel(objFilePath, texture, false) {
+        ;
+    }
+    ModFPoSu3DModel(const UString &objFilePathOrContents, Image *texture, bool source);
+    ~ModFPoSu3DModel();
+
+    void draw3D();
+
+   private:
+    VertexArrayObject *vao;
+    Image *texture;
 };

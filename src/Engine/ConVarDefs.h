@@ -186,6 +186,7 @@ CONVAR(autopilot_snapping_strength, "osu_autopilot_snapping_strength", 2.0f, FCV
        "How many iterations of quadratic interpolation to use, more = snappier, 0 = linear");
 CONVAR(avoid_flashes, "avoid_flashes", false, FCVAR_BANCHO_COMPATIBLE,
        "disable flashing elements (like FL dimming on sliders)");
+CONVAR(background_alpha, "osu_background_alpha", 1.0f, FCVAR_BANCHO_COMPATIBLE, "transparency of all background layers at once, only useful for FPoSu");
 CONVAR(background_brightness, "osu_background_brightness", 0.0f, FCVAR_BANCHO_COMPATIBLE,
        "0 to 1, if this is larger than 0 then it will replace the entire beatmap background "
        "image with a solid color (see osu_background_color_r/g/b)");
@@ -458,6 +459,8 @@ CONVAR(force_oauth, "force_oauth", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVAT
        "always display oauth login button instead of password field");
 CONVAR(force_legacy_slider_renderer, "osu_force_legacy_slider_renderer", false, FCVAR_BANCHO_COMPATIBLE,
        "on some older machines, this may be faster than vertexbuffers");
+CONVAR(fposu_3d_skybox, "fposu_3d_skybox", true, FCVAR_BANCHO_COMPATIBLE);
+CONVAR(fposu_3d_skybox_size, "fposu_3d_skybox_size", 450.0f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(fposu_absolute_mode, "fposu_absolute_mode", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(fposu_cube, "fposu_cube", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(fposu_cube_size, "fposu_cube_size", 500.0f, FCVAR_BANCHO_COMPATIBLE);

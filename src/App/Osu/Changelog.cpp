@@ -1,4 +1,4 @@
-// Copyright (c) 2017, PG, All rights reserved.
+// Copyright (c) 2017, PG & 2023-2025, kiwec, All rights reserved.
 #include "Changelog.h"
 
 #include "CBaseUIButton.h"
@@ -31,6 +31,7 @@ Changelog::Changelog() : ScreenBackable() {
     v40_00.title = "40.00";
     v40_00.changes = {
         // R"(- Re-added local user stats)",
+        R"(- Re-added FPoSu 3D skybox support)",
         R"(- Added chat ticker)",
         R"(- Switched to SDL3 platform backend)",
         R"(- Added chat/screenshot/status notifications)",

@@ -1,9 +1,6 @@
 // Copyright (c) 2019, Colin Brook & PG, All rights reserved.
 #include "ModFPoSu.h"
 
-#include <cmath>
-#include <sstream>
-
 #include "AnimationHandler.h"
 #include "BackgroundImageHandler.h"
 #include "Bancho.h"
@@ -15,6 +12,7 @@
 #include "KeyBindings.h"
 #include "Keyboard.h"
 #include "ModSelector.h"
+#include "ModFPoSu3DModels.h"
 #include "Mouse.h"
 #include "OpenGLHeaders.h"
 #include "OpenGLLegacyInterface.h"
@@ -22,6 +20,10 @@
 #include "Osu.h"
 #include "ResourceManager.h"
 #include "Skin.h"
+
+#include <cmath>
+#include <sstream>
+#include <fstream>
 
 constexpr const float ModFPoSu::SIZEDIV3D;
 constexpr const int ModFPoSu::SUBDIVISIONS;
@@ -47,6 +49,7 @@ ModFPoSu::ModFPoSu() {
     this->vao = resourceManager->createVertexArrayObject();
     this->vaoCube = resourceManager->createVertexArrayObject();
 
+    this->skyboxModel = nullptr;
     this->hitcircleShader = nullptr;
 
     // convar callbacks
@@ -124,13 +127,35 @@ void ModFPoSu::draw() {
                             g->drawVAO(&vao);
                         }
 
-                        // cube
-                        if(cv::fposu_cube.getBool()) {
+                        // skybox/cube
+                        if(cv::fposu_skybox.getBool()) {
+                            this->handleLazyLoad3DModels();
+
+                            g->pushTransform();
+                            {
+                                Matrix4 modelMatrix;
+                                {
+                                    Matrix4 scale;
+                                    scale.scale(cv::fposu_3d_skybox_size.getFloat());
+
+                                    modelMatrix = scale;
+                                }
+                                g->setWorldMatrixMul(modelMatrix);
+
+                                g->setColor(0xffffffff);
+                                osu->getSkin()->getSkybox()->bind();
+                                {
+                                    this->skyboxModel->draw3D();
+                                }
+                                osu->getSkin()->getSkybox()->unbind();
+                            }
+                            g->popTransform();
+                        } else if(cv::fposu_cube.getBool()) {
                             osu->getSkin()->getBackgroundCube()->bind();
                             {
-                                g->setColor(argb(255, std::clamp<int>(cv::fposu_cube_tint_r.getInt(), 0, 255),
-                                                 std::clamp<int>(cv::fposu_cube_tint_g.getInt(), 0, 255),
-                                                 std::clamp<int>(cv::fposu_cube_tint_b.getInt(), 0, 255)));
+                                g->setColor(rgb(std::clamp<int>(cv::fposu_cube_tint_r.getInt(), 0, 255),
+                                                std::clamp<int>(cv::fposu_cube_tint_g.getInt(), 0, 255),
+                                                std::clamp<int>(cv::fposu_cube_tint_b.getInt(), 0, 255)));
                                 g->drawVAO(this->vaoCube);
                             }
                             osu->getSkin()->getBackgroundCube()->unbind();
@@ -138,9 +163,20 @@ void ModFPoSu::draw() {
                     }
                     g->setDepthBuffer(false);
 
-                    if(cv::fposu_transparent_playfield.getBool()) g->setBlending(true);
+                    const bool isTransparent = (cv::background_alpha.getFloat() < 1.0f);
+                    if(isTransparent) {
+                        g->setBlending(true);
+                        g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_PREMUL_COLOR);
+                    }
 
                     Matrix4 worldMatrix = this->modelMatrix;
+
+                    if constexpr(Env::cfg(REND::DX11)) {
+                        // NOTE: convert from OpenGL coordinate system
+                        static Matrix4 zflip = Matrix4().scale(1, 1, -1);
+                        worldMatrix = worldMatrix * zflip;
+                    }
+
                     g->setWorldMatrixMul(worldMatrix);
                     {
                         osu->getPlayfieldBuffer()->bind();
@@ -150,6 +186,8 @@ void ModFPoSu::draw() {
                         }
                         osu->getPlayfieldBuffer()->unbind();
                     }
+
+                    if(isTransparent) g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ALPHA);
 
                     // (no setBlending(false), since we are already at the end)
                 }
@@ -656,6 +694,10 @@ void ModFPoSu::makeBackgroundCube() {
     this->vaoCube->addTexcoord(0.0f, 1.0f);
 }
 
+void ModFPoSu::handleLazyLoad3DModels() {
+    if(this->skyboxModel == nullptr) this->skyboxModel = new ModFPoSu3DModel(skyboxObj, nullptr, true);
+}
+
 void ModFPoSu::onCurvedChange() { this->makePlayfield(); }
 
 void ModFPoSu::onDistanceChange() { this->makePlayfield(); }
@@ -706,4 +748,157 @@ Vector3 ModFPoSu::normalFromTriangle(Vector3 p1, Vector3 p2, Vector3 p3) {
     const Vector3 v = (p3 - p1);
 
     return u.cross(v).normalize();
+}
+
+ModFPoSu3DModel::ModFPoSu3DModel(const UString &objFilePathOrContents, Image *texture, bool source) {
+    this->texture = texture;
+
+    this->vao = resourceManager->createVertexArrayObject(Graphics::PRIMITIVE::PRIMITIVE_TRIANGLES);
+
+    // load
+    {
+        struct RAW_FACE {
+            int vertexIndex1;
+            int vertexIndex2;
+            int vertexIndex3;
+            int uvIndex1;
+            int uvIndex2;
+            int uvIndex3;
+            int normalIndex1;
+            int normalIndex2;
+            int normalIndex3;
+
+            RAW_FACE() {
+                vertexIndex1 = 0;
+                vertexIndex2 = 0;
+                vertexIndex3 = 0;
+                uvIndex1 = 0;
+                uvIndex2 = 0;
+                uvIndex3 = 0;
+                normalIndex1 = 0;
+                normalIndex2 = 0;
+                normalIndex3 = 0;
+            }
+        };
+
+        // load model data
+        std::vector<Vector3> rawVertices;
+        std::vector<Vector2> rawTexcoords;
+        std::vector<Color> rawColors;
+        std::vector<Vector3> rawNormals;
+        std::vector<RAW_FACE> rawFaces;
+        {
+            UString fileContents;
+            if(!source) {
+                UString filePath = "models/";
+                filePath.append(objFilePathOrContents);
+
+                std::string stdFileContents;
+                {
+                    std::ifstream f(filePath.toUtf8(), std::ios::in | std::ios::binary);
+                    if(f.good()) {
+                        f.seekg(0, std::ios::end);
+                        const std::streampos numBytes = f.tellg();
+                        f.seekg(0, std::ios::beg);
+
+                        stdFileContents.resize(numBytes);
+                        f.read(&stdFileContents[0], numBytes);
+                    } else
+                        debugLog("Failed to load {:s}\n", objFilePathOrContents.toUtf8());
+                }
+                fileContents = UString(stdFileContents.c_str(), stdFileContents.size());
+            }
+
+            std::istringstream iss(source ? objFilePathOrContents.toUtf8() : fileContents.toUtf8());
+            std::string line;
+            while(std::getline(iss, line)) {
+                if(line.starts_with("v ")) {
+                    Vector3 vertex;
+                    Vector3 rgb;
+
+                    if(sscanf(line.c_str(), "v %f %f %f %f %f %f ", &vertex.x, &vertex.y, &vertex.z, &rgb.x, &rgb.y,
+                              &rgb.z) == 6) {
+                        rawVertices.push_back(vertex);
+                        rawColors.push_back(argb(1.0f, rgb.x, rgb.y, rgb.z));
+                    } else if(sscanf(line.c_str(), "v %f %f %f ", &vertex.x, &vertex.y, &vertex.z) == 3)
+                        rawVertices.push_back(vertex);
+                } else if(line.starts_with("vt ")) {
+                    Vector2 uv;
+                    if(sscanf(line.c_str(), "vt %f %f ", &uv.x, &uv.y) == 2)
+                        rawTexcoords.emplace_back(uv.x, 1.0f - uv.y);
+                } else if(line.starts_with("vn ")) {
+                    Vector3 normal;
+                    if(sscanf(line.c_str(), "vn %f %f %f ", &normal.x, &normal.y, &normal.z) == 3)
+                        rawNormals.push_back(normal);
+                } else if(line.starts_with("f ")) {
+                    RAW_FACE face;
+                    if(sscanf(line.c_str(), "f %i/%i/%i %i/%i/%i %i/%i/%i ", &face.vertexIndex1, &face.uvIndex1,
+                              &face.normalIndex1, &face.vertexIndex2, &face.uvIndex2, &face.normalIndex2,
+                              &face.vertexIndex3, &face.uvIndex3, &face.normalIndex3) == 9 ||
+                       sscanf(line.c_str(), "f %i//%i %i//%i %i//%i ", &face.vertexIndex1, &face.normalIndex1,
+                              &face.vertexIndex2, &face.normalIndex2, &face.vertexIndex3, &face.normalIndex3) == 6 ||
+                       sscanf(line.c_str(), "f %i/%i/ %i/%i/ %i/%i/ ", &face.vertexIndex1, &face.uvIndex1,
+                              &face.vertexIndex2, &face.uvIndex2, &face.vertexIndex3, &face.uvIndex3) == 6 ||
+                       sscanf(line.c_str(), "f %i/%i %i/%i %i/%i ", &face.vertexIndex1, &face.uvIndex1,
+                              &face.vertexIndex2, &face.uvIndex2, &face.vertexIndex3, &face.uvIndex3) == 6) {
+                        rawFaces.push_back(face);
+                    }
+                }
+            }
+        }
+
+        // build vao
+        if(rawVertices.size() > 0) {
+            const bool hasTexcoords = (rawTexcoords.size() > 0);
+            const bool hasColors = (rawColors.size() > 0);
+            const bool hasNormals = (rawNormals.size() > 0);
+
+            bool hasAtLeastOneTriangle = false;
+
+            for(const auto &face : rawFaces) {
+                if((size_t)(face.vertexIndex1 - 1) < rawVertices.size() &&
+                   (size_t)(face.vertexIndex2 - 1) < rawVertices.size() &&
+                   (size_t)(face.vertexIndex3 - 1) < rawVertices.size() &&
+                   (!hasTexcoords || (size_t)(face.uvIndex1 - 1) < rawTexcoords.size()) &&
+                   (!hasTexcoords || (size_t)(face.uvIndex2 - 1) < rawTexcoords.size()) &&
+                   (!hasTexcoords || (size_t)(face.uvIndex3 - 1) < rawTexcoords.size()) &&
+                   (!hasColors || (size_t)(face.vertexIndex1 - 1) < rawColors.size()) &&
+                   (!hasColors || (size_t)(face.vertexIndex2 - 1) < rawColors.size()) &&
+                   (!hasColors || (size_t)(face.vertexIndex3 - 1) < rawColors.size()) &&
+                   (!hasNormals || (size_t)(face.normalIndex1 - 1) < rawNormals.size()) &&
+                   (!hasNormals || (size_t)(face.normalIndex2 - 1) < rawNormals.size()) &&
+                   (!hasNormals || (size_t)(face.normalIndex3 - 1) < rawNormals.size())) {
+                    hasAtLeastOneTriangle = true;
+
+                    this->vao->addVertex(rawVertices[(size_t)(face.vertexIndex1 - 1)]);
+                    if(hasTexcoords) this->vao->addTexcoord(rawTexcoords[(size_t)(face.uvIndex1 - 1)]);
+                    if(hasColors) this->vao->addColor(rawColors[(size_t)(face.vertexIndex1 - 1)]);
+                    if(hasNormals) this->vao->addNormal(rawNormals[(size_t)(face.normalIndex1 - 1)]);
+
+                    this->vao->addVertex(rawVertices[(size_t)(face.vertexIndex2 - 1)]);
+                    if(hasTexcoords) this->vao->addTexcoord(rawTexcoords[(size_t)(face.uvIndex2 - 1)]);
+                    if(hasColors) this->vao->addColor(rawColors[(size_t)(face.vertexIndex2 - 1)]);
+                    if(hasNormals) this->vao->addNormal(rawNormals[(size_t)(face.normalIndex2 - 1)]);
+
+                    this->vao->addVertex(rawVertices[(size_t)(face.vertexIndex3 - 1)]);
+                    if(hasTexcoords) this->vao->addTexcoord(rawTexcoords[(size_t)(face.uvIndex3 - 1)]);
+                    if(hasColors) this->vao->addColor(rawColors[(size_t)(face.vertexIndex3 - 1)]);
+                    if(hasNormals) this->vao->addNormal(rawNormals[(size_t)(face.normalIndex3 - 1)]);
+                }
+            }
+
+            // bake it for performance
+            if(hasAtLeastOneTriangle) resourceManager->loadResource(this->vao);
+        }
+    }
+}
+
+ModFPoSu3DModel::~ModFPoSu3DModel() { resourceManager->destroyResource(this->vao); }
+
+void ModFPoSu3DModel::draw3D() {
+    if(this->texture != nullptr) this->texture->bind();
+
+    g->drawVAO(this->vao);
+
+    if(this->texture != nullptr) this->texture->unbind();
 }

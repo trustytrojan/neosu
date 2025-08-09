@@ -1,4 +1,5 @@
 #pragma once
+// Copyright (c) 2025, WH, All rights reserved.
 
 namespace dynutils {
 using lib_obj = struct lib_obj;
