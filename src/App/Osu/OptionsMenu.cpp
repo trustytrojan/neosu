@@ -1164,7 +1164,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addCheckbox("Curved play area", &cv::fposu_curved);
     this->addCheckbox("Background cube", &cv::fposu_cube);
     this->addCheckbox(
-        "Skybox", "NOTE: Overrides \"Background cube\".\nSee skybox_example.png for cubemap layout. (CURRENTLY BROKEN)",
+        "Skybox", "NOTE: Overrides \"Background cube\".\nSee skybox_example.png for cubemap layout.",
         &cv::fposu_skybox);
 
     this->addSubSection("FPoSu - Mouse");

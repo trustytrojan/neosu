@@ -635,7 +635,7 @@ void Environment::enableFullscreen() {
     syncWindow();
 
     // TODO: fix/remove the need to have these here
-    if (osu) {
+    if(osu) {
         auto res = cv::resolution.getString().c_str();
         osu->onInternalResolutionChanged(res, res);
     }
@@ -652,7 +652,7 @@ void Environment::disableFullscreen() {
 
     syncWindow();
 
-    if (osu) {
+    if(osu) {
         auto res = cv::windowed_resolution.getString().c_str();
         osu->onWindowedResolutionChanged(res, res);
     }
@@ -827,19 +827,19 @@ void Environment::setCursor(CURSORTYPE cur) {
 }
 
 void Environment::notifyWantRawInput(bool raw) {
+    // with rawinput, we handle the movement data in Mouse::raw_motion_cb instead of through the event queue
+    SDL_SetEventEnabled(SDL_EVENT_MOUSE_MOTION, !raw);
+
     {
-        // first check if we actually need to do anything
+        // check if we actually need to do anything about the rawinput state/clip rect
         const SDL_Rect *existingClipRect = nullptr;
         if((raw == SDL_GetWindowRelativeMouseMode(m_window)) &&
            (!isCursorClipped() || ((existingClipRect = SDL_GetWindowMouseRect(m_window)) &&
                                    m_cursorClipRect == SDLRectToMcRect(*existingClipRect)))) {
-            // if we already have raw input and the clip rect didn't change, there's nothing to do
+            // if we already have raw input and the clip rect didn't change, there's nothing else to do
             return;
         }
     }
-
-    // with rawinput, we handle the movement data in Mouse::rawMotionCB instead of through the event queue
-    SDL_SetEventEnabled(SDL_EVENT_MOUSE_MOTION, !raw);
 
     // SetRelativeMouseTransform can only be called with relative mode disabled, so disable it before setting the
     // transform (and re-enable it after, if we want raw input) see SDL_mouse.c:1177
@@ -855,8 +855,18 @@ void Environment::notifyWantRawInput(bool raw) {
             SDL_SetWindowMouseRect(m_window, &sdlClip);
         }
 
-        SDL_SetRelativeMouseTransform(Mouse::raw_motion_cb, (void *)mouse->getMotionCallbackData());
-        SDL_SetWindowRelativeMouseMode(m_window, true);
+        if(!SDL_SetRelativeMouseTransform(Mouse::raw_motion_cb, (void *)mouse->getMotionCallbackData())) {
+            // need some better way to handle this possibility, this is jank
+            debugLog("FIXME (handle error): SDL_SetRelativeMouseTransform failed: {:s}\n", SDL_GetError());
+            cv::mouse_raw_input.setValue(false);
+            return;
+        }
+
+        if(!SDL_SetWindowRelativeMouseMode(m_window, true)) {
+            debugLog("FIXME (handle error): SDL_SetWindowRelativeMouseMode failed: {:s}\n", SDL_GetError());
+            cv::mouse_raw_input.setValue(false);
+            return;
+        }
     } else {
         // let the mouse handler clip the cursor as it sees fit
         // this is because SDL has no equivalent of sensTransformFunc for non-relative mouse mode
@@ -1189,4 +1199,4 @@ std::vector<std::string> Environment::enumerateDirectory(const std::string &path
     return contents;
 }
 
-#endif // MCENGINE_PLATFORM_WINDOWS
+#endif  // MCENGINE_PLATFORM_WINDOWS
