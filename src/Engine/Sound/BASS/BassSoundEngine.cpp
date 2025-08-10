@@ -503,7 +503,7 @@ bool BassSoundEngine::play(Sound *snd, float pan, float pitch) {
         bassSound->fLastPlayTime = bassSound->fChannelCreationTime;
     }
 
-    if(cv::debug.getBool()) {
+    if(cv::debug_snd.getBool()) {
         debugLog("Playing {:s}\n", bassSound->getFilePath().c_str());
     }
 

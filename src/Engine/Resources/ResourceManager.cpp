@@ -60,7 +60,7 @@ void ResourceManager::destroyResources() {
     this->mNameToResourceMap.clear();
 }
 
-void ResourceManager::destroyResource(Resource *rs) {
+void ResourceManager::destroyResource(Resource *rs, bool forceBlocking) {
     const bool debug = cv::debug_rm.getBool();
     if(rs == nullptr) {
         if(debug) debugLog("ResourceManager Warning: destroyResource(NULL)!\n");
@@ -92,6 +92,12 @@ void ResourceManager::destroyResource(Resource *rs) {
         this->asyncLoader->scheduleAsyncDestroy(rs);
 
         if(isManagedResource) removeManagedResource(rs, managedResourceIndex);
+
+        if(forceBlocking) {
+            do {
+                this->asyncLoader->update(false);
+            }while(this->asyncLoader->isLoadingResource(rs));
+        }
 
         return;
     }

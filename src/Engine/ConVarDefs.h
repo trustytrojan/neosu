@@ -333,6 +333,8 @@ CONVAR(database_ignore_version, "osu_database_ignore_version", true, FCVAR_BANCH
 CONVAR(database_version, "osu_database_version", OSU_VERSION_DATEONLY, FCVAR_BANCHO_COMPATIBLE,
        "maximum supported osu!.db version, above this will use fallback loader");
 CONVAR(debug, "osu_debug", false, FCVAR_BANCHO_COMPATIBLE);
+CONVAR(debug_db, "debug_db", false, FCVAR_BANCHO_COMPATIBLE);
+CONVAR(debug_async_db, "debug_async_db", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(debug_anim, "debug_anim", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(debug_box_shadows, "debug_box_shadows", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(debug_draw_timingpoints, "osu_debug_draw_timingpoints", false, FCVAR_LOCKED | FCVAR_GAMEPLAY);

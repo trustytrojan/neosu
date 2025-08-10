@@ -88,89 +88,100 @@ bool sortScoreByPP(FinishedScore const &a, FinishedScore const &b) {
 
 }  // namespace
 
-class DatabaseLoader : public Resource {
-   public:
-    DatabaseLoader() : Resource() {
-        this->bAsyncReady = false;
-        this->bReady = false;
-    };
+// run after at least one engine frame (due to resourceManager->update() in Engine::onUpdate())
+void Database::AsyncDBLoader::init() {
+    if(cv::debug_db.getBool() || cv::debug_async_db.getBool()) debugLog("(AsyncDBLoader) start\n");
 
-    [[nodiscard]] Type getResType() const override { return APPDEFINED; }  // TODO: handle this better?
-
-   protected:
-    void init() override {
-        this->bReady = true;
-        if(this->bNeedRawLoad) {
-            db->scheduleLoadRaw();
-        }
-
-        resourceManager->destroyResource(this);  // commit sudoku
+    if(this->bNeedRawLoad) {
+        db->scheduleLoadRaw();
+    } else {
+        MapCalcThread::start_calc(db->maps_to_recalc);
+        VolNormalization::start_calc(db->loudness_to_calc);
+        sct_calc(db->scores_to_convert);
     }
 
-    void initAsync() override {
-        debugLog("DatabaseLoader::initAsync()\n");
+    // signal that we are done
+    db->fLoadingProgress = 1.0f;
+    this->bReady = true;
 
-        // stop threads that rely on database content
-        sct_abort();
-        lct_set_map(nullptr);
-        MapCalcThread::abort();
-        VolNormalization::abort();
+    if(cv::debug_db.getBool() || cv::debug_async_db.getBool()) debugLog("(AsyncDBLoader) done\n");
+}
 
-        db->loudness_to_calc.clear();
-        db->maps_to_recalc.clear();
+// run immediately on a separate thread when resourceManager->loadResource() is called
+void Database::AsyncDBLoader::initAsync() {
+    if(cv::debug_db.getBool() || cv::debug_async_db.getBool()) debugLog("(AsyncDBLoader) start\n");
 
-        for(auto &beatmapset : db->beatmapsets) {
-            SAFE_DELETE(beatmapset);
-        }
-        db->beatmapsets.clear();
+    if(!db) return;
 
-        for(auto &neosu_set : db->neosu_sets) {
-            SAFE_DELETE(neosu_set);
-        }
-        db->neosu_sets.clear();
+    // stop threads that rely on database content
+    sct_abort();
+    lct_set_map(nullptr);
+    MapCalcThread::abort();
+    VolNormalization::abort();
 
-        db->openDatabases();
+    db->scores_to_convert.clear();
+    db->loudness_to_calc.clear();
+    db->maps_to_recalc.clear();
 
-        std::string peppy_scores_path = cv::osu_folder.getString();
-        peppy_scores_path.append(PREF_PATHSEP "scores.db");
-        db->scores_to_convert.clear();
-        db->loadScores(db->database_files["neosu_scores.db"]);
-        db->loadOldMcNeosuScores(db->database_files["scores.db"]);
-        db->loadPeppyScores(db->database_files[peppy_scores_path]);
-        db->bScoresLoaded = true;
+    for(auto &beatmapset : db->beatmapsets) {
+        SAFE_DELETE(beatmapset);
+    }
+    db->beatmapsets.clear();
 
-        db->loadMaps();
+    for(auto &neosu_set : db->neosu_sets) {
+        SAFE_DELETE(neosu_set);
+    }
+    db->neosu_sets.clear();
 
-        // .db files that were dropped on the main window
-        for(auto &db_path : db->dbPathsToImport) {
-            db->importDatabase(db_path);
-        }
-        db->dbPathsToImport.clear();
+    db->openDatabases();
+    db->loadScores(db->database_files["neosu_scores.db"]);
+    db->loadOldMcNeosuScores(db->database_files["scores.db"]);
 
-        this->bNeedRawLoad = (!env->fileExists(fmt::format("{}" PREF_PATHSEP "osu!.db", cv::osu_folder.getString())) ||
-                              !cv::database_enabled.getBool());
+    std::string peppy_scores_path = cv::osu_folder.getString();
+    peppy_scores_path.append(PREF_PATHSEP "scores.db");
 
-        if(!this->bNeedRawLoad) {
-            load_collections();
-        }
+    db->loadPeppyScores(db->database_files[peppy_scores_path]);
 
-        // signal that we are done
-        db->fLoadingProgress = 1.0f;
-        this->bAsyncReady = true;
+    db->bScoresLoaded = true;
 
-        // XXX: Is it bad to start a new thread from outside the main thread?
-        if(!this->bNeedRawLoad) {
-            MapCalcThread::start_calc(db->maps_to_recalc);
-            VolNormalization::start_calc(db->loudness_to_calc);
-            sct_calc(db->scores_to_convert);
-        }
+    db->loadMaps();
+
+    // .db files that were dropped on the main window
+    for(auto &db_path : db->dbPathsToImport) {
+        db->importDatabase(db_path);
+    }
+    db->dbPathsToImport.clear();
+
+    this->bNeedRawLoad = (!env->fileExists(fmt::format("{}" PREF_PATHSEP "osu!.db", cv::osu_folder.getString())) ||
+                          !cv::database_enabled.getBool());
+
+    if(!this->bNeedRawLoad) {
+        load_collections();
     }
 
-    void destroy() override { ; }
+    this->bAsyncReady = true;
+    if(cv::debug_db.getBool() || cv::debug_async_db.getBool()) debugLog("(AsyncDBLoader) done\n");
+}
 
-   private:
-    bool bNeedRawLoad{false};
-};
+void Database::startLoader() {
+    if(cv::debug_db.getBool() || cv::debug_async_db.getBool()) debugLog("start\n");
+    this->destroyLoader();
+
+    this->loader = new AsyncDBLoader();
+    resourceManager->requestNextLoadAsync();
+    resourceManager->loadResource(this->loader);
+
+    if(cv::debug_db.getBool() || cv::debug_async_db.getBool()) debugLog("done\n");
+}
+
+void Database::destroyLoader() {
+    if(cv::debug_db.getBool() || cv::debug_async_db.getBool()) debugLog("start\n");
+    if(this->loader) {
+        resourceManager->destroyResource(this->loader, true);  // force blocking
+        this->loader = nullptr;
+    }
+    if(cv::debug_db.getBool() || cv::debug_async_db.getBool()) debugLog("done\n");
+}
 
 Database::Database() {
     // vars
@@ -201,6 +212,8 @@ Database::Database() {
 }
 
 Database::~Database() {
+    this->destroyLoader();
+
     SAFE_DELETE(this->importTimer);
 
     sct_abort();
@@ -287,8 +300,7 @@ void Database::load() {
     this->bInterruptLoad = false;
     this->fLoadingProgress = 0.0f;
 
-    resourceManager->requestNextLoadAsync();
-    resourceManager->loadResource(new DatabaseLoader());  // (deletes itself after finishing)
+    this->startLoader();
 }
 
 void Database::cancel() {
@@ -418,7 +430,7 @@ void Database::sortScoresInPlace(std::vector<FinishedScore> &scores) {
         }
     }
 
-    if(cv::debug.getBool()) {
+    if(cv::debug_db.getBool()) {
         debugLog("ERROR: Invalid score sortingtype \"{:s}\"\n", cv::songbrowser_scores_sortingtype.getString());
     }
 }
@@ -917,7 +929,7 @@ void Database::loadMaps() {
             for(int i = 0; i < this->iNumBeatmapsToLoad; i++) {
                 if(this->bInterruptLoad.load()) break;  // cancellation point
 
-                if(cv::debug.getBool())
+                if(cv::debug_db.getBool())
                     debugLog("Database: Reading beatmap {:d}/{:d} ...\n", (i + 1), this->iNumBeatmapsToLoad);
 
                 // update progress (another thread checks if progress >= 1.f to know when we're done)
@@ -1455,10 +1467,8 @@ bool Database::importDatabase(const std::string &db_path) {
                 (void)map_md5;
                 u32 nb_scores = score_db.read<u32>();
                 for(u32 j = 0; j < nb_scores; j++) {
-                    u8 gamemode = score_db.read<u8>();
-                    (void)gamemode;  // could check for 0xA9, but better method below
-                    u32 score_version = score_db.read<u32>();
-                    (void)score_version;  // useless
+                    /* u8 gamemode = */ score_db.skip<u8>(); // could check for 0xA9, but better method below
+                    /* u32 score_version = */ score_db.skip<u32>(); // useless
 
                     // Here, neosu stores an int64 timestamp. First 32 bits should be 0 (until 2106).
                     // Meanwhile, peppy stores the beatmap hash, which will NEVER be 0, since
@@ -1737,7 +1747,7 @@ void Database::loadOldMcNeosuScores(const UString &dbPath) {
                 break;
             }
 
-            if(cv::debug.getBool())
+            if(cv::debug_db.getBool())
                 debugLog("Beatmap[{}]: md5hash = {:s}, numScores = {}\n", b, md5hash.hash.data(), numScores);
 
             for(int s = 0; s < numScores; s++) {
@@ -1759,7 +1769,7 @@ void Database::loadOldMcNeosuScores(const UString &dbPath) {
                     }
                     db.skip_bytes(bytesToSkipUntilNextScore);
                     db.skip_string();  // experimentalMods
-                    if(cv::debug.getBool()) {
+                    if(cv::debug_db.getBool()) {
                         debugLog("skipped score {} (already loaded from neosu_scores.db)\n", md5hash.hash.data());
                     }
                     continue;
@@ -2106,7 +2116,7 @@ void Database::saveScores() {
 }
 
 BeatmapSet *Database::loadRawBeatmap(const std::string &beatmapPath) {
-    if(cv::debug.getBool()) debugLog("BeatmapDatabase::loadRawBeatmap() : {:s}\n", beatmapPath.c_str());
+    if(cv::debug_db.getBool()) debugLog("BeatmapDatabase::loadRawBeatmap() : {:s}\n", beatmapPath.c_str());
 
     // try loading all diffs
     std::vector<BeatmapDifficulty *> *diffs2 = new std::vector<BeatmapDifficulty *>();
@@ -2123,7 +2133,7 @@ BeatmapSet *Database::loadRawBeatmap(const std::string &beatmapPath) {
         if(diff2->loadMetadata()) {
             diffs2->push_back(diff2);
         } else {
-            if(cv::debug.getBool()) {
+            if(cv::debug_db.getBool()) {
                 debugLog("BeatmapDatabase::loadRawBeatmap() : Couldn't loadMetadata(), deleting object.\n");
             }
             SAFE_DELETE(diff2);

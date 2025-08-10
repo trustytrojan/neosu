@@ -188,7 +188,7 @@ void BassSound::setPositionMS(unsigned long ms) {
         if(this->isPlaying()) {
             if(!BASS_Mixer_ChannelSetPosition(this->stream, target_pos,
                                               BASS_POS_BYTE | BASS_POS_DECODETO | BASS_POS_MIXER_RESET)) {
-                if(cv::debug.getBool()) {
+                if(cv::debug_snd.getBool()) {
                     debugLog("setPositionMS( {} ) BASS_ChannelSetPosition() error on file {}: {}\n", ms,
                               this->sFilePath.c_str(), BassManager::getErrorUString(BASS_ErrorGetCode()));
                 }
@@ -196,7 +196,7 @@ void BassSound::setPositionMS(unsigned long ms) {
             this->fLastPlayTime = this->fChannelCreationTime - ((f64)ms / 1000.0);
         } else {
             if(!BASS_ChannelSetPosition(this->stream, target_pos, BASS_POS_BYTE | BASS_POS_DECODETO | BASS_POS_FLUSH)) {
-                if(cv::debug.getBool()) {
+                if(cv::debug_snd.getBool()) {
                     debugLog("setPositionMS( {} ) BASS_ChannelSetPosition() error on file {}: {}\n", ms,
                               this->sFilePath.c_str(), BassManager::getErrorUString(BASS_ErrorGetCode()));
                 }
@@ -217,7 +217,7 @@ void BassSound::setPositionMS(unsigned long ms) {
         this->paused_position_ms = ms;
 
         if(!BASS_ChannelSetPosition(this->stream, target_pos, BASS_POS_BYTE | BASS_POS_DECODETO | BASS_POS_FLUSH)) {
-            if(cv::debug.getBool()) {
+            if(cv::debug_snd.getBool()) {
                 debugLog("setPositionMS( {} ) BASS_ChannelSetPosition() error on file {}: {}\n", ms,
                           this->sFilePath.c_str(), BassManager::getErrorUString());
             }
@@ -249,7 +249,7 @@ void BassSound::setPositionMS_fast(u32 ms) {
 
     if(this->isPlaying()) {
         if(!BASS_Mixer_ChannelSetPosition(this->stream, target_pos, BASS_POS_BYTE | BASS_POS_MIXER_RESET)) {
-            if(cv::debug.getBool()) {
+            if(cv::debug_snd.getBool()) {
                 debugLog("BASS_Mixer_ChannelSetPosition( stream , {} ) error on file {}: {}\n", ms,
                           this->sFilePath.c_str(), BassManager::getErrorUString());
             }
@@ -257,7 +257,7 @@ void BassSound::setPositionMS_fast(u32 ms) {
         this->fLastPlayTime = this->fChannelCreationTime - ((f64)ms / 1000.0);
     } else {
         if(!BASS_ChannelSetPosition(this->stream, target_pos, BASS_POS_BYTE | BASS_POS_FLUSH)) {
-            if(cv::debug.getBool()) {
+            if(cv::debug_snd.getBool()) {
                 debugLog("BASS_ChannelSetPosition( stream , {} ) error on file {}: {}\n", ms, this->sFilePath.c_str(),
                           BassManager::getErrorUString());
             }

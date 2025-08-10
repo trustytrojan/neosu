@@ -246,6 +246,7 @@ class ConVar {
 
     [[nodiscard]] constexpr int getInt() const { return getVal<int>(); }
     [[nodiscard]] constexpr bool getBool() const { return getVal<bool>(); }
+    [[nodiscard]] constexpr bool get() const { return getVal<bool>(); }
     [[nodiscard]] constexpr float getFloat() const { return getVal<float>(); }
 
     [[nodiscard]]

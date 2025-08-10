@@ -42,7 +42,7 @@ class ResourceManager final {
         requestNextLoadUnmanaged();
         loadResource(rs, true);
     }
-    void destroyResource(Resource *rs);
+    void destroyResource(Resource *rs, bool forceBlocking = false); // forceBlocking: don't allow async destroy
     void destroyResources();
 
     // async reload

@@ -3,6 +3,7 @@
 
 #include "ConVar.h"
 
+#include "Resource.h"
 #include "ByteBufferedFile.h"
 #include "LegacyReplay.h"
 #include "Overrides.h"
@@ -18,12 +19,14 @@ class Timer;
 class ConVar;
 
 class DatabaseBeatmap;
-class DatabaseLoader;
 typedef DatabaseBeatmap BeatmapDifficulty;
 typedef DatabaseBeatmap BeatmapSet;
 
 #define NEOSU_MAPS_DB_VERSION 20250801
 #define NEOSU_SCORE_DB_VERSION 20240725
+
+class Database;
+extern std::unique_ptr<Database> db;
 
 class Database {
 // Field ordering matters here
@@ -127,7 +130,31 @@ class Database {
     std::vector<std::string> dbPathsToImport;
 
    private:
-    friend class DatabaseLoader;
+    class AsyncDBLoader : public Resource {
+       public:
+        ~AsyncDBLoader() override = default;
+        AsyncDBLoader() : Resource() {}
+
+        AsyncDBLoader &operator=(const AsyncDBLoader &) = delete;
+        AsyncDBLoader &operator=(AsyncDBLoader &&) = delete;
+        AsyncDBLoader(const AsyncDBLoader &) = delete;
+        AsyncDBLoader(AsyncDBLoader &&) = delete;
+
+        [[nodiscard]] Type getResType() const override { return APPDEFINED; }
+
+       protected:
+        void init() override;
+        void initAsync() override;
+        void destroy() override { ; }
+
+       private:
+        friend class Database;
+        bool bNeedRawLoad{false};
+    };
+
+    friend class AsyncDBLoader;
+    void startLoader();
+    void destroyLoader();
 
     void saveMaps();
 
@@ -141,6 +168,7 @@ class Database {
     bool addScoreRaw(const FinishedScore &score);
     bool isScoreAlreadyInDB(u64 unix_timestamp, const MD5Hash &map_hash);
 
+    AsyncDBLoader *loader{nullptr};
     Timing::Timer *importTimer;
     bool bIsFirstLoad;   // only load differences after first raw load
     bool bFoundChanges;  // for total refresh detection of raw loading
@@ -173,5 +201,3 @@ class Database {
     std::vector<std::string> rawBeatmapFolders;
     std::vector<std::string> rawLoadBeatmapFolders;
 };
-
-extern std::unique_ptr<Database> db;
