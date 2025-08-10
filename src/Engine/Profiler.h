@@ -1,7 +1,7 @@
 #pragma once
 // Copyright (c) 2020, PG, All rights reserved.
 #define VPROF_MAIN()             \
-    g_profCurrentProfile.main(); \
+    g_profCurrentProfile.mainprof(); \
     VPROF("Main")
 
 #define VPROF(name) VPROF_(name, VPROF_BUDGETGROUP_ROOT)
@@ -113,7 +113,7 @@ class ProfilerProfile {
    public:
     ProfilerProfile(bool manualStartViaMain = false);
 
-    inline void main() {
+    inline void mainprof() {
         if(this->bEnableScheduled) {
             this->bEnableScheduled = false;
             this->root.enterScope();

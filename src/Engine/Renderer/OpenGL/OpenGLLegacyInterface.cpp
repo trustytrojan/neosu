@@ -151,8 +151,8 @@ void OpenGLLegacyInterface::drawLinef(float x1, float y1, float x2, float y2) {
 
     glBegin(GL_LINES);
     {
-        glVertex2f(x1 + 0.5f, y1 + 0.5f);
-        glVertex2f(x2 + 0.5f, y2 + 0.5f);
+        glVertex2f(x1, y1);
+        glVertex2f(x2, y2);
     }
     glEnd();
 }
@@ -166,25 +166,25 @@ void OpenGLLegacyInterface::drawRectf(float x, float y, float width, float heigh
     glBegin(withColor ? GL_LINES : GL_LINE_LOOP);
     if(withColor) {
         setColor(top);
-        glVertex2f(x + 0.5f, y + 0.5f);
-        glVertex2f(x + width - 0.5f, y + 0.5f);
-
-        setColor(right);
-        glVertex2f(x + width - 0.5f, y + 0.5f);
-        glVertex2f(x + width - 0.5f, y + height - 0.5f);
-
-        setColor(bottom);
-        glVertex2f(x + width - 0.5f, y + height - 0.5f);
-        glVertex2f(x + 0.5f, y + height - 0.5f);
+        glVertex2f(x, y);
+        glVertex2f(x + width, y);
 
         setColor(left);
-        glVertex2f(x + 0.5f, y + height - 0.5f);
-        glVertex2f(x + 0.5f, y + 0.5f);
+        glVertex2f(x, y + height);
+        glVertex2f(x, y);
+
+        setColor(bottom);
+        glVertex2f(x + width, y + height);
+        glVertex2f(x, y + height);
+
+        setColor(right);
+        glVertex2f(x + width, y);
+        glVertex2f(x + width, y + height);
     } else {
-        glVertex2f(x + 0.5f, y + 0.5f);
-        glVertex2f(x + width - 0.5f, y + 0.5f);
-        glVertex2f(x + width - 0.5f, y + height - 0.5f);
-        glVertex2f(x + 0.5f, y + height - 0.5f);
+        glVertex2f(x, y);                   // top-left
+        glVertex2f(x + width, y);           // top-right
+        glVertex2f(x + width, y + height);  // bottom-right
+        glVertex2f(x, y + height);          // bottom-left
     }
     glEnd();
 }

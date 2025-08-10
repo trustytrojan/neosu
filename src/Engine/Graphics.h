@@ -101,12 +101,12 @@ class Graphics {
                             const void *pixels) = 0;
     virtual void drawPixel(int x, int y) = 0;
     virtual void drawLinef(float x1, float y1, float x2, float y2) = 0;
-    virtual void drawRectf(float x, float y, float width, float height, bool withColor = false, Color top = {},
-                           Color right = {}, Color bottom = {}, Color left = {}) = 0;
+    virtual void drawRectf(float x, float y, float width, float height, bool withColor = false, Color top = -1,
+                           Color right = -1, Color bottom = -1, Color left = -1) = 0;
     virtual void fillRectf(float x, float y, float width, float height) = 0;
 
     inline void drawLine(int x1, int y1, int x2, int y2) {
-        this->drawLinef((float)x1, (float)y1, (float)x2, (float)y2);
+        this->drawLinef((float)x1 + 0.5f, (float)y1 + 0.5f, (float)x2 + 0.5f, (float)y2 + 0.5f);
     }
     inline void drawLine(Vector2 pos1, Vector2 pos2) { this->drawLinef(pos1.x, pos1.y, pos2.x, pos2.y); }
     inline void drawRectf(float x, float y, float width, float height, Color top, Color right, Color bottom,
@@ -114,10 +114,10 @@ class Graphics {
         this->drawRectf(x, y, width, height, true, top, right, bottom, left);
     }
     inline void drawRect(int x, int y, int width, int height) {
-        this->drawRectf((float)x, (float)y, (float)width, (float)height);
+        this->drawRectf((float)x + 0.5f, (float)y + 0.5f, (float)width, (float)height);
     }
     inline void drawRect(int x, int y, int width, int height, Color top, Color right, Color bottom, Color left) {
-        this->drawRectf((float)x, (float)y, (float)width, (float)height, top, right, bottom, left);
+        this->drawRectf((float)x + 0.5f, (float)y + 0.5f, (float)width, (float)height, top, right, bottom, left);
     }
     inline void fillRect(int x, int y, int width, int height) {
         this->fillRectf((float)x, (float)y, (float)width, (float)height);

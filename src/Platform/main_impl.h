@@ -1,0 +1,63 @@
+#pragma once
+// Copyright (c) 2025, WH, All rights reserved.
+
+#include "Environment.h"
+
+namespace Timing {
+class Timer;
+}
+
+#if !defined(SDL_h_) && !defined(SDL_main_h_)
+typedef struct SDL_GLContextState *SDL_GLContext;
+typedef union SDL_Event SDL_Event;
+enum SDL_AppResult : uint8_t;
+#endif
+
+#if !defined(SDL_main_h_)
+extern void SDL_AppQuit(void *appstate, SDL_AppResult result);
+#endif
+
+class SDLMain final : public Environment {
+   public:
+    SDLMain(int argc, char *argv[]);
+    ~SDLMain() override;
+
+    SDLMain &operator=(const SDLMain &) = delete;
+    SDLMain &operator=(SDLMain &&) = delete;
+    SDLMain(const SDLMain &) = delete;
+    SDLMain(SDLMain &&) = delete;
+
+    SDL_AppResult initialize();
+    SDL_AppResult iterate();
+    SDL_AppResult handleEvent(SDL_Event *event);
+    void shutdown(SDL_AppResult result);
+
+    static void restart(const std::vector<UString> &restartArgs);
+
+   private:
+    // init methods
+    bool createWindow();
+    void setupLogging();
+    void configureEvents();
+    float queryDisplayHz();
+    void doEarlyCmdlineOverrides();
+
+    // callback handlers
+    void fps_max_callback(float newVal);
+    void fps_max_background_callback(float newVal);
+
+    // set iteration rate for callbacks
+    void setFgFPS();
+    void setBgFPS();
+
+    // window and context
+    SDL_GLContext m_context{nullptr};
+
+    // engine update timer
+    Timing::Timer *m_deltaTimer{nullptr};
+
+    int m_iFpsMax{360};
+    int m_iFpsMaxBG{30};
+
+    std::vector<UString> m_vDroppedData;  // queued data dropped onto window
+};
