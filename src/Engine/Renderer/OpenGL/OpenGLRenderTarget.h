@@ -7,6 +7,8 @@
 
 #if defined(MCENGINE_FEATURE_OPENGL) || defined(MCENGINE_FEATURE_GLES32)
 
+#include <array>
+
 class OpenGLRenderTarget final : public RenderTarget {
    public:
     OpenGLRenderTarget(int x, int y, int width, int height,

@@ -47,6 +47,11 @@ void setcwdexe(const std::string &exePathStr) noexcept {
 }  // namespace
 #endif
 
+#if defined(_WIN32) && defined(_DEBUG) // only debug builds create a console
+#include "WinDebloatDefs.h"
+#include <consoleapi2.h> // for SetConsoleOutputCP
+#endif
+
 #include "SString.h"
 #include "Profiler.h"
 
@@ -120,6 +125,10 @@ MAIN_FUNC /* int argc, char *argv[] */
     // if a neosu instance is already running, send it a message then quit
     // TODO actually test this and make sure it works
     Environment::Interop::handle_existing_window(argc, argv);
+
+#if defined(_WIN32) && defined(_DEBUG)
+    SetConsoleOutputCP(65001 /*CP_UTF8*/);
+#endif
 
     // improve floating point perf in case this isn't already enabled by the compiler
     SET_FPU_DAZ_FTZ

@@ -245,13 +245,11 @@ static constexpr auto OPTIMAL_UNROLL = 4;
 
 typedef void* HWND;
 
-#define PREF_PATHSEP "/"
-
 #else  // Windows build
 
-#define PREF_PATHSEP "\\"
-
 #if defined(_MSC_VER)
+#pragma execution_character_set("utf-8")  // msvc wrangling
+
 #ifdef _WIN64
 #define _AMD64_
 #elif defined(_WIN32)
@@ -292,7 +290,10 @@ typedef SSIZE_T ssize_t;
 #error "OS not currently supported"
 #endif
 
-#define MCENGINE_DATA_DIR "." PREF_PATHSEP
+// always use / for path separators
+// windows does not care whether you use / or \, every other sane OS does
+#define PREF_PATHSEP "/"
+#define MCENGINE_DATA_DIR "./"
 
 #if defined(_X86_) || defined(__i386__) || (defined(_WIN32) && !defined(_WIN64))
 #define MC_ARCH64

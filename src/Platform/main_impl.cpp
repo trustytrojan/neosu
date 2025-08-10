@@ -377,7 +377,6 @@ bool SDLMain::createWindow() {
                 aaSamples = std::clamp(std::bit_floor(aaSamples), 2u, 16u);
                 SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
                 SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, static_cast<int>(aaSamples));
-                debugLog("set AA samples to {}\n", aaSamples);
             }
         }
     }
