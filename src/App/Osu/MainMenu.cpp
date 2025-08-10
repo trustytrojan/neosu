@@ -508,7 +508,8 @@ void MainMenu::draw() {
     g->popTransform();
 
     // friend
-    if(this->fMainMenuAnimFriendPercent > 0.0f) {
+    const bool drawing_friend = this->fMainMenuAnimFriendPercent > 0.0f;
+    if(drawing_friend) {
         // ears
         {
             const float width = mainButtonRect.getWidth() * 0.11f * 2.0f * (1.0f - pulse * 0.05f);
@@ -749,6 +750,7 @@ void MainMenu::draw() {
     }
 
     // neosu/server logo
+    if(!drawing_friend)  // it looks weird
     {
         auto logo = this->logo_img;
         if(bancho->server_icon != nullptr && bancho->server_icon->isReady() &&

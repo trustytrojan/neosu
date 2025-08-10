@@ -119,8 +119,8 @@ class Database {
 
     // should only be accessed from database loader thread!
     std::unordered_map<std::string, UString> database_files;
-    u64 bytes_processed;
-    u64 total_bytes;
+    u64 bytes_processed{0};
+    u64 total_bytes{0};
     std::atomic<float> fLoadingProgress;
 
     // fine to be modified as long as the db is not currently being loaded
@@ -174,4 +174,4 @@ class Database {
     std::vector<std::string> rawLoadBeatmapFolders;
 };
 
-extern Database *db;
+extern std::unique_ptr<Database> db;

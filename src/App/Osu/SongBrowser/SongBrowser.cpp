@@ -57,6 +57,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <memory>
 #include <utility>
 
 const Color highlightColor = argb(255, 0, 255, 0);
@@ -467,7 +468,7 @@ SongBrowser::SongBrowser()  // NOLINT(cert-msc51-cpp, cert-msc32-c)
     this->thumbnailYRatio = cv::draw_songbrowser_thumbnails.getBool() ? 1.333333f : 0.f;
 
     // beatmap database
-    db = new Database();
+    db = std::make_unique<Database>();
     this->bBeatmapRefreshScheduled = true;
 
     // behaviour
@@ -547,7 +548,7 @@ SongBrowser::~SongBrowser() {
     SAFE_DELETE(this->topbarRight);
     SAFE_DELETE(this->scoreBrowser);
     SAFE_DELETE(this->carousel);
-    SAFE_DELETE(db);
+    db.reset();
 
     // Memory leak on shutdown, maybe
     this->invalidate();
@@ -3269,7 +3270,7 @@ void SongBrowser::onSongButtonContextMenu(SongButton *songButton, const UString 
     // debugLog("SongBrowser::onSongButtonContextMenu({:p}, {:s}, {:d})\n", songButton, text.toUtf8(), id);
 
     struct CollectionManagementHelper {
-        static std::vector<MD5Hash> getBeatmapSetHashesForSongButton(SongButton *songButton, Database *db) {
+        static std::vector<MD5Hash> getBeatmapSetHashesForSongButton(SongButton *songButton) {
             std::vector<MD5Hash> beatmapSetHashes;
             {
                 const auto &songButtonChildren = songButton->getChildren();
@@ -3306,7 +3307,7 @@ void SongBrowser::onSongButtonContextMenu(SongButton *songButton, const UString 
             std::string name = text.toUtf8();
             auto collection = get_or_create_collection(name);
             const std::vector<MD5Hash> beatmapSetHashes =
-                CollectionManagementHelper::getBeatmapSetHashesForSongButton(songButton, db);
+                CollectionManagementHelper::getBeatmapSetHashesForSongButton(songButton);
             for(auto hash : beatmapSetHashes) {
                 collection->add_map(hash);
             }
@@ -3346,7 +3347,7 @@ void SongBrowser::onSongButtonContextMenu(SongButton *songButton, const UString 
 
             auto collection = get_or_create_collection(collectionName);
             const std::vector<MD5Hash> beatmapSetHashes =
-                CollectionManagementHelper::getBeatmapSetHashesForSongButton(songButton, db);
+                CollectionManagementHelper::getBeatmapSetHashesForSongButton(songButton);
             for(auto hash : beatmapSetHashes) {
                 collection->remove_map(hash);
             }
@@ -3364,7 +3365,7 @@ void SongBrowser::onSongButtonContextMenu(SongButton *songButton, const UString 
             } else if(id == -4) {
                 // id == -4 means beatmapset
                 const std::vector<MD5Hash> beatmapSetHashes =
-                    CollectionManagementHelper::getBeatmapSetHashesForSongButton(songButton, db);
+                    CollectionManagementHelper::getBeatmapSetHashesForSongButton(songButton);
                 for(const auto &beatmapSetHashe : beatmapSetHashes) {
                     collection->add_map(beatmapSetHashe);
                 }

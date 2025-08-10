@@ -28,7 +28,7 @@
 #include <cstring>
 #include <utility>
 
-Database *db = nullptr;
+std::unique_ptr<Database> db = nullptr;
 
 namespace {  // static namespace
 bool sortScoreByScore(FinishedScore const &a, FinishedScore const &b) {
@@ -90,9 +90,7 @@ bool sortScoreByPP(FinishedScore const &a, FinishedScore const &b) {
 
 class DatabaseLoader : public Resource {
    public:
-    DatabaseLoader(Database *db) : Resource() {
-        this->db = db;
-
+    DatabaseLoader() : Resource() {
         this->bAsyncReady = false;
         this->bReady = false;
     };
@@ -103,7 +101,7 @@ class DatabaseLoader : public Resource {
     void init() override {
         this->bReady = true;
         if(this->bNeedRawLoad) {
-            this->db->scheduleLoadRaw();
+            db->scheduleLoadRaw();
         }
 
         resourceManager->destroyResource(this);  // commit sudoku
@@ -118,36 +116,36 @@ class DatabaseLoader : public Resource {
         MapCalcThread::abort();
         VolNormalization::abort();
 
-        this->db->loudness_to_calc.clear();
-        this->db->maps_to_recalc.clear();
+        db->loudness_to_calc.clear();
+        db->maps_to_recalc.clear();
 
-        for(auto &beatmapset : this->db->beatmapsets) {
+        for(auto &beatmapset : db->beatmapsets) {
             SAFE_DELETE(beatmapset);
         }
-        this->db->beatmapsets.clear();
+        db->beatmapsets.clear();
 
-        for(auto &neosu_set : this->db->neosu_sets) {
+        for(auto &neosu_set : db->neosu_sets) {
             SAFE_DELETE(neosu_set);
         }
-        this->db->neosu_sets.clear();
+        db->neosu_sets.clear();
 
-        this->db->openDatabases();
+        db->openDatabases();
 
         std::string peppy_scores_path = cv::osu_folder.getString();
         peppy_scores_path.append(PREF_PATHSEP "scores.db");
-        this->db->scores_to_convert.clear();
-        this->db->loadScores(this->db->database_files["neosu_scores.db"]);
-        this->db->loadOldMcNeosuScores(this->db->database_files["scores.db"]);
-        this->db->loadPeppyScores(this->db->database_files[peppy_scores_path]);
-        this->db->bScoresLoaded = true;
+        db->scores_to_convert.clear();
+        db->loadScores(db->database_files["neosu_scores.db"]);
+        db->loadOldMcNeosuScores(db->database_files["scores.db"]);
+        db->loadPeppyScores(db->database_files[peppy_scores_path]);
+        db->bScoresLoaded = true;
 
-        this->db->loadMaps();
+        db->loadMaps();
 
         // .db files that were dropped on the main window
-        for(auto &db_path : this->db->dbPathsToImport) {
-            this->db->importDatabase(db_path);
+        for(auto &db_path : db->dbPathsToImport) {
+            db->importDatabase(db_path);
         }
-        this->db->dbPathsToImport.clear();
+        db->dbPathsToImport.clear();
 
         this->bNeedRawLoad = (!env->fileExists(fmt::format("{}" PREF_PATHSEP "osu!.db", cv::osu_folder.getString())) ||
                               !cv::database_enabled.getBool());
@@ -157,14 +155,14 @@ class DatabaseLoader : public Resource {
         }
 
         // signal that we are done
-        this->db->fLoadingProgress = 1.0f;
+        db->fLoadingProgress = 1.0f;
         this->bAsyncReady = true;
 
         // XXX: Is it bad to start a new thread from outside the main thread?
         if(!this->bNeedRawLoad) {
-            MapCalcThread::start_calc(this->db->maps_to_recalc);
-            VolNormalization::start_calc(this->db->loudness_to_calc);
-            sct_calc(this->db->scores_to_convert);
+            MapCalcThread::start_calc(db->maps_to_recalc);
+            VolNormalization::start_calc(db->loudness_to_calc);
+            sct_calc(db->scores_to_convert);
         }
     }
 
@@ -172,7 +170,6 @@ class DatabaseLoader : public Resource {
 
    private:
     bool bNeedRawLoad{false};
-    Database *db;
 };
 
 Database::Database() {
@@ -290,10 +287,8 @@ void Database::load() {
     this->bInterruptLoad = false;
     this->fLoadingProgress = 0.0f;
 
-    DatabaseLoader *loader = new DatabaseLoader(this);  // (deletes itself after finishing)
-
     resourceManager->requestNextLoadAsync();
-    resourceManager->loadResource(loader);
+    resourceManager->loadResource(new DatabaseLoader());  // (deletes itself after finishing)
 }
 
 void Database::cancel() {
