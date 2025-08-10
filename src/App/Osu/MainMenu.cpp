@@ -137,7 +137,7 @@ MainMenu::MainMenu() : OsuScreen() {
 
     this->fBackgroundFadeInTime = 0.0f;
 
-    this->logo_img = resourceManager->loadImage("neosu.png", "NEOSU_LOGO");
+    this->logo_img = resourceManager->loadImage("neosu.png", "NEOSU_LOGO", true /* mipmapped */);
     // background_shader = resourceManager->loadShader("main_menu_bg.vsh", "main_menu_bg.fsh");
 
     // check if the user has never clicked the changelog for this update
@@ -288,7 +288,7 @@ void MainMenu::draw() {
                 fclose(file);
             }
 
-            bancho->server_icon = resourceManager->loadImageAbs(icon_path, icon_path);
+            bancho->server_icon = resourceManager->loadImageAbs(icon_path, icon_path, true /* mipmapped */);
         }
     }
 
@@ -441,14 +441,21 @@ void MainMenu::draw() {
 
     float inset = 0.0f;
     if(drawing_full_cube) {
-        inset = 1.0f - 0.5 * this->fMainMenuAnimFriendPercent;
+        inset = (1.0f - 0.5f * this->fMainMenuAnimFriendPercent);
 
+        osu->getAAFrameBuffer()->enable();
+
+        g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_PREMUL_COLOR);
+
+        // avoid ugly aliasing with rotation
+        g->setLineWidth(1.25f);
+        g->setAntialiasing(true);
         g->setDepthBuffer(true);
         g->clearDepthBuffer();
         g->setCulling(true);
 
         g->push3DScene(mainButtonRect);
-        g->offset3DScene(0, 0, mainButtonRect.getWidth() / 2);
+        g->offset3DScene(0, 0, mainButtonRect.getWidth() / 2.f);
 
         float friendRotation = 0.0f;
         float friendTranslationX = 0.0f;
@@ -467,8 +474,8 @@ void MainMenu::draw() {
             const float anim3 = anim;
 
             friendRotation = anim2 * 13;
-            friendTranslationX = -anim2 * mainButtonRect.getWidth() * 0.175;
-            friendTranslationY = anim3 * mainButtonRect.getWidth() * 0.10;
+            friendTranslationX = -anim2 * mainButtonRect.getWidth() * 0.175f;
+            friendTranslationY = anim3 * mainButtonRect.getWidth() * 0.10f;
 
             friendRotation *= this->fMainMenuAnimFriendPercent;
             friendTranslationX *= this->fMainMenuAnimFriendPercent;
@@ -492,11 +499,12 @@ void MainMenu::draw() {
     g->translate(0, 0, inset);
     g->setColor(cubeColor);
     g->setAlpha(cv::main_menu_alpha.getFloat());
-    g->fillRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
-                mainButtonRect.getHeight() - 2 * inset);
+    g->fillRectf(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
+                 mainButtonRect.getHeight() - 2 * inset);
+    g->translate(0, 0, -0.2f);  // move the border slightly towards the camera to prevent Z fighting
     g->setColor(cubeBorderColor);
-    g->drawRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
-                mainButtonRect.getHeight() - 2 * inset);
+    g->drawRectf(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
+                 mainButtonRect.getHeight() - 2 * inset);
     g->popTransform();
 
     // friend
@@ -604,7 +612,7 @@ void MainMenu::draw() {
         // mouth
         {
             const float width = mainButtonRect.getWidth() * 0.10f;
-            const float height = mainButtonRect.getHeight() * 0.03f * 1.75;
+            const float height = mainButtonRect.getHeight() * 0.03f * 1.75f;
 
             const float length = width * std::sqrt(2.0f) * 2;
 
@@ -620,10 +628,10 @@ void MainMenu::draw() {
 
                 g->setColor(0xff000000);
                 g->setAlpha(cv::main_menu_alpha.getFloat());
-                g->fillRect(0, 0, width, height);
-                g->fillRect(width - height / 2.0f, 0, height, width);
-                g->fillRect(width - height / 2.0f, width - height / 2.0f, width, height);
-                g->fillRect(width * 2 - height, width - height / 2.0f, height, width + height / 2);
+                g->fillRectf(0, 0, width, height);
+                g->fillRectf(width - height / 2.0f, 0, height, width);
+                g->fillRectf(width - height / 2.0f, width - height / 2.0f, width, height);
+                g->fillRectf(width * 2 - height, width - height / 2.0f, height, width + height / 2);
             }
             g->popTransform();
         }
@@ -650,7 +658,7 @@ void MainMenu::draw() {
 
                 g->setColor(0xff000000);
                 g->setAlpha(cv::main_menu_alpha.getFloat());
-                g->fillRect(0, 0, width, height);
+                g->fillRectf(0, 0, width, height);
             }
             g->popTransform();
 
@@ -665,18 +673,18 @@ void MainMenu::draw() {
 
                 g->setColor(0xff000000);
                 g->setAlpha(cv::main_menu_alpha.getFloat());
-                g->fillRect(0, 0, width, height);
+                g->fillRectf(0, 0, width, height);
             }
             g->popTransform();
 
             // tear
             g->setColor(0xff000000);
             g->setAlpha(cv::main_menu_alpha.getFloat());
-            g->fillRect(mainButtonRect.getX() + offsetX + width * 0.375f -
-                            this->fMainMenuAnimFriendEyeFollowX * mainButtonRect.getWidth(),
-                        mainButtonRect.getY() + offsetY + width / 2.0f -
-                            this->fMainMenuAnimFriendEyeFollowY * mainButtonRect.getWidth(),
-                        height * 0.75f, width * 0.375f);
+            g->fillRectf(mainButtonRect.getX() + offsetX + width * 0.375f -
+                             this->fMainMenuAnimFriendEyeFollowX * mainButtonRect.getWidth(),
+                         mainButtonRect.getY() + offsetY + width / 2.0f -
+                             this->fMainMenuAnimFriendEyeFollowY * mainButtonRect.getWidth(),
+                         height * 0.75f, width * 0.375f);
         }
 
         // hands
@@ -720,7 +728,7 @@ void MainMenu::draw() {
                              mainButtonRect.getY() + mainButtonRect.getHeight() - size -
                                  animLeftMoveUp * mainButtonRect.getHeight() * 0.85f,
                              -0.5f);
-                g->fillRect(0, 0, size, size);
+                g->fillRectf(0, 0, size, size);
             }
             g->popTransform();
 
@@ -734,7 +742,7 @@ void MainMenu::draw() {
                              mainButtonRect.getY() + mainButtonRect.getHeight() - size -
                                  animRightMoveUp * mainButtonRect.getHeight() * 0.85f,
                              -0.5f);
-                g->fillRect(0, 0, size, size);
+                g->fillRectf(0, 0, size, size);
             }
             g->popTransform();
         }
@@ -751,8 +759,8 @@ void MainMenu::draw() {
         float alpha = (1.0f - this->fMainMenuAnimFriendPercent) * (1.0f - this->fMainMenuAnimFriendPercent) *
                       (1.0f - this->fMainMenuAnimFriendPercent);
 
-        float xscale = mainButtonRect.getWidth() / logo->getWidth();
-        float yscale = mainButtonRect.getHeight() / logo->getHeight();
+        float xscale = mainButtonRect.getWidth() / static_cast<float>(logo->getWidth());
+        float yscale = mainButtonRect.getHeight() / static_cast<float>(logo->getHeight());
         float scale = std::min(xscale, yscale) * 0.8f;
 
         g->pushTransform();
@@ -771,11 +779,12 @@ void MainMenu::draw() {
         g->translate(0, 0, inset);
         g->setColor(cubeColor);
         g->setAlpha(cv::main_menu_alpha.getFloat());
-        g->fillRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
-                    mainButtonRect.getHeight() - 2 * inset);
+        g->fillRectf(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset,
+                     mainButtonRect.getWidth() - 2 * inset, mainButtonRect.getHeight() - 2 * inset);
+        g->translate(0, 0, -0.2f);
         g->setColor(cubeBorderColor);
-        g->drawRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
-                    mainButtonRect.getHeight() - 2 * inset);
+        g->drawRectf(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset,
+                     mainButtonRect.getWidth() - 2 * inset, mainButtonRect.getHeight() - 2 * inset);
         g->popTransform();
 
         // right side
@@ -785,11 +794,12 @@ void MainMenu::draw() {
         g->translate(0, 0, inset);
         g->setColor(cubeColor);
         g->setAlpha(cv::main_menu_alpha.getFloat());
-        g->fillRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
-                    mainButtonRect.getHeight() - 2 * inset);
+        g->fillRectf(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset,
+                     mainButtonRect.getWidth() - 2 * inset, mainButtonRect.getHeight() - 2 * inset);
+        g->translate(0, 0, -0.2f);
         g->setColor(cubeBorderColor);
-        g->drawRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
-                    mainButtonRect.getHeight() - 2 * inset);
+        g->drawRectf(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset,
+                     mainButtonRect.getWidth() - 2 * inset, mainButtonRect.getHeight() - 2 * inset);
         g->popTransform();
         g->rotate3DScene(0, -90, 0);
         g->offset3DScene(0, 0, 0);
@@ -801,11 +811,12 @@ void MainMenu::draw() {
         g->translate(0, 0, inset);
         g->setColor(cubeColor);
         g->setAlpha(cv::main_menu_alpha.getFloat());
-        g->fillRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
-                    mainButtonRect.getHeight() - 2 * inset);
+        g->fillRectf(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset,
+                     mainButtonRect.getWidth() - 2 * inset, mainButtonRect.getHeight() - 2 * inset);
+        g->translate(0, 0, -0.2f);
         g->setColor(cubeBorderColor);
-        g->drawRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
-                    mainButtonRect.getHeight() - 2 * inset);
+        g->drawRectf(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset,
+                     mainButtonRect.getWidth() - 2 * inset, mainButtonRect.getHeight() - 2 * inset);
         g->popTransform();
         g->rotate3DScene(0, 90, 0);
         g->offset3DScene(0, 0, 0);
@@ -817,11 +828,12 @@ void MainMenu::draw() {
         g->translate(0, 0, inset);
         g->setColor(cubeColor);
         g->setAlpha(cv::main_menu_alpha.getFloat());
-        g->fillRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
-                    mainButtonRect.getHeight() - 2 * inset);
+        g->fillRectf(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset,
+                     mainButtonRect.getWidth() - 2 * inset, mainButtonRect.getHeight() - 2 * inset);
+        g->translate(0, 0, -0.2f);
         g->setColor(cubeBorderColor);
-        g->drawRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
-                    mainButtonRect.getHeight() - 2 * inset);
+        g->drawRectf(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset,
+                     mainButtonRect.getWidth() - 2 * inset, mainButtonRect.getHeight() - 2 * inset);
         g->popTransform();
         g->rotate3DScene(-90, 0, 0);
         g->offset3DScene(0, 0, 0);
@@ -833,11 +845,12 @@ void MainMenu::draw() {
         g->translate(0, 0, inset);
         g->setColor(cubeColor);
         g->setAlpha(cv::main_menu_alpha.getFloat());
-        g->fillRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
-                    mainButtonRect.getHeight() - 2 * inset);
+        g->fillRectf(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset,
+                     mainButtonRect.getWidth() - 2 * inset, mainButtonRect.getHeight() - 2 * inset);
+        g->translate(0, 0, -0.2f);
         g->setColor(cubeBorderColor);
-        g->drawRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
-                    mainButtonRect.getHeight() - 2 * inset);
+        g->drawRectf(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset,
+                     mainButtonRect.getWidth() - 2 * inset, mainButtonRect.getHeight() - 2 * inset);
         g->popTransform();
         g->rotate3DScene(90, 0, 0);
         g->offset3DScene(0, 0, 0);
@@ -846,6 +859,14 @@ void MainMenu::draw() {
 
         g->setCulling(false);
         g->setDepthBuffer(false);
+        g->setAntialiasing(false);
+
+        g->setLineWidth(1.0f);
+
+        g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ALPHA);
+
+        osu->getAAFrameBuffer()->disable();
+        osu->getAAFrameBuffer()->draw(0, 0);
     }
 }
 

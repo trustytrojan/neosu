@@ -30,19 +30,18 @@ class OpenGLLegacyInterface : public Graphics {
     // 2d primitive drawing
     void drawPixels(int x, int y, int width, int height, Graphics::DRAWPIXELS_TYPE type, const void *pixels) final;
     void drawPixel(int x, int y) final;
-    void drawLine(int x1, int y1, int x2, int y2) final;
-    void drawLine(Vector2 pos1, Vector2 pos2) final;
-    void drawRect(int x, int y, int width, int height) final;
-    void drawRect(int x, int y, int width, int height, Color top, Color right, Color bottom, Color left) final;
+    void drawLinef(float x1, float y1, float x2, float y2) final;
+    void drawRectf(float x, float y, float width, float height, bool withColor, Color top, Color right, Color bottom,
+                   Color left) final;
 
-    void fillRect(int x, int y, int width, int height) final;
+    void fillRectf(float x, float y, float width, float height) final;
     void fillRoundedRect(int x, int y, int width, int height, int radius) final;
     void fillGradient(int x, int y, int width, int height, Color topLeftColor, Color topRightColor,
                       Color bottomLeftColor, Color bottomRightColor) final;
 
-    void drawQuad(int x, int y, int width, int height) final;
+    void drawQuad(int x, int y, int width, int height, bool flipped = false) final;
     void drawQuad(Vector2 topLeft, Vector2 topRight, Vector2 bottomRight, Vector2 bottomLeft, Color topLeftColor,
-                  Color topRightColor, Color bottomRightColor, Color bottomLeftColor) final;
+                  Color topRightColor, Color bottomRightColor, Color bottomLeftColor, bool flipped = false) final;
 
     // 2d resource drawing
     void drawImage(Image *image, AnchorPoint anchor = AnchorPoint::CENTER) final;
@@ -71,6 +70,7 @@ class OpenGLLegacyInterface : public Graphics {
     void setCulling(bool culling) final;
     void setAntialiasing(bool aa) final;
     void setWireframe(bool enabled) final;
+    void setLineWidth(float width) final;
 
     // renderer actions
     void flush() final;

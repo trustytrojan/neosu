@@ -47,7 +47,6 @@ void setcwdexe(const std::string &exePathStr) noexcept {
 #endif
 
 #include "SString.h"
-#include "fmt/format.h"
 
 #include "Engine.h"
 #include "Environment.h"

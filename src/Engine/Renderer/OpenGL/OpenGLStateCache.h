@@ -7,8 +7,15 @@
 
 #if defined(MCENGINE_FEATURE_OPENGL) || defined(MCENGINE_FEATURE_GLES32)
 
+#include <array>
+
 class OpenGLStateCache final {
    public:
+    OpenGLStateCache &operator=(const OpenGLStateCache &) = delete;
+    OpenGLStateCache &operator=(OpenGLStateCache &&) = delete;
+    OpenGLStateCache(const OpenGLStateCache &) = delete;
+    OpenGLStateCache(OpenGLStateCache &&) = delete;
+
     static OpenGLStateCache &getInstance();
 
     // program state
@@ -30,18 +37,19 @@ class OpenGLStateCache final {
     void refresh();
 
    private:
-    OpenGLStateCache();
+    OpenGLStateCache() = default;
     ~OpenGLStateCache() = default;
+
+    std::array<int, 4> iViewport{};
 
     // singleton pattern
     static OpenGLStateCache *s_instance;
 
     // cache
-    int iCurrentProgram;
-    int iCurrentFramebuffer;
-    int iViewport[4];
+    int iCurrentProgram{0};
+    int iCurrentFramebuffer{0};
 
-    bool bInitialized;
+    bool bInitialized{false};
 };
 
 #endif

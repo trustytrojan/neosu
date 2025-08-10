@@ -182,6 +182,8 @@ Osu::Osu() {
     this->playfieldBuffer = resourceManager->createRenderTarget(0, 0, 64, 64);
     this->sliderFrameBuffer =
         resourceManager->createRenderTarget(0, 0, this->getScreenWidth(), this->getScreenHeight());
+    this->AAFrameBuffer = resourceManager->createRenderTarget(
+        0, 0, this->getScreenWidth(), this->getScreenHeight(), Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_16X);
     this->frameBuffer = resourceManager->createRenderTarget(0, 0, 64, 64);
     this->frameBuffer2 = resourceManager->createRenderTarget(0, 0, 64, 64);
 
@@ -1662,6 +1664,8 @@ void Osu::rebuildRenderTargets() {
 
     this->sliderFrameBuffer->rebuild(0, 0, g_vInternalResolution.x, g_vInternalResolution.y,
                                      Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_0X);
+
+    this->AAFrameBuffer->rebuild(0, 0, g_vInternalResolution.x, g_vInternalResolution.y);
 
     if(cv::mod_mafham.getBool()) {
         this->frameBuffer->rebuild(0, 0, g_vInternalResolution.x, g_vInternalResolution.y);

@@ -100,19 +100,37 @@ class Graphics {
     virtual void drawPixels(int x, int y, int width, int height, Graphics::DRAWPIXELS_TYPE type,
                             const void *pixels) = 0;
     virtual void drawPixel(int x, int y) = 0;
-    virtual void drawLine(int x1, int y1, int x2, int y2) = 0;
-    virtual void drawLine(Vector2 pos1, Vector2 pos2) = 0;
-    virtual void drawRect(int x, int y, int width, int height) = 0;
-    virtual void drawRect(int x, int y, int width, int height, Color top, Color right, Color bottom, Color left) = 0;
+    virtual void drawLinef(float x1, float y1, float x2, float y2) = 0;
+    virtual void drawRectf(float x, float y, float width, float height, bool withColor = false, Color top = {},
+                           Color right = {}, Color bottom = {}, Color left = {}) = 0;
+    virtual void fillRectf(float x, float y, float width, float height) = 0;
 
-    virtual void fillRect(int x, int y, int width, int height) = 0;
+    inline void drawLine(int x1, int y1, int x2, int y2) {
+        this->drawLinef((float)x1, (float)y1, (float)x2, (float)y2);
+    }
+    inline void drawLine(Vector2 pos1, Vector2 pos2) { this->drawLinef(pos1.x, pos1.y, pos2.x, pos2.y); }
+    inline void drawRectf(float x, float y, float width, float height, Color top, Color right, Color bottom,
+                          Color left) {
+        this->drawRectf(x, y, width, height, true, top, right, bottom, left);
+    }
+    inline void drawRect(int x, int y, int width, int height) {
+        this->drawRectf((float)x, (float)y, (float)width, (float)height);
+    }
+    inline void drawRect(int x, int y, int width, int height, Color top, Color right, Color bottom, Color left) {
+        this->drawRectf((float)x, (float)y, (float)width, (float)height, top, right, bottom, left);
+    }
+    inline void fillRect(int x, int y, int width, int height) {
+        this->fillRectf((float)x, (float)y, (float)width, (float)height);
+    }
+
     virtual void fillRoundedRect(int x, int y, int width, int height, int radius) = 0;
     virtual void fillGradient(int x, int y, int width, int height, Color topLeftColor, Color topRightColor,
                               Color bottomLeftColor, Color bottomRightColor) = 0;
 
-    virtual void drawQuad(int x, int y, int width, int height) = 0;
+    virtual void drawQuad(int x, int y, int width, int height, bool flipped = false) = 0;
     virtual void drawQuad(Vector2 topLeft, Vector2 topRight, Vector2 bottomRight, Vector2 bottomLeft,
-                          Color topLeftColor, Color topRightColor, Color bottomRightColor, Color bottomLeftColor) = 0;
+                          Color topLeftColor, Color topRightColor, Color bottomRightColor, Color bottomLeftColor,
+                          bool flipped = false) = 0;
 
     // 2d resource drawing
     virtual void drawImage(Image *image, AnchorPoint anchor = AnchorPoint::CENTER) = 0;
@@ -142,6 +160,7 @@ class Graphics {
     virtual void setVSync(bool enabled) = 0;
     virtual void setAntialiasing(bool enabled) = 0;
     virtual void setWireframe(bool enabled) = 0;
+    virtual void setLineWidth(float width) = 0;
 
     // renderer actions
     virtual void flush() = 0;

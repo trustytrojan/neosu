@@ -115,6 +115,7 @@ class Osu final : public MouseListener, public KeyboardListener {
 
     [[nodiscard]] inline RenderTarget *getPlayfieldBuffer() const { return this->playfieldBuffer; }
     [[nodiscard]] inline RenderTarget *getSliderFrameBuffer() const { return this->sliderFrameBuffer; }
+    [[nodiscard]] inline RenderTarget *getAAFrameBuffer() const { return this->AAFrameBuffer; }
     [[nodiscard]] inline RenderTarget *getFrameBuffer() const { return this->frameBuffer; }
     [[nodiscard]] inline RenderTarget *getFrameBuffer2() const { return this->frameBuffer2; }
     [[nodiscard]] inline McFont *getTitleFont() const { return this->titleFont; }
@@ -246,6 +247,7 @@ class Osu final : public MouseListener, public KeyboardListener {
     RenderTarget *backBuffer;
     RenderTarget *playfieldBuffer;
     RenderTarget *sliderFrameBuffer;
+    RenderTarget *AAFrameBuffer;
     RenderTarget *frameBuffer;
     RenderTarget *frameBuffer2;
     Vector2 vInternalResolution;

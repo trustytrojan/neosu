@@ -5,18 +5,6 @@
 #include "Engine.h"
 #include "VertexArrayObject.h"
 
-RenderTarget::RenderTarget(int x, int y, int width, int height, Graphics::MULTISAMPLE_TYPE multiSampleType) {
-    this->vPos = Vector2(x, y);
-    this->vSize = Vector2(width, height);
-    this->multiSampleType = multiSampleType;
-
-    this->bClearColorOnDraw = true;
-    this->bClearDepthOnDraw = true;
-
-    this->color = 0xffffffff;
-    this->clearColor = 0x00000000;
-}
-
 void RenderTarget::draw(int x, int y) {
     if(!this->bReady) {
         if(cv::debug_rt.getBool()) debugLog("WARNING: RenderTarget is not ready!\n");
@@ -27,35 +15,7 @@ void RenderTarget::draw(int x, int y) {
 
     this->bind();
     {
-        // NOTE: can't use drawQuad because opengl fucks shit up and flips framebuffers vertically (due to bottom left
-        // opengl origin and top left engine origin)
-        // g->drawQuad(x, y, this->vSize.x, this->vSize.y);
-
-        // compromise: all draw*() functions of the RenderTarget class guarantee correctly flipped images.
-        //             if bind() is used, no guarantee can be made about the texture orientation (assuming an anonymous
-        //             Renderer)
-
-        VertexArrayObject vao;
-        {
-            vao.addTexcoord(0, 1);
-            vao.addVertex(x, y);
-
-            vao.addTexcoord(0, 0);
-            vao.addVertex(x, y + this->vSize.y);
-
-            vao.addTexcoord(1, 0);
-            vao.addVertex(x + this->vSize.x, y + this->vSize.y);
-
-            vao.addTexcoord(1, 0);
-            vao.addVertex(x + this->vSize.x, y + this->vSize.y);
-
-            vao.addTexcoord(1, 1);
-            vao.addVertex(x + this->vSize.x, y);
-
-            vao.addTexcoord(0, 1);
-            vao.addVertex(x, y);
-        }
-        g->drawVAO(&vao);
+        g->drawQuad(x, y, this->vSize.x, this->vSize.y, true); // draw flipped for opengl<->engine coordinate mapping
     }
     this->unbind();
 }
@@ -70,27 +30,7 @@ void RenderTarget::draw(int x, int y, int width, int height) {
 
     this->bind();
     {
-        VertexArrayObject vao;
-        {
-            vao.addTexcoord(0, 1);
-            vao.addVertex(x, y);
-
-            vao.addTexcoord(0, 0);
-            vao.addVertex(x, y + height);
-
-            vao.addTexcoord(1, 0);
-            vao.addVertex(x + width, y + height);
-
-            vao.addTexcoord(1, 0);
-            vao.addVertex(x + width, y + height);
-
-            vao.addTexcoord(1, 1);
-            vao.addVertex(x + width, y);
-
-            vao.addTexcoord(0, 1);
-            vao.addVertex(x, y);
-        }
-        g->drawVAO(&vao);
+        g->drawQuad(x, y, width, height, true); // draw flipped for opengl<->engine coordinate mapping
     }
     this->unbind();
 }

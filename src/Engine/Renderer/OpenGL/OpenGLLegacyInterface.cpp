@@ -34,10 +34,20 @@ OpenGLLegacyInterface::OpenGLLegacyInterface() : Graphics() {
     this->syncobj = new OpenGLSync();
     this->syncobj->init();
 
+    // quality
+    glHint(GL_FRAGMENT_SHADER_DERIVATIVE_HINT, GL_NICEST);
+    glHint(GL_GENERATE_MIPMAP_HINT, GL_NICEST);
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+    glHint(GL_TEXTURE_COMPRESSION_HINT, GL_NICEST);
+
     // enable
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
     glEnable(GL_COLOR_MATERIAL);
+    glEnable(GL_LINE_SMOOTH);
 
     // disable
     glDisable(GL_CULL_FACE);
@@ -46,9 +56,6 @@ OpenGLLegacyInterface::OpenGLLegacyInterface() : Graphics() {
 
     // shading
     glShadeModel(GL_SMOOTH);
-    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
     // blending
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -137,7 +144,7 @@ void OpenGLLegacyInterface::drawPixel(int x, int y) {
     glEnd();
 }
 
-void OpenGLLegacyInterface::drawLine(int x1, int y1, int x2, int y2) {
+void OpenGLLegacyInterface::drawLinef(float x1, float y1, float x2, float y2) {
     updateTransform();
 
     glDisable(GL_TEXTURE_2D);
@@ -150,68 +157,49 @@ void OpenGLLegacyInterface::drawLine(int x1, int y1, int x2, int y2) {
     glEnd();
 }
 
-void OpenGLLegacyInterface::drawLine(Vector2 pos1, Vector2 pos2) { drawLine(pos1.x, pos1.y, pos2.x, pos2.y); }
-
-void OpenGLLegacyInterface::drawRect(int x, int y, int width, int height) {
+void OpenGLLegacyInterface::drawRectf(float x, float y, float width, float height, bool withColor, Color top,
+                                      Color right, Color bottom, Color left) {
     updateTransform();
 
     glDisable(GL_TEXTURE_2D);
 
-    glBegin(GL_LINES);
-    {
-        glVertex2f((x + 1) + 0.5f, y + 0.5f);
-        glVertex2f((x + width) + 0.5f, y + 0.5f);
-
-        glVertex2f(x + 0.5f, y + 0.5f);
-        glVertex2f(x + 0.5f, (y + height) + 0.5f);
-
-        glVertex2f(x + 0.5f, (y + height) + 0.5f);
-        glVertex2f((x + width + 1) + 0.5f, (y + height) + 0.5f);
-
-        glVertex2f((x + width) + 0.5f, y + 0.5f);
-        glVertex2f((x + width) + 0.5f, (y + height) + 0.5f);
-    }
-    glEnd();
-}
-
-void OpenGLLegacyInterface::drawRect(int x, int y, int width, int height, Color top, Color right, Color bottom,
-                                     Color left) {
-    updateTransform();
-
-    glDisable(GL_TEXTURE_2D);
-
-    glBegin(GL_LINES);
-    {
+    glBegin(withColor ? GL_LINES : GL_LINE_LOOP);
+    if(withColor) {
         setColor(top);
-        glVertex2f((x + 1) + 0.5f, y + 0.5f);
-        glVertex2f((x + width) + 0.5f, y + 0.5f);
-
-        setColor(left);
         glVertex2f(x + 0.5f, y + 0.5f);
-        glVertex2f(x + 0.5f, (y + height) + 0.5f);
-
-        setColor(bottom);
-        glVertex2f(x + 0.5f, (y + height) + 0.5f);
-        glVertex2f((x + width + 1) + 0.5f, (y + height) + 0.5f);
+        glVertex2f(x + width - 0.5f, y + 0.5f);
 
         setColor(right);
-        glVertex2f((x + width) + 0.5f, y + 0.5f);
-        glVertex2f((x + width) + 0.5f, (y + height) + 0.5f);
+        glVertex2f(x + width - 0.5f, y + 0.5f);
+        glVertex2f(x + width - 0.5f, y + height - 0.5f);
+
+        setColor(bottom);
+        glVertex2f(x + width - 0.5f, y + height - 0.5f);
+        glVertex2f(x + 0.5f, y + height - 0.5f);
+
+        setColor(left);
+        glVertex2f(x + 0.5f, y + height - 0.5f);
+        glVertex2f(x + 0.5f, y + 0.5f);
+    } else {
+        glVertex2f(x + 0.5f, y + 0.5f);
+        glVertex2f(x + width - 0.5f, y + 0.5f);
+        glVertex2f(x + width - 0.5f, y + height - 0.5f);
+        glVertex2f(x + 0.5f, y + height - 0.5f);
     }
     glEnd();
 }
 
-void OpenGLLegacyInterface::fillRect(int x, int y, int width, int height) {
+void OpenGLLegacyInterface::fillRectf(float x, float y, float width, float height) {
     updateTransform();
 
     glDisable(GL_TEXTURE_2D);
 
     glBegin(GL_QUADS);
     {
-        glVertex2i(x, y);
-        glVertex2i(x, (y + height));
-        glVertex2i((x + width), (y + height));
-        glVertex2i((x + width), y);
+        glVertex2f(x, y);
+        glVertex2f(x, (y + height));
+        glVertex2f((x + width), (y + height));
+        glVertex2f((x + width), y);
     }
     glEnd();
 }
@@ -278,48 +266,64 @@ void OpenGLLegacyInterface::fillGradient(int x, int y, int width, int height, Co
     glEnd();
 }
 
-void OpenGLLegacyInterface::drawQuad(int x, int y, int width, int height) {
+void OpenGLLegacyInterface::drawQuad(int x, int y, int width, int height, bool flipped) {
     updateTransform();
+
+    const int left = x;
+    const int right = (x + width);
+
+    const int top = flipped ? y : (y + height);
+    const int bottom = flipped ? (y + height) : y;
 
     glBegin(GL_QUADS);
     {
-        glTexCoord2f(0, 0);
-        glVertex2f(x, y);
+        glTexCoord2i(0, 0);
+        glVertex2i(left, bottom);
 
-        glTexCoord2f(0, 1);
-        glVertex2f(x, (y + height));
+        glTexCoord2i(0, 1);
+        glVertex2i(left, top);
 
-        glTexCoord2f(1, 1);
-        glVertex2f((x + width), (y + height));
+        glTexCoord2i(1, 1);
+        glVertex2i(right, top);
 
-        glTexCoord2f(1, 0);
-        glVertex2f((x + width), y);
+        glTexCoord2i(1, 0);
+        glVertex2i(right, bottom);
     }
     glEnd();
 }
 
 void OpenGLLegacyInterface::drawQuad(Vector2 topLeft, Vector2 topRight, Vector2 bottomRight, Vector2 bottomLeft,
                                      Color topLeftColor, Color topRightColor, Color bottomRightColor,
-                                     Color bottomLeftColor) {
+                                     Color bottomLeftColor, bool flipped) {
     updateTransform();
+
+    const float topLeftX = topLeft.x;
+    const float botLeftX = bottomLeft.x;
+    const float topRightX = topRight.x;
+    const float botRightX = bottomRight.x;
+
+    const float topLeftY = flipped ? bottomLeft.y : topLeft.y;
+    const float botLeftY = flipped ? topLeft.y : bottomLeft.y;
+    const float topRightY = flipped ? bottomRight.y : topRight.y;
+    const float botRightY = flipped ? topRight.y : bottomRight.y;
 
     glBegin(GL_QUADS);
     {
         setColor(topLeftColor);
-        glTexCoord2f(0, 0);
-        glVertex2f(topLeft.x, topLeft.y);
+        glTexCoord2f(0.f, 0.f);
+        glVertex2f(topLeftX, topLeftY);
 
         setColor(bottomLeftColor);
-        glTexCoord2f(0, 1);
-        glVertex2f(bottomLeft.x, bottomLeft.y);
+        glTexCoord2f(0.f, 1.f);
+        glVertex2f(botLeftX, botLeftY);
 
         setColor(bottomRightColor);
-        glTexCoord2f(1, 1);
-        glVertex2f(bottomRight.x, bottomRight.y);
+        glTexCoord2f(1.f, 1.f);
+        glVertex2f(botRightX, botRightY);
 
         setColor(topRightColor);
-        glTexCoord2f(1, 0);
-        glVertex2f(topRight.x, topRight.y);
+        glTexCoord2f(1.f, 0.f);
+        glVertex2f(topRightX, topRightY);
     }
     glEnd();
 }
@@ -444,8 +448,8 @@ void OpenGLLegacyInterface::setClipRect(McRect clipRect) {
     // if (m_bIs3DScene) return; // HACKHACK:TODO:
 
     // HACKHACK: compensate for viewport changes caused by RenderTargets!
-    int viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
+    std::array<int, 4> viewport;  // NOLINT
+    glGetIntegerv(GL_VIEWPORT, viewport.data());
 
     // debugLog("viewport = {}, {}, {}, {}\n", viewport[0], viewport[1], viewport[2], viewport[3]);
 
@@ -568,6 +572,8 @@ void OpenGLLegacyInterface::setWireframe(bool enabled) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
+void OpenGLLegacyInterface::setLineWidth(float width) { glLineWidth(width); }
+
 void OpenGLLegacyInterface::flush() { glFlush(); }
 
 std::vector<u8> OpenGLLegacyInterface::getScreenshot(bool withAlpha) {
@@ -590,13 +596,12 @@ std::vector<u8> OpenGLLegacyInterface::getScreenshot(bool withAlpha) {
     glFinish();
     for(sSz y = 0; y < height; y++)  // flip it while reading
     {
-        glReadPixels(0, (height - (y + 1)), width, 1, glFormat, GL_UNSIGNED_BYTE,
-                     &(pixels[y * width * numChannels]));
+        glReadPixels(0, (height - (y + 1)), width, 1, glFormat, GL_UNSIGNED_BYTE, &(pixels[y * width * numChannels]));
     }
 
     // fix alpha channel (set all pixels to fully opaque)
     // TODO: allow proper transparent screenshots
-    if (withAlpha) {
+    if(withAlpha) {
         for(u32 i = 3; i < numElements; i += numChannels) {
             pixels[i] = 255;
         }

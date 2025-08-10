@@ -23,8 +23,6 @@
 #include "fmt/format.h"
 #include "fmt/printf.h"
 
-using namespace fmt::literals;
-
 class UString {
    public:
     template <typename... Args>

@@ -175,8 +175,8 @@ void Mouse::onMotion(Vector2 origRel, Vector2 origAbs, bool raw) {
 
     if(!raw && !(env->isCursorVisible() || !env->isCursorInWindow() || !engine->hasFocus())) {
         const bool couldCursorEscapeWindow =
-            this->fSensitivity < 0.995f || ((cv::mod_fposu.getBool() && !cv::fposu_absolute_mode.getBool()) &&
-                                            (osu && osu->isInPlayModeAndNotPaused()));
+            this->fSensitivity < 0.995f ||
+            ((cv::mod_fposu.getBool() && !cv::fposu_absolute_mode.getBool()) && (osu && osu->isInPlayMode()));
 
         this->bNeedsCursorLock = couldCursorEscapeWindow;
 

@@ -8,7 +8,8 @@ class ConVar;
 class RenderTarget : public Resource {
    public:
     RenderTarget(int x, int y, int width, int height,
-                 Graphics::MULTISAMPLE_TYPE multiSampleType = Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_0X);
+                 Graphics::MULTISAMPLE_TYPE multiSampleType = Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_0X)
+        : vPos(Vector2{x, y}), vSize(width, height), multiSampleType(multiSampleType) {}
     ~RenderTarget() override { ; }
 
     virtual void draw(int x, int y);
@@ -59,14 +60,14 @@ class RenderTarget : public Resource {
     void initAsync() override = 0;
     void destroy() override = 0;
 
-    bool bClearColorOnDraw;
-    bool bClearDepthOnDraw;
-
     Vector2 vPos;
     Vector2 vSize;
 
+    Color color{static_cast<uint32_t>(-1)};
+    Color clearColor{0};
+
     Graphics::MULTISAMPLE_TYPE multiSampleType;
 
-    Color color;
-    Color clearColor;
+    bool bClearColorOnDraw{true};
+    bool bClearDepthOnDraw{true};
 };

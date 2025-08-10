@@ -6,7 +6,6 @@
 #include "Timing.h"
 #include "App.h"
 #include "fmt/color.h"
-#include "fmt/printf.h"
 
 class Mouse;
 class ConVar;

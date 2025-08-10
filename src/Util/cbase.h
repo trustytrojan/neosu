@@ -20,10 +20,6 @@
 #include "UString.h"
 #include "Vectors.h"
 
-// EXTERNAL INCLUDES
-
-#include <glm/trigonometric.hpp> // for glm::radians/glm::degrees
-
 // DEFS
 
 #ifndef PATH_MAX
