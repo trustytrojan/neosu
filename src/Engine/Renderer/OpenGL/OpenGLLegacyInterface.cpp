@@ -266,14 +266,14 @@ void OpenGLLegacyInterface::fillGradient(int x, int y, int width, int height, Co
     glEnd();
 }
 
-void OpenGLLegacyInterface::drawQuad(int x, int y, int width, int height, bool flipped) {
+void OpenGLLegacyInterface::drawQuad(int x, int y, int width, int height) {
     updateTransform();
 
     const int left = x;
     const int right = (x + width);
 
-    const int top = flipped ? y : (y + height);
-    const int bottom = flipped ? (y + height) : y;
+    const int top = (y + height);
+    const int bottom = y;
 
     glBegin(GL_QUADS);
     {
@@ -294,36 +294,26 @@ void OpenGLLegacyInterface::drawQuad(int x, int y, int width, int height, bool f
 
 void OpenGLLegacyInterface::drawQuad(Vector2 topLeft, Vector2 topRight, Vector2 bottomRight, Vector2 bottomLeft,
                                      Color topLeftColor, Color topRightColor, Color bottomRightColor,
-                                     Color bottomLeftColor, bool flipped) {
+                                     Color bottomLeftColor) {
     updateTransform();
-
-    const float topLeftX = topLeft.x;
-    const float botLeftX = bottomLeft.x;
-    const float topRightX = topRight.x;
-    const float botRightX = bottomRight.x;
-
-    const float topLeftY = flipped ? bottomLeft.y : topLeft.y;
-    const float botLeftY = flipped ? topLeft.y : bottomLeft.y;
-    const float topRightY = flipped ? bottomRight.y : topRight.y;
-    const float botRightY = flipped ? topRight.y : bottomRight.y;
 
     glBegin(GL_QUADS);
     {
         setColor(topLeftColor);
         glTexCoord2f(0.f, 0.f);
-        glVertex2f(topLeftX, topLeftY);
+        glVertex2f(topLeft.x, topLeft.y);
 
         setColor(bottomLeftColor);
         glTexCoord2f(0.f, 1.f);
-        glVertex2f(botLeftX, botLeftY);
+        glVertex2f(bottomLeft.x, bottomLeft.y);
 
         setColor(bottomRightColor);
         glTexCoord2f(1.f, 1.f);
-        glVertex2f(botRightX, botRightY);
+        glVertex2f(bottomRight.x, bottomRight.y);
 
         setColor(topRightColor);
         glTexCoord2f(1.f, 0.f);
-        glVertex2f(topRightX, topRightY);
+        glVertex2f(topRight.x, topRight.y);
     }
     glEnd();
 }

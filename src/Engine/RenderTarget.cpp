@@ -15,7 +15,8 @@ void RenderTarget::draw(int x, int y) {
 
     this->bind();
     {
-        g->drawQuad(x, y, this->vSize.x, this->vSize.y, true); // draw flipped for opengl<->engine coordinate mapping
+        // draw flipped for opengl<->engine coordinate mapping
+        g->drawQuad(x, y + this->vSize.y, this->vSize.x, -this->vSize.y);
     }
     this->unbind();
 }
@@ -30,7 +31,8 @@ void RenderTarget::draw(int x, int y, int width, int height) {
 
     this->bind();
     {
-        g->drawQuad(x, y, width, height, true); // draw flipped for opengl<->engine coordinate mapping
+        // draw flipped for opengl<->engine coordinate mapping
+        g->drawQuad(x, y + height, width, -height);
     }
     this->unbind();
 }

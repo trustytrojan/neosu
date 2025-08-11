@@ -127,10 +127,9 @@ class Graphics {
     virtual void fillGradient(int x, int y, int width, int height, Color topLeftColor, Color topRightColor,
                               Color bottomLeftColor, Color bottomRightColor) = 0;
 
-    virtual void drawQuad(int x, int y, int width, int height, bool flipped = false) = 0;
+    virtual void drawQuad(int x, int y, int width, int height) = 0;
     virtual void drawQuad(Vector2 topLeft, Vector2 topRight, Vector2 bottomRight, Vector2 bottomLeft,
-                          Color topLeftColor, Color topRightColor, Color bottomRightColor, Color bottomLeftColor,
-                          bool flipped = false) = 0;
+                          Color topLeftColor, Color topRightColor, Color bottomRightColor, Color bottomLeftColor) = 0;
 
     // 2d resource drawing
     virtual void drawImage(Image *image, AnchorPoint anchor = AnchorPoint::CENTER) = 0;

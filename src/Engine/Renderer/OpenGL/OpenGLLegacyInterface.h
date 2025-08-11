@@ -39,9 +39,9 @@ class OpenGLLegacyInterface : public Graphics {
     void fillGradient(int x, int y, int width, int height, Color topLeftColor, Color topRightColor,
                       Color bottomLeftColor, Color bottomRightColor) final;
 
-    void drawQuad(int x, int y, int width, int height, bool flipped = false) final;
+    void drawQuad(int x, int y, int width, int height) final;
     void drawQuad(Vector2 topLeft, Vector2 topRight, Vector2 bottomRight, Vector2 bottomLeft, Color topLeftColor,
-                  Color topRightColor, Color bottomRightColor, Color bottomLeftColor, bool flipped = false) final;
+                  Color topRightColor, Color bottomRightColor, Color bottomLeftColor) final;
 
     // 2d resource drawing
     void drawImage(Image *image, AnchorPoint anchor = AnchorPoint::CENTER) final;
