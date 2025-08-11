@@ -336,7 +336,7 @@ bool Environment::isAbsolutePath(const std::string &filePath) noexcept {
 
     if constexpr(Env::cfg(OS::WINDOWS)) {
         // On Wine, linux paths are also valid, hence the OR
-        is_absolute_path |= (filePath.find(':') == 1) || (filePath.starts_with(R"(\\?\)") == 0);
+        is_absolute_path |= ((filePath.find(':') == 1) || (filePath.starts_with(R"(\\?\)")));
     }
 
     return is_absolute_path;

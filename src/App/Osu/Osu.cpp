@@ -183,7 +183,7 @@ Osu::Osu() {
     this->sliderFrameBuffer =
         resourceManager->createRenderTarget(0, 0, this->getScreenWidth(), this->getScreenHeight());
     this->AAFrameBuffer = resourceManager->createRenderTarget(
-        0, 0, this->getScreenWidth(), this->getScreenHeight(), Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_16X);
+        0, 0, this->getScreenWidth(), this->getScreenHeight(), Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_4X);
     this->frameBuffer = resourceManager->createRenderTarget(0, 0, 64, 64);
     this->frameBuffer2 = resourceManager->createRenderTarget(0, 0, 64, 64);
 
