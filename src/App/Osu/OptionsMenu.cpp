@@ -1535,7 +1535,7 @@ void OptionsMenu::mouse_update(bool *propagate_clicks) {
     }
 
     // apply textbox changes on enter key
-    if(this->osuFolderTextbox->hitEnter()) osu->updateOsuFolder();
+    if(this->osuFolderTextbox->hitEnter()) cv::osu_folder.setValue(this->osuFolderTextbox->getText());
 
     cv::name.setValue(this->nameTextbox->getText());
     cv::mp_password_temporary.setValue(this->passwordTextbox->getText());
@@ -2365,10 +2365,9 @@ void OptionsMenu::onSkinSelect() {
         return;
     }
 
-    osu->updateOsuFolder();
-
     if(osu->isSkinLoading()) return;
 
+    cv::osu_folder.setValue(this->osuFolderTextbox->getText());
     std::string skinFolder{cv::osu_folder.getString()};
     skinFolder.append("/");
     skinFolder.append(cv::osu_folder_sub_skins.getString());
@@ -3643,7 +3642,7 @@ void OptionsMenu::save() {
         return;
     }
 
-    osu->updateOsuFolder();
+    cv::osu_folder.setValue(this->osuFolderTextbox->getText());
     this->updateFposuDPI();
     this->updateFposuCMper360();
 
