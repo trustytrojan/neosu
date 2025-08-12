@@ -305,7 +305,6 @@ class Osu final : public MouseListener, public KeyboardListener {
     // custom
     bool music_unpause_scheduled = false;
     bool bScheduleEndlessModNextBeatmap;
-    int iMultiplayerClientNumEscPresses;
     bool bWasBossKeyPaused;
     bool bSkinLoadScheduled;
     bool bSkinLoadWasReload;

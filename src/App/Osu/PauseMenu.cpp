@@ -67,7 +67,7 @@ void PauseMenu::draw() {
 
     // draw background image
     if((this->bVisible || isAnimating)) {
-        Image* image = nullptr;
+        Image *image = nullptr;
         if(this->bContinueEnabled)
             image = osu->getSkin()->getPauseOverlay();
         else
@@ -118,6 +118,9 @@ void PauseMenu::draw() {
 void PauseMenu::mouse_update(bool *propagate_clicks) {
     if(!this->bVisible) return;
 
+    // hide retry button in multiplayer
+    this->buttons[1]->setVisible(!bancho->is_playing_a_multi_map());
+
     // update and focus handling
     OsuScreen::mouse_update(propagate_clicks);
 
@@ -140,6 +143,7 @@ void PauseMenu::onContinueClicked() {
 }
 
 void PauseMenu::onRetryClicked() {
+    if(bancho->is_playing_a_multi_map()) return;  // sanity
     if(anim->isAnimating(&this->fDimAnim)) return;
 
     soundEngine->play(osu->getSkin()->clickPauseRetry);
@@ -152,7 +156,7 @@ void PauseMenu::onBackClicked() {
     if(anim->isAnimating(&this->fDimAnim)) return;
 
     soundEngine->play(osu->getSkin()->clickPauseBack);
-    osu->getSelectedBeatmap()->stop();
+    osu->getSelectedBeatmap()->stop(true);
 
     this->scheduleVisibilityChange(false);
 }

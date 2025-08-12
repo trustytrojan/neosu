@@ -163,7 +163,6 @@ Osu::Osu() {
     this->bToggleEditorScheduled = false;
 
     this->bScheduleEndlessModNextBeatmap = false;
-    this->iMultiplayerClientNumEscPresses = 0;
     this->bWasBossKeyPaused = false;
     this->bSkinLoadScheduled = false;
     this->bSkinLoadWasReload = false;
@@ -1226,30 +1225,21 @@ void Osu::onKeyDown(KeyboardEvent &key) {
         // if playing
         if(this->isInPlayMode()) {
             // toggle pause menu
-            if((key == (KEYCODE)cv::GAME_PAUSE.getInt() || key == KEY_ESCAPE) && !this->bEscape) {
-                if(!bancho->is_playing_a_multi_map() || this->iMultiplayerClientNumEscPresses > 1) {
-                    if(this->iMultiplayerClientNumEscPresses > 1) {
-                        this->getSelectedBeatmap()->stop(true);
-                        this->room->ragequit();
-                    } else {
-                        // you can open the pause menu while the failing animation is
-                        // happening, but never close it then
-                        if(!this->getSelectedBeatmap()->hasFailed() || !this->pauseMenu->isVisible()) {
-                            this->bEscape = true;
-                            this->getSelectedBeatmap()->pause();
-                            this->pauseMenu->setVisible(this->getSelectedBeatmap()->isPaused());
-
-                            key.consume();
-                        } else  // pressing escape while in failed pause menu
-                        {
-                            this->getSelectedBeatmap()->stop(true);
-                        }
+            bool wants_pause = (key == (KEYCODE)cv::GAME_PAUSE.getInt()) || (key == KEY_ESCAPE);
+            if(wants_pause && !this->bEscape) {
+                // you can open the pause menu while the failing animation is
+                // happening, but never close it then
+                if(!this->getSelectedBeatmap()->hasFailed() || !this->pauseMenu->isVisible()) {
+                    this->bEscape = true;
+                    if(!bancho->is_playing_a_multi_map()) {
+                        this->getSelectedBeatmap()->pause();
                     }
+                    this->pauseMenu->setVisible(true);
+
+                    key.consume();
                 } else {
-                    this->iMultiplayerClientNumEscPresses++;
-                    if(this->iMultiplayerClientNumEscPresses == 2)
-                        this->notificationOverlay->addNotification(
-                            "Hit 'Escape' once more to exit this multiplayer match.", 0xffffffff, false, 0.75f);
+                    // pressing escape while in failed pause menu
+                    this->getSelectedBeatmap()->stop(true);
                 }
             }
 
@@ -1504,8 +1494,6 @@ void Osu::onPlayEnd(FinishedScore score, bool quit, bool /*aborted*/) {
     this->mainMenu->setVisible(false);
     this->modSelector->setVisible(false);
     this->pauseMenu->setVisible(false);
-
-    this->iMultiplayerClientNumEscPresses = 0;
 
     if(this->songBrowser2 != nullptr) this->songBrowser2->onPlayEnd(quit);
 
