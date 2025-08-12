@@ -8,8 +8,10 @@
 #include <vector>
 
 #include "types.h"
+#include "templates.h"
 
 class DatabaseBeatmap;
+struct BPMTuple;
 
 class MapCalcThread {
    public:
@@ -94,6 +96,7 @@ class MapCalcThread {
     std::atomic<u32> computed_count{0};
     std::atomic<u32> total_count{0};
     std::vector<mct_result> results{};
+    zarray<BPMTuple> bpm_calc_buf;
 
     const std::vector<DatabaseBeatmap*> *maps_to_process{nullptr};
 

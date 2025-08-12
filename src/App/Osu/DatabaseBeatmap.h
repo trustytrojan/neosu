@@ -183,7 +183,7 @@ class DatabaseBeatmap final {
         requires(std::is_same_v<std::remove_cv_t<T>, DatabaseBeatmap>)
     {
         static std::vector<T *> empty;
-        return this->difficulties == nullptr ? empty : reinterpret_cast<const std::vector<T*>&>(*this->difficulties);
+        return this->difficulties == nullptr ? empty : reinterpret_cast<const std::vector<T *> &>(*this->difficulties);
     }
 
     [[nodiscard]] inline const MD5Hash &getMD5Hash() const { return this->sMD5Hash; }
@@ -345,7 +345,7 @@ class DatabaseBeatmap final {
         int beatmapVersion, std::vector<SLIDER> &sliders, zarray<DatabaseBeatmap::TIMINGPOINT> &timingpoints,
         float sliderMultiplier, float sliderTickRate, const std::atomic<bool> &dead);
 
-    std::vector<DatabaseBeatmap*>* difficulties = nullptr;
+    std::vector<DatabaseBeatmap *> *difficulties = nullptr;
     BeatmapType type;
 
     MD5Hash sMD5Hash;
@@ -371,28 +371,24 @@ class DatabaseBeatmapBackgroundImagePathLoader : public Resource {
 };
 
 struct BPMInfo {
-    i32 min;
-    i32 max;
-    i32 most_common;
+    i32 min{0};
+    i32 max{0};
+    i32 most_common{0};
+};
+
+struct BPMTuple {
+    i32 bpm;
+    double duration;
 };
 
 template <typename T>
-struct BPMInfo getBPM(const zarray<T> &timing_points) {
+struct BPMInfo getBPM(const zarray<T> &timing_points, zarray<BPMTuple> &bpm_buffer) {
     if(timing_points.empty()) {
-        return BPMInfo{
-            .min = 0,
-            .max = 0,
-            .most_common = 0,
-        };
+        return {};
     }
 
-    struct Tuple {
-        i32 bpm;
-        double duration;
-    };
-
-    zarray<Tuple> bpms;
-    bpms.reserve(timing_points.size());
+    bpm_buffer.clear();  // reuse existing buffer
+    bpm_buffer.reserve(timing_points.size());
 
     double lastTime = timing_points[timing_points.size() - 1].offset;
     for(size_t i = 0; i < timing_points.size(); i++) {
@@ -410,7 +406,7 @@ struct BPMInfo getBPM(const zarray<T> &timing_points) {
         double duration = std::max(nextTime - currentTime, 0.0);
 
         bool found = false;
-        for(auto tuple : bpms) {
+        for(auto &tuple : bpm_buffer) {
             if(tuple.bpm == bpm) {
                 tuple.duration += duration;
                 found = true;
@@ -419,7 +415,7 @@ struct BPMInfo getBPM(const zarray<T> &timing_points) {
         }
 
         if(!found) {
-            bpms.push_back(Tuple{
+            bpm_buffer.push_back(BPMTuple{
                 .bpm = bpm,
                 .duration = duration,
             });
@@ -430,7 +426,7 @@ struct BPMInfo getBPM(const zarray<T> &timing_points) {
     i32 max = 0;
     i32 mostCommonBPM = 0;
     double longestDuration = 0;
-    for(auto tuple : bpms) {
+    for(const auto &tuple : bpm_buffer) {
         if(tuple.bpm > max) max = tuple.bpm;
         if(tuple.bpm < min) min = tuple.bpm;
         if(tuple.duration > longestDuration || (tuple.duration == longestDuration && tuple.bpm > mostCommonBPM)) {

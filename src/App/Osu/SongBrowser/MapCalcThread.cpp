@@ -13,7 +13,7 @@ std::unique_ptr<MapCalcThread> MapCalcThread::instance = nullptr;
 std::once_flag MapCalcThread::instance_flag;
 std::once_flag MapCalcThread::shutdown_flag;
 
-void MapCalcThread::start_calc_instance(const std::vector<DatabaseBeatmap*> &maps_to_calc) {
+void MapCalcThread::start_calc_instance(const std::vector<DatabaseBeatmap*>& maps_to_calc) {
     abort_instance();
 
     if(maps_to_calc.empty()) {
@@ -49,7 +49,7 @@ void MapCalcThread::run() {
     std::vector<f64> aimStrains;
     std::vector<f64> speedStrains;
 
-    for(const auto & diff2 : *this->maps_to_process) {
+    for(const auto& diff2 : *this->maps_to_process) {
         // pause handling
         while(osu->should_pause_background_threads.load() && !this->should_stop.load()) {
             Timing::sleepMS(100);
@@ -122,7 +122,11 @@ void MapCalcThread::run() {
             return;
         }
 
-        BPMInfo bpm = getBPM(c.timingpoints);
+        BPMInfo bpm{};
+        if(c.timingpoints.size() > 0) {
+            this->bpm_calc_buf.resize(c.timingpoints.size());
+            bpm = getBPM(c.timingpoints, this->bpm_calc_buf);
+        }
         result.min_bpm = bpm.min;
         result.max_bpm = bpm.max;
         result.avg_bpm = bpm.most_common;

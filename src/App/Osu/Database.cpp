@@ -926,6 +926,9 @@ void Database::loadMaps() {
         }
 
         if(should_read_peppy_database) {
+            zarray<BPMTuple> bpm_calculation_buffer;
+            zarray<Database::TIMINGPOINT> timing_points_buffer;
+
             for(int i = 0; i < this->iNumBeatmapsToLoad; i++) {
                 if(this->bInterruptLoad.load()) break;  // cancellation point
 
@@ -1059,13 +1062,14 @@ void Database::loadMaps() {
                     bpm.min = overrides->second.min_bpm;
                     bpm.max = overrides->second.max_bpm;
                     bpm.most_common = overrides->second.avg_bpm;
-                } else {
-                    zarray<Database::TIMINGPOINT> timingPoints(nb_timing_points);
-                    if(db.read_bytes((u8 *)timingPoints.data(), sizeof(Database::TIMINGPOINT) * nb_timing_points) !=
+                } else if (nb_timing_points > 0) {
+                    timing_points_buffer.resize(nb_timing_points);
+                    if(db.read_bytes((u8 *)timing_points_buffer.data(),
+                                     sizeof(Database::TIMINGPOINT) * nb_timing_points) !=
                        sizeof(Database::TIMINGPOINT) * nb_timing_points) {
                         debugLog("WARNING: failed to read timing points from beatmap {:d} !\n", (i + 1));
                     }
-                    bpm = getBPM(timingPoints);
+                    bpm = getBPM(timing_points_buffer, bpm_calculation_buffer);
                 }
 
                 int beatmapID = db.read<i32>();  // fucking bullshit, this is NOT an unsigned integer as is described on
@@ -1466,8 +1470,8 @@ bool Database::importDatabase(const std::string &db_path) {
                 (void)map_md5;
                 u32 nb_scores = score_db.read<u32>();
                 for(u32 j = 0; j < nb_scores; j++) {
-                    /* u8 gamemode = */ score_db.skip<u8>(); // could check for 0xA9, but better method below
-                    /* u32 score_version = */ score_db.skip<u32>(); // useless
+                    /* u8 gamemode = */ score_db.skip<u8>();         // could check for 0xA9, but better method below
+                    /* u32 score_version = */ score_db.skip<u32>();  // useless
 
                     // Here, neosu stores an int64 timestamp. First 32 bits should be 0 (until 2106).
                     // Meanwhile, peppy stores the beatmap hash, which will NEVER be 0, since

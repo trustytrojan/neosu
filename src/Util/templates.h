@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <atomic>
+#include <cassert>
 
 // zero-initialized dynamic array, similar to std::vector but way faster when you don't need constructors
 // obviously don't use it on complex types :)
@@ -28,6 +29,10 @@ struct zarray {
     }
 
     void reserve(size_t new_max) {
+        if(new_max <= this->max) {
+            return;
+        }
+
         if(this->max == 0) {
             this->memory = (T *)calloc(new_max, sizeof(T));
         } else {
@@ -39,6 +44,7 @@ struct zarray {
     }
 
     void resize(size_t new_nb) {
+        assert((static_cast<long long>(this->nb) - new_nb) >= 0);
         if(new_nb < this->nb) {
             memset(&this->memory[new_nb], 0, (this->nb - new_nb) * sizeof(T));
         } else if(new_nb > this->max) {

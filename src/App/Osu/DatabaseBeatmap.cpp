@@ -497,7 +497,9 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
     int beatmapVersion, std::vector<SLIDER> &sliders, zarray<DatabaseBeatmap::TIMINGPOINT> &timingpoints,
     float sliderMultiplier, float sliderTickRate, const std::atomic<bool> &dead) {
     CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT r;
-    { r.errorCode = 0; }
+    {
+        r.errorCode = 0;
+    }
 
     if(timingpoints.size() < 1) {
         r.errorCode = 3;
@@ -1166,7 +1168,11 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
 
         if(this->iMostCommonBPM == 0) {
             if(cv::debug.getBool()) debugLog("DatabaseBeatmap::loadMetadata() : calculating BPM range ...\n");
-            auto bpm = getBPM(this->timingpoints);
+            BPMInfo bpm{};
+            if (this->timingpoints.size() > 0) {
+                zarray<BPMTuple> bpm_calculation_buffer(this->timingpoints.size());
+                bpm = getBPM(this->timingpoints, bpm_calculation_buffer);
+            }
             this->iMinBPM = bpm.min;
             this->iMaxBPM = bpm.max;
             this->iMostCommonBPM = bpm.most_common;
@@ -1287,7 +1293,7 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
         int combo = 0;
         for(size_t i = 0; i < result.hitobjects.size(); i++) {
             HitObject *currentHitObject = result.hitobjects[i];
-            const HitObject* nextHitObject = (i + 1 < result.hitobjects.size() ? result.hitobjects[i + 1] : nullptr);
+            const HitObject *nextHitObject = (i + 1 < result.hitobjects.size() ? result.hitobjects[i + 1] : nullptr);
 
             const Circle *circlePointer = dynamic_cast<Circle *>(currentHitObject);
             const Slider *sliderPointer = dynamic_cast<Slider *>(currentHitObject);
