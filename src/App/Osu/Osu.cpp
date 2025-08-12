@@ -1958,7 +1958,7 @@ void Osu::onLetterboxingChange(const UString &oldValue, const UString &newValue)
 
 // Here, "cursor" is the Windows mouse cursor, not the game cursor
 void Osu::updateCursorVisibility() {
-    if(!env->canChangeCursorVisibility() || !env->isCursorInWindow()) {
+    if(!env->isCursorInWindow()) {
         return;  // don't do anything
     }
 
@@ -1977,8 +1977,7 @@ void Osu::updateCursorVisibility() {
         const bool internal_contains_mouse = McRect{{}, g_vInternalResolution}.contains(mouse->getPos());
         if(internal_contains_mouse) {
             desired_vis = false;
-        } else if(!env->isCursorClipped()) {
-            // don't allow making the cursor visible (i.e. exiting internal res) if it's clipped, that makes no sense
+        } else {
             desired_vis = true;
         }
     }

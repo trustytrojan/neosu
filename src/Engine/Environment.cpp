@@ -98,7 +98,7 @@ Environment::Environment(int argc, char *argv[]) {
     m_hwnd = nullptr;
 
     m_bIsCursorInsideWindow = true;
-    m_bAllowCursorVisibilityChanges = true;
+    m_bActualRawInputState = false;
     m_bCursorClipped = false;
     m_bCursorVisible = false;
     m_cursorType = CURSORTYPE::CURSOR_NORMAL;
@@ -107,7 +107,6 @@ Environment::Environment(int argc, char *argv[]) {
     m_mCursorIcons = {};
 
     m_vLastAbsMousePos = Vector2{};
-    m_vLastRelMousePos = Vector2{};
 
     m_sCurrClipboardText = {};
     // lazy init
@@ -159,7 +158,7 @@ Graphics *Environment::createRenderer() {
 void Environment::shutdown() {
     // need to disable this since sensTransformFunc accesses &mouse->getSensitivity(), which will become invalidated
     // when the mouse device is free'd on engine shutdown
-    notifyWantRawInput(false);
+    setRawInput(false);
 
     SDL_Event event;
     event.type = SDL_EVENT_QUIT;
@@ -829,82 +828,43 @@ void Environment::setCursor(CURSORTYPE cur) {
     }
 }
 
-void Environment::notifyWantRawInput(bool raw) {
-    // with rawinput, we handle the movement data in Mouse::raw_motion_cb instead of through the event queue
-    SDL_SetEventEnabled(SDL_EVENT_MOUSE_MOTION, !raw);
+void Environment::setRawInput(bool raw) {
+    m_bActualRawInputState = raw;
 
-    {
-        // check if we actually need to do anything about the rawinput state/clip rect
-        const SDL_Rect *existingClipRect = nullptr;
-        if((raw == SDL_GetWindowRelativeMouseMode(m_window)) &&
-           (!isCursorClipped() || ((existingClipRect = SDL_GetWindowMouseRect(m_window)) &&
-                                   m_cursorClipRect == SDLRectToMcRect(*existingClipRect)))) {
-            // if we already have raw input and the clip rect didn't change, there's nothing else to do
-            return;
-        }
+    if(raw == SDL_GetWindowRelativeMouseMode(m_window)) {
+        // nothing to do
+        return;
     }
 
-    // SetRelativeMouseTransform can only be called with relative mode disabled, so disable it before setting the
-    // transform (and re-enable it after, if we want raw input) see SDL_mouse.c:1177
-    SDL_SetWindowRelativeMouseMode(m_window, false);
+    if(!raw && mouse) {
+        // need to manually set the cursor position if we're disabling raw input
+        setMousePos(mouse->getRealPos());
+    }
 
-    syncWindow();
-
-    if(raw) {
-        assert(mouse && "mouse was not initialized yet (or was destroyed already)");
-        // when enabling, we need to make sure we start from the virtual cursor position
-        setOSMousePos(mouse->getRealPos());
-
-        if(isCursorClipped()) {
-            const SDL_Rect sdlClip = McRectToSDLRect(m_cursorClipRect);
-            SDL_SetWindowMouseRect(m_window, &sdlClip);
-        }
-
-        if(!SDL_SetRelativeMouseTransform(Mouse::raw_motion_cb, (void *)mouse->getMotionCallbackData())) {
-            // need some better way to handle this possibility, this is jank
-            debugLog("FIXME (handle error): SDL_SetRelativeMouseTransform failed: {:s}\n", SDL_GetError());
-            cv::mouse_raw_input.setValue(false);
-            return;
-        }
-
-        if(!SDL_SetWindowRelativeMouseMode(m_window, true)) {
-            debugLog("FIXME (handle error): SDL_SetWindowRelativeMouseMode failed: {:s}\n", SDL_GetError());
-            cv::mouse_raw_input.setValue(false);
-            return;
-        }
-    } else {
-        // let the mouse handler clip the cursor as it sees fit
-        // this is because SDL has no equivalent of sensTransformFunc for non-relative mouse mode
-        SDL_SetWindowMouseRect(m_window, nullptr);
-        SDL_SetRelativeMouseTransform(nullptr, nullptr);
+    if(!SDL_SetWindowRelativeMouseMode(m_window, raw)) {
+        debugLog("FIXME (handle error): SDL_SetWindowRelativeMouseMode failed: {:s}\n", SDL_GetError());
+        m_bActualRawInputState = !raw;
     }
 }
 
 void Environment::setCursorVisible(bool visible) {
-    if(!m_bAllowCursorVisibilityChanges) {
-        if(m_bEnvDebug) {
-            debugLog("Tried to set cursor {}, but cursor visibility changes are disallowed\n",
-                     visible ? "visible" : "invisible");
-        }
-        return;
-    }
-
     m_bCursorVisible = visible;
 
     if(visible) {
         // disable rawinput (allow regular mouse movement)
-        // TODO: consolidate all this BS transition logic into some onPointerEnter/onPointerLeave handler
-        if(mouse->isRawInput()) {
-            setOSMousePos(Vector2{getMousePos()}.nudge(getWindowSize() / 2.0f, 1.0f));  // nudge it outwards
-            notifyWantRawInput(false);
-        } else  // snap the OS cursor to virtual cursor position
-            setOSMousePos(Vector2{mouse->getRealPos()}.nudge(getWindowSize() / 2.0f, 1.0f));  // nudge it outwards
+        setRawInput(false);
+        SDL_SetWindowMouseGrab(m_window, false);  // release grab
         SDL_ShowCursor();
     } else {
         setCursor(CURSORTYPE::CURSOR_NORMAL);
         SDL_HideCursor();
-        if(mouse->isRawInput())  // re-enable rawinput
-            notifyWantRawInput(true);
+
+        if(mouse && mouse->isRawInputWanted()) {  // re-enable rawinput
+            setRawInput(true);
+        }
+        if(isCursorClipped()) {
+            SDL_SetWindowMouseGrab(m_window, true);  // re-enable grab
+        }
     }
 
     // sanity
@@ -914,10 +874,8 @@ void Environment::setCursorVisible(bool visible) {
 void Environment::setCursorClip(bool clip, McRect rect) {
     m_cursorClipRect = rect;
     if(clip) {
-        if(mouse->isRawInput()) {
-            const SDL_Rect sdlClip = McRectToSDLRect(rect);
-            SDL_SetWindowMouseRect(m_window, &sdlClip);
-        }
+        const SDL_Rect sdlClip = McRectToSDLRect(rect);
+        SDL_SetWindowMouseRect(m_window, &sdlClip);
         SDL_SetWindowMouseGrab(m_window, true);
         m_bCursorClipped = true;
     } else {
@@ -925,6 +883,11 @@ void Environment::setCursorClip(bool clip, McRect rect) {
         SDL_SetWindowMouseRect(m_window, nullptr);
         SDL_SetWindowMouseGrab(m_window, false);
     }
+}
+
+void Environment::setMousePos(Vector2 pos) {
+    SDL_WarpMouseInWindow(m_window, pos.x, pos.y);
+    m_vLastAbsMousePos = pos;
 }
 
 UString Environment::keyCodeToString(KEYCODE keyCode) {
@@ -979,33 +942,17 @@ McRect Environment::SDLRectToMcRect(const SDL_Rect &sdlrect) noexcept {
             static_cast<float>(sdlrect.h)};
 }
 
-void Environment::notifyMouseEvent(bool inside) {
-    SDL_Event event;
-    event.type = inside ? SDL_EVENT_WINDOW_MOUSE_ENTER : SDL_EVENT_WINDOW_MOUSE_LEAVE;
-    SDL_PushEvent(&event);
-}
+std::pair<Vector2, Vector2> Environment::consumeMousePositionCache() {
+    float xRel{0.f}, yRel{0.f};
+    float x{m_vLastAbsMousePos.x}, y{m_vLastAbsMousePos.y};
 
-void Environment::setOSMousePos(Vector2 pos) const {
-    SDL_WarpMouseInWindow(m_window, pos.x, pos.y);
-    if constexpr(Env::cfg(OS::LINUX)) {
-        if((mouse && !mouse->isRawInput()) && m_bIsX11) {
-            static std::array<SDL_Event, 3> BSEventQ{};
-            SDL_PumpEvents();
-            int count = SDL_PeepEvents(BSEventQ.data(), 3, SDL_GETEVENT, SDL_EVENT_MOUSE_MOTION, SDL_EVENT_MOUSE_MOTION);
-            for(int i = 0; i < count; ++i) {
-                if(static_cast<int>(BSEventQ[i].motion.x) == static_cast<int>(pos.x) &&
-                   static_cast<int>(BSEventQ[i].motion.y) == static_cast<int>(pos.y)) {
-                    // throw away the synthetic motion event
-                    if(cv::debug_mouse.getBool()) {
-                        debugLog("found bullshit event as event num {}\n", i);
-                    }
-                } else {
-                    // otherwise put it back in the queue so we don't lose any real motion data (SDL_GETEVENT removes from the queue)
-                    SDL_PushEvent(&BSEventQ[i]);
-                }
-            }
-        }
-    }
+    // this gets zeroed on every call to it, which is why this function "consumes" data
+    // both of these calls are only updated with the last SDL_PumpEvents call
+    SDL_GetRelativeMouseState(&xRel, &yRel);
+    SDL_GetMouseState(&x, &y);
+
+    // <rel, abs>
+    return {{xRel, yRel}, {x, y}};
 }
 
 void Environment::initCursors() {

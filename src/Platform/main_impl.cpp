@@ -108,10 +108,19 @@ SDL_AppResult SDLMain::initialize() {
     SDL_ShowWindow(m_window);
     SDL_RaiseWindow(m_window);
 
-    // initialize mouse position (SDL_GetMouse* functions don't work at this stage, just center it)
-    m_vLastAbsMousePos = getWindowSize() / 2.f;
+    syncWindow();
 
     setWindowResizable(true);
+
+    // initialize mouse position
+    {
+        float x{0.f}, y{0.f};
+        SDL_GetGlobalMouseState(&x, &y);
+        Vector2 posInWindow = Vector2{x, y} - getWindowPos();
+
+        setMousePos(posInWindow);
+        mouse->onPosChange(posInWindow);
+    }
 
     // SDL3 stops listening to text input globally when window is created
     SDL_StartTextInput(m_window);
@@ -215,13 +224,11 @@ SDL_AppResult SDLMain::handleEvent(SDL_Event *event) {
 
                 case SDL_EVENT_WINDOW_MOUSE_ENTER:
                     m_bIsCursorInsideWindow = true;
-                    m_bAllowCursorVisibilityChanges = true;
                     break;
 
                 case SDL_EVENT_WINDOW_MOUSE_LEAVE:
                     m_bIsCursorInsideWindow = false;
                     setCursorVisible(true);
-                    m_bAllowCursorVisibilityChanges = false;
                     break;
 
                 case SDL_EVENT_WINDOW_MINIMIZED:
@@ -301,12 +308,6 @@ SDL_AppResult SDLMain::handleEvent(SDL_Event *event) {
             if(event->wheel.y != 0)
                 mouse->onWheelVertical(event->wheel.y > 0 ? 120 * std::abs(static_cast<int>(event->wheel.y))
                                                           : -120 * std::abs(static_cast<int>(event->wheel.y)));
-            break;
-
-        case SDL_EVENT_MOUSE_MOTION:
-            m_vLastRelMousePos = Vector2{event->motion.xrel, event->motion.yrel};
-            m_vLastAbsMousePos = Vector2{event->motion.x, event->motion.y};
-            mouse->onMotion(m_vLastRelMousePos, m_vLastAbsMousePos, event->motion.which != 0);
             break;
 
         default:
@@ -468,6 +469,8 @@ bool SDLMain::createWindow() {
 
 void SDLMain::configureEvents() {
     // disable unused events
+    SDL_SetEventEnabled(SDL_EVENT_MOUSE_MOTION, false);
+
     // joystick
     SDL_SetEventEnabled(SDL_EVENT_JOYSTICK_AXIS_MOTION, false);
     SDL_SetEventEnabled(SDL_EVENT_JOYSTICK_BALL_MOTION, false);

@@ -162,25 +162,20 @@ class Environment {
 
     // mouse
     [[nodiscard]] inline const bool &isCursorInWindow() const { return m_bIsCursorInsideWindow; }
-    [[nodiscard]] inline const bool &canChangeCursorVisibility() const { return m_bAllowCursorVisibilityChanges; }
     [[nodiscard]] inline const bool &isCursorVisible() const { return m_bCursorVisible; }
     [[nodiscard]] inline const bool &isCursorClipped() const { return m_bCursorClipped; }
     [[nodiscard]] inline const Vector2 &getMousePos() const { return m_vLastAbsMousePos; }
     [[nodiscard]] inline const McRect &getCursorClip() const { return m_cursorClipRect; }
     [[nodiscard]] inline const CURSORTYPE &getCursor() const { return m_cursorType; }
+    [[nodiscard]] inline const bool &isOSMouseInputRaw() const { return m_bActualRawInputState; }
+
     void setCursor(CURSORTYPE cur);
     void setCursorVisible(bool visible);
     void setCursorClip(bool clip, McRect rect);
-    void notifyWantRawInput(bool raw);  // enable/disable OS-level rawinput
-    inline void setMousePos(Vector2 pos) {
-        m_vLastAbsMousePos = pos;
-        setOSMousePos(m_vLastAbsMousePos);
-    }
-    inline void setMousePos(float x, float y) {
-        m_vLastAbsMousePos.x = x;
-        m_vLastAbsMousePos.y = y;
-        setOSMousePos(m_vLastAbsMousePos);
-    }
+    void setRawInput(bool raw);  // enable/disable OS-level rawinput
+
+    void setMousePos(Vector2 pos);
+    inline void setMousePos(float x, float y) { setMousePos(Vector2{x, y}); }
 
     // keyboard
     UString keyCodeToString(KEYCODE keyCode);
@@ -208,23 +203,6 @@ class Environment {
 
     bool m_bMinimized;  // for fps_max_background
     bool m_bHasFocus;   // for fps_max_background
-
-    void setOSMousePos(Vector2 pos) const;
-
-    // the absolute/relative mouse position from the most recent iteration of the event loop
-    // relative only useful if raw input is enabled, value is undefined/garbage otherwise
-    Vector2 m_vLastAbsMousePos;
-    Vector2 m_vLastRelMousePos;
-
-    // for when raw input is enabled, Mouse::update() needs a way to update the cached mouse position from the
-    // accumulated data since we ignore SDL_EVENT_MOUSE_MOTION when it's disabled
-    friend class Mouse;
-    inline void updateCachedMousePos(Vector2 rel, Vector2 abs) {
-        m_vLastRelMousePos = rel;
-        m_vLastAbsMousePos = abs;
-    }
-    // send an SDL_EVENT_WINDOW_MOUSE_(ENTER/LEAVE), to be called from Mouse
-    void notifyMouseEvent(bool inside);
 
     // cache
     UString m_sUsername;
@@ -267,10 +245,19 @@ class Environment {
     mutable Vector2 m_vLastKnownWindowPos;
 
     // mouse
+
+    friend class Mouse;
+    // <rel, abs>
+    std::pair<Vector2, Vector2> consumeMousePositionCache();
+    // allow Mouse to update the cached environment position post-sensitivity/clipping
+    // the difference between setMousePos and this is that it doesn't actually warp the OS cursor
+    inline void updateCachedMousePos(const Vector2 &pos) { m_vLastAbsMousePos = pos; }
+
+    Vector2 m_vLastAbsMousePos;
     bool m_bIsCursorInsideWindow;
-    bool m_bAllowCursorVisibilityChanges;
     bool m_bCursorClipped;
     bool m_bCursorVisible;
+    bool m_bActualRawInputState;
     McRect m_cursorClipRect;
     CURSORTYPE m_cursorType;
     std::map<CURSORTYPE, SDL_Cursor *> m_mCursorIcons;
