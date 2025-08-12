@@ -6221,7 +6221,7 @@ if test ${enable_native+y}
 then :
   enableval=$enable_native;
 fi
- # currently broken
+ # currently broken for windows
 # Check whether --enable-debug was given.
 if test ${enable_debug+y}
 then :
@@ -8208,8 +8208,8 @@ then :
 
 else case e in #(
   e)
-        CXXFLAGS="$CXXFLAGS -march=${host_cpu//_/-} -mtune=generic"
-        CFLAGS="$CFLAGS -march=${host_cpu//_/-} -mtune=generic"
+        CXXFLAGS="$CXXFLAGS -march=nocona -mtune=core-avx2"
+        CFLAGS="$CFLAGS -march=nocona -mtune=core-avx2"
      ;;
 esac
 fi

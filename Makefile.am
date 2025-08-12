@@ -583,7 +583,7 @@ $(DEPS_PREFIX)/libpng-$(LIBPNG_VERSION).built: $(DEPS_PREFIX)/zlib-$(ZLIB_VERSIO
 	cd $(DEPS_PREFIX)/libpng && PKG_CONFIG="$(PKG_CONFIG)" \
 		./configure lt_cv_prog_gnu_ld=yes --host=$(host) --build=$(build) --prefix="$(DEPS_PREFIX)" \
 		$(if $(STATICBUILD),--enable-static --disable-shared,--enable-shared --disable-static) \
-		--disable-tools --disable-tests --with-gnu-ld $(if $(or $(DISABLE_NATIVE),$(ENABLE_DEBUG)),,--enable-hardware-optimizations=on) \
+		--disable-tools --disable-tests --with-gnu-ld --enable-hardware-optimizations=on \
 			CC="$(CC) $(ZLIB_CFLAGS)" RANLIB="$(RANLIB)" AR="$(AR)" CXX="$(CXX)" LD="$(LD)" \
 			CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" LDFLAGS="$(LDFLAGS) $(ZLIB_LIBS)" && \
 	$(MAKE) $(MAKEFLAGS) && \
@@ -635,7 +635,7 @@ $(DEPS_PREFIX)/zlib-$(ZLIB_VERSION).built: $(DEPS_CACHE)/zlib-$(ZLIB_VERSION).so
 	$(TAR) xf $(DEPS_CACHE)/zlib-$(ZLIB_VERSION).tar.gz -C $(DEPS_PREFIX)/zlib --strip-components=1 && \
 	cd $(DEPS_PREFIX)/zlib/build && PKG_CONFIG="$(PKG_CONFIG)" \
 		$(if $(findstring linux,$(host_os)),,uname=mingw CHOST=$(host)) RANLIB="$(RANLIB)" AR="$(AR)" CC="$(CC)" CXX="$(CXX)" LD="$(LD)" CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" LDFLAGS="$(LDFLAGS)" \
-		../configure --zlib-compat --prefix="$(DEPS_PREFIX)" $(if $(or $(DISABLE_NATIVE),$(ENABLE_DEBUG)),--without-optimizations,) $(if $(STATICBUILD),--static,) && \
+		../configure --zlib-compat --prefix="$(DEPS_PREFIX)" $(if $(STATICBUILD),--static,) && \
 	$(MAKE) $(MAKEFLAGS) install && \
 	$(SED) -i 's|sharedlibdir=.*|sharedlibdir=$${libdir}|' $(DEPS_PREFIX)/lib/pkgconfig/zlib.pc && \
 	$(PKG_CONFIG) --exists --print-errors zlib

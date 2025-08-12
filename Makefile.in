@@ -5134,7 +5134,7 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source: $(DEPS_CACHE)/curl-$(CUR
 @BUILD_LIBPNG_TRUE@	cd $(DEPS_PREFIX)/libpng && PKG_CONFIG="$(PKG_CONFIG)" \
 @BUILD_LIBPNG_TRUE@		./configure lt_cv_prog_gnu_ld=yes --host=$(host) --build=$(build) --prefix="$(DEPS_PREFIX)" \
 @BUILD_LIBPNG_TRUE@		$(if $(STATICBUILD),--enable-static --disable-shared,--enable-shared --disable-static) \
-@BUILD_LIBPNG_TRUE@		--disable-tools --disable-tests --with-gnu-ld $(if $(or $(DISABLE_NATIVE),$(ENABLE_DEBUG)),,--enable-hardware-optimizations=on) \
+@BUILD_LIBPNG_TRUE@		--disable-tools --disable-tests --with-gnu-ld --enable-hardware-optimizations=on \
 @BUILD_LIBPNG_TRUE@			CC="$(CC) $(ZLIB_CFLAGS)" RANLIB="$(RANLIB)" AR="$(AR)" CXX="$(CXX)" LD="$(LD)" \
 @BUILD_LIBPNG_TRUE@			CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" LDFLAGS="$(LDFLAGS) $(ZLIB_LIBS)" && \
 @BUILD_LIBPNG_TRUE@	$(MAKE) $(MAKEFLAGS) && \
@@ -5174,7 +5174,7 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source: $(DEPS_CACHE)/curl-$(CUR
 @BUILD_ZLIB_TRUE@	$(TAR) xf $(DEPS_CACHE)/zlib-$(ZLIB_VERSION).tar.gz -C $(DEPS_PREFIX)/zlib --strip-components=1 && \
 @BUILD_ZLIB_TRUE@	cd $(DEPS_PREFIX)/zlib/build && PKG_CONFIG="$(PKG_CONFIG)" \
 @BUILD_ZLIB_TRUE@		$(if $(findstring linux,$(host_os)),,uname=mingw CHOST=$(host)) RANLIB="$(RANLIB)" AR="$(AR)" CC="$(CC)" CXX="$(CXX)" LD="$(LD)" CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" LDFLAGS="$(LDFLAGS)" \
-@BUILD_ZLIB_TRUE@		../configure --zlib-compat --prefix="$(DEPS_PREFIX)" $(if $(or $(DISABLE_NATIVE),$(ENABLE_DEBUG)),--without-optimizations,) $(if $(STATICBUILD),--static,) && \
+@BUILD_ZLIB_TRUE@		../configure --zlib-compat --prefix="$(DEPS_PREFIX)" $(if $(STATICBUILD),--static,) && \
 @BUILD_ZLIB_TRUE@	$(MAKE) $(MAKEFLAGS) install && \
 @BUILD_ZLIB_TRUE@	$(SED) -i 's|sharedlibdir=.*|sharedlibdir=$${libdir}|' $(DEPS_PREFIX)/lib/pkgconfig/zlib.pc && \
 @BUILD_ZLIB_TRUE@	$(PKG_CONFIG) --exists --print-errors zlib

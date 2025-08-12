@@ -127,7 +127,7 @@ AC_SUBST([WINE])
 AC_ARG_ENABLE([optimize],
     AS_HELP_STRING([--enable-optimize], [Optimize for speed (default: yes)]))
 AC_ARG_ENABLE([native],
-    AS_HELP_STRING([--enable-native], [Compile for -march=native (default: no)])) # currently broken
+    AS_HELP_STRING([--enable-native], [Compile for -march=native (default: no)])) # currently broken for windows
 AC_ARG_ENABLE([debug],
     AS_HELP_STRING([--enable-debug], [Enable debug build (default: no)]))
 AC_ARG_ENABLE([strip],
@@ -506,8 +506,8 @@ AS_IF([test "x$enable_native" != "xno"], [
         CXXFLAGS="$CXXFLAGS -march=pentium4 -mtune=generic"
         CFLAGS="$CFLAGS -march=pentium4 -mtune=generic"
     ], [
-        CXXFLAGS="$CXXFLAGS -march=${host_cpu//_/-} -mtune=generic"
-        CFLAGS="$CFLAGS -march=${host_cpu//_/-} -mtune=generic"
+        CXXFLAGS="$CXXFLAGS -march=nocona -mtune=core-avx2"
+        CFLAGS="$CFLAGS -march=nocona -mtune=core-avx2"
     ])
 ])
 # use c/c++23 because we can
