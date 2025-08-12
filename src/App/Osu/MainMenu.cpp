@@ -445,7 +445,7 @@ void MainMenu::draw() {
 
         osu->getAAFrameBuffer()->enable();
 
-        g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_PREMUL_COLOR);
+        g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_PREMUL_ALPHA);
 
         // avoid ugly aliasing with rotation
         g->setAntialiasing(true);
