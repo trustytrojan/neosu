@@ -21,10 +21,10 @@
 
 
 
-CollectionButton::CollectionButton(SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu,
+CollectionButton::CollectionButton(SongBrowser *songBrowser, const std::unique_ptr<BeatmapCarousel> &view, UIContextMenu *contextMenu,
                                    float xPos, float yPos, float xSize, float ySize, UString name,
                                    const UString& collectionName, std::vector<SongButton *> children)
-    : Button(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, std::move(name)) {
+    : SongBrowserButton(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, std::move(name)) {
     this->sCollectionName = collectionName.utf8View();
     this->children = std::move(children);
 
@@ -35,7 +35,7 @@ CollectionButton::CollectionButton(SongBrowser *songBrowser, CBaseUIScrollView *
 }
 
 void CollectionButton::draw() {
-    Button::draw();
+    SongBrowserButton::draw();
     if(!this->bVisible) return;
 
     Skin *skin = osu->getSkin();
@@ -73,7 +73,7 @@ void CollectionButton::draw() {
 }
 
 void CollectionButton::onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected) {
-    Button::onSelected(wasSelected, autoSelectBottomMostChild, wasParentSelected);
+    SongBrowserButton::onSelected(wasSelected, autoSelectBottomMostChild, wasParentSelected);
 
     this->songBrowser->onSelectionChange(this, true);
     this->songBrowser->scrollToSongButton(this, true);

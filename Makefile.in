@@ -199,8 +199,8 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/App/Osu/neosu-SkinImage.$(OBJEXT) \
 	src/App/Osu/neosu-SliderCurves.$(OBJEXT) \
 	src/App/Osu/neosu-SliderRenderer.$(OBJEXT) \
+	src/App/Osu/SongBrowser/neosu-BeatmapCarousel.$(OBJEXT) \
 	src/App/Osu/SongBrowser/neosu-BottomBar.$(OBJEXT) \
-	src/App/Osu/SongBrowser/neosu-Button.$(OBJEXT) \
 	src/App/Osu/SongBrowser/neosu-CollectionButton.$(OBJEXT) \
 	src/App/Osu/SongBrowser/neosu-InfoLabel.$(OBJEXT) \
 	src/App/Osu/SongBrowser/neosu-LeaderboardPPCalcThread.$(OBJEXT) \
@@ -209,6 +209,7 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/App/Osu/SongBrowser/neosu-ScoreButton.$(OBJEXT) \
 	src/App/Osu/SongBrowser/neosu-ScoreConverterThread.$(OBJEXT) \
 	src/App/Osu/SongBrowser/neosu-SongBrowser.$(OBJEXT) \
+	src/App/Osu/SongBrowser/neosu-SongBrowserButton.$(OBJEXT) \
 	src/App/Osu/SongBrowser/neosu-SongButton.$(OBJEXT) \
 	src/App/Osu/SongBrowser/neosu-SongDifficultyButton.$(OBJEXT) \
 	src/App/Osu/neosu-SpectatorScreen.$(OBJEXT) \
@@ -387,8 +388,8 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/App/Osu/$(DEPDIR)/neosu-UserStatsScreen.Po \
 	src/App/Osu/$(DEPDIR)/neosu-VolumeOverlay.Po \
 	src/App/Osu/$(DEPDIR)/neosu-score.Po \
+	src/App/Osu/SongBrowser/$(DEPDIR)/neosu-BeatmapCarousel.Po \
 	src/App/Osu/SongBrowser/$(DEPDIR)/neosu-BottomBar.Po \
-	src/App/Osu/SongBrowser/$(DEPDIR)/neosu-Button.Po \
 	src/App/Osu/SongBrowser/$(DEPDIR)/neosu-CollectionButton.Po \
 	src/App/Osu/SongBrowser/$(DEPDIR)/neosu-InfoLabel.Po \
 	src/App/Osu/SongBrowser/$(DEPDIR)/neosu-LeaderboardPPCalcThread.Po \
@@ -397,6 +398,7 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/App/Osu/SongBrowser/$(DEPDIR)/neosu-ScoreButton.Po \
 	src/App/Osu/SongBrowser/$(DEPDIR)/neosu-ScoreConverterThread.Po \
 	src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongBrowser.Po \
+	src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongBrowserButton.Po \
 	src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongButton.Po \
 	src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongDifficultyButton.Po \
 	src/Engine/$(DEPDIR)/neosu-AnimationHandler.Po \
@@ -850,8 +852,8 @@ neosu_SOURCES = \
 	src/App/Osu/SkinImage.cpp \
 	src/App/Osu/SliderCurves.cpp \
 	src/App/Osu/SliderRenderer.cpp \
+	src/App/Osu/SongBrowser/BeatmapCarousel.cpp \
 	src/App/Osu/SongBrowser/BottomBar.cpp \
-	src/App/Osu/SongBrowser/Button.cpp \
 	src/App/Osu/SongBrowser/CollectionButton.cpp \
 	src/App/Osu/SongBrowser/InfoLabel.cpp \
 	src/App/Osu/SongBrowser/LeaderboardPPCalcThread.cpp \
@@ -860,6 +862,7 @@ neosu_SOURCES = \
 	src/App/Osu/SongBrowser/ScoreButton.cpp \
 	src/App/Osu/SongBrowser/ScoreConverterThread.cpp \
 	src/App/Osu/SongBrowser/SongBrowser.cpp \
+	src/App/Osu/SongBrowser/SongBrowserButton.cpp \
 	src/App/Osu/SongBrowser/SongButton.cpp \
 	src/App/Osu/SongBrowser/SongDifficultyButton.cpp \
 	src/App/Osu/SpectatorScreen.cpp \
@@ -1344,10 +1347,10 @@ src/App/Osu/SongBrowser/$(am__dirstamp):
 src/App/Osu/SongBrowser/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) src/App/Osu/SongBrowser/$(DEPDIR)
 	@: >>src/App/Osu/SongBrowser/$(DEPDIR)/$(am__dirstamp)
-src/App/Osu/SongBrowser/neosu-BottomBar.$(OBJEXT):  \
+src/App/Osu/SongBrowser/neosu-BeatmapCarousel.$(OBJEXT):  \
 	src/App/Osu/SongBrowser/$(am__dirstamp) \
 	src/App/Osu/SongBrowser/$(DEPDIR)/$(am__dirstamp)
-src/App/Osu/SongBrowser/neosu-Button.$(OBJEXT):  \
+src/App/Osu/SongBrowser/neosu-BottomBar.$(OBJEXT):  \
 	src/App/Osu/SongBrowser/$(am__dirstamp) \
 	src/App/Osu/SongBrowser/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/SongBrowser/neosu-CollectionButton.$(OBJEXT):  \
@@ -1372,6 +1375,9 @@ src/App/Osu/SongBrowser/neosu-ScoreConverterThread.$(OBJEXT):  \
 	src/App/Osu/SongBrowser/$(am__dirstamp) \
 	src/App/Osu/SongBrowser/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/SongBrowser/neosu-SongBrowser.$(OBJEXT):  \
+	src/App/Osu/SongBrowser/$(am__dirstamp) \
+	src/App/Osu/SongBrowser/$(DEPDIR)/$(am__dirstamp)
+src/App/Osu/SongBrowser/neosu-SongBrowserButton.$(OBJEXT):  \
 	src/App/Osu/SongBrowser/$(am__dirstamp) \
 	src/App/Osu/SongBrowser/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/SongBrowser/neosu-SongButton.$(OBJEXT):  \
@@ -1758,8 +1764,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-UserStatsScreen.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-VolumeOverlay.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-score.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/SongBrowser/$(DEPDIR)/neosu-BeatmapCarousel.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/SongBrowser/$(DEPDIR)/neosu-BottomBar.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/SongBrowser/$(DEPDIR)/neosu-Button.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/SongBrowser/$(DEPDIR)/neosu-CollectionButton.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/SongBrowser/$(DEPDIR)/neosu-InfoLabel.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/SongBrowser/$(DEPDIR)/neosu-LeaderboardPPCalcThread.Po@am__quote@ # am--include-marker
@@ -1768,6 +1774,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/SongBrowser/$(DEPDIR)/neosu-ScoreButton.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/SongBrowser/$(DEPDIR)/neosu-ScoreConverterThread.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongBrowser.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongBrowserButton.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongButton.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongDifficultyButton.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-AnimationHandler.Po@am__quote@ # am--include-marker
@@ -2585,6 +2592,20 @@ src/App/Osu/neosu-SliderRenderer.obj: src/App/Osu/SliderRenderer.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-SliderRenderer.obj `if test -f 'src/App/Osu/SliderRenderer.cpp'; then $(CYGPATH_W) 'src/App/Osu/SliderRenderer.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/SliderRenderer.cpp'; fi`
 
+src/App/Osu/SongBrowser/neosu-BeatmapCarousel.o: src/App/Osu/SongBrowser/BeatmapCarousel.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/SongBrowser/neosu-BeatmapCarousel.o -MD -MP -MF src/App/Osu/SongBrowser/$(DEPDIR)/neosu-BeatmapCarousel.Tpo -c -o src/App/Osu/SongBrowser/neosu-BeatmapCarousel.o `test -f 'src/App/Osu/SongBrowser/BeatmapCarousel.cpp' || echo '$(srcdir)/'`src/App/Osu/SongBrowser/BeatmapCarousel.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/SongBrowser/$(DEPDIR)/neosu-BeatmapCarousel.Tpo src/App/Osu/SongBrowser/$(DEPDIR)/neosu-BeatmapCarousel.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/SongBrowser/BeatmapCarousel.cpp' object='src/App/Osu/SongBrowser/neosu-BeatmapCarousel.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/SongBrowser/neosu-BeatmapCarousel.o `test -f 'src/App/Osu/SongBrowser/BeatmapCarousel.cpp' || echo '$(srcdir)/'`src/App/Osu/SongBrowser/BeatmapCarousel.cpp
+
+src/App/Osu/SongBrowser/neosu-BeatmapCarousel.obj: src/App/Osu/SongBrowser/BeatmapCarousel.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/SongBrowser/neosu-BeatmapCarousel.obj -MD -MP -MF src/App/Osu/SongBrowser/$(DEPDIR)/neosu-BeatmapCarousel.Tpo -c -o src/App/Osu/SongBrowser/neosu-BeatmapCarousel.obj `if test -f 'src/App/Osu/SongBrowser/BeatmapCarousel.cpp'; then $(CYGPATH_W) 'src/App/Osu/SongBrowser/BeatmapCarousel.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/SongBrowser/BeatmapCarousel.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/SongBrowser/$(DEPDIR)/neosu-BeatmapCarousel.Tpo src/App/Osu/SongBrowser/$(DEPDIR)/neosu-BeatmapCarousel.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/SongBrowser/BeatmapCarousel.cpp' object='src/App/Osu/SongBrowser/neosu-BeatmapCarousel.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/SongBrowser/neosu-BeatmapCarousel.obj `if test -f 'src/App/Osu/SongBrowser/BeatmapCarousel.cpp'; then $(CYGPATH_W) 'src/App/Osu/SongBrowser/BeatmapCarousel.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/SongBrowser/BeatmapCarousel.cpp'; fi`
+
 src/App/Osu/SongBrowser/neosu-BottomBar.o: src/App/Osu/SongBrowser/BottomBar.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/SongBrowser/neosu-BottomBar.o -MD -MP -MF src/App/Osu/SongBrowser/$(DEPDIR)/neosu-BottomBar.Tpo -c -o src/App/Osu/SongBrowser/neosu-BottomBar.o `test -f 'src/App/Osu/SongBrowser/BottomBar.cpp' || echo '$(srcdir)/'`src/App/Osu/SongBrowser/BottomBar.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/SongBrowser/$(DEPDIR)/neosu-BottomBar.Tpo src/App/Osu/SongBrowser/$(DEPDIR)/neosu-BottomBar.Po
@@ -2598,20 +2619,6 @@ src/App/Osu/SongBrowser/neosu-BottomBar.obj: src/App/Osu/SongBrowser/BottomBar.c
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/SongBrowser/BottomBar.cpp' object='src/App/Osu/SongBrowser/neosu-BottomBar.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/SongBrowser/neosu-BottomBar.obj `if test -f 'src/App/Osu/SongBrowser/BottomBar.cpp'; then $(CYGPATH_W) 'src/App/Osu/SongBrowser/BottomBar.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/SongBrowser/BottomBar.cpp'; fi`
-
-src/App/Osu/SongBrowser/neosu-Button.o: src/App/Osu/SongBrowser/Button.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/SongBrowser/neosu-Button.o -MD -MP -MF src/App/Osu/SongBrowser/$(DEPDIR)/neosu-Button.Tpo -c -o src/App/Osu/SongBrowser/neosu-Button.o `test -f 'src/App/Osu/SongBrowser/Button.cpp' || echo '$(srcdir)/'`src/App/Osu/SongBrowser/Button.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/SongBrowser/$(DEPDIR)/neosu-Button.Tpo src/App/Osu/SongBrowser/$(DEPDIR)/neosu-Button.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/SongBrowser/Button.cpp' object='src/App/Osu/SongBrowser/neosu-Button.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/SongBrowser/neosu-Button.o `test -f 'src/App/Osu/SongBrowser/Button.cpp' || echo '$(srcdir)/'`src/App/Osu/SongBrowser/Button.cpp
-
-src/App/Osu/SongBrowser/neosu-Button.obj: src/App/Osu/SongBrowser/Button.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/SongBrowser/neosu-Button.obj -MD -MP -MF src/App/Osu/SongBrowser/$(DEPDIR)/neosu-Button.Tpo -c -o src/App/Osu/SongBrowser/neosu-Button.obj `if test -f 'src/App/Osu/SongBrowser/Button.cpp'; then $(CYGPATH_W) 'src/App/Osu/SongBrowser/Button.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/SongBrowser/Button.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/SongBrowser/$(DEPDIR)/neosu-Button.Tpo src/App/Osu/SongBrowser/$(DEPDIR)/neosu-Button.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/SongBrowser/Button.cpp' object='src/App/Osu/SongBrowser/neosu-Button.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/SongBrowser/neosu-Button.obj `if test -f 'src/App/Osu/SongBrowser/Button.cpp'; then $(CYGPATH_W) 'src/App/Osu/SongBrowser/Button.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/SongBrowser/Button.cpp'; fi`
 
 src/App/Osu/SongBrowser/neosu-CollectionButton.o: src/App/Osu/SongBrowser/CollectionButton.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/SongBrowser/neosu-CollectionButton.o -MD -MP -MF src/App/Osu/SongBrowser/$(DEPDIR)/neosu-CollectionButton.Tpo -c -o src/App/Osu/SongBrowser/neosu-CollectionButton.o `test -f 'src/App/Osu/SongBrowser/CollectionButton.cpp' || echo '$(srcdir)/'`src/App/Osu/SongBrowser/CollectionButton.cpp
@@ -2724,6 +2731,20 @@ src/App/Osu/SongBrowser/neosu-SongBrowser.obj: src/App/Osu/SongBrowser/SongBrows
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/SongBrowser/SongBrowser.cpp' object='src/App/Osu/SongBrowser/neosu-SongBrowser.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/SongBrowser/neosu-SongBrowser.obj `if test -f 'src/App/Osu/SongBrowser/SongBrowser.cpp'; then $(CYGPATH_W) 'src/App/Osu/SongBrowser/SongBrowser.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/SongBrowser/SongBrowser.cpp'; fi`
+
+src/App/Osu/SongBrowser/neosu-SongBrowserButton.o: src/App/Osu/SongBrowser/SongBrowserButton.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/SongBrowser/neosu-SongBrowserButton.o -MD -MP -MF src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongBrowserButton.Tpo -c -o src/App/Osu/SongBrowser/neosu-SongBrowserButton.o `test -f 'src/App/Osu/SongBrowser/SongBrowserButton.cpp' || echo '$(srcdir)/'`src/App/Osu/SongBrowser/SongBrowserButton.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongBrowserButton.Tpo src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongBrowserButton.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/SongBrowser/SongBrowserButton.cpp' object='src/App/Osu/SongBrowser/neosu-SongBrowserButton.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/SongBrowser/neosu-SongBrowserButton.o `test -f 'src/App/Osu/SongBrowser/SongBrowserButton.cpp' || echo '$(srcdir)/'`src/App/Osu/SongBrowser/SongBrowserButton.cpp
+
+src/App/Osu/SongBrowser/neosu-SongBrowserButton.obj: src/App/Osu/SongBrowser/SongBrowserButton.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/SongBrowser/neosu-SongBrowserButton.obj -MD -MP -MF src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongBrowserButton.Tpo -c -o src/App/Osu/SongBrowser/neosu-SongBrowserButton.obj `if test -f 'src/App/Osu/SongBrowser/SongBrowserButton.cpp'; then $(CYGPATH_W) 'src/App/Osu/SongBrowser/SongBrowserButton.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/SongBrowser/SongBrowserButton.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongBrowserButton.Tpo src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongBrowserButton.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/SongBrowser/SongBrowserButton.cpp' object='src/App/Osu/SongBrowser/neosu-SongBrowserButton.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/SongBrowser/neosu-SongBrowserButton.obj `if test -f 'src/App/Osu/SongBrowser/SongBrowserButton.cpp'; then $(CYGPATH_W) 'src/App/Osu/SongBrowser/SongBrowserButton.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/SongBrowser/SongBrowserButton.cpp'; fi`
 
 src/App/Osu/SongBrowser/neosu-SongButton.o: src/App/Osu/SongBrowser/SongButton.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/SongBrowser/neosu-SongButton.o -MD -MP -MF src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongButton.Tpo -c -o src/App/Osu/SongBrowser/neosu-SongButton.o `test -f 'src/App/Osu/SongBrowser/SongButton.cpp' || echo '$(srcdir)/'`src/App/Osu/SongBrowser/SongButton.cpp
@@ -4334,8 +4355,8 @@ distclean: distclean-am
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-UserStatsScreen.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-VolumeOverlay.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-score.Po
+	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-BeatmapCarousel.Po
 	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-BottomBar.Po
-	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-Button.Po
 	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-CollectionButton.Po
 	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-InfoLabel.Po
 	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-LeaderboardPPCalcThread.Po
@@ -4344,6 +4365,7 @@ distclean: distclean-am
 	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-ScoreButton.Po
 	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-ScoreConverterThread.Po
 	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongBrowser.Po
+	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongBrowserButton.Po
 	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongButton.Po
 	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongDifficultyButton.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-AnimationHandler.Po
@@ -4531,8 +4553,8 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-UserStatsScreen.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-VolumeOverlay.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-score.Po
+	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-BeatmapCarousel.Po
 	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-BottomBar.Po
-	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-Button.Po
 	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-CollectionButton.Po
 	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-InfoLabel.Po
 	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-LeaderboardPPCalcThread.Po
@@ -4541,6 +4563,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-ScoreButton.Po
 	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-ScoreConverterThread.Po
 	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongBrowser.Po
+	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongBrowserButton.Po
 	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongButton.Po
 	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongDifficultyButton.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-AnimationHandler.Po

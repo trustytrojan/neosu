@@ -6,6 +6,7 @@
 #include <random>
 
 class Beatmap;
+class BeatmapCarousel;
 class Database;
 class DatabaseBeatmap;
 typedef DatabaseBeatmap BeatmapDifficulty;
@@ -16,7 +17,7 @@ class UIContextMenu;
 class UISearchOverlay;
 class InfoLabel;
 class ScoreButton;
-class Button;
+class SongBrowserButton;
 class SongButton;
 class SongDifficultyButton;
 class CollectionButton;
@@ -72,7 +73,7 @@ class SongBrowser final : public ScreenBackable {
     void selectSelectedBeatmapSongButton();
     void onPlayEnd(bool quit = true);  // called when a beatmap is finished playing (or the player quit)
 
-    void onSelectionChange(Button *button, bool rebuild);
+    void onSelectionChange(SongBrowserButton *button, bool rebuild);
     void onDifficultySelected(DatabaseBeatmap *diff2, bool play = false);
 
     void onScoreContextMenu(ScoreButton *scoreButton, int id);
@@ -93,9 +94,9 @@ class SongBrowser final : public ScreenBackable {
                                           const std::string &name);
 
     void requestNextScrollToSongButtonJumpFix(SongDifficultyButton *diffButton);
-    bool isButtonVisible(Button *songButton);
+    bool isButtonVisible(SongBrowserButton *songButton);
     void scrollToBestButton();
-    void scrollToSongButton(Button *songButton, bool alignOnTop = false);
+    void scrollToSongButton(SongBrowserButton *songButton, bool alignOnTop = false);
     void rebuildSongButtons();
     void recreateCollectionsButtons();
     void rebuildScoreButtons();
@@ -176,7 +177,7 @@ class SongBrowser final : public ScreenBackable {
 
     void onScoreClicked(CBaseUIButton *button);
 
-    void selectSongButton(Button *songButton);
+    void selectSongButton(SongBrowserButton *songButton);
     void selectPreviousRandomBeatmap();
     void playSelectedDifficulty();
 
@@ -219,8 +220,8 @@ class SongBrowser final : public ScreenBackable {
     bool score_resort_scheduled = false;
 
     // song carousel
-    CBaseUIScrollView *carousel;
-    Button* selectedButton = nullptr;
+    std::unique_ptr<BeatmapCarousel> carousel{nullptr};
+    SongBrowserButton* selectedButton = nullptr;
     bool bSongBrowserRightClickScrollCheck;
     bool bSongBrowserRightClickScrolling;
     bool bNextScrollToSongButtonJumpFixScheduled;
@@ -238,7 +239,7 @@ class SongBrowser final : public ScreenBackable {
     // beatmap database
     std::vector<DatabaseBeatmap *> beatmaps;
     std::vector<SongButton *> songButtons;
-    std::vector<Button *> visibleSongButtons;
+    std::vector<SongBrowserButton *> visibleSongButtons;
     std::vector<CollectionButton *> collectionButtons;
     std::vector<CollectionButton *> artistCollectionButtons;
     std::vector<CollectionButton *> difficultyCollectionButtons;

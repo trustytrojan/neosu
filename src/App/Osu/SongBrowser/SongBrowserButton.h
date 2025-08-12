@@ -10,13 +10,13 @@ class SongBrowser;
 class SongButton;
 class UIContextMenu;
 
-class CBaseUIScrollView;
+class BeatmapCarousel;
 
-class Button : public CBaseUIButton {
+class SongBrowserButton : public CBaseUIButton {
    public:
-    Button(SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu, float xPos, float yPos,
+    SongBrowserButton(SongBrowser *songBrowser, const std::unique_ptr<BeatmapCarousel> &view, UIContextMenu *contextMenu, float xPos, float yPos,
            float xSize, float ySize, UString name);
-    ~Button() override;
+    ~SongBrowserButton() override;
     void deleteAnimations();
 
     void draw() override;
@@ -24,7 +24,7 @@ class Button : public CBaseUIButton {
 
     virtual void updateLayoutEx();
 
-    Button *setVisible(bool visible) override;
+    SongBrowserButton *setVisible(bool visible) override;
 
     void select(bool fireCallbacks = true, bool autoSelectBottomMostChild = true, bool wasParentSelected = true);
     void deselect();
@@ -56,7 +56,7 @@ class Button : public CBaseUIButton {
     virtual void onSelected(bool  /*wasSelected*/, bool  /*autoSelectBottomMostChild*/, bool  /*wasParentSelected*/) { ; }
     virtual void onRightMouseUpInside() { ; }
 
-    CBaseUIScrollView *view;
+    const std::unique_ptr<BeatmapCarousel> &carousel;
     SongBrowser *songBrowser;
     UIContextMenu *contextMenu;
 

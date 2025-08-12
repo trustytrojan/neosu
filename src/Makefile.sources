@@ -52,8 +52,8 @@ neosu_SOURCES = \
 	src/App/Osu/SkinImage.cpp \
 	src/App/Osu/SliderCurves.cpp \
 	src/App/Osu/SliderRenderer.cpp \
+	src/App/Osu/SongBrowser/BeatmapCarousel.cpp \
 	src/App/Osu/SongBrowser/BottomBar.cpp \
-	src/App/Osu/SongBrowser/Button.cpp \
 	src/App/Osu/SongBrowser/CollectionButton.cpp \
 	src/App/Osu/SongBrowser/InfoLabel.cpp \
 	src/App/Osu/SongBrowser/LeaderboardPPCalcThread.cpp \
@@ -62,6 +62,7 @@ neosu_SOURCES = \
 	src/App/Osu/SongBrowser/ScoreButton.cpp \
 	src/App/Osu/SongBrowser/ScoreConverterThread.cpp \
 	src/App/Osu/SongBrowser/SongBrowser.cpp \
+	src/App/Osu/SongBrowser/SongBrowserButton.cpp \
 	src/App/Osu/SongBrowser/SongButton.cpp \
 	src/App/Osu/SongBrowser/SongDifficultyButton.cpp \
 	src/App/Osu/SpectatorScreen.cpp \

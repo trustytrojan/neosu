@@ -23,9 +23,9 @@
 #include "SkinImage.h"
 #include "UIContextMenu.h"
 
-SongButton::SongButton(SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu, float xPos,
+SongButton::SongButton(SongBrowser *songBrowser, const std::unique_ptr<BeatmapCarousel> &view, UIContextMenu *contextMenu, float xPos,
                        float yPos, float xSize, float ySize, UString name, DatabaseBeatmap *databaseBeatmap)
-    : Button(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, std::move(name)) {
+    : SongBrowserButton(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, std::move(name)) {
     this->databaseBeatmap = databaseBeatmap;
 
     // settings
@@ -47,7 +47,7 @@ SongButton::SongButton(SongBrowser *songBrowser, CBaseUIScrollView *view, UICont
 
         // and add them
         for(auto difficultie : difficulties) {
-            SongButton *songButton = new SongDifficultyButton(this->songBrowser, this->view, this->contextMenu, 0, 0, 0,
+            SongButton *songButton = new SongDifficultyButton(this->songBrowser, this->carousel, this->contextMenu, 0, 0, 0,
                                                               0, "", difficultie, this);
 
             this->children.push_back(songButton);
@@ -68,7 +68,7 @@ void SongButton::draw() {
     if(this->vPos.y + this->vSize.y < 0) return;
     if(this->vPos.y > osu->getScreenHeight()) return;
 
-    Button::draw();
+    SongBrowserButton::draw();
 
     // draw background image
     this->sortChildren();
@@ -218,7 +218,7 @@ void SongButton::drawSubTitle(float deselectedAlpha, bool forceSelectedStyle) {
 void SongButton::sortChildren() { std::ranges::sort(this->children, sort_by_difficulty); }
 
 void SongButton::updateLayoutEx() {
-    Button::updateLayoutEx();
+    SongBrowserButton::updateLayoutEx();
 
     // scaling
     const Vector2 size = this->getActualSize();
@@ -238,7 +238,7 @@ void SongButton::updateLayoutEx() {
 }
 
 void SongButton::onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected) {
-    Button::onSelected(wasSelected, autoSelectBottomMostChild, wasParentSelected);
+    SongBrowserButton::onSelected(wasSelected, autoSelectBottomMostChild, wasParentSelected);
 
     // resort children (since they might have been updated in the meantime)
     this->sortChildren();

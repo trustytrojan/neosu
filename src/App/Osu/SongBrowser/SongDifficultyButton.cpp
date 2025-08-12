@@ -21,7 +21,7 @@
 #include "SoundEngine.h"
 #include "Timing.h"
 
-SongDifficultyButton::SongDifficultyButton(SongBrowser* songBrowser, CBaseUIScrollView* view,
+SongDifficultyButton::SongDifficultyButton(SongBrowser* songBrowser,  const std::unique_ptr<BeatmapCarousel> &view,
                                            UIContextMenu* contextMenu, float xPos, float yPos, float xSize, float ySize,
                                            UString name, DatabaseBeatmap* diff2, SongButton* parentSongButton)
     : SongButton(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, std::move(name), nullptr) {
@@ -48,7 +48,7 @@ SongDifficultyButton::SongDifficultyButton(SongBrowser* songBrowser, CBaseUIScro
 SongDifficultyButton::~SongDifficultyButton() { anim->deleteExistingAnimation(&this->fOffsetPercentAnim); }
 
 void SongDifficultyButton::draw() {
-    Button::draw();
+    SongBrowserButton::draw();
     if(!this->bVisible) return;
 
     const bool isIndependentDiff = this->isIndependentDiffButton();
@@ -173,7 +173,7 @@ void SongDifficultyButton::onClicked(bool left, bool right) {
 }
 
 void SongDifficultyButton::onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected) {
-    Button::onSelected(wasSelected, autoSelectBottomMostChild, wasParentSelected);
+    SongBrowserButton::onSelected(wasSelected, autoSelectBottomMostChild, wasParentSelected);
 
     const bool wasParentActuallySelected = (this->parentSongButton != nullptr && wasParentSelected);
 

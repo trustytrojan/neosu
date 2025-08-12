@@ -110,7 +110,7 @@ void UserStatsScreen::rebuildScoreButtons() {
         button->setScore(*score, diff, ++i, title, weight);
         button->setClickCallback([](CBaseUIButton *button) {
             auto score = ((ScoreButton *)button)->getScore();
-            auto song_button = (Button *)osu->getSongBrowser()->hashToSongButton[score.beatmap_hash];
+            auto song_button = (SongBrowserButton *)osu->getSongBrowser()->hashToSongButton[score.beatmap_hash];
             osu->userStats->setVisible(false);
             osu->getSongBrowser()->selectSongButton(song_button);
             osu->getSongBrowser()->highlightScore(score.unixTimestamp);

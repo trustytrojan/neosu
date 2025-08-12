@@ -1,14 +1,15 @@
 #pragma once
 // Copyright (c) 2016, PG, All rights reserved.
-#include "Button.h"
+#include "SongBrowserButton.h"
 #include "score.h"
 
 class SongBrowser;
 class DatabaseBeatmap;
+class BeatmapCarousel;
 
-class SongButton : public Button {
+class SongButton : public SongBrowserButton {
    public:
-    SongButton(SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu, float xPos, float yPos,
+    SongButton(SongBrowser *songBrowser, const std::unique_ptr<BeatmapCarousel> &view, UIContextMenu *contextMenu, float xPos, float yPos,
                float xSize, float ySize, UString name, DatabaseBeatmap *databaseBeatmap);
     ~SongButton() override;
 
