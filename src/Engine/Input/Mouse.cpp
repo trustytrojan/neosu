@@ -97,9 +97,7 @@ void Mouse::update() {
     // vRawDelta doesn't include sensitivity or clipping, which is useful for fposu
     this->vRawDelta = newRel;
 
-    const bool actuallyRaw{this->bIsRawInputDesired || env->isOSMouseInputRaw()};
-
-    if(actuallyRaw) {
+    if(env->isOSMouseInputRaw()) {
         // only relative input (raw) can have sensitivity
         newRel *= this->fSensitivity;
         // we only base the absolute position off of the relative motion for raw input
@@ -130,9 +128,6 @@ void Mouse::update() {
     // vPosWithoutOffsets should always match the post-transformation newAbs
     this->vPosWithoutOffsets = newAbs;
 
-    // notify environment of the virtual cursor position
-    env->updateCachedMousePos(this->vPosWithoutOffsets);
-
     this->onPosChange(this->vPosWithoutOffsets);
 }
 
@@ -148,6 +143,9 @@ void Mouse::onPosChange(Vector2 pos) {
     this->vPosWithoutOffsets = pos;
     this->vPos = (this->vOffset + pos);
     this->vActualPos = this->vPos;
+
+    // notify environment of the virtual cursor position
+    env->updateCachedMousePos(this->vPosWithoutOffsets);
 }
 
 void Mouse::onWheelVertical(int delta) {

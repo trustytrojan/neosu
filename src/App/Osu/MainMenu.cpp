@@ -448,7 +448,6 @@ void MainMenu::draw() {
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_PREMUL_COLOR);
 
         // avoid ugly aliasing with rotation
-        g->setLineWidth(1.25f);
         g->setAntialiasing(true);
         g->setDepthBuffer(true);
         g->clearDepthBuffer();
@@ -495,6 +494,7 @@ void MainMenu::draw() {
                                        std::lerp(1.0f, 0.965f, this->fMainMenuAnimFriendPercent));
 
     // front side
+    g->setLineWidth(2.0f);
     g->pushTransform();
     g->translate(0, 0, inset);
     g->setColor(cubeColor);
@@ -506,6 +506,7 @@ void MainMenu::draw() {
     g->drawRectf(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
                  mainButtonRect.getHeight() - 2 * inset);
     g->popTransform();
+    g->setLineWidth(1.0f);
 
     // friend
     const bool drawing_friend = this->fMainMenuAnimFriendPercent > 0.0f;
@@ -750,7 +751,6 @@ void MainMenu::draw() {
     }
 
     // neosu/server logo
-    if(!drawing_friend)  // it looks weird
     {
         auto logo = this->logo_img;
         if(bancho->server_icon != nullptr && bancho->server_icon->isReady() &&
@@ -766,15 +766,18 @@ void MainMenu::draw() {
         float scale = std::min(xscale, yscale) * 0.8f;
 
         g->pushTransform();
-        g->setColor(0xffffffff);
-        g->setAlpha(alpha);
+        g->setColor(argb(alpha, 1.0f, 1.0f, 1.0f));
         g->scale(scale, scale);
+
         g->translate(this->vCenter.x - this->fCenterOffsetAnim, this->vCenter.y);
+
         g->drawImage(logo);
         g->popTransform();
     }
 
     if(drawing_full_cube) {
+        g->setLineWidth(2.0f);
+
         // back side
         g->rotate3DScene(0, -180, 0);
         g->pushTransform();

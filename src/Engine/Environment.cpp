@@ -841,8 +841,6 @@ void Environment::setRawInput(bool raw) {
         setOSMousePos(mouse->getRealPos());
     }
 
-    debugLog("setting raw input {}\n", raw);
-
     if(!SDL_SetWindowRelativeMouseMode(m_window, raw)) {
         debugLog("FIXME (handle error): SDL_SetWindowRelativeMouseMode failed: {:s}\n", SDL_GetError());
         m_bActualRawInputState = !raw;

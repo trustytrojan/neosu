@@ -325,6 +325,7 @@ void OpenGLLegacyInterface::drawImage(Image *image, AnchorPoint anchor) {
         return;
     }
     if(!image->isReady()) return;
+    if(this->color.A() == 0) return;  // don't draw completely transparent images
 
     this->updateTransform();
 
