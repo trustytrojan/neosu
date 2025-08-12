@@ -67,7 +67,10 @@ OpenGLLegacyInterface::OpenGLLegacyInterface() : Graphics() {
     OpenGLStateCache::getInstance().initialize();
 }
 
-OpenGLLegacyInterface::~OpenGLLegacyInterface() { SAFE_DELETE(this->syncobj); }
+OpenGLLegacyInterface::~OpenGLLegacyInterface() {
+    SAFE_DELETE(this->syncobj);
+    SAFE_DELETE(this->smoothClipShader);
+}
 
 void OpenGLLegacyInterface::beginScene() {
     this->bInScene = true;
@@ -319,13 +322,30 @@ void OpenGLLegacyInterface::drawQuad(Vector2 topLeft, Vector2 topRight, Vector2 
     glEnd();
 }
 
-void OpenGLLegacyInterface::drawImage(Image *image, AnchorPoint anchor) {
+void OpenGLLegacyInterface::drawImage(Image *image, AnchorPoint anchor, float edgeSoftness, McRect clipRect) {
     if(image == nullptr) {
         debugLog("WARNING: Tried to draw image with NULL texture!\n");
         return;
     }
     if(!image->isReady()) return;
-    if(this->color.A() == 0) return;  // don't draw completely transparent images
+    if(this->color.A() == 0) return;
+
+    bool clipRectSpecified = clipRect.getSize().length() != 0;
+    bool smoothedEdges = edgeSoftness > 0.0f;
+
+    // initialize shader on first use
+    if(smoothedEdges) {
+        if(!this->smoothClipShader) {
+            this->initSmoothClipShader();
+        }
+        smoothedEdges = this->smoothClipShader->isReady();
+    }
+
+    const bool fallbackClip = clipRectSpecified && !smoothedEdges;
+
+    if(fallbackClip) {
+        pushClipRect(clipRect);
+    }
 
     this->updateTransform();
 
@@ -355,7 +375,28 @@ void OpenGLLegacyInterface::drawImage(Image *image, AnchorPoint anchor) {
             y = -height / 2;
             break;
         default:
-            abort();  // :-)
+            abort();
+    }
+
+    if(smoothedEdges && !clipRectSpecified) {
+        // set a default clip rect as the exact image size if one wasn't explicitly passed, but we still want smoothing
+        clipRect = McRect{x, y, width, height};
+    }
+
+    if(smoothedEdges) {
+        // compensate for viewport changed by rendertargets
+        // flip Y for engine<->opengl coordinate origin
+        const auto &viewport{OpenGLStateCache::getInstance().getCurrentViewport()};
+        float clipMinX{clipRect.getX() + viewport[0]},                                           //
+            clipMinY{viewport[3] - (clipRect.getY() - viewport[1] - 1 + clipRect.getHeight())},  //
+            clipMaxX{clipMinX + clipRect.getWidth()},                                            //
+            clipMaxY{clipMinY + clipRect.getHeight()};                                           //
+
+        this->smoothClipShader->enable();
+        this->smoothClipShader->setUniform2f("rect_min", clipMinX, clipMinY);
+        this->smoothClipShader->setUniform2f("rect_max", clipMaxX, clipMaxY);
+        this->smoothClipShader->setUniform1f("edge_softness", edgeSoftness);
+        //this->smoothClipShader->setUniform1i("texture", 0);
     }
 
     image->bind();
@@ -377,6 +418,12 @@ void OpenGLLegacyInterface::drawImage(Image *image, AnchorPoint anchor) {
         glEnd();
     }
     if(cv::r_image_unbind_after_drawimage.getBool()) image->unbind();
+
+    if(smoothedEdges) {
+        this->smoothClipShader->disable();
+    } else if(fallbackClip) {
+        popClipRect();
+    }
 
     if(cv::r_debug_drawimage.getBool()) {
         this->setColor(0xbbff00ff);
@@ -437,11 +484,10 @@ void OpenGLLegacyInterface::drawVAO(VertexArrayObject *vao) {
 
 void OpenGLLegacyInterface::setClipRect(McRect clipRect) {
     if(cv::r_debug_disable_cliprect.getBool()) return;
-    // if (m_bIs3DScene) return; // HACKHACK:TODO:
+    // if (m_bIs3DScene) return; // TODO
 
-    // HACKHACK: compensate for viewport changes caused by RenderTargets!
-    std::array<int, 4> viewport;  // NOLINT
-    glGetIntegerv(GL_VIEWPORT, viewport.data());
+    // rendertargets change the current viewport
+    const auto &viewport{OpenGLStateCache::getInstance().getCurrentViewport()};
 
     // debugLog("viewport = {}, {}, {}, {}\n", viewport[0], viewport[1], viewport[2], viewport[3]);
 
@@ -451,8 +497,6 @@ void OpenGLLegacyInterface::setClipRect(McRect clipRect) {
               (int)clipRect.getWidth(), (int)clipRect.getHeight());
 
     // debugLog("scissor = {}, {}, {}, {}\n", (int)clipRect.getX()+viewport[0],
-    // viewport[3]-((int)clipRect.getY()-viewport[1]-1+(int)clipRect.getHeight()), (int)clipRect.getWidth(),
-    // (int)clipRect.getHeight());
 }
 
 void OpenGLLegacyInterface::pushClipRect(McRect clipRect) {
@@ -656,6 +700,40 @@ void OpenGLLegacyInterface::onTransformUpdate(Matrix4 &projectionMatrix, Matrix4
 
     glMatrixMode(GL_MODELVIEW);
     glLoadMatrixf(worldMatrix.get());
+}
+
+void OpenGLLegacyInterface::initSmoothClipShader() {
+    if(this->smoothClipShader != nullptr) return;
+
+    this->smoothClipShader = createShaderFromSource(R"(
+        #version 110
+        varying vec2 tex_coord;
+        void main() {
+            gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.x, gl_Vertex.y, 0.0, 1.0);
+            gl_FrontColor = gl_Color;
+            tex_coord = gl_MultiTexCoord0.xy;
+        })",
+                                                    R"(
+        #version 110
+        uniform sampler2D texture;
+        uniform vec2 rect_min;     // clip rect in gl_FragCoord space (bottom-left origin)
+        uniform vec2 rect_max;
+        uniform float edge_softness;
+        varying vec2 tex_coord;
+
+        void main() {
+            vec2 dist_to_edges = min(gl_FragCoord.xy - rect_min, rect_max - gl_FragCoord.xy);
+            float min_dist = min(dist_to_edges.x, dist_to_edges.y);
+
+            float alpha = smoothstep(-edge_softness, 0.0, min_dist);
+            vec4 texColor = texture2D(texture, tex_coord);
+            gl_FragColor = vec4(texColor.rgb * gl_Color.rgb, texColor.a * gl_Color.a * alpha);
+        })");
+
+    if(this->smoothClipShader != nullptr) {
+        this->smoothClipShader->loadAsync();
+        this->smoothClipShader->load();
+    }
 }
 
 #endif

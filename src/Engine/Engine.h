@@ -155,6 +155,7 @@ class Engine final : public KeyboardListener {
 
        public:
         // debug build shows full source location
+#ifdef _DEBUG
         template <typename... Args>
         static void log(const std::source_location &loc, const char *func, fmt::format_string<Args...> fmt,
                         Args &&...args) {
@@ -174,7 +175,7 @@ class Engine final : public KeyboardListener {
             auto message = fmt::format(fmt, std::forward<Args>(args)...);
             Engine::logImpl(contextPrefix + message, color);
         }
-
+#else
         // release build only shows function name
         template <typename... Args>
         static void log(const char *func, fmt::format_string<Args...> fmt, Args &&...args) {
@@ -191,6 +192,7 @@ class Engine final : public KeyboardListener {
             auto message = fmt::format(fmt, std::forward<Args>(args)...);
             Engine::logImpl(contextPrefix + message, color);
         }
+#endif
     };
     template <typename... Args>
     static void logRaw(fmt::format_string<Args...> fmt, Args &&...args) {

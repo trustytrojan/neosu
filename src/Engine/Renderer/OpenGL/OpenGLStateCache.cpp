@@ -43,7 +43,7 @@ void OpenGLStateCache::setCurrentViewport(int x, int y, int width, int height) {
     this->iViewport[3] = height;
 }
 
-void OpenGLStateCache::getCurrentViewport(int &x, int &y, int &width, int &height) {
+void OpenGLStateCache::getCurrentViewport(int &x, int &y, int &width, int &height) const {
     x = this->iViewport[0];
     y = this->iViewport[1];
     width = this->iViewport[2];

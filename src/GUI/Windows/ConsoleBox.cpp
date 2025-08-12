@@ -16,8 +16,6 @@
 #include "Mouse.h"
 #include "ResourceManager.h"
 
-
-
 class ConsoleBoxTextbox : public CBaseUITextbox {
    public:
     ConsoleBoxTextbox(float xPos, float yPos, float xSize, float ySize, UString name)
@@ -65,15 +63,16 @@ class ConsoleBoxSuggestionButton : public CBaseUIButton {
                 const UString helpTextSeparator = "-";
                 const int helpTextOffset = std::round(2.0f * this->font->getStringWidth(helpTextSeparator) *
                                                       ((float)this->font->getDPI() / 96.0f));  // NOTE: abusing font dpi
-                const int helpTextSeparatorStringWidth = std::max(1, (int)this->font->getStringWidth(helpTextSeparator));
+                const int helpTextSeparatorStringWidth =
+                    std::max(1, (int)this->font->getStringWidth(helpTextSeparator));
                 const int helpTextStringWidth = std::max(1, (int)this->font->getStringWidth(this->sHelpText));
 
                 g->pushTransform();
                 {
-                    const float scale =
-                        std::min(1.0f, (std::max(1.0f, this->consoleBox->getTextbox()->getSize().x - this->fStringWidth -
-                                                 helpTextOffset * 1.5f - helpTextSeparatorStringWidth * 1.5f)) /
-                                      (float)helpTextStringWidth);
+                    const float scale = std::min(
+                        1.0f, (std::max(1.0f, this->consoleBox->getTextbox()->getSize().x - this->fStringWidth -
+                                                  helpTextOffset * 1.5f - helpTextSeparatorStringWidth * 1.5f)) /
+                                  (float)helpTextStringWidth);
 
                     g->scale(scale, scale);
                     g->translate((int)(this->vPos.x + this->fStringWidth + helpTextOffset * scale / 2 +
@@ -131,6 +130,8 @@ ConsoleBox::ConsoleBox() : CBaseUIElement(0, 0, 0, 0, "") {
         this->suggestion->setVerticalScrolling(true);
         this->suggestion->setVisible(false);
     }
+    this->fSuggestionY = 0.0f;
+    this->fLogTime = 0.0f;
     this->fSuggestionAnimation = 0;
     this->bSuggestionAnimateIn = false;
     this->bSuggestionAnimateOut = false;
@@ -230,16 +231,14 @@ void ConsoleBox::drawLogOverlay() {
     g->popTransform();
 }
 
-void ConsoleBox::processPendingLogAnimations()
-{
-	// check if we have pending animation reset from logging thread
-	if (this->bLogAnimationResetPending.exchange(false))
-	{
-		// execute animation operations on main thread only
-		anim->deleteExistingAnimation(&this->fLogYPos);
-		this->fLogYPos = 0;
-		this->fLogTime = this->fPendingLogTime.load();
-	}
+void ConsoleBox::processPendingLogAnimations() {
+    // check if we have pending animation reset from logging thread
+    if(this->bLogAnimationResetPending.exchange(false)) {
+        // execute animation operations on main thread only
+        anim->deleteExistingAnimation(&this->fLogYPos);
+        this->fLogYPos = 0;
+        this->fLogTime = this->fPendingLogTime.load();
+    }
 }
 
 void ConsoleBox::mouse_update(bool *propagate_clicks) {
@@ -332,8 +331,8 @@ void ConsoleBox::mouse_update(bool *propagate_clicks) {
     bool forceVisible = this->bForceLogVisible.exchange(false);
     if(!forceVisible && engine->getTime() > this->fLogTime) {
         if(!anim->isAnimating(&this->fLogYPos) && this->fLogYPos == 0.0f)
-            anim->moveQuadInOut(&this->fLogYPos, this->logFont->getHeight() * (cv::console_overlay_lines.getFloat() + 1),
-                                0.5f);
+            anim->moveQuadInOut(&this->fLogYPos,
+                                this->logFont->getHeight() * (cv::console_overlay_lines.getFloat() + 1), 0.5f);
 
         if(this->fLogYPos == this->logFont->getHeight() * (cv::console_overlay_lines.getInt() + 1)) {
             std::scoped_lock logGuard(this->logMutex);
@@ -528,7 +527,7 @@ void ConsoleBox::onResolutionChange(Vector2 newResolution) {
     this->suggestion->setSizeX(newResolution.x - 10 * dpiScale);
 }
 
-void ConsoleBox::processCommand(const std::string& command) {
+void ConsoleBox::processCommand(const std::string &command) {
     this->clearSuggestions();
     this->iSelectedHistory = -1;
 

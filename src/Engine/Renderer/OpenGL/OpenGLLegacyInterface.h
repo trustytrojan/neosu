@@ -44,7 +44,7 @@ class OpenGLLegacyInterface : public Graphics {
                   Color topRightColor, Color bottomRightColor, Color bottomLeftColor) final;
 
     // 2d resource drawing
-    void drawImage(Image *image, AnchorPoint anchor = AnchorPoint::CENTER) final;
+    void drawImage(Image *image, AnchorPoint anchor = AnchorPoint::CENTER, float edgeSoftness = 0.0f, McRect clipRect = {}) final;
     void drawString(McFont *font, const UString &text) final;
 
     // 3d type drawing
@@ -97,6 +97,9 @@ class OpenGLLegacyInterface : public Graphics {
     void onTransformUpdate(Matrix4 &projectionMatrix, Matrix4 &worldMatrix) final;
 
    private:
+    Shader* smoothClipShader{nullptr};
+    void initSmoothClipShader();
+
     // renderer
     bool bInScene;
     Vector2 vResolution;

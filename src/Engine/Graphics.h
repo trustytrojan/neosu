@@ -132,13 +132,13 @@ class Graphics {
                           Color topLeftColor, Color topRightColor, Color bottomRightColor, Color bottomLeftColor) = 0;
 
     // 2d resource drawing
-    virtual void drawImage(Image *image, AnchorPoint anchor = AnchorPoint::CENTER) = 0;
+    virtual void drawImage(Image *image, AnchorPoint anchor = AnchorPoint::CENTER, float edgeSoftness = 0.0f, McRect clipRect = {}) = 0;
     virtual void drawString(McFont *font, const UString &text) = 0;
 
     // 3d type drawing
     virtual void drawVAO(VertexArrayObject *vao) = 0;
 
-    // DEPRECATED: 2d clipping
+    // 2d clipping
     virtual void setClipRect(McRect clipRect) = 0;
     virtual void pushClipRect(McRect clipRect) = 0;
     virtual void popClipRect() = 0;

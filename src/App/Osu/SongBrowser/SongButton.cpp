@@ -23,8 +23,9 @@
 #include "SkinImage.h"
 #include "UIContextMenu.h"
 
-SongButton::SongButton(SongBrowser *songBrowser, const std::unique_ptr<BeatmapCarousel> &view, UIContextMenu *contextMenu, float xPos,
-                       float yPos, float xSize, float ySize, UString name, DatabaseBeatmap *databaseBeatmap)
+SongButton::SongButton(SongBrowser *songBrowser, const std::unique_ptr<BeatmapCarousel> &view,
+                       UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize, UString name,
+                       DatabaseBeatmap *databaseBeatmap)
     : SongBrowserButton(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, std::move(name)) {
     this->databaseBeatmap = databaseBeatmap;
 
@@ -47,8 +48,8 @@ SongButton::SongButton(SongBrowser *songBrowser, const std::unique_ptr<BeatmapCa
 
         // and add them
         for(auto difficultie : difficulties) {
-            SongButton *songButton = new SongDifficultyButton(this->songBrowser, this->carousel, this->contextMenu, 0, 0, 0,
-                                                              0, "", difficultie, this);
+            SongButton *songButton = new SongDifficultyButton(this->songBrowser, this->carousel, this->contextMenu, 0,
+                                                              0, 0, 0, "", difficultie, this);
 
             this->children.push_back(songButton);
         }
@@ -121,20 +122,16 @@ void SongButton::drawBeatmapBackgroundThumbnail(Image *image) {
     const f32 beatmapBackgroundScale =
         Osu::getImageScaleToFillResolution(image, Vector2(size.y * thumbnailYRatio, size.y)) * 1.05f;
 
-    Vector2 centerOffset = Vector2(std::round((size.y * thumbnailYRatio) / 2.0f), std::round(size.y / 2.0f));
-    McRect clipRect = McRect(pos.x - 2, pos.y + 1, (int)(size.y * thumbnailYRatio) + 5, size.y + 2);
+    Vector2 centerOffset = Vector2((size.y * thumbnailYRatio) / 2.0f, size.y / 2.0f);
+    McRect clipRect = McRect(pos.x - 2, pos.y + 1, (size.y * thumbnailYRatio) + 5, size.y + 2);
 
-    g->setColor(0xffffffff);
-    g->setAlpha(alpha);
+    g->setColor(argb(alpha, 1.f, 1.f, 1.f));
     g->pushTransform();
     {
         g->scale(beatmapBackgroundScale, beatmapBackgroundScale);
-        g->translate(pos.x + (int)centerOffset.x, pos.y + (int)centerOffset.y);
-        g->pushClipRect(clipRect);
-        {
-            g->drawImage(image);
-        }
-        g->popClipRect();
+        g->translate(pos.x + centerOffset.x, pos.y + centerOffset.y);
+        // draw with smooth edge clipping
+        g->drawImage(image, {}, 0.5f, clipRect);
     }
     g->popTransform();
 

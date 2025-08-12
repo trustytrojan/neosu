@@ -28,7 +28,8 @@ class OpenGLStateCache final {
 
     // viewport state
     void setCurrentViewport(int x, int y, int width, int height);
-    void getCurrentViewport(int &x, int &y, int &width, int &height);
+    void getCurrentViewport(int &x, int &y, int &width, int &height) const;
+    [[nodiscard]] inline const std::array<int, 4> &getCurrentViewport() const { return this->iViewport; }
 
     // initialize cache with actual GL states (once at startup)
     void initialize();
