@@ -159,7 +159,7 @@ void Bancho::handle_packet(Packet *packet) {
                     UserInfo *user = BANCHO::User::get_user_info(stats_user_id);
                     osu->chat->openChannel(user->name);
                 };
-                osu->notificationOverlay->addToast(text, STATUS_TOAST, open_dms);
+                osu->notificationOverlay->addToast(text, STATUS_TOAST, open_dms, ToastElement::TYPE::CHAT);
             }
         }
 
@@ -603,7 +603,7 @@ UString Bancho::get_disk_uuid_blkid() const {
     const std::string &exe_path = Environment::getPathToSelf();
 
     // get the device number of the device the current exe is running from
-    struct stat st {};
+    struct stat st{};
     if(stat(exe_path.c_str(), &st) != 0) {
         return w_uuid;
     }

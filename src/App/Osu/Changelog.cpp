@@ -34,6 +34,7 @@ Changelog::Changelog() : ScreenBackable() {
         R"(- Improved the quality of the main menu cube)",
         R"(- Added a new command line launch option to enable global MSAA)",
         R"(  - Run neosu with "-aa 2" (in the "Target" field for the shortcut on Windows) for 2x MSAA; up to 16x is supported)",
+        R"(- Fixed chat toasts always being visible during gameplay)",
     };
     changelogs.push_back(v40_01);
 

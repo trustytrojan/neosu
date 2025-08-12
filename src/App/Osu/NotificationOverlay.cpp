@@ -120,7 +120,13 @@ void NotificationOverlay::mouse_update(bool *propagate_clicks) {
 }
 
 void NotificationOverlay::draw() {
+    bool chat_toasts_visible = cv::notify_during_gameplay.getBool();
+    chat_toasts_visible |= !osu->isInPlayMode();
+    chat_toasts_visible |= osu->pauseMenu->isVisible();
+
     for(auto t : this->toasts) {
+        if(t->type == ToastElement::TYPE::CHAT && !chat_toasts_visible) continue;
+
         t->draw();
     }
 

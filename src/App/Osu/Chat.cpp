@@ -906,8 +906,8 @@ void Chat::addMessage(UString channel_name, const ChatMessage &msg, bool mark_un
 
         if(cv::chat_notify_on_dm.getBool()) {
             auto notif = UString::format("%s sent you a message", msg.author_name.toUtf8());
-            osu->notificationOverlay->addToast(notif, CHAT_TOAST,
-                                               [channel_name] { osu->chat->openChannel(channel_name); });
+            osu->notificationOverlay->addToast(
+                notif, CHAT_TOAST, [channel_name] { osu->chat->openChannel(channel_name); }, ToastElement::TYPE::CHAT);
         }
         if(cv::chat_ping_on_mention.getBool()) {
             // Yes, osu! really does use "match-start.wav" for when you get pinged
@@ -920,7 +920,8 @@ void Chat::addMessage(UString channel_name, const ChatMessage &msg, bool mark_un
     mentioned &= msg.author_id != bancho->user_id;
     if(mentioned && cv::chat_notify_on_mention.getBool()) {
         auto notif = UString::format("You were mentioned in %s", channel_name.toUtf8());
-        osu->notificationOverlay->addToast(notif, CHAT_TOAST, [channel_name] { osu->chat->openChannel(channel_name); });
+        osu->notificationOverlay->addToast(
+            notif, CHAT_TOAST, [channel_name] { osu->chat->openChannel(channel_name); }, ToastElement::TYPE::CHAT);
     }
     if(mentioned && cv::chat_ping_on_mention.getBool()) {
         // Yes, osu! really does use "match-start.wav" for when you get pinged
