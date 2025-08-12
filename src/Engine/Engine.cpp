@@ -28,10 +28,10 @@ std::unique_ptr<ResourceManager> resourceManager = nullptr;
 std::unique_ptr<NetworkHandler> networkHandler = nullptr;
 std::unique_ptr<AnimationHandler> animationHandler = nullptr;
 
-Engine* engine = nullptr;
+Engine *engine = nullptr;
 
-Console* Engine::console = nullptr;
-ConsoleBox* Engine::consoleBox = nullptr;
+Console *Engine::console = nullptr;
+ConsoleBox *Engine::consoleBox = nullptr;
 
 Engine::Engine() {
     engine = this;
@@ -52,7 +52,11 @@ Engine::Engine() {
     this->dTime = 0;
     this->dRunTime = 0;
     this->iFrameCount = 0;
+    this->iVsyncFrameCount = 0;
+    this->fVsyncFrameCounterTime = 0.0f;
     this->dFrameTime = 0.016f;
+
+    cv::engine_throttle.setCallback(SA::MakeDelegate<&Engine::onEngineThrottleChanged>(this));
 
     // window
     this->bBlackout = false;
@@ -305,6 +309,14 @@ void Engine::onUpdate() {
             this->timer->update();
             this->dRunTime = this->timer->getElapsedTime();
             this->dTime += this->dFrameTime;
+            if(cv::engine_throttle.getBool()) {
+                // it's more like a crude estimate but it gets the job done for use as a throttle
+                if((this->fVsyncFrameCounterTime += static_cast<float>(this->dFrameTime)) >
+                   env->getDisplayRefreshTime()) {
+                    this->fVsyncFrameCounterTime = 0.0f;
+                    ++this->iVsyncFrameCount;
+                }
+            }
         }
     }
 
@@ -558,6 +570,14 @@ void Engine::setFrameTime(double delta) {
         this->dFrameTime = delta;
     else
         this->dFrameTime = std::clamp<double>(delta, 0.0001, 1.0);
+}
+
+void Engine::onEngineThrottleChanged(float newVal) {
+    const bool enable = !!static_cast<int>(newVal);
+    if(!enable) {
+        this->fVsyncFrameCounterTime = 0.0f;
+        this->iVsyncFrameCount = 0;
+    }
 }
 
 double Engine::getTimeReal() {

@@ -1073,9 +1073,9 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
     // if cursor is to the left edge of the screen, force center currently selected beatmap/diff
     // but only if the context menu is currently not visible (since we don't want move things while e.g. managing
     // collections etc.)
-    static uint8_t throttle = 255;  // slow!
-    if(!(++throttle % 8) && !osu->getOptionsMenu()->isVisible() && mouse->getPos().x < osu->getScreenWidth() * 0.1f &&
-       !this->contextMenu->isVisible()) {
+    // NOTE: it's very slow, so only run it every 10 vsync frames
+    if(engine->throttledShouldRun(10) && !osu->getOptionsMenu()->isVisible() &&
+       mouse->getPos().x < osu->getScreenWidth() * 0.1f && !this->contextMenu->isVisible()) {
         this->scheduled_scroll_to_selected_button = true;
     }
 
@@ -1330,7 +1330,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
         const std::vector<CBaseUIElement *> &elements = this->carousel->getContainer()->getElements();
 
         for(auto element : elements) {
-            const CollectionButton *collectionButtonPointer = dynamic_cast<CollectionButton *>(element);
+            const auto *collectionButtonPointer = dynamic_cast<const CollectionButton *>(element);
 
             auto *button = dynamic_cast<SongBrowserButton *>(element);
 

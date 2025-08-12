@@ -186,7 +186,8 @@ CONVAR(autopilot_snapping_strength, "osu_autopilot_snapping_strength", 2.0f, FCV
        "How many iterations of quadratic interpolation to use, more = snappier, 0 = linear");
 CONVAR(avoid_flashes, "avoid_flashes", false, FCVAR_BANCHO_COMPATIBLE,
        "disable flashing elements (like FL dimming on sliders)");
-CONVAR(background_alpha, "osu_background_alpha", 1.0f, FCVAR_BANCHO_COMPATIBLE, "transparency of all background layers at once, only useful for FPoSu");
+CONVAR(background_alpha, "osu_background_alpha", 1.0f, FCVAR_BANCHO_COMPATIBLE,
+       "transparency of all background layers at once, only useful for FPoSu");
 CONVAR(background_brightness, "osu_background_brightness", 0.0f, FCVAR_BANCHO_COMPATIBLE,
        "0 to 1, if this is larger than 0 then it will replace the entire beatmap background "
        "image with a solid color (see osu_background_color_r/g/b)");
@@ -428,6 +429,9 @@ CONVAR(end_skip, "osu_end_skip", true, FCVAR_BANCHO_COMPATIBLE,
 CONVAR(end_skip_time, "osu_end_skip_time", 400.0f, FCVAR_BANCHO_COMPATIBLE,
        "Duration in ms which is added to the endTime of the last hitobject, after which pausing the "
        "game will immediately jump to the ranking screen");
+CONVAR(engine_throttle, "engine_throttle", true, FCVAR_BANCHO_COMPATIBLE,
+       "limit some engine component updates to improve performance (non-gameplay-related, only turn this off if you "
+       "like lower performance for no reason)");
 CONVAR(fail_time, "osu_fail_time", 2.25f, FCVAR_BANCHO_COMPATIBLE,
        "Timeframe in s for the slowdown effect after failing, before the pause menu is shown");
 CONVAR(file_size_max, "file_size_max", 1024, FCVAR_BANCHO_COMPATIBLE,

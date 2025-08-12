@@ -90,6 +90,11 @@ class Engine final : public KeyboardListener {
     [[nodiscard]] constexpr double getFrameTime() const { return this->dFrameTime; }
     [[nodiscard]] constexpr unsigned long getFrameCount() const { return this->iFrameCount; }
 
+    // clang-format off
+    // NOTE: if engine_throttle cvar is off, this will always return true
+    [[nodiscard]] inline bool throttledShouldRun(unsigned int howManyVsyncFramesToWaitBetweenExecutions) { return (this->fVsyncFrameCounterTime == 0.0f) && !(this->iVsyncFrameCount % howManyVsyncFramesToWaitBetweenExecutions);}
+    // clang-format on
+
     [[nodiscard]] constexpr bool hasFocus() const { return this->bHasFocus; }
     [[nodiscard]] constexpr bool isDrawing() const { return this->bDrawing; }
     [[nodiscard]] constexpr bool isMinimized() const { return this->bIsMinimized; }
@@ -111,6 +116,10 @@ class Engine final : public KeyboardListener {
     double dRunTime;
     unsigned long iFrameCount;
     double dFrameTime;
+    // this will wrap quickly, and that's fine, it should be used as a dividend in a modular expression anyways
+    uint8_t iVsyncFrameCount;
+    float fVsyncFrameCounterTime;
+    void onEngineThrottleChanged(float newVal);
 
     // primary screen
     McRect screenRect;
