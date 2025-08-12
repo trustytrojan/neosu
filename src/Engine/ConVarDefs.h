@@ -1238,7 +1238,7 @@ CONVAR(vprof_display_mode, "vprof_display_mode", 0, FCVAR_BANCHO_COMPATIBLE,
        "cycle through, 0 = disabled");
 CONVAR(vprof_graph, "vprof_graph", true, FCVAR_BANCHO_COMPATIBLE,
        "whether to draw the graph when the overlay is enabled");
-CONVAR(vprof_graph_alpha, "vprof_graph_alpha", 1.0f, FCVAR_BANCHO_COMPATIBLE, "line opacity");
+CONVAR(vprof_graph_alpha, "vprof_graph_alpha", 0.9f, FCVAR_BANCHO_COMPATIBLE, "line opacity");
 CONVAR(vprof_graph_draw_overhead, "vprof_graph_draw_overhead", false, FCVAR_BANCHO_COMPATIBLE,
        "whether to draw the profiling overhead time in white (usually negligible)");
 CONVAR(vprof_graph_height, "vprof_graph_height", 250.0f, FCVAR_BANCHO_COMPATIBLE);

@@ -47,7 +47,6 @@ OpenGLLegacyInterface::OpenGLLegacyInterface() : Graphics() {
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
     glEnable(GL_COLOR_MATERIAL);
-    glEnable(GL_LINE_SMOOTH);
 
     // disable
     glDisable(GL_CULL_FACE);
@@ -122,7 +121,9 @@ void OpenGLLegacyInterface::setColor(Color color) {
 }
 
 void OpenGLLegacyInterface::setAlpha(float alpha) {
-    setColor(rgba(this->color.Rf(), this->color.Gf(), this->color.Bf(), alpha));
+    Color newColor = this->color;
+    newColor.setA(alpha);
+    setColor(newColor);
 }
 
 void OpenGLLegacyInterface::drawPixels(int x, int y, int width, int height, Graphics::DRAWPIXELS_TYPE type,

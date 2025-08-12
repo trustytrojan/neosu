@@ -489,8 +489,8 @@ void VisualProfiler::mouse_update(bool *propagate_clicks) {
             // preallocate 2 vertices per line
             for(int x = 0; x < graphWidth; x++) {
                 for(int g = 0; g < numGroups; g++) {
-                    const Color color = argb(this->fPrevVaoAlpha, this->groups[g].color.Rf(),
-                                             this->groups[g].color.Gf(), this->groups[g].color.Bf());
+                    Color color = this->groups[g].color;
+                    color.setA(this->fPrevVaoAlpha);
 
                     // this->lineVao->addVertex(x, -(((float)graphHeight)/(float)numGroups)*g, 0);
                     this->lineVao->addVertex(x, 0, 0);

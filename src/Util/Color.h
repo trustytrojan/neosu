@@ -21,6 +21,16 @@
 
 using Channel = std::uint8_t;
 
+template <typename T>
+concept Numeric = std::is_arithmetic_v<T>;
+
+constexpr Channel to_byte(Numeric auto value) {
+    if constexpr(std::is_floating_point_v<decltype(value)>)
+        return static_cast<Channel>(std::clamp<decltype(value)>(value, 0, 1) * 255);
+    else
+        return static_cast<Channel>(std::clamp<Channel>(value, 0, 255));
+}
+
 // argb colors
 struct Color {
     std::uint32_t v;
@@ -50,6 +60,15 @@ struct Color {
 	template <typename T = float>
 	[[nodiscard]] constexpr T Bf() const { return static_cast<T>(static_cast<float>(v & 0xFF) / 255.0f); }
 
+	template <typename T = Channel>
+	constexpr void setA(T a) { v = ((v & 0x00FFFFFF) | (to_byte(a) << 24)); }
+	template <typename T = Channel>
+	constexpr void setR(T r) { v = ((v & 0xFF00FFFF) | (to_byte(r) << 16)); }
+	template <typename T = Channel>
+	constexpr void setG(T g) { v = ((v & 0xFFFF00FF) | (to_byte(g) << 8)); }
+	template <typename T = Channel>
+	constexpr void setB(T b) { v = ((v & 0xFFFFFF00) | (to_byte(b) << 0)); }
+
 	constexpr Color& operator&=(std::uint32_t val) { v &= val; return *this; }
 	constexpr Color& operator|=(std::uint32_t val) { v |= val; return *this; }
 	constexpr Color& operator^=(std::uint32_t val) { v ^= val; return *this; }
@@ -63,17 +82,6 @@ struct Color {
 
 	operator std::uint32_t() const { return v; }
 };
-
-template <typename T>
-concept Numeric = std::is_arithmetic_v<T>;
-
-constexpr Channel to_byte(Numeric auto value)
-{
-	if constexpr (std::is_floating_point_v<decltype(value)>)
-		return static_cast<Channel>(std::clamp<decltype(value)>(value, 0, 1) * 255);
-	else
-		return static_cast<Channel>(std::clamp<Channel>(value, 0, 255));
-}
 
 // helper to detect if types are "compatible"
 template <typename T, typename U>
