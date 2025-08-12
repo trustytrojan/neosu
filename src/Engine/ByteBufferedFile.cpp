@@ -10,7 +10,7 @@ ByteBufferedFile::Reader::Reader(const UString &uPath) : buffer(READ_BUFFER_SIZE
     if(!this->file.is_open()) {
         this->set_error("Failed to open file for reading: " + std::generic_category().message(errno));
         debugLog("Failed to open '{:s}': {:s}\n", path.string().c_str(),
-                  std::generic_category().message(errno).c_str());
+                 std::generic_category().message(errno).c_str());
         return;
     }
 
@@ -31,7 +31,7 @@ ByteBufferedFile::Reader::Reader(const UString &uPath) : buffer(READ_BUFFER_SIZE
 seek_error:
     this->set_error("Failed to initialize file reader: " + std::generic_category().message(errno));
     debugLog("Failed to initialize file reader '{:s}': {:s}\n", path.string().c_str(),
-              std::generic_category().message(errno).c_str());
+             std::generic_category().message(errno).c_str());
     this->file.close();
     return;
 }
@@ -62,7 +62,7 @@ MD5Hash ByteBufferedFile::Reader::read_hash() {
         len = 32;
     }
 
-    assert(len <= 32); // shut up gcc PLEASE
+    assert(len <= 32);  // shut up gcc PLEASE
     if(this->read_bytes(reinterpret_cast<u8 *>(hash.hash.data()), len) != len) {
         // just continue, don't set error flag
         debugLog("WARNING: failed to read {} bytes to obtain hash.\n", len);
@@ -82,13 +82,12 @@ std::string ByteBufferedFile::Reader::read_string() {
     if(empty_check == 0) return {};
 
     u32 len = this->read_uleb128();
-    auto str = std::make_unique<u8[]>(len + 1);
-    if(this->read_bytes(str.get(), len) != len) {
+    std::string str_out;
+    str_out.resize(len);
+    if(this->read_bytes(reinterpret_cast<u8 *>(str_out.data()), len) != len) {
         this->set_error("Failed to read " + std::to_string(len) + " bytes for string");
         return {};
     }
-
-    std::string str_out(reinterpret_cast<const char *>(str.get()), len);
 
     return str_out;
 }
@@ -133,7 +132,7 @@ ByteBufferedFile::Writer::Writer(const UString &uPath) : buffer(WRITE_BUFFER_SIZ
     if(!this->file.is_open()) {
         this->set_error("Failed to open file for writing: " + std::generic_category().message(errno));
         debugLog("Failed to open '{:s}': {:s}\n", path.string().c_str(),
-                  std::generic_category().message(errno).c_str());
+                 std::generic_category().message(errno).c_str());
         return;
     }
 }

@@ -138,7 +138,7 @@ bool McFont::loadGlyphDynamic(wchar_t ch) {
             const char *charRange = FontTypeMap::getCharacterRangeName(ch);
             if(charRange)
                 debugLog("Font Warning: Character U+{:04X} ({:s}) not supported by any font\n", (unsigned int)ch,
-                          charRange);
+                         charRange);
             else
                 debugLog("Font Warning: Character U+{:04X} not supported by any font\n", (unsigned int)ch);
         }
@@ -318,8 +318,7 @@ void McFont::discoverSystemFallbacks() {
 bool McFont::loadFallbackFont(const UString &fontPath, bool isSystemFont) {
     FT_Face face{};
     if(FT_New_Face(s_sharedFtLibrary, fontPath.toUtf8(), 0, &face)) {
-        if(cv::r_debug_font_unicode.getBool())
-            debugLog("Font Warning: Failed to load fallback font: {:s}\n", fontPath);
+        if(cv::r_debug_font_unicode.getBool()) debugLog("Font Warning: Failed to load fallback font: {:s}\n", fontPath);
         return false;
     }
 
@@ -481,8 +480,11 @@ bool McFont::createAndPackAtlas(const std::vector<wchar_t> &glyphs) {
     for(wchar_t ch : glyphs) {
         const auto &metrics = this->vGlyphMetrics[ch];
         if(metrics.sizePixelsX > 0 && metrics.sizePixelsY > 0) {
-            packRects.push_back({0, 0, static_cast<int>(metrics.sizePixelsX), static_cast<int>(metrics.sizePixelsY),
-                                 static_cast<int>(rectIndex)});
+            packRects.push_back({.x = 0,
+                                 .y = 0,
+                                 .width = static_cast<int>(metrics.sizePixelsX),
+                                 .height = static_cast<int>(metrics.sizePixelsY),
+                                 .id = static_cast<int>(rectIndex)});
             rectsToChars.push_back(ch);
             rectIndex++;
         }
