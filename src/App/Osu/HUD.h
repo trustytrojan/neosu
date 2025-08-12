@@ -33,8 +33,6 @@ class HUD : public OsuScreen {
     ~HUD() override;
 
     void draw() override;
-    void mouse_update(bool *propagate_clicks) override;
-
     void drawDummy();
 
     void drawCursor(Vector2 pos, float alphaMultiplier = 1.0f, bool secondTrail = false,
@@ -43,11 +41,11 @@ class HUD : public OsuScreen {
         Vector2 pos, float alphaMultiplier = 1.0f,
         bool secondTrail = false);  // NOTE: only use if drawCursor() with updateAndDrawTrail = false (FPoSu)
     void drawCursorRipples();
-    void drawFps() { this->drawFps(this->tempFont, this->fCurFps); }
+    void drawFps();
     void drawHitErrorBar(Beatmap *beatmap);
     void drawPlayfieldBorder(Vector2 playfieldCenter, Vector2 playfieldSize, float hitcircleDiameter);
     void drawPlayfieldBorder(Vector2 playfieldCenter, Vector2 playfieldSize, float hitcircleDiameter, float borderSize);
-    void drawLoadingSmall(const UString& text);
+    void drawLoadingSmall(const UString &text);
     void drawBeatmapImportSpinner();
     void drawScoreNumber(unsigned long long number, float scale = 1.0f, bool drawLeadingZeroes = false);
     void drawComboNumber(unsigned long long number, float scale = 1.0f, bool drawLeadingZeroes = false);
@@ -84,7 +82,7 @@ class HUD : public OsuScreen {
     // ILLEGAL:
     [[nodiscard]] inline float getScoreBarBreakAnim() const { return this->fScoreBarBreakAnim; }
 
-    ScoreboardSlot* player_slot = nullptr;
+    ScoreboardSlot *player_slot = nullptr;
     std::vector<ScoreboardSlot *> slots;
     MD5Hash beatmap_md5;
 
@@ -124,9 +122,6 @@ class HUD : public OsuScreen {
 
     void addCursorTrailPosition(std::vector<CURSORTRAIL> &trail, Vector2 pos, bool empty = false);
 
-    void drawCursorInt(Shader *trailShader, std::vector<CURSORTRAIL> &trail, Matrix4 &mvp, Vector2 pos,
-                       float alphaMultiplier = 1.0f, bool emptyTrailFrame = false, bool updateAndDrawTrail = true);
-    void drawCursorRaw(Vector2 pos, float alphaMultiplier = 1.0f);
     void drawCursorTrailInt(Shader *trailShader, std::vector<CURSORTRAIL> &trail, Matrix4 &mvp, Vector2 pos,
                             float alphaMultiplier = 1.0f, bool emptyTrailFrame = false);
     void drawCursorTrailRaw(float alpha, Vector2 pos);

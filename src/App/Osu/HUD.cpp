@@ -84,9 +84,10 @@ void HUD::draw() {
 
         g->pushTransform();
         {
-            if(osu->getModTarget() && cv::draw_target_heatmap.getBool())
+            if(osu->getModTarget() && cv::draw_target_heatmap.getBool()) {
                 g->translate(0, beatmap->fHitcircleDiameter *
                                     (1.0f / (cv::hud_scale.getFloat() * cv::hud_statistics_scale.getFloat())));
+            }
 
             auto diff2 = beatmap->getSelectedDifficulty2();
             this->drawStatistics(
@@ -100,6 +101,31 @@ void HUD::draw() {
                 osu->getScore()->getHitErrorAvgCustomMin(), osu->getScore()->getHitErrorAvgCustomMax());
         }
         g->popTransform();
+
+        // health anim
+        const double currentHealth = beatmap->getHealth();
+        const double elapsedMS = engine->getFrameTime() * 1000.0;
+        const double frameAimTime = 1000.0 / 60.0;
+        const double frameRatio = elapsedMS / frameAimTime;
+        if(this->fHealth < currentHealth) {
+            this->fHealth = std::min(1.0, this->fHealth + std::abs(currentHealth - this->fHealth) / 4.0 * frameRatio);
+        } else if(this->fHealth > currentHealth) {
+            this->fHealth = std::max(0.0, this->fHealth - std::abs(this->fHealth - currentHealth) / 6.0 * frameRatio);
+        }
+
+        if(cv::hud_scorebar_hide_during_breaks.getBool()) {
+            if(!anim->isAnimating(&this->fScoreBarBreakAnim) && !beatmap->isWaiting()) {
+                if(this->fScoreBarBreakAnim == 0.0f && beatmap->isInBreak()) {
+                    anim->moveLinear(&this->fScoreBarBreakAnim, 1.0f, cv::hud_scorebar_hide_anim_duration.getFloat(),
+                                     true);
+                } else if(this->fScoreBarBreakAnim == 1.0f && !beatmap->isInBreak()) {
+                    anim->moveLinear(&this->fScoreBarBreakAnim, 0.0f, cv::hud_scorebar_hide_anim_duration.getFloat(),
+                                     true);
+                }
+            }
+        } else {
+            this->fScoreBarBreakAnim = 0.0f;
+        }
 
         // NOTE: special case for FPoSu, if players manually set fposu_draw_scorebarbg_on_top to 1
         if(cv::draw_scorebarbg.getBool() && cv::mod_fposu.getBool() && cv::fposu_draw_scorebarbg_on_top.getBool())
@@ -127,6 +153,9 @@ void HUD::draw() {
         if(cv::draw_score.getBool()) this->drawScore(osu->getScore()->getScore());
 
         if(cv::draw_combo.getBool()) this->drawCombo(osu->getScore()->getCombo());
+
+        // dynamic hud scaling updates
+        this->fScoreHeight = osu->getSkin()->getScore0()->getHeight() * this->getScoreScale();
 
         if(cv::draw_progressbar.getBool())
             this->drawProgressBar(beatmap->getPercentFinishedPlayable(), beatmap->isWaiting());
@@ -225,60 +254,12 @@ void HUD::draw() {
         g->drawString(font, str);
         g->popTransform();
     }
-}
-
-void HUD::mouse_update(bool * /*propagate_clicks*/) {
-    Beatmap *beatmap = osu->getSelectedBeatmap();
-
-    if(beatmap != nullptr) {
-        // health anim
-        const double currentHealth = beatmap->getHealth();
-        const double elapsedMS = engine->getFrameTime() * 1000.0;
-        const double frameAimTime = 1000.0 / 60.0;
-        const double frameRatio = elapsedMS / frameAimTime;
-        if(this->fHealth < currentHealth)
-            this->fHealth = std::min(1.0, this->fHealth + std::abs(currentHealth - this->fHealth) / 4.0 * frameRatio);
-        else if(this->fHealth > currentHealth)
-            this->fHealth = std::max(0.0, this->fHealth - std::abs(this->fHealth - currentHealth) / 6.0 * frameRatio);
-
-        if(cv::hud_scorebar_hide_during_breaks.getBool()) {
-            if(!anim->isAnimating(&this->fScoreBarBreakAnim) && !beatmap->isWaiting()) {
-                if(this->fScoreBarBreakAnim == 0.0f && beatmap->isInBreak())
-                    anim->moveLinear(&this->fScoreBarBreakAnim, 1.0f, cv::hud_scorebar_hide_anim_duration.getFloat(),
-                                     true);
-                else if(this->fScoreBarBreakAnim == 1.0f && !beatmap->isInBreak())
-                    anim->moveLinear(&this->fScoreBarBreakAnim, 0.0f, cv::hud_scorebar_hide_anim_duration.getFloat(),
-                                     true);
-            }
-        } else
-            this->fScoreBarBreakAnim = 0.0f;
-    }
-
-    // dynamic hud scaling updates
-    this->fScoreHeight = osu->getSkin()->getScore0()->getHeight() * this->getScoreScale();
-
-    // fps string update
-    if(cv::hud_fps_smoothing.getBool()) {
-        const float smooth = pow(0.05, engine->getFrameTime());
-        this->fCurFpsSmooth = smooth * this->fCurFpsSmooth + (1.0f - smooth) * (1.0f / engine->getFrameTime());
-        if(engine->getTime() > this->fFpsUpdate || std::abs(this->fCurFpsSmooth - this->fCurFps) > 2.0f) {
-            this->fFpsUpdate = engine->getTime() + 0.25f;
-            this->fCurFps = this->fCurFpsSmooth;
-        }
-    } else {
-        this->fCurFps = (1.0f / engine->getFrameTime());
-    }
 
     // target heatmap cleanup
     if(osu->getModTarget()) {
-        if(this->targets.size() > 0 && engine->getTime() > this->targets[0].time)
+        if(this->targets.size() > 0 && engine->getTime() > this->targets[0].time) {
             this->targets.erase(this->targets.begin());
-    }
-
-    // cursor ripples cleanup
-    if(cv::draw_cursor_ripples.getBool()) {
-        if(this->cursorRipples.size() > 0 && engine->getTime() > this->cursorRipples[0].time)
-            this->cursorRipples.erase(this->cursorRipples.begin());
+        }
     }
 }
 
@@ -302,7 +283,9 @@ void HUD::drawDummy() {
        (cv::draw_scoreboard_mp.getBool() && bancho->is_playing_a_multi_map())) {
         static std::vector<SCORE_ENTRY> scoreEntries;
         scoreEntries.clear();
-        { scoreEntries.push_back(scoreEntry); }
+        {
+            scoreEntries.push_back(scoreEntry);
+        }
     }
 
     this->drawSkip();
@@ -315,6 +298,8 @@ void HUD::drawDummy() {
 
     if(cv::draw_score.getBool()) this->drawScore(scoreEntry.score);
 
+    this->fScoreHeight = 0.0f;
+
     if(cv::draw_progressbar.getBool()) this->drawProgressBar(0.25f, false);
 
     if(cv::draw_accuracy.getBool()) this->drawAccuracy(scoreEntry.accuracy * 100.0f);
@@ -323,12 +308,61 @@ void HUD::drawDummy() {
 }
 
 void HUD::drawCursor(Vector2 pos, float alphaMultiplier, bool secondTrail, bool updateAndDrawTrail) {
-    if(cv::draw_cursor_ripples.getBool() && (!cv::mod_fposu.getBool() || !osu->isInPlayMode()))
+    if(cv::draw_cursor_ripples.getBool() && (!cv::mod_fposu.getBool() || !osu->isInPlayMode())) {
         this->drawCursorRipples();
+    }
 
-    Matrix4 mvp;
-    this->drawCursorInt(this->cursorTrailShader, secondTrail ? this->cursorTrail2 : this->cursorTrail, mvp, pos,
-                        alphaMultiplier, false, updateAndDrawTrail);
+    if(updateAndDrawTrail) {
+        Matrix4 mvp;
+        auto &trail = secondTrail ? this->cursorTrail2 : this->cursorTrail;
+        this->drawCursorTrailInt(this->cursorTrailShader, trail, mvp, pos, alphaMultiplier, false);
+    }
+
+    Image *cursor = osu->getSkin()->getCursor();
+    const float scale = this->getCursorScaleFactor() * (osu->getSkin()->isCursor2x() ? 0.5f : 1.0f);
+    const float animatedScale = scale * (osu->getSkin()->getCursorExpand() ? this->fCursorExpandAnim : 1.0f);
+
+    // draw cursor
+    g->setColor(0xffffffff);
+    g->setAlpha(cv::cursor_alpha.getFloat() * alphaMultiplier);
+    g->pushTransform();
+    {
+        g->scale(animatedScale * cv::cursor_scale.getFloat(), animatedScale * cv::cursor_scale.getFloat());
+
+        if(!osu->getSkin()->getCursorCenter())
+            g->translate((cursor->getWidth() / 2.0f) * animatedScale * cv::cursor_scale.getFloat(),
+                         (cursor->getHeight() / 2.0f) * animatedScale * cv::cursor_scale.getFloat());
+
+        if(osu->getSkin()->getCursorRotate()) g->rotate(fmod(engine->getTime() * 37.0f, 360.0f));
+
+        g->translate(pos.x, pos.y);
+        g->drawImage(cursor);
+    }
+    g->popTransform();
+
+    // draw cursor middle
+    if(osu->getSkin()->getCursorMiddle() != osu->getSkin()->getMissingTexture()) {
+        g->setColor(0xffffffff);
+        g->setAlpha(cv::cursor_alpha.getFloat() * alphaMultiplier);
+        g->pushTransform();
+        {
+            g->scale(scale * cv::cursor_scale.getFloat(), scale * cv::cursor_scale.getFloat());
+            g->translate(pos.x, pos.y, 0.05f);
+
+            if(!osu->getSkin()->getCursorCenter())
+                g->translate(
+                    (osu->getSkin()->getCursorMiddle()->getWidth() / 2.0f) * scale * cv::cursor_scale.getFloat(),
+                    (osu->getSkin()->getCursorMiddle()->getHeight() / 2.0f) * scale * cv::cursor_scale.getFloat());
+
+            g->drawImage(osu->getSkin()->getCursorMiddle());
+        }
+        g->popTransform();
+    }
+
+    // cursor ripples cleanup
+    if(this->cursorRipples.size() > 0 && engine->getTime() > this->cursorRipples[0].time) {
+        this->cursorRipples.erase(this->cursorRipples.begin());
+    }
 }
 
 void HUD::drawCursorTrail(Vector2 pos, float alphaMultiplier, bool secondTrail) {
@@ -338,13 +372,6 @@ void HUD::drawCursorTrail(Vector2 pos, float alphaMultiplier, bool secondTrail) 
     Matrix4 mvp;
     this->drawCursorTrailInt(this->cursorTrailShader, secondTrail ? this->cursorTrail2 : this->cursorTrail, mvp, pos,
                              alphaMultiplier, fposuTrailJumpFix);
-}
-
-void HUD::drawCursorInt(Shader *trailShader, std::vector<CURSORTRAIL> &trail, Matrix4 &mvp, Vector2 pos,
-                        float alphaMultiplier, bool emptyTrailFrame, bool updateAndDrawTrail) {
-    if(updateAndDrawTrail) this->drawCursorTrailInt(trailShader, trail, mvp, pos, alphaMultiplier, emptyTrailFrame);
-
-    this->drawCursorRaw(pos, alphaMultiplier);
 }
 
 void HUD::drawCursorTrailInt(Shader *trailShader, std::vector<CURSORTRAIL> &trail, Matrix4 & /*mvp*/, Vector2 pos,
@@ -435,49 +462,6 @@ void HUD::drawCursorTrailInt(Shader *trailShader, std::vector<CURSORTRAIL> &trai
     }
 }
 
-void HUD::drawCursorRaw(Vector2 pos, float alphaMultiplier) {
-    Image *cursor = osu->getSkin()->getCursor();
-    const float scale = this->getCursorScaleFactor() * (osu->getSkin()->isCursor2x() ? 0.5f : 1.0f);
-    const float animatedScale = scale * (osu->getSkin()->getCursorExpand() ? this->fCursorExpandAnim : 1.0f);
-
-    // draw cursor
-    g->setColor(0xffffffff);
-    g->setAlpha(cv::cursor_alpha.getFloat() * alphaMultiplier);
-    g->pushTransform();
-    {
-        g->scale(animatedScale * cv::cursor_scale.getFloat(), animatedScale * cv::cursor_scale.getFloat());
-
-        if(!osu->getSkin()->getCursorCenter())
-            g->translate((cursor->getWidth() / 2.0f) * animatedScale * cv::cursor_scale.getFloat(),
-                         (cursor->getHeight() / 2.0f) * animatedScale * cv::cursor_scale.getFloat());
-
-        if(osu->getSkin()->getCursorRotate()) g->rotate(fmod(engine->getTime() * 37.0f, 360.0f));
-
-        g->translate(pos.x, pos.y);
-        g->drawImage(cursor);
-    }
-    g->popTransform();
-
-    // draw cursor middle
-    if(osu->getSkin()->getCursorMiddle() != osu->getSkin()->getMissingTexture()) {
-        g->setColor(0xffffffff);
-        g->setAlpha(cv::cursor_alpha.getFloat() * alphaMultiplier);
-        g->pushTransform();
-        {
-            g->scale(scale * cv::cursor_scale.getFloat(), scale * cv::cursor_scale.getFloat());
-            g->translate(pos.x, pos.y, 0.05f);
-
-            if(!osu->getSkin()->getCursorCenter())
-                g->translate(
-                    (osu->getSkin()->getCursorMiddle()->getWidth() / 2.0f) * scale * cv::cursor_scale.getFloat(),
-                    (osu->getSkin()->getCursorMiddle()->getHeight() / 2.0f) * scale * cv::cursor_scale.getFloat());
-
-            g->drawImage(osu->getSkin()->getCursorMiddle());
-        }
-        g->popTransform();
-    }
-}
-
 void HUD::drawCursorTrailRaw(float alpha, Vector2 pos) {
     Image *trailImage = osu->getSkin()->getCursorTrail();
     const float scale = this->getCursorTrailScaleFactor();
@@ -540,7 +524,21 @@ void HUD::drawCursorRipples() {
     if(cv::cursor_ripple_additive.getBool()) g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ALPHA);
 }
 
-void HUD::drawFps(McFont *font, float fps) {
+void HUD::drawFps() {
+    if(cv::hud_fps_smoothing.getBool()) {
+        const float smooth = pow(0.05, engine->getFrameTime());
+        this->fCurFpsSmooth = smooth * this->fCurFpsSmooth + (1.0f - smooth) * (1.0f / engine->getFrameTime());
+        if(engine->getTime() > this->fFpsUpdate || std::abs(this->fCurFpsSmooth - this->fCurFps) > 2.0f) {
+            this->fFpsUpdate = engine->getTime() + 0.25f;
+            this->fCurFps = this->fCurFpsSmooth;
+        }
+    } else {
+        this->fCurFps = (1.0f / engine->getFrameTime());
+    }
+
+    auto font = this->tempFont;
+    auto fps = this->fCurFps;
+
     static double old_worst_frametime = 0.0;
     static double new_worst_frametime = 0.0;
     static double current_second = 0.0;
@@ -1055,7 +1053,7 @@ void HUD::drawHPBar(double health, float alpha, float breakAnim) {
 
     // draw ki
     {
-        SkinImage* ki = nullptr;
+        SkinImage *ki = nullptr;
 
         if(useNewDefault)
             ki = osu->getSkin()->getScorebarMarker();
