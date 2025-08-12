@@ -6,7 +6,7 @@ class ConVar;
 
 class SongDifficultyButton : public SongButton {
    public:
-    SongDifficultyButton(SongBrowser *songBrowser, const std::unique_ptr<BeatmapCarousel> &view, UIContextMenu *contextMenu, float xPos,
+    SongDifficultyButton(SongBrowser *songBrowser, BeatmapCarousel *view, UIContextMenu *contextMenu, float xPos,
                          float yPos, float xSize, float ySize, UString name, DatabaseBeatmap *diff2,
                          SongButton *parentSongButton);
     ~SongDifficultyButton() override;

@@ -9,7 +9,7 @@ class BeatmapCarousel;
 
 class SongButton : public SongBrowserButton {
    public:
-    SongButton(SongBrowser *songBrowser, const std::unique_ptr<BeatmapCarousel> &view, UIContextMenu *contextMenu, float xPos, float yPos,
+    SongButton(SongBrowser *songBrowser, BeatmapCarousel *view, UIContextMenu *contextMenu, float xPos, float yPos,
                float xSize, float ySize, UString name, DatabaseBeatmap *databaseBeatmap);
     ~SongButton() override;
 
@@ -29,9 +29,9 @@ class SongButton : public SongBrowserButton {
     void onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected) override;
     void onRightMouseUpInside() override;
 
-    void onContextMenu(const UString& text, int id = -1);
-    void onAddToCollectionConfirmed(const UString& text, int id = -1);
-    void onCreateNewCollectionConfirmed(const UString& text, int id = -1);
+    void onContextMenu(const UString &text, int id = -1);
+    void onAddToCollectionConfirmed(const UString &text, int id = -1);
+    void onCreateNewCollectionConfirmed(const UString &text, int id = -1);
 
     void drawBeatmapBackgroundThumbnail(Image *image);
     void drawGrade();

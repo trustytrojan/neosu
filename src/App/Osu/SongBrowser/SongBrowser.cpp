@@ -460,7 +460,7 @@ SongBrowser::SongBrowser()  // NOLINT(cert-msc51-cpp, cert-msc32-c)
     this->localBestLabel->setTextJustification(CBaseUILabel::TEXT_JUSTIFICATION::TEXT_JUSTIFICATION_CENTERED);
 
     // build carousel
-    this->carousel = std::make_unique<BeatmapCarousel>(this, 0, 0, 0, 0, "Carousel");
+    this->carousel = new BeatmapCarousel(this, 0, 0, 0, 0, "Carousel");
     this->thumbnailYRatio = cv::draw_songbrowser_thumbnails.getBool() ? 1.333333f : 0.f;
 
     // beatmap database

@@ -24,9 +24,8 @@ float SongBrowserButton::lastHoverSoundTime = 0;
 
 // Color Button::inactiveDifficultyBackgroundColor = argb(255, 0, 150, 236); // blue
 
-SongBrowserButton::SongBrowserButton(SongBrowser *songBrowser, const std::unique_ptr<BeatmapCarousel> &view,
-                                     UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize,
-                                     UString name)
+SongBrowserButton::SongBrowserButton(SongBrowser *songBrowser, BeatmapCarousel *view, UIContextMenu *contextMenu,
+                                     float xPos, float yPos, float xSize, float ySize, UString name)
     : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), ""), carousel(view) {
     this->songBrowser = songBrowser;
     this->contextMenu = contextMenu;

@@ -5,17 +5,16 @@
 
 #include "CBaseUIButton.h"
 
+class BeatmapCarousel;
 class DatabaseBeatmap;
 class SongBrowser;
 class SongButton;
 class UIContextMenu;
 
-class BeatmapCarousel;
-
 class SongBrowserButton : public CBaseUIButton {
    public:
-    SongBrowserButton(SongBrowser *songBrowser, const std::unique_ptr<BeatmapCarousel> &view, UIContextMenu *contextMenu, float xPos, float yPos,
-           float xSize, float ySize, UString name);
+    SongBrowserButton(SongBrowser *songBrowser, BeatmapCarousel *view, UIContextMenu *contextMenu, float xPos,
+                      float yPos, float xSize, float ySize, UString name);
     ~SongBrowserButton() override;
     void deleteAnimations();
 
@@ -42,7 +41,7 @@ class SongBrowserButton : public CBaseUIButton {
     [[nodiscard]] inline Vector2 getActualPos() const { return this->vPos + this->getActualOffset(); }
     inline std::vector<SongButton *> &getChildren() { return this->children; }
 
-    [[nodiscard]] virtual DatabaseBeatmap* getDatabaseBeatmap() const { return nullptr; }
+    [[nodiscard]] virtual DatabaseBeatmap *getDatabaseBeatmap() const { return nullptr; }
     [[nodiscard]] virtual Color getActiveBackgroundColor() const;
     [[nodiscard]] virtual Color getInactiveBackgroundColor() const;
 
@@ -53,10 +52,10 @@ class SongBrowserButton : public CBaseUIButton {
    protected:
     void drawMenuButtonBackground();
 
-    virtual void onSelected(bool  /*wasSelected*/, bool  /*autoSelectBottomMostChild*/, bool  /*wasParentSelected*/) { ; }
+    virtual void onSelected(bool /*wasSelected*/, bool /*autoSelectBottomMostChild*/, bool /*wasParentSelected*/) { ; }
     virtual void onRightMouseUpInside() { ; }
 
-    const std::unique_ptr<BeatmapCarousel> &carousel;
+    BeatmapCarousel *carousel;
     SongBrowser *songBrowser;
     UIContextMenu *contextMenu;
 

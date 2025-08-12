@@ -23,9 +23,8 @@
 #include "SkinImage.h"
 #include "UIContextMenu.h"
 
-SongButton::SongButton(SongBrowser *songBrowser, const std::unique_ptr<BeatmapCarousel> &view,
-                       UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize, UString name,
-                       DatabaseBeatmap *databaseBeatmap)
+SongButton::SongButton(SongBrowser *songBrowser, BeatmapCarousel *view, UIContextMenu *contextMenu, float xPos,
+                       float yPos, float xSize, float ySize, UString name, DatabaseBeatmap *databaseBeatmap)
     : SongBrowserButton(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, std::move(name)) {
     this->databaseBeatmap = databaseBeatmap;
 

@@ -5,7 +5,7 @@
 
 class CollectionButton : public SongBrowserButton {
    public:
-    CollectionButton(SongBrowser *songBrowser, const std::unique_ptr<BeatmapCarousel> &view, UIContextMenu *contextMenu, float xPos,
+    CollectionButton(SongBrowser *songBrowser, BeatmapCarousel *view, UIContextMenu *contextMenu, float xPos,
                      float yPos, float xSize, float ySize, UString name, const UString &collectionName,
                      std::vector<SongButton *> children);
 

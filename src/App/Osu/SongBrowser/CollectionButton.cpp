@@ -19,11 +19,9 @@
 #include "Skin.h"
 #include "UIContextMenu.h"
 
-
-
-CollectionButton::CollectionButton(SongBrowser *songBrowser, const std::unique_ptr<BeatmapCarousel> &view, UIContextMenu *contextMenu,
+CollectionButton::CollectionButton(SongBrowser *songBrowser, BeatmapCarousel *view, UIContextMenu *contextMenu,
                                    float xPos, float yPos, float xSize, float ySize, UString name,
-                                   const UString& collectionName, std::vector<SongButton *> children)
+                                   const UString &collectionName, std::vector<SongButton *> children)
     : SongBrowserButton(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, std::move(name)) {
     this->sCollectionName = collectionName.utf8View();
     this->children = std::move(children);
@@ -106,7 +104,7 @@ void CollectionButton::triggerContextMenu(Vector2 pos) {
     }
 }
 
-void CollectionButton::onContextMenu(const UString& text, int id) {
+void CollectionButton::onContextMenu(const UString &text, int id) {
     if(id == 1) {
         this->contextMenu->begin(0, true);
         {
@@ -134,8 +132,7 @@ void CollectionButton::onContextMenu(const UString& text, int id) {
             label->setTextDarkColor(0xff000000);
         }
         this->contextMenu->end(false, false);
-        this->contextMenu->setClickCallback(
-            SA::MakeDelegate<&CollectionButton::onRenameCollectionConfirmed>(this));
+        this->contextMenu->setClickCallback(SA::MakeDelegate<&CollectionButton::onRenameCollectionConfirmed>(this));
         UIContextMenu::clampToRightScreenEdge(this->contextMenu);
         UIContextMenu::clampToBottomScreenEdge(this->contextMenu);
     } else if(id == 2) {
@@ -154,15 +151,14 @@ void CollectionButton::onContextMenu(const UString& text, int id) {
                 this->contextMenu->addButton("No")->setTextLeft(false);
             }
             this->contextMenu->end(false, false);
-            this->contextMenu->setClickCallback(
-                SA::MakeDelegate<&CollectionButton::onDeleteCollectionConfirmed>(this));
+            this->contextMenu->setClickCallback(SA::MakeDelegate<&CollectionButton::onDeleteCollectionConfirmed>(this));
             UIContextMenu::clampToRightScreenEdge(this->contextMenu);
             UIContextMenu::clampToBottomScreenEdge(this->contextMenu);
         }
     }
 }
 
-void CollectionButton::onRenameCollectionConfirmed(const UString& text, int  /*id*/) {
+void CollectionButton::onRenameCollectionConfirmed(const UString &text, int /*id*/) {
     if(text.length() > 0) {
         std::string new_name = text.toUtf8();
         auto collection = get_or_create_collection(this->sCollectionName);
@@ -174,7 +170,7 @@ void CollectionButton::onRenameCollectionConfirmed(const UString& text, int  /*i
     }
 }
 
-void CollectionButton::onDeleteCollectionConfirmed(const UString&  /*text*/, int id) {
+void CollectionButton::onDeleteCollectionConfirmed(const UString & /*text*/, int id) {
     if(id != 2) return;
 
     // just forward it
@@ -183,14 +179,14 @@ void CollectionButton::onDeleteCollectionConfirmed(const UString&  /*text*/, int
 
 Color CollectionButton::getActiveBackgroundColor() const {
     return argb(std::clamp<int>(cv::songbrowser_button_collection_active_color_a.getInt(), 0, 255),
-                 std::clamp<int>(cv::songbrowser_button_collection_active_color_r.getInt(), 0, 255),
-                 std::clamp<int>(cv::songbrowser_button_collection_active_color_g.getInt(), 0, 255),
-                 std::clamp<int>(cv::songbrowser_button_collection_active_color_b.getInt(), 0, 255));
+                std::clamp<int>(cv::songbrowser_button_collection_active_color_r.getInt(), 0, 255),
+                std::clamp<int>(cv::songbrowser_button_collection_active_color_g.getInt(), 0, 255),
+                std::clamp<int>(cv::songbrowser_button_collection_active_color_b.getInt(), 0, 255));
 }
 
 Color CollectionButton::getInactiveBackgroundColor() const {
     return argb(std::clamp<int>(cv::songbrowser_button_collection_inactive_color_a.getInt(), 0, 255),
-                 std::clamp<int>(cv::songbrowser_button_collection_inactive_color_r.getInt(), 0, 255),
-                 std::clamp<int>(cv::songbrowser_button_collection_inactive_color_g.getInt(), 0, 255),
-                 std::clamp<int>(cv::songbrowser_button_collection_inactive_color_b.getInt(), 0, 255));
+                std::clamp<int>(cv::songbrowser_button_collection_inactive_color_r.getInt(), 0, 255),
+                std::clamp<int>(cv::songbrowser_button_collection_inactive_color_g.getInt(), 0, 255),
+                std::clamp<int>(cv::songbrowser_button_collection_inactive_color_b.getInt(), 0, 255));
 }

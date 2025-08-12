@@ -21,9 +21,9 @@
 #include "SoundEngine.h"
 #include "Timing.h"
 
-SongDifficultyButton::SongDifficultyButton(SongBrowser* songBrowser,  const std::unique_ptr<BeatmapCarousel> &view,
-                                           UIContextMenu* contextMenu, float xPos, float yPos, float xSize, float ySize,
-                                           UString name, DatabaseBeatmap* diff2, SongButton* parentSongButton)
+SongDifficultyButton::SongDifficultyButton(SongBrowser* songBrowser, BeatmapCarousel* view, UIContextMenu* contextMenu,
+                                           float xPos, float yPos, float xSize, float ySize, UString name,
+                                           DatabaseBeatmap* diff2, SongButton* parentSongButton)
     : SongButton(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, std::move(name), nullptr) {
     this->databaseBeatmap = diff2;  // NOTE: can't use parent constructor for passing this argument, as it would
                                     // otherwise try to build a full button (and not just a diff button)
@@ -53,7 +53,7 @@ void SongDifficultyButton::draw() {
 
     const bool isIndependentDiff = this->isIndependentDiffButton();
 
-    Skin *skin = osu->getSkin();
+    Skin* skin = osu->getSkin();
 
     // scaling
     const Vector2 pos = this->getActualPos();
@@ -144,7 +144,7 @@ void SongDifficultyButton::draw() {
     }
 }
 
-void SongDifficultyButton::mouse_update(bool *propagate_clicks) {
+void SongDifficultyButton::mouse_update(bool* propagate_clicks) {
     if(!this->bVisible) return;
     SongButton::mouse_update(propagate_clicks);
 
@@ -193,7 +193,7 @@ void SongDifficultyButton::updateGrade() {
 
     std::scoped_lock lock(db->scores_mtx);
     auto db_scores = db->getScores();
-    for(auto &score : (*db_scores)[this->databaseBeatmap->getMD5Hash()]) {
+    for(auto& score : (*db_scores)[this->databaseBeatmap->getMD5Hash()]) {
         if(score.grade < this->grade) {
             this->grade = score.grade;
 
