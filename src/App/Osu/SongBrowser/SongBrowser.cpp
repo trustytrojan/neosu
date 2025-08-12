@@ -460,11 +460,7 @@ SongBrowser::SongBrowser()  // NOLINT(cert-msc51-cpp, cert-msc32-c)
     this->localBestLabel->setTextJustification(CBaseUILabel::TEXT_JUSTIFICATION::TEXT_JUSTIFICATION_CENTERED);
 
     // build carousel
-    this->carousel = std::make_unique<BeatmapCarousel>(0, 0, 0, 0, "Carousel");
-    this->carousel->setDrawBackground(false);
-    this->carousel->setDrawFrame(false);
-    this->carousel->setHorizontalScrolling(false);
-    this->carousel->setScrollResistance(15);
+    this->carousel = std::make_unique<BeatmapCarousel>(this, 0, 0, 0, 0, "Carousel");
     this->thumbnailYRatio = cv::draw_songbrowser_thumbnails.getBool() ? 1.333333f : 0.f;
 
     // beatmap database
@@ -497,8 +493,6 @@ SongBrowser::~SongBrowser() {
     this->checkHandleKillBackgroundSearchMatcher();
 
     resourceManager->destroyResource(this->backgroundSearchMatcher);
-
-    this->carousel->getContainer()->invalidate();
 
     for(auto &songButton : this->songButtons) {
         delete songButton;
@@ -762,7 +756,7 @@ void SongBrowser::draw() {
         }
     }
 
-    // draw song browser
+    // draw beatmap carousel
     this->carousel->draw();
 
     // draw topbar background
@@ -1018,47 +1012,11 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
 
     // update and focus handling
     this->topbarRight->mouse_update(propagate_clicks);
-    this->carousel->mouse_update(propagate_clicks);
-    this->carousel->getContainer()->update_pos();  // necessary due to constant animations
     if(this->localBestButton) this->localBestButton->mouse_update(propagate_clicks);
     this->scoreBrowser->mouse_update(propagate_clicks);
     this->topbarLeft->mouse_update(propagate_clicks);
 
-    // handle right click absolute scrolling
-    {
-        if(mouse->isRightDown() && !this->contextMenu->isMouseInside()) {
-            if(!this->bSongBrowserRightClickScrollCheck) {
-                this->bSongBrowserRightClickScrollCheck = true;
-
-                bool isMouseInsideAnySongButton = false;
-                {
-                    const std::vector<CBaseUIElement *> &elements = this->carousel->getContainer()->getElements();
-                    for(CBaseUIElement *songButton : elements) {
-                        if(songButton->isMouseInside()) {
-                            isMouseInsideAnySongButton = true;
-                            break;
-                        }
-                    }
-                }
-
-                if(this->carousel->isMouseInside() && !osu->getOptionsMenu()->isMouseInside() &&
-                   !isMouseInsideAnySongButton)
-                    this->bSongBrowserRightClickScrolling = true;
-                else
-                    this->bSongBrowserRightClickScrolling = false;
-            }
-        } else {
-            this->bSongBrowserRightClickScrollCheck = false;
-            this->bSongBrowserRightClickScrolling = false;
-        }
-
-        if(this->bSongBrowserRightClickScrolling) {
-            const int scrollingTo =
-                -((mouse->getPos().y - 2 - this->carousel->getPos().y) / this->carousel->getSize().y) *
-                (this->carousel->getScrollSize().y /* HACK: WTF? */ * 1.1);
-            this->carousel->scrollToY(scrollingTo);
-        }
-    }
+    this->carousel->mouse_update(propagate_clicks);
 
     // handle async random beatmap selection
     if(this->bRandomBeatmapScheduled) {
@@ -1185,165 +1143,8 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
 
     if(key == KEY_F5) this->refreshBeatmaps();
 
-    // selection move
-    if(!keyboard->isAltDown() && key == KEY_DOWN) {
-        const std::vector<CBaseUIElement *> &elements = this->carousel->getContainer()->getElements();
-
-        // get bottom selection
-        int selectedIndex = -1;
-        for(int i = 0; i < elements.size(); i++) {
-            auto *button = dynamic_cast<SongBrowserButton *>(elements[i]);
-            if(button != nullptr && button->isSelected()) selectedIndex = i;
-        }
-
-        // select +1
-        if(selectedIndex > -1 && selectedIndex + 1 < elements.size()) {
-            int nextSelectionIndex = selectedIndex + 1;
-            auto *nextButton = dynamic_cast<SongBrowserButton *>(elements[nextSelectionIndex]);
-            auto *songButton = dynamic_cast<SongButton *>(elements[nextSelectionIndex]);
-            if(nextButton != nullptr) {
-                nextButton->select(true, false);
-
-                // if this is a song button, select top child
-                if(songButton != nullptr) {
-                    const auto &children = songButton->getChildren();
-                    if(children.size() > 0 && !children[0]->isSelected()) children[0]->select(true, false, false);
-                }
-            }
-        }
-    }
-
-    if(!keyboard->isAltDown() && key == KEY_UP) {
-        const std::vector<CBaseUIElement *> &elements = this->carousel->getContainer()->getElements();
-
-        // get bottom selection
-        int selectedIndex = -1;
-        for(int i = 0; i < elements.size(); i++) {
-            auto *button = dynamic_cast<SongBrowserButton *>(elements[i]);
-            if(button != nullptr && button->isSelected()) selectedIndex = i;
-        }
-
-        // select -1
-        if(selectedIndex > -1 && selectedIndex - 1 > -1) {
-            int nextSelectionIndex = selectedIndex - 1;
-            auto *nextButton = dynamic_cast<SongBrowserButton *>(elements[nextSelectionIndex]);
-            bool isCollectionButton = dynamic_cast<CollectionButton *>(elements[nextSelectionIndex]);
-
-            if(nextButton != nullptr) {
-                nextButton->select();
-
-                // automatically open collection on top of this one and go to bottom child
-                if(isCollectionButton && nextSelectionIndex - 1 > -1) {
-                    nextSelectionIndex = nextSelectionIndex - 1;
-                    auto *nextCollectionButton = dynamic_cast<CollectionButton *>(elements[nextSelectionIndex]);
-                    if(nextCollectionButton != nullptr) {
-                        nextCollectionButton->select();
-
-                        const auto &children = nextCollectionButton->getChildren();
-                        if(children.size() > 0 && !children[children.size() - 1]->isSelected())
-                            children[children.size() - 1]->select();
-                    }
-                }
-            }
-        }
-    }
-
-    if(key == KEY_LEFT && !this->bLeft) {
-        this->bLeft = true;
-
-        const bool jumpToNextGroup = keyboard->isShiftDown();
-
-        const std::vector<CBaseUIElement *> &elements = this->carousel->getContainer()->getElements();
-
-        bool foundSelected = false;
-        for(int i = elements.size() - 1; i >= 0; i--) {
-            const SongDifficultyButton *diffButtonPointer = dynamic_cast<SongDifficultyButton *>(elements[i]);
-            const CollectionButton *collectionButtonPointer = dynamic_cast<CollectionButton *>(elements[i]);
-
-            auto *button = dynamic_cast<SongBrowserButton *>(elements[i]);
-            const bool isSongDifficultyButtonAndNotIndependent =
-                (diffButtonPointer != nullptr && !diffButtonPointer->isIndependentDiffButton());
-
-            if(foundSelected && button != nullptr && !button->isSelected() &&
-               !isSongDifficultyButtonAndNotIndependent && (!jumpToNextGroup || collectionButtonPointer != nullptr)) {
-                this->bNextScrollToSongButtonJumpFixUseScrollSizeDelta = true;
-                {
-                    button->select();
-
-                    if(!jumpToNextGroup || collectionButtonPointer == nullptr) {
-                        // automatically open collection below and go to bottom child
-                        auto *collectionButton = dynamic_cast<CollectionButton *>(elements[i]);
-                        if(collectionButton != nullptr) {
-                            const auto &children = collectionButton->getChildren();
-                            if(children.size() > 0 && !children[children.size() - 1]->isSelected())
-                                children[children.size() - 1]->select();
-                        }
-                    }
-                }
-                this->bNextScrollToSongButtonJumpFixUseScrollSizeDelta = false;
-
-                break;
-            }
-
-            if(button != nullptr && button->isSelected()) foundSelected = true;
-        }
-    }
-
-    if(key == KEY_RIGHT && !this->bRight) {
-        this->bRight = true;
-
-        const bool jumpToNextGroup = keyboard->isShiftDown();
-
-        const std::vector<CBaseUIElement *> &elements = this->carousel->getContainer()->getElements();
-
-        // get bottom selection
-        int selectedIndex = -1;
-        for(size_t i = 0; i < elements.size(); i++) {
-            auto *button = dynamic_cast<SongBrowserButton *>(elements[i]);
-            if(button != nullptr && button->isSelected()) selectedIndex = i;
-        }
-
-        if(selectedIndex > -1) {
-            for(size_t i = selectedIndex; i < elements.size(); i++) {
-                const SongDifficultyButton *diffButtonPointer = dynamic_cast<SongDifficultyButton *>(elements[i]);
-                const CollectionButton *collectionButtonPointer = dynamic_cast<CollectionButton *>(elements[i]);
-
-                auto *button = dynamic_cast<SongBrowserButton *>(elements[i]);
-                const bool isSongDifficultyButtonAndNotIndependent =
-                    (diffButtonPointer != nullptr && !diffButtonPointer->isIndependentDiffButton());
-
-                if(button != nullptr && !button->isSelected() && !isSongDifficultyButtonAndNotIndependent &&
-                   (!jumpToNextGroup || collectionButtonPointer != nullptr)) {
-                    button->select();
-                    break;
-                }
-            }
-        }
-    }
-
-    if(key == KEY_PAGEUP) this->carousel->scrollY(this->carousel->getSize().y);
-    if(key == KEY_PAGEDOWN) this->carousel->scrollY(-this->carousel->getSize().y);
-
-    // group open/close
-    // NOTE: only closing works atm (no "focus" state on buttons yet)
-    if((key == KEY_ENTER || key == KEY_NUMPAD_ENTER) && keyboard->isShiftDown()) {
-        const std::vector<CBaseUIElement *> &elements = this->carousel->getContainer()->getElements();
-
-        for(auto element : elements) {
-            const auto *collectionButtonPointer = dynamic_cast<const CollectionButton *>(element);
-
-            auto *button = dynamic_cast<SongBrowserButton *>(element);
-
-            if(collectionButtonPointer != nullptr && button != nullptr && button->isSelected()) {
-                button->select();  // deselect
-                this->scrollToSongButton(button);
-                break;
-            }
-        }
-    }
-
-    // selection select
-    if((key == KEY_ENTER || key == KEY_NUMPAD_ENTER) && !keyboard->isShiftDown()) this->playSelectedDifficulty();
+    this->carousel->onKeyDown(key);
+    //if (key.isConsumed()) return;
 
     // toggle auto
     if(key == KEY_A && keyboard->isControlDown()) osu->getModSelector()->toggleAuto();
@@ -2871,7 +2672,7 @@ void SongBrowser::onSearchUpdate() {
         for(auto &songButton : this->songButtons) {
             const auto &children = songButton->getChildren();
             if(children.size() > 0) {
-                for(auto c : children) {
+                for(auto &c : children) {
                     c->setIsSearchMatch(true);
                 }
             } else

@@ -54,6 +54,7 @@ class SongBrowser final : public ScreenBackable {
     };
 
     friend class SongBrowserBackgroundSearchMatcher;
+    friend class BeatmapCarousel;
 
     SongBrowser();
     ~SongBrowser() override;
