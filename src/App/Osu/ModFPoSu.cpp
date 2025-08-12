@@ -44,6 +44,7 @@ ModFPoSu::ModFPoSu() {
 
     this->fEdgeDistance = 0.0f;
     this->bCrosshairIntersectsScreen = false;
+    this->bAlreadyWarnedAboutRawInputOverride = false;
 
     // load resources
     this->vao = resourceManager->createVertexArrayObject();
@@ -208,7 +209,10 @@ void ModFPoSu::draw() {
 }
 
 void ModFPoSu::update() {
-    if(!cv::mod_fposu.getBool()) return;
+    if(!osu->isInPlayMode() || !cv::mod_fposu.getBool()) {
+        this->handleInputOverrides(false);  // release overridden rawinput state
+        return;
+    }
 
     if(cv::fposu_noclip.getBool()) this->noclipMove();
 
@@ -275,11 +279,9 @@ void ModFPoSu::update() {
 
         // apply zoom_sensitivity_ratio if zoomed
         if(this->bZoomed && cv::fposu_zoom_sensitivity_ratio.getFloat() > 0.0f)
-            rawDelta *=
-                (cv::fposu_zoom_fov.getFloat() / cv::fposu_fov.getFloat()) *
-                cv::fposu_zoom_sensitivity_ratio
-                    .getFloat();  // see
-                                  // https://www.reddit.com/r/GlobalOffensive/comments/3vxkav/how_zoomed_sensitivity_works/
+            rawDelta *= (cv::fposu_zoom_fov.getFloat() / cv::fposu_fov.getFloat()) *
+                        cv::fposu_zoom_sensitivity_ratio.getFloat();  // see
+        // https://www.reddit.com/r/GlobalOffensive/comments/3vxkav/how_zoomed_sensitivity_works/
 
         // update camera
         if(rawDelta.x != 0.0f)
@@ -301,6 +303,8 @@ void ModFPoSu::update() {
             }
         }
     } else {
+        this->handleInputOverrides(false);  // we don't need raw deltas for absolute mode
+
         // absolute mouse position mode (or auto)
         Vector2 mousePos = mouse->getPos();
         auto beatmap = osu->getSelectedBeatmap();
@@ -431,13 +435,30 @@ void ModFPoSu::handleZoomedChange() {
                           this->fZoomFOVAnimPercent * cv::fposu_zoom_anim_duration.getFloat(), true);
 }
 
+void ModFPoSu::handleInputOverrides(bool rawDeltasRequired) {
+    if(mouse->isRawInputWanted() == true) {
+        return;  // nothing to do if user desired state is already raw (no override required)
+    }
+
+    // otherwise, cv::mouse_raw_input == false so we need to enable raw input at the backend level
+    if(env->isOSMouseInputRaw() != rawDeltasRequired) {
+        if(rawDeltasRequired && !this->bAlreadyWarnedAboutRawInputOverride) {
+            this->bAlreadyWarnedAboutRawInputOverride = true;
+            osu->notificationOverlay->addToast(
+                R"(Forced raw input. Enable "Tablet/Absolute Mode" if you're using a tablet!)", INFO_TOAST);
+        }
+        env->setRawInput(rawDeltasRequired);
+    }
+}
+
 void ModFPoSu::setMousePosCompensated(Vector2 newMousePos) {
+    this->handleInputOverrides(true);  // outside of absolute mode, we need raw mouse deltas
+
     // NOTE: letterboxing uses Mouse::setOffset() to offset the virtual engine cursor coordinate system, so we have to
     // respect that when setting a new (absolute) position
     newMousePos -= mouse->getOffset();
 
     mouse->onPosChange(newMousePos);
-    // env->setMousePos(newMousePos.x, newMousePos.y);
 }
 
 Vector2 ModFPoSu::intersectRayMesh(Vector3 pos, Vector3 dir) {

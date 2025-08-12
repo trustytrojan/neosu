@@ -506,7 +506,6 @@ bool Beatmap::watch(FinishedScore score, f64 start_percent) {
 
     this->spectated_replay = score.replay;
 
-    osu->songBrowser2->bHasSelectedAndIsPlaying = true;
     osu->songBrowser2->setVisible(false);
 
     // Don't seek to 0%, since it feels really bad to start immediately
@@ -546,7 +545,6 @@ bool Beatmap::spectate() {
     this->spectated_replay.clear();
     this->score_frames.clear();
 
-    osu->songBrowser2->bHasSelectedAndIsPlaying = true;
     osu->songBrowser2->setVisible(false);
 
     SAFE_DELETE(sim);
@@ -558,6 +556,9 @@ bool Beatmap::spectate() {
 }
 
 bool Beatmap::start() {
+    // set it to false to catch early returns first
+    osu->songBrowser2->bHasSelectedAndIsPlaying = false;
+
     if(this->selectedDifficulty2 == nullptr) return false;
 
     osu->should_pause_background_threads = true;
@@ -723,6 +724,10 @@ bool Beatmap::start() {
 
     osu->fQuickSaveTime = 0.0f;  // reset
 
+    // this needs to be set here, because updateConfineCursor relies on this
+    // awesome spaghetti logic btw
+    osu->songBrowser2->bHasSelectedAndIsPlaying = true;
+
     osu->updateConfineCursor();
     osu->updateWindowsKeyDisable();
 
@@ -884,6 +889,8 @@ bool Beatmap::isPreviewMusicPlaying() {
 }
 
 void Beatmap::stop(bool quit) {
+    osu->songBrowser2->bHasSelectedAndIsPlaying = false;
+
     if(this->selectedDifficulty2 == nullptr) return;
 
     if(this->getSkin()->getFailsound()->isPlaying()) soundEngine->stop(this->getSkin()->getFailsound());

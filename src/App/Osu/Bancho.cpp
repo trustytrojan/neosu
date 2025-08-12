@@ -238,7 +238,6 @@ void Bancho::handle_packet(Packet *packet) {
                     info->map_id = 0;
                     info->map_md5 = MD5Hash();
                     beatmap->stop(true);
-                    osu->songBrowser2->bHasSelectedAndIsPlaying = false;
                 }
                 if(action == LiveReplayBundle::Action::UNPAUSE) {
                     beatmap->spectate_pause = false;
@@ -319,7 +318,6 @@ void Bancho::handle_packet(Packet *packet) {
         }
         if(osu->isInPlayMode()) {
             osu->getSelectedBeatmap()->stop(true);
-            osu->songBrowser2->bHasSelectedAndIsPlaying = false;
         }
 
         auto room = Room(packet);

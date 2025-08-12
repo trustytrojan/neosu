@@ -41,6 +41,7 @@ class ModFPoSu {
     void handleZoomedChange();
     void noclipMove();
 
+    void handleInputOverrides(bool required);
     void setMousePosCompensated(Vector2 newMousePos);
     Vector2 intersectRayMesh(Vector3 pos, Vector3 dir);
     Vector3 calculateUnProjectedVector(Vector2 pos);
@@ -91,6 +92,7 @@ class ModFPoSu {
 
     float fEdgeDistance;
     bool bCrosshairIntersectsScreen;
+    bool bAlreadyWarnedAboutRawInputOverride;
 
     ModFPoSu3DModel *skyboxModel;
 

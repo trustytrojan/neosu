@@ -118,7 +118,7 @@ SDL_AppResult SDLMain::initialize() {
         SDL_GetGlobalMouseState(&x, &y);
         Vector2 posInWindow = Vector2{x, y} - getWindowPos();
 
-        setMousePos(posInWindow);
+        setOSMousePos(posInWindow);
         mouse->onPosChange(posInWindow);
     }
 

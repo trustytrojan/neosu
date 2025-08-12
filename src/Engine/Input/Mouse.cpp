@@ -8,7 +8,7 @@
 
 Mouse::Mouse() : InputDevice(), vPos(env->getMousePos()), vPosWithoutOffsets(this->vPos), vActualPos(this->vPos) {
     this->fSensitivity = cv::mouse_sensitivity.getFloat();
-    this->bIsRawInput = cv::mouse_raw_input.getBool();
+    this->bIsRawInputDesired = cv::mouse_raw_input.getBool();
     cv::mouse_raw_input.setCallback(SA::MakeDelegate<&Mouse::onRawInputChanged>(this));
     cv::mouse_sensitivity.setCallback(SA::MakeDelegate<&Mouse::onSensitivityChanged>(this));
 }
@@ -97,7 +97,7 @@ void Mouse::update() {
     // vRawDelta doesn't include sensitivity or clipping, which is useful for fposu
     this->vRawDelta = newRel;
 
-    const bool actuallyRaw{this->bIsRawInput && env->isOSMouseInputRaw()};
+    const bool actuallyRaw{this->bIsRawInputDesired || env->isOSMouseInputRaw()};
 
     if(actuallyRaw) {
         // only relative input (raw) can have sensitivity
@@ -215,12 +215,12 @@ void Mouse::removeListener(MouseListener *mouseListener) {
 }
 
 void Mouse::onRawInputChanged(float newval) {
-    this->bIsRawInput = !!static_cast<int>(newval);
-    env->setRawInput(this->bIsRawInput);  // request environment to change the real OS cursor state (may or may
+    this->bIsRawInputDesired = !!static_cast<int>(newval);
+    env->setRawInput(this->bIsRawInputDesired);  // request environment to change the real OS cursor state (may or may
                                           // not take effect immediately)
 
     // non-rawinput with sensitivity != 1 is unsupported
-    if(!this->bIsRawInput && (this->fSensitivity < 0.999f || this->fSensitivity > 1.001f)) {
+    if(!this->bIsRawInputDesired && (this->fSensitivity < 0.999f || this->fSensitivity > 1.001f)) {
         debugLog("forced sensitivity to 1.0 due to raw input being disabled\n");
         cv::mouse_sensitivity.setValue(1.0f);
     }
@@ -230,7 +230,7 @@ void Mouse::onSensitivityChanged(float newSens) {
     this->fSensitivity = newSens;
 
     // non-rawinput with sensitivity != 1 is unsupported
-    if(!this->bIsRawInput && (this->fSensitivity < 0.999f || this->fSensitivity > 1.001f)) {
+    if(!this->bIsRawInputDesired && (this->fSensitivity < 0.999f || this->fSensitivity > 1.001f)) {
         debugLog("forced raw input enabled due to sensitivity != 1.0\n");
         cv::mouse_raw_input.setValue(true);
     }

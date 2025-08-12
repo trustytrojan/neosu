@@ -838,8 +838,10 @@ void Environment::setRawInput(bool raw) {
 
     if(!raw && mouse) {
         // need to manually set the cursor position if we're disabling raw input
-        setMousePos(mouse->getRealPos());
+        setOSMousePos(mouse->getRealPos());
     }
+
+    debugLog("setting raw input {}\n", raw);
 
     if(!SDL_SetWindowRelativeMouseMode(m_window, raw)) {
         debugLog("FIXME (handle error): SDL_SetWindowRelativeMouseMode failed: {:s}\n", SDL_GetError());
@@ -885,7 +887,7 @@ void Environment::setCursorClip(bool clip, McRect rect) {
     }
 }
 
-void Environment::setMousePos(Vector2 pos) {
+void Environment::setOSMousePos(Vector2 pos) {
     SDL_WarpMouseInWindow(m_window, pos.x, pos.y);
     m_vLastAbsMousePos = pos;
 }

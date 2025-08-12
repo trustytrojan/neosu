@@ -1180,7 +1180,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addCheckbox("Invert Vertical", &cv::fposu_invert_vertical);
     this->addCheckbox("Invert Horizontal", &cv::fposu_invert_horizontal);
     this->addCheckbox("Tablet/Absolute Mode (!)",
-                      "WARNING: Do NOT enable this if you are using a mouse!\nIf this is enabled, then DPI and cm per "
+                      "Don't enable this if you are using a mouse.\nIf this is enabled, then DPI and cm per "
                       "360 will be ignored!",
                       &cv::fposu_absolute_mode);
 

@@ -86,7 +86,6 @@ void stop_spectating() {
 
     if(osu->isInPlayMode()) {
         osu->getSelectedBeatmap()->stop(true);
-        osu->songBrowser2->bHasSelectedAndIsPlaying = false;
     }
 
     auto user_info = BANCHO::User::get_user_info(bancho->spectated_player_id, true);

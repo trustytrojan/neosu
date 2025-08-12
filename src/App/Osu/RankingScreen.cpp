@@ -430,7 +430,6 @@ CBaseUIContainer *RankingScreen::setVisible(bool visible) {
 void RankingScreen::onRetryClicked() {
     this->setVisible(false);
     if(osu->getSelectedBeatmap()->play()) {
-        osu->songBrowser2->bHasSelectedAndIsPlaying = true;
         osu->songBrowser2->setVisible(false);
     }
 }

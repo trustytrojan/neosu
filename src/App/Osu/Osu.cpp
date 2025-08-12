@@ -182,8 +182,8 @@ Osu::Osu() {
     this->playfieldBuffer = resourceManager->createRenderTarget(0, 0, 64, 64);
     this->sliderFrameBuffer =
         resourceManager->createRenderTarget(0, 0, this->getScreenWidth(), this->getScreenHeight());
-    this->AAFrameBuffer = resourceManager->createRenderTarget(
-        0, 0, this->getScreenWidth(), this->getScreenHeight(), Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_4X);
+    this->AAFrameBuffer = resourceManager->createRenderTarget(0, 0, this->getScreenWidth(), this->getScreenHeight(),
+                                                              Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_4X);
     this->frameBuffer = resourceManager->createRenderTarget(0, 0, 64, 64);
     this->frameBuffer2 = resourceManager->createRenderTarget(0, 0, 64, 64);
 
@@ -628,7 +628,7 @@ void Osu::draw() {
 void Osu::update() {
     if(this->skin != nullptr) this->skin->update();
 
-    if(this->isInPlayMode() && cv::mod_fposu.getBool()) this->fposu->update();
+    this->fposu->update();
 
     bool propagate_clicks = true;
     for(int i = 0; i < this->screens.size() && propagate_clicks; i++) {
@@ -1993,18 +1993,22 @@ void Osu::updateCursorVisibility() {
 
 void Osu::updateConfineCursor() {
     McRect clip{};
-    bool effectivelyFS = env->isFullscreen() || env->isFullscreenWindowedBorderless();
+    const bool effectivelyFS = env->isFullscreen() || env->isFullscreenWindowedBorderless();
+    const bool playing = this->isInPlayMode();
+    // we need relative mode (rawinput) for fposu without absolute mode
+    const bool playing_fposu_nonabs = (playing && cv::mod_fposu.getBool() && !cv::fposu_absolute_mode.getBool());
 
-    bool might_confine = (effectivelyFS && cv::confine_cursor_fullscreen.getBool()) ||                  //
-                         (!effectivelyFS && cv::confine_cursor_windowed.getBool()) ||                   //
-                         (this->isInPlayMode() && !(this->pauseMenu && this->pauseMenu->isVisible()));  //
+    const bool might_confine = (playing_fposu_nonabs) ||                                         //
+                               (effectivelyFS && cv::confine_cursor_fullscreen.getBool()) ||     //
+                               (!effectivelyFS && cv::confine_cursor_windowed.getBool()) ||      //
+                               (playing && !(this->pauseMenu && this->pauseMenu->isVisible()));  //
 
-    bool force_no_confine = !engine->hasFocus() ||                                                      //
-                            cv::confine_cursor_never.getBool() ||                                       //
-                            this->getModAuto() ||                                                       //
-                            this->getModAutopilot() ||                                                  //
-                            (this->getSelectedBeatmap() && this->getSelectedBeatmap()->is_watching) ||  //
-                            bancho->spectating;                                                         //
+    const bool force_no_confine = !engine->hasFocus() ||                                                      //
+                                  (!playing_fposu_nonabs && cv::confine_cursor_never.getBool()) ||            //
+                                  this->getModAuto() ||                                                       //
+                                  this->getModAutopilot() ||                                                  //
+                                  (this->getSelectedBeatmap() && this->getSelectedBeatmap()->is_watching) ||  //
+                                  bancho->spectating;                                                         //
 
     bool confine_cursor = might_confine && !force_no_confine;
     if(confine_cursor) {

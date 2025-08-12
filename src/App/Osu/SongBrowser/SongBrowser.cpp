@@ -1382,7 +1382,6 @@ void SongBrowser::onDifficultySelected(DatabaseBeatmap *diff2, bool play) {
             }
 
             if(this->beatmap->play()) {
-                this->bHasSelectedAndIsPlaying = true;
                 this->setVisible(false);
             }
         }

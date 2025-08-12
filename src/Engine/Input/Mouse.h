@@ -68,7 +68,7 @@ class Mouse final : public InputDevice {
     void resetWheelDelta();
 
     [[nodiscard]] inline const bool &isRawInputWanted() const {
-        return this->bIsRawInput;
+        return this->bIsRawInputDesired;
     }  // "desired" rawinput state, NOT actual OS raw input state!
 
    private:
@@ -84,7 +84,7 @@ class Mouse final : public InputDevice {
     Vector2 vActualPos;   // final cursor position after all transformations
 
     // mode tracking
-    bool bIsRawInput{false};  // whether raw input is active
+    bool bIsRawInputDesired{false};  // whether the user wants raw (relative) input
     float fSensitivity{1.0f};
 
     // button state (using our internal button index)

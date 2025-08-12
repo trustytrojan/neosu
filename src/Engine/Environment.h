@@ -174,8 +174,8 @@ class Environment {
     void setCursorClip(bool clip, McRect rect);
     void setRawInput(bool raw);  // enable/disable OS-level rawinput
 
-    void setMousePos(Vector2 pos);
-    inline void setMousePos(float x, float y) { setMousePos(Vector2{x, y}); }
+    void setOSMousePos(Vector2 pos);
+    inline void setMousePos(float x, float y) { setOSMousePos(Vector2{x, y}); }
 
     // keyboard
     UString keyCodeToString(KEYCODE keyCode);
