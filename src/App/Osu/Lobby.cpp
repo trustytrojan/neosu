@@ -212,7 +212,7 @@ void Lobby::joinRoom(u32 id, const UString& password) {
     BANCHO::Net::send_packet(packet);
 
     for(CBaseUIElement* elm : this->list->getContainer()->getElements()) {
-        RoomUIElement* room = dynamic_cast<RoomUIElement*>(elm);
+        auto* room = dynamic_cast<RoomUIElement*>(elm);
         if(room == nullptr) continue;
         if(room->room_id != id) continue;
         room->join_btn->is_loading = true;

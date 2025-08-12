@@ -525,8 +525,8 @@ bool McFont::createAndPackAtlas(const std::vector<wchar_t> &glyphs) {
 }
 
 void McFont::buildGlyphGeometry(const GLYPH_METRICS &gm, const Vector3 &basePos, float advanceX, size_t &vertexCount) {
-    const float atlasWidth = static_cast<float>(this->textureAtlas->getAtlasImage()->getWidth());
-    const float atlasHeight = static_cast<float>(this->textureAtlas->getAtlasImage()->getHeight());
+    const auto atlasWidth = static_cast<float>(this->textureAtlas->getAtlasImage()->getWidth());
+    const auto atlasHeight = static_cast<float>(this->textureAtlas->getAtlasImage()->getHeight());
 
     const float x = basePos.x + gm.left + advanceX;
     const float y = basePos.y - (gm.top - gm.rows);

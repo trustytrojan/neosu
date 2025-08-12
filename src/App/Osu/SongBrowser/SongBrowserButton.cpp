@@ -273,7 +273,7 @@ void SongBrowserButton::onMouseInside() {
     const std::vector<CBaseUIElement *> &elements = this->carousel->getContainer()->getElements();
     bool foundCenter = false;
     for(auto element : elements) {
-        SongBrowserButton *b = dynamic_cast<SongBrowserButton *>(element);
+        auto *b = dynamic_cast<SongBrowserButton *>(element);
         if(b != nullptr)  // sanity
         {
             if(b == this) {
@@ -296,7 +296,7 @@ void SongBrowserButton::onMouseOutside() {
     if(this->moveAwayState == MOVE_AWAY_STATE::MOVE_CENTER) {
         const std::vector<CBaseUIElement *> &elements = this->carousel->getContainer()->getElements();
         for(auto element : elements) {
-            SongBrowserButton *b = dynamic_cast<SongBrowserButton *>(element);
+            auto *b = dynamic_cast<SongBrowserButton *>(element);
             if(b != nullptr)  // sanity check
                 b->setMoveAwayState(MOVE_AWAY_STATE::MOVE_CENTER);
         }

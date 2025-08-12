@@ -725,7 +725,7 @@ void SimulatedBeatmap::update(f64 frame_time) {
 
     // spinner detection (used by osu!stable drain, and by HUD for not drawing the hiterrorbar)
     if(this->currentHitObject != nullptr) {
-        Spinner *spinnerPointer = dynamic_cast<Spinner *>(this->currentHitObject);
+        auto *spinnerPointer = dynamic_cast<Spinner *>(this->currentHitObject);
         if(spinnerPointer != nullptr && this->iCurMusicPos > this->currentHitObject->click_time &&
            this->iCurMusicPos < this->currentHitObject->click_time + this->currentHitObject->duration)
             this->bIsSpinnerActive = true;
@@ -987,7 +987,7 @@ void SimulatedBeatmap::calculateStacks() {
 
         for(int i = 0; i < this->hitobjects.size(); i++) {
             HitObject *currHitObject = this->hitobjects[i];
-            Slider *sliderPointer = dynamic_cast<Slider *>(currHitObject);
+            auto *sliderPointer = dynamic_cast<Slider *>(currHitObject);
 
             const bool isSlider = (sliderPointer != nullptr);
 
@@ -1121,8 +1121,8 @@ void SimulatedBeatmap::computeDrainRate() {
 
             for(int i = 0; i < this->hitobjects.size(); i++) {
                 const HitObject *h = this->hitobjects[i];
-                const Slider *sliderPointer = dynamic_cast<const Slider *>(h);
-                const Spinner *spinnerPointer = dynamic_cast<const Spinner *>(h);
+                const auto *sliderPointer = dynamic_cast<const Slider *>(h);
+                const auto *spinnerPointer = dynamic_cast<const Spinner *>(h);
 
                 const int localLastTime = lastTime;
 

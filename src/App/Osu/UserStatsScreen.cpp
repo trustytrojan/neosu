@@ -105,7 +105,7 @@ void UserStatsScreen::rebuildScoreButtons() {
             title.append("]");
         }
 
-        ScoreButton *button = new ScoreButton(this->m_contextMenu, 0, 0, 300, 100, ScoreButton::STYLE::TOP_RANKS);
+        auto *button = new ScoreButton(this->m_contextMenu, 0, 0, 300, 100, ScoreButton::STYLE::TOP_RANKS);
         button->map_hash = score->beatmap_hash;
         button->setScore(*score, diff, ++i, title, weight);
         button->setClickCallback([](CBaseUIButton *button) {

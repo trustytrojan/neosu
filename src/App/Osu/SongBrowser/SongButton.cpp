@@ -245,7 +245,7 @@ void SongButton::onSelected(bool wasSelected, bool autoSelectBottomMostChild, bo
 
     // update grade on child
     for(auto &c : this->children) {
-        SongDifficultyButton *child = (SongDifficultyButton *)c;
+        auto *child = (SongDifficultyButton *)c;
         child->updateGrade();
     }
 

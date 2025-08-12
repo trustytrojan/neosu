@@ -154,7 +154,7 @@ ModSelector::ModSelector() : OsuScreen() {
 
     for(int x = 0; x < this->iGridWidth; x++) {
         for(int y = 0; y < this->iGridHeight; y++) {
-            UIModSelectorModButton *imageButton = new UIModSelectorModButton(this, 50, 50, 100, 100, "");
+            auto *imageButton = new UIModSelectorModButton(this, 50, 50, 100, 100, "");
             imageButton->setDrawBackground(false);
             imageButton->setVisible(false);
 
@@ -398,7 +398,7 @@ void ModSelector::updateExperimentalButtons() {
     for(auto &experimentalMod : this->experimentalMods) {
         ConVar *cvar = experimentalMod.cvar;
         if(cvar != nullptr) {
-            CBaseUICheckbox *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(experimentalMod.element);
+            auto *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(experimentalMod.element);
             if(checkboxPointer != nullptr) {
                 if(cvar->getBool() != checkboxPointer->isChecked()) checkboxPointer->setChecked(cvar->getBool(), false);
             }
@@ -600,7 +600,7 @@ void ModSelector::mouse_update(bool *propagate_clicks) {
         // handle experimental mods visibility
         bool experimentalModEnabled = false;
         for(auto &experimentalMod : this->experimentalMods) {
-            CBaseUICheckbox *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(experimentalMod.element);
+            auto *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(experimentalMod.element);
             if(checkboxPointer != nullptr && checkboxPointer->isChecked()) {
                 experimentalModEnabled = true;
                 break;
@@ -716,7 +716,7 @@ CBaseUIContainer *ModSelector::setVisible(bool visible) {
 
         bool experimentalModEnabled = false;
         for(auto &experimentalMod : this->experimentalMods) {
-            CBaseUICheckbox *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(experimentalMod.element);
+            auto *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(experimentalMod.element);
             if(checkboxPointer != nullptr && checkboxPointer->isChecked()) {
                 experimentalModEnabled = true;
                 break;
@@ -959,13 +959,13 @@ void ModSelector::updateExperimentalLayout() {
 
         // custom
         {
-            CBaseUICheckbox *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(e);
+            auto *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(e);
             if(checkboxPointer != nullptr) {
                 checkboxPointer->onResized();
                 checkboxPointer->setWidthToContent(0);
             }
 
-            CBaseUILabel *labelPointer = dynamic_cast<CBaseUILabel *>(e);
+            auto *labelPointer = dynamic_cast<CBaseUILabel *>(e);
             if(labelPointer != nullptr) {
                 labelPointer->onResized();
                 labelPointer->setWidthToContent(0);
@@ -1073,7 +1073,7 @@ ModSelector::OVERRIDE_SLIDER ModSelector::addOverrideSlider(UString text, const 
 }
 
 UIButton *ModSelector::addActionButton(const UString& text) {
-    UIButton *actionButton = new UIButton(50, 50, 100, 100, text, text);
+    auto *actionButton = new UIButton(50, 50, 100, 100, text, text);
     this->actionButtons.push_back(actionButton);
     this->addBaseUIElement(actionButton);
 
@@ -1081,7 +1081,7 @@ UIButton *ModSelector::addActionButton(const UString& text) {
 }
 
 CBaseUILabel *ModSelector::addExperimentalLabel(const UString& text) {
-    CBaseUILabel *label = new CBaseUILabel(0, 0, 0, 25, text, text);
+    auto *label = new CBaseUILabel(0, 0, 0, 25, text, text);
     label->setFont(osu->getSubTitleFont());
     label->setWidthToContent(0);
     label->setDrawBackground(false);
@@ -1097,7 +1097,7 @@ CBaseUILabel *ModSelector::addExperimentalLabel(const UString& text) {
 }
 
 UICheckbox *ModSelector::addExperimentalCheckbox(const UString& text, const UString& tooltipText, ConVar *cvar) {
-    UICheckbox *checkbox = new UICheckbox(0, 0, 0, 35, text, text);
+    auto *checkbox = new UICheckbox(0, 0, 0, 35, text, text);
     checkbox->setTooltipText(tooltipText);
     checkbox->setWidthToContent(0);
     if(cvar != nullptr) {
@@ -1168,7 +1168,7 @@ void ModSelector::resetMods() {
 
     for(auto &experimentalMod : this->experimentalMods) {
         ConVar *cvar = experimentalMod.cvar;
-        CBaseUICheckbox *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(experimentalMod.element);
+        auto *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(experimentalMod.element);
         if(checkboxPointer != nullptr) {
             // HACKHACK: we update both just in case because if the mod selector was not yet visible after a convar
             // change (e.g. because of "Use mods") then the checkbox has not yet updated its internal state

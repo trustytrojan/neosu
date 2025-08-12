@@ -1499,7 +1499,7 @@ void Skin::randomizeFilePath() {
 
 SkinImage *Skin::createSkinImage(const std::string &skinElementName, Vector2 baseSizeForScaling2x, float osuSize,
                                  bool ignoreDefaultSkin, const std::string &animationSeparator) {
-    SkinImage *skinImage =
+    auto *skinImage =
         new SkinImage(this, skinElementName, baseSizeForScaling2x, osuSize, animationSeparator, ignoreDefaultSkin);
     this->images.push_back(skinImage);
 

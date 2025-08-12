@@ -2088,7 +2088,7 @@ float Slider::getT(long pos, bool raw) const {
     if(raw)
         return t;
     else {
-        float floorVal = (float)std::floor(t);
+        auto floorVal = (float)std::floor(t);
         return ((int)floorVal % 2 == 0) ? t - floorVal : floorVal + 1 - t;
     }
 }
@@ -2727,7 +2727,7 @@ void Spinner::update(long curPos, f64 frame_time) {
             angleDiff = frame_time * 1000.0f * AUTO_MULTIPLIER * this->bi->getSpeedMultiplier();
         } else {  // user spin
             Vector2 mouseDelta = this->bi->getCursorPos() - this->bi->osuCoords2Pixels(this->vRawPos);
-            const float currentMouseAngle = (float)std::atan2(mouseDelta.y, mouseDelta.x);
+            const auto currentMouseAngle = (float)std::atan2(mouseDelta.y, mouseDelta.x);
             angleDiff = (currentMouseAngle - this->fLastMouseAngle);
 
             if(std::abs(angleDiff) > 0.001f)

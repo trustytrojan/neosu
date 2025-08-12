@@ -441,8 +441,8 @@ void ModFPoSu::setMousePosCompensated(Vector2 newMousePos) {
 }
 
 Vector2 ModFPoSu::intersectRayMesh(Vector3 pos, Vector3 dir) {
-    std::list<VertexPair>::iterator begin = this->meshList.begin();
-    std::list<VertexPair>::iterator next = ++this->meshList.begin();
+    auto begin = this->meshList.begin();
+    auto next = ++this->meshList.begin();
     int face = 0;
     while(next != this->meshList.end()) {
         const Vector4 topLeft = (this->modelMatrix * Vector4((*begin).a.x, (*begin).a.y, (*begin).a.z, 1.0f));
@@ -508,8 +508,8 @@ Vector3 ModFPoSu::calculateUnProjectedVector(Vector2 pos) {
     const float cursorXPercent = std::clamp<float>(pos.x / (float)osu->getScreenWidth(), 0.0f, 1.0f);
     const float cursorYPercent = std::clamp<float>(pos.y / (float)osu->getScreenHeight(), 0.0f, 1.0f);
 
-    std::list<VertexPair>::iterator begin = this->meshList.begin();
-    std::list<VertexPair>::iterator next = ++this->meshList.begin();
+    auto begin = this->meshList.begin();
+    auto next = ++this->meshList.begin();
     while(next != this->meshList.end()) {
         Vector3 topLeft = (*begin).a;
         Vector3 bottomLeft = (*begin).b;
@@ -561,13 +561,13 @@ void ModFPoSu::makePlayfield() {
     this->meshList.push_back(vp1);
     this->meshList.push_back(vp2);
 
-    std::list<VertexPair>::iterator begin = this->meshList.begin();
-    std::list<VertexPair>::iterator end = this->meshList.end();
+    auto begin = this->meshList.begin();
+    auto end = this->meshList.end();
     --end;
     this->fCircumLength = subdivide(this->meshList, begin, end, SUBDIVISIONS, this->fEdgeDistance);
 
     begin = this->meshList.begin();
-    std::list<VertexPair>::iterator next = ++this->meshList.begin();
+    auto next = ++this->meshList.begin();
     while(next != this->meshList.end()) {
         Vector3 topLeft = (*begin).a;
         Vector3 bottomLeft = (*begin).b;
@@ -728,7 +728,7 @@ float ModFPoSu::subdivide(std::list<VertexPair> &meshList, const std::list<Verte
     const float tc = std::lerp((*begin).textureCoordinate, (*end).textureCoordinate, 0.5f);
 
     VertexPair newVP = VertexPair(top, bottom, tc);
-    const std::list<VertexPair>::iterator newPos = meshList.insert(end, newVP);
+    const auto newPos = meshList.insert(end, newVP);
 
     float circumLength = 0.0f;
 

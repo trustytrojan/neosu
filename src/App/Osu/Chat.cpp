@@ -97,7 +97,7 @@ void ChatChannel::add_message(ChatMessage msg) {
     auto timestamp_str = UString::format("%02d:%02d ", tm->tm_hour, tm->tm_min);
     if(is_action) timestamp_str.append("*");
     float time_width = chat_font->getStringWidth(timestamp_str);
-    CBaseUILabel *timestamp = new CBaseUILabel(x, this->y_total, time_width, line_height, "", timestamp_str);
+    auto *timestamp = new CBaseUILabel(x, this->y_total, time_width, line_height, "", timestamp_str);
     timestamp->setDrawFrame(false);
     timestamp->setDrawBackground(false);
     this->ui->getContainer()->addBaseUIElement(timestamp);
@@ -216,9 +216,9 @@ void ChatChannel::add_message(ChatMessage msg) {
         for(int i = 0; i < fragment_text.length(); i++) {
             float char_width = chat_font->getGlyphMetrics(fragment_text[i]).advance_x;
             if(line_width + char_width + 20 >= this->ui->getSize().x) {
-                ChatLink *link_fragment = dynamic_cast<ChatLink *>(fragment);
+                auto *link_fragment = dynamic_cast<ChatLink *>(fragment);
                 if(link_fragment == nullptr) {
-                    CBaseUILabel *text = new CBaseUILabel(x, this->y_total, line_width - x, line_height, "", text_str);
+                    auto *text = new CBaseUILabel(x, this->y_total, line_width - x, line_height, "", text_str);
                     text->setDrawFrame(false);
                     text->setDrawBackground(false);
                     if(is_system_message) {
@@ -226,7 +226,7 @@ void ChatChannel::add_message(ChatMessage msg) {
                     }
                     this->ui->getContainer()->addBaseUIElement(text);
                 } else {
-                    ChatLink *link =
+                    auto *link =
                         new ChatLink(x, this->y_total, line_width - x, line_height, fragment->getName(), text_str);
                     this->ui->getContainer()->addBaseUIElement(link);
                 }
@@ -241,9 +241,9 @@ void ChatChannel::add_message(ChatMessage msg) {
             line_width += char_width;
         }
 
-        ChatLink *link_fragment = dynamic_cast<ChatLink *>(fragment);
+        auto *link_fragment = dynamic_cast<ChatLink *>(fragment);
         if(link_fragment == nullptr) {
-            CBaseUILabel *text = new CBaseUILabel(x, this->y_total, line_width - x, line_height, "", text_str);
+            auto *text = new CBaseUILabel(x, this->y_total, line_width - x, line_height, "", text_str);
             text->setDrawFrame(false);
             text->setDrawBackground(false);
             if(is_system_message) {
@@ -251,7 +251,7 @@ void ChatChannel::add_message(ChatMessage msg) {
             }
             this->ui->getContainer()->addBaseUIElement(text);
         } else {
-            ChatLink *link = new ChatLink(x, this->y_total, line_width - x, line_height, fragment->getName(), text_str);
+            auto *link = new ChatLink(x, this->y_total, line_width - x, line_height, fragment->getName(), text_str);
             this->ui->getContainer()->addBaseUIElement(link);
         }
 
@@ -398,7 +398,7 @@ void Chat::mouse_update(bool *propagate_clicks) {
 
     // Request stats for on-screen user cards
     for(auto elm : this->user_list->getContainer()->getElements()) {
-        UserCard2 *card = (UserCard2 *)elm;
+        auto *card = (UserCard2 *)elm;
         if(card->info->irc_user) continue;
 
         bool is_outdated = card->info->stats_tms + 5000 < Timing::getTicksMS();
@@ -843,7 +843,7 @@ void Chat::addChannel(const UString &channel_name, bool switch_to) {
         }
     }
 
-    ChatChannel *chan = new ChatChannel(this, channel_name);
+    auto *chan = new ChatChannel(this, channel_name);
     this->channels.push_back(chan);
 
     if(this->selected_channel == nullptr && this->channels.size() == 1) {

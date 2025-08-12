@@ -230,7 +230,7 @@ void Bancho::handle_packet(Packet *packet) {
                 beatmap->last_frame_ms = frame.cur_music_pos;
             }
 
-            LiveReplayBundle::Action action = (LiveReplayBundle::Action)proto::read<u8>(packet);
+            auto action = (LiveReplayBundle::Action)proto::read<u8>(packet);
             info->spec_action = action;
 
             if(osu->isInPlayMode()) {

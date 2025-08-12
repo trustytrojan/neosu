@@ -529,7 +529,7 @@ SliderCurveCircumscribedCircle::SliderCurveCircumscribedCircle(std::vector<Vecto
     Vector2 endAngPoint = end - this->vCircleCenter;
 
     this->fCalculationStartAngle = (float)std::atan2(startAngPoint.y, startAngPoint.x);
-    const float midAng = (float)std::atan2(midAngPoint.y, midAngPoint.x);
+    const auto midAng = (float)std::atan2(midAngPoint.y, midAngPoint.x);
     this->fCalculationEndAngle = (float)std::atan2(endAngPoint.y, endAngPoint.x);
 
     // find the angles that pass through midAng

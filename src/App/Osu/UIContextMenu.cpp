@@ -190,8 +190,7 @@ UIContextMenuButton *UIContextMenu::addButton(const UString &text, int id) {
     const int buttonHeight = 30 * Osu::getUIScale() * (this->bBigStyle ? 1.27f : 1.0f);
     const int margin = 9 * Osu::getUIScale();
 
-    UIContextMenuButton *button =
-        new UIContextMenuButton(margin, this->iYCounter + margin, 0, buttonHeight, text, text, id);
+    auto *button = new UIContextMenuButton(margin, this->iYCounter + margin, 0, buttonHeight, text, text, id);
     {
         if(this->bBigStyle) button->setFont(osu->getSubTitleFont());
 
@@ -218,8 +217,7 @@ UIContextMenuTextbox *UIContextMenu::addTextbox(const UString &text, int id) {
     const int buttonHeight = 30 * Osu::getUIScale() * (this->bBigStyle ? 1.27f : 1.0f);
     const int margin = 9 * Osu::getUIScale();
 
-    UIContextMenuTextbox *textbox =
-        new UIContextMenuTextbox(margin, this->iYCounter + margin, 0, buttonHeight, text, id);
+    auto *textbox = new UIContextMenuTextbox(margin, this->iYCounter + margin, 0, buttonHeight, text, id);
     {
         textbox->setText(text);
 

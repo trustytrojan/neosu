@@ -121,8 +121,8 @@ void draw(const std::vector<Vector2> &points, const std::vector<Vector2> &always
         const float circleImageScale = hitcircleDiameter / (float)osu->getSkin()->getHitCircle()->getWidth();
         const float circleImageScaleInv = (1.0f / circleImageScale);
 
-        const float width = (float)osu->getSkin()->getHitCircle()->getWidth();
-        const float height = (float)osu->getSkin()->getHitCircle()->getHeight();
+        const auto width = (float)osu->getSkin()->getHitCircle()->getWidth();
+        const auto height = (float)osu->getSkin()->getHitCircle()->getHeight();
 
         const float x = (-width / 2.0f);
         const float y = (-height / 2.0f);

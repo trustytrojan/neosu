@@ -356,7 +356,7 @@ float BassSound::getPosition() {
         positionBytes = BASS_ChannelGetPosition(this->stream, BASS_POS_BYTE);
     }
 
-    const float position = (float)((double)(positionBytes) / (double)(lengthBytes));
+    const auto position = (float)((double)(positionBytes) / (double)(lengthBytes));
     return position;
 }
 

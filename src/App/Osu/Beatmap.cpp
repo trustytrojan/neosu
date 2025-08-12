@@ -1815,7 +1815,7 @@ void Beatmap::drawFollowPoints() {
         lastObjectIndex = index - 1;
 
         // ignore future spinners
-        Spinner *spinnerPointer = dynamic_cast<Spinner *>(this->hitobjects[index]);
+        auto *spinnerPointer = dynamic_cast<Spinner *>(this->hitobjects[index]);
         if(spinnerPointer != nullptr && !followPointsConnectSpinners)  // if this is a spinner
         {
             lastObjectIndex = -1;
@@ -2138,7 +2138,7 @@ void Beatmap::update() {
                 debugLog("Beatmap: Preloading done.\n");
                 break;
             } else {
-                Slider *sliderPointer = dynamic_cast<Slider *>(this->hitobjects[this->iPreLoadingIndex]);
+                auto *sliderPointer = dynamic_cast<Slider *>(this->hitobjects[this->iPreLoadingIndex]);
                 if(sliderPointer != nullptr) sliderPointer->rebuildVertexBuffer();
             }
 
@@ -3661,7 +3661,7 @@ void Beatmap::updateAutoCursorPos() {
                 prevPos = o->getAutoCursorPos(curMusicPos);
                 if(o->duration > 0 && curMusicPos - o->click_time <= o->duration) {
                     if(cv::auto_cursordance.getBool()) {
-                        Slider *sliderPointer = dynamic_cast<Slider *>(o);
+                        auto *sliderPointer = dynamic_cast<Slider *>(o);
                         if(sliderPointer != nullptr) {
                             const std::vector<Slider::SLIDERCLICK> &clicks = sliderPointer->getClicks();
 
@@ -3847,7 +3847,7 @@ void Beatmap::updateSliderVertexBuffers() {
     debugLog("Beatmap::updateSliderVertexBuffers() for {:d} hitobjects ...\n", this->hitobjects.size());
 
     for(auto &hitobject : this->hitobjects) {
-        Slider *sliderPointer = dynamic_cast<Slider *>(hitobject);
+        auto *sliderPointer = dynamic_cast<Slider *>(hitobject);
         if(sliderPointer != nullptr) sliderPointer->rebuildVertexBuffer();
     }
 }
@@ -3946,7 +3946,7 @@ void Beatmap::calculateStacks() {
 
         for(int i = 0; i < this->hitobjects.size(); i++) {
             HitObject *currHitObject = this->hitobjects[i];
-            Slider *sliderPointer = dynamic_cast<Slider *>(currHitObject);
+            auto *sliderPointer = dynamic_cast<Slider *>(currHitObject);
 
             const bool isSlider = (sliderPointer != nullptr);
 
@@ -4080,8 +4080,8 @@ void Beatmap::computeDrainRate() {
 
             for(int i = 0; i < this->hitobjects.size(); i++) {
                 const HitObject *h = this->hitobjects[i];
-                const Slider *sliderPointer = dynamic_cast<const Slider *>(h);
-                const Spinner *spinnerPointer = dynamic_cast<const Spinner *>(h);
+                const auto *sliderPointer = dynamic_cast<const Slider *>(h);
+                const auto *spinnerPointer = dynamic_cast<const Spinner *>(h);
 
                 const int localLastTime = lastTime;
 

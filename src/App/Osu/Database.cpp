@@ -789,7 +789,7 @@ void Database::loadMaps() {
                 mapset_path.append(std::to_string(set_id));
                 mapset_path.append("/");
 
-                std::vector<BeatmapDifficulty *> *diffs = new std::vector<DatabaseBeatmap *>();
+                auto *diffs = new std::vector<DatabaseBeatmap *>();
                 for(u16 j = 0; j < nb_diffs; j++) {
                     std::string osu_filename = neosu_maps.read_string();
 
@@ -964,9 +964,9 @@ void Database::loadMaps() {
 
                 std::string osuFileName = db.read_string();
                 /*unsigned char rankedStatus = */ db.skip<u8>();
-                unsigned short numCircles = db.read<u16>();
-                unsigned short numSliders = db.read<u16>();
-                unsigned short numSpinners = db.read<u16>();
+                auto numCircles = db.read<u16>();
+                auto numSliders = db.read<u16>();
+                auto numSpinners = db.read<u16>();
                 long long lastModificationTime = db.read<u64>();
 
                 f32 AR, CS, HP, OD;
@@ -982,14 +982,14 @@ void Database::loadMaps() {
                     OD = db.read<f32>();
                 }
 
-                double sliderMultiplier = db.read<f64>();
+                auto sliderMultiplier = db.read<f64>();
 
                 f32 nomod_star_rating = 0.0f;
                 if(this->iVersion >= 20140609) {
-                    unsigned int numOsuStandardStarRatings = db.read<u32>();
+                    auto numOsuStandardStarRatings = db.read<u32>();
                     for(int s = 0; s < numOsuStandardStarRatings; s++) {
                         db.skip<u8>();  // 0x08
-                        unsigned int mods = db.read<u32>();
+                        auto mods = db.read<u32>();
                         db.skip<u8>();  // 0x0c
 
                         f32 sr = 0.f;
@@ -1004,7 +1004,7 @@ void Database::loadMaps() {
                         if(mods == 0) nomod_star_rating = sr;
                     }
 
-                    unsigned int numTaikoStarRatings = db.read<u32>();
+                    auto numTaikoStarRatings = db.read<u32>();
                     for(int s = 0; s < numTaikoStarRatings; s++) {
                         db.skip<u8>();  // 0x08
                         db.skip<u32>();
@@ -1018,7 +1018,7 @@ void Database::loadMaps() {
                         }
                     }
 
-                    unsigned int numCtbStarRatings = db.read<u32>();
+                    auto numCtbStarRatings = db.read<u32>();
                     for(int s = 0; s < numCtbStarRatings; s++) {
                         db.skip<u8>();  // 0x08
                         db.skip<u32>();
@@ -1032,7 +1032,7 @@ void Database::loadMaps() {
                         }
                     }
 
-                    unsigned int numManiaStarRatings = db.read<u32>();
+                    auto numManiaStarRatings = db.read<u32>();
                     for(int s = 0; s < numManiaStarRatings; s++) {
                         db.skip<u8>();  // 0x08
                         db.skip<u32>();
@@ -1053,7 +1053,7 @@ void Database::loadMaps() {
                 int previewTime = db.read<u32>();
 
                 BPMInfo bpm;
-                unsigned int nb_timing_points = db.read<u32>();
+                auto nb_timing_points = db.read<u32>();
                 if(overrides_found) {
                     db.skip_bytes(sizeof(Database::TIMINGPOINT) * nb_timing_points);
                     bpm.min = overrides->second.min_bpm;
@@ -1079,8 +1079,8 @@ void Database::loadMaps() {
                 /*unsigned char maniaGrade = */ db.skip<u8>();
 
                 short localOffset = db.read<u16>();
-                float stackLeniency = db.read<f32>();
-                unsigned char mode = db.read<u8>();
+                auto stackLeniency = db.read<f32>();
+                auto mode = db.read<u8>();
 
                 auto songSource = db.read_string();
                 auto songTags = db.read_string();
@@ -1142,7 +1142,7 @@ void Database::loadMaps() {
                 // fill diff with data
                 if(mode != 0) continue;
 
-                DatabaseBeatmap *diff2 =
+                auto *diff2 =
                     new DatabaseBeatmap(fullFilePath, beatmapPath, DatabaseBeatmap::BeatmapType::PEPPY_DIFFICULTY);
                 {
                     diff2->sTitle = songTitle;
@@ -1267,7 +1267,7 @@ void Database::loadMaps() {
                 if(beatmapSet.diffs2->empty()) continue;  // sanity check
 
                 if(beatmapSet.setID > 0) {
-                    BeatmapSet *set = new BeatmapSet(beatmapSet.diffs2, DatabaseBeatmap::BeatmapType::PEPPY_BEATMAPSET);
+                    auto *set = new BeatmapSet(beatmapSet.diffs2, DatabaseBeatmap::BeatmapType::PEPPY_BEATMAPSET);
                     this->beatmapsets.push_back(set);
                 } else {
                     // set with invalid ID: treat all its diffs separately. we'll group the diffs by title+artist.
@@ -1286,8 +1286,7 @@ void Database::loadMaps() {
                     }
 
                     for(const auto &scuffed_set : titleArtistToBeatmap) {
-                        BeatmapSet *set =
-                            new BeatmapSet(scuffed_set.second, DatabaseBeatmap::BeatmapType::PEPPY_BEATMAPSET);
+                        auto *set = new BeatmapSet(scuffed_set.second, DatabaseBeatmap::BeatmapType::PEPPY_BEATMAPSET);
                         this->beatmapsets.push_back(set);
                     }
                 }
@@ -2119,7 +2118,7 @@ BeatmapSet *Database::loadRawBeatmap(const std::string &beatmapPath) {
     if(cv::debug_db.getBool()) debugLog("BeatmapDatabase::loadRawBeatmap() : {:s}\n", beatmapPath.c_str());
 
     // try loading all diffs
-    std::vector<BeatmapDifficulty *> *diffs2 = new std::vector<BeatmapDifficulty *>();
+    auto *diffs2 = new std::vector<BeatmapDifficulty *>();
     std::vector<std::string> beatmapFiles = env->getFilesInFolder(beatmapPath);
     for(const auto &beatmapFile : beatmapFiles) {
         std::string ext = env->getFileExtensionFromFilePath(beatmapFile);
@@ -2128,8 +2127,7 @@ BeatmapSet *Database::loadRawBeatmap(const std::string &beatmapPath) {
         std::string fullFilePath = beatmapPath;
         fullFilePath.append(beatmapFile);
 
-        BeatmapDifficulty *diff2 =
-            new BeatmapDifficulty(fullFilePath, beatmapPath, DatabaseBeatmap::BeatmapType::NEOSU_DIFFICULTY);
+        auto *diff2 = new BeatmapDifficulty(fullFilePath, beatmapPath, DatabaseBeatmap::BeatmapType::NEOSU_DIFFICULTY);
         if(diff2->loadMetadata()) {
             diffs2->push_back(diff2);
         } else {

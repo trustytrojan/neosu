@@ -278,7 +278,7 @@ void load_and_watch(FinishedScore score) {
 
             // Need to allocate with calloc since APIRequests free() the .extra
             void* mem = calloc(1, sizeof(FinishedScore));
-            FinishedScore* score_cpy = new(mem) FinishedScore;
+            auto* score_cpy = new(mem) FinishedScore;
             *score_cpy = score;
 
             APIRequest request;

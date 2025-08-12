@@ -285,7 +285,7 @@ class OptionsMenuKeyBindLabel : public CBaseUILabel {
         if(!this->bVisible) return;
         CBaseUILabel::mouse_update(propagate_clicks);
 
-        const KEYCODE newKeyCode = (KEYCODE)this->key->getInt();
+        const auto newKeyCode = (KEYCODE)this->key->getInt();
         if(this->keyCode == newKeyCode) return;
 
         this->keyCode = newKeyCode;
@@ -3226,7 +3226,7 @@ void OptionsMenu::onResetClicked(CBaseUIButton *button) {
             switch(element->type) {
                 case CBX:
                     for(auto &e : element->baseElems) {
-                        CBaseUICheckbox *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(e);
+                        auto *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(e);
                         if(checkboxPointer != nullptr) checkboxPointer->setChecked((bool)cv->getDefaultFloat());
                     }
                     break;
@@ -3292,7 +3292,7 @@ void OptionsMenu::addSpacer() {
 }
 
 CBaseUILabel *OptionsMenu::addSection(const UString &text) {
-    CBaseUILabel *label = new CBaseUILabel(0, 0, this->options->getSize().x, 25, text, text);
+    auto *label = new CBaseUILabel(0, 0, this->options->getSize().x, 25, text, text);
     // label->setTextColor(0xff58dafe);
     label->setFont(osu->getTitleFont());
     label->setSizeToContent(0, 0);
@@ -3310,7 +3310,7 @@ CBaseUILabel *OptionsMenu::addSection(const UString &text) {
 }
 
 CBaseUILabel *OptionsMenu::addSubSection(const UString &text, UString searchTags) {
-    CBaseUILabel *label = new CBaseUILabel(0, 0, this->options->getSize().x, 25, text, text);
+    auto *label = new CBaseUILabel(0, 0, this->options->getSize().x, 25, text, text);
     label->setFont(osu->getSubTitleFont());
     label->setSizeToContent(0, 0);
     label->setDrawFrame(false);
@@ -3327,7 +3327,7 @@ CBaseUILabel *OptionsMenu::addSubSection(const UString &text, UString searchTags
 }
 
 CBaseUILabel *OptionsMenu::addLabel(const UString &text) {
-    CBaseUILabel *label = new CBaseUILabel(0, 0, this->options->getSize().x, 25, text, text);
+    auto *label = new CBaseUILabel(0, 0, this->options->getSize().x, 25, text, text);
     label->setSizeToContent(0, 0);
     label->setDrawFrame(false);
     label->setDrawBackground(false);
@@ -3342,7 +3342,7 @@ CBaseUILabel *OptionsMenu::addLabel(const UString &text) {
 }
 
 UIButton *OptionsMenu::addButton(const UString &text) {
-    UIButton *button = new UIButton(0, 0, this->options->getSize().x, 50, text, text);
+    auto *button = new UIButton(0, 0, this->options->getSize().x, 50, text, text);
     button->setColor(0xff0e94b5);
     button->setUseDefaultSkin();
     this->options->getContainer()->addBaseUIElement(button);
@@ -3357,12 +3357,12 @@ UIButton *OptionsMenu::addButton(const UString &text) {
 
 OptionsMenu::OPTIONS_ELEMENT *OptionsMenu::addButton(const UString &text, const UString &labelText,
                                                      bool withResetButton) {
-    UIButton *button = new UIButton(0, 0, this->options->getSize().x, 50, text, text);
+    auto *button = new UIButton(0, 0, this->options->getSize().x, 50, text, text);
     button->setColor(0xff0e94b5);
     button->setUseDefaultSkin();
     this->options->getContainer()->addBaseUIElement(button);
 
-    CBaseUILabel *label = new CBaseUILabel(0, 0, this->options->getSize().x, 50, labelText, labelText);
+    auto *label = new CBaseUILabel(0, 0, this->options->getSize().x, 50, labelText, labelText);
     label->setDrawFrame(false);
     label->setDrawBackground(false);
     this->options->getContainer()->addBaseUIElement(label);
@@ -3380,12 +3380,12 @@ OptionsMenu::OPTIONS_ELEMENT *OptionsMenu::addButton(const UString &text, const 
 }
 
 OptionsMenu::OPTIONS_ELEMENT *OptionsMenu::addButtonButton(const UString &text1, const UString &text2) {
-    UIButton *button = new UIButton(0, 0, this->options->getSize().x, 50, text1, text1);
+    auto *button = new UIButton(0, 0, this->options->getSize().x, 50, text1, text1);
     button->setColor(0xff0e94b5);
     button->setUseDefaultSkin();
     this->options->getContainer()->addBaseUIElement(button);
 
-    UIButton *button2 = new UIButton(0, 0, this->options->getSize().x, 50, text2, text2);
+    auto *button2 = new UIButton(0, 0, this->options->getSize().x, 50, text2, text2);
     button2->setColor(0xff0e94b5);
     button2->setUseDefaultSkin();
     this->options->getContainer()->addBaseUIElement(button2);
@@ -3401,17 +3401,17 @@ OptionsMenu::OPTIONS_ELEMENT *OptionsMenu::addButtonButton(const UString &text1,
 
 OptionsMenu::OPTIONS_ELEMENT *OptionsMenu::addButtonButtonLabel(const UString &text1, const UString &text2,
                                                                 const UString &labelText, bool withResetButton) {
-    UIButton *button = new UIButton(0, 0, this->options->getSize().x, 50, text1, text1);
+    auto *button = new UIButton(0, 0, this->options->getSize().x, 50, text1, text1);
     button->setColor(0xff0e94b5);
     button->setUseDefaultSkin();
     this->options->getContainer()->addBaseUIElement(button);
 
-    UIButton *button2 = new UIButton(0, 0, this->options->getSize().x, 50, text2, text2);
+    auto *button2 = new UIButton(0, 0, this->options->getSize().x, 50, text2, text2);
     button2->setColor(0xff0e94b5);
     button2->setUseDefaultSkin();
     this->options->getContainer()->addBaseUIElement(button2);
 
-    CBaseUILabel *label = new CBaseUILabel(0, 0, this->options->getSize().x, 50, labelText, labelText);
+    auto *label = new CBaseUILabel(0, 0, this->options->getSize().x, 50, labelText, labelText);
     label->setDrawFrame(false);
     label->setDrawBackground(false);
     this->options->getContainer()->addBaseUIElement(label);
@@ -3431,7 +3431,7 @@ OptionsMenu::OPTIONS_ELEMENT *OptionsMenu::addButtonButtonLabel(const UString &t
 
 OptionsMenuKeyBindButton *OptionsMenu::addKeyBindButton(const UString &text, ConVar *cvar) {
     /// UString unbindIconString; unbindIconString.insert(0, Icons::UNDO);
-    UIButton *unbindButton = new UIButton(0, 0, this->options->getSize().x, 50, text, "");
+    auto *unbindButton = new UIButton(0, 0, this->options->getSize().x, 50, text, "");
     unbindButton->setTooltipText("Unbind");
     unbindButton->setColor(0x77ff0000);
     unbindButton->setUseDefaultSkin();
@@ -3439,15 +3439,13 @@ OptionsMenuKeyBindButton *OptionsMenu::addKeyBindButton(const UString &text, Con
     /// unbindButton->setFont(osu->getFontIcons());
     this->options->getContainer()->addBaseUIElement(unbindButton);
 
-    OptionsMenuKeyBindButton *bindButton =
-        new OptionsMenuKeyBindButton(0, 0, this->options->getSize().x, 50, text, text);
+    auto *bindButton = new OptionsMenuKeyBindButton(0, 0, this->options->getSize().x, 50, text, text);
     bindButton->setColor(0xff0e94b5);
     bindButton->setUseDefaultSkin();
     bindButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onKeyBindingButtonPressed>(this));
     this->options->getContainer()->addBaseUIElement(bindButton);
 
-    OptionsMenuKeyBindLabel *label =
-        new OptionsMenuKeyBindLabel(0, 0, this->options->getSize().x, 50, "", "", cvar, bindButton);
+    auto *label = new OptionsMenuKeyBindLabel(0, 0, this->options->getSize().x, 50, "", "", cvar, bindButton);
     label->setDrawFrame(false);
     label->setDrawBackground(false);
     this->options->getContainer()->addBaseUIElement(label);
@@ -3469,7 +3467,7 @@ CBaseUICheckbox *OptionsMenu::addCheckbox(const UString &text, ConVar *cvar) {
 }
 
 CBaseUICheckbox *OptionsMenu::addCheckbox(const UString &text, const UString &tooltipText, ConVar *cvar) {
-    UICheckbox *checkbox = new UICheckbox(0, 0, this->options->getSize().x, 50, text, text);
+    auto *checkbox = new UICheckbox(0, 0, this->options->getSize().x, 50, text, text);
     checkbox->setDrawFrame(false);
     checkbox->setDrawBackground(false);
 
@@ -3497,12 +3495,12 @@ CBaseUICheckbox *OptionsMenu::addCheckbox(const UString &text, const UString &to
 }
 
 OptionsMenu::OPTIONS_ELEMENT *OptionsMenu::addButtonCheckbox(const UString &buttontext, const UString &cbxtooltip) {
-    UIButton *button = new UIButton(0, 0, this->options->getSize().x, 50, buttontext, buttontext);
+    auto *button = new UIButton(0, 0, this->options->getSize().x, 50, buttontext, buttontext);
     button->setColor(0xff0e94b5);
     button->setUseDefaultSkin();
     this->options->getContainer()->addBaseUIElement(button);
 
-    UICheckbox *checkbox =
+    auto *checkbox =
         new UICheckbox(button->getSize().x, 0, this->options->getSize().x - button->getSize().x, 50, "", "");
     checkbox->setTooltipText(cbxtooltip);
     checkbox->setWidthToContent(0);
@@ -3521,7 +3519,7 @@ OptionsMenu::OPTIONS_ELEMENT *OptionsMenu::addButtonCheckbox(const UString &butt
 
 UISlider *OptionsMenu::addSlider(const UString &text, float min, float max, ConVar *cvar, float label1Width,
                                  bool allowOverscale, bool allowUnderscale) {
-    UISlider *slider = new UISlider(0, 0, 100, 50, text);
+    auto *slider = new UISlider(0, 0, 100, 50, text);
     slider->setAllowMouseWheel(false);
     slider->setBounds(min, max);
     slider->setLiveUpdate(true);
@@ -3531,7 +3529,7 @@ UISlider *OptionsMenu::addSlider(const UString &text, float min, float max, ConV
     }
     this->options->getContainer()->addBaseUIElement(slider);
 
-    CBaseUILabel *label1 = new CBaseUILabel(0, 0, this->options->getSize().x, 50, text, text);
+    auto *label1 = new CBaseUILabel(0, 0, this->options->getSize().x, 50, text, text);
     label1->setDrawFrame(false);
     label1->setDrawBackground(false);
     label1->setWidthToContent();
@@ -3539,7 +3537,7 @@ UISlider *OptionsMenu::addSlider(const UString &text, float min, float max, ConV
     label1->setRelSizeX(label1->getSize().x);
     this->options->getContainer()->addBaseUIElement(label1);
 
-    CBaseUILabel *label2 = new CBaseUILabel(0, 0, this->options->getSize().x, 50, "", "8.81");
+    auto *label2 = new CBaseUILabel(0, 0, this->options->getSize().x, 50, "", "8.81");
     label2->setDrawFrame(false);
     label2->setDrawBackground(false);
     label2->setWidthToContent();
@@ -3567,7 +3565,7 @@ UISlider *OptionsMenu::addSlider(const UString &text, float min, float max, ConV
 }
 
 CBaseUITextbox *OptionsMenu::addTextbox(UString text, ConVar *cvar) {
-    CBaseUITextbox *textbox = new CBaseUITextbox(0, 0, this->options->getSize().x, 40, "");
+    auto *textbox = new CBaseUITextbox(0, 0, this->options->getSize().x, 40, "");
     textbox->setText(std::move(text));
     this->options->getContainer()->addBaseUIElement(textbox);
 
@@ -3581,11 +3579,11 @@ CBaseUITextbox *OptionsMenu::addTextbox(UString text, ConVar *cvar) {
 }
 
 CBaseUITextbox *OptionsMenu::addTextbox(UString text, const UString &labelText, ConVar *cvar) {
-    CBaseUITextbox *textbox = new CBaseUITextbox(0, 0, this->options->getSize().x, 40, "");
+    auto *textbox = new CBaseUITextbox(0, 0, this->options->getSize().x, 40, "");
     textbox->setText(std::move(text));
     this->options->getContainer()->addBaseUIElement(textbox);
 
-    CBaseUILabel *label = new CBaseUILabel(0, 0, this->options->getSize().x, 40, labelText, labelText);
+    auto *label = new CBaseUILabel(0, 0, this->options->getSize().x, 40, labelText, labelText);
     label->setDrawFrame(false);
     label->setDrawBackground(false);
     label->setWidthToContent();
@@ -3628,7 +3626,7 @@ CBaseUIElement *OptionsMenu::addSliderPreview() {
 OptionsMenuCategoryButton *OptionsMenu::addCategory(CBaseUIElement *section, wchar_t icon) {
     UString iconString;
     iconString.insert(0, icon);
-    OptionsMenuCategoryButton *button = new OptionsMenuCategoryButton(section, 0, 0, 50, 50, "", iconString);
+    auto *button = new OptionsMenuCategoryButton(section, 0, 0, 50, 50, "", iconString);
     button->setFont(osu->getFontIcons());
     button->setDrawBackground(false);
     button->setDrawFrame(false);

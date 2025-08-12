@@ -1192,15 +1192,15 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
         // get bottom selection
         int selectedIndex = -1;
         for(int i = 0; i < elements.size(); i++) {
-            SongBrowserButton *button = dynamic_cast<SongBrowserButton *>(elements[i]);
+            auto *button = dynamic_cast<SongBrowserButton *>(elements[i]);
             if(button != nullptr && button->isSelected()) selectedIndex = i;
         }
 
         // select +1
         if(selectedIndex > -1 && selectedIndex + 1 < elements.size()) {
             int nextSelectionIndex = selectedIndex + 1;
-            SongBrowserButton *nextButton = dynamic_cast<SongBrowserButton *>(elements[nextSelectionIndex]);
-            SongButton *songButton = dynamic_cast<SongButton *>(elements[nextSelectionIndex]);
+            auto *nextButton = dynamic_cast<SongBrowserButton *>(elements[nextSelectionIndex]);
+            auto *songButton = dynamic_cast<SongButton *>(elements[nextSelectionIndex]);
             if(nextButton != nullptr) {
                 nextButton->select(true, false);
 
@@ -1219,14 +1219,14 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
         // get bottom selection
         int selectedIndex = -1;
         for(int i = 0; i < elements.size(); i++) {
-            SongBrowserButton *button = dynamic_cast<SongBrowserButton *>(elements[i]);
+            auto *button = dynamic_cast<SongBrowserButton *>(elements[i]);
             if(button != nullptr && button->isSelected()) selectedIndex = i;
         }
 
         // select -1
         if(selectedIndex > -1 && selectedIndex - 1 > -1) {
             int nextSelectionIndex = selectedIndex - 1;
-            SongBrowserButton *nextButton = dynamic_cast<SongBrowserButton *>(elements[nextSelectionIndex]);
+            auto *nextButton = dynamic_cast<SongBrowserButton *>(elements[nextSelectionIndex]);
             bool isCollectionButton = dynamic_cast<CollectionButton *>(elements[nextSelectionIndex]);
 
             if(nextButton != nullptr) {
@@ -1235,8 +1235,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
                 // automatically open collection on top of this one and go to bottom child
                 if(isCollectionButton && nextSelectionIndex - 1 > -1) {
                     nextSelectionIndex = nextSelectionIndex - 1;
-                    CollectionButton *nextCollectionButton =
-                        dynamic_cast<CollectionButton *>(elements[nextSelectionIndex]);
+                    auto *nextCollectionButton = dynamic_cast<CollectionButton *>(elements[nextSelectionIndex]);
                     if(nextCollectionButton != nullptr) {
                         nextCollectionButton->select();
 
@@ -1261,7 +1260,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
             const SongDifficultyButton *diffButtonPointer = dynamic_cast<SongDifficultyButton *>(elements[i]);
             const CollectionButton *collectionButtonPointer = dynamic_cast<CollectionButton *>(elements[i]);
 
-            SongBrowserButton *button = dynamic_cast<SongBrowserButton *>(elements[i]);
+            auto *button = dynamic_cast<SongBrowserButton *>(elements[i]);
             const bool isSongDifficultyButtonAndNotIndependent =
                 (diffButtonPointer != nullptr && !diffButtonPointer->isIndependentDiffButton());
 
@@ -1273,7 +1272,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
 
                     if(!jumpToNextGroup || collectionButtonPointer == nullptr) {
                         // automatically open collection below and go to bottom child
-                        CollectionButton *collectionButton = dynamic_cast<CollectionButton *>(elements[i]);
+                        auto *collectionButton = dynamic_cast<CollectionButton *>(elements[i]);
                         if(collectionButton != nullptr) {
                             const auto &children = collectionButton->getChildren();
                             if(children.size() > 0 && !children[children.size() - 1]->isSelected())
@@ -1300,7 +1299,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
         // get bottom selection
         int selectedIndex = -1;
         for(size_t i = 0; i < elements.size(); i++) {
-            SongBrowserButton *button = dynamic_cast<SongBrowserButton *>(elements[i]);
+            auto *button = dynamic_cast<SongBrowserButton *>(elements[i]);
             if(button != nullptr && button->isSelected()) selectedIndex = i;
         }
 
@@ -1309,7 +1308,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
                 const SongDifficultyButton *diffButtonPointer = dynamic_cast<SongDifficultyButton *>(elements[i]);
                 const CollectionButton *collectionButtonPointer = dynamic_cast<CollectionButton *>(elements[i]);
 
-                SongBrowserButton *button = dynamic_cast<SongBrowserButton *>(elements[i]);
+                auto *button = dynamic_cast<SongBrowserButton *>(elements[i]);
                 const bool isSongDifficultyButtonAndNotIndependent =
                     (diffButtonPointer != nullptr && !diffButtonPointer->isIndependentDiffButton());
 
@@ -1333,7 +1332,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
         for(auto element : elements) {
             const CollectionButton *collectionButtonPointer = dynamic_cast<CollectionButton *>(element);
 
-            SongBrowserButton *button = dynamic_cast<SongBrowserButton *>(element);
+            auto *button = dynamic_cast<SongBrowserButton *>(element);
 
             if(collectionButtonPointer != nullptr && button != nullptr && button->isSelected()) {
                 button->select();  // deselect
@@ -1470,7 +1469,7 @@ void SongBrowser::onPlayEnd(bool quit) {
     if(!quit) {
         this->rebuildScoreButtons();
 
-        SongDifficultyButton *selectedSongDiffButton = dynamic_cast<SongDifficultyButton *>(this->selectedButton);
+        auto *selectedSongDiffButton = dynamic_cast<SongDifficultyButton *>(this->selectedButton);
         if(selectedSongDiffButton != nullptr) selectedSongDiffButton->updateGrade();
     }
 
@@ -1490,9 +1489,9 @@ void SongBrowser::onSelectionChange(SongBrowserButton *button, bool rebuild) {
     // I'm still not happy with this, but at least all state update logic is localized in this function instead of
     // spread across all buttons
 
-    SongButton *songButtonPointer = dynamic_cast<SongButton *>(button);
-    SongDifficultyButton *songDiffButtonPointer = dynamic_cast<SongDifficultyButton *>(button);
-    CollectionButton *collectionButtonPointer = dynamic_cast<CollectionButton *>(button);
+    auto *songButtonPointer = dynamic_cast<SongButton *>(button);
+    auto *songDiffButtonPointer = dynamic_cast<SongDifficultyButton *>(button);
+    auto *collectionButtonPointer = dynamic_cast<CollectionButton *>(button);
 
     if(songDiffButtonPointer != nullptr) {
         if(this->selectionPreviousSongDiffButton != nullptr &&
@@ -1995,7 +1994,7 @@ void SongBrowser::updateSongButtonLayout() {
     bool isSelected = false;
     bool inOpenCollection = false;
     for(auto &element : elements) {
-        SongBrowserButton *songButton = dynamic_cast<SongBrowserButton *>(element);
+        auto *songButton = dynamic_cast<SongBrowserButton *>(element);
 
         if(songButton != nullptr) {
             const SongDifficultyButton *diffButtonPointer = dynamic_cast<SongDifficultyButton *>(songButton);
@@ -2572,7 +2571,7 @@ void SongBrowser::rebuildScoreButtons() {
     if(numScores > this->scoreButtonCache.size()) {
         const int numNewButtons = numScores - this->scoreButtonCache.size();
         for(size_t i = 0; i < numNewButtons; i++) {
-            ScoreButton *scoreButton = new ScoreButton(this->contextMenu, 0, 0, 0, 0);
+            auto *scoreButton = new ScoreButton(this->contextMenu, 0, 0, 0, 0);
             scoreButton->setClickCallback(SA::MakeDelegate<&SongBrowser::onScoreClicked>(this));
             this->scoreButtonCache.push_back(scoreButton);
         }
@@ -2650,8 +2649,8 @@ void SongBrowser::onDatabaseLoadingFinished() {
         {
             // 0-9
             {
-                CollectionButton *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50,
-                                                           "", "0-9", std::vector<SongButton *>());
+                auto *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "", "0-9",
+                                               std::vector<SongButton *>());
                 this->artistCollectionButtons.push_back(b);
             }
 
@@ -2659,15 +2658,15 @@ void SongBrowser::onDatabaseLoadingFinished() {
             for(size_t i = 0; i < 26; i++) {
                 UString artistCollectionName = UString::format("%c", 'A' + i);
 
-                CollectionButton *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50,
-                                                           "", artistCollectionName, std::vector<SongButton *>());
+                auto *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "",
+                                               artistCollectionName, std::vector<SongButton *>());
                 this->artistCollectionButtons.push_back(b);
             }
 
             // Other
             {
-                CollectionButton *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50,
-                                                           "", "Other", std::vector<SongButton *>());
+                auto *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "", "Other",
+                                               std::vector<SongButton *>());
                 this->artistCollectionButtons.push_back(b);
             }
         }
@@ -2680,15 +2679,15 @@ void SongBrowser::onDatabaseLoadingFinished() {
 
             std::vector<SongButton *> children;
 
-            CollectionButton *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "",
-                                                       difficultyCollectionName, children);
+            auto *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "",
+                                           difficultyCollectionName, children);
             this->difficultyCollectionButtons.push_back(b);
         }
 
         // bpm
         {
-            CollectionButton *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "",
-                                                       "Under 60 BPM", std::vector<SongButton *>());
+            auto *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "",
+                                           "Under 60 BPM", std::vector<SongButton *>());
             this->bpmCollectionButtons.push_back(b);
             b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "", "Under 120 BPM",
                                      std::vector<SongButton *>());
@@ -2711,8 +2710,8 @@ void SongBrowser::onDatabaseLoadingFinished() {
         {
             // 0-9
             {
-                CollectionButton *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50,
-                                                           "", "0-9", std::vector<SongButton *>());
+                auto *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "", "0-9",
+                                               std::vector<SongButton *>());
                 this->creatorCollectionButtons.push_back(b);
             }
 
@@ -2720,15 +2719,15 @@ void SongBrowser::onDatabaseLoadingFinished() {
             for(size_t i = 0; i < 26; i++) {
                 UString artistCollectionName = UString::format("%c", 'A' + i);
 
-                CollectionButton *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50,
-                                                           "", artistCollectionName, std::vector<SongButton *>());
+                auto *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "",
+                                               artistCollectionName, std::vector<SongButton *>());
                 this->creatorCollectionButtons.push_back(b);
             }
 
             // Other
             {
-                CollectionButton *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50,
-                                                           "", "Other", std::vector<SongButton *>());
+                auto *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "", "Other",
+                                               std::vector<SongButton *>());
                 this->creatorCollectionButtons.push_back(b);
             }
         }
@@ -2740,8 +2739,8 @@ void SongBrowser::onDatabaseLoadingFinished() {
 
         // length
         {
-            CollectionButton *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "",
-                                                       "1 minute or less", std::vector<SongButton *>());
+            auto *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "",
+                                           "1 minute or less", std::vector<SongButton *>());
             this->lengthCollectionButtons.push_back(b);
             b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "",
                                      "2 minutes or less", std::vector<SongButton *>());
@@ -2767,8 +2766,8 @@ void SongBrowser::onDatabaseLoadingFinished() {
         {
             // 0-9
             {
-                CollectionButton *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50,
-                                                           "", "0-9", std::vector<SongButton *>());
+                auto *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "", "0-9",
+                                               std::vector<SongButton *>());
                 this->titleCollectionButtons.push_back(b);
             }
 
@@ -2776,15 +2775,15 @@ void SongBrowser::onDatabaseLoadingFinished() {
             for(size_t i = 0; i < 26; i++) {
                 UString artistCollectionName = UString::format("%c", 'A' + i);
 
-                CollectionButton *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50,
-                                                           "", artistCollectionName, std::vector<SongButton *>());
+                auto *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "",
+                                               artistCollectionName, std::vector<SongButton *>());
                 this->titleCollectionButtons.push_back(b);
             }
 
             // Other
             {
-                CollectionButton *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50,
-                                                           "", "Other", std::vector<SongButton *>());
+                auto *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "", "Other",
+                                               std::vector<SongButton *>());
                 this->titleCollectionButtons.push_back(b);
             }
         }
@@ -2993,10 +2992,10 @@ void SongBrowser::onSortScoresChange(const UString &text, int /*id*/) {
     if(this->beatmap != nullptr) {
         for(auto &visibleSongButton : this->visibleSongButtons) {
             if(visibleSongButton->getDatabaseBeatmap() == this->beatmap->getSelectedDifficulty2()) {
-                SongButton *songButtonPointer = dynamic_cast<SongButton *>(visibleSongButton);
+                auto *songButtonPointer = dynamic_cast<SongButton *>(visibleSongButton);
                 if(songButtonPointer != nullptr) {
                     for(SongBrowserButton *diffButton : songButtonPointer->getChildren()) {
-                        SongButton *diffButtonPointer = dynamic_cast<SongButton *>(diffButton);
+                        auto *diffButtonPointer = dynamic_cast<SongButton *>(diffButton);
                         if(diffButtonPointer != nullptr) diffButtonPointer->updateGrade();
                     }
                 }
@@ -3231,8 +3230,8 @@ void SongBrowser::onSelectionOptions() {
         const Vector2 heuristicSongButtonPositionAfterSmoothScrollFinishes =
             (this->carousel->getPos() + this->carousel->getSize() / 2);
 
-        SongButton *songButtonPointer = dynamic_cast<SongButton *>(this->selectedButton);
-        CollectionButton *collectionButtonPointer = dynamic_cast<CollectionButton *>(this->selectedButton);
+        auto *songButtonPointer = dynamic_cast<SongButton *>(this->selectedButton);
+        auto *collectionButtonPointer = dynamic_cast<CollectionButton *>(this->selectedButton);
         if(songButtonPointer != nullptr) {
             songButtonPointer->triggerContextMenu(heuristicSongButtonPositionAfterSmoothScrollFinishes);
         } else if(collectionButtonPointer != nullptr) {
@@ -3242,7 +3241,7 @@ void SongBrowser::onSelectionOptions() {
 }
 
 void SongBrowser::onScoreClicked(CBaseUIButton *button) {
-    ScoreButton *scoreButton = (ScoreButton *)button;
+    auto *scoreButton = (ScoreButton *)button;
 
     // NOTE: the order of these two calls matters
     osu->getRankingScreen()->setScore(scoreButton->getScore());
@@ -3457,8 +3456,8 @@ void SongBrowser::selectRandomBeatmap() {
     const std::vector<CBaseUIElement *> &elements = this->carousel->getContainer()->getElements();
     std::vector<SongButton *> songButtons;
     for(auto element : elements) {
-        SongButton *songButtonPointer = dynamic_cast<SongButton *>(element);
-        SongDifficultyButton *songDifficultyButtonPointer = dynamic_cast<SongDifficultyButton *>(element);
+        auto *songButtonPointer = dynamic_cast<SongButton *>(element);
+        auto *songDifficultyButtonPointer = dynamic_cast<SongDifficultyButton *>(element);
 
         if(songButtonPointer != nullptr &&
            (songDifficultyButtonPointer == nullptr ||
@@ -3477,7 +3476,7 @@ void SongBrowser::selectRandomBeatmap() {
     std::uniform_int_distribution<size_t> rng(0, songButtons.size() - 1);
     size_t randomIndex = rng(this->rngalg);
 
-    SongButton *songButton = dynamic_cast<SongButton *>(songButtons[randomIndex]);
+    auto *songButton = dynamic_cast<SongButton *>(songButtons[randomIndex]);
     this->selectSongButton(songButton);
 }
 
@@ -3494,7 +3493,7 @@ void SongBrowser::selectPreviousRandomBeatmap() {
         const std::vector<CBaseUIElement *> &elements = this->carousel->getContainer()->getElements();
         std::vector<SongButton *> songButtons;
         for(auto element : elements) {
-            SongButton *songButtonPointer = dynamic_cast<SongButton *>(element);
+            auto *songButtonPointer = dynamic_cast<SongButton *>(element);
 
             if(songButtonPointer != nullptr)  // allow ALL songbuttons
                 songButtons.push_back(songButtonPointer);
@@ -3533,7 +3532,7 @@ void SongBrowser::selectPreviousRandomBeatmap() {
 void SongBrowser::playSelectedDifficulty() {
     const std::vector<CBaseUIElement *> &elements = this->carousel->getContainer()->getElements();
     for(auto element : elements) {
-        SongDifficultyButton *songDifficultyButton = dynamic_cast<SongDifficultyButton *>(element);
+        auto *songDifficultyButton = dynamic_cast<SongDifficultyButton *>(element);
         if(songDifficultyButton != nullptr && songDifficultyButton->isSelected()) {
             songDifficultyButton->select();
             break;

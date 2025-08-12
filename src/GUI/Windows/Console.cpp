@@ -232,7 +232,7 @@ void Console::log(UString text, Color textColor) {
     int height = 13;
 
     // create new label, add it
-    CBaseUILabel *logEntry = new CBaseUILabel(3, height * index - 1, 150, height, text, text);
+    auto *logEntry = new CBaseUILabel(3, height * index - 1, 150, height, text, text);
     logEntry->setDrawFrame(false);
     logEntry->setDrawBackground(false);
     logEntry->setTextColor(textColor);
