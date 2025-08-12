@@ -1798,7 +1798,7 @@ void SongBrowser::updateSongButtonLayout() {
         auto *songButton = dynamic_cast<SongBrowserButton *>(element);
 
         if(songButton != nullptr) {
-            const SongDifficultyButton *diffButtonPointer = dynamic_cast<SongDifficultyButton *>(songButton);
+            const auto *diffButtonPointer = dynamic_cast<const SongDifficultyButton *>(songButton);
 
             // depending on the object type, layout differently
             const bool isCollectionButton = dynamic_cast<CollectionButton *>(songButton) != nullptr;

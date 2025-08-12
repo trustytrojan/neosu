@@ -26,6 +26,7 @@ class BeatmapCarousel : public CBaseUIScrollView {
     void onKeyDown(KeyboardEvent &e) override;
     void onChar(KeyboardEvent &e) override;
 
+    void draw() override;
     void mouse_update(bool *propagate_clicks) override;
 
    private:

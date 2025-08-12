@@ -30,7 +30,10 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG v40_01;
     v40_01.title = "40.01";
     v40_01.changes = {
-        R"()",
+        R"(- Fixed tablet/mouse breakage)",
+        R"(- Improved the quality of the main menu cube)",
+        R"(- Added a new command line launch option to enable global MSAA)",
+        R"(  - Run neosu with "-aa 2" (in the "Target" field for the shortcut on Windows) for 2x MSAA; up to 16x is supported)",
     };
     changelogs.push_back(v40_01);
 

@@ -19,6 +19,8 @@ BeatmapCarousel::~BeatmapCarousel() {
     this->getContainer()->invalidate();
 }
 
+void BeatmapCarousel::draw() { CBaseUIScrollView::draw(); }
+
 void BeatmapCarousel::mouse_update(bool *propagate_clicks) {
     CBaseUIScrollView::mouse_update(propagate_clicks);
     if(!this->isVisible()) return;
@@ -65,7 +67,7 @@ void BeatmapCarousel::onKeyUp(KeyboardEvent & /*e*/) { /*this->getContainer()->o
 void BeatmapCarousel::onKeyDown(KeyboardEvent &key) {
     /*this->getContainer()->onKeyDown(e);*/
 
-    const std::vector<CBaseUIElement *> &elements = this->getContainer()->getElements();
+    const std::vector<CBaseUIElement *> &elements{this->getContainer()->getElements()};
 
     // selection move
     if(!keyboard->isAltDown() && key == KEY_DOWN) {
