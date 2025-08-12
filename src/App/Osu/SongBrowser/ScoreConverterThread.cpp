@@ -160,12 +160,12 @@ static void run_sct() {
     sct_computed++;
 }
 
-void sct_calc(const std::vector<FinishedScore>& scores_to_calc) {
+void sct_calc(std::vector<FinishedScore> scores_to_calc) {
     sct_abort();
     if(scores_to_calc.empty()) return;
 
     dead = false;
-    scores = scores_to_calc;
+    scores = std::move(scores_to_calc);
     sct_computed = 0;
     sct_total = scores.size() + 1;
     thr = std::thread(run_sct);

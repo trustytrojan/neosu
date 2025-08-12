@@ -995,7 +995,7 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
         switch(curBlock) {
             case -1:  // header (e.g. "osu file format v12")
             {
-                if(sscanf(curLineChar, " osu file format v %i \n", &this->iVersion) == 1) {
+                if(sscanf(curLineChar, " osu file format v %i \n", (int*)&this->iVersion) == 1) {
                     if(this->iVersion > cv::beatmap_version.getInt()) {
                         debugLog("Ignoring unknown/invalid beatmap version {:d}\n", this->iVersion);
                         return false;
@@ -1013,7 +1013,7 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
 
                 sscanf(curLineChar, " StackLeniency : %f \n", &this->fStackLeniency);
                 sscanf(curLineChar, " PreviewTime : %i \n", &this->iPreviewTime);
-                sscanf(curLineChar, " Mode : %i \n", &this->iGameMode);
+                sscanf(curLineChar, " Mode : %i \n", (int*)&this->iGameMode);
             } break;
 
             case 1:  // Metadata
@@ -1066,7 +1066,7 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
                     SString::trim(&this->sTags);
                 }
 
-                sscanf(curLineChar, " BeatmapID : %ld \n", &this->iID);
+                sscanf(curLineChar, " BeatmapID : %ld \n", (long*)&this->iID);
                 sscanf(curLineChar, " BeatmapSetID : %i \n", &this->iSetID);
             } break;
 
@@ -1169,7 +1169,7 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
         if(this->iMostCommonBPM == 0) {
             if(cv::debug.getBool()) debugLog("DatabaseBeatmap::loadMetadata() : calculating BPM range ...\n");
             BPMInfo bpm{};
-            if (this->timingpoints.size() > 0) {
+            if(this->timingpoints.size() > 0) {
                 zarray<BPMTuple> bpm_calculation_buffer(this->timingpoints.size());
                 bpm = getBPM(this->timingpoints, bpm_calculation_buffer);
             }

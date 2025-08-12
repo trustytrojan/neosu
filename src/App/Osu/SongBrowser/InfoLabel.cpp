@@ -327,7 +327,7 @@ UString InfoLabel::buildDiffInfoString() {
         if(diff2) {
             modStars = diff2->pp.total_stars;
             modPp = diff2->pp.pp;
-            if(diff2->pp.pp != -1.0) {
+            if(modPp != -1.0) {
                 pp_available = true;
             }
         }

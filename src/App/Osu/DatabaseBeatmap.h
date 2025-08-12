@@ -163,18 +163,16 @@ class DatabaseBeatmap final {
     MapOverrides get_overrides();
     void update_overrides();
 
-    void setLocalOffset(long localOffset) {
+    void setLocalOffset(i16 localOffset) {
         this->iLocalOffset = localOffset;
         this->update_overrides();
     }
 
-    void setOnlineOffset(long onlineOffset) {
+    void setOnlineOffset(i16 onlineOffset) {
         this->iOnlineOffset = onlineOffset;
         this->update_overrides();
     }
 
-    std::string sFolder;    // path to folder containing .osu file (e.g. "/path/to/beatmapfolder/")
-    std::string sFilePath;  // path to .osu file (e.g. "/path/to/beatmapfolder/beatmap.osu")
     [[nodiscard]] inline std::string getFolder() const { return this->sFolder; }
     [[nodiscard]] inline std::string getFilePath() const { return this->sFilePath; }
 
@@ -274,6 +272,8 @@ class DatabaseBeatmap final {
 
     // redundant data (technically contained in metadata, but precomputed anyway)
 
+    std::string sFolder;    // path to folder containing .osu file (e.g. "/path/to/beatmapfolder/")
+    std::string sFilePath;  // path to .osu file (e.g. "/path/to/beatmapfolder/beatmap.osu")
     std::string sFullSoundFilePath;
     std::string sFullBackgroundImageFilePath;
 
@@ -290,11 +290,11 @@ class DatabaseBeatmap final {
     std::string sBackgroundImageFileName;
     std::string sAudioFileName;
 
-    long iID;  // online ID, if uploaded
+    int iID;  // online ID, if uploaded
     unsigned long iLengthMS;
 
-    int iVersion;   // e.g. "osu file format v12" -> 12
-    int iGameMode;  // 0 = osu!standard, 1 = Taiko, 2 = Catch the Beat, 3 = osu!mania
+    u8 iVersion;   // e.g. "osu file format v12" -> 12
+    u8 iGameMode;  // 0 = osu!standard, 1 = Taiko, 2 = Catch the Beat, 3 = osu!mania
     int iSetID;     // online set ID, if uploaded
 
     int iPreviewTime;
@@ -324,8 +324,8 @@ class DatabaseBeatmap final {
     // custom data (not necessary, not part of the beatmap file, and not precomputed)
     std::atomic<f32> loudness = 0.f;
 
-    long iLocalOffset;
-    long iOnlineOffset;
+    i16 iLocalOffset;
+    i16 iOnlineOffset;
 
     struct CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT {
         int errorCode;

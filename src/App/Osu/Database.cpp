@@ -1250,7 +1250,7 @@ void Database::loadMaps() {
                         }
 
                         diff2->iLocalOffset = localOffset;
-                        diff2->iOnlineOffset = (long)onlineOffset;
+                        diff2->iOnlineOffset = onlineOffset;
                         diff2->fStarsNomod = nomod_star_rating;
                         diff2->draw_background = true;
                     }
