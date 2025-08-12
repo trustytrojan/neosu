@@ -13,7 +13,7 @@ class Skin {
    public:
     static void unpack(const char *filepath);
 
-    Skin(const UString& name, std::string filepath, bool isDefaultSkin = false);
+    Skin(const UString &name, std::string filepath, bool isDefaultSkin = false);
     virtual ~Skin();
 
     void update();
@@ -21,7 +21,7 @@ class Skin {
     bool isReady();
 
     void load();
-    void loadBeatmapOverride(const std::string& filepath);
+    void loadBeatmapOverride(const std::string &filepath);
     void reloadSounds();
 
     void setAnimationSpeed(float animationSpeed) { this->animationSpeedMultiplier = animationSpeed; }
@@ -325,15 +325,15 @@ class Skin {
 
     bool parseSkinINI(std::string filepath);
 
-    bool compareFilenameWithSkinElementName(const std::string& filename, const std::string& skinElementName);
+    bool compareFilenameWithSkinElementName(const std::string &filename, const std::string &skinElementName);
 
-    SkinImage *createSkinImage(const std::string& skinElementName, Vector2 baseSizeForScaling2x, float osuSize,
-                               bool ignoreDefaultSkin = false, const std::string& animationSeparator = "-");
-    void checkLoadImage(Image **addressOfPointer, const std::string& skinElementName, const std::string& resourceName,
-                        bool ignoreDefaultSkin = false, const std::string& fileExtension = "png",
+    SkinImage *createSkinImage(const std::string &skinElementName, Vector2 baseSizeForScaling2x, float osuSize,
+                               bool ignoreDefaultSkin = false, const std::string &animationSeparator = "-");
+    void checkLoadImage(Image **addressOfPointer, const std::string &skinElementName, const std::string &resourceName,
+                        bool ignoreDefaultSkin = false, const std::string &fileExtension = "png",
                         bool forceLoadMipmaps = false);
 
-    void checkLoadSound(Sound **addressOfPointer, const std::string& skinElementName, std::string resourceName,
+    void checkLoadSound(Sound **addressOfPointer, const std::string &skinElementName, std::string resourceName,
                         bool isOverlayable = false, bool isSample = false, bool loop = false,
                         bool fallback_to_default = true, float hardcodedVolumeMultiplier = -1.0f);
 
@@ -453,6 +453,7 @@ class Skin {
     Image *cursorMiddle;
     Image *cursorTrail;
     Image *cursorRipple;
+    Image *cursorSmoke;
 
     SkinImage *selectionModEasy;
     SkinImage *selectionModNoFail;
@@ -572,75 +573,75 @@ class Skin {
     Sound *spinnerSpinSound;
 
     // Plays when sending a message in chat
-    Sound* messageSent = nullptr;
+    Sound *messageSent = nullptr;
 
     // Plays when deleting text in a message in chat
-    Sound* deletingText = nullptr;
+    Sound *deletingText = nullptr;
 
     // Plays when changing the text cursor position
-    Sound* movingTextCursor = nullptr;
+    Sound *movingTextCursor = nullptr;
 
     // Plays when pressing a key for chat, search, edit, etc
-    Sound* typing1 = nullptr;
-    Sound* typing2 = nullptr;
-    Sound* typing3 = nullptr;
-    Sound* typing4 = nullptr;
+    Sound *typing1 = nullptr;
+    Sound *typing2 = nullptr;
+    Sound *typing3 = nullptr;
+    Sound *typing4 = nullptr;
 
     // Plays when returning to the previous screen
-    Sound* menuBack = nullptr;
+    Sound *menuBack = nullptr;
 
     // Plays when closing a chat tab
-    Sound* closeChatTab = nullptr;
+    Sound *closeChatTab = nullptr;
 
     // Plays when hovering above all selectable boxes except beatmaps or main screen buttons
-    Sound* hoverButton = nullptr;
+    Sound *hoverButton = nullptr;
 
     // Plays when clicking to confirm a button or dropdown option, opening or
     // closing chat, switching between chat tabs, or switching groups
-    Sound* clickButton = nullptr;
+    Sound *clickButton = nullptr;
 
     // Main menu sounds
-    Sound* clickMainMenuCube = nullptr;
-    Sound* hoverMainMenuCube = nullptr;
-    Sound* clickSingleplayer = nullptr;
-    Sound* hoverSingleplayer = nullptr;
-    Sound* clickMultiplayer = nullptr;
-    Sound* hoverMultiplayer = nullptr;
-    Sound* clickOptions = nullptr;
-    Sound* hoverOptions = nullptr;
-    Sound* clickExit = nullptr;
-    Sound* hoverExit = nullptr;
+    Sound *clickMainMenuCube = nullptr;
+    Sound *hoverMainMenuCube = nullptr;
+    Sound *clickSingleplayer = nullptr;
+    Sound *hoverSingleplayer = nullptr;
+    Sound *clickMultiplayer = nullptr;
+    Sound *hoverMultiplayer = nullptr;
+    Sound *clickOptions = nullptr;
+    Sound *hoverOptions = nullptr;
+    Sound *clickExit = nullptr;
+    Sound *hoverExit = nullptr;
 
     // Pause menu sounds
-    Sound* pauseLoop = nullptr;
-    Sound* pauseHover = nullptr;
-    Sound* clickPauseBack = nullptr;
-    Sound* hoverPauseBack = nullptr;
-    Sound* clickPauseContinue = nullptr;
-    Sound* hoverPauseContinue = nullptr;
-    Sound* clickPauseRetry = nullptr;
-    Sound* hoverPauseRetry = nullptr;
+    Sound *pauseLoop = nullptr;
+    Sound *pauseHover = nullptr;
+    Sound *clickPauseBack = nullptr;
+    Sound *hoverPauseBack = nullptr;
+    Sound *clickPauseContinue = nullptr;
+    Sound *hoverPauseContinue = nullptr;
+    Sound *clickPauseRetry = nullptr;
+    Sound *hoverPauseRetry = nullptr;
 
     // Back button sounds
-    Sound* backButtonClick = nullptr;
-    Sound* backButtonHover = nullptr;
+    Sound *backButtonClick = nullptr;
+    Sound *backButtonHover = nullptr;
 
     // Plays when switching into song selection, selecting a beatmap, opening dropdown boxes, opening chat tabs
-    Sound* expand = nullptr;
+    Sound *expand = nullptr;
 
     // Plays when selecting a difficulty of a beatmap
-    Sound* selectDifficulty = nullptr;
+    Sound *selectDifficulty = nullptr;
 
     // Plays when changing the options via a slider
-    Sound* sliderbar = nullptr;
+    Sound *sliderbar = nullptr;
 
     // Multiplayer sounds
-    Sound* matchConfirm = nullptr;  // all players are ready
-    Sound* roomJoined = nullptr;    // a player joined
-    Sound* roomQuit = nullptr;      // a player left
-    Sound* roomNotReady = nullptr;  // a player is no longer ready
-    Sound* roomReady = nullptr;     // a player is now ready
-    Sound* matchStart = nullptr;    // match started
+    Sound *matchConfirm = nullptr;  // all players are ready
+    Sound *roomJoined = nullptr;    // a player joined
+    Sound *roomQuit = nullptr;      // a player left
+    Sound *roomNotReady = nullptr;  // a player is no longer ready
+    Sound *roomReady = nullptr;     // a player is now ready
+    Sound *matchStart = nullptr;    // match started
 
     Sound *combobreak;
     Sound *failsound;
@@ -670,6 +671,7 @@ class Skin {
     bool bCursor2x;
     bool bCursorTrail2x;
     bool bCursorRipple2x;
+    bool bCursorSmoke2x;
     bool bApproachCircle2x;
     bool bReverseArrow2x;
     bool bHitCircle2x;

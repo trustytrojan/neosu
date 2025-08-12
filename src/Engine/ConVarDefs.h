@@ -151,6 +151,7 @@ CONVAR(SAVE_SCREENSHOT, "osu_key_save_screenshot", (int)KEY_F12, FCVAR_BANCHO_CO
 CONVAR(SEEK_TIME, "osu_key_seek_time", (int)KEY_LSHIFT, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(SEEK_TIME_BACKWARD, "osu_key_seek_time_backward", (int)KEY_LEFT, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(SEEK_TIME_FORWARD, "osu_key_seek_time_forward", (int)KEY_RIGHT, FCVAR_BANCHO_COMPATIBLE);
+CONVAR(SMOKE, "key_smoke", 0, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(SKIP_CUTSCENE, "osu_key_skip_cutscene", (int)KEY_SPACE, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(TOGGLE_CHAT, "osu_key_toggle_chat", (int)KEY_F8, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(TOGGLE_EXTENDED_CHAT, "key_toggle_extended_chat", (int)KEY_F9, FCVAR_BANCHO_COMPATIBLE);
@@ -1076,6 +1077,15 @@ CONVAR(slider_snake_duration_multiplier, "osu_slider_snake_duration_multiplier",
        "the default snaking duration is multiplied with this (max sensible value "
        "is 3, anything above that will take longer than the approachtime)");
 CONVAR(slider_use_gradient_image, "osu_slider_use_gradient_image", false, FCVAR_BANCHO_COMPATIBLE);
+CONVAR(smoke_scale, "smoke_scale", 1.f, FCVAR_BANCHO_COMPATIBLE);
+CONVAR(smoke_trail_duration, "smoke_trail_duration", 10.f, FCVAR_BANCHO_COMPATIBLE,
+       "how long smoke trails should last before being completely gone, in seconds");
+CONVAR(smoke_trail_max_size, "smoke_trail_max_size", 2048, FCVAR_BANCHO_COMPATIBLE,
+       "maximum number of rendered smoke trail images, array size limit");
+CONVAR(smoke_trail_opaque_duration, "smoke_trail_opaque_duration", 7.f, FCVAR_BANCHO_COMPATIBLE,
+       "how long smoke trails should last before starting to fade out, in seconds");
+CONVAR(smoke_trail_spacing, "smoke_trail_spacing", 15.f, FCVAR_BANCHO_COMPATIBLE,
+       "how big the gap between smoke particles should be, in milliseconds");
 CONVAR(snaking_sliders, "osu_snaking_sliders", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(snd_async_buffer, "snd_async_buffer", 65536, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "BASS_CONFIG_ASYNCFILE_BUFFER length in bytes. Set to 0 to disable.");
@@ -1289,7 +1299,6 @@ CONVAR(ignore_beatmap_skins, "ignore_beatmap_skins", false, FCVAR_BANCHO_COMPATI
 CONVAR(language, "language", "en", FCVAR_BANCHO_COMPATIBLE);
 CONVAR(draw_storyboard, "draw_storyboard", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(draw_video, "draw_video", true, FCVAR_BANCHO_COMPATIBLE);
-CONVAR(SMOKE, "key_smoke", 0, FCVAR_BANCHO_COMPATIBLE);
 
 // NOLINTEND(misc-definitions-in-headers)
 

@@ -269,6 +269,21 @@ void Beatmap::onKeyDown(KeyboardEvent &e) {
     if(e == KEY_O && keyboard->isControlDown()) {
         osu->toggleOptionsMenu();
         e.consume();
+        return;
+    }
+
+    if(e == (KEYCODE)cv::SMOKE.getInt()) {
+        this->current_keys |= LegacyReplay::Smoke;
+        e.consume();
+        return;
+    }
+}
+
+void Beatmap::onKeyUp(KeyboardEvent &e) {
+    if(e == (KEYCODE)cv::SMOKE.getInt()) {
+        this->current_keys &= ~LegacyReplay::Smoke;
+        e.consume();
+        return;
     }
 }
 
@@ -351,9 +366,9 @@ void Beatmap::keyPressed1(bool mouse) {
         });
 
     if(mouse) {
-        this->current_keys = this->current_keys | LegacyReplay::M1;
+        this->current_keys |= LegacyReplay::M1;
     } else {
-        this->current_keys = this->current_keys | LegacyReplay::M1 | LegacyReplay::K1;
+        this->current_keys |= LegacyReplay::M1 | LegacyReplay::K1;
     }
 }
 
@@ -389,9 +404,9 @@ void Beatmap::keyPressed2(bool mouse) {
         });
 
     if(mouse) {
-        this->current_keys = this->current_keys | LegacyReplay::M2;
+        this->current_keys |= LegacyReplay::M2;
     } else {
-        this->current_keys = this->current_keys | LegacyReplay::M2 | LegacyReplay::K2;
+        this->current_keys |= LegacyReplay::M2 | LegacyReplay::K2;
     }
 }
 
@@ -404,7 +419,7 @@ void Beatmap::keyReleased1(bool /*mouse*/) {
 
     this->bClick1Held = false;
 
-    this->current_keys = this->current_keys & ~(LegacyReplay::M1 | LegacyReplay::K1);
+    this->current_keys &= ~(LegacyReplay::M1 | LegacyReplay::K1);
 }
 
 void Beatmap::keyReleased2(bool /*mouse*/) {
@@ -416,7 +431,7 @@ void Beatmap::keyReleased2(bool /*mouse*/) {
 
     this->bClick2Held = false;
 
-    this->current_keys = this->current_keys & ~(LegacyReplay::M2 | LegacyReplay::K2);
+    this->current_keys &= ~(LegacyReplay::M2 | LegacyReplay::K2);
 }
 
 void Beatmap::select() {
@@ -598,6 +613,7 @@ bool Beatmap::start() {
     // played
     this->unloadObjects();
     this->resetScore();
+    this->smoke_trail.clear();
 
     // some hitobjects already need this information to be up-to-date before their constructor is called
     this->updatePlayfieldMetrics();
@@ -752,6 +768,7 @@ void Beatmap::actualRestart() {
     // reset everything
     this->resetScore();
     this->resetHitObjects(-1000);
+    this->smoke_trail.clear();
 
     // we are waiting for an asynchronous start of the beatmap in the next update()
     this->bIsWaiting = true;
@@ -1503,8 +1520,6 @@ bool Beatmap::canDraw() {
     return true;
 }
 
-bool Beatmap::canUpdate() { return this->bIsPlaying || this->bIsPaused || this->bContinueScheduled; }
-
 void Beatmap::handlePreviewPlay() {
     if(this->music == nullptr) return;
 
@@ -1775,6 +1790,9 @@ void Beatmap::draw() {
     // draw all hitobjects in reverse
     if(cv::draw_hitobjects.getBool()) this->drawHitObjects();
 
+    // draw smoke
+    this->drawSmoke();
+
     // draw spectator pause message
     if(this->spectate_pause) {
         auto info = BANCHO::User::get_user_info(bancho->spectated_player_id);
@@ -1789,6 +1807,69 @@ void Beatmap::draw() {
             Vector2 pos = this->osuCoords2Pixels(misaimObject->getRawPosAt(0));
             g->fillRect(pos.x - 50, pos.y - 50, 100, 100);
         }
+    }
+}
+
+void Beatmap::drawSmoke() {
+    // TODO @kiwec:
+    // - Currently, smoke isn't visible at all. Can't figure out why.
+    // - Test 2x scaling
+    // - Test FPoSu
+    // - Better default smoke img?
+
+    Image *smoke = osu->getSkin()->cursorSmoke;
+    if(!smoke->isReady()) return;
+
+    // Add new smoke particles if unpaused & smoke key pressed
+    if(!this->bIsPaused && (this->current_keys & LegacyReplay::Smoke)) {
+        HUD::CURSORRIPPLE sm;
+        sm.pos = this->pixels2OsuCoords(this->getCursorPos());
+        sm.time = engine->getTime();
+
+        if(!this->smoke_trail.empty()) {
+            f32 last_trail_tms = this->smoke_trail[this->smoke_trail.size() - 1].time;
+            if(sm.time < last_trail_tms + cv::smoke_trail_spacing.getFloat() / 1000.f) {
+                // Remove last trail element so we can replace it with a newer one
+                this->smoke_trail.pop_back();
+            }
+        }
+
+        this->smoke_trail.push_back(sm);
+
+        while(this->smoke_trail.size() > cv::smoke_trail_max_size.getInt()) {
+            this->smoke_trail.erase(this->smoke_trail.begin());
+        }
+    }
+
+    // XXX: not sure about 2x
+    f32 scale = osu->hud->getCursorScaleFactor() * (osu->getSkin()->bCursorSmoke2x ? 0.5f : 1.0f);
+    scale *= cv::cursor_scale.getFloat();
+    scale *= cv::smoke_scale.getFloat();
+
+    f32 time_visible = cv::smoke_trail_duration.getFloat();
+    f32 time_fully_visible = cv::smoke_trail_opaque_duration.getFloat();
+    f32 fade_time = time_visible - time_fully_visible;
+    for(auto sm : this->smoke_trail) {
+        f32 active_for = engine->getTime() - sm.time;
+
+        // Start fading out when time_fully_visible has passed
+        f32 alpha = std::min(fade_time, time_fully_visible - active_for) / fade_time;
+        if(alpha <= 0.f) continue;
+
+        g->setColor(argb(alpha, 255, 255, 255));
+        g->pushTransform();
+        {
+            auto pos = this->osuCoords2Pixels(sm.pos);
+            g->scale(scale, scale);
+            g->translate(pos.x, pos.y);
+            g->drawImage(smoke);
+        }
+        g->popTransform();
+    }
+
+    // trail cleanup
+    while(!this->smoke_trail.empty() && engine->getTime() > this->smoke_trail[0].time + time_visible) {
+        this->smoke_trail.erase(this->smoke_trail.begin());
     }
 }
 
@@ -2107,7 +2188,7 @@ void Beatmap::drawHitObjects() {
 }
 
 void Beatmap::update() {
-    if(!this->canUpdate()) return;
+    if(!this->bIsPlaying && !this->bIsPaused && !this->bContinueScheduled) return;
 
     // some things need to be updated before loading has finished, so control flow is a bit weird here.
 

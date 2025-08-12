@@ -173,6 +173,7 @@ Skin::Skin(const UString &name, std::string filepath, bool isDefaultSkin) {
     this->cursorMiddle = m_missingTexture;
     this->cursorTrail = m_missingTexture;
     this->cursorRipple = m_missingTexture;
+    this->cursorSmoke = m_missingTexture;
 
     this->pauseContinue = m_missingTexture;
     this->pauseReplay = m_missingTexture;
@@ -271,6 +272,7 @@ Skin::Skin(const UString &name, std::string filepath, bool isDefaultSkin) {
     this->bCursor2x = false;
     this->bCursorTrail2x = false;
     this->bCursorRipple2x = false;
+    this->bCursorSmoke2x = false;
     this->bApproachCircle2x = false;
     this->bReverseArrow2x = false;
     this->bHitCircle2x = false;
@@ -439,6 +441,7 @@ void Skin::load() {
         this->checkLoadImage(&this->cursorMiddle, "cursormiddle", "OSU_SKIN_CURSORMIDDLE", true);
         this->checkLoadImage(&this->cursorTrail, "cursortrail", "OSU_SKIN_CURSORTRAIL");
         this->checkLoadImage(&this->cursorRipple, "cursor-ripple", "OSU_SKIN_CURSORRIPPLE");
+        this->checkLoadImage(&this->cursorSmoke, "cursor-smoke", "OSU_SKIN_CURSORSMOKE");
 
         // special case: if fallback to default cursor, do load cursorMiddle
         if(this->cursor == resourceManager->getImage("OSU_SKIN_CURSOR_DEFAULT"))
@@ -1002,6 +1005,7 @@ void Skin::load() {
     if(this->cursorTrail != nullptr && this->cursorTrail->getFilePath().find("@2x") != -1) this->bCursorTrail2x = true;
     if(this->cursorRipple != nullptr && this->cursorRipple->getFilePath().find("@2x") != -1)
         this->bCursorRipple2x = true;
+    if(this->cursorSmoke != nullptr && this->cursorSmoke->getFilePath().find("@2x") != -1) this->bCursorSmoke2x = true;
     if(this->approachCircle != nullptr && this->approachCircle->getFilePath().find("@2x") != -1)
         this->bApproachCircle2x = true;
     if(this->reverseArrow != nullptr && this->reverseArrow->getFilePath().find("@2x") != -1)

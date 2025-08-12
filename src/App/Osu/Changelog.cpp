@@ -30,6 +30,7 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG v40_01;
     v40_01.title = "40.01";
     v40_01.changes = {
+        // R"(- Added cursor smoke)",
         R"(- Fixed tablet/mouse breakage)",
         R"(- Improved the quality of the main menu cube)",
         R"(- Added a new command line launch option to enable global MSAA)",

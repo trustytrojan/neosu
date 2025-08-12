@@ -893,15 +893,12 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     UIButton *resetAllKeyBindingsButton = this->addButton("Reset all key bindings");
     resetAllKeyBindingsButton->setColor(0xffff0000);
     resetAllKeyBindingsButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onKeyBindingsResetAllPressed>(this));
-    this->addSubSection("Keys - osu! Standard Mode", keyboardSectionTags);
+    this->addSubSection("Keys - In-Game", keyboardSectionTags);
     this->addKeyBindButton("Left Click", &cv::LEFT_CLICK);
     this->addKeyBindButton("Right Click", &cv::RIGHT_CLICK);
-    this->addSpacer();
     this->addKeyBindButton("Left Click (2)", &cv::LEFT_CLICK_2);
     this->addKeyBindButton("Right Click (2)", &cv::RIGHT_CLICK_2);
-    this->addSubSection("Keys - FPoSu", keyboardSectionTags);
-    this->addKeyBindButton("Zoom", &cv::FPOSU_ZOOM);
-    this->addSubSection("Keys - In-Game", keyboardSectionTags);
+    this->addKeyBindButton("Smoke", &cv::SMOKE);
     this->addKeyBindButton("Game Pause", &cv::GAME_PAUSE)->setDisallowLeftMouseClickBinding(true);
     this->addKeyBindButton("Skip Cutscene", &cv::SKIP_CUTSCENE);
     this->addKeyBindButton("Toggle Scoreboard", &cv::TOGGLE_SCOREBOARD);
@@ -914,6 +911,8 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addKeyBindButton("Quick Save", &cv::QUICK_SAVE);
     this->addKeyBindButton("Quick Load", &cv::QUICK_LOAD);
     this->addKeyBindButton("Instant Replay", &cv::INSTANT_REPLAY);
+    this->addSubSection("Keys - FPoSu", keyboardSectionTags);
+    this->addKeyBindButton("Zoom", &cv::FPOSU_ZOOM);
     this->addSubSection("Keys - Universal", keyboardSectionTags);
     this->addKeyBindButton("Toggle chat", &cv::TOGGLE_CHAT);
     this->addKeyBindButton("Toggle user list", &cv::TOGGLE_EXTENDED_CHAT);

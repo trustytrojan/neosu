@@ -4,6 +4,7 @@
 #include "BeatmapInterface.h"
 #include "DatabaseBeatmap.h"
 #include "DifficultyCalculator.h"
+#include "HUD.h"
 #include "LegacyReplay.h"
 #include "score.h"
 #include "uwu.h"
@@ -35,6 +36,7 @@ class Beatmap : public BeatmapInterface {
     void update2();  // Used to be Beatmap::update()
 
     void onKeyDown(KeyboardEvent &e);
+    void onKeyUp(KeyboardEvent &e);
 
     // Potentially Visible Set gate time size, for optimizing draw() and update() when iterating over all hitobjects
     long getPVS();
@@ -55,11 +57,11 @@ class Beatmap : public BeatmapInterface {
     [[nodiscard]] Vector2 pixels2OsuCoords(Vector2 pixelCoords) const override;  // only used for positional audio atm
     [[nodiscard]] Vector2 osuCoords2Pixels(
         Vector2 coords) const override;  // hitobjects should use this one (includes lots of special behaviour)
-    [[nodiscard]] Vector2 osuCoords2RawPixels(
-        Vector2 coords) const override;  // raw transform from osu!pixels to absolute screen pixels (without any mods whatsoever)
-    [[nodiscard]] Vector2 osuCoords2LegacyPixels(
-        Vector2 coords) const override;  // only applies vanilla osu mods and static mods to the coordinates (used for generating
-                                // the static slider mesh) centered at (0, 0, 0)
+    [[nodiscard]] Vector2 osuCoords2RawPixels(Vector2 coords)
+        const override;  // raw transform from osu!pixels to absolute screen pixels (without any mods whatsoever)
+    [[nodiscard]] Vector2 osuCoords2LegacyPixels(Vector2 coords)
+        const override;  // only applies vanilla osu mods and static mods to the coordinates (used for generating
+                         // the static slider mesh) centered at (0, 0, 0)
 
     // cursor
     [[nodiscard]] Vector2 getMousePos() const;
@@ -158,7 +160,7 @@ class Beatmap : public BeatmapInterface {
     Vector2 interpolatedMousePos;
     bool is_watching = false;
     long current_frame_idx = 0;
-    SimulatedBeatmap* sim = nullptr;
+    SimulatedBeatmap *sim = nullptr;
 
     // getting spectated (live)
     void broadcast_spectator_frames();
@@ -209,8 +211,8 @@ class Beatmap : public BeatmapInterface {
 
     // HitObject and other helper functions
     LiveScore::HIT addHitResult(HitObject *hitObject, LiveScore::HIT hit, i32 delta, bool isEndOfCombo = false,
-                                        bool ignoreOnHitErrorBar = false, bool hitErrorBarOnly = false,
-                                        bool ignoreCombo = false, bool ignoreScore = false, bool ignoreHealth = false) override;
+                                bool ignoreOnHitErrorBar = false, bool hitErrorBarOnly = false,
+                                bool ignoreCombo = false, bool ignoreScore = false, bool ignoreHealth = false) override;
     void addSliderBreak() override;
     void addScorePoints(int points, bool isSpinner = false) override;
     void addHealth(f64 percent, bool isFromHitResult);
@@ -244,7 +246,6 @@ class Beatmap : public BeatmapInterface {
    protected:
     // internal
     bool canDraw();
-    bool canUpdate();
 
     void actualRestart();
 
@@ -318,7 +319,6 @@ class Beatmap : public BeatmapInterface {
     int iPreviousFollowPointObjectIndex;  // TODO: this shouldn't be in this class
 
    private:
-
     [[nodiscard]] u32 getScoreV1DifficultyMultiplier_full() const override;
     [[nodiscard]] Replay::Mods getMods_full() const override;
     [[nodiscard]] u32 getModsLegacy_full() const override;
@@ -352,6 +352,7 @@ class Beatmap : public BeatmapInterface {
 
     void drawFollowPoints();
     void drawHitObjects();
+    void drawSmoke();
 
     void updateAutoCursorPos();
     void updatePlayfieldMetrics();
@@ -413,4 +414,6 @@ class Beatmap : public BeatmapInterface {
     int iMafhamFinishedRenderHitObjectIndex;
     bool bInMafhamRenderChunk;  // used by Slider to not animate the reverse arrow, and by Circle to not animate
                                 // note blocking shaking, while being rendered into the scene buffer
+
+    std::vector<HUD::CURSORRIPPLE> smoke_trail;
 };

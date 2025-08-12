@@ -313,9 +313,8 @@ void HUD::drawCursor(Vector2 pos, float alphaMultiplier, bool secondTrail, bool 
     }
 
     if(updateAndDrawTrail) {
-        Matrix4 mvp;
         auto &trail = secondTrail ? this->cursorTrail2 : this->cursorTrail;
-        this->drawCursorTrailInt(this->cursorTrailShader, trail, mvp, pos, alphaMultiplier, false);
+        this->drawCursorTrailInt(this->cursorTrailShader, trail, pos, alphaMultiplier, false);
     }
 
     Image *cursor = osu->getSkin()->getCursor();
@@ -369,13 +368,12 @@ void HUD::drawCursorTrail(Vector2 pos, float alphaMultiplier, bool secondTrail) 
     const bool fposuTrailJumpFix =
         (cv::mod_fposu.getBool() && osu->isInPlayMode() && !osu->getFPoSu()->isCrosshairIntersectingScreen());
 
-    Matrix4 mvp;
-    this->drawCursorTrailInt(this->cursorTrailShader, secondTrail ? this->cursorTrail2 : this->cursorTrail, mvp, pos,
+    this->drawCursorTrailInt(this->cursorTrailShader, secondTrail ? this->cursorTrail2 : this->cursorTrail, pos,
                              alphaMultiplier, fposuTrailJumpFix);
 }
 
-void HUD::drawCursorTrailInt(Shader *trailShader, std::vector<CURSORTRAIL> &trail, Matrix4 & /*mvp*/, Vector2 pos,
-                             float alphaMultiplier, bool emptyTrailFrame) {
+void HUD::drawCursorTrailInt(Shader *trailShader, std::vector<CURSORTRAIL> &trail, Vector2 pos, float alphaMultiplier,
+                             bool emptyTrailFrame) {
     Image *trailImage = osu->getSkin()->getCursorTrail();
 
     if(cv::draw_cursor_trail.getBool() && trailImage->isReady()) {
@@ -390,7 +388,7 @@ void HUD::drawCursorTrailInt(Shader *trailShader, std::vector<CURSORTRAIL> &trai
         if(smoothCursorTrail) this->cursorTrailVAO->empty();
 
         // add the sample for the current frame
-        this->addCursorTrailPosition(trail, pos, emptyTrailFrame);
+        if(!emptyTrailFrame) this->addCursorTrailPosition(trail, pos);
 
         // this loop draws the old style trail, and updates the alpha values for each segment, and fills the vao for the
         // new style trail
@@ -2491,8 +2489,7 @@ void HUD::animateKiExplode() {
     // if not additive: fade from 1.0 alpha to 0, scale from 1.0 to 1.6
 }
 
-void HUD::addCursorTrailPosition(std::vector<CURSORTRAIL> &trail, Vector2 pos, bool empty) {
-    if(empty) return;
+void HUD::addCursorTrailPosition(std::vector<CURSORTRAIL> &trail, Vector2 pos) {
     if(pos.x < -osu->getScreenWidth() || pos.x > osu->getScreenWidth() * 2 || pos.y < -osu->getScreenHeight() ||
        pos.y > osu->getScreenHeight() * 2)
         return;  // fuck oob trails

@@ -89,7 +89,6 @@ class HUD : public OsuScreen {
     f32 live_pp = 0.0;
     f32 live_stars = 0.0;
 
-   private:
     struct CURSORTRAIL {
         Vector2 pos;
         float time;
@@ -102,6 +101,10 @@ class HUD : public OsuScreen {
         float time;
     };
 
+    float getCursorScaleFactor();
+    void addCursorTrailPosition(std::vector<CURSORTRAIL> &trail, Vector2 pos);
+
+   private:
     struct HITERROR {
         float time;
         long delta;
@@ -120,9 +123,7 @@ class HUD : public OsuScreen {
         float endPercent;
     };
 
-    void addCursorTrailPosition(std::vector<CURSORTRAIL> &trail, Vector2 pos, bool empty = false);
-
-    void drawCursorTrailInt(Shader *trailShader, std::vector<CURSORTRAIL> &trail, Matrix4 &mvp, Vector2 pos,
+    void drawCursorTrailInt(Shader *trailShader, std::vector<CURSORTRAIL> &trail, Vector2 pos,
                             float alphaMultiplier = 1.0f, bool emptyTrailFrame = false);
     void drawCursorTrailRaw(float alpha, Vector2 pos);
     void drawFps(McFont *font, float fps);
@@ -146,7 +147,6 @@ class HUD : public OsuScreen {
                                float beatmapPercentFinishedPlayable, const std::vector<BREAK> &breaks);
     void drawInputOverlay(int numK1, int numK2, int numM1, int numM2);
 
-    float getCursorScaleFactor();
     float getCursorTrailScaleFactor();
 
     float getScoreScale();
