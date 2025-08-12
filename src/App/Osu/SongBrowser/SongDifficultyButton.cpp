@@ -48,7 +48,7 @@ SongDifficultyButton::SongDifficultyButton(SongBrowser* songBrowser, BeatmapCaro
 SongDifficultyButton::~SongDifficultyButton() { anim->deleteExistingAnimation(&this->fOffsetPercentAnim); }
 
 void SongDifficultyButton::draw() {
-    SongBrowserButton::draw();
+    CarouselButton::draw();
     if(!this->bVisible) return;
 
     const bool isIndependentDiff = this->isIndependentDiffButton();
@@ -173,7 +173,7 @@ void SongDifficultyButton::onClicked(bool left, bool right) {
 }
 
 void SongDifficultyButton::onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected) {
-    SongBrowserButton::onSelected(wasSelected, autoSelectBottomMostChild, wasParentSelected);
+    CarouselButton::onSelected(wasSelected, autoSelectBottomMostChild, wasParentSelected);
 
     const bool wasParentActuallySelected = (this->parentSongButton != nullptr && wasParentSelected);
 

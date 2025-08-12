@@ -25,7 +25,7 @@
 
 SongButton::SongButton(SongBrowser *songBrowser, BeatmapCarousel *view, UIContextMenu *contextMenu, float xPos,
                        float yPos, float xSize, float ySize, UString name, DatabaseBeatmap *databaseBeatmap)
-    : SongBrowserButton(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, std::move(name)) {
+    : CarouselButton(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, std::move(name)) {
     this->databaseBeatmap = databaseBeatmap;
 
     // settings
@@ -68,7 +68,7 @@ void SongButton::draw() {
     if(this->vPos.y + this->vSize.y < 0) return;
     if(this->vPos.y > osu->getScreenHeight()) return;
 
-    SongBrowserButton::draw();
+    CarouselButton::draw();
 
     // draw background image
     this->sortChildren();
@@ -214,7 +214,7 @@ void SongButton::drawSubTitle(float deselectedAlpha, bool forceSelectedStyle) {
 void SongButton::sortChildren() { std::ranges::sort(this->children, sort_by_difficulty); }
 
 void SongButton::updateLayoutEx() {
-    SongBrowserButton::updateLayoutEx();
+    CarouselButton::updateLayoutEx();
 
     // scaling
     const Vector2 size = this->getActualSize();
@@ -234,7 +234,7 @@ void SongButton::updateLayoutEx() {
 }
 
 void SongButton::onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected) {
-    SongBrowserButton::onSelected(wasSelected, autoSelectBottomMostChild, wasParentSelected);
+    CarouselButton::onSelected(wasSelected, autoSelectBottomMostChild, wasParentSelected);
 
     // resort children (since they might have been updated in the meantime)
     this->sortChildren();

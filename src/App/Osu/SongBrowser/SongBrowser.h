@@ -17,7 +17,7 @@ class UIContextMenu;
 class UISearchOverlay;
 class InfoLabel;
 class ScoreButton;
-class SongBrowserButton;
+class CarouselButton;
 class SongButton;
 class SongDifficultyButton;
 class CollectionButton;
@@ -74,7 +74,7 @@ class SongBrowser final : public ScreenBackable {
     void selectSelectedBeatmapSongButton();
     void onPlayEnd(bool quit = true);  // called when a beatmap is finished playing (or the player quit)
 
-    void onSelectionChange(SongBrowserButton *button, bool rebuild);
+    void onSelectionChange(CarouselButton *button, bool rebuild);
     void onDifficultySelected(DatabaseBeatmap *diff2, bool play = false);
 
     void onScoreContextMenu(ScoreButton *scoreButton, int id);
@@ -95,9 +95,9 @@ class SongBrowser final : public ScreenBackable {
                                           const std::string &name);
 
     void requestNextScrollToSongButtonJumpFix(SongDifficultyButton *diffButton);
-    bool isButtonVisible(SongBrowserButton *songButton);
+    bool isButtonVisible(CarouselButton *songButton);
     void scrollToBestButton();
-    void scrollToSongButton(SongBrowserButton *songButton, bool alignOnTop = false);
+    void scrollToSongButton(CarouselButton *songButton, bool alignOnTop = false);
     void rebuildSongButtons();
     void recreateCollectionsButtons();
     void rebuildScoreButtons();
@@ -178,7 +178,7 @@ class SongBrowser final : public ScreenBackable {
 
     void onScoreClicked(CBaseUIButton *button);
 
-    void selectSongButton(SongBrowserButton *songButton);
+    void selectSongButton(CarouselButton *songButton);
     void selectPreviousRandomBeatmap();
     void playSelectedDifficulty();
 
@@ -222,7 +222,7 @@ class SongBrowser final : public ScreenBackable {
 
     // song carousel
     BeatmapCarousel *carousel{nullptr};
-    SongBrowserButton *selectedButton = nullptr;
+    CarouselButton *selectedButton = nullptr;
     bool bSongBrowserRightClickScrollCheck;
     bool bSongBrowserRightClickScrolling;
     bool bNextScrollToSongButtonJumpFixScheduled;
@@ -240,7 +240,7 @@ class SongBrowser final : public ScreenBackable {
     // beatmap database
     std::vector<DatabaseBeatmap *> beatmaps;
     std::vector<SongButton *> songButtons;
-    std::vector<SongBrowserButton *> visibleSongButtons;
+    std::vector<CarouselButton *> visibleSongButtons;
     std::vector<CollectionButton *> collectionButtons;
     std::vector<CollectionButton *> artistCollectionButtons;
     std::vector<CollectionButton *> difficultyCollectionButtons;

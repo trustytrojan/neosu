@@ -1,9 +1,9 @@
 #pragma once
 // Copyright (c) 2016, PG, All rights reserved.
 
-#include "SongBrowserButton.h"
+#include "CarouselButton.h"
 
-class CollectionButton : public SongBrowserButton {
+class CollectionButton : public CarouselButton {
    public:
     CollectionButton(SongBrowser *songBrowser, BeatmapCarousel *view, UIContextMenu *contextMenu, float xPos,
                      float yPos, float xSize, float ySize, UString name, const UString &collectionName,

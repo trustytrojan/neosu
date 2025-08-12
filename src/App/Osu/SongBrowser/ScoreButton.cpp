@@ -607,7 +607,7 @@ void ScoreButton::onContextMenu(const UString &text, int id) {
         auto score = this->getScore();
         osu->userStats->setVisible(false);
 
-        auto song_button = (SongBrowserButton *)osu->getSongBrowser()->hashToSongButton[score.beatmap_hash];
+        auto song_button = (CarouselButton *)osu->getSongBrowser()->hashToSongButton[score.beatmap_hash];
         osu->getSongBrowser()->selectSongButton(song_button);
     }
 

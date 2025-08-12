@@ -1,5 +1,5 @@
 // Copyright (c) 2016, PG, All rights reserved.
-#include "SongBrowserButton.h"
+#include "CarouselButton.h"
 
 #include <utility>
 
@@ -18,14 +18,14 @@
 #include "Skin.h"
 #include "SoundEngine.h"
 
-int SongBrowserButton::marginPixelsX = 9;
-int SongBrowserButton::marginPixelsY = 9;
-float SongBrowserButton::lastHoverSoundTime = 0;
+int CarouselButton::marginPixelsX = 9;
+int CarouselButton::marginPixelsY = 9;
+float CarouselButton::lastHoverSoundTime = 0;
 
 // Color Button::inactiveDifficultyBackgroundColor = argb(255, 0, 150, 236); // blue
 
-SongBrowserButton::SongBrowserButton(SongBrowser *songBrowser, BeatmapCarousel *view, UIContextMenu *contextMenu,
-                                     float xPos, float yPos, float xSize, float ySize, UString name)
+CarouselButton::CarouselButton(SongBrowser *songBrowser, BeatmapCarousel *view, UIContextMenu *contextMenu, float xPos,
+                               float yPos, float xSize, float ySize, UString name)
     : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), ""), carousel(view) {
     this->songBrowser = songBrowser;
     this->contextMenu = contextMenu;
@@ -52,16 +52,16 @@ SongBrowserButton::SongBrowserButton(SongBrowser *songBrowser, BeatmapCarousel *
     this->moveAwayState = MOVE_AWAY_STATE::MOVE_CENTER;
 }
 
-SongBrowserButton::~SongBrowserButton() { this->deleteAnimations(); }
+CarouselButton::~CarouselButton() { this->deleteAnimations(); }
 
-void SongBrowserButton::deleteAnimations() {
+void CarouselButton::deleteAnimations() {
     anim->deleteExistingAnimation(&this->fCenterOffsetAnimation);
     anim->deleteExistingAnimation(&this->fCenterOffsetVelocityAnimation);
     anim->deleteExistingAnimation(&this->fHoverOffsetAnimation);
     anim->deleteExistingAnimation(&this->fHoverMoveAwayAnimation);
 }
 
-void SongBrowserButton::draw() {
+void CarouselButton::draw() {
     if(!this->bVisible) return;
 
     this->drawMenuButtonBackground();
@@ -91,7 +91,7 @@ void SongBrowserButton::draw() {
     }
 }
 
-void SongBrowserButton::drawMenuButtonBackground() {
+void CarouselButton::drawMenuButtonBackground() {
     g->setColor(this->bSelected ? this->getActiveBackgroundColor() : this->getInactiveBackgroundColor());
     g->pushTransform();
     {
@@ -102,7 +102,7 @@ void SongBrowserButton::drawMenuButtonBackground() {
     g->popTransform();
 }
 
-void SongBrowserButton::mouse_update(bool *propagate_clicks) {
+void CarouselButton::mouse_update(bool *propagate_clicks) {
     // Not correct, but clears most of the lag
     if(this->vPos.y + this->vSize.y < 0) return;
     if(this->vPos.y > osu->getScreenHeight()) return;
@@ -144,7 +144,7 @@ void SongBrowserButton::mouse_update(bool *propagate_clicks) {
     this->updateLayoutEx();
 }
 
-void SongBrowserButton::updateLayoutEx() {
+void CarouselButton::updateLayoutEx() {
     const float uiScale = cv::ui_scale.getFloat();
 
     Image *menuButtonBackground = osu->getSkin()->getMenuButtonBackground();
@@ -210,7 +210,7 @@ void SongBrowserButton::updateLayoutEx() {
     this->setRelPosY(this->fTargetRelPosY + this->getSize().y * 0.125f * this->fHoverMoveAwayAnimation);
 }
 
-SongBrowserButton *SongBrowserButton::setVisible(bool visible) {
+CarouselButton *CarouselButton::setVisible(bool visible) {
     CBaseUIButton::setVisible(visible);
 
     this->deleteAnimations();
@@ -234,7 +234,7 @@ SongBrowserButton *SongBrowserButton::setVisible(bool visible) {
     return this;
 }
 
-void SongBrowserButton::select(bool fireCallbacks, bool autoSelectBottomMostChild, bool wasParentSelected) {
+void CarouselButton::select(bool fireCallbacks, bool autoSelectBottomMostChild, bool wasParentSelected) {
     const bool wasSelected = this->bSelected;
     this->bSelected = true;
 
@@ -242,11 +242,11 @@ void SongBrowserButton::select(bool fireCallbacks, bool autoSelectBottomMostChil
     if(fireCallbacks) this->onSelected(wasSelected, autoSelectBottomMostChild, wasParentSelected);
 }
 
-void SongBrowserButton::deselect() { this->bSelected = false; }
+void CarouselButton::deselect() { this->bSelected = false; }
 
-void SongBrowserButton::resetAnimations() { this->setMoveAwayState(MOVE_AWAY_STATE::MOVE_CENTER, false); }
+void CarouselButton::resetAnimations() { this->setMoveAwayState(MOVE_AWAY_STATE::MOVE_CENTER, false); }
 
-void SongBrowserButton::onClicked(bool left, bool right) {
+void CarouselButton::onClicked(bool left, bool right) {
     soundEngine->play(osu->getSkin()->selectDifficulty);
 
     CBaseUIButton::onClicked(left, right);
@@ -254,7 +254,7 @@ void SongBrowserButton::onClicked(bool left, bool right) {
     this->select(true, true);
 }
 
-void SongBrowserButton::onMouseInside() {
+void CarouselButton::onMouseInside() {
     CBaseUIButton::onMouseInside();
 
     // hover sound
@@ -272,7 +272,7 @@ void SongBrowserButton::onMouseInside() {
     const std::vector<CBaseUIElement *> &elements = this->carousel->getContainer()->getElements();
     bool foundCenter = false;
     for(auto element : elements) {
-        auto *b = dynamic_cast<SongBrowserButton *>(element);
+        auto *b = dynamic_cast<CarouselButton *>(element);
         if(b != nullptr)  // sanity
         {
             if(b == this) {
@@ -284,7 +284,7 @@ void SongBrowserButton::onMouseInside() {
     }
 }
 
-void SongBrowserButton::onMouseOutside() {
+void CarouselButton::onMouseOutside() {
     CBaseUIButton::onMouseOutside();
 
     // reverse hover anim
@@ -295,19 +295,19 @@ void SongBrowserButton::onMouseOutside() {
     if(this->moveAwayState == MOVE_AWAY_STATE::MOVE_CENTER) {
         const std::vector<CBaseUIElement *> &elements = this->carousel->getContainer()->getElements();
         for(auto element : elements) {
-            auto *b = dynamic_cast<SongBrowserButton *>(element);
+            auto *b = dynamic_cast<CarouselButton *>(element);
             if(b != nullptr)  // sanity check
                 b->setMoveAwayState(MOVE_AWAY_STATE::MOVE_CENTER);
         }
     }
 }
 
-void SongBrowserButton::setTargetRelPosY(float targetRelPosY) {
+void CarouselButton::setTargetRelPosY(float targetRelPosY) {
     this->fTargetRelPosY = targetRelPosY;
     this->setRelPosY(this->fTargetRelPosY);
 }
 
-Vector2 SongBrowserButton::getActualOffset() const {
+Vector2 CarouselButton::getActualOffset() const {
     const float hd2xMultiplier = osu->getSkin()->isMenuButtonBackground2x() ? 2.0f : 1.0f;
     const float correctedMarginPixelsY =
         (2 * marginPixelsY + osu->getSkin()->getMenuButtonBackground()->getHeight() / hd2xMultiplier - 103.0f) / 2.0f;
@@ -315,7 +315,7 @@ Vector2 SongBrowserButton::getActualOffset() const {
                    (int)(correctedMarginPixelsY * this->fScale * hd2xMultiplier));
 }
 
-void SongBrowserButton::setMoveAwayState(SongBrowserButton::MOVE_AWAY_STATE moveAwayState, bool animate) {
+void CarouselButton::setMoveAwayState(CarouselButton::MOVE_AWAY_STATE moveAwayState, bool animate) {
     this->moveAwayState = moveAwayState;
 
     // if we are not visible, destroy possibly existing animation
@@ -349,14 +349,14 @@ void SongBrowserButton::setMoveAwayState(SongBrowserButton::MOVE_AWAY_STATE move
     }
 }
 
-Color SongBrowserButton::getActiveBackgroundColor() const {
+Color CarouselButton::getActiveBackgroundColor() const {
     return argb(std::clamp<int>(cv::songbrowser_button_active_color_a.getInt(), 0, 255),
                 std::clamp<int>(cv::songbrowser_button_active_color_r.getInt(), 0, 255),
                 std::clamp<int>(cv::songbrowser_button_active_color_g.getInt(), 0, 255),
                 std::clamp<int>(cv::songbrowser_button_active_color_b.getInt(), 0, 255));
 }
 
-Color SongBrowserButton::getInactiveBackgroundColor() const {
+Color CarouselButton::getInactiveBackgroundColor() const {
     return argb(std::clamp<int>(cv::songbrowser_button_inactive_color_a.getInt(), 0, 255),
                 std::clamp<int>(cv::songbrowser_button_inactive_color_r.getInt(), 0, 255),
                 std::clamp<int>(cv::songbrowser_button_inactive_color_g.getInt(), 0, 255),

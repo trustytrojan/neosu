@@ -1,13 +1,13 @@
 #pragma once
 // Copyright (c) 2016, PG, All rights reserved.
-#include "SongBrowserButton.h"
+#include "CarouselButton.h"
 #include "score.h"
 
 class SongBrowser;
 class DatabaseBeatmap;
 class BeatmapCarousel;
 
-class SongButton : public SongBrowserButton {
+class SongButton : public CarouselButton {
    public:
     SongButton(SongBrowser *songBrowser, BeatmapCarousel *view, UIContextMenu *contextMenu, float xPos, float yPos,
                float xSize, float ySize, UString name, DatabaseBeatmap *databaseBeatmap);

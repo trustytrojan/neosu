@@ -11,11 +11,11 @@ class SongBrowser;
 class SongButton;
 class UIContextMenu;
 
-class SongBrowserButton : public CBaseUIButton {
+class CarouselButton : public CBaseUIButton {
    public:
-    SongBrowserButton(SongBrowser *songBrowser, BeatmapCarousel *view, UIContextMenu *contextMenu, float xPos,
-                      float yPos, float xSize, float ySize, UString name);
-    ~SongBrowserButton() override;
+    CarouselButton(SongBrowser *songBrowser, BeatmapCarousel *view, UIContextMenu *contextMenu, float xPos, float yPos,
+                   float xSize, float ySize, UString name);
+    ~CarouselButton() override;
     void deleteAnimations();
 
     void draw() override;
@@ -23,7 +23,7 @@ class SongBrowserButton : public CBaseUIButton {
 
     virtual void updateLayoutEx();
 
-    SongBrowserButton *setVisible(bool visible) override;
+    CarouselButton *setVisible(bool visible) override;
 
     void select(bool fireCallbacks = true, bool autoSelectBottomMostChild = true, bool wasParentSelected = true);
     void deselect();
