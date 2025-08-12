@@ -1,6 +1,7 @@
 // Copyright (c) 2018, PG, All rights reserved.
 #include "ScoreButton.h"
 
+#include "OptionsMenu.h"
 #include "SongBrowser.h"
 // ---
 
@@ -379,7 +380,9 @@ void ScoreButton::draw() {
 }
 
 void ScoreButton::mouse_update(bool *propagate_clicks) {
-    if(!this->bVisible) return;
+    if(!this->bVisible) {
+        return;
+    }
 
     // Update pp
     if(this->score.get_pp() == -1.0) {
@@ -425,6 +428,11 @@ void ScoreButton::mouse_update(bool *propagate_clicks) {
                 (this->score.perfect ? "PP: %ipp (%ix PFC)" : (fullCombo ? "PP: %ipp (%ix FC)" : "PP: %ipp (%ix)")),
                 (int)std::round(this->score.get_pp()), this->score.comboMax);
         }
+    }
+
+    // dumb hack to avoid taking focus and drawing score button tooltips over options menu
+    if(osu->getOptionsMenu()->isVisible()) {
+        return;
     }
 
     if(this->avatar) {
