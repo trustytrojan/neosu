@@ -21,10 +21,10 @@
 #include "SoundEngine.h"
 #include "Timing.h"
 
-SongDifficultyButton::SongDifficultyButton(SongBrowser* songBrowser, BeatmapCarousel* view, UIContextMenu* contextMenu,
+SongDifficultyButton::SongDifficultyButton(SongBrowser* songBrowser, UIContextMenu* contextMenu,
                                            float xPos, float yPos, float xSize, float ySize, UString name,
                                            DatabaseBeatmap* diff2, SongButton* parentSongButton)
-    : SongButton(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, std::move(name), nullptr) {
+    : SongButton(songBrowser, contextMenu, xPos, yPos, xSize, ySize, std::move(name), nullptr) {
     this->databaseBeatmap = diff2;  // NOTE: can't use parent constructor for passing this argument, as it would
                                     // otherwise try to build a full button (and not just a diff button)
     this->parentSongButton = parentSongButton;

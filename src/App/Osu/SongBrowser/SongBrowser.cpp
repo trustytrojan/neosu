@@ -466,7 +466,7 @@ SongBrowser::SongBrowser()  // NOLINT(cert-msc51-cpp, cert-msc32-c)
     this->localBestLabel->setTextJustification(CBaseUILabel::TEXT_JUSTIFICATION::TEXT_JUSTIFICATION_CENTERED);
 
     // build carousel
-    this->carousel = new BeatmapCarousel(this, 0, 0, 0, 0, "Carousel");
+    this->carousel = std::make_unique<BeatmapCarousel>(this, 0, 0, 0, 0, "Carousel");
     this->thumbnailYRatio = cv::draw_songbrowser_thumbnails.getBool() ? 1.333333f : 0.f;
 
     // beatmap database
@@ -1514,12 +1514,11 @@ void SongBrowser::addBeatmapSet(BeatmapSet *mapset) {
 
     SongButton *songButton;
     if(mapset->getDifficulties().size() > 1) {
-        songButton = new SongButton(this, this->carousel, this->contextMenu, 250, 250 + this->beatmaps.size() * 50, 200,
-                                    50, "", mapset);
-    } else {
         songButton =
-            new SongDifficultyButton(this, this->carousel, this->contextMenu, 250, 250 + this->beatmaps.size() * 50,
-                                     200, 50, "", mapset->getDifficulties()[0], nullptr);
+            new SongButton(this, this->contextMenu, 250, 250 + this->beatmaps.size() * 50, 200, 50, "", mapset);
+    } else {
+        songButton = new SongDifficultyButton(this, this->contextMenu, 250, 250 + this->beatmaps.size() * 50, 200, 50,
+                                              "", mapset->getDifficulties()[0], nullptr);
     }
 
     this->songButtons.push_back(songButton);
@@ -2455,7 +2454,7 @@ void SongBrowser::onDatabaseLoadingFinished() {
         {
             // 0-9
             {
-                auto *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "", "0-9",
+                auto *b = new CollectionButton(this, this->contextMenu, 250, 250, 200, 50, "", "0-9",
                                                std::vector<SongButton *>());
                 this->artistCollectionButtons.push_back(b);
             }
@@ -2464,14 +2463,14 @@ void SongBrowser::onDatabaseLoadingFinished() {
             for(size_t i = 0; i < 26; i++) {
                 UString artistCollectionName = UString::format("%c", 'A' + i);
 
-                auto *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "",
-                                               artistCollectionName, std::vector<SongButton *>());
+                auto *b = new CollectionButton(this, this->contextMenu, 250, 250, 200, 50, "", artistCollectionName,
+                                               std::vector<SongButton *>());
                 this->artistCollectionButtons.push_back(b);
             }
 
             // Other
             {
-                auto *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "", "Other",
+                auto *b = new CollectionButton(this, this->contextMenu, 250, 250, 200, 50, "", "Other",
                                                std::vector<SongButton *>());
                 this->artistCollectionButtons.push_back(b);
             }
@@ -2485,29 +2484,29 @@ void SongBrowser::onDatabaseLoadingFinished() {
 
             std::vector<SongButton *> children;
 
-            auto *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "",
-                                           difficultyCollectionName, children);
+            auto *b = new CollectionButton(this, this->contextMenu, 250, 250, 200, 50, "", difficultyCollectionName,
+                                           children);
             this->difficultyCollectionButtons.push_back(b);
         }
 
         // bpm
         {
-            auto *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "",
-                                           "Under 60 BPM", std::vector<SongButton *>());
+            auto *b = new CollectionButton(this, this->contextMenu, 250, 250, 200, 50, "", "Under 60 BPM",
+                                           std::vector<SongButton *>());
             this->bpmCollectionButtons.push_back(b);
-            b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "", "Under 120 BPM",
+            b = new CollectionButton(this, this->contextMenu, 250, 250, 200, 50, "", "Under 120 BPM",
                                      std::vector<SongButton *>());
             this->bpmCollectionButtons.push_back(b);
-            b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "", "Under 180 BPM",
+            b = new CollectionButton(this, this->contextMenu, 250, 250, 200, 50, "", "Under 180 BPM",
                                      std::vector<SongButton *>());
             this->bpmCollectionButtons.push_back(b);
-            b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "", "Under 240 BPM",
+            b = new CollectionButton(this, this->contextMenu, 250, 250, 200, 50, "", "Under 240 BPM",
                                      std::vector<SongButton *>());
             this->bpmCollectionButtons.push_back(b);
-            b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "", "Under 300 BPM",
+            b = new CollectionButton(this, this->contextMenu, 250, 250, 200, 50, "", "Under 300 BPM",
                                      std::vector<SongButton *>());
             this->bpmCollectionButtons.push_back(b);
-            b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "", "Over 300 BPM",
+            b = new CollectionButton(this, this->contextMenu, 250, 250, 200, 50, "", "Over 300 BPM",
                                      std::vector<SongButton *>());
             this->bpmCollectionButtons.push_back(b);
         }
@@ -2516,7 +2515,7 @@ void SongBrowser::onDatabaseLoadingFinished() {
         {
             // 0-9
             {
-                auto *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "", "0-9",
+                auto *b = new CollectionButton(this, this->contextMenu, 250, 250, 200, 50, "", "0-9",
                                                std::vector<SongButton *>());
                 this->creatorCollectionButtons.push_back(b);
             }
@@ -2525,14 +2524,14 @@ void SongBrowser::onDatabaseLoadingFinished() {
             for(size_t i = 0; i < 26; i++) {
                 UString artistCollectionName = UString::format("%c", 'A' + i);
 
-                auto *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "",
-                                               artistCollectionName, std::vector<SongButton *>());
+                auto *b = new CollectionButton(this, this->contextMenu, 250, 250, 200, 50, "", artistCollectionName,
+                                               std::vector<SongButton *>());
                 this->creatorCollectionButtons.push_back(b);
             }
 
             // Other
             {
-                auto *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "", "Other",
+                auto *b = new CollectionButton(this, this->contextMenu, 250, 250, 200, 50, "", "Other",
                                                std::vector<SongButton *>());
                 this->creatorCollectionButtons.push_back(b);
             }
@@ -2545,25 +2544,25 @@ void SongBrowser::onDatabaseLoadingFinished() {
 
         // length
         {
-            auto *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "",
-                                           "1 minute or less", std::vector<SongButton *>());
+            auto *b = new CollectionButton(this, this->contextMenu, 250, 250, 200, 50, "", "1 minute or less",
+                                           std::vector<SongButton *>());
             this->lengthCollectionButtons.push_back(b);
-            b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "",
-                                     "2 minutes or less", std::vector<SongButton *>());
+            b = new CollectionButton(this, this->contextMenu, 250, 250, 200, 50, "", "2 minutes or less",
+                                     std::vector<SongButton *>());
             this->lengthCollectionButtons.push_back(b);
-            b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "",
-                                     "3 minutes or less", std::vector<SongButton *>());
+            b = new CollectionButton(this, this->contextMenu, 250, 250, 200, 50, "", "3 minutes or less",
+                                     std::vector<SongButton *>());
             this->lengthCollectionButtons.push_back(b);
-            b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "",
-                                     "4 minutes or less", std::vector<SongButton *>());
+            b = new CollectionButton(this, this->contextMenu, 250, 250, 200, 50, "", "4 minutes or less",
+                                     std::vector<SongButton *>());
             this->lengthCollectionButtons.push_back(b);
-            b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "",
-                                     "5 minutes or less", std::vector<SongButton *>());
+            b = new CollectionButton(this, this->contextMenu, 250, 250, 200, 50, "", "5 minutes or less",
+                                     std::vector<SongButton *>());
             this->lengthCollectionButtons.push_back(b);
-            b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "",
-                                     "10 minutes or less", std::vector<SongButton *>());
+            b = new CollectionButton(this, this->contextMenu, 250, 250, 200, 50, "", "10 minutes or less",
+                                     std::vector<SongButton *>());
             this->lengthCollectionButtons.push_back(b);
-            b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "", "Over 10 minutes",
+            b = new CollectionButton(this, this->contextMenu, 250, 250, 200, 50, "", "Over 10 minutes",
                                      std::vector<SongButton *>());
             this->lengthCollectionButtons.push_back(b);
         }
@@ -2572,7 +2571,7 @@ void SongBrowser::onDatabaseLoadingFinished() {
         {
             // 0-9
             {
-                auto *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "", "0-9",
+                auto *b = new CollectionButton(this, this->contextMenu, 250, 250, 200, 50, "", "0-9",
                                                std::vector<SongButton *>());
                 this->titleCollectionButtons.push_back(b);
             }
@@ -2581,14 +2580,14 @@ void SongBrowser::onDatabaseLoadingFinished() {
             for(size_t i = 0; i < 26; i++) {
                 UString artistCollectionName = UString::format("%c", 'A' + i);
 
-                auto *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "",
-                                               artistCollectionName, std::vector<SongButton *>());
+                auto *b = new CollectionButton(this, this->contextMenu, 250, 250, 200, 50, "", artistCollectionName,
+                                               std::vector<SongButton *>());
                 this->titleCollectionButtons.push_back(b);
             }
 
             // Other
             {
-                auto *b = new CollectionButton(this, this->carousel, this->contextMenu, 250, 250, 200, 50, "", "Other",
+                auto *b = new CollectionButton(this, this->contextMenu, 250, 250, 200, 50, "", "Other",
                                                std::vector<SongButton *>());
                 this->titleCollectionButtons.push_back(b);
             }
@@ -3414,7 +3413,7 @@ void SongBrowser::recreateCollectionsButtons() {
 
         if(!folder.empty()) {
             UString uname = collection->name.c_str();
-            this->collectionButtons.push_back(new CollectionButton(this, this->carousel, this->contextMenu, 250,
+            this->collectionButtons.push_back(new CollectionButton(this, this->contextMenu, 250,
                                                                    250 + this->beatmaps.size() * 50, 200, 50, "", uname,
                                                                    folder));
         }

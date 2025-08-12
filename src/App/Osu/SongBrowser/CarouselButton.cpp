@@ -24,9 +24,9 @@ float CarouselButton::lastHoverSoundTime = 0;
 
 // Color Button::inactiveDifficultyBackgroundColor = argb(255, 0, 150, 236); // blue
 
-CarouselButton::CarouselButton(SongBrowser *songBrowser, BeatmapCarousel *view, UIContextMenu *contextMenu, float xPos,
-                               float yPos, float xSize, float ySize, UString name)
-    : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), ""), carousel(view) {
+CarouselButton::CarouselButton(SongBrowser *songBrowser, UIContextMenu *contextMenu, float xPos, float yPos,
+                               float xSize, float ySize, UString name)
+    : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), "") {
     this->songBrowser = songBrowser;
     this->contextMenu = contextMenu;
 
@@ -158,18 +158,19 @@ void CarouselButton::updateLayoutEx() {
     if(this->bVisible)  // lag prevention (animationHandler overflow)
     {
         const float centerOffsetAnimationTarget =
-            1.0f - std::clamp<float>(std::abs((this->vPos.y + (this->vSize.y / 2) - this->carousel->getPos().y -
-                                               this->carousel->getSize().y / 2) /
-                                              (this->carousel->getSize().y / 2)),
-                                     0.0f, 1.0f);
+            1.0f - std::clamp<float>(
+                       std::abs((this->vPos.y + (this->vSize.y / 2) - this->songBrowser->getCarousel()->getPos().y -
+                                 this->songBrowser->getCarousel()->getSize().y / 2) /
+                                (this->songBrowser->getCarousel()->getSize().y / 2)),
+                       0.0f, 1.0f);
         anim->moveQuadOut(&this->fCenterOffsetAnimation, centerOffsetAnimationTarget, 0.5f, true);
 
         float centerOffsetVelocityAnimationTarget =
-            std::clamp<float>((std::abs(this->carousel->getVelocity().y)) / 3500.0f, 0.0f, 1.0f);
+            std::clamp<float>((std::abs(this->songBrowser->getCarousel()->getVelocity().y)) / 3500.0f, 0.0f, 1.0f);
 
         if(this->songBrowser->isRightClickScrolling()) centerOffsetVelocityAnimationTarget = 0.0f;
 
-        if(this->carousel->isScrolling())
+        if(this->songBrowser->getCarousel()->isScrolling())
             anim->moveQuadOut(&this->fCenterOffsetVelocityAnimation, 0.0f, 1.0f, true);
         else
             anim->moveQuadOut(&this->fCenterOffsetVelocityAnimation, centerOffsetVelocityAnimationTarget, 1.25f, true);
@@ -184,26 +185,27 @@ void CarouselButton::updateLayoutEx() {
 
     // this is the minimum offset necessary to not clip into the score scrollview (including all possible max animations
     // which can push us to the left, worst case)
-    float minOffset = this->carousel->getSize().x * (percentCenterOffsetAnimation + percentHoverOffsetAnimation);
+    float minOffset =
+        this->songBrowser->getCarousel()->getSize().x * (percentCenterOffsetAnimation + percentHoverOffsetAnimation);
     {
         // also respect the width of the button image: push to the right until the edge of the button image can never be
         // visible even if all animations are fully active the 0.85f here heuristically pushes the buttons a bit further
         // to the right than would be necessary, to make animations work better on lower resolutions (would otherwise
         // hit the left edge too early)
         const float buttonWidthCompensation =
-            std::max(this->carousel->getSize().x - this->getActualSize().x * 0.85f, 0.0f);
+            std::max(this->songBrowser->getCarousel()->getSize().x - this->getActualSize().x * 0.85f, 0.0f);
         minOffset += buttonWidthCompensation;
     }
 
     float offsetX =
-        minOffset - this->carousel->getSize().x *
+        minOffset - this->songBrowser->getCarousel()->getSize().x *
                         (percentCenterOffsetAnimation * this->fCenterOffsetAnimation *
                              (1.0f - this->fCenterOffsetVelocityAnimation) +
                          percentHoverOffsetAnimation * this->fHoverOffsetAnimation -
                          percentVelocityOffsetAnimation * this->fCenterOffsetVelocityAnimation + this->fOffsetPercent);
     offsetX = std::clamp<float>(
         offsetX, 0.0f,
-        this->carousel->getSize().x -
+        this->songBrowser->getCarousel()->getSize().x -
             this->getActualSize().x * 0.15f);  // WARNING: hardcoded to match 0.85f above for buttonWidthCompensation
 
     this->setRelPosX(offsetX);
@@ -221,7 +223,7 @@ CarouselButton *CarouselButton::setVisible(bool visible) {
         this->fHoverOffsetAnimation = 0.0f;
 
         float centerOffsetVelocityAnimationTarget =
-            std::clamp<float>((std::abs(this->carousel->getVelocity().y)) / 3500.0f, 0.0f, 1.0f);
+            std::clamp<float>((std::abs(this->songBrowser->getCarousel()->getVelocity().y)) / 3500.0f, 0.0f, 1.0f);
 
         if(this->songBrowser->isRightClickScrolling()) centerOffsetVelocityAnimationTarget = 0.0f;
 
@@ -269,7 +271,7 @@ void CarouselButton::onMouseInside() {
     anim->moveQuadOut(&this->fHoverOffsetAnimation, 1.0f, 1.0f * (1.0f - this->fHoverOffsetAnimation), true);
 
     // move the rest of the buttons away from hovered-over one
-    const std::vector<CBaseUIElement *> &elements = this->carousel->getContainer()->getElements();
+    const std::vector<CBaseUIElement *> &elements = this->songBrowser->getCarousel()->getContainer()->getElements();
     bool foundCenter = false;
     for(auto element : elements) {
         auto *b = dynamic_cast<CarouselButton *>(element);
@@ -293,7 +295,7 @@ void CarouselButton::onMouseOutside() {
     // only reset all other elements' state if we still should do so (possible frame delay of onMouseOutside coming
     // together with the next element already getting onMouseInside!)
     if(this->moveAwayState == MOVE_AWAY_STATE::MOVE_CENTER) {
-        const std::vector<CBaseUIElement *> &elements = this->carousel->getContainer()->getElements();
+        const std::vector<CBaseUIElement *> &elements = this->songBrowser->getCarousel()->getContainer()->getElements();
         for(auto element : elements) {
             auto *b = dynamic_cast<CarouselButton *>(element);
             if(b != nullptr)  // sanity check

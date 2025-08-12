@@ -9,7 +9,7 @@ class BeatmapCarousel;
 
 class SongButton : public CarouselButton {
    public:
-    SongButton(SongBrowser *songBrowser, BeatmapCarousel *view, UIContextMenu *contextMenu, float xPos, float yPos,
+    SongButton(SongBrowser *songBrowser, UIContextMenu *contextMenu, float xPos, float yPos,
                float xSize, float ySize, UString name, DatabaseBeatmap *databaseBeatmap);
     ~SongButton() override;
 

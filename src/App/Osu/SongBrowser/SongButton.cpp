@@ -23,9 +23,9 @@
 #include "SkinImage.h"
 #include "UIContextMenu.h"
 
-SongButton::SongButton(SongBrowser *songBrowser, BeatmapCarousel *view, UIContextMenu *contextMenu, float xPos,
+SongButton::SongButton(SongBrowser *songBrowser, UIContextMenu *contextMenu, float xPos,
                        float yPos, float xSize, float ySize, UString name, DatabaseBeatmap *databaseBeatmap)
-    : CarouselButton(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, std::move(name)) {
+    : CarouselButton(songBrowser, contextMenu, xPos, yPos, xSize, ySize, std::move(name)) {
     this->databaseBeatmap = databaseBeatmap;
 
     // settings
@@ -47,7 +47,7 @@ SongButton::SongButton(SongBrowser *songBrowser, BeatmapCarousel *view, UIContex
 
         // and add them
         for(auto difficultie : difficulties) {
-            SongButton *songButton = new SongDifficultyButton(this->songBrowser, this->carousel, this->contextMenu, 0,
+            SongButton *songButton = new SongDifficultyButton(this->songBrowser, this->contextMenu, 0,
                                                               0, 0, 0, "", difficultie, this);
 
             this->children.push_back(songButton);

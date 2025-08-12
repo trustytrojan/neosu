@@ -19,10 +19,10 @@
 #include "Skin.h"
 #include "UIContextMenu.h"
 
-CollectionButton::CollectionButton(SongBrowser *songBrowser, BeatmapCarousel *view, UIContextMenu *contextMenu,
+CollectionButton::CollectionButton(SongBrowser *songBrowser, UIContextMenu *contextMenu,
                                    float xPos, float yPos, float xSize, float ySize, UString name,
                                    const UString &collectionName, std::vector<SongButton *> children)
-    : CarouselButton(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, std::move(name)) {
+    : CarouselButton(songBrowser, contextMenu, xPos, yPos, xSize, ySize, std::move(name)) {
     this->sCollectionName = collectionName.utf8View();
     this->children = std::move(children);
 

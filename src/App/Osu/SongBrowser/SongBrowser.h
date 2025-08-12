@@ -107,6 +107,10 @@ class SongBrowser final : public ScreenBackable {
         return this->collectionButtons;
     }
 
+    [[nodiscard]] inline const std::unique_ptr<BeatmapCarousel> &getCarousel() const {
+        return this->carousel;
+    }
+
     [[nodiscard]] inline bool isInSearch() const { return this->bInSearch; }
     [[nodiscard]] inline bool isRightClickScrolling() const { return this->bSongBrowserRightClickScrolling; }
 
@@ -221,7 +225,7 @@ class SongBrowser final : public ScreenBackable {
     bool score_resort_scheduled = false;
 
     // song carousel
-    BeatmapCarousel *carousel{nullptr};
+    std::unique_ptr<BeatmapCarousel> carousel{nullptr};
     CarouselButton *selectedButton = nullptr;
     bool bSongBrowserRightClickScrollCheck;
     bool bSongBrowserRightClickScrolling;

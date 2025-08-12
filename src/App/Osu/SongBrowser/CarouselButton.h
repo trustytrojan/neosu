@@ -13,7 +13,7 @@ class UIContextMenu;
 
 class CarouselButton : public CBaseUIButton {
    public:
-    CarouselButton(SongBrowser *songBrowser, BeatmapCarousel *view, UIContextMenu *contextMenu, float xPos, float yPos,
+    CarouselButton(SongBrowser *songBrowser, UIContextMenu *contextMenu, float xPos, float yPos,
                    float xSize, float ySize, UString name);
     ~CarouselButton() override;
     void deleteAnimations();
@@ -55,7 +55,6 @@ class CarouselButton : public CBaseUIButton {
     virtual void onSelected(bool /*wasSelected*/, bool /*autoSelectBottomMostChild*/, bool /*wasParentSelected*/) { ; }
     virtual void onRightMouseUpInside() { ; }
 
-    BeatmapCarousel *carousel;
     SongBrowser *songBrowser;
     UIContextMenu *contextMenu;
 
