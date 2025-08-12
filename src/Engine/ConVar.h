@@ -196,7 +196,7 @@ class ConVar {
 
     // set
     void setDefaultBool(bool defaultValue) { this->setDefaultFloat(defaultValue ? 1.f : 0.f); }
-    void setDefaultInt(int defaultValue) { this->setDefaultFloat((float)defaultValue); }
+    void setDefaultInt(int defaultValue) { this->setDefaultFloat(static_cast<float>(defaultValue)); }
     void setDefaultFloat(float defaultValue);
     void setDefaultString(const UString &defaultValue);
     inline void setHelpString(const UString &helpString) { this->sHelpString = helpString.utf8View(); };
@@ -231,23 +231,25 @@ class ConVar {
     }
 
     // get
-    [[nodiscard]] inline float getDefaultFloat() const { return this->fDefaultValue.load(); }
+    [[nodiscard]] inline float getDefaultFloat() const {
+        return static_cast<float>(this->dDefaultValue.load(std::memory_order_acquire));
+    }
+    [[nodiscard]] inline double getDefaultDouble() const { return this->dDefaultValue.load(std::memory_order_acquire); }
     [[nodiscard]] inline const ConVarString &getDefaultString() const { return this->sDefaultValue; }
-
-    // Used for build_timestamp, which is too big for f32
-    u64 getU64() const { return std::strtoull(this->getString().c_str(), nullptr, 10); }
 
     std::string getFancyDefaultValue();
 
     template <typename T = int>
     [[nodiscard]] constexpr auto getVal() const {
-        return static_cast<T>(this->is_unlocked() ? this->fValue.load() : this->fDefaultValue.load());
+        return static_cast<T>(this->is_unlocked() ? this->dValue.load(std::memory_order_acquire)
+                                                  : this->dDefaultValue.load(std::memory_order_acquire));
     }
 
     [[nodiscard]] constexpr int getInt() const { return getVal<int>(); }
     [[nodiscard]] constexpr bool getBool() const { return getVal<bool>(); }
     [[nodiscard]] constexpr bool get() const { return getVal<bool>(); }
     [[nodiscard]] constexpr float getFloat() const { return getVal<float>(); }
+    [[nodiscard]] constexpr double getDouble() const { return getVal<double>(); }
 
     [[nodiscard]]
     constexpr const ConVarString &getString() const {
@@ -311,22 +313,22 @@ class ConVar {
         this->type = getTypeFor<T>();
 
         // set default value
-        if constexpr(std::is_convertible_v<std::decay_t<T>, float> && !std::is_same_v<std::decay_t<T>, UString> &&
+        if constexpr(std::is_convertible_v<std::decay_t<T>, double> && !std::is_same_v<std::decay_t<T>, UString> &&
                      !std::is_same_v<std::decay_t<T>, std::string_view> &&
                      !std::is_same_v<std::decay_t<T>, const char *>)
-            setDefaultFloatInt(static_cast<float>(defaultValue));
+            setDefaultFloatInt(static_cast<double>(defaultValue));
         else
             setDefaultStringInt(defaultValue);
 
         // set "default default" value
-        this->fDefaultDefaultValue = this->fDefaultValue;
+        this->dDefaultDefaultValue = this->dDefaultValue.load(std::memory_order_acquire);
         this->sDefaultDefaultValue = this->sDefaultValue;
 
         // set initial value (without triggering callbacks)
-        if constexpr(std::is_convertible_v<std::decay_t<T>, float> && !std::is_same_v<std::decay_t<T>, UString> &&
+        if constexpr(std::is_convertible_v<std::decay_t<T>, double> && !std::is_same_v<std::decay_t<T>, UString> &&
                      !std::is_same_v<std::decay_t<T>, std::string_view> &&
                      !std::is_same_v<std::decay_t<T>, const char *>)
-            setValueInt(static_cast<float>(defaultValue));
+            setValueInt(static_cast<double>(defaultValue));
         else
             setValueInt(defaultValue);
 
@@ -345,7 +347,7 @@ class ConVar {
         }
     }
 
-    void setDefaultFloatInt(float defaultValue);
+    void setDefaultFloatInt(double defaultValue);
     void setDefaultStringInt(const std::string_view &defaultValue);
 
     template <typename T>
@@ -354,31 +356,31 @@ class ConVar {
     {
         this->bHasValue = true;
 
-        // determine float and string representations depending on whether setValue("string") or setValue(float) was
+        // determine double and string representations depending on whether setValue("string") or setValue(double) was
         // called
-        const auto [newFloat, newString] = [&]() -> std::pair<float, std::string> {
-            if constexpr(std::is_convertible_v<std::decay_t<T>, float> && !std::is_same_v<std::decay_t<T>, UString> &&
+        const auto [newDouble, newString] = [&]() -> std::pair<double, std::string> {
+            if constexpr(std::is_convertible_v<std::decay_t<T>, double> && !std::is_same_v<std::decay_t<T>, UString> &&
                          !std::is_same_v<std::decay_t<T>, std::string_view> &&
                          !std::is_same_v<std::decay_t<T>, const char *>) {
-                const auto f = static_cast<float>(value);
+                const auto f = static_cast<double>(value);
                 return std::make_pair(f, fmt::format("{:g}", f));
             } else if constexpr(std::is_same_v<std::decay_t<T>, UString>) {
                 const UString s = std::forward<T>(value);
-                const float f = !s.isEmpty() ? s.toFloat() : 0.0f;
+                const double f = !s.isEmpty() ? s.toDouble() : 0.;
                 return std::make_pair(f, std::string{s.toUtf8()});
             } else {
                 const std::string s{std::forward<T>(value)};
-                const float f = !s.empty() ? std::strtof(s.c_str(), nullptr) : 0.0f;
+                const double f = !s.empty() ? std::strtod(s.c_str(), nullptr) : 0.;
                 return std::make_pair(f, s);
             }
         }();
 
         // backup previous values
-        const float oldFloat = this->fValue.load();
+        const double oldDouble = this->dValue.load(std::memory_order_acquire);
         const std::string oldString{this->sValue};
 
         // set new values
-        this->fValue = newFloat;
+        this->dValue.store(newDouble, std::memory_order_release);
         this->sValue = newString;
 
         if(doCallback) {
@@ -392,7 +394,7 @@ class ConVar {
                         else if constexpr(std::is_same_v<CallbackType, NativeConVarCallbackArgs>)
                             callback(UString{newString});
                         else if constexpr(std::is_same_v<CallbackType, NativeConVarCallbackFloat>)
-                            callback(newFloat);
+                            callback(static_cast<float>(newDouble));
                     },
                     this->callback);
             }
@@ -405,7 +407,7 @@ class ConVar {
                         if constexpr(std::is_same_v<CallbackType, NativeConVarChangeCallback>)
                             callback(UString{oldString}, UString{newString});
                         else if constexpr(std::is_same_v<CallbackType, NativeConVarChangeCallbackFloat>)
-                            callback(oldFloat, newFloat);
+                            callback(static_cast<float>(oldDouble), static_cast<float>(newDouble));
                     },
                     this->changeCallback);
             }
@@ -418,9 +420,10 @@ class ConVar {
     uint8_t iDefaultFlags{FCVAR_BANCHO_COMPATIBLE};
     uint8_t iFlags{FCVAR_BANCHO_COMPATIBLE};
 
-    std::atomic<float> fValue{0.0f};
-    std::atomic<float> fDefaultValue{0.0f};
-    float fDefaultDefaultValue{0.0f};
+    // store doubles internally to allow converting to larger integers accurately
+    std::atomic<double> dValue{0.0f};
+    std::atomic<double> dDefaultValue{0.0f};
+    double dDefaultDefaultValue{0.0f};
 
     ConVarString sName;
     ConVarString sHelpString;

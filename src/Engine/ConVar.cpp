@@ -57,11 +57,11 @@ static ConVar *_getConVar(const ConVarString &name) {
 ConVarString ConVar::getFancyDefaultValue() {
     switch(this->getType()) {
         case ConVar::CONVAR_TYPE::CONVAR_TYPE_BOOL:
-            return this->fDefaultDefaultValue == 0 ? "false" : "true";
+            return this->dDefaultDefaultValue == 0 ? "false" : "true";
         case ConVar::CONVAR_TYPE::CONVAR_TYPE_INT:
-            return std::to_string((int)this->fDefaultDefaultValue);
+            return std::to_string((int)this->dDefaultDefaultValue);
         case ConVar::CONVAR_TYPE::CONVAR_TYPE_FLOAT:
-            return std::to_string(this->fDefaultDefaultValue);
+            return std::to_string(this->dDefaultDefaultValue);
         case ConVar::CONVAR_TYPE::CONVAR_TYPE_STRING: {
             ConVarString out = "\"";
             out.append(this->sDefaultDefaultValue);
@@ -129,17 +129,17 @@ void ConVar::setDefaultString(const UString &defaultValue) { this->setDefaultStr
 
 void ConVar::setDefaultFloat(float defaultValue) { this->setDefaultFloatInt(defaultValue); }
 
-void ConVar::setDefaultFloatInt(float defaultValue) {
-    this->fDefaultValue = defaultValue;
+void ConVar::setDefaultFloatInt(double defaultValue) {
+    this->dDefaultValue.store(defaultValue, std::memory_order_release);
     this->sDefaultValue = fmt::format("{:g}", defaultValue);
 }
 
 void ConVar::setDefaultStringInt(const std::string_view &defaultValue) {
     this->sDefaultValue = defaultValue;
     // also try to parse default float from the default string
-    const float f = std::strtof(this->sDefaultValue.c_str(), nullptr);
-    if(f != 0.0f) {
-        this->fDefaultValue = f;
+    const double f = std::strtod(this->sDefaultValue.c_str(), nullptr);
+    if(f != 0.0) {
+        this->dDefaultValue.store(f, std::memory_order_release);
     }
 }
 
