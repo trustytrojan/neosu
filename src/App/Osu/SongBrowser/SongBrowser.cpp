@@ -252,7 +252,9 @@ bool sort_by_artist(SongButton const *a, SongButton const *b) {
     const auto &artistA{aPtr->getArtist()};
     const auto &artistB{bPtr->getArtist()};
 
-    return strcasecmp(artistA.c_str(), artistB.c_str()) < 0;
+    i32 cmp = strcasecmp(artistA.c_str(), artistB.c_str());
+    if(cmp == 0) return sort_by_difficulty(a, b);
+    return cmp < 0;
 }
 
 bool sort_by_bpm(SongButton const *a, SongButton const *b) {
@@ -261,7 +263,7 @@ bool sort_by_bpm(SongButton const *a, SongButton const *b) {
 
     int bpm1 = aPtr->getMostCommonBPM();
     int bpm2 = bPtr->getMostCommonBPM();
-    if(bpm1 == bpm2) return false;
+    if(bpm1 == bpm2) return sort_by_difficulty(a, b);
     return bpm1 < bpm2;
 }
 
@@ -272,7 +274,9 @@ bool sort_by_creator(SongButton const *a, SongButton const *b) {
     const auto &creatorA{aPtr->getCreator()};
     const auto &creatorB{bPtr->getCreator()};
 
-    return strcasecmp(creatorA.c_str(), creatorB.c_str()) < 0;
+    i32 cmp = strcasecmp(creatorA.c_str(), creatorB.c_str());
+    if(cmp == 0) return sort_by_difficulty(a, b);
+    return cmp < 0;
 }
 
 bool sort_by_date_added(SongButton const *a, SongButton const *b) {
@@ -281,12 +285,12 @@ bool sort_by_date_added(SongButton const *a, SongButton const *b) {
 
     long long time1 = aPtr->last_modification_time;
     long long time2 = bPtr->last_modification_time;
-    if(time1 == time2) return false;
+    if(time1 == time2) return sort_by_difficulty(a, b);
     return time1 > time2;
 }
 
 bool sort_by_grade(SongButton const *a, SongButton const *b) {
-    if(a->grade == b->grade) return false;
+    if(a->grade == b->grade) return sort_by_difficulty(a, b);
     return a->grade < b->grade;
 }
 
@@ -296,7 +300,7 @@ bool sort_by_length(SongButton const *a, SongButton const *b) {
 
     unsigned long length1 = aPtr->getLengthMS();
     unsigned long length2 = bPtr->getLengthMS();
-    if(length1 == length2) return false;
+    if(length1 == length2) return sort_by_difficulty(a, b);
     return length1 < length2;
 }
 
@@ -307,7 +311,9 @@ bool sort_by_title(SongButton const *a, SongButton const *b) {
     const auto &titleA{aPtr->getTitle()};
     const auto &titleB{bPtr->getTitle()};
 
-    return strcasecmp(titleA.c_str(), titleB.c_str()) < 0;
+    i32 cmp = strcasecmp(titleA.c_str(), titleB.c_str());
+    if(cmp == 0) return sort_by_difficulty(a, b);
+    return cmp < 0;
 }
 
 }  // namespace
