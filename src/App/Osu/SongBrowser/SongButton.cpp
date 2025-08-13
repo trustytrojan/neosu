@@ -23,8 +23,8 @@
 #include "SkinImage.h"
 #include "UIContextMenu.h"
 
-SongButton::SongButton(SongBrowser *songBrowser, UIContextMenu *contextMenu, float xPos,
-                       float yPos, float xSize, float ySize, UString name, DatabaseBeatmap *databaseBeatmap)
+SongButton::SongButton(SongBrowser *songBrowser, UIContextMenu *contextMenu, float xPos, float yPos, float xSize,
+                       float ySize, UString name, DatabaseBeatmap *databaseBeatmap)
     : CarouselButton(songBrowser, contextMenu, xPos, yPos, xSize, ySize, std::move(name)) {
     this->databaseBeatmap = databaseBeatmap;
 
@@ -47,8 +47,8 @@ SongButton::SongButton(SongBrowser *songBrowser, UIContextMenu *contextMenu, flo
 
         // and add them
         for(auto difficultie : difficulties) {
-            SongButton *songButton = new SongDifficultyButton(this->songBrowser, this->contextMenu, 0,
-                                                              0, 0, 0, "", difficultie, this);
+            SongButton *songButton =
+                new SongDifficultyButton(this->songBrowser, this->contextMenu, 0, 0, 0, 0, "", difficultie, this);
 
             this->children.push_back(songButton);
         }
@@ -238,6 +238,10 @@ void SongButton::onSelected(bool wasSelected, bool autoSelectBottomMostChild, bo
 
     // resort children (since they might have been updated in the meantime)
     this->sortChildren();
+
+    // update button positions so the resort is actually applied
+    // XXX: we shouldn't be updating ALL of the buttons
+    osu->songBrowser2->updateSongButtonLayout();
 
     // update grade on child
     for(auto &c : this->children) {
