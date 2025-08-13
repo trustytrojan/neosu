@@ -1273,6 +1273,8 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     UIButton *importSettingsButton = this->addButton("Import settings from osu!stable");
     importSettingsButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onImportSettingsFromStable>(this));
     importSettingsButton->setColor(0xffff0000);
+    this->addSubSection("Testing");
+    this->addCheckbox("Use bleeding edge release stream", &cv::bleedingedge);
     this->addSpacer();
     this->addSpacer();
     this->addSpacer();
