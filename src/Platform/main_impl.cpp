@@ -643,6 +643,7 @@ void SDLMain::restart(const std::vector<UString> &args) {
         SDL_SetStringProperty(restartprops, SDL_PROP_PROCESS_CREATE_CMDLINE_STRING, GetCommandLineA());
     }
 #endif
+    SDL_SetBooleanProperty(restartprops, SDL_PROP_PROCESS_CREATE_BACKGROUND_BOOLEAN, true);
 
     if(!SDL_CreateProcessWithProperties(restartprops)) {
         fprintf(stderr, "[restart]: WARNING: couldn't restart!\n");
