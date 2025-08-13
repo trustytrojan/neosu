@@ -41,8 +41,13 @@ extern "C" {
 
 #ifndef BASS_CONFIG_MP3_OLDGAPS
 #define BASS_CONFIG_MP3_OLDGAPS 68
+#endif
+#ifndef BASS_CONFIG_DEV_TIMEOUT
 #define BASS_CONFIG_DEV_TIMEOUT \
     70  // https://github.com/ppy/osu-framework/blob/eed788fd166540f7e219e1e48a36d0bf64f07cc4/osu.Framework/Audio/AudioManager.cs#L419
+#endif
+#ifndef BASS_CONFIG_VISTA_TRUEPOS
+#define BASS_CONFIG_VISTA_TRUEPOS 30
 #endif
 
 #ifdef MCENGINE_PLATFORM_WINDOWS

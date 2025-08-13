@@ -10864,7 +10864,7 @@ FFMPEG_VERSION=7.1
 DISCORDSDK_VERSION=2.5.6
  # pre-built
 
-BASS_VERSION=20250721
+BASS_VERSION=20250813
  # just mark the date so we can invalidate the cache if necessary
 
 if test "$SYSNAME" = "linux"
