@@ -333,45 +333,47 @@ void PauseMenu::onResolutionChange(Vector2 newResolution) {
 CBaseUIContainer *PauseMenu::setVisible(bool visible) {
     this->bVisible = visible;
 
-    if(osu->isInPlayMode()) {
-        this->setContinueEnabled(!osu->getSelectedBeatmap()->hasFailed());
-    } else {
-        this->setContinueEnabled(true);
-    }
+    if(!bancho->is_playing_a_multi_map()) {
+        if(osu->isInPlayMode()) {
+            this->setContinueEnabled(!osu->getSelectedBeatmap()->hasFailed());
+        } else {
+            this->setContinueEnabled(true);
+        }
 
-    if(visible) {
-        soundEngine->play(osu->getSkin()->pauseLoop);
+        if(visible) {
+            soundEngine->play(osu->getSkin()->pauseLoop);
 
-        if(this->bContinueEnabled) {
-            RichPresence::setBanchoStatus("Taking a break", PAUSED);
+            if(this->bContinueEnabled) {
+                RichPresence::setBanchoStatus("Taking a break", PAUSED);
+
+                if(!bancho->spectators.empty()) {
+                    Packet packet;
+                    packet.id = OUT_SPECTATE_FRAMES;
+                    BANCHO::Proto::write<i32>(&packet, 0);
+                    BANCHO::Proto::write<u16>(&packet, 0);
+                    BANCHO::Proto::write<u8>(&packet, LiveReplayBundle::Action::PAUSE);
+                    BANCHO::Proto::write<ScoreFrame>(&packet, ScoreFrame::get());
+                    BANCHO::Proto::write<u16>(&packet, osu->getSelectedBeatmap()->spectator_sequence++);
+                    BANCHO::Net::send_packet(packet);
+                }
+            } else {
+                RichPresence::setBanchoStatus("Failed", SUBMITTING);
+            }
+        } else {
+            soundEngine->stop(osu->getSkin()->pauseLoop);
+
+            RichPresence::onPlayStart();
 
             if(!bancho->spectators.empty()) {
                 Packet packet;
                 packet.id = OUT_SPECTATE_FRAMES;
                 BANCHO::Proto::write<i32>(&packet, 0);
                 BANCHO::Proto::write<u16>(&packet, 0);
-                BANCHO::Proto::write<u8>(&packet, LiveReplayBundle::Action::PAUSE);
+                BANCHO::Proto::write<u8>(&packet, LiveReplayBundle::Action::UNPAUSE);
                 BANCHO::Proto::write<ScoreFrame>(&packet, ScoreFrame::get());
                 BANCHO::Proto::write<u16>(&packet, osu->getSelectedBeatmap()->spectator_sequence++);
                 BANCHO::Net::send_packet(packet);
             }
-        } else {
-            RichPresence::setBanchoStatus("Failed", SUBMITTING);
-        }
-    } else {
-        soundEngine->stop(osu->getSkin()->pauseLoop);
-
-        RichPresence::onPlayStart();
-
-        if(!bancho->spectators.empty()) {
-            Packet packet;
-            packet.id = OUT_SPECTATE_FRAMES;
-            BANCHO::Proto::write<i32>(&packet, 0);
-            BANCHO::Proto::write<u16>(&packet, 0);
-            BANCHO::Proto::write<u8>(&packet, LiveReplayBundle::Action::UNPAUSE);
-            BANCHO::Proto::write<ScoreFrame>(&packet, ScoreFrame::get());
-            BANCHO::Proto::write<u16>(&packet, osu->getSelectedBeatmap()->spectator_sequence++);
-            BANCHO::Net::send_packet(packet);
         }
     }
 
