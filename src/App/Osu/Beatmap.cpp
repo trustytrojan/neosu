@@ -1856,7 +1856,8 @@ void Beatmap::drawSmoke() {
         f32 alpha = std::min(fade_time, time_fully_visible - active_for) / fade_time;
         if(alpha <= 0.f) continue;
 
-        g->setColor(argb(alpha, 255, 255, 255));
+        g->setColor(0xffffffff);
+        g->setAlpha(alpha);
         g->pushTransform();
         {
             auto pos = this->osuCoords2Pixels(sm.pos);
