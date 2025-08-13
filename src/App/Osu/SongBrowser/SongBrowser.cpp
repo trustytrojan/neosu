@@ -1354,9 +1354,6 @@ void SongBrowser::onDifficultySelected(DatabaseBeatmap *diff2, bool play) {
     // deselect = unload
     auto prev_diff2 = this->beatmap->getSelectedDifficulty2();
     this->beatmap->deselect();
-    if(diff2 != prev_diff2 && !diff2->do_not_store) {
-        this->previousRandomBeatmaps.push_back(diff2);
-    }
 
     // select = play preview music
     this->beatmap->selectDifficulty2(diff2);
@@ -3413,9 +3410,8 @@ void SongBrowser::recreateCollectionsButtons() {
 
         if(!folder.empty()) {
             UString uname = collection->name.c_str();
-            this->collectionButtons.push_back(new CollectionButton(this, this->contextMenu, 250,
-                                                                   250 + this->beatmaps.size() * 50, 200, 50, "", uname,
-                                                                   folder));
+            this->collectionButtons.push_back(new CollectionButton(
+                this, this->contextMenu, 250, 250 + this->beatmaps.size() * 50, 200, 50, "", uname, folder));
         }
     }
 
