@@ -1791,7 +1791,7 @@ void Beatmap::draw() {
     if(cv::draw_hitobjects.getBool()) this->drawHitObjects();
 
     // draw smoke
-    this->drawSmoke();
+    if(cv::draw_smoke.getBool()) this->drawSmoke();
 
     // draw spectator pause message
     if(this->spectate_pause) {
@@ -1817,8 +1817,8 @@ void Beatmap::drawSmoke() {
     // - Test FPoSu
     // - Better default smoke img?
 
-    Image *smoke = osu->getSkin()->cursorSmoke;
-    if(!smoke->isReady()) return;
+    Image *smoke = osu->getSkin()->getCursorSmoke();
+    if(smoke == osu->getSkin()->getMissingTexture()) return;
 
     // Add new smoke particles if unpaused & smoke key pressed
     if(!this->bIsPaused && (this->current_keys & LegacyReplay::Smoke)) {
@@ -1842,22 +1842,22 @@ void Beatmap::drawSmoke() {
     }
 
     // XXX: not sure about 2x
-    f32 scale = osu->hud->getCursorScaleFactor() * (osu->getSkin()->bCursorSmoke2x ? 0.5f : 1.0f);
+    f32 scale = osu->getHUD()->getCursorScaleFactor() * (osu->getSkin()->isCursorSmoke2x() ? 0.5f : 1.0f);
     scale *= cv::cursor_scale.getFloat();
     scale *= cv::smoke_scale.getFloat();
 
     f32 time_visible = cv::smoke_trail_duration.getFloat();
     f32 time_fully_visible = cv::smoke_trail_opaque_duration.getFloat();
     f32 fade_time = time_visible - time_fully_visible;
-    for(auto sm : this->smoke_trail) {
+
+    smoke->bind();
+    for(const auto &sm : this->smoke_trail) {
         f32 active_for = engine->getTime() - sm.time;
 
         // Start fading out when time_fully_visible has passed
         f32 alpha = std::min(fade_time, time_fully_visible - active_for) / fade_time;
         if(alpha <= 0.f) continue;
-
-        g->setColor(0xffffffff);
-        g->setAlpha(alpha);
+        g->setColor(argb(alpha, 1.f, 1.f, 1.f));
         g->pushTransform();
         {
             auto pos = this->osuCoords2Pixels(sm.pos);
@@ -1867,6 +1867,7 @@ void Beatmap::drawSmoke() {
         }
         g->popTransform();
     }
+    smoke->unbind();
 
     // trail cleanup
     while(!this->smoke_trail.empty() && engine->getTime() > this->smoke_trail[0].time + time_visible) {

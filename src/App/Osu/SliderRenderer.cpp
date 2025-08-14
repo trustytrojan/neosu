@@ -13,22 +13,24 @@
 #include "Skin.h"
 #include "VertexArrayObject.h"
 
+#include "shaders.h"
+
 #include <limits>
 
 namespace SliderRenderer {
 
 namespace {  // static namespace
 
-Shader* s_BLEND_SHADER = nullptr;
+Shader *s_BLEND_SHADER = nullptr;
 float s_UNIT_CIRCLE_VAO_DIAMETER = 0.0f;
 
 // base mesh
 float s_MESH_CENTER_HEIGHT = 0.5f;   // Camera::buildMatrixOrtho2D() uses -1 to 1 for zn/zf, so don't make this too high
 int s_UNIT_CIRCLE_SUBDIVISIONS = 0;  // see osu_slider_body_unit_circle_subdivisions now
 std::vector<float> s_UNIT_CIRCLE;
-VertexArrayObject* s_UNIT_CIRCLE_VAO = nullptr;
-VertexArrayObject* s_UNIT_CIRCLE_VAO_BAKED = nullptr;
-VertexArrayObject* s_UNIT_CIRCLE_VAO_TRIANGLES = nullptr;
+VertexArrayObject *s_UNIT_CIRCLE_VAO = nullptr;
+VertexArrayObject *s_UNIT_CIRCLE_VAO_BAKED = nullptr;
+VertexArrayObject *s_UNIT_CIRCLE_VAO_TRIANGLES = nullptr;
 
 // tiny rendering optimization for RenderTarget
 float s_fBoundingBoxMinX = (std::numeric_limits<float>::max)();
@@ -37,8 +39,8 @@ float s_fBoundingBoxMinY = (std::numeric_limits<float>::max)();
 float s_fBoundingBoxMaxY = 0.0f;
 
 // forward decls
-void drawFillSliderBodyPeppy(const std::vector<Vector2>& points, VertexArrayObject* circleMesh, float radius,
-                             int drawFromIndex, int drawUpToIndex, Shader* shader = nullptr);
+void drawFillSliderBodyPeppy(const std::vector<Vector2> &points, VertexArrayObject *circleMesh, float radius,
+                             int drawFromIndex, int drawUpToIndex, Shader *shader = nullptr);
 void checkUpdateVars(float hitcircleDiameter);
 void resetRenderTargetBoundingBox();
 
@@ -416,7 +418,9 @@ void checkUpdateVars(float hitcircleDiameter) {
     if(s_BLEND_SHADER == nullptr)  // only do this once
     {
         // build shaders
-        s_BLEND_SHADER = resourceManager->loadShader("slider.vsh", "slider.fsh", "slider");
+        s_BLEND_SHADER = resourceManager->createShader(
+            std::string(reinterpret_cast<const char *>(slider_vsh), slider_vsh_size()),
+            std::string(reinterpret_cast<const char *>(slider_fsh), slider_fsh_size()), "slider");
     }
 
     const int subdivisions = cv::slider_body_unit_circle_subdivisions.getInt();

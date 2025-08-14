@@ -91,6 +91,11 @@ find_package(glm REQUIRED)
 pkg_check_modules(BZIP2 REQUIRED bzip2)
 pkg_check_modules(LIBARCHIVE REQUIRED libarchive)
 
+# for binary resources
+enable_language(ASM_NASM)
+
+include(${CMAKE_SOURCE_DIR}/binclude.cmake)
+
 # Collect source files
 file(GLOB_RECURSE SOURCES
     "${CMAKE_SOURCE_DIR}/../../src/*.cpp"
@@ -182,7 +187,21 @@ target_link_directories(neosu PRIVATE
     ${LIBARCHIVE_STATIC_LIBRARY_DIRS}
 )
 
-# Link libraries using proper CMake targets and variables
+# binary resources
+target_binary_resources(neosu PRIVATE
+    cursortrail_vsh "${CMAKE_SOURCE_DIR}/../../assets/shaders/cursortrail_v.glsl"
+    cursortrail_fsh "${CMAKE_SOURCE_DIR}/../../assets/shaders/cursortrail_f.glsl"
+    slider_vsh "${CMAKE_SOURCE_DIR}/../../assets/shaders/slider_v.glsl"
+    slider_fsh "${CMAKE_SOURCE_DIR}/../../assets/shaders/slider_f.glsl"
+    flashlight_vsh "${CMAKE_SOURCE_DIR}/../../assets/shaders/flashlight_v.glsl"
+    flashlight_fsh "${CMAKE_SOURCE_DIR}/../../assets/shaders/flashlight_f.glsl"
+    actual_flashlight_vsh "${CMAKE_SOURCE_DIR}/../../assets/shaders/actual_flashlight_v.glsl"
+    actual_flashlight_fsh "${CMAKE_SOURCE_DIR}/../../assets/shaders/actual_flashlight_f.glsl"
+    smoothclip_vsh "${CMAKE_SOURCE_DIR}/../../assets/shaders/smoothclip_v.glsl"
+    smoothclip_fsh "${CMAKE_SOURCE_DIR}/../../assets/shaders/smoothclip_f.glsl"
+)
+
+# Link libraries
 target_link_libraries(neosu PRIVATE
     OpenGL::GL
     OpenGL::GLU
@@ -210,7 +229,6 @@ install(FILES $<TARGET_PDB_FILE:${PROJECT_NAME}> DESTINATION bin OPTIONAL)
 
 # Install assets
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/../../assets/materials DESTINATION bin)
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/../../assets/shaders DESTINATION bin)
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/../../assets/fonts DESTINATION bin)
 
 # Install BASS DLLs

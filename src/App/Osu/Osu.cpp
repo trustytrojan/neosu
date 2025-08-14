@@ -2,7 +2,6 @@
 #include "Osu.h"
 
 #include <algorithm>
-#include <sstream>
 #include <utility>
 
 #include "AnimationHandler.h"
@@ -66,6 +65,8 @@
 #include "VolumeOverlay.h"
 
 #include "score.h"
+
+#include "shaders.h"
 
 Osu *osu = nullptr;
 
@@ -353,44 +354,14 @@ Osu::Osu() {
     env->getEnvInterop().handle_cmdline_args();
 
     // Not the type of shader you want players to tweak or delete, so loading from string
-    actual_flashlight_shader = g->createShaderFromSource(
-        "#version 110\n"
-        "varying vec2 tex_coord;\n"
-        "void main() {\n"
-        "    gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.x, gl_Vertex.y, 0.0, 1.0);\n"
-        "    gl_FrontColor = gl_Color;\n"
-        "    tex_coord = gl_MultiTexCoord0.xy;\n"
-        "}",
-        "#version 110\n"
-        "uniform float max_opacity;\n"
-        "uniform float flashlight_radius;\n"
-        "uniform vec2 flashlight_center;\n"
-        "void main(void) {\n"
-        "    float dist = distance(flashlight_center, gl_FragCoord.xy);\n"
-        "    float opacity = smoothstep(flashlight_radius, flashlight_radius * 1.4, dist);\n"
-        "    opacity = 1.0 - min(opacity, max_opacity);\n"
-        "    gl_FragColor = vec4(1.0, 1.0, 0.9, opacity);\n"
-        "}");
-    flashlight_shader = g->createShaderFromSource(
-        "#version 110\n"
-        "varying vec2 tex_coord;\n"
-        "void main() {\n"
-        "    gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.x, gl_Vertex.y, 0.0, 1.0);\n"
-        "    gl_FrontColor = gl_Color;\n"
-        "    tex_coord = gl_MultiTexCoord0.xy;\n"
-        "}",
-        "#version 110\n"
-        "uniform float max_opacity;\n"
-        "uniform float flashlight_radius;\n"
-        "uniform vec2 flashlight_center;\n"
-        "void main(void) {\n"
-        "    float dist = distance(flashlight_center, gl_FragCoord.xy);\n"
-        "    float opacity = 1.0 - smoothstep(flashlight_radius, flashlight_radius * 1.4, dist);\n"
-        "    opacity = 1.0 - min(opacity, max_opacity);\n"
-        "    gl_FragColor = vec4(0.0, 0.0, 0.0, opacity);\n"
-        "}");
-    resourceManager->loadResource(actual_flashlight_shader);
-    resourceManager->loadResource(flashlight_shader);
+    actual_flashlight_shader = resourceManager->createShader(
+        std::string(reinterpret_cast<const char *>(actual_flashlight_vsh), actual_flashlight_vsh_size()),
+        std::string(reinterpret_cast<const char *>(actual_flashlight_fsh), actual_flashlight_fsh_size()),
+        "actual_flashlight");
+
+    flashlight_shader = resourceManager->createShader(
+        std::string(reinterpret_cast<const char *>(flashlight_vsh), flashlight_vsh_size()),
+        std::string(reinterpret_cast<const char *>(flashlight_fsh), flashlight_fsh_size()), "flashlight");
 
     env->setCursorVisible(!McRect{{}, g_vInternalResolution}.contains(mouse->getPos()));
 }
@@ -946,11 +917,9 @@ void Osu::onKeyDown(KeyboardEvent &key) {
     if(keyboard->isAltDown() && keyboard->isControlDown() && key == KEY_R) {
         Shader *sliderShader = resourceManager->getShader("slider");
         Shader *cursorTrailShader = resourceManager->getShader("cursortrail");
-        Shader *hitcircle3DShader = resourceManager->getShader("hitcircle3D");
 
         if(sliderShader != nullptr) sliderShader->reload();
         if(cursorTrailShader != nullptr) cursorTrailShader->reload();
-        if(hitcircle3DShader != nullptr) hitcircle3DShader->reload();
 
         key.consume();
     }

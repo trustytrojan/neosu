@@ -282,8 +282,7 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source: $(DEPS_CACHE)/curl-$(CUR
 ## BEGIN EXTERNAL DEPENDENCY BUILD/SETUP SECTION
 #####################################################################################################################################################
 
-CURL_CFLAGS += -DCURL_CERT_BUNDLE_PATH="\"$(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle/cacert.pem\""
-CURL_CERT_BUNDLE_INCLUDE := -Wa,-I$(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle/ -I$(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle/
+ASSEMBLER_INCLUDE_PATHS += -Wa,-I$(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle
 if BUILD_CURL
 lb := (
 lbq := '('
@@ -809,7 +808,7 @@ BUILT_SOURCES := \
 	$(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle/cacert.pem
 
 # making sure deps are built before main compile
-$(neosu_OBJECTS): src/config.h $(BUILT_SOURCES)
+$(neosu_OBJECTS): src/config.h $(BUILT_SOURCES) $(EXTRA_BINDEPS)
 
 if WIN_PLATFORM
 neosu_resource.o: $(srcdir)/$(ASSETS_DIR)/resource.rc $(srcdir)/$(ASSETS_DIR)/neosu.manifest $(srcdir)/$(ASSETS_DIR)/icon.ico
@@ -826,12 +825,12 @@ NEOSU_INCLUDE_FLAGS := $(shell find $(srcdir)/src -not -path '*/.*' -type d -pri
 neosu_CPPFLAGS := $(NEOSU_CPPFLAGS)
 
 neosu_CXXFLAGS := \
+	$(ASSEMBLER_INCLUDE_PATHS) \
 	-I$(DEPS_PREFIX)/include \
 	$(CXXFLAGS_EXTRA) \
 	$(NEOSU_CXXFLAGS) \
 	$(NEOSU_INCLUDE_FLAGS) \
 	$(BUNDLED_INCLUDES) \
-	$(CURL_CERT_BUNDLE_INCLUDE) \
 	$(CURL_CFLAGS) \
 	$(SDL3_CFLAGS) \
 	$(AUDIO_CFLAGS) \
@@ -862,7 +861,6 @@ neosu_LDFLAGS := \
 	-Wl,-rpath='$$ORIGIN/lib',-rpath='$$ORIGIN' \
 	-Wl,--start-group \
 	$(MIMALLOC_DYNAMIC_LIBS) \
-	$(CURL_CERT_BUNDLE_INCLUDE) \
 	$(CURL_LIBS) \
 	$(SDL3_LIBS) \
 	$(AUDIO_LIBS) \
@@ -935,13 +933,11 @@ endif
 # if they're external or built statically we don't need to do anything
 install-libs:
 	$(INSTALL) -dm 755 "$(DESTDIR)$(bindir)/screenshots"
-	$(INSTALL) -dm 755 "$(DESTDIR)$(bindir)/shaders"
 	$(INSTALL) -dm 755 "$(DESTDIR)$(bindir)/$(LIBDEST)"
 	$(INSTALL) -dm 755 "$(DESTDIR)$(bindir)/fonts"
 	$(INSTALL) -dm 755 "$(DESTDIR)$(bindir)/materials"
 	$(INSTALL) -dm 755 "$(DESTDIR)$(bindir)/materials/default"
 	$(INSTALL) -dm 755 "$(DESTDIR)$(bindir)/cfg"
-	find $(srcdir)/$(ASSETS_DIR)/shaders -type f -exec $(INSTALL) -Dm 644 '{''}' "$(DESTDIR)$(bindir)/shaders" ';'
 	find $(srcdir)/$(ASSETS_DIR)/fonts -type f -exec $(INSTALL) -Dm 644 '{''}' "$(DESTDIR)$(bindir)/fonts" ';'
 	find $(srcdir)/$(ASSETS_DIR)/materials -mindepth 1 -maxdepth 1 -type f -exec $(INSTALL) -Dm 644 '{''}' "$(DESTDIR)$(bindir)/materials" ';'
 	find $(srcdir)/$(ASSETS_DIR)/materials/default -mindepth 1 -maxdepth 1 -type f -exec $(INSTALL) -Dm 644 '{''}' "$(DESTDIR)$(bindir)/materials/default" ';'
@@ -1047,7 +1043,6 @@ distclean-local: clean-deps clean-dep-cache
 
 # TODO: distribution packaging
 dist-hook:
-	cp -r $(srcdir)/$(ASSETS_DIR)/shaders $(distdir)/
 	cp -r $(srcdir)/$(ASSETS_DIR)/fonts $(distdir)/
 	cp -r $(srcdir)/$(ASSETS_DIR)/materials $(distdir)/
 	find $(distdir) -type f -name ".git*" -delete
@@ -1057,7 +1052,6 @@ dist-hook:
 
 # TODO: distribution package files
 EXTRA_DIST := \
-	$(ASSETS_DIR)/shaders \
 	$(ASSETS_DIR)/fonts \
 	$(ASSETS_DIR)/materials \
 	$(ASSETS_DIR)/icon.ico \

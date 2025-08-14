@@ -152,6 +152,7 @@ class Skin {
     inline Image *getCursorMiddle() { return this->cursorMiddle; }
     inline Image *getCursorTrail() { return this->cursorTrail; }
     inline Image *getCursorRipple() { return this->cursorRipple; }
+    inline Image *getCursorSmoke() { return this->cursorSmoke; }
 
     inline SkinImage *getSelectionModEasy() { return this->selectionModEasy; }
     inline SkinImage *getSelectionModNoFail() { return this->selectionModNoFail; }
@@ -241,6 +242,7 @@ class Skin {
     inline bool isCursor2x() { return this->bCursor2x; }
     inline bool isCursorTrail2x() { return this->bCursorTrail2x; }
     inline bool isCursorRipple2x() { return this->bCursorRipple2x; }
+    inline bool isCursorSmoke2x() { return this->bCursorSmoke2x; }
     inline bool isApproachCircle2x() { return this->bApproachCircle2x; }
     inline bool isReverseArrow2x() { return this->bReverseArrow2x; }
     inline bool isHitCircle2x() { return this->bHitCircle2x; }

@@ -3,7 +3,7 @@
 varying vec2 tex_coord;
 
 void main()
-{	
+{
 	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
 	
 	gl_FrontColor = gl_Color;

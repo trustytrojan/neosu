@@ -151,7 +151,7 @@ CONVAR(SAVE_SCREENSHOT, "osu_key_save_screenshot", (int)KEY_F12, FCVAR_BANCHO_CO
 CONVAR(SEEK_TIME, "osu_key_seek_time", (int)KEY_LSHIFT, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(SEEK_TIME_BACKWARD, "osu_key_seek_time_backward", (int)KEY_LEFT, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(SEEK_TIME_FORWARD, "osu_key_seek_time_forward", (int)KEY_RIGHT, FCVAR_BANCHO_COMPATIBLE);
-CONVAR(SMOKE, "key_smoke", 0, FCVAR_BANCHO_COMPATIBLE);
+CONVAR(SMOKE, "osu_key_smoke", 0, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(SKIP_CUTSCENE, "osu_key_skip_cutscene", (int)KEY_SPACE, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(TOGGLE_CHAT, "osu_key_toggle_chat", (int)KEY_F8, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(TOGGLE_EXTENDED_CHAT, "key_toggle_extended_chat", (int)KEY_F9, FCVAR_BANCHO_COMPATIBLE);
@@ -395,6 +395,7 @@ CONVAR(draw_scrubbing_timeline, "osu_draw_scrubbing_timeline", true, FCVAR_BANCH
 CONVAR(draw_scrubbing_timeline_breaks, "osu_draw_scrubbing_timeline_breaks", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(draw_scrubbing_timeline_strain_graph, "osu_draw_scrubbing_timeline_strain_graph", false,
        FCVAR_BANCHO_COMPATIBLE);
+CONVAR(draw_smoke, "osu_draw_smoke", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(draw_songbrowser_background_image, "osu_draw_songbrowser_background_image", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(draw_songbrowser_menu_background_image, "osu_draw_songbrowser_menu_background_image", true,
        FCVAR_BANCHO_COMPATIBLE);

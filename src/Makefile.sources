@@ -3,7 +3,6 @@ neosu_SOURCES = \
 	libraries/MD5.cpp \
 	libraries/base64.cpp \
 	libraries/cJSON.cpp \
-	libraries/curl_blob.cpp \
 	libraries/glad/glad.cpp \
 	libraries/lodepng.cpp \
 	libraries/sha256.cpp \
@@ -86,6 +85,8 @@ neosu_SOURCES = \
 	src/App/Osu/UserStatsScreen.cpp \
 	src/App/Osu/VolumeOverlay.cpp \
 	src/App/Osu/score.cpp \
+	src/Binary/curl_blob.cpp \
+	src/Binary/shaders.cpp \
 	src/Engine/AnimationHandler.cpp \
 	src/Engine/Archival.cpp \
 	src/Engine/ByteBufferedFile.cpp \
@@ -150,4 +151,16 @@ neosu_SOURCES = \
 	src/Util/UString.cpp \
 	src/Util/crypto.cpp \
 	src/Util/dynutils.cpp \
+$(NULL)
+EXTRA_BINDEPS = \
+	assets/shaders/actual_flashlight_f.glsl \
+	assets/shaders/actual_flashlight_v.glsl \
+	assets/shaders/cursortrail_f.glsl \
+	assets/shaders/cursortrail_v.glsl \
+	assets/shaders/flashlight_f.glsl \
+	assets/shaders/flashlight_v.glsl \
+	assets/shaders/slider_f.glsl \
+	assets/shaders/slider_v.glsl \
+	assets/shaders/smoothclip_f.glsl \
+	assets/shaders/smoothclip_v.glsl \
 $(NULL)

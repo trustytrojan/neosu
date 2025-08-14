@@ -30,10 +30,15 @@
 #include "VertexArrayObject.h"
 #include "score.h"
 
+#include "shaders.h"
+
 HUD::HUD() : OsuScreen() {
     // resources
     this->tempFont = resourceManager->getFont("FONT_DEFAULT");
-    this->cursorTrailShader = resourceManager->loadShader("cursortrail.vsh", "cursortrail.fsh", "cursortrail");
+    this->cursorTrailShader = resourceManager->createShader(
+        std::string(reinterpret_cast<const char *>(cursortrail_vsh), cursortrail_vsh_size()),
+        std::string(reinterpret_cast<const char *>(cursortrail_fsh), cursortrail_fsh_size()), "cursortrail");
+
     this->cursorTrail.reserve(cv::cursor_trail_max_size.getInt() * 2);
     this->cursorTrailVAO = resourceManager->createVertexArrayObject(Graphics::PRIMITIVE::PRIMITIVE_QUADS,
                                                                     Graphics::USAGE_TYPE::USAGE_DYNAMIC);

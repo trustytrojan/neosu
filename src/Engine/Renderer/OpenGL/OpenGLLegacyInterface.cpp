@@ -17,8 +17,9 @@
 #include "SDLGLInterface.h"
 #include "OpenGLStateCache.h"
 
+#include "shaders.h"
+
 #include <cstddef>
-#include <utility>
 
 OpenGLLegacyInterface::OpenGLLegacyInterface() : Graphics() {
     // renderer
@@ -705,30 +706,9 @@ void OpenGLLegacyInterface::onTransformUpdate(Matrix4 &projectionMatrix, Matrix4
 void OpenGLLegacyInterface::initSmoothClipShader() {
     if(this->smoothClipShader != nullptr) return;
 
-    this->smoothClipShader = createShaderFromSource(R"(
-        #version 110
-        varying vec2 tex_coord;
-        void main() {
-            gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.x, gl_Vertex.y, 0.0, 1.0);
-            gl_FrontColor = gl_Color;
-            tex_coord = gl_MultiTexCoord0.xy;
-        })",
-                                                    R"(
-        #version 110
-        uniform sampler2D texture;
-        uniform vec2 rect_min;     // clip rect in gl_FragCoord space (bottom-left origin)
-        uniform vec2 rect_max;
-        uniform float edge_softness;
-        varying vec2 tex_coord;
-
-        void main() {
-            vec2 dist_to_edges = min(gl_FragCoord.xy - rect_min, rect_max - gl_FragCoord.xy);
-            float min_dist = min(dist_to_edges.x, dist_to_edges.y);
-
-            float alpha = smoothstep(-edge_softness, 0.0, min_dist);
-            vec4 texColor = texture2D(texture, tex_coord);
-            gl_FragColor = vec4(texColor.rgb * gl_Color.rgb, texColor.a * gl_Color.a * alpha);
-        })");
+    this->smoothClipShader =
+        g->createShaderFromSource(std::string(reinterpret_cast<const char *>(smoothclip_vsh), smoothclip_vsh_size()),
+                                  std::string(reinterpret_cast<const char *>(smoothclip_fsh), smoothclip_fsh_size()));
 
     if(this->smoothClipShader != nullptr) {
         this->smoothClipShader->loadAsync();

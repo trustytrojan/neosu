@@ -662,12 +662,15 @@ BUNDLED_INCLUDES="$BUNDLED_INCLUDES -I\$(srcdir)/libraries/delegatesv2 -I\$(srcd
 AC_SUBST([BUNDLED_INCLUDES])
 
 AC_MSG_CHECKING([for shaders in $srcdir/$ASSETS_DIR/shaders])
-AS_IF([test -d "$srcdir/$ASSETS_DIR/shaders"], [
+AS_IF([test -f "$srcdir/$ASSETS_DIR/shaders/slider_f.glsl"], [
     AC_MSG_RESULT([yes])
+    ASSEMBLER_INCLUDE_PATHS="$ASSEMBLER_INCLUDE_PATHS -Wa,-I$srcdir/$ASSETS_DIR/shaders"
 ], [
     AC_MSG_RESULT([no])
-    AC_MSG_ERROR([neosu shader assets are missing!])
+    AC_MSG_ERROR([neosu shader resources are missing!])
 ])
+
+AC_SUBST([ASSEMBLER_INCLUDE_PATHS])
 
 AC_MSG_CHECKING([for fonts in $srcdir/$ASSETS_DIR/fonts])
 AS_IF([test -d "$srcdir/$ASSETS_DIR/fonts"], [

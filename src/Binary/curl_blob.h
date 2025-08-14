@@ -1,16 +1,15 @@
+// Copyright (c) 2025, WH, All rights reserved.
 #pragma once
 
-// unsupported with MSVC, unneeded anyways because it uses schannel instead of OpenSSL
+// unneeded for MSVC because it uses schannel instead of OpenSSL
 #ifndef _MSC_VER
 
-// data in curl_blob.c
-extern "C" {
-extern const unsigned char curl_ca_embed[];
-extern const unsigned char curl_ca_embed_end[];
-}
+#include "incbin.h"
 
-unsigned long long curl_ca_embed_size();
+// data in curl_blob.cpp
+INCBIN_H(curl_ca_embed)
 
+// shorthand macro
 #define curl_easy_setopt_CAINFO_BLOB_embedded(curl) \
     struct curl_blob blob{};                        \
     blob.data = (void *)curl_ca_embed;              \

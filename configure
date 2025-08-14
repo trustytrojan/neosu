@@ -771,6 +771,7 @@ PKG_CONFIG_LIBDIR
 BUILD_MISCDIR
 DEPS_CACHE
 DEPS_PREFIX
+ASSEMBLER_INCLUDE_PATHS
 BUNDLED_INCLUDES
 AUDIO_LIBS
 AUDIO_CFLAGS
@@ -9198,20 +9199,23 @@ BUNDLED_INCLUDES="$BUNDLED_INCLUDES -I\$(srcdir)/libraries/delegatesv2 -I\$(srcd
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for shaders in $srcdir/$ASSETS_DIR/shaders" >&5
 printf %s "checking for shaders in $srcdir/$ASSETS_DIR/shaders... " >&6; }
-if test -d "$srcdir/$ASSETS_DIR/shaders"
+if test -f "$srcdir/$ASSETS_DIR/shaders/slider_f.glsl"
 then :
 
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 printf "%s\n" "yes" >&6; }
+    ASSEMBLER_INCLUDE_PATHS="$ASSEMBLER_INCLUDE_PATHS -Wa,-I$srcdir/$ASSETS_DIR/shaders"
 
 else case e in #(
   e)
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
 printf "%s\n" "no" >&6; }
-    as_fn_error $? "neosu shader assets are missing!" "$LINENO" 5
+    as_fn_error $? "neosu shader resources are missing!" "$LINENO" 5
  ;;
 esac
 fi
+
+
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for fonts in $srcdir/$ASSETS_DIR/fonts" >&5
 printf %s "checking for fonts in $srcdir/$ASSETS_DIR/fonts... " >&6; }
