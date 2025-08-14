@@ -7,17 +7,23 @@
 
 #elif defined(_WIN32)  // MinGW PE/COFF
 
-#define INCBIN_PLAT(sym, file)       \
-    __asm__(                         \
-        ".section .rdata\n"          \
-        ".balign 1\n"                \
-        ".globl " #sym "\n" #sym     \
-        ":\n"                        \
-        ".incbin \"" file            \
-        "\"\n"                       \
-        ".globl " #sym "_end\n" #sym \
-        "_end:\n"                    \
-        ".balign 1\n"                \
+#ifdef _WIN64
+#define INCBIN_PREFIX ""
+#else
+#define INCBIN_PREFIX "_"
+#endif
+
+#define INCBIN_PLAT(sym, file)                                   \
+    __asm__(                                                     \
+        ".section .rdata,\"dr\"\n"                               \
+        ".balign 1\n"                                            \
+        ".globl " INCBIN_PREFIX #sym "\n" INCBIN_PREFIX #sym     \
+        ":\n"                                                    \
+        ".incbin \"" file                                        \
+        "\"\n"                                                   \
+        ".globl " INCBIN_PREFIX #sym "_end\n" INCBIN_PREFIX #sym \
+        "_end:\n"                                                \
+        ".balign 1\n"                                            \
         ".section .text\n");
 
 #else  // ELF
