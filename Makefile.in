@@ -4972,6 +4972,7 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source: $(DEPS_CACHE)/curl-$(CUR
 @BUILD_SDL3_TRUE@	$(TAR) xf $(DEPS_CACHE)/SDL3-$(SDL3_VERSION).tar.gz -C $(DEPS_PREFIX)/SDL3 --strip-components=1 && \
 @BUILD_SDL3_TRUE@	$(MKDIR_P) $(DEPS_PREFIX)/SDL3/build
 @BUILD_SDL3_TRUE@	cd $(DEPS_PREFIX)/SDL3 && \
+@BUILD_SDL3_TRUE@	patch -Np1<$(BUILD_MISCDIR)/sdl-fix-xinput2-scaled-relative-motion.patch && \
 @BUILD_SDL3_TRUE@	$(if $(SDL3_STATIC),$(SED) -i -e 's|#ifdef SDL_DYNAMIC_API.*|#if 1|' -e 's|#error.*Nope.*|#define SDL_DYNAMIC_API 0|' src/dynapi/SDL_dynapi.h,true) && \
 @BUILD_SDL3_TRUE@	PKG_CONFIG="$(PKG_CONFIG)" \
 @BUILD_SDL3_TRUE@	CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" LDFLAGS="$(LDFLAGS)" $(CMAKE) -S . -B build -G "$(CMAKE_GEN)" \
@@ -4987,6 +4988,7 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source: $(DEPS_CACHE)/curl-$(CUR
 @BUILD_SDL3_TRUE@		-D CMAKE_SYSTEM_PROCESSOR="$(host_cpu)" \
 @BUILD_SDL3_TRUE@		-D SDL_RPATH=OFF \
 @BUILD_SDL3_TRUE@		-D SDL_IBUS=OFF \
+@BUILD_SDL3_TRUE@		-D SDL_TEST_LIBRARY=OFF \
 @BUILD_SDL3_TRUE@		$(if $(NOIME),-DSDL_DBUS=OFF -DSDL_USE_IME=OFF -DSDL_DISABLE_WINDOWS_IME=ON,) \
 @BUILD_SDL3_TRUE@		-D SDL_CCACHE="$(if $(filter ccache,$(CCACHE)),ON,OFF)" \
 @BUILD_SDL3_TRUE@		-D CMAKE_C_COMPILER="$(CC)" \
