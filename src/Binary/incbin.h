@@ -1,7 +1,7 @@
 // Copyright (c) 2025, WH, All rights reserved.
 #pragma once
 
-#if defined(_MSC_VER) && !defined(__clang__)  // MSVC COFF (needs external assembler)
+#if defined(_MSC_VER) && !defined(__clang__)  // MSVC COFF (needs external assembler (MASM/NASM/YASM))
 
 #define INCBIN_PLAT(sym, file)
 
