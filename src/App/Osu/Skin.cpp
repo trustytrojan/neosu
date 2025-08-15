@@ -1189,8 +1189,6 @@ bool Skin::parseSkinINI(std::string filepath) {
         size_t firstNonSpace = curLine.find_first_not_of(" \t");
         if(firstNonSpace != std::string::npos && curLine.substr(firstNonSpace).starts_with("//")) continue;
 
-        debugLog("curLine: {}\n", curLine);
-
         // section detection
         if(curLine.find("[General]") != std::string::npos)
             curBlock = 0;
