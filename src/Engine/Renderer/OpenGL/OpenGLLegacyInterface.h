@@ -14,7 +14,7 @@ class Image;
 class OpenGLLegacyInterface : public Graphics {
    public:
     OpenGLLegacyInterface();
-    ~OpenGLLegacyInterface() override;
+    ~OpenGLLegacyInterface() override = default;
 
     // scene
     void beginScene() final;
@@ -97,21 +97,21 @@ class OpenGLLegacyInterface : public Graphics {
     void onTransformUpdate(Matrix4 &projectionMatrix, Matrix4 &worldMatrix) final;
 
    private:
-    Shader* smoothClipShader{nullptr};
+    std::unique_ptr<Shader> smoothClipShader{nullptr};
     void initSmoothClipShader();
 
     // renderer
-    bool bInScene;
+    bool bInScene{false};
     Vector2 vResolution;
 
     // persistent vars
-    bool bAntiAliasing;
-    Color color;
-    float fZ;
-    float fClearZ;
+    bool bAntiAliasing{true};
+    Color color{0xffffffff};
+    float fZ{1};
+    float fClearZ{1};
 
     // synchronization
-    OpenGLSync *syncobj;
+    std::unique_ptr<OpenGLSync> syncobj{nullptr};
 
     // clipping
     std::stack<McRect> clipRectStack;

@@ -47,11 +47,11 @@ void OpenGLShader::enable() {
     if(!this->bReady) return;
 
     // use the state cache instead of querying gl directly
-    this->iProgramBackup = OpenGLStateCache::getInstance().getCurrentProgram();
+    this->iProgramBackup = OpenGLStateCache::getCurrentProgram();
     glUseProgramObjectARB(this->iProgram);
 
     // update cache
-    OpenGLStateCache::getInstance().setCurrentProgram(this->iProgram);
+    OpenGLStateCache::setCurrentProgram(this->iProgram);
 }
 
 void OpenGLShader::disable() {
@@ -60,7 +60,7 @@ void OpenGLShader::disable() {
     glUseProgramObjectARB(this->iProgramBackup);
 
     // update cache
-    OpenGLStateCache::getInstance().setCurrentProgram(this->iProgramBackup);
+    OpenGLStateCache::setCurrentProgram(this->iProgramBackup);
 }
 
 void OpenGLShader::setUniform1f(const std::string_view &name, float value) {

@@ -6,51 +6,44 @@
 #include "BaseEnvironment.h"
 
 #if defined(MCENGINE_FEATURE_OPENGL) || defined(MCENGINE_FEATURE_GLES32)
-
 #include <array>
 
 class OpenGLStateCache final {
    public:
+    // entirely static class so no ctors/dtors necessary
+    OpenGLStateCache() = delete;
+    ~OpenGLStateCache() = delete;
+
     OpenGLStateCache &operator=(const OpenGLStateCache &) = delete;
     OpenGLStateCache &operator=(OpenGLStateCache &&) = delete;
     OpenGLStateCache(const OpenGLStateCache &) = delete;
     OpenGLStateCache(OpenGLStateCache &&) = delete;
 
-    static OpenGLStateCache &getInstance();
-
     // program state
-    void setCurrentProgram(int program);
-    [[nodiscard]] int getCurrentProgram() const;
+    static void setCurrentProgram(int program);
+    [[nodiscard]] static int getCurrentProgram();
 
     // framebuffer state
-    void setCurrentFramebuffer(int framebuffer);
-    [[nodiscard]] int getCurrentFramebuffer() const;
+    static void setCurrentFramebuffer(int framebuffer);
+    [[nodiscard]] static int getCurrentFramebuffer();
 
     // viewport state
-    void setCurrentViewport(int x, int y, int width, int height);
-    void getCurrentViewport(int &x, int &y, int &width, int &height) const;
-    [[nodiscard]] inline const std::array<int, 4> &getCurrentViewport() const { return this->iViewport; }
+    static void setCurrentViewport(int x, int y, int width, int height);
+    static void getCurrentViewport(int &x, int &y, int &width, int &height);
+    [[nodiscard]] inline static const std::array<int, 4> &getCurrentViewport() { return iViewport; }
 
     // initialize cache with actual GL states (once at startup)
-    void initialize();
+    static void initialize();
 
     // force a refresh of cached states from actual GL state (expensive, avoid)
-    void refresh();
+    static void refresh();
 
    private:
-    OpenGLStateCache() = default;
-    ~OpenGLStateCache() = default;
-
-    std::array<int, 4> iViewport{};
-
-    // singleton pattern
-    static OpenGLStateCache *s_instance;
+    static std::array<int, 4> iViewport;
 
     // cache
-    int iCurrentProgram{0};
-    int iCurrentFramebuffer{0};
-
-    bool bInitialized{false};
+    static int iCurrentProgram;
+    static int iCurrentFramebuffer;
 };
 
 #endif

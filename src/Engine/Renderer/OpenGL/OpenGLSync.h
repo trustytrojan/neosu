@@ -21,7 +21,7 @@ class OpenGLSync final {
     void end();    // call in endScene()
 
    private:
-    enum SYNC_RESULT {
+    enum SYNC_RESULT : uint8_t {
         SYNC_OBJECT_NOT_READY,  // sync object not created or already signaled
         SYNC_ALREADY_SIGNALED,  // GPU already done with the work
         SYNC_TIMEOUT_EXPIRED,   // waited but timed out

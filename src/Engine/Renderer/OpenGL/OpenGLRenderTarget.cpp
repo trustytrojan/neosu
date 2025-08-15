@@ -175,10 +175,10 @@ void OpenGLRenderTarget::init() {
     // reset bound texture and framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     // check if the default framebuffer is active first before setting viewport
-    if(OpenGLStateCache::getInstance().getCurrentFramebuffer() == 0) {
+    if(OpenGLStateCache::getCurrentFramebuffer() == 0) {
         std::array<int, 4> viewport;  // NOLINT
         glGetIntegerv(GL_VIEWPORT, viewport.data());
-        OpenGLStateCache::getInstance().setCurrentViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+        OpenGLStateCache::setCurrentViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
     }
 
     this->bReady = true;
@@ -204,11 +204,11 @@ void OpenGLRenderTarget::enable() {
     if(!this->bReady) return;
 
     // use the state cache instead of querying OpenGL directly
-    this->iFrameBufferBackup = OpenGLStateCache::getInstance().getCurrentFramebuffer();
+    this->iFrameBufferBackup = OpenGLStateCache::getCurrentFramebuffer();
     glBindFramebuffer(GL_FRAMEBUFFER, this->iFrameBuffer);
-    OpenGLStateCache::getInstance().setCurrentFramebuffer(this->iFrameBuffer);
+    OpenGLStateCache::setCurrentFramebuffer(this->iFrameBuffer);
 
-    OpenGLStateCache::getInstance().getCurrentViewport(this->iViewportBackup[0], this->iViewportBackup[1],
+    OpenGLStateCache::getCurrentViewport(this->iViewportBackup[0], this->iViewportBackup[1],
                                                        this->iViewportBackup[2], this->iViewportBackup[3]);
 
     // set new viewport
@@ -220,7 +220,7 @@ void OpenGLRenderTarget::enable() {
     glViewport(newViewX, newViewY, newViewWidth, newViewHeight);
 
     // update cache
-    OpenGLStateCache::getInstance().setCurrentViewport(newViewX, newViewY, newViewWidth, newViewHeight);
+    OpenGLStateCache::setCurrentViewport(newViewX, newViewY, newViewWidth, newViewHeight);
 
     // clear
     if(cv::debug_rt.getBool())
@@ -253,7 +253,7 @@ void OpenGLRenderTarget::disable() {
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
         // update cache for the current framebuffer (now 0)
-        OpenGLStateCache::getInstance().setCurrentFramebuffer(0);
+        OpenGLStateCache::setCurrentFramebuffer(0);
     }
 #endif
 
@@ -261,14 +261,14 @@ void OpenGLRenderTarget::disable() {
     glViewport(this->iViewportBackup[0], this->iViewportBackup[1], this->iViewportBackup[2], this->iViewportBackup[3]);
 
     // update the cache with restored viewport
-    OpenGLStateCache::getInstance().setCurrentViewport(this->iViewportBackup[0], this->iViewportBackup[1],
+    OpenGLStateCache::setCurrentViewport(this->iViewportBackup[0], this->iViewportBackup[1],
                                                        this->iViewportBackup[2], this->iViewportBackup[3]);
 
     // restore framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, this->iFrameBufferBackup);
 
     // update cache for the restored framebuffer
-    OpenGLStateCache::getInstance().setCurrentFramebuffer(this->iFrameBufferBackup);
+    OpenGLStateCache::setCurrentFramebuffer(this->iFrameBufferBackup);
 }
 
 void OpenGLRenderTarget::bind(unsigned int textureUnit) {

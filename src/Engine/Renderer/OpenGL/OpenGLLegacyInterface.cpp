@@ -21,18 +21,11 @@
 
 #include <cstddef>
 
-OpenGLLegacyInterface::OpenGLLegacyInterface() : Graphics() {
-    // renderer
-    this->bInScene = false;
-    this->vResolution = engine->getScreenSize();  // initial viewport size = window size
-
-    // persistent vars
-    this->bAntiAliasing = true;
-    this->color = 0xffffffff;
-    this->fClearZ = 1;
-    this->fZ = 1;
-
-    this->syncobj = new OpenGLSync();
+OpenGLLegacyInterface::OpenGLLegacyInterface()
+    : Graphics(),
+      vResolution(engine->getScreenSize()),  // initial viewport size = window size
+      syncobj(std::make_unique<OpenGLSync>()) {
+    //
     this->syncobj->init();
 
     // quality
@@ -65,12 +58,7 @@ OpenGLLegacyInterface::OpenGLLegacyInterface() : Graphics() {
     glFrontFace(GL_CCW);
 
     // initialize the state cache
-    OpenGLStateCache::getInstance().initialize();
-}
-
-OpenGLLegacyInterface::~OpenGLLegacyInterface() {
-    SAFE_DELETE(this->syncobj);
-    SAFE_DELETE(this->smoothClipShader);
+    OpenGLStateCache::initialize();
 }
 
 void OpenGLLegacyInterface::beginScene() {
@@ -332,7 +320,7 @@ void OpenGLLegacyInterface::drawImage(Image *image, AnchorPoint anchor, float ed
     if(this->color.A() == 0) return;
 
     bool clipRectSpecified = clipRect.getSize().length() != 0;
-    bool smoothedEdges = edgeSoftness > 0.0f;
+    bool smoothedEdges = false;//edgeSoftness > 0.0f;
 
     // initialize shader on first use
     if(smoothedEdges) {
@@ -387,7 +375,7 @@ void OpenGLLegacyInterface::drawImage(Image *image, AnchorPoint anchor, float ed
     if(smoothedEdges) {
         // compensate for viewport changed by rendertargets
         // flip Y for engine<->opengl coordinate origin
-        const auto &viewport{OpenGLStateCache::getInstance().getCurrentViewport()};
+        const auto &viewport{OpenGLStateCache::getCurrentViewport()};
         float clipMinX{clipRect.getX() + viewport[0]},                                           //
             clipMinY{viewport[3] - (clipRect.getY() - viewport[1] - 1 + clipRect.getHeight())},  //
             clipMaxX{clipMinX + clipRect.getWidth()},                                            //
@@ -488,7 +476,7 @@ void OpenGLLegacyInterface::setClipRect(McRect clipRect) {
     // if (m_bIs3DScene) return; // TODO
 
     // rendertargets change the current viewport
-    const auto &viewport{OpenGLStateCache::getInstance().getCurrentViewport()};
+    const auto &viewport{OpenGLStateCache::getCurrentViewport()};
 
     // debugLog("viewport = {}, {}, {}, {}\n", viewport[0], viewport[1], viewport[2], viewport[3]);
 
@@ -658,7 +646,7 @@ void OpenGLLegacyInterface::onResolutionChange(Vector2 newResolution) {
     glViewport(0, 0, this->vResolution.x, this->vResolution.y);
 
     // update state cache with the new viewport
-    OpenGLStateCache::getInstance().setCurrentViewport(0, 0, this->vResolution.x, this->vResolution.y);
+    OpenGLStateCache::setCurrentViewport(0, 0, this->vResolution.x, this->vResolution.y);
 
     // special case: custom rendertarget resolution rendering, update active projection matrix immediately
     if(this->bInScene) {
@@ -706,9 +694,9 @@ void OpenGLLegacyInterface::onTransformUpdate(Matrix4 &projectionMatrix, Matrix4
 void OpenGLLegacyInterface::initSmoothClipShader() {
     if(this->smoothClipShader != nullptr) return;
 
-    this->smoothClipShader =
+    this->smoothClipShader.reset(
         g->createShaderFromSource(std::string(reinterpret_cast<const char *>(smoothclip_vsh), smoothclip_vsh_size()),
-                                  std::string(reinterpret_cast<const char *>(smoothclip_fsh), smoothclip_fsh_size()));
+                                  std::string(reinterpret_cast<const char *>(smoothclip_fsh), smoothclip_fsh_size())));
 
     if(this->smoothClipShader != nullptr) {
         this->smoothClipShader->loadAsync();

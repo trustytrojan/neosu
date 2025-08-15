@@ -4,7 +4,6 @@
 *.vcxproj.user
 
 .cache/
-cmake-win/
 build/
 obj/
 resources/cfg/osu.cfg

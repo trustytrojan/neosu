@@ -34,10 +34,14 @@ OpenGLSync::~OpenGLSync() {
 }
 
 bool OpenGLSync::init() {
-#ifndef MCENGINE_PLATFORM_WASM
-    this->bAvailable = GLVersion.major > 3 || (GLVersion.major == 3 && GLVersion.minor >= 2);
-#else
+#ifdef MCENGINE_PLATFORM_WASM
     this->bAvailable = false;
+#else
+    if constexpr(Env::cfg(REND::GLES32)) {
+        this->bAvailable = true;
+    } else {
+        this->bAvailable = GLVersion.major > 3 || (GLVersion.major == 3 && GLVersion.minor >= 2);
+    }
 #endif
     this->bEnabled = cv::r_sync_enabled.getBool() && this->bAvailable;
     return this->bEnabled;
@@ -65,7 +69,7 @@ void OpenGLSync::end() {
 
             if(cv::r_sync_debug.getBool())
                 debugLog("Created sync object for frame {:d} (frames in flight: {:d}/{:d})\n", syncPoint.frameNumber,
-                          this->frameSyncQueue.size(), this->iMaxFramesInFlight);
+                         this->frameSyncQueue.size(), this->iMaxFramesInFlight);
         }
     }
 }
@@ -114,7 +118,7 @@ void OpenGLSync::manageFrameSyncQueue(bool forceWait) {
     else if(needToWait) {
         if(debug)
             debugLog("Waiting for frame {:d} to complete (frames in flight: {:d}/{:d})\n", oldestSync.frameNumber,
-                      this->frameSyncQueue.size(), this->iMaxFramesInFlight);
+                     this->frameSyncQueue.size(), this->iMaxFramesInFlight);
 
         SYNC_RESULT result = this->waitForSyncObject(oldestSync.syncObject, cv::r_sync_timeout.getInt());
 
@@ -131,7 +135,7 @@ void OpenGLSync::manageFrameSyncQueue(bool forceWait) {
                     break;
                 case SYNC_TIMEOUT_EXPIRED:
                     debugLog("Frame {:d} sync object timed out after {:d} microseconds\n", oldestSync.frameNumber,
-                              cv::r_sync_timeout.getInt());
+                             cv::r_sync_timeout.getInt());
                     break;
                 case SYNC_WAIT_FAILED:
                     debugLog("Frame {:d} sync wait failed\n", oldestSync.frameNumber);
