@@ -1171,131 +1171,129 @@ bool Skin::parseSkinINI(std::string filepath) {
     for(int i = 0; i < fileContent.length(); i++) {
         wchar_t ch = fileContent[i];
 
-        if(ch == L'\r' || ch == L'\n') {
-            // handle CRLF, CR, or LF
-            if(ch == L'\r' && i + 1 < fileContent.length() && fileContent[i + 1] == L'\n') i++;  // skip LF in CRLF
+        // accumulate characters until we hit a line ending
+        if(ch != L'\r' && ch != L'\n') {
+            currentLine += ch;
+            continue;
+        }
 
-            // process line if not empty
-            if(!currentLine.isEmpty()) {
-                const char *curLineChar = currentLine.toUtf8();
-                std::string curLine(curLineChar);
-                nonEmptyLineCounter++;
+        // handle CRLF, CR, or LF
+        if(ch == L'\r' && i + 1 < fileContent.length() && fileContent[i + 1] == L'\n') i++;  // skip LF in CRLF
 
-                // ignore comments
-                if(curLine.starts_with("//")) continue;
+        std::string curLine{currentLine.toUtf8()};
+        currentLine.clear();  // reset for next line
 
-                if(curLine.find("[General]") != std::string::npos)
-                    curBlock = 0;
-                else if(curLine.find("[Colours]") != std::string::npos || curLine.find("[Colors]") != std::string::npos)
-                    curBlock = 1;
-                else if(curLine.find("[Fonts]") != std::string::npos)
-                    curBlock = 2;
+        if(!curLine.empty()) nonEmptyLineCounter++;
 
-                switch(curBlock) {
-                    // General
-                    case 0: {
-                        std::string version;
-                        if(Parsing::parse_value(curLine, "Version", &version)) {
-                            if((version.find("latest") != std::string::npos) ||
-                               (version.find("User") != std::string::npos)) {
-                                this->fVersion = 2.5f;
-                            } else {
-                                Parsing::parse_value(curLine, "Version", &this->fVersion);
-                            }
-                        }
+        // skip comments
+        size_t firstNonSpace = curLine.find_first_not_of(" \t");
+        if(firstNonSpace != std::string::npos && curLine.substr(firstNonSpace).starts_with("//")) continue;
 
-                        Parsing::parse_value(curLine, "CursorRotate", &this->bCursorRotate);
-                        Parsing::parse_value(curLine, "CursorCentre", &this->bCursorCenter);
-                        Parsing::parse_value(curLine, "CursorExpand", &this->bCursorExpand);
-                        Parsing::parse_value(curLine, "SliderBallFlip", &this->bSliderBallFlip);
-                        Parsing::parse_value(curLine, "AllowSliderBallTint", &this->bAllowSliderBallTint);
-                        Parsing::parse_value(curLine, "HitCircleOverlayAboveNumber",
-                                             &this->bHitCircleOverlayAboveNumber);
+        // section detection
+        if(curLine.find("[General]") != std::string::npos)
+            curBlock = 0;
+        else if(curLine.find("[Colours]") != std::string::npos || curLine.find("[Colors]") != std::string::npos)
+            curBlock = 1;
+        else if(curLine.find("[Fonts]") != std::string::npos)
+            curBlock = 2;
 
-                        // https://osu.ppy.sh/community/forums/topics/314209
-                        Parsing::parse_value(curLine, "HitCircleOverlayAboveNumer",
-                                             &this->bHitCircleOverlayAboveNumber);
-
-                        if(Parsing::parse_value(curLine, "SliderStyle", &this->iSliderStyle)) {
-                            if(this->iSliderStyle != 1 && this->iSliderStyle != 2) this->iSliderStyle = 2;
-                        }
-
-                        if(Parsing::parse_value(curLine, "AnimationFramerate", &this->fAnimationFramerate)) {
-                            if(this->fAnimationFramerate < 0.f) this->fAnimationFramerate = 0.f;
-                        }
-
-                        break;
-                    }
-
-                    // Colors
-                    case 1: {
-                        i32 comboNum;
-                        i32 r, g, b;
-
-                        if(Parsing::parse_value(curLine, "Combo", &comboNum, &r, &g, &b))
-                            this->comboColors.push_back(rgb(r, g, b));
-                        else if(Parsing::parse_value(curLine, "SpinnerApproachCircle", &r, &g, &b))
-                            this->spinnerApproachCircleColor = rgb(r, g, b);
-                        else if(Parsing::parse_value(curLine, "SliderBall", &r, &g, &b))
-                            this->sliderBallColor = rgb(r, g, b);
-                        else if(Parsing::parse_value(curLine, "SliderBorder", &r, &g, &b))
-                            this->sliderBorderColor = rgb(r, g, b);
-                        else if(Parsing::parse_value(curLine, "SliderTrackOverride", &r, &g, &b)) {
-                            this->sliderTrackOverride = rgb(r, g, b);
-                            this->bSliderTrackOverride = true;
-                        } else if(Parsing::parse_value(curLine, "SongSelectActiveText", &r, &g, &b))
-                            this->songSelectActiveText = rgb(r, g, b);
-                        else if(Parsing::parse_value(curLine, "SongSelectInactiveText", &r, &g, &b))
-                            this->songSelectInactiveText = rgb(r, g, b);
-                        else if(Parsing::parse_value(curLine, "InputOverlayText", &r, &g, &b))
-                            this->inputOverlayText = rgb(r, g, b);
-
-                        break;
-                    }
-
-                    // Fonts
-                    case 2: {
-                        Parsing::parse_value(curLine, "ComboOverlap", &this->iComboOverlap);
-                        Parsing::parse_value(curLine, "ScoreOverlap", &this->iScoreOverlap);
-                        Parsing::parse_value(curLine, "HitCircleOverlap", &this->iHitCircleOverlap);
-
-                        if(Parsing::parse_value(curLine, "ComboPrefix", &this->sComboPrefix)) {
-                            // XXX: jank path normalization
-                            for(int i = 0; i < this->sComboPrefix.length(); i++) {
-                                if(this->sComboPrefix[i] == '\\') {
-                                    this->sComboPrefix.erase(i, 1);
-                                    this->sComboPrefix.insert(i, "/");
-                                }
-                            }
-                        }
-
-                        if(Parsing::parse_value(curLine, "ScorePrefix", &this->sScorePrefix)) {
-                            // XXX: jank path normalization
-                            for(int i = 0; i < this->sScorePrefix.length(); i++) {
-                                if(this->sScorePrefix[i] == '\\') {
-                                    this->sScorePrefix.erase(i, 1);
-                                    this->sScorePrefix.insert(i, "/");
-                                }
-                            }
-                        }
-
-                        if(Parsing::parse_value(curLine, "HitCirclePrefix", &this->sHitCirclePrefix)) {
-                            // XXX: jank path normalization
-                            for(int i = 0; i < this->sHitCirclePrefix.length(); i++) {
-                                if(this->sHitCirclePrefix[i] == '\\') {
-                                    this->sHitCirclePrefix.erase(i, 1);
-                                    this->sHitCirclePrefix.insert(i, "/");
-                                }
-                            }
-                        }
-
-                        break;
+        switch(curBlock) {
+            // General
+            case 0: {
+                std::string version;
+                if(Parsing::parse_value(curLine, "Version", &version)) {
+                    if((version.find("latest") != std::string::npos) || (version.find("User") != std::string::npos)) {
+                        this->fVersion = 2.5f;
+                    } else {
+                        Parsing::parse_value(curLine, "Version", &this->fVersion);
                     }
                 }
+
+                Parsing::parse_value(curLine, "CursorRotate", &this->bCursorRotate);
+                Parsing::parse_value(curLine, "CursorCentre", &this->bCursorCenter);
+                Parsing::parse_value(curLine, "CursorExpand", &this->bCursorExpand);
+                Parsing::parse_value(curLine, "SliderBallFlip", &this->bSliderBallFlip);
+                Parsing::parse_value(curLine, "AllowSliderBallTint", &this->bAllowSliderBallTint);
+                Parsing::parse_value(curLine, "HitCircleOverlayAboveNumber", &this->bHitCircleOverlayAboveNumber);
+
+                // https://osu.ppy.sh/community/forums/topics/314209
+                Parsing::parse_value(curLine, "HitCircleOverlayAboveNumer", &this->bHitCircleOverlayAboveNumber);
+
+                if(Parsing::parse_value(curLine, "SliderStyle", &this->iSliderStyle)) {
+                    if(this->iSliderStyle != 1 && this->iSliderStyle != 2) this->iSliderStyle = 2;
+                }
+
+                if(Parsing::parse_value(curLine, "AnimationFramerate", &this->fAnimationFramerate)) {
+                    if(this->fAnimationFramerate < 0.f) this->fAnimationFramerate = 0.f;
+                }
+
+                break;
             }
-            currentLine.clear();
-        } else {
-            currentLine += ch;
+
+            // Colors
+            case 1: {
+                i32 comboNum;
+                i32 r, g, b;
+
+                if(Parsing::parse_value(curLine, "Combo", &comboNum, &r, &g, &b))
+                    this->comboColors.push_back(rgb(r, g, b));
+                else if(Parsing::parse_value(curLine, "SpinnerApproachCircle", &r, &g, &b))
+                    this->spinnerApproachCircleColor = rgb(r, g, b);
+                else if(Parsing::parse_value(curLine, "SliderBall", &r, &g, &b))
+                    this->sliderBallColor = rgb(r, g, b);
+                else if(Parsing::parse_value(curLine, "SliderBorder", &r, &g, &b))
+                    this->sliderBorderColor = rgb(r, g, b);
+                else if(Parsing::parse_value(curLine, "SliderTrackOverride", &r, &g, &b)) {
+                    this->sliderTrackOverride = rgb(r, g, b);
+                    this->bSliderTrackOverride = true;
+                } else if(Parsing::parse_value(curLine, "SongSelectActiveText", &r, &g, &b))
+                    this->songSelectActiveText = rgb(r, g, b);
+                else if(Parsing::parse_value(curLine, "SongSelectInactiveText", &r, &g, &b))
+                    this->songSelectInactiveText = rgb(r, g, b);
+                else if(Parsing::parse_value(curLine, "InputOverlayText", &r, &g, &b))
+                    this->inputOverlayText = rgb(r, g, b);
+
+                break;
+            }
+
+            // Fonts
+            case 2: {
+                Parsing::parse_value(curLine, "ComboOverlap", &this->iComboOverlap);
+                Parsing::parse_value(curLine, "ScoreOverlap", &this->iScoreOverlap);
+                Parsing::parse_value(curLine, "HitCircleOverlap", &this->iHitCircleOverlap);
+
+                if(Parsing::parse_value(curLine, "ComboPrefix", &this->sComboPrefix)) {
+                    // XXX: jank path normalization
+                    for(int i = 0; i < this->sComboPrefix.length(); i++) {
+                        if(this->sComboPrefix[i] == '\\') {
+                            this->sComboPrefix.erase(i, 1);
+                            this->sComboPrefix.insert(i, "/");
+                        }
+                    }
+                }
+
+                if(Parsing::parse_value(curLine, "ScorePrefix", &this->sScorePrefix)) {
+                    // XXX: jank path normalization
+                    for(int i = 0; i < this->sScorePrefix.length(); i++) {
+                        if(this->sScorePrefix[i] == '\\') {
+                            this->sScorePrefix.erase(i, 1);
+                            this->sScorePrefix.insert(i, "/");
+                        }
+                    }
+                }
+
+                if(Parsing::parse_value(curLine, "HitCirclePrefix", &this->sHitCirclePrefix)) {
+                    // XXX: jank path normalization
+                    for(int i = 0; i < this->sHitCirclePrefix.length(); i++) {
+                        if(this->sHitCirclePrefix[i] == '\\') {
+                            this->sHitCirclePrefix.erase(i, 1);
+                            this->sHitCirclePrefix.insert(i, "/");
+                        }
+                    }
+                }
+
+                break;
+            }
         }
     }
 
