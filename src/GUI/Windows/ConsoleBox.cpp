@@ -214,8 +214,8 @@ void ConsoleBox::drawLogOverlay() {
     }
     g->popTransform();
 
-    g->setColor(Color(0xffffffff).setA(alpha));
-
+    g->setColor(0xffffffff);
+    if(this->fLogYPos != 0.0f) g->setAlpha(alpha);
 
     g->pushTransform();
     {
