@@ -333,13 +333,12 @@ void PauseMenu::onResolutionChange(Vector2 newResolution) {
 CBaseUIContainer *PauseMenu::setVisible(bool visible) {
     this->bVisible = visible;
 
-    if(!bancho->is_playing_a_multi_map()) {
-        if(osu->isInPlayMode()) {
-            this->setContinueEnabled(!osu->getSelectedBeatmap()->hasFailed());
-        } else {
-            this->setContinueEnabled(true);
-        }
+    auto beatmap = osu->getSelectedBeatmap();
+    if(!beatmap || !osu->isInPlayMode()) return this;  // sanity
 
+    this->setContinueEnabled(!beatmap->hasFailed());
+
+    if(!bancho->is_playing_a_multi_map()) {
         if(visible) {
             soundEngine->play(osu->getSkin()->pauseLoop);
 
@@ -353,7 +352,7 @@ CBaseUIContainer *PauseMenu::setVisible(bool visible) {
                     BANCHO::Proto::write<u16>(&packet, 0);
                     BANCHO::Proto::write<u8>(&packet, LiveReplayBundle::Action::PAUSE);
                     BANCHO::Proto::write<ScoreFrame>(&packet, ScoreFrame::get());
-                    BANCHO::Proto::write<u16>(&packet, osu->getSelectedBeatmap()->spectator_sequence++);
+                    BANCHO::Proto::write<u16>(&packet, beatmap->spectator_sequence++);
                     BANCHO::Net::send_packet(packet);
                 }
             } else {
@@ -371,7 +370,7 @@ CBaseUIContainer *PauseMenu::setVisible(bool visible) {
                 BANCHO::Proto::write<u16>(&packet, 0);
                 BANCHO::Proto::write<u8>(&packet, LiveReplayBundle::Action::UNPAUSE);
                 BANCHO::Proto::write<ScoreFrame>(&packet, ScoreFrame::get());
-                BANCHO::Proto::write<u16>(&packet, osu->getSelectedBeatmap()->spectator_sequence++);
+                BANCHO::Proto::write<u16>(&packet, beatmap->spectator_sequence++);
                 BANCHO::Net::send_packet(packet);
             }
         }

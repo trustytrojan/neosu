@@ -415,5 +415,9 @@ class Beatmap : public BeatmapInterface {
     bool bInMafhamRenderChunk;  // used by Slider to not animate the reverse arrow, and by Circle to not animate
                                 // note blocking shaking, while being rendered into the scene buffer
 
-    std::vector<HUD::CURSORRIPPLE> smoke_trail;
+    struct SMOKETRAIL {
+        Vector2 pos;
+        i64 time;
+    };
+    std::vector<SMOKETRAIL> smoke_trail;
 };

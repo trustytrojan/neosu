@@ -1822,13 +1822,13 @@ void Beatmap::drawSmoke() {
 
     // Add new smoke particles if unpaused & smoke key pressed
     if(!this->bIsPaused && (this->current_keys & LegacyReplay::Smoke)) {
-        HUD::CURSORRIPPLE sm;
+        SMOKETRAIL sm;
         sm.pos = this->pixels2OsuCoords(this->getCursorPos());
-        sm.time = engine->getTime();
+        sm.time = this->iCurMusicPos;
 
         if(!this->smoke_trail.empty()) {
-            f32 last_trail_tms = this->smoke_trail[this->smoke_trail.size() - 1].time;
-            if(sm.time < last_trail_tms + cv::smoke_trail_spacing.getFloat() / 1000.f) {
+            i64 last_trail_tms = this->smoke_trail[this->smoke_trail.size() - 1].time;
+            if(sm.time < last_trail_tms + cv::smoke_trail_spacing.getInt()) {
                 // Remove last trail element so we can replace it with a newer one
                 this->smoke_trail.pop_back();
             }
@@ -1846,17 +1846,19 @@ void Beatmap::drawSmoke() {
     scale *= cv::cursor_scale.getFloat();
     scale *= cv::smoke_scale.getFloat();
 
-    f32 time_visible = cv::smoke_trail_duration.getFloat();
-    f32 time_fully_visible = cv::smoke_trail_opaque_duration.getFloat();
-    f32 fade_time = time_visible - time_fully_visible;
+    i64 time_visible = (i64)(cv::smoke_trail_duration.getFloat() * 1000.f);
+    i64 time_fully_visible = (i64)(cv::smoke_trail_opaque_duration.getFloat() * 1000.f);
+    i64 fade_time = time_visible - time_fully_visible;
 
     smoke->bind();
     for(const auto &sm : this->smoke_trail) {
-        f32 active_for = engine->getTime() - sm.time;
+        i64 active_for = this->iCurMusicPos - sm.time;
+        if(active_for >= time_visible) continue;  // avoids division by 0 when (time_visible == time_fully_visible)
 
         // Start fading out when time_fully_visible has passed
-        f32 alpha = std::min(fade_time, time_fully_visible - active_for) / fade_time;
+        f32 alpha = (f32)std::min(fade_time, time_fully_visible - active_for) / (f32)fade_time;
         if(alpha <= 0.f) continue;
+
         g->setColor(argb(alpha, 1.f, 1.f, 1.f));
         g->pushTransform();
         {
@@ -1870,7 +1872,7 @@ void Beatmap::drawSmoke() {
     smoke->unbind();
 
     // trail cleanup
-    while(!this->smoke_trail.empty() && engine->getTime() > this->smoke_trail[0].time + time_visible) {
+    while(!this->smoke_trail.empty() && this->iCurMusicPos > this->smoke_trail[0].time + time_visible) {
         this->smoke_trail.erase(this->smoke_trail.begin());
     }
 }
