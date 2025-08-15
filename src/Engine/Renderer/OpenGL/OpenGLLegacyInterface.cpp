@@ -320,7 +320,7 @@ void OpenGLLegacyInterface::drawImage(Image *image, AnchorPoint anchor, float ed
     if(this->color.A() == 0) return;
 
     bool clipRectSpecified = clipRect.getSize().length() != 0;
-    bool smoothedEdges = false;//edgeSoftness > 0.0f;
+    bool smoothedEdges = edgeSoftness > 0.0f;
 
     // initialize shader on first use
     if(smoothedEdges) {
