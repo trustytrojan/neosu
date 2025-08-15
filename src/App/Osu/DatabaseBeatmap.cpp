@@ -297,12 +297,15 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                 case 5: {
                     // XXX: this assumes combo colors are defined in the proper order
                     //      and also that they're written like "Combo1" and not "Combo 1"
-                    i32 comboNum;
-                    i32 r, g, b;
+                    u8 comboNum;
+                    u8 r, g, b;
 
-                    // FIXME: actually use comboNum???
-                    if(Parsing::parse_numbered_value(curLine, "Combo", &comboNum, &r, &g, &b))
-                        c.combocolors.push_back(rgb(r, g, b));
+                    // FIXME: actually use comboNum for ordering
+                    if(Parsing::parse_numbered_value(curLine, "Combo", &comboNum, &r, &g, &b)) {
+                        if(comboNum >= 1 && comboNum <= 8) {  // bare minimum validation effort
+                            c.combocolors.push_back(rgb(r, g, b));
+                        }
+                    }
 
                     break;
                 }

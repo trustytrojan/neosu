@@ -1232,13 +1232,15 @@ bool Skin::parseSkinINI(std::string filepath) {
 
             // Colors
             case 1: {
-                i32 comboNum;
-                i32 r, g, b;
+                u8 comboNum;
+                u8 r, g, b;
 
-                // FIXME: actually use comboNum???
-                if(Parsing::parse_numbered_value(curLine, "Combo", &comboNum, &r, &g, &b))
-                    this->comboColors.push_back(rgb(r, g, b));
-                else if(Parsing::parse_value(curLine, "SpinnerApproachCircle", &r, &g, &b))
+                // FIXME: actually use comboNum for ordering
+                if(Parsing::parse_numbered_value(curLine, "Combo", &comboNum, &r, &g, &b)) {
+                    if(comboNum >= 1 && comboNum <= 8) {
+                        this->comboColors.push_back(rgb(r, g, b));
+                    }
+                } else if(Parsing::parse_value(curLine, "SpinnerApproachCircle", &r, &g, &b))
                     this->spinnerApproachCircleColor = rgb(r, g, b);
                 else if(Parsing::parse_value(curLine, "SliderBall", &r, &g, &b))
                     this->sliderBallColor = rgb(r, g, b);
