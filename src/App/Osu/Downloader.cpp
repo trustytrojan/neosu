@@ -18,6 +18,7 @@
 #include "Engine.h"
 #include "NetworkHandler.h"
 #include "Osu.h"
+#include "Parsing.h"
 #include "SString.h"
 #include "SongBrowser/SongBrowser.h"
 
@@ -192,22 +193,17 @@ std::unordered_map<i32, i32> beatmap_to_beatmapset;
 
 i32 get_beatmapset_id_from_osu_file(const u8* osu_data, size_t s_osu_data) {
     i32 set_id = -1;
-    std::string line;
-    for(size_t i = 0; i < s_osu_data; i++) {
-        if(osu_data[i] == '\n') {
-            if(!line.starts_with("//")) {
-                sscanf(line.c_str(), " BeatmapSetID : %i \n", &set_id);
-                if(set_id != -1) return set_id;
-            }
 
-            line = "";
-        } else {
-            line.push_back(static_cast<char>(osu_data[i]));
+    std::string file((const char*)osu_data, s_osu_data);
+    auto lines = SString::split(file, "\n");
+    for(auto& line : lines) {
+        if(line.empty()) continue;
+        if(line.starts_with("//")) continue;
+        if(line.back() == '\r') line.pop_back();
+
+        if(Parsing::parse_value(line, "BeatmapSetID", &set_id)) {
+            return set_id;
         }
-    }
-
-    if(!line.starts_with("//")) {
-        sscanf(line.c_str(), " BeatmapSetID : %i \n", &set_id);
     }
 
     return -1;

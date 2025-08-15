@@ -132,18 +132,17 @@ class DatabaseBeatmap final {
         zarray<DatabaseBeatmap::TIMINGPOINT> timingpoints{};
         std::vector<Color> combocolors{};
 
-        float stackLeniency{};
-
-        float sliderMultiplier{};
-        float sliderTickRate{};
+        f32 stackLeniency{};
+        f32 sliderMultiplier{};
+        f32 sliderTickRate{};
 
         u32 numCircles{};
         u32 numSliders{};
         u32 numSpinners{};
         u32 numHitobjects{};
 
-        int version{};
-        int errorCode{0};
+        i32 version{};
+        i32 errorCode{0};
     };
 
     DatabaseBeatmap(std::string filePath, std::string folder, BeatmapType type);
@@ -295,7 +294,7 @@ class DatabaseBeatmap final {
 
     u8 iVersion;   // e.g. "osu file format v12" -> 12
     u8 iGameMode;  // 0 = osu!standard, 1 = Taiko, 2 = Catch the Beat, 3 = osu!mania
-    int iSetID;     // online set ID, if uploaded
+    int iSetID;    // online set ID, if uploaded
 
     int iPreviewTime;
 

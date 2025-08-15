@@ -2,7 +2,6 @@
 #include "Skin.h"
 
 #include <cstring>
-
 #include <utility>
 
 #include "Archival.h"
@@ -14,6 +13,7 @@
 #include "Database.h"
 #include "NotificationOverlay.h"
 #include "Osu.h"
+#include "Parsing.h"
 #include "ResourceManager.h"
 #include "SString.h"
 #include "SkinImage.h"
@@ -1181,120 +1181,115 @@ bool Skin::parseSkinINI(std::string filepath) {
                 std::string curLine(curLineChar);
                 nonEmptyLineCounter++;
 
-                if(!curLine.starts_with("//"))  // ignore comments // TODO: this is incorrect, but it works well enough
-                {
-                    if(curLine.find("[General]") != std::string::npos)
-                        curBlock = 0;
-                    else if(curLine.find("[Colours]") != std::string::npos ||
-                            curLine.find("[Colors]") != std::string::npos)
-                        curBlock = 1;
-                    else if(curLine.find("[Fonts]") != std::string::npos)
-                        curBlock = 2;
+                // ignore comments
+                if(curLine.starts_with("//")) continue;
 
-                    switch(curBlock) {
-                        case 0:  // General
-                        {
-                            int val;
-                            float floatVal;
-                            char stringBuffer[1024];
+                if(curLine.find("[General]") != std::string::npos)
+                    curBlock = 0;
+                else if(curLine.find("[Colours]") != std::string::npos || curLine.find("[Colors]") != std::string::npos)
+                    curBlock = 1;
+                else if(curLine.find("[Fonts]") != std::string::npos)
+                    curBlock = 2;
 
-                            memset(stringBuffer, '\0', 1024);
-                            if(sscanf(curLineChar, " Version : %1023[^\n]", stringBuffer) == 1) {
-                                UString versionString = UString(stringBuffer);
-                                if(versionString.find("latest") != -1 || versionString.find("User") != -1)
-                                    this->fVersion = 2.5f;  // default to latest version available
-                                else
-                                    this->fVersion = versionString.toFloat();
+                switch(curBlock) {
+                    // General
+                    case 0: {
+                        std::string version;
+                        if(Parsing::parse_value(curLine, "Version", &version)) {
+                            if((version.find("latest") != std::string::npos) ||
+                               (version.find("User") != std::string::npos)) {
+                                this->fVersion = 2.5f;
+                            } else {
+                                Parsing::parse_value(curLine, "Version", &this->fVersion);
                             }
+                        }
 
-                            if(sscanf(curLineChar, " CursorRotate : %i \n", &val) == 1)
-                                this->bCursorRotate = val > 0 ? true : false;
-                            if(sscanf(curLineChar, " CursorCentre : %i \n", &val) == 1)
-                                this->bCursorCenter = val > 0 ? true : false;
-                            if(sscanf(curLineChar, " CursorExpand : %i \n", &val) == 1)
-                                this->bCursorExpand = val > 0 ? true : false;
-                            if(sscanf(curLineChar, " SliderBallFlip : %i \n", &val) == 1)
-                                this->bSliderBallFlip = val > 0 ? true : false;
-                            if(sscanf(curLineChar, " AllowSliderBallTint : %i \n", &val) == 1)
-                                this->bAllowSliderBallTint = val > 0 ? true : false;
-                            if(sscanf(curLineChar, " HitCircleOverlayAboveNumber : %i \n", &val) == 1)
-                                this->bHitCircleOverlayAboveNumber = val > 0 ? true : false;
-                            if(sscanf(curLineChar, " HitCircleOverlayAboveNumer : %i \n", &val) == 1)
-                                this->bHitCircleOverlayAboveNumber = val > 0 ? true : false;
-                            if(sscanf(curLineChar, " SliderStyle : %i \n", &val) == 1) {
-                                this->iSliderStyle = val;
-                                if(this->iSliderStyle != 1 && this->iSliderStyle != 2) this->iSliderStyle = 2;
-                            }
-                            if(sscanf(curLineChar, " AnimationFramerate : %f \n", &floatVal) == 1)
-                                this->fAnimationFramerate = floatVal < 0 ? 0.0f : floatVal;
-                        } break;
-                        case 1:  // Colors
-                        {
-                            int comboNum;
-                            int r, g, b;
+                        Parsing::parse_value(curLine, "CursorRotate", &this->bCursorRotate);
+                        Parsing::parse_value(curLine, "CursorCentre", &this->bCursorCenter);
+                        Parsing::parse_value(curLine, "CursorExpand", &this->bCursorExpand);
+                        Parsing::parse_value(curLine, "SliderBallFlip", &this->bSliderBallFlip);
+                        Parsing::parse_value(curLine, "AllowSliderBallTint", &this->bAllowSliderBallTint);
+                        Parsing::parse_value(curLine, "HitCircleOverlayAboveNumber",
+                                             &this->bHitCircleOverlayAboveNumber);
 
-                            if(sscanf(curLineChar, " Combo %i : %i , %i , %i \n", &comboNum, &r, &g, &b) == 4)
-                                this->comboColors.push_back(rgb(r, g, b));
-                            if(sscanf(curLineChar, " SpinnerApproachCircle : %i , %i , %i \n", &r, &g, &b) == 3)
-                                this->spinnerApproachCircleColor = rgb(r, g, b);
-                            if(sscanf(curLineChar, " SliderBorder: %i , %i , %i \n", &r, &g, &b) == 3)
-                                this->sliderBorderColor = rgb(r, g, b);
-                            if(sscanf(curLineChar, " SliderTrackOverride : %i , %i , %i \n", &r, &g, &b) == 3) {
-                                this->sliderTrackOverride = rgb(r, g, b);
-                                this->bSliderTrackOverride = true;
-                            }
-                            if(sscanf(curLineChar, " SliderBall : %i , %i , %i \n", &r, &g, &b) == 3)
-                                this->sliderBallColor = rgb(r, g, b);
-                            if(sscanf(curLineChar, " SongSelectActiveText : %i , %i , %i \n", &r, &g, &b) == 3)
-                                this->songSelectActiveText = rgb(r, g, b);
-                            if(sscanf(curLineChar, " SongSelectInactiveText : %i , %i , %i \n", &r, &g, &b) == 3)
-                                this->songSelectInactiveText = rgb(r, g, b);
-                            if(sscanf(curLineChar, " InputOverlayText : %i , %i , %i \n", &r, &g, &b) == 3)
-                                this->inputOverlayText = rgb(r, g, b);
-                        } break;
-                        case 2:  // Fonts
-                        {
-                            int val;
-                            char stringBuffer[1024];
+                        // https://osu.ppy.sh/community/forums/topics/314209
+                        Parsing::parse_value(curLine, "HitCircleOverlayAboveNumer",
+                                             &this->bHitCircleOverlayAboveNumber);
 
-                            memset(stringBuffer, '\0', 1024);
-                            if(sscanf(curLineChar, " ComboPrefix : %1023[^\n]", stringBuffer) == 1) {
-                                this->sComboPrefix = stringBuffer;
+                        if(Parsing::parse_value(curLine, "SliderStyle", &this->iSliderStyle)) {
+                            if(this->iSliderStyle != 1 && this->iSliderStyle != 2) this->iSliderStyle = 2;
+                        }
 
-                                for(int i = 0; i < this->sComboPrefix.length(); i++) {
-                                    if(this->sComboPrefix[i] == '\\') {
-                                        this->sComboPrefix.erase(i, 1);
-                                        this->sComboPrefix.insert(i, "/");
-                                    }
+                        if(Parsing::parse_value(curLine, "AnimationFramerate", &this->fAnimationFramerate)) {
+                            if(this->fAnimationFramerate < 0.f) this->fAnimationFramerate = 0.f;
+                        }
+
+                        break;
+                    }
+
+                    // Colors
+                    case 1: {
+                        i32 comboNum;
+                        i32 r, g, b;
+
+                        if(Parsing::parse_value(curLine, "Combo", &comboNum, &r, &g, &b))
+                            this->comboColors.push_back(rgb(r, g, b));
+                        else if(Parsing::parse_value(curLine, "SpinnerApproachCircle", &r, &g, &b))
+                            this->spinnerApproachCircleColor = rgb(r, g, b);
+                        else if(Parsing::parse_value(curLine, "SliderBall", &r, &g, &b))
+                            this->sliderBallColor = rgb(r, g, b);
+                        else if(Parsing::parse_value(curLine, "SliderBorder", &r, &g, &b))
+                            this->sliderBorderColor = rgb(r, g, b);
+                        else if(Parsing::parse_value(curLine, "SliderTrackOverride", &r, &g, &b)) {
+                            this->sliderTrackOverride = rgb(r, g, b);
+                            this->bSliderTrackOverride = true;
+                        } else if(Parsing::parse_value(curLine, "SongSelectActiveText", &r, &g, &b))
+                            this->songSelectActiveText = rgb(r, g, b);
+                        else if(Parsing::parse_value(curLine, "SongSelectInactiveText", &r, &g, &b))
+                            this->songSelectInactiveText = rgb(r, g, b);
+                        else if(Parsing::parse_value(curLine, "InputOverlayText", &r, &g, &b))
+                            this->inputOverlayText = rgb(r, g, b);
+
+                        break;
+                    }
+
+                    // Fonts
+                    case 2: {
+                        Parsing::parse_value(curLine, "ComboOverlap", &this->iComboOverlap);
+                        Parsing::parse_value(curLine, "ScoreOverlap", &this->iScoreOverlap);
+                        Parsing::parse_value(curLine, "HitCircleOverlap", &this->iHitCircleOverlap);
+
+                        if(Parsing::parse_value(curLine, "ComboPrefix", &this->sComboPrefix)) {
+                            // XXX: jank path normalization
+                            for(int i = 0; i < this->sComboPrefix.length(); i++) {
+                                if(this->sComboPrefix[i] == '\\') {
+                                    this->sComboPrefix.erase(i, 1);
+                                    this->sComboPrefix.insert(i, "/");
                                 }
                             }
-                            if(sscanf(curLineChar, " ComboOverlap : %i \n", &val) == 1) this->iComboOverlap = val;
+                        }
 
-                            if(sscanf(curLineChar, " ScorePrefix : %1023[^\n]", stringBuffer) == 1) {
-                                this->sScorePrefix = stringBuffer;
-
-                                for(int i = 0; i < this->sScorePrefix.length(); i++) {
-                                    if(this->sScorePrefix[i] == '\\') {
-                                        this->sScorePrefix.erase(i, 1);
-                                        this->sScorePrefix.insert(i, "/");
-                                    }
+                        if(Parsing::parse_value(curLine, "ScorePrefix", &this->sScorePrefix)) {
+                            // XXX: jank path normalization
+                            for(int i = 0; i < this->sScorePrefix.length(); i++) {
+                                if(this->sScorePrefix[i] == '\\') {
+                                    this->sScorePrefix.erase(i, 1);
+                                    this->sScorePrefix.insert(i, "/");
                                 }
                             }
-                            if(sscanf(curLineChar, " ScoreOverlap : %i \n", &val) == 1) this->iScoreOverlap = val;
+                        }
 
-                            if(sscanf(curLineChar, " HitCirclePrefix : %1023[^\n]", stringBuffer) == 1) {
-                                this->sHitCirclePrefix = stringBuffer;
-
-                                for(int i = 0; i < this->sHitCirclePrefix.length(); i++) {
-                                    if(this->sHitCirclePrefix[i] == '\\') {
-                                        this->sHitCirclePrefix.erase(i, 1);
-                                        this->sHitCirclePrefix.insert(i, "/");
-                                    }
+                        if(Parsing::parse_value(curLine, "HitCirclePrefix", &this->sHitCirclePrefix)) {
+                            // XXX: jank path normalization
+                            for(int i = 0; i < this->sHitCirclePrefix.length(); i++) {
+                                if(this->sHitCirclePrefix[i] == '\\') {
+                                    this->sHitCirclePrefix.erase(i, 1);
+                                    this->sHitCirclePrefix.insert(i, "/");
                                 }
                             }
-                            if(sscanf(curLineChar, " HitCircleOverlap : %i \n", &val) == 1)
-                                this->iHitCircleOverlap = val;
-                        } break;
+                        }
+
+                        break;
                     }
                 }
             }
