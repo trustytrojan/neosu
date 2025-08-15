@@ -694,9 +694,9 @@ void OpenGLLegacyInterface::onTransformUpdate(Matrix4 &projectionMatrix, Matrix4
 void OpenGLLegacyInterface::initSmoothClipShader() {
     if(this->smoothClipShader != nullptr) return;
 
-    this->smoothClipShader.reset(
-        g->createShaderFromSource(std::string(reinterpret_cast<const char *>(smoothclip_vsh), smoothclip_vsh_size()),
-                                  std::string(reinterpret_cast<const char *>(smoothclip_fsh), smoothclip_fsh_size())));
+    this->smoothClipShader.reset(this->createShaderFromSource(
+        std::string(reinterpret_cast<const char *>(smoothclip_vsh), smoothclip_vsh_size()),
+        std::string(reinterpret_cast<const char *>(smoothclip_fsh), smoothclip_fsh_size())));
 
     if(this->smoothClipShader != nullptr) {
         this->smoothClipShader->loadAsync();
