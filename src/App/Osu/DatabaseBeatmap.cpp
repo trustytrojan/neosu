@@ -295,25 +295,13 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
 
                 // Colours
                 case 5: {
-                    i32 r, g, b;
-
                     // XXX: this assumes combo colors are defined in the proper order
                     //      and also that they're written like "Combo1" and not "Combo 1"
-                    if(Parsing::parse_value(curLine, "Combo1", &r, &g, &b))
-                        c.combocolors.push_back(rgb(r, g, b));
-                    else if(Parsing::parse_value(curLine, "Combo2", &r, &g, &b))
-                        c.combocolors.push_back(rgb(r, g, b));
-                    else if(Parsing::parse_value(curLine, "Combo3", &r, &g, &b))
-                        c.combocolors.push_back(rgb(r, g, b));
-                    else if(Parsing::parse_value(curLine, "Combo4", &r, &g, &b))
-                        c.combocolors.push_back(rgb(r, g, b));
-                    else if(Parsing::parse_value(curLine, "Combo5", &r, &g, &b))
-                        c.combocolors.push_back(rgb(r, g, b));
-                    else if(Parsing::parse_value(curLine, "Combo6", &r, &g, &b))
-                        c.combocolors.push_back(rgb(r, g, b));
-                    else if(Parsing::parse_value(curLine, "Combo7", &r, &g, &b))
-                        c.combocolors.push_back(rgb(r, g, b));
-                    else if(Parsing::parse_value(curLine, "Combo8", &r, &g, &b))
+                    i32 comboNum;
+                    i32 r, g, b;
+
+                    // FIXME: actually use comboNum???
+                    if(Parsing::parse_numbered_value(curLine, "Combo", &comboNum, &r, &g, &b))
                         c.combocolors.push_back(rgb(r, g, b));
 
                     break;

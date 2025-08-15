@@ -1189,6 +1189,8 @@ bool Skin::parseSkinINI(std::string filepath) {
         size_t firstNonSpace = curLine.find_first_not_of(" \t");
         if(firstNonSpace != std::string::npos && curLine.substr(firstNonSpace).starts_with("//")) continue;
 
+        debugLog("curLine: {}\n", curLine);
+
         // section detection
         if(curLine.find("[General]") != std::string::npos)
             curBlock = 0;
@@ -1235,7 +1237,8 @@ bool Skin::parseSkinINI(std::string filepath) {
                 i32 comboNum;
                 i32 r, g, b;
 
-                if(Parsing::parse_value(curLine, "Combo", &comboNum, &r, &g, &b))
+                // FIXME: actually use comboNum???
+                if(Parsing::parse_numbered_value(curLine, "Combo", &comboNum, &r, &g, &b))
                     this->comboColors.push_back(rgb(r, g, b));
                 else if(Parsing::parse_value(curLine, "SpinnerApproachCircle", &r, &g, &b))
                     this->spinnerApproachCircleColor = rgb(r, g, b);
