@@ -175,40 +175,56 @@ void Console::execConfigFile(std::string filename) {
     filename.insert(0, MCENGINE_DATA_DIR "cfg" PREF_PATHSEP "");
     if(filename.find(".cfg", (filename.length() - 4), filename.length()) == std::string::npos) filename.append(".cfg");
 
-    File configFile(filename, File::TYPE::READ);
-    if(!configFile.canRead()) {
-        debugLog("error, file \"{:s}\" not found!\n", filename);
-        return;
-    }
+    bool needs_write = false;
+    std::string rewritten_file;
 
-    // collect commands first
-    std::vector<UString> cmds;
-    while(true) {
-        UString line{configFile.readLine()};
+    {
+        File configFile(filename, File::TYPE::READ);
+        if(!configFile.canRead()) {
+            debugLog("error, file \"{:s}\" not found!\n", filename);
+            return;
+        }
 
-        // if canRead() is false after readLine(), we hit EOF
-        if(!configFile.canRead()) break;
+        // collect commands first
+        std::vector<UString> cmds;
+        while(true) {
+            UString line{configFile.readLine()};
 
-        // only process non-empty lines
-        if(!line.isEmpty()) {
-            // handle comments - find "//" and remove everything after
-            const int commentIndex = line.find("//");
-            if(commentIndex != -1) line.erase(commentIndex, line.length() - commentIndex);
+            // if canRead() is false after readLine(), we hit EOF
+            if(!configFile.canRead()) break;
 
-            // McOsu used to prefix all convars with "osu_". Maybe it made sense when McEngine was
-            // a separate thing, but in neosu everything is related to osu anyway, so it's redundant.
-            // So, to avoid breaking old configs, we're removing the prefix for (almost) all convars here.
-            if(line.startsWith("osu_") && !line.startsWith("osu_folder")) {
-                line.erase(0, 4);
+            // only process non-empty lines
+            if(!line.isEmpty()) {
+                // handle comments - find "//" and remove everything after
+                const int commentIndex = line.find("//");
+                if(commentIndex != -1) line.erase(commentIndex, line.length() - commentIndex);
+
+                // McOsu used to prefix all convars with "osu_". Maybe it made sense when McEngine was
+                // a separate thing, but in neosu everything is related to osu anyway, so it's redundant.
+                // So, to avoid breaking old configs, we're removing the prefix for (almost) all convars here.
+                if(line.startsWith("osu_") && !line.startsWith("osu_folder")) {
+                    line.erase(0, 4);
+                    needs_write = true;
+                }
+
+                // add command (original adds all processed lines, even if they become empty after comment removal)
+                cmds.push_back(line);
             }
 
-            // add command (original adds all processed lines, even if they become empty after comment removal)
-            cmds.push_back(line);
+            rewritten_file.append(line.toUtf8());
+            rewritten_file.push_back('\n');
         }
+
+        // process the collected commands
+        for(const auto &cmd : cmds) processCommand(cmd.toUtf8(), true);
     }
 
-    // process the collected commands
-    for(const auto &cmd : cmds) processCommand(cmd.toUtf8(), true);
+    // if we don't remove prefixed lines, this could prevent users from
+    // setting some convars back to their default value
+    if(needs_write) {
+        File configFile(filename, File::TYPE::WRITE);
+        configFile.write((u8 *)rewritten_file.data(), rewritten_file.length());
+    }
 }
 
 void Console::mouse_update(bool *propagate_clicks) {
