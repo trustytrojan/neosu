@@ -1,14 +1,5 @@
-//========= Copyright (c) 2009, 2D Boy & PG & 2025, WH, All rights reserved. =========//
-//
-// Purpose:		unicode string class (modified)
-//
-// $NoKeywords: $ustring $string
-//====================================================================================//
-
+// Copyright (c) 2009, 2D Boy & PG & 2025, WH, All rights reserved.
 #pragma once
-#ifndef USTRING_H
-#define USTRING_H
-
 #include <algorithm>
 #include <cstring>
 #include <cwctype>
@@ -331,5 +322,3 @@ UString UString::join(const Range &range, std::string_view delim) noexcept {
 
     return result;
 }
-
-#endif  // USTRING_H

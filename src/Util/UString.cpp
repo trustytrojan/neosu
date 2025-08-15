@@ -1,10 +1,4 @@
-//========= Copyright (c) 2009, 2D Boy & PG & 2025, WH, All rights reserved. =========//
-//
-// Purpose:		unicode string class (modified)
-//
-// $NoKeywords: $ustring $string
-//====================================================================================//
-
+// Copyright (c) 2009, 2D Boy & PG & 2025, WH, All rights reserved.
 #include "UString.h"
 
 #include <algorithm>

@@ -511,15 +511,15 @@ void Environment::setClipBoardText(const UString &text) {
 }
 
 void Environment::showMessageInfo(const UString &title, const UString &message) const {
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, title.toUtf8(), message.toUtf8(), m_window);
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, title.toUtf8(), message.toUtf8(), nullptr);
 }
 
 void Environment::showMessageWarning(const UString &title, const UString &message) const {
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, title.toUtf8(), message.toUtf8(), m_window);
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, title.toUtf8(), message.toUtf8(), nullptr);
 }
 
 void Environment::showMessageError(const UString &title, const UString &message) const {
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title.toUtf8(), message.toUtf8(), m_window);
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title.toUtf8(), message.toUtf8(), nullptr);
 }
 
 void Environment::showMessageErrorFatal(const UString &title, const UString &message) const {

@@ -37,12 +37,21 @@ void ConVar::addConVar(ConVar *c) {
 
     const std::string &cname_str = c->getName();
 
+    // XXX: "Programmer Error"s are kind of silly, we should just use asserts instead (but debugging is broken atm)
+
+    if(cname_str.starts_with("osu_") && !cname_str.starts_with("osu_folder")) {
+        // osu_ prefix is deprecated.
+        // If you really need it, you'll also need to edit Console::execConfigFile to whitelist it there.
+        engine->showMessageError("Programmer Error", UString::fmt("Remove 'osu_' from the '{}' convar.", cname_str));
+        return;
+    }
+
     if(_getGlobalConVarMap().find(cname_str) == _getGlobalConVarMap().end()) {
         _getGlobalConVarArray().push_back(c);
         _getGlobalConVarMap()[cname_str] = c;
     } else {
-        printf("FATAL: Duplicate ConVar name (\"%s\")\n", cname_str.c_str());
-        std::exit(100);
+        engine->showMessageError("Programmer Error", UString::fmt("Duplicate ConVar name '{}'", cname_str.c_str()));
+        return;
     }
 }
 

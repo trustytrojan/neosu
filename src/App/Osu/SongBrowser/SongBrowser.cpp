@@ -1352,7 +1352,6 @@ void SongBrowser::onSelectionChange(CarouselButton *button, bool rebuild) {
 
 void SongBrowser::onDifficultySelected(DatabaseBeatmap *diff2, bool play) {
     // deselect = unload
-    auto prev_diff2 = this->beatmap->getSelectedDifficulty2();
     this->beatmap->deselect();
 
     // select = play preview music

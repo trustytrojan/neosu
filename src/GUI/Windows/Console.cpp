@@ -195,6 +195,13 @@ void Console::execConfigFile(std::string filename) {
             const int commentIndex = line.find("//");
             if(commentIndex != -1) line.erase(commentIndex, line.length() - commentIndex);
 
+            // McOsu used to prefix all convars with "osu_". Maybe it made sense when McEngine was
+            // a separate thing, but in neosu everything is related to osu anyway, so it's redundant.
+            // So, to avoid breaking old configs, we're removing the prefix for (almost) all convars here.
+            if(line.startsWith("osu_") && !line.startsWith("osu_folder")) {
+                line.erase(0, 4);
+            }
+
             // add command (original adds all processed lines, even if they become empty after comment removal)
             cmds.push_back(line);
         }
