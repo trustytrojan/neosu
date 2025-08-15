@@ -327,8 +327,8 @@ void HUD::drawCursor(Vector2 pos, float alphaMultiplier, bool secondTrail, bool 
     const float animatedScale = scale * (osu->getSkin()->getCursorExpand() ? this->fCursorExpandAnim : 1.0f);
 
     // draw cursor
-    g->setColor(0xffffffff);
-    g->setAlpha(cv::cursor_alpha.getFloat() * alphaMultiplier);
+    g->setColor(Color(0xffffffff).setA(cv::cursor_alpha.getFloat() * alphaMultiplier));
+
     g->pushTransform();
     {
         g->scale(animatedScale * cv::cursor_scale.getFloat(), animatedScale * cv::cursor_scale.getFloat());
@@ -346,8 +346,8 @@ void HUD::drawCursor(Vector2 pos, float alphaMultiplier, bool secondTrail, bool 
 
     // draw cursor middle
     if(osu->getSkin()->getCursorMiddle() != osu->getSkin()->getMissingTexture()) {
-        g->setColor(0xffffffff);
-        g->setAlpha(cv::cursor_alpha.getFloat() * alphaMultiplier);
+        g->setColor(Color(0xffffffff).setA(cv::cursor_alpha.getFloat() * alphaMultiplier));
+
         g->pushTransform();
         {
             g->scale(scale * cv::cursor_scale.getFloat(), scale * cv::cursor_scale.getFloat());
@@ -473,8 +473,8 @@ void HUD::drawCursorTrailRaw(float alpha, Vector2 pos) {
         (osu->getSkin()->getCursorExpand() && cv::cursor_trail_expand.getBool() ? this->fCursorExpandAnim : 1.0f) *
         cv::cursor_trail_scale.getFloat();
 
-    g->setColor(0xffffffff);
-    g->setAlpha(alpha);
+    g->setColor(Color(0xffffffff).setA(alpha));
+
     g->pushTransform();
     {
         g->scale(animatedScale * cv::cursor_scale.getFloat(), animatedScale * cv::cursor_scale.getFloat());
@@ -995,24 +995,24 @@ void HUD::drawScorebarBg(float alpha, float breakAnim) {
     const float ratio = Osu::getImageScale(Vector2(1, 1), 1.0f);
 
     const Vector2 breakAnimOffset = Vector2(0, -20.0f * breakAnim) * ratio;
-    g->setColor(0xffffffff);
-    g->setAlpha(alpha * (1.0f - breakAnim));
+    g->setColor(Color(0xffffffff).setA(alpha * (1.0f - breakAnim)));
+
     osu->getSkin()->getScorebarBg()->draw(
         (osu->getSkin()->getScorebarBg()->getSize() / 2.0f) * scale + (breakAnimOffset * scale), scale);
 }
 
 void HUD::drawSectionPass(float alpha) {
     if(!osu->getSkin()->getSectionPassImage()->isMissingTexture()) {
-        g->setColor(0xffffffff);
-        g->setAlpha(alpha);
+        g->setColor(Color(0xffffffff).setA(alpha));
+
         osu->getSkin()->getSectionPassImage()->draw(osu->getScreenSize() / 2);
     }
 }
 
 void HUD::drawSectionFail(float alpha) {
     if(!osu->getSkin()->getSectionFailImage()->isMissingTexture()) {
-        g->setColor(0xffffffff);
-        g->setAlpha(alpha);
+        g->setColor(Color(0xffffffff).setA(alpha));
+
         osu->getSkin()->getSectionFailImage()->draw(osu->getScreenSize() / 2);
     }
 }
@@ -1615,8 +1615,8 @@ void HUD::drawHitErrorBarInt(float hitWindow300, float hitWindow100, float hitWi
                                     : (std::abs(percent) <= percent100 && !modMing3012 ? color100 : color50));
             }
 
-            g->setColor(barColor);
-            g->setAlpha(alphaEntry * fade);
+            g->setColor(Color(barColor).setA(alphaEntry * fade));
+
 
             float missHeightMultiplier = 1.0f;
             if(this->hiterrors[i].miss) missHeightMultiplier = 1.5f;
@@ -1670,15 +1670,15 @@ void HUD::drawHitErrorBarInt2(Vector2 center, int ur) {
                     1);
 
             // shadow
-            g->setColor(0xff000000);
-            g->setAlpha(alpha);
+            g->setColor(Color(0xff000000).setA(alpha));
+
             g->drawString(urTextFont, urText);
 
             g->translate(-1, -1);
 
             // text
-            g->setColor(0xffffffff);
-            g->setAlpha(alpha);
+            g->setColor(Color(0xffffffff).setA(alpha));
+
             g->drawString(urTextFont, urText);
         }
         g->popTransform();
@@ -1921,8 +1921,8 @@ void HUD::drawTargetHeatmap(float hitcircleDiameter) {
         else
             color = colorMiss;
 
-        g->setColor(color);
-        g->setAlpha(std::clamp<float>((target.time - engine->getTime()) / 3.5f, 0.0f, 1.0f));
+        g->setColor(Color(color).setA(std::clamp<float>((target.time - engine->getTime()) / 3.5f, 0.0f, 1.0f)));
+
 
         const float theta = glm::radians(target.angle);
         const float cs = std::cos(theta);
@@ -2075,8 +2075,8 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
 
                     const float margin = 5.0f * dpiScale;
 
-                    g->setColor(0xffffffff);
-                    g->setAlpha(alpha);
+                    g->setColor(Color(0xffffffff).setA(alpha));
+
                     g->drawRect(topLeftCenter.x - margin * strainWidth, topLeftCenter.y - margin * strainWidth,
                                 strainWidth * 2 * margin,
                                 aimStrainHeight + speedStrainHeight + 2 * margin * strainWidth);
@@ -2086,8 +2086,8 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
     }
 
     // breaks
-    g->setColor(greyTransparent);
-    g->setAlpha(galpha);
+    g->setColor(Color(greyTransparent).setA(galpha));
+
     for(auto i : breaks) {
         const int width =
             std::max((int)(osu->getScreenWidth() * std::clamp<float>(i.endPercent - i.startPercent, 0.0f, 1.0f)), 2);
@@ -2095,11 +2095,11 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
     }
 
     // line
-    g->setColor(0xff000000);
-    g->setAlpha(galpha);
+    g->setColor(Color(0xff000000).setA(galpha));
+
     g->drawLine(0, cursorPos.y + 1, osu->getScreenWidth(), cursorPos.y + 1);
-    g->setColor(grey);
-    g->setAlpha(galpha);
+    g->setColor(Color(grey).setA(galpha));
+
     g->drawLine(0, cursorPos.y, osu->getScreenWidth(), cursorPos.y);
 
     // current time triangle
@@ -2107,12 +2107,12 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
     g->pushTransform();
     {
         g->translate(triangleTip.x + 1, triangleTip.y - osu->getSkin()->getSeekTriangle()->getHeight() / 2.0f + 1);
-        g->setColor(0xff000000);
-        g->setAlpha(galpha);
+        g->setColor(Color(0xff000000).setA(galpha));
+
         g->drawImage(osu->getSkin()->getSeekTriangle());
         g->translate(-1, -1);
-        g->setColor(green);
-        g->setAlpha(galpha);
+        g->setColor(Color(green).setA(galpha));
+
         g->drawImage(osu->getSkin()->getSeekTriangle());
     }
     g->popTransform();
@@ -2127,12 +2127,12 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
                 osu->getScreenWidth() - timeFont->getStringWidth(currentTimeText) - currentTimeLeftRightTextOffset) +
                 1,
             triangleTip.y - osu->getSkin()->getSeekTriangle()->getHeight() - currentTimeTopTextOffset + 1);
-        g->setColor(0xff000000);
-        g->setAlpha(galpha);
+        g->setColor(Color(0xff000000).setA(galpha));
+
         g->drawString(timeFont, currentTimeText);
         g->translate(-1, -1);
-        g->setColor(green);
-        g->setAlpha(galpha);
+        g->setColor(Color(green).setA(galpha));
+
         g->drawString(timeFont, currentTimeText);
     }
     g->popTransform();
@@ -2143,12 +2143,12 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
     {
         g->translate((int)(startAndEndTimeTextOffset + 1),
                      (int)(triangleTip.y + startAndEndTimeTextOffset + timeFont->getHeight() + 1));
-        g->setColor(0xff000000);
-        g->setAlpha(galpha);
+        g->setColor(Color(0xff000000).setA(galpha));
+
         g->drawString(timeFont, startTimeText);
         g->translate(-1, -1);
-        g->setColor(greyDark);
-        g->setAlpha(galpha);
+        g->setColor(Color(greyDark).setA(galpha));
+
         g->drawString(timeFont, startTimeText);
     }
     g->popTransform();
@@ -2160,12 +2160,12 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
         g->translate(
             (int)(osu->getScreenWidth() - timeFont->getStringWidth(endTimeText) - startAndEndTimeTextOffset + 1),
             (int)(triangleTip.y + startAndEndTimeTextOffset + timeFont->getHeight() + 1));
-        g->setColor(0xff000000);
-        g->setAlpha(galpha);
+        g->setColor(Color(0xff000000).setA(galpha));
+
         g->drawString(timeFont, endTimeText);
         g->translate(-1, -1);
-        g->setColor(greyDark);
-        g->setAlpha(galpha);
+        g->setColor(Color(greyDark).setA(galpha));
+
         g->drawString(timeFont, endTimeText);
     }
     g->popTransform();
@@ -2179,12 +2179,12 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
         {
             g->rotate(180);
             g->translate(triangleTip.x + 1, triangleTip.y + osu->getSkin()->getSeekTriangle()->getHeight() / 2.0f + 1);
-            g->setColor(0xff000000);
-            g->setAlpha(galpha);
+            g->setColor(Color(0xff000000).setA(galpha));
+
             g->drawImage(osu->getSkin()->getSeekTriangle());
             g->translate(-1, -1);
-            g->setColor(grey);
-            g->setAlpha(galpha);
+            g->setColor(Color(grey).setA(galpha));
+
             g->drawImage(osu->getSkin()->getSeekTriangle());
         }
         g->popTransform();
@@ -2203,12 +2203,12 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
                                currentTimeTopTextOffset *
                                    std::max(1.0f, this->getCursorScaleFactor() * cv::cursor_scale.getFloat()) *
                                    cv::hud_scrubbing_timeline_hover_tooltip_offset_multiplier.getFloat()));
-            g->setColor(0xff000000);
-            g->setAlpha(galpha);
+            g->setColor(Color(0xff000000).setA(galpha));
+
             g->drawString(timeFont, endTimeText);
             g->translate(-1, -1);
-            g->setColor(grey);
-            g->setAlpha(galpha);
+            g->setColor(Color(grey).setA(galpha));
+
             g->drawString(timeFont, endTimeText);
         }
         g->popTransform();
@@ -2231,12 +2231,12 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
                       std::max(1.0f, this->getCursorScaleFactor() * cv::cursor_scale.getFloat()) *
                       cv::hud_scrubbing_timeline_hover_tooltip_offset_multiplier.getFloat() * 2.0f -
                   1));
-        g->setColor(0xff000000);
-        g->setAlpha(galpha);
+        g->setColor(Color(0xff000000).setA(galpha));
+
         g->drawString(timeFont, hoverTimeText);
         g->translate(-1, -1);
-        g->setColor(0xff666666);
-        g->setAlpha(galpha);
+        g->setColor(Color(0xff666666).setA(galpha));
+
         g->drawString(timeFont, hoverTimeText);
     }
     g->popTransform();

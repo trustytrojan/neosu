@@ -299,8 +299,8 @@ void MainMenu::draw() {
            backgroundImage->isReady()) {
             const float scale = Osu::getImageScaleToFillResolution(backgroundImage, osu->getScreenSize());
 
-            g->setColor(0xffffffff);
-            g->setAlpha(this->fStartupAnim);
+            g->setColor(Color(0xffffffff).setA(this->fStartupAnim));
+
             g->pushTransform();
             {
                 g->scale(scale, scale);
@@ -497,8 +497,8 @@ void MainMenu::draw() {
     g->setLineWidth(2.0f);
     g->pushTransform();
     g->translate(0, 0, inset);
-    g->setColor(cubeColor);
-    g->setAlpha(cv::main_menu_alpha.getFloat());
+    g->setColor(Color(cubeColor).setA(cv::main_menu_alpha.getFloat()));
+
     g->fillRectf(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
                  mainButtonRect.getHeight() - 2 * inset);
     g->translate(0, 0, -0.2f);  // move the border slightly towards the camera to prevent Z fighting
@@ -580,8 +580,8 @@ void MainMenu::draw() {
             }
 
             // left
-            g->setColor(0xffc8faf1);
-            g->setAlpha(this->fMainMenuAnimFriendPercent * cv::main_menu_alpha.getFloat());
+            g->setColor(Color(0xffc8faf1).setA(this->fMainMenuAnimFriendPercent * cv::main_menu_alpha.getFloat()));
+
             g->drawVAO(&vao);
 
             // right
@@ -628,8 +628,8 @@ void MainMenu::draw() {
                              mainButtonRect.getY() + offsetY -
                                  this->fMainMenuAnimFriendEyeFollowY * mainButtonRect.getWidth() * 0.5f);
 
-                g->setColor(0xff000000);
-                g->setAlpha(cv::main_menu_alpha.getFloat());
+                g->setColor(Color(0xff000000).setA(cv::main_menu_alpha.getFloat()));
+
                 g->fillRectf(0, 0, width, height);
                 g->fillRectf(width - height / 2.0f, 0, height, width);
                 g->fillRectf(width - height / 2.0f, width - height / 2.0f, width, height);
@@ -658,8 +658,8 @@ void MainMenu::draw() {
                     mainButtonRect.getX() + offsetX - this->fMainMenuAnimFriendEyeFollowX * mainButtonRect.getWidth(),
                     mainButtonRect.getY() + offsetY - this->fMainMenuAnimFriendEyeFollowY * mainButtonRect.getWidth());
 
-                g->setColor(0xff000000);
-                g->setAlpha(cv::main_menu_alpha.getFloat());
+                g->setColor(Color(0xff000000).setA(cv::main_menu_alpha.getFloat()));
+
                 g->fillRectf(0, 0, width, height);
             }
             g->popTransform();
@@ -673,15 +673,15 @@ void MainMenu::draw() {
                         this->fMainMenuAnimFriendEyeFollowX * mainButtonRect.getWidth(),
                     mainButtonRect.getY() + offsetY - this->fMainMenuAnimFriendEyeFollowY * mainButtonRect.getWidth());
 
-                g->setColor(0xff000000);
-                g->setAlpha(cv::main_menu_alpha.getFloat());
+                g->setColor(Color(0xff000000).setA(cv::main_menu_alpha.getFloat()));
+
                 g->fillRectf(0, 0, width, height);
             }
             g->popTransform();
 
             // tear
-            g->setColor(0xff000000);
-            g->setAlpha(cv::main_menu_alpha.getFloat());
+            g->setColor(Color(0xff000000).setA(cv::main_menu_alpha.getFloat()));
+
             g->fillRectf(mainButtonRect.getX() + offsetX + width * 0.375f -
                              this->fMainMenuAnimFriendEyeFollowX * mainButtonRect.getWidth(),
                          mainButtonRect.getY() + offsetY + width / 2.0f -
@@ -719,8 +719,8 @@ void MainMenu::draw() {
             const float animRightMoveRight = animLeftMoveUp * (this->iMainMenuAnimBeatCounter % 2 == 0 ? 1.0f : 0.0f);
 
             // left
-            g->setColor(0xffd5f6fd);
-            g->setAlpha(this->fMainMenuAnimFriendPercent * cv::main_menu_alpha.getFloat());
+            g->setColor(Color(0xffd5f6fd).setA(this->fMainMenuAnimFriendPercent * cv::main_menu_alpha.getFloat()));
+
             g->pushTransform();
             {
                 g->rotate(40 - (1.0f - customPulse) * 10 + animLeftMoveLeft * animLeftMoveLeft * 20);
@@ -782,8 +782,8 @@ void MainMenu::draw() {
         g->rotate3DScene(0, -180, 0);
         g->pushTransform();
         g->translate(0, 0, inset);
-        g->setColor(cubeColor);
-        g->setAlpha(cv::main_menu_alpha.getFloat());
+        g->setColor(Color(cubeColor).setA(cv::main_menu_alpha.getFloat()));
+
         g->fillRectf(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset,
                      mainButtonRect.getWidth() - 2 * inset, mainButtonRect.getHeight() - 2 * inset);
         g->translate(0, 0, -0.2f);
@@ -797,8 +797,8 @@ void MainMenu::draw() {
         g->rotate3DScene(0, 90, 0);
         g->pushTransform();
         g->translate(0, 0, inset);
-        g->setColor(cubeColor);
-        g->setAlpha(cv::main_menu_alpha.getFloat());
+        g->setColor(Color(cubeColor).setA(cv::main_menu_alpha.getFloat()));
+
         g->fillRectf(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset,
                      mainButtonRect.getWidth() - 2 * inset, mainButtonRect.getHeight() - 2 * inset);
         g->translate(0, 0, -0.2f);
@@ -814,8 +814,8 @@ void MainMenu::draw() {
         g->rotate3DScene(0, -90, 0);
         g->pushTransform();
         g->translate(0, 0, inset);
-        g->setColor(cubeColor);
-        g->setAlpha(cv::main_menu_alpha.getFloat());
+        g->setColor(Color(cubeColor).setA(cv::main_menu_alpha.getFloat()));
+
         g->fillRectf(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset,
                      mainButtonRect.getWidth() - 2 * inset, mainButtonRect.getHeight() - 2 * inset);
         g->translate(0, 0, -0.2f);
@@ -831,8 +831,8 @@ void MainMenu::draw() {
         g->rotate3DScene(90, 0, 0);
         g->pushTransform();
         g->translate(0, 0, inset);
-        g->setColor(cubeColor);
-        g->setAlpha(cv::main_menu_alpha.getFloat());
+        g->setColor(Color(cubeColor).setA(cv::main_menu_alpha.getFloat()));
+
         g->fillRectf(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset,
                      mainButtonRect.getWidth() - 2 * inset, mainButtonRect.getHeight() - 2 * inset);
         g->translate(0, 0, -0.2f);
@@ -848,8 +848,8 @@ void MainMenu::draw() {
         g->rotate3DScene(-90, 0, 0);
         g->pushTransform();
         g->translate(0, 0, inset);
-        g->setColor(cubeColor);
-        g->setAlpha(cv::main_menu_alpha.getFloat());
+        g->setColor(Color(cubeColor).setA(cv::main_menu_alpha.getFloat()));
+
         g->fillRectf(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset,
                      mainButtonRect.getWidth() - 2 * inset, mainButtonRect.getHeight() - 2 * inset);
         g->translate(0, 0, -0.2f);

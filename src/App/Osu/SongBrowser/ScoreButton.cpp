@@ -67,8 +67,8 @@ void ScoreButton::draw() {
     // background
     if(this->style == STYLE::SONG_BROWSER) {
         // XXX: Make it flash with song BPM
-        g->setColor(0xff000000);
-        g->setAlpha(0.59f * (0.5f + 0.5f * this->fIndexNumberAnim));
+        g->setColor(Color(0xff000000).setA(0.59f * (0.5f + 0.5f * this->fIndexNumberAnim)));
+
         Image *backgroundImage = osu->getSkin()->getMenuButtonBackground();
         g->pushTransform();
         {
@@ -85,8 +85,8 @@ void ScoreButton::draw() {
         }
         g->popTransform();
     } else if(this->style == STYLE::TOP_RANKS) {
-        g->setColor(0xff666666);  // from 33413c to 4e7466
-        g->setAlpha(0.59f * (0.5f + 0.5f * this->fIndexNumberAnim));
+        g->setColor(Color(0xff666666).setA(0.59f * (0.5f + 0.5f * this->fIndexNumberAnim)));  // from 33413c to 4e7466
+
         g->fillRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
     }
 
@@ -120,12 +120,12 @@ void ScoreButton::draw() {
                            indexNumberFont->getStringWidth(indexNumberString) * scale / 2.0f),
                      (int)(yPos + this->vSize.y / 2.0f + indexNumberFont->getHeight() * scale / 2.0f));
         g->translate(0.5f, 0.5f);
-        g->setColor(0xff000000);
-        g->setAlpha(1.0f - (1.0f - this->fIndexNumberAnim));
+        g->setColor(Color(0xff000000).setA(1.0f - (1.0f - this->fIndexNumberAnim)));
+
         g->drawString(indexNumberFont, indexNumberString);
         g->translate(-0.5f, -0.5f);
-        g->setColor(0xffffffff);
-        g->setAlpha(1.0f - (1.0f - this->fIndexNumberAnim) * (1.0f - this->fIndexNumberAnim));
+        g->setColor(Color(0xffffffff).setA(1.0f - (1.0f - this->fIndexNumberAnim) * (1.0f - this->fIndexNumberAnim)));
+
         g->drawString(indexNumberFont, indexNumberString);
     }
     g->popTransform();
@@ -167,8 +167,8 @@ void ScoreButton::draw() {
         g->translate((int)(this->vPos.x + this->vSize.x * indexNumberWidthPercent + gradeWidth + gradePaddingRight),
                      (int)(yPos + height / 2.0f + usernameFont->getHeight() * scale / 2.0f + paddingTop));
         g->translate(0.75f, 0.75f);
-        g->setColor(0xff000000);
-        g->setAlpha(0.75f);
+        g->setColor(Color(0xff000000).setA(0.75f));
+
         g->drawString(usernameFont, string);
         g->translate(-0.75f, -0.75f);
         g->setColor(this->is_friend ? 0xffD424B0 : 0xffffffff);
@@ -194,8 +194,8 @@ void ScoreButton::draw() {
         g->translate((int)(this->vPos.x + this->vSize.x * indexNumberWidthPercent + gradeWidth + gradePaddingRight),
                      (int)(yPos + height * 1.5f + scoreFont->getHeight() * scale / 2.0f - paddingBottom));
         g->translate(0.75f, 0.75f);
-        g->setColor(0xff000000);
-        g->setAlpha(0.75f);
+        g->setColor(Color(0xff000000).setA(0.75f));
+
         const auto &scoreStr = (this->style == STYLE::TOP_RANKS ? string : this->sScoreScore);
         g->drawString(scoreFont, (cv::scores_sort_by_pp.getBool() ? string : scoreStr));
         g->translate(-0.75f, -0.75f);
@@ -205,8 +205,8 @@ void ScoreButton::draw() {
         if(this->style == STYLE::TOP_RANKS) {
             g->translate(scoreFont->getStringWidth(string) * scale, 0);
             g->translate(0.75f, 0.75f);
-            g->setColor(0xff000000);
-            g->setAlpha(0.75f);
+            g->setColor(Color(0xff000000).setA(0.75f));
+
             g->drawString(scoreFont, this->sScoreScorePPWeightedWeight);
             g->translate(-0.75f, -0.75f);
             g->setColor(0xffbbbbbb);
@@ -233,8 +233,8 @@ void ScoreButton::draw() {
                            rightSidePaddingRight),
                      (int)(yPos + height * 0.5f + modFont->getHeight() * scale / 2.0f + paddingTop));
         g->translate(0.75f, 0.75f);
-        g->setColor(0xff000000);
-        g->setAlpha(0.75f);
+        g->setColor(Color(0xff000000).setA(0.75f));
+
         g->drawString(modFont, this->sScoreMods);
         g->translate(-0.75f, -0.75f);
         g->setColor(0xffffffff);
@@ -260,8 +260,8 @@ void ScoreButton::draw() {
                            rightSidePaddingRight),
                      (int)(yPos + height * 1.5f + accFont->getHeight() * scale / 2.0f + paddingTop));
         g->translate(0.75f, 0.75f);
-        g->setColor(0xff000000);
-        g->setAlpha(0.75f);
+        g->setColor(Color(0xff000000).setA(0.75f));
+
         g->drawString(accFont, scoreAccuracy);
         g->translate(-0.75f, -0.75f);
         g->setColor((this->style == STYLE::TOP_RANKS ? 0xffffcc22 : 0xffffffff));
@@ -285,8 +285,8 @@ void ScoreButton::draw() {
                                rightSidePaddingRight),
                          (int)(yPos + height * 2.325f + customFont->getHeight() * scale / 2.0f + paddingTop));
             g->translate(0.75f, 0.75f);
-            g->setColor(0xff000000);
-            g->setAlpha(0.75f);
+            g->setColor(Color(0xff000000).setA(0.75f));
+
             g->drawString(customFont, this->sCustom);
             g->translate(-0.75f, -0.75f);
             g->setColor(0xffffffff);
@@ -311,8 +311,8 @@ void ScoreButton::draw() {
                                rightSidePaddingRight),
                          (int)(yPos + height * 2.5f + weightFont->getHeight() * scale / 2.0f - paddingBottom));
             g->translate(0.75f, 0.75f);
-            g->setColor(0xff000000);
-            g->setAlpha(0.75f);
+            g->setColor(Color(0xff000000).setA(0.75f));
+
             g->drawString(weightFont, this->sScoreWeight);
             g->translate(-0.75f, -0.75f);
             g->setColor(0xff999999);
@@ -338,8 +338,8 @@ void ScoreButton::draw() {
             g->translate((int)(this->vPos.x + this->vSize.x + iconPaddingLeft),
                          (int)(yPos + this->vSize.y / 2 + iconHeight / 2));
             g->translate(1, 1);
-            g->setColor(0xff000000);
-            g->setAlpha(0.75f);
+            g->setColor(Color(0xff000000).setA(0.75f));
+
             g->drawString(iconFont, recentScoreIconString);
             g->translate(-1, -1);
             g->setColor(0xffffffff);
@@ -360,8 +360,8 @@ void ScoreButton::draw() {
                                    iconFont->getStringWidth(recentScoreIconString) * iconScale + timePaddingLeft),
                              (int)(yPos + this->vSize.y / 2 + timeFont->getHeight() * timeScale / 2));
                 g->translate(0.75f, 0.75f);
-                g->setColor(0xff000000);
-                g->setAlpha(0.85f);
+                g->setColor(Color(0xff000000).setA(0.85f));
+
                 g->drawString(timeFont, this->sScoreTime);
                 g->translate(-0.75f, -0.75f);
                 g->setColor(0xffffffff);

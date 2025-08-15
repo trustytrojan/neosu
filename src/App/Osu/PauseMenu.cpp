@@ -103,8 +103,8 @@ void PauseMenu::draw() {
         animation = -animation * (animation - 2);  // quad out
         const float offset = osu->getUIScale(20.0f + 45.0f * animation);
 
-        g->setColor(arrowColor);
-        g->setAlpha(this->fWarningArrowsAnimAlpha * this->fDimAnim);
+        g->setColor(Color(arrowColor).setA(this->fWarningArrowsAnimAlpha * this->fDimAnim));
+
         osu->getHUD()->drawWarningArrow(Vector2(this->fWarningArrowsAnimX, this->fWarningArrowsAnimY) +
                                             Vector2(0, this->selectedButton->getSize().y / 2) - Vector2(offset, 0),
                                         false, false);

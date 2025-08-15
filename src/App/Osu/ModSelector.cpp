@@ -521,8 +521,8 @@ void ModSelector::draw() {
                     (int)(experimentalTextHeight / 3.0f +
                           std::max(0.0f, experimentalModsAnimationTranslation + this->experimentalContainer->getSize().x)),
                     (int)(osu->getScreenHeight() / 2 - experimentalTextWidth / 2));
-                g->setColor(0xff777777);
-                g->setAlpha(1.0f - this->fExperimentalAnimation * this->fExperimentalAnimation);
+                g->setColor(Color(0xff777777).setA(1.0f - this->fExperimentalAnimation * this->fExperimentalAnimation));
+
                 g->drawString(experimentalFont, experimentalText);
             }
             g->popTransform();

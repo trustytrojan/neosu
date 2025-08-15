@@ -188,8 +188,7 @@ void UserCard::draw() {
             const Vector2 textPos = Vector2(pos.x, pos.y + deltaFont->getHeight() * scale);
 
             // background (to ensure readability even with stupid long usernames)
-            g->setColor(argb(1.0f, 0.f, 0.f, 0.f));
-            g->setAlpha(1.0f - (1.0f - this->fPPDeltaAnim) * (1.0f - this->fPPDeltaAnim));
+            g->setColor(argb(1.0f - (1.0f - this->fPPDeltaAnim) * (1.0f - this->fPPDeltaAnim), 0.f, 0.f, 0.f));
             g->fillRect(pos.x, pos.y, backgroundSize.x, backgroundSize.y);
 
             // delta text
@@ -199,13 +198,13 @@ void UserCard::draw() {
                 g->translate((int)textPos.x, (int)textPos.y);
 
                 g->translate(1, 1);
-                g->setColor(0xff000000);
-                g->setAlpha(this->fPPDeltaAnim);
+                g->setColor(Color(0xff000000).setA(this->fPPDeltaAnim));
+
                 g->drawString(deltaFont, performanceDeltaString);
 
                 g->translate(-1, -1);
-                g->setColor(this->fPPDelta > 0.0f ? 0xff00ff00 : 0xffff0000);
-                g->setAlpha(this->fPPDeltaAnim);
+                g->setColor(Color(this->fPPDelta > 0.0f ? 0xff00ff00 : 0xffff0000).setA(this->fPPDeltaAnim));
+
                 g->drawString(deltaFont, performanceDeltaString);
             }
             g->popTransform();

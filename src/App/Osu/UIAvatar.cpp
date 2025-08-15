@@ -101,8 +101,8 @@ void UIAvatar::draw_avatar(float alpha) {
         }
     } else {
         g->pushTransform();
-        g->setColor(0xffffffff);
-        g->setAlpha(alpha);
+        g->setColor(Color(0xffffffff).setA(alpha));
+
         g->scale(this->vSize.x / this->avatar->getWidth(), this->vSize.y / this->avatar->getHeight());
         g->translate(this->vPos.x + this->vSize.x / 2.0f, this->vPos.y + this->vSize.y / 2.0f);
         g->drawImage(this->avatar);

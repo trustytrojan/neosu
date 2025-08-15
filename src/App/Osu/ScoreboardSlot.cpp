@@ -47,8 +47,8 @@ void ScoreboardSlot::draw() {
     start_y = roundf(start_y);
 
     if(this->fFlash > 0.f && !cv::avoid_flashes.getBool()) {
-        g->setColor(0xffffffff);
-        g->setAlpha(this->fFlash);
+        g->setColor(Color(0xffffffff).setA(this->fFlash));
+
         g->fillRect(0, start_y, avatar_width + width, height);
     }
 
@@ -98,13 +98,13 @@ void ScoreboardSlot::draw() {
                      start_y + (avatar_height / 2.0f) + indexFont->getHeight() * scale / 2.0f * 0.9f);
 
         g->translate(0.5f, 0.5f);
-        g->setColor(0xff000000);
-        g->setAlpha(0.3f * this->fAlpha);
+        g->setColor(Color(0xff000000).setA(0.3f * this->fAlpha));
+
         g->drawString(indexFont, indexString);
 
         g->translate(-0.5f, -0.5f);
-        g->setColor(0xffffffff);
-        g->setAlpha(0.7f * this->fAlpha);
+        g->setColor(Color(0xffffffff).setA(0.7f * this->fAlpha));
+
         g->drawString(indexFont, indexString);
     }
     g->popTransform();
@@ -123,8 +123,8 @@ void ScoreboardSlot::draw() {
         g->translate(avatar_width + padding, start_y + padding + nameFont->getHeight() * scale);
         if(drawTextShadow) {
             g->translate(1, 1);
-            g->setColor(textShadowColor);
-            g->setAlpha(this->fAlpha);
+            g->setColor(Color(textShadowColor).setA(this->fAlpha));
+
             g->drawString(nameFont, this->score.name);
             g->translate(-1, -1);
         }
@@ -164,8 +164,8 @@ void ScoreboardSlot::draw() {
         g->translate(avatar_width + width - stringWidth * scale - padding * 1.35f, start_y + height - 2 * padding);
         if(drawTextShadow) {
             g->translate(1, 1);
-            g->setColor(textShadowColor);
-            g->setAlpha(this->fAlpha);
+            g->setColor(Color(textShadowColor).setA(this->fAlpha));
+
             g->drawString(comboFont, comboString);
             g->translate(-1, -1);
         }
@@ -194,8 +194,8 @@ void ScoreboardSlot::draw() {
             g->translate(avatar_width + padding * 1.35f, start_y + height - 2 * padding);
             {
                 g->translate(1, 1);
-                g->setColor(textShadowColor);
-                g->setAlpha(this->fAlpha);
+                g->setColor(Color(textShadowColor).setA(this->fAlpha));
+
                 g->drawString(accFont, accString);
                 g->translate(-1, -1);
             }
@@ -226,8 +226,8 @@ void ScoreboardSlot::draw() {
             g->translate(avatar_width + padding * 1.35f, start_y + height - 2 * padding);
             if(drawTextShadow) {
                 g->translate(1, 1);
-                g->setColor(textShadowColor);
-                g->setAlpha(this->fAlpha);
+                g->setColor(Color(textShadowColor).setA(this->fAlpha));
+
                 g->drawString(scoreFont, scoreString);
                 g->translate(-1, -1);
             }

@@ -89,13 +89,13 @@ void UIContextMenu::draw() {
     }
 
     // draw background
-    g->setColor(0xff222222);
-    g->setAlpha(this->fAnimation);
+    g->setColor(Color(0xff222222).setA(this->fAnimation));
+
     g->fillRect(this->vPos.x + 1, this->vPos.y + 1, this->vSize.x - 1, this->vSize.y - 1);
 
     // draw frame
-    g->setColor(0xffffffff);
-    g->setAlpha(this->fAnimation * this->fAnimation);
+    g->setColor(Color(0xffffffff).setA(this->fAnimation * this->fAnimation));
+
     g->drawRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
 
     CBaseUIScrollView::draw();

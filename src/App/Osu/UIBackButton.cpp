@@ -35,8 +35,8 @@ void UIBackButton::draw() {
     if(this->fAnimation > 0.0f) {
         g->pushTransform();
         {
-            g->setColor(0xffffffff);
-            g->setAlpha(this->fAnimation * 0.15f);
+            g->setColor(Color(0xffffffff).setA(this->fAnimation * 0.15f));
+
             g->translate(this->vPos.x + this->vSize.x / 2, this->vPos.y + this->vSize.y / 2);
             g->fillRect(-this->vSize.x / 2, -this->vSize.y / 2, this->vSize.x, this->vSize.y + 5);
         }

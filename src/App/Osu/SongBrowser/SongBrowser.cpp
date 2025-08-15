@@ -744,8 +744,8 @@ void SongBrowser::draw() {
 
                     const float margin = 5.0f * dpiScale;
 
-                    g->setColor(0xffffffff);
-                    g->setAlpha(alpha);
+                    g->setColor(Color(0xffffffff).setA(alpha));
+
                     g->drawRect(topLeftCenter.x - margin * strainWidth, topLeftCenter.y - margin * strainWidth,
                                 strainWidth * 2 * margin,
                                 aimStrainHeight + speedStrainHeight + 2 * margin * strainWidth);
@@ -846,8 +846,8 @@ void SongBrowser::drawSelectedBeatmapBackgroundImage(float alpha) {
         if(backgroundImage != nullptr && backgroundImage->isReady()) {
             const float scale = Osu::getImageScaleToFillResolution(backgroundImage, osu->getScreenSize());
 
-            g->setColor(0xff999999);
-            g->setAlpha(alpha);
+            g->setColor(Color(0xff999999).setA(alpha));
+
             g->pushTransform();
             {
                 g->scale(scale, scale);

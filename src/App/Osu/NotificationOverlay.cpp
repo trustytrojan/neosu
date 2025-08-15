@@ -57,21 +57,21 @@ void ToastElement::draw() {
     alpha *= std::max(0.0, (this->creationTime + 9.5) - engine->getTime());
 
     // background
-    g->setColor(this->isMouseInside() ? 0xff222222 : 0xff111111);
-    g->setAlpha(alpha);
+    g->setColor(Color(this->isMouseInside() ? 0xff222222 : 0xff111111).setA(alpha));
+
     g->fillRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
 
     // border
-    g->setColor(this->isMouseInside() ? rgb(255, 255, 255) : this->borderColor);
-    g->setAlpha(alpha);
+    g->setColor(Color(this->isMouseInside() ? rgb(255, 255, 255) : this->borderColor).setA(alpha));
+
     g->drawRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
 
     // text
     f64 y = this->vPos.y;
     for(const auto &line : this->lines) {
         y += (font->getHeight() * 1.5);
-        g->setColor(0xffffffff);
-        g->setAlpha(alpha);
+        g->setColor(Color(0xffffffff).setA(alpha));
+
         g->pushTransform();
         g->translate(this->vPos.x + TOAST_INNER_X_MARGIN, y);
         g->drawString(font, line);
@@ -133,8 +133,8 @@ void NotificationOverlay::draw() {
     if(!this->isVisible()) return;
 
     if(this->bWaitForKey) {
-        g->setColor(0x22ffffff);
-        g->setAlpha((this->notification1.backgroundAnim / 0.5f) * 0.13f);
+        g->setColor(Color(0x22ffffff).setA((this->notification1.backgroundAnim / 0.5f) * 0.13f));
+
         g->fillRect(0, 0, osu->getScreenWidth(), osu->getScreenHeight());
     }
 
@@ -151,14 +151,14 @@ void NotificationOverlay::drawNotificationText(NotificationOverlay::NOTIFICATION
 
     g->pushTransform();
     {
-        g->setColor(0xff000000);
-        g->setAlpha(n.alpha);
+        g->setColor(Color(0xff000000).setA(n.alpha));
+
         g->translate((int)(osu->getScreenWidth() / 2 - stringWidth / 2 + 1),
                      (int)(osu->getScreenHeight() / 2 + font->getHeight() / 2 + n.fallAnim * height * 0.15f + 1));
         g->drawString(font, n.text);
 
-        g->setColor(n.textColor);
-        g->setAlpha(n.alpha);
+        g->setColor(Color(n.textColor).setA(n.alpha));
+
         g->translate(-1, -1);
         g->drawString(font, n.text);
     }
@@ -169,8 +169,8 @@ void NotificationOverlay::drawNotificationBackground(NotificationOverlay::NOTIFI
     McFont *font = osu->getSubTitleFont();
     int height = font->getHeight() * 2 * n.backgroundAnim;
 
-    g->setColor(0xff000000);
-    g->setAlpha(n.alpha * 0.75f);
+    g->setColor(Color(0xff000000).setA(n.alpha * 0.75f));
+
     g->fillRect(0, osu->getScreenHeight() / 2 - height / 2, osu->getScreenWidth(), height);
 }
 

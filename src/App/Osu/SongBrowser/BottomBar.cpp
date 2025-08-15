@@ -161,26 +161,26 @@ void draw_bottombar() {
     // Ok, and now for the hover images... which are drawn in a weird order, same as update_bottombar()
     auto random_img = osu->getSkin()->selectionRandomOver;
     f32 random_scale = global_scale * (random_img->is_2x ? 0.5f : 1.f);
-    g->setColor(0xffffffff);
-    g->setAlpha(btn_hovers[RANDOM]);
+    g->setColor(Color(0xffffffff).setA(btn_hovers[RANDOM]));
+
     random_img->drawRaw(Vector2(btns_x[RANDOM], osu->getScreenHeight()), random_scale, AnchorPoint::BOTTOM_LEFT);
 
     auto mods_img = osu->getSkin()->selectionModsOver;
     f32 mods_scale = global_scale * (mods_img->is_2x ? 0.5f : 1.f);
-    g->setColor(0xffffffff);
-    g->setAlpha(btn_hovers[MODS]);
+    g->setColor(Color(0xffffffff).setA(btn_hovers[MODS]));
+
     mods_img->drawRaw(Vector2(btns_x[MODS], osu->getScreenHeight()), mods_scale, AnchorPoint::BOTTOM_LEFT);
 
     auto mode_img = osu->getSkin()->selectionModeOver;
     f32 mode_scale = global_scale * (mode_img->is_2x ? 0.5f : 1.f);
-    g->setColor(0xffffffff);
-    g->setAlpha(btn_hovers[MODE]);
+    g->setColor(Color(0xffffffff).setA(btn_hovers[MODE]));
+
     mode_img->drawRaw(Vector2(btns_x[MODE], osu->getScreenHeight()), mode_scale, AnchorPoint::BOTTOM_LEFT);
 
     auto options_img = osu->getSkin()->selectionOptionsOver;
     f32 options_scale = global_scale * (options_img->is_2x ? 0.5f : 1.f);
-    g->setColor(0xffffffff);
-    g->setAlpha(btn_hovers[OPTIONS]);
+    g->setColor(Color(0xffffffff).setA(btn_hovers[OPTIONS]));
+
     options_img->drawRaw(Vector2(btns_x[OPTIONS], osu->getScreenHeight()), options_scale, AnchorPoint::BOTTOM_LEFT);
 
     // mode-osu-small (often used as overlay)

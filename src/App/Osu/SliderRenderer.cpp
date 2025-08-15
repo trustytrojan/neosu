@@ -136,8 +136,8 @@ void draw(const std::vector<Vector2> &points, const std::vector<Vector2> &always
 
             const Color dimmedColor = Colors::scale(undimmedColor, colorRGBMultiplier);
 
-            g->setColor(dimmedColor);
-            g->setAlpha(alpha * cv::slider_alpha_multiplier.getFloat());
+            g->setColor(Color(dimmedColor).setA(alpha * cv::slider_alpha_multiplier.getFloat()));
+
             osu->getSkin()->getHitCircle()->bind();
             {
                 for(int i = drawFromIndex; i < drawUpToIndex; i++) {
@@ -268,8 +268,8 @@ void draw(VertexArrayObject *vao, const std::vector<Vector2> &alwaysPoints, Vect
     if(cv::slider_debug_draw_square_vao.getBool()) {
         const Color dimmedColor = Colors::scale(undimmedColor, colorRGBMultiplier);
 
-        g->setColor(dimmedColor);
-        g->setAlpha(alpha * cv::slider_alpha_multiplier.getFloat());
+        g->setColor(Color(dimmedColor).setA(alpha * cv::slider_alpha_multiplier.getFloat()));
+
         osu->getSkin()->getHitCircle()->bind();
 
         vao->setDrawPercent(from, to, 6);  // HACKHACK: hardcoded magic number

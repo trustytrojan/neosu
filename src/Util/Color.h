@@ -61,13 +61,13 @@ struct Color {
 	[[nodiscard]] constexpr T Bf() const { return static_cast<T>(static_cast<float>(v & 0xFF) / 255.0f); }
 
 	template <typename T = Channel>
-	constexpr void setA(T a) { v = ((v & 0x00FFFFFF) | (to_byte(a) << 24)); }
+	constexpr Color &setA(T a) { *this = ((*this & 0x00FFFFFF) | (to_byte(a) << 24)); return *this; }
 	template <typename T = Channel>
-	constexpr void setR(T r) { v = ((v & 0xFF00FFFF) | (to_byte(r) << 16)); }
+	constexpr Color &setR(T r) { *this = ((*this & 0xFF00FFFF) | (to_byte(r) << 16)); return *this; }
 	template <typename T = Channel>
-	constexpr void setG(T g) { v = ((v & 0xFFFF00FF) | (to_byte(g) << 8)); }
+	constexpr Color &setG(T g) { *this = ((*this & 0xFFFF00FF) | (to_byte(g) << 8)); return *this; }
 	template <typename T = Channel>
-	constexpr void setB(T b) { v = ((v & 0xFFFFFF00) | (to_byte(b) << 0)); }
+	constexpr Color &setB(T b) { *this = ((*this & 0xFFFFFF00) | (to_byte(b) << 0)); return *this; }
 
 	constexpr Color& operator&=(std::uint32_t val) { v &= val; return *this; }
 	constexpr Color& operator|=(std::uint32_t val) { v |= val; return *this; }

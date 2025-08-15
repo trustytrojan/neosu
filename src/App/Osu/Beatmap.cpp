@@ -1988,8 +1988,8 @@ void Beatmap::drawFollowPoints() {
                     alpha = 0.0f;
 
                 // draw it
-                g->setColor(0xffffffff);
-                g->setAlpha(alpha);
+                g->setColor(Color(0xffffffff).setA(alpha));
+
                 g->pushTransform();
                 {
                     g->rotate(glm::degrees(std::atan2(yDiff, xDiff)));

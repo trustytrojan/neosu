@@ -214,8 +214,8 @@ void ConsoleBox::drawLogOverlay() {
     }
     g->popTransform();
 
-    g->setColor(0xffffffff);
-    if(this->fLogYPos != 0.0f) g->setAlpha(alpha);
+    g->setColor(Color(0xffffffff).setA(alpha));
+
 
     g->pushTransform();
     {
@@ -223,8 +223,8 @@ void ConsoleBox::drawLogOverlay() {
         g->translate(2 * logScale, -this->fLogYPos);
         for(size_t i = 0; i < this->log_entries.size(); i++) {
             g->translate(0, (int)((this->logFont->getHeight() + (i == 0 ? 0 : 2) + 1) * logScale));
-            g->setColor(this->log_entries[i].textColor);
-            g->setAlpha(alpha);
+            g->setColor(Color(this->log_entries[i].textColor).setA(alpha));
+
             g->drawString(this->logFont, this->log_entries[i].text);
         }
     }

@@ -703,8 +703,7 @@ void Circle::drawApproachCircle(Skin *skin, Vector2 pos, Color comboColor, float
 
 void Circle::drawHitCircleOverlay(SkinImage *hitCircleOverlayImage, Vector2 pos, float circleOverlayImageScale,
                                   float alpha, float colorRGBMultiplier) {
-    g->setColor(argb(1.0f, colorRGBMultiplier, colorRGBMultiplier, colorRGBMultiplier));
-    g->setAlpha(alpha);
+    g->setColor(argb(alpha, colorRGBMultiplier, colorRGBMultiplier, colorRGBMultiplier));
     hitCircleOverlayImage->drawRaw(pos, circleOverlayImageScale);
 }
 
@@ -1230,8 +1229,8 @@ void Slider::draw() {
 
             Vector2 pos = this->bm->osuCoords2Pixels(this->curve->pointAt(tick.percent));
 
-            g->setColor(tickColor);
-            g->setAlpha(alpha);
+            g->setColor(Color(tickColor).setA(alpha));
+
             g->pushTransform();
             {
                 g->scale(tickImageScale, tickImageScale);
@@ -1311,8 +1310,8 @@ void Slider::draw() {
 
                     reverseArrowImageScale *= 1.0f + pulse * 0.30f;
 
-                    g->setColor(reverseArrowColor);
-                    g->setAlpha(this->fReverseArrowAlpha);
+                    g->setColor(Color(reverseArrowColor).setA(this->fReverseArrowAlpha));
+
                     g->pushTransform();
                     {
                         g->rotate(rotation);
@@ -1340,8 +1339,8 @@ void Slider::draw() {
 
                     reverseArrowImageScale *= 1.0f + pulse * 0.30f;
 
-                    g->setColor(reverseArrowColor);
-                    g->setAlpha(this->fReverseArrowAlpha);
+                    g->setColor(Color(reverseArrowColor).setA(this->fReverseArrowAlpha));
+
                     g->pushTransform();
                     {
                         g->rotate(rotation);
@@ -1495,8 +1494,8 @@ void Slider::draw2(bool drawApproachCircle, bool drawOnlyApproachCircle) {
         }
         float tickAnimationScale = 1.0f + tickAnimation * cv::slider_followcircle_tick_pulse_scale.getFloat();
 
-        g->setColor(0xffffffff);
-        g->setAlpha(this->fFollowCircleAnimationAlpha);
+        g->setColor(Color(0xffffffff).setA(this->fFollowCircleAnimationAlpha));
+
         skin->getSliderFollowCircle2()->setAnimationTimeOffset(skin->getAnimationSpeed(), this->click_time);
         skin->getSliderFollowCircle2()->drawRaw(
             point,
@@ -2521,8 +2520,8 @@ void Spinner::draw() {
             const float spinnerCircleScale =
                 globalBaseSize / (globalBaseSkinSize * (skin->isSpinnerCircle2x() ? 2.0f : 1.0f));
 
-            g->setColor(0xffffffff);
-            g->setAlpha(this->fAlphaWithoutHidden * alphaMultiplier);
+            g->setColor(Color(0xffffffff).setA(this->fAlphaWithoutHidden * alphaMultiplier));
+
             g->pushTransform();
             {
                 g->rotate(this->fDrawRot);
@@ -2538,8 +2537,8 @@ void Spinner::draw() {
             const float spinnerApproachCircleImageScale =
                 globalBaseSize / ((globalBaseSkinSize / 2) * (skin->isSpinnerApproachCircle2x() ? 2.0f : 1.0f));
 
-            g->setColor(skin->getSpinnerApproachCircleColor());
-            g->setAlpha(this->fAlphaWithoutHidden * alphaMultiplier);
+            g->setColor(Color(skin->getSpinnerApproachCircleColor()).setA(this->fAlphaWithoutHidden * alphaMultiplier));
+
             g->pushTransform();
             {
                 g->scale(spinnerApproachCircleImageScale * this->fPercent * globalScale,
@@ -2556,8 +2555,8 @@ void Spinner::draw() {
             const float spinnerBottomImageScale =
                 globalBaseSize / (globalBaseSkinSize * (skin->isSpinnerBottom2x() ? 2.0f : 1.0f));
 
-            g->setColor(0xffffffff);
-            g->setAlpha(this->fAlphaWithoutHidden * alphaMultiplier);
+            g->setColor(Color(0xffffffff).setA(this->fAlphaWithoutHidden * alphaMultiplier));
+
             g->pushTransform();
             {
                 g->rotate(this->fDrawRot / 7.0f);
@@ -2574,8 +2573,8 @@ void Spinner::draw() {
             const float spinnerTopImageScale =
                 globalBaseSize / (globalBaseSkinSize * (skin->isSpinnerTop2x() ? 2.0f : 1.0f));
 
-            g->setColor(0xffffffff);
-            g->setAlpha(this->fAlphaWithoutHidden * alphaMultiplier);
+            g->setColor(Color(0xffffffff).setA(this->fAlphaWithoutHidden * alphaMultiplier));
+
             g->pushTransform();
             {
                 g->rotate(this->fDrawRot / 2.0f);
@@ -2592,8 +2591,8 @@ void Spinner::draw() {
             const float spinnerMiddle2ImageScale =
                 globalBaseSize / (globalBaseSkinSize * (skin->isSpinnerMiddle22x() ? 2.0f : 1.0f));
 
-            g->setColor(0xffffffff);
-            g->setAlpha(this->fAlphaWithoutHidden * alphaMultiplier);
+            g->setColor(Color(0xffffffff).setA(this->fAlphaWithoutHidden * alphaMultiplier));
+
             g->pushTransform();
             {
                 g->rotate(this->fDrawRot);
@@ -2608,8 +2607,7 @@ void Spinner::draw() {
             const float spinnerMiddleImageScale =
                 globalBaseSize / (globalBaseSkinSize * (skin->isSpinnerMiddle2x() ? 2.0f : 1.0f));
 
-            g->setColor(argb(255, 255, (int)(255 * this->fPercent), (int)(255 * this->fPercent)));
-            g->setAlpha(this->fAlphaWithoutHidden * alphaMultiplier);
+            g->setColor(argb(this->fAlphaWithoutHidden * alphaMultiplier, 1.f, (1.f * this->fPercent), (1.f * this->fPercent)));
             g->pushTransform();
             {
                 g->rotate(this->fDrawRot / 2.0f);  // apparently does not rotate in osu
@@ -2626,8 +2624,8 @@ void Spinner::draw() {
             const float spinnerApproachCircleImageScale =
                 globalBaseSize / ((globalBaseSkinSize / 2) * (skin->isSpinnerApproachCircle2x() ? 2.0f : 1.0f));
 
-            g->setColor(skin->getSpinnerApproachCircleColor());
-            g->setAlpha(this->fAlphaWithoutHidden * alphaMultiplier);
+            g->setColor(Color(skin->getSpinnerApproachCircleColor()).setA(this->fAlphaWithoutHidden * alphaMultiplier));
+
             g->pushTransform();
             {
                 g->scale(spinnerApproachCircleImageScale * this->fPercent * globalScale,
@@ -2643,8 +2641,8 @@ void Spinner::draw() {
     if(this->fRatio >= 1.0f) {
         const float spinnerClearImageScale = Osu::getImageScale(skin->getSpinnerClear(), 80);
 
-        g->setColor(0xffffffff);
-        g->setAlpha(alphaMultiplier);
+        g->setColor(Color(0xffffffff).setA(alphaMultiplier));
+
         g->pushTransform();
         {
             g->scale(spinnerClearImageScale, spinnerClearImageScale);
@@ -2658,8 +2656,8 @@ void Spinner::draw() {
     if(clampedRatio < 0.03f) {
         const float spinerSpinImageScale = Osu::getImageScale(skin->getSpinnerSpin(), 80);
 
-        g->setColor(0xffffffff);
-        g->setAlpha(this->fAlphaWithoutHidden * alphaMultiplier);
+        g->setColor(Color(0xffffffff).setA(this->fAlphaWithoutHidden * alphaMultiplier));
+
         g->pushTransform();
         {
             g->scale(spinerSpinImageScale, spinerSpinImageScale);
@@ -2673,9 +2671,9 @@ void Spinner::draw() {
     if(this->iDelta < 0) {
         McFont *rpmFont = resourceManager->getFont("FONT_DEFAULT");
         const float stringWidth = rpmFont->getStringWidth("RPM: 477");
-        g->setColor(0xffffffff);
-        g->setAlpha(this->fAlphaWithoutHidden * this->fAlphaWithoutHidden * this->fAlphaWithoutHidden *
-                    alphaMultiplier);
+        g->setColor(Color(0xffffffff).setA(this->fAlphaWithoutHidden * this->fAlphaWithoutHidden * this->fAlphaWithoutHidden *
+                    alphaMultiplier));
+
         g->pushTransform();
         {
             g->translate(

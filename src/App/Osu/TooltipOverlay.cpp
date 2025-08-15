@@ -57,13 +57,13 @@ void TooltipOverlay::draw() {
         if(cursorPos.y < 0) cursorPos.y += std::abs(cursorPos.y);
 
         // draw background
-        g->setColor(0xff000000);
-        g->setAlpha(alpha);
+        g->setColor(Color(0xff000000).setA(alpha));
+
         g->fillRect((int)cursorPos.x + offset.x, (int)cursorPos.y + offset.y, width + 2 * margin, height + 2 * margin);
 
         // draw text
-        g->setColor(0xffffffff);
-        g->setAlpha(alpha);
+        g->setColor(Color(0xffffffff).setA(alpha));
+
         g->pushTransform();
         g->translate((int)(cursorPos.x + offset.x + margin),
                      (int)(cursorPos.y + offset.y + margin + font->getHeight()));
@@ -74,8 +74,8 @@ void TooltipOverlay::draw() {
         g->popTransform();
 
         // draw border
-        g->setColor(0xffffffff);
-        g->setAlpha(alpha);
+        g->setColor(Color(0xffffffff).setA(alpha));
+
         g->drawRect((int)cursorPos.x + offset.x, (int)cursorPos.y + offset.y, width + 2 * margin, height + 2 * margin);
     }
 }
