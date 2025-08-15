@@ -116,6 +116,9 @@ class Environment {
     void setClipBoardText(const UString &text);
 
     // dialogs & message boxes
+    static void showDialog(const char *title, const char *message,
+                           unsigned int flags = 0x00000010u /* SDL_MESSAGEBOX_ERROR */,
+                           void /*SDL_Window*/ *modalWindow = nullptr);
     void showMessageInfo(const UString &title, const UString &message) const;
     void showMessageWarning(const UString &title, const UString &message) const;
     void showMessageError(const UString &title, const UString &message) const;

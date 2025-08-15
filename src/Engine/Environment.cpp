@@ -510,18 +510,31 @@ void Environment::setClipBoardText(const UString &text) {
     SDL_SetClipboardText(text.toUtf8());
 }
 
+// static helper for class methods below (defaults to flags = error, modalWindow = null)
+void Environment::showDialog(const char *title, const char *message, unsigned int flags, void *modalWindow) {
+    auto *actualWin{static_cast<SDL_Window *>(modalWindow)};
+
+    // message does not show up for hidden windows
+    if(actualWin && ((SDL_GetWindowFlags(actualWin) & SDL_WINDOW_HIDDEN) == SDL_WINDOW_HIDDEN)) {
+        actualWin = nullptr;
+    }
+
+    SDL_ShowSimpleMessageBox(flags, title, message, actualWin);
+}
+
 void Environment::showMessageInfo(const UString &title, const UString &message) const {
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, title.toUtf8(), message.toUtf8(), nullptr);
+    showDialog(title.toUtf8(), message.toUtf8(), SDL_MESSAGEBOX_INFORMATION, m_window);
 }
 
 void Environment::showMessageWarning(const UString &title, const UString &message) const {
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, title.toUtf8(), message.toUtf8(), nullptr);
+    showDialog(title.toUtf8(), message.toUtf8(), SDL_MESSAGEBOX_WARNING, m_window);
 }
 
 void Environment::showMessageError(const UString &title, const UString &message) const {
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title.toUtf8(), message.toUtf8(), nullptr);
+    showDialog(title.toUtf8(), message.toUtf8(), SDL_MESSAGEBOX_ERROR, m_window);
 }
 
+// what is the point of this exactly?
 void Environment::showMessageErrorFatal(const UString &title, const UString &message) const {
     showMessageError(title, message);
 }
