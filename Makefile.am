@@ -826,10 +826,8 @@ neosu_CPPFLAGS := $(NEOSU_CPPFLAGS)
 neosu_CXXFLAGS := \
 	$(ASSEMBLER_INCLUDE_PATHS) \
 	-I$(DEPS_PREFIX)/include \
-	$(CXXFLAGS_EXTRA) \
-	$(NEOSU_CXXFLAGS) \
-	$(NEOSU_INCLUDE_FLAGS) \
 	$(BUNDLED_INCLUDES) \
+	$(NEOSU_INCLUDE_FLAGS) \
 	$(CURL_CFLAGS) \
 	$(SDL3_CFLAGS) \
 	$(AUDIO_CFLAGS) \
@@ -852,7 +850,9 @@ neosu_CXXFLAGS := \
 	$(VKD3D_CFLAGS) \
 	$(BLKID_CFLAGS) \
 	$(LZMA_CFLAGS) \
-	$(DISCORDSDK_CFLAGS)
+	$(DISCORDSDK_CFLAGS) \
+	$(NEOSU_CXXFLAGS) \
+	$(CXXFLAGS_EXTRA)
 
 # Wl,--start-group with no --end-group is a stupid hack.
 neosu_LDFLAGS := \
