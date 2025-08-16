@@ -14,8 +14,8 @@
 #define NEOSU_DOMAIN "neosu.net"
 
 // NOTE: Full version can be something like "b20200201.2cuttingedge"
-#define OSU_VERSION "b20250702.1"
-#define OSU_VERSION_DATEONLY 20250702
+#define OSU_VERSION "b20250815"
+#define OSU_VERSION_DATEONLY 20250815
 
 // forward def
 typedef struct curl_mime curl_mime;
@@ -50,10 +50,10 @@ void disconnect();
 void reconnect();
 
 // Send an API request.
-void send_api_request(const APIRequest &request);
+void send_api_request(const APIRequest& request);
 
 // Send a packet to Bancho. Do not free it after calling this.
-void send_packet(Packet &packet);
+void send_packet(Packet& packet);
 
 // Poll for new packets. Should be called regularly from main thread.
 void receive_api_responses();

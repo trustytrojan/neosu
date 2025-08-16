@@ -489,6 +489,10 @@ Packet Bancho::build_login_packet() {
     proto::write_bytes(&packet, (u8 *)this->pw_md5.hash.data(), 32);
     proto::write<u8>(&packet, '\n');
 
+    // OSU_VERSION is something like "b20200201.2"
+    // This check is so you avoid forgetting the 'b' when changing versions.
+    assert(OSU_VERSION[0] == 'b');
+
     proto::write_bytes(&packet, (u8 *)OSU_VERSION, sizeof(OSU_VERSION) - 1);
     proto::write<u8>(&packet, '|');
 
