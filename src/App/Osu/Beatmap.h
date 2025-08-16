@@ -35,9 +35,6 @@ class Beatmap : public BeatmapInterface {
     void update();
     void update2();  // Used to be Beatmap::update()
 
-    void onKeyDown(KeyboardEvent &e);
-    void onKeyUp(KeyboardEvent &e);
-
     // Potentially Visible Set gate time size, for optimizing draw() and update() when iterating over all hitobjects
     long getPVS();
 

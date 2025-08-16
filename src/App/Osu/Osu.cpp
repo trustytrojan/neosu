@@ -1038,8 +1038,6 @@ void Osu::onKeyDown(KeyboardEvent &key) {
 
         // while playing and not paused
         if(!this->getSelectedBeatmap()->isPaused()) {
-            this->getSelectedBeatmap()->onKeyDown(key);
-
             // K1
             {
                 const bool isKeyLeftClick = (key == (KEYCODE)cv::LEFT_CLICK.getInt());
@@ -1074,6 +1072,12 @@ void Osu::onKeyDown(KeyboardEvent &key) {
                 } else if(isKeyRightClick || isKeyRightClick2) {
                     if(!this->getSelectedBeatmap()->hasFailed()) key.consume();
                 }
+            }
+
+            // Smoke
+            if(key == (KEYCODE)cv::SMOKE.getInt()) {
+                this->getSelectedBeatmap()->current_keys |= LegacyReplay::Smoke;
+                key.consume();
             }
 
             // handle skipping
@@ -1194,21 +1198,23 @@ void Osu::onKeyDown(KeyboardEvent &key) {
         // if playing
         if(this->isInPlayMode()) {
             // toggle pause menu
-            bool wants_pause = (key == (KEYCODE)cv::GAME_PAUSE.getInt()) || (key == KEY_ESCAPE);
-            if(wants_pause && !this->bEscape) {
-                // you can open the pause menu while the failing animation is
-                // happening, but never close it then
-                if(!this->getSelectedBeatmap()->hasFailed() || !this->pauseMenu->isVisible()) {
-                    this->bEscape = true;
-                    if(!bancho->is_playing_a_multi_map()) {
-                        this->getSelectedBeatmap()->pause();
-                    }
-                    this->pauseMenu->setVisible(true);
+            bool pressed_pause = (key == (KEYCODE)cv::GAME_PAUSE.getInt()) || (key == KEY_ESCAPE);
+            pressed_pause &= !this->bEscape;  // ignore repeat events when key is held down
+            if(pressed_pause) {
+                this->bEscape = true;
+                key.consume();
 
-                    key.consume();
-                } else {
-                    // pressing escape while in failed pause menu
+                if(!bancho->is_playing_a_multi_map()) {
+                    // bit of a misnomer, this pauses OR unpauses the music
+                    this->getSelectedBeatmap()->pause();
+                }
+
+                if(this->pauseMenu->isVisible() && this->getSelectedBeatmap()->hasFailed()) {
+                    // quit if we try to 'escape' the pause menu when dead (satisfying ragequit mechanic)
                     this->getSelectedBeatmap()->stop(true);
+                } else {
+                    // else just toggle the pause menu
+                    this->pauseMenu->setVisible(!this->pauseMenu->isVisible());
                 }
             }
 
@@ -1263,6 +1269,12 @@ void Osu::onKeyUp(KeyboardEvent &key) {
                 if(this->isInPlayMode()) this->onKey2Change(false, false);
             }
         }
+
+        // Smoke
+        if(this->getSelectedBeatmap() && (key == (KEYCODE)cv::SMOKE.getInt())) {
+            this->getSelectedBeatmap()->current_keys &= ~LegacyReplay::Smoke;
+            key.consume();
+        }
     }
 
     // forward to all subsystems, if not consumed
@@ -1273,6 +1285,7 @@ void Osu::onKeyUp(KeyboardEvent &key) {
     }
 
     // misc hotkeys release
+    // XXX: handle keypresses in the engine, instead of doing this hacky mess
     if(key == KEY_F1 || key == (KEYCODE)cv::TOGGLE_MODSELECT.getInt()) this->bF1 = false;
     if(key == (KEYCODE)cv::GAME_PAUSE.getInt() || key == KEY_ESCAPE) this->bEscape = false;
     if(key == KEY_LSHIFT || key == KEY_RSHIFT) this->bUIToggleCheck = false;

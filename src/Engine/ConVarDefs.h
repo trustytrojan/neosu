@@ -1064,7 +1064,7 @@ CONVAR(smoke_trail_max_size, "smoke_trail_max_size", 2048, FCVAR_BANCHO_COMPATIB
        "maximum number of rendered smoke trail images, array size limit");
 CONVAR(smoke_trail_opaque_duration, "smoke_trail_opaque_duration", 7.f, FCVAR_BANCHO_COMPATIBLE,
        "how long smoke trails should last before starting to fade out, in seconds");
-CONVAR(smoke_trail_spacing, "smoke_trail_spacing", 15.f, FCVAR_BANCHO_COMPATIBLE,
+CONVAR(smoke_trail_spacing, "smoke_trail_spacing", 5.f, FCVAR_BANCHO_COMPATIBLE,
        "how big the gap between smoke particles should be, in milliseconds");
 CONVAR(snaking_sliders, "snaking_sliders", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(snd_async_buffer, "snd_async_buffer", 65536, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,

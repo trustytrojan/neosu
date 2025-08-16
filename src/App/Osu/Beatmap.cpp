@@ -265,28 +265,6 @@ void Beatmap::drawBackground() {
     }
 }
 
-void Beatmap::onKeyDown(KeyboardEvent &e) {
-    if(e == KEY_O && keyboard->isControlDown()) {
-        osu->toggleOptionsMenu();
-        e.consume();
-        return;
-    }
-
-    if(e == (KEYCODE)cv::SMOKE.getInt()) {
-        this->current_keys |= LegacyReplay::Smoke;
-        e.consume();
-        return;
-    }
-}
-
-void Beatmap::onKeyUp(KeyboardEvent &e) {
-    if(e == (KEYCODE)cv::SMOKE.getInt()) {
-        this->current_keys &= ~LegacyReplay::Smoke;
-        e.consume();
-        return;
-    }
-}
-
 void Beatmap::skipEmptySection() {
     if(!this->bIsInSkippableSection) return;
     this->bIsInSkippableSection = false;
@@ -1811,37 +1789,38 @@ void Beatmap::draw() {
 }
 
 void Beatmap::drawSmoke() {
-    // TODO @kiwec:
-    // - Currently, smoke isn't visible at all. Can't figure out why.
-    // - Test 2x scaling
-    // - Test FPoSu
-    // - Better default smoke img?
-
     Image *smoke = osu->getSkin()->getCursorSmoke();
     if(smoke == osu->getSkin()->getMissingTexture()) return;
+
+    // We're not using this->iCurMusicPos, because we want the user to be able
+    // to draw while the music is loading / before the map starts.
+    auto current_time = Timing::getTicksMS();
 
     // Add new smoke particles if unpaused & smoke key pressed
     if(!this->bIsPaused && (this->current_keys & LegacyReplay::Smoke)) {
         SMOKETRAIL sm;
         sm.pos = this->pixels2OsuCoords(this->getCursorPos());
-        sm.time = this->iCurMusicPos;
-
-        if(!this->smoke_trail.empty()) {
-            i64 last_trail_tms = this->smoke_trail[this->smoke_trail.size() - 1].time;
-            if(sm.time < last_trail_tms + cv::smoke_trail_spacing.getInt()) {
-                // Remove last trail element so we can replace it with a newer one
-                this->smoke_trail.pop_back();
-            }
-        }
-
-        this->smoke_trail.push_back(sm);
+        sm.time = current_time;
 
         while(this->smoke_trail.size() > cv::smoke_trail_max_size.getInt()) {
             this->smoke_trail.erase(this->smoke_trail.begin());
         }
+
+        // Only add smoke particle if 5ms have passed since we added the last one
+        // XXX: This is not how stable does it, at all. Instead of *only* relying on time,
+        //      when you move the cursor, stable fills the path with smoke particles
+        //      so that there is no 'gap' in between particles.
+        //      (similar to HUD::addCursorTrailPosition...)
+        //      Also our smoke_trail_spacing is too low, stable probably has it over 15ms.
+        i64 last_trail_tms = 0;
+        if(!this->smoke_trail.empty()) {
+            last_trail_tms = this->smoke_trail[this->smoke_trail.size() - 1].time;
+        }
+        if(sm.time - last_trail_tms > cv::smoke_trail_spacing.getInt()) {
+            this->smoke_trail.push_back(sm);
+        }
     }
 
-    // XXX: not sure about 2x
     f32 scale = osu->getHUD()->getCursorScaleFactor() * (osu->getSkin()->isCursorSmoke2x() ? 0.5f : 1.0f);
     scale *= cv::cursor_scale.getFloat();
     scale *= cv::smoke_scale.getFloat();
@@ -1852,7 +1831,7 @@ void Beatmap::drawSmoke() {
 
     smoke->bind();
     for(const auto &sm : this->smoke_trail) {
-        i64 active_for = this->iCurMusicPos - sm.time;
+        i64 active_for = current_time - sm.time;
         if(active_for >= time_visible) continue;  // avoids division by 0 when (time_visible == time_fully_visible)
 
         // Start fading out when time_fully_visible has passed
@@ -1872,7 +1851,7 @@ void Beatmap::drawSmoke() {
     smoke->unbind();
 
     // trail cleanup
-    while(!this->smoke_trail.empty() && this->iCurMusicPos > this->smoke_trail[0].time + time_visible) {
+    while(!this->smoke_trail.empty() && current_time > this->smoke_trail[0].time + time_visible) {
         this->smoke_trail.erase(this->smoke_trail.begin());
     }
 }
