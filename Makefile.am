@@ -237,24 +237,24 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle/cacert.pem:
 	$(MKDIR_P) $(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle && \
 	$(WGET) -qO $(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle/cacert.pem "https://curl.se/ca/cacert.pem"
 
-$(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsi686.zip:
+$(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsi686.tar.xz:
 	$(MKDIR_P) $(DEPS_CACHE)/curl-$(CURL_VERSION) && \
-	$(WGET) -qO $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsi686.zip "https://curl.se/windows/dl-$(CURL_VERSION)_2/curl-$(CURL_VERSION)_2-win32-mingw.zip"
+	$(WGET) -qO $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsi686.tar.xz "https://github.com/whrvt/static-curl/releases/download/$(CURL_VERSION)/curl-windows-i686-dev-$(CURL_VERSION).tar.xz"
 
 $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsx86_64.zip:
 	$(MKDIR_P) $(DEPS_CACHE)/curl-$(CURL_VERSION) && \
 	$(WGET) -qO $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsx86_64.zip "https://curl.se/windows/dl-$(CURL_VERSION)_2/curl-$(CURL_VERSION)_2-win64-mingw.zip"
 
-$(DEPS_CACHE)/curl-$(CURL_VERSION)-windows-binary.source: $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsi686.zip $\
+$(DEPS_CACHE)/curl-$(CURL_VERSION)-windows-binary.source: $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsi686.tar.xz $\
 											$(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsx86_64.zip
 	cd $(DEPS_CACHE)/curl-$(CURL_VERSION) && \
-	$(MKDIR_P) windowsi686/bin && $(UNZIP) -qjo curl-windowsi686.zip "*/bin/*.dll" -d windowsi686/bin && \
-	$(MKDIR_P) windowsi686/lib && $(UNZIP) -qjo curl-windowsi686.zip "*/lib/*.a" -d windowsi686/lib && \
-	$(MKDIR_P) windowsi686/include && $(UNZIP) -qo curl-windowsi686.zip "*/include/*" -d windowsi686/include && mv windowsi686/include/*/*/* windowsi686/include/ && \
+	rm -rf windowsi686 && \
+	$(MKDIR_P) windowsi686 && $(TAR) xf curl-windowsi686.tar.xz -C windowsi686 --strip-components=1 --wildcards --no-anchored include lib/'*'.a && \
+	rm -rf windowsx86_64 && \
 	$(MKDIR_P) windowsx86_64/bin && $(UNZIP) -qjo curl-windowsx86_64.zip "*/bin/*.dll" -d windowsx86_64/bin && \
 	$(MKDIR_P) windowsx86_64/lib && $(UNZIP) -qjo curl-windowsx86_64.zip "*/lib/*.a" -d windowsx86_64/lib && \
 	$(MKDIR_P) windowsx86_64/include && $(UNZIP) -qo curl-windowsx86_64.zip "*/include/*" -d windowsx86_64/include && mv windowsx86_64/include/*/*/* windowsx86_64/include/ && \
-	rm -rf windows*/lib/libz.a && \
+	rm -rf windows*/lib/libz.a windows*/lib/zlib*.a && \
 	touch $@
 
 $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-linuxi686.tar.xz:
@@ -291,8 +291,10 @@ rbq := ')'
 if WIN_PLATFORM
 CURL_CFLAGS += -I$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/include -DWITH_GZFILEOP -DCURL_STATICLIB
 CURL_LIBS += -L$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib $(shell find $(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib -type f -not $(lbq) -name '*dll*' $(rbq) -execdir printf '%s ' '{''}' ';' | $(SED) -e 's|./lib|-l|g' -e 's|\.a||g' -e 's|-lcurl|-l:libcurl.a|g') $\
-			-lws2_32 -lwldap32 -lcrypt32 -lbcrypt -lsecur32 -liphlpapi
-
+			-lws2_32 -lwldap32 -lcrypt32 -lsecur32 -liphlpapi
+if !WIN32_PLATFORM
+CURL_LIBS += -lbcrypt
+endif
 $(DEPS_PREFIX)/curl-$(CURL_VERSION).built: $(DEPS_CACHE)/curl-$(CURL_VERSION)-windows-binary.source
 	$(MKDIR_P) $(DEPS_PREFIX)
 	touch $@
@@ -401,7 +403,9 @@ $(DEPS_PREFIX)/mpg123-$(MPG123_VERSION).built: $(DEPS_CACHE)/mpg123-$(MPG123_VER
 	rm -rf $(DEPS_PREFIX)/mpg123
 	$(MKDIR_P) $(DEPS_PREFIX) $(DEPS_PREFIX)/include $(DEPS_PREFIX)/lib/pkgconfig $(DEPS_PREFIX)/mpg123/build
 	$(TAR) xf $(DEPS_CACHE)/mpg123-$(MPG123_VERSION).tar.gz -C $(DEPS_PREFIX)/mpg123 --strip-components=1 && \
-	cd $(DEPS_PREFIX)/mpg123 && autoreconf -fiv && cd $(DEPS_PREFIX)/mpg123/build && \
+	cd $(DEPS_PREFIX)/mpg123 && \
+	$(if $(ubercompat),$(SED) -i -e 's|.*ThreadErrorMode.*||g' -e 's|mode_ok|0|' src/compat/compat_dl.c,true) && \
+	autoreconf -fiv && cd $(DEPS_PREFIX)/mpg123/build && \
 	PKG_CONFIG="$(PKG_CONFIG)" \
 		../configure lt_cv_prog_gnu_ld=yes --host=$(host) --prefix="$(DEPS_PREFIX)" $(if $(STATICBUILD),--enable-static --disable-shared,--enable-shared --disable-static) \
 		--disable-components --enable-libmpg123 --with-audio=dummy --disable-modules \
@@ -756,7 +760,8 @@ $(DEPS_PREFIX)/libarchive-$(LIBARCHIVE_VERSION).built: $(DEPS_CACHE)/libarchive-
 	$(MKDIR_P) $(DEPS_PREFIX)/libarchive/build $(DEPS_PREFIX)/lib/pkgconfig
 	$(TAR) xf $(DEPS_CACHE)/libarchive-$(LIBARCHIVE_VERSION).tar.gz -C $(DEPS_PREFIX)/libarchive --strip-components=1 && \
 	cd $(DEPS_PREFIX)/libarchive && \
-	$(SED) -i -e 's|time_t ctime_sec, mtime_sec;|int64_t ctime_sec, mtime_sec;|' libarchive/archive_match.c && cd build && \
+	$(SED) -i -e 's|time_t ctime_sec, mtime_sec;|int64_t ctime_sec, mtime_sec;|' libarchive/archive_match.c && \
+	cd build && \
 	PKG_CONFIG="$(PKG_CONFIG)" \
 	../configure lt_cv_prog_gnu_ld=yes --host=$(host) --build=$(build) --prefix="$(DEPS_PREFIX)" \
 		$(if $(STATICBUILD),--enable-static --disable-shared,--enable-shared --disable-static) \
@@ -765,7 +770,7 @@ $(DEPS_PREFIX)/libarchive-$(LIBARCHIVE_VERSION).built: $(DEPS_CACHE)/libarchive-
 		--without-nettle --without-mbedtls --without-lzo2 --without-lz4 --without-libiconv-prefix \
 		--without-iconv --without-libb2 --without-zstd --with-lzma --with-zlib --with-bz2lib \
 		CC="$(CC)" RANLIB="$(RANLIB)" AR="$(AR)" CXX="$(CXX)" LD="$(LD)" \
-		CFLAGS="$(CFLAGS) -I$(DEPS_PREFIX)/include $(LZMA_CFLAGS) $(BZIP2_CFLAGS) $(ZLIB_CFLAGS)" \
+		CFLAGS="$(CFLAGS) -I$(DEPS_PREFIX)/include $(LZMA_CFLAGS) $(BZIP2_CFLAGS) $(ZLIB_CFLAGS) -D_POSIX_C_SOURCE" \
 		LDFLAGS="$(LDFLAGS) -L$(DEPS_PREFIX)/lib $(LZMA_LIBS) $(BZIP2_LIBS) $(ZLIB_LIBS)" && \
 	$(MAKE) $(MAKEFLAGS) && \
 	$(MAKE) $(MAKEFLAGS) install

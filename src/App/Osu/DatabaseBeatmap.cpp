@@ -334,14 +334,16 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                     if(!intScan) {
                         f32 fX, fY;
                         floatScan = (Parsing::parse(curLineChar, &fX, &fY, &time, &type, &hitSound) != nullptr);
-                        x = (std::isfinite(fX) && fX >= static_cast<float>(std::numeric_limits<int>::min()) &&
-                             fX <= static_cast<float>(std::numeric_limits<int>::max()))
-                                ? static_cast<int>(fX)
-                                : 0;
-                        y = (std::isfinite(fY) && fY >= static_cast<float>(std::numeric_limits<int>::min()) &&
-                             fY <= static_cast<float>(std::numeric_limits<int>::max()))
-                                ? static_cast<int>(fY)
-                                : 0;
+                        if (floatScan) {
+                            x = (std::isfinite(fX) && fX >= static_cast<float>(std::numeric_limits<int>::min()) &&
+                                fX <= static_cast<float>(std::numeric_limits<int>::max()))
+                                    ? static_cast<int>(fX)
+                                    : 0;
+                            y = (std::isfinite(fY) && fY >= static_cast<float>(std::numeric_limits<int>::min()) &&
+                                fY <= static_cast<float>(std::numeric_limits<int>::max()))
+                                    ? static_cast<int>(fY)
+                                    : 0;
+                        }
                     }
 
                     if(intScan || floatScan) {

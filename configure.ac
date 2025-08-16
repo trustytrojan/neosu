@@ -409,16 +409,16 @@ __EOF__
     DLLEXT=".dll"
     LIBPREFIX=""
 
-    AS_IF([test "$host_cpu" = "i686"], [ # uber compatibility configuration, works on vista (winxp should work, but curl's openssl depends on vista+, can be fixed in the future)
+    AS_IF([test "$host_cpu" = "i686"], [ # uber compatibility configuration, works on xp
         d3dcompiler_lib="-ld3dcompiler_43"
         ubercompat=on
         with_mimalloc="no"
         LDFLAGS="$LDFLAGS -m32 -Wl,--large-address-aware"
         WINPTHREAD_LDFLAGS="-lwinpthread"
-        # vista (winxp should work, but curl's openssl depends on vista+, can be fixed in the future)
-        CPPFLAGS="$CPPFLAGS -DWINVER=0x0600 -D_WIN32_WINNT=0x0600 -D_WIN32_WINDOWS=0x0600 -D_WIN32_IE=0x0600"
-        CFLAGS="$CFLAGS -m32 -fno-omit-frame-pointer -momit-leaf-frame-pointer -DWINVER=0x0600 -D_WIN32_WINNT=0x0600 -D_WIN32_WINDOWS=0x0600 -D_WIN32_IE=0x0600 -mfpmath=sse"
-        CXXFLAGS="$CXXFLAGS -m32 -fno-omit-frame-pointer -momit-leaf-frame-pointer -DWINVER=0x0600 -D_WIN32_WINNT=0x0600 -D_WIN32_WINDOWS=0x0600 -D_WIN32_IE=0x0600 -mfpmath=sse"
+        # xp
+        CPPFLAGS="$CPPFLAGS -DWINVER=0x0501 -D_WIN32_WINNT=0x0501 -D_WIN32_WINDOWS=0x0501 -D_WIN32_IE=0x0501"
+        CFLAGS="$CFLAGS -m32 -fno-omit-frame-pointer -momit-leaf-frame-pointer -DWINVER=0x0501 -D_WIN32_WINNT=0x0501 -D_WIN32_WINDOWS=0x0501 -D_WIN32_IE=0x0501 -mfpmath=sse"
+        CXXFLAGS="$CXXFLAGS -m32 -fno-omit-frame-pointer -momit-leaf-frame-pointer -DWINVER=0x0501 -D_WIN32_WINNT=0x0501 -D_WIN32_WINDOWS=0x0501 -D_WIN32_IE=0x0501 -mfpmath=sse"
         AC_SUBST([NASMOBJ],[win32])
     ], [
         d3dcompiler_lib="-ld3dcompiler_47"

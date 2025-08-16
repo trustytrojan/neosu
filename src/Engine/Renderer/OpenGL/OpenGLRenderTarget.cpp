@@ -14,6 +14,8 @@
 #define HAS_MULTISAMPLING
 #endif
 
+int OpenGLRenderTarget::iMaxMultiSamples{-1};
+
 void OpenGLRenderTarget::init() {
     debugLog("Building RenderTarget ({}x{}) ...\n", (int)this->vSize.x, (int)this->vSize.y);
 
@@ -24,9 +26,20 @@ void OpenGLRenderTarget::init() {
     this->iResolveFrameBuffer = 0;
 
     int numMultiSamples = 2;
+
+    if(iMaxMultiSamples == -1) {
+        if((GLVersion.major < 3) || !glTexImage2DMultisample || !glRenderbufferStorageMultisample) {
+            iMaxMultiSamples = 0;
+        } else {
+            glGetIntegerv(GL_MAX_SAMPLES, &iMaxMultiSamples);
+        }
+        if(iMaxMultiSamples == 0) {
+            this->multiSampleType = Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_0X;
+        }
+    }
+
     switch(this->multiSampleType) {
-        case Graphics::MULTISAMPLE_TYPE::
-            MULTISAMPLE_0X:  // spec: i guess 0x isn't desirable? seems like it's handled in "if (isMultiSampled())"
+        case Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_0X:
             break;
         case Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_2X:
             numMultiSamples = 2;
@@ -40,6 +53,10 @@ void OpenGLRenderTarget::init() {
         case Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_16X:
             numMultiSamples = 16;
             break;
+    }
+
+    if(iMaxMultiSamples < numMultiSamples) {
+        numMultiSamples = iMaxMultiSamples;
     }
 
     // create framebuffer
@@ -208,8 +225,8 @@ void OpenGLRenderTarget::enable() {
     glBindFramebuffer(GL_FRAMEBUFFER, this->iFrameBuffer);
     OpenGLStateCache::setCurrentFramebuffer(this->iFrameBuffer);
 
-    OpenGLStateCache::getCurrentViewport(this->iViewportBackup[0], this->iViewportBackup[1],
-                                                       this->iViewportBackup[2], this->iViewportBackup[3]);
+    OpenGLStateCache::getCurrentViewport(this->iViewportBackup[0], this->iViewportBackup[1], this->iViewportBackup[2],
+                                         this->iViewportBackup[3]);
 
     // set new viewport
     int newViewX = -this->vPos.x;
@@ -261,8 +278,8 @@ void OpenGLRenderTarget::disable() {
     glViewport(this->iViewportBackup[0], this->iViewportBackup[1], this->iViewportBackup[2], this->iViewportBackup[3]);
 
     // update the cache with restored viewport
-    OpenGLStateCache::setCurrentViewport(this->iViewportBackup[0], this->iViewportBackup[1],
-                                                       this->iViewportBackup[2], this->iViewportBackup[3]);
+    OpenGLStateCache::setCurrentViewport(this->iViewportBackup[0], this->iViewportBackup[1], this->iViewportBackup[2],
+                                         this->iViewportBackup[3]);
 
     // restore framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, this->iFrameBufferBackup);

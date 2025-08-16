@@ -94,43 +94,44 @@ target_triplet = @target@
 bin_PROGRAMS = neosu$(EXEEXT)
 @BUILD_CURL_TRUE@@WIN_PLATFORM_TRUE@am__append_1 = -I$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/include -DWITH_GZFILEOP -DCURL_STATICLIB
 @BUILD_CURL_TRUE@@WIN_PLATFORM_TRUE@am__append_2 = -L$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib $(shell find $(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib -type f -not $(lbq) -name '*dll*' $(rbq) -execdir printf '%s ' '{''}' ';' | $(SED) -e 's|./lib|-l|g' -e 's|\.a||g' -e 's|-lcurl|-l:libcurl.a|g') $\
-@BUILD_CURL_TRUE@@WIN_PLATFORM_TRUE@			-lws2_32 -lwldap32 -lcrypt32 -lbcrypt -lsecur32 -liphlpapi
+@BUILD_CURL_TRUE@@WIN_PLATFORM_TRUE@			-lws2_32 -lwldap32 -lcrypt32 -lsecur32 -liphlpapi
 
-@BUILD_CURL_TRUE@@WIN_PLATFORM_FALSE@am__append_3 = -I$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/include -DWITH_GZFILEOP -DCURL_STATICLIB
-@BUILD_CURL_TRUE@@WIN_PLATFORM_FALSE@am__append_4 = -L$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib $(shell find $(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib -type f -not $(lbq) -name '*dll*' $(rbq) -execdir printf '%s ' '{''}' ';' | $(SED) -e 's|./lib|-l|g' -e 's|\.a||g' -e 's|-lcurl|-l:libcurl.a|g') $\
+@BUILD_CURL_TRUE@@WIN32_PLATFORM_FALSE@@WIN_PLATFORM_TRUE@am__append_3 = -lbcrypt
+@BUILD_CURL_TRUE@@WIN_PLATFORM_FALSE@am__append_4 = -I$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/include -DWITH_GZFILEOP -DCURL_STATICLIB
+@BUILD_CURL_TRUE@@WIN_PLATFORM_FALSE@am__append_5 = -L$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib $(shell find $(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib -type f -not $(lbq) -name '*dll*' $(rbq) -execdir printf '%s ' '{''}' ';' | $(SED) -e 's|./lib|-l|g' -e 's|\.a||g' -e 's|-lcurl|-l:libcurl.a|g') $\
 @BUILD_CURL_TRUE@@WIN_PLATFORM_FALSE@			-ldl -pthread
 
-@BUILD_SDL3_TRUE@am__append_5 = $(shell $(PKG_CONFIG) --cflags sdl3)
-@BUILD_SDL3_TRUE@am__append_6 = $(shell $(PKG_CONFIG) --libs sdl3)
-@BUILD_MPG123_TRUE@am__append_7 = $(shell $(PKG_CONFIG) --cflags libmpg123)
-@BUILD_MPG123_TRUE@am__append_8 = $(shell $(PKG_CONFIG) --libs libmpg123)
-@USE_SOLOUD_TRUE@am__append_9 = $(shell $(PKG_CONFIG) --cflags soloud) $(shell $(PKG_CONFIG) --cflags soundtouch) $(MPG123_CFLAGS) -DST_NO_EXCEPTION_HANDLING $(if $(and $(filter i686,$(host_cpu)),$(DISABLE_NATIVE)),-DSOUNDTOUCH_DISABLE_X86_OPTIMIZATIONS,)
-@USE_SOLOUD_TRUE@am__append_10 = $(shell $(PKG_CONFIG) --libs soloud) $(shell $(PKG_CONFIG) --libs soundtouch) $(MPG123_LIBS)
-@USE_BASS_TRUE@am__append_11 = -I$(DEPS_CACHE)/bass-$(BASS_VERSION)/bass/include -I$(DEPS_CACHE)/bass-$(BASS_VERSION)/bassfx/include -I$(DEPS_CACHE)/bass-$(BASS_VERSION)/bassmix/include \
+@BUILD_SDL3_TRUE@am__append_6 = $(shell $(PKG_CONFIG) --cflags sdl3)
+@BUILD_SDL3_TRUE@am__append_7 = $(shell $(PKG_CONFIG) --libs sdl3)
+@BUILD_MPG123_TRUE@am__append_8 = $(shell $(PKG_CONFIG) --cflags libmpg123)
+@BUILD_MPG123_TRUE@am__append_9 = $(shell $(PKG_CONFIG) --libs libmpg123)
+@USE_SOLOUD_TRUE@am__append_10 = $(shell $(PKG_CONFIG) --cflags soloud) $(shell $(PKG_CONFIG) --cflags soundtouch) $(MPG123_CFLAGS) -DST_NO_EXCEPTION_HANDLING $(if $(and $(filter i686,$(host_cpu)),$(DISABLE_NATIVE)),-DSOUNDTOUCH_DISABLE_X86_OPTIMIZATIONS,)
+@USE_SOLOUD_TRUE@am__append_11 = $(shell $(PKG_CONFIG) --libs soloud) $(shell $(PKG_CONFIG) --libs soundtouch) $(MPG123_LIBS)
+@USE_BASS_TRUE@am__append_12 = -I$(DEPS_CACHE)/bass-$(BASS_VERSION)/bass/include -I$(DEPS_CACHE)/bass-$(BASS_VERSION)/bassfx/include -I$(DEPS_CACHE)/bass-$(BASS_VERSION)/bassmix/include \
 @USE_BASS_TRUE@				-I$(DEPS_CACHE)/bass-$(BASS_VERSION)/bassloud/include
 
-@USE_BASS_TRUE@@WIN_PLATFORM_TRUE@am__append_12 = -I$(DEPS_CACHE)/bass-$(BASS_VERSION)/bassasio/include -I$(DEPS_CACHE)/bass-$(BASS_VERSION)/basswasapi/include
-@USE_BASS_TRUE@@WIN_PLATFORM_TRUE@am__append_13 = $(DEPS_CACHE)/bass-$(BASS_VERSION)/bassasio/lib/$(SYSNAME)/$(host_cpu)/$(LIBPREFIX)bassasio$(DLLEXT) \
+@USE_BASS_TRUE@@WIN_PLATFORM_TRUE@am__append_13 = -I$(DEPS_CACHE)/bass-$(BASS_VERSION)/bassasio/include -I$(DEPS_CACHE)/bass-$(BASS_VERSION)/basswasapi/include
+@USE_BASS_TRUE@@WIN_PLATFORM_TRUE@am__append_14 = $(DEPS_CACHE)/bass-$(BASS_VERSION)/bassasio/lib/$(SYSNAME)/$(host_cpu)/$(LIBPREFIX)bassasio$(DLLEXT) \
 @USE_BASS_TRUE@@WIN_PLATFORM_TRUE@					$(DEPS_CACHE)/bass-$(BASS_VERSION)/basswasapi/lib/$(SYSNAME)/$(host_cpu)/$(LIBPREFIX)basswasapi$(DLLEXT)
 
-@BUILD_LIBJPEG_TRUE@am__append_14 = $(shell $(PKG_CONFIG) --cflags libturbojpeg)
-@BUILD_LIBJPEG_TRUE@am__append_15 = $(shell $(PKG_CONFIG) --libs libturbojpeg)
-@BUILD_GLM_TRUE@am__append_16 = -I$(DEPS_PREFIX)/include
-@BUILD_LIBPNG_TRUE@am__append_17 = $(shell $(PKG_CONFIG) --cflags libpng)
-@BUILD_LIBPNG_TRUE@am__append_18 = $(shell $(PKG_CONFIG) --libs libpng)
-@BUILD_BZIP2_TRUE@am__append_19 = $(shell $(PKG_CONFIG) --cflags bzip2)
-@BUILD_BZIP2_TRUE@am__append_20 = $(shell $(PKG_CONFIG) --libs bzip2)
-@BUILD_ZLIB_TRUE@am__append_21 = $(shell $(PKG_CONFIG) --cflags zlib)
-@BUILD_ZLIB_TRUE@am__append_22 = $(shell $(PKG_CONFIG) --libs zlib)
-@BUILD_FMT_TRUE@am__append_23 = $(shell $(PKG_CONFIG) --cflags fmt)
-@BUILD_FMT_TRUE@am__append_24 = $(shell $(PKG_CONFIG) --libs fmt)
-@BUILD_FREETYPE2_TRUE@am__append_25 = $(shell $(PKG_CONFIG) --cflags freetype2)
-@BUILD_FREETYPE2_TRUE@am__append_26 = $(shell $(PKG_CONFIG) --libs freetype2)
-@BUILD_LZMA_TRUE@am__append_27 = $(shell $(PKG_CONFIG) --cflags liblzma)
-@BUILD_LZMA_TRUE@am__append_28 = $(shell $(PKG_CONFIG) --libs liblzma)
-@BUILD_LIBARCHIVE_TRUE@am__append_29 = $(shell $(PKG_CONFIG) --cflags libarchive)
-@BUILD_LIBARCHIVE_TRUE@am__append_30 = $(shell $(PKG_CONFIG) --libs libarchive)
-@WIN_PLATFORM_FALSE@am__append_31 = lib/
+@BUILD_LIBJPEG_TRUE@am__append_15 = $(shell $(PKG_CONFIG) --cflags libturbojpeg)
+@BUILD_LIBJPEG_TRUE@am__append_16 = $(shell $(PKG_CONFIG) --libs libturbojpeg)
+@BUILD_GLM_TRUE@am__append_17 = -I$(DEPS_PREFIX)/include
+@BUILD_LIBPNG_TRUE@am__append_18 = $(shell $(PKG_CONFIG) --cflags libpng)
+@BUILD_LIBPNG_TRUE@am__append_19 = $(shell $(PKG_CONFIG) --libs libpng)
+@BUILD_BZIP2_TRUE@am__append_20 = $(shell $(PKG_CONFIG) --cflags bzip2)
+@BUILD_BZIP2_TRUE@am__append_21 = $(shell $(PKG_CONFIG) --libs bzip2)
+@BUILD_ZLIB_TRUE@am__append_22 = $(shell $(PKG_CONFIG) --cflags zlib)
+@BUILD_ZLIB_TRUE@am__append_23 = $(shell $(PKG_CONFIG) --libs zlib)
+@BUILD_FMT_TRUE@am__append_24 = $(shell $(PKG_CONFIG) --cflags fmt)
+@BUILD_FMT_TRUE@am__append_25 = $(shell $(PKG_CONFIG) --libs fmt)
+@BUILD_FREETYPE2_TRUE@am__append_26 = $(shell $(PKG_CONFIG) --cflags freetype2)
+@BUILD_FREETYPE2_TRUE@am__append_27 = $(shell $(PKG_CONFIG) --libs freetype2)
+@BUILD_LZMA_TRUE@am__append_28 = $(shell $(PKG_CONFIG) --cflags liblzma)
+@BUILD_LZMA_TRUE@am__append_29 = $(shell $(PKG_CONFIG) --libs liblzma)
+@BUILD_LIBARCHIVE_TRUE@am__append_30 = $(shell $(PKG_CONFIG) --cflags libarchive)
+@BUILD_LIBARCHIVE_TRUE@am__append_31 = $(shell $(PKG_CONFIG) --libs libarchive)
+@WIN_PLATFORM_FALSE@am__append_32 = lib/
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -556,9 +557,9 @@ ASSEMBLER_INCLUDE_PATHS = @ASSEMBLER_INCLUDE_PATHS@ \
 	-Wa,-I$(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle
 ASSETS_DIR = @ASSETS_DIR@
 AUDBACKENDLIST = @AUDBACKENDLIST@
-AUDIO_CFLAGS = @AUDIO_CFLAGS@ $(am__append_9) $(am__append_11) \
-	$(am__append_12)
-AUDIO_LIBS = @AUDIO_LIBS@ $(am__append_10)
+AUDIO_CFLAGS = @AUDIO_CFLAGS@ $(am__append_10) $(am__append_12) \
+	$(am__append_13)
+AUDIO_LIBS = @AUDIO_LIBS@ $(am__append_11)
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
@@ -569,8 +570,8 @@ BLKID_CFLAGS = @BLKID_CFLAGS@
 BLKID_LIBS = @BLKID_LIBS@
 BUILD_MISCDIR = @BUILD_MISCDIR@
 BUNDLED_INCLUDES = @BUNDLED_INCLUDES@
-BZIP2_CFLAGS = @BZIP2_CFLAGS@ $(am__append_19)
-BZIP2_LIBS = @BZIP2_LIBS@ $(am__append_20)
+BZIP2_CFLAGS = @BZIP2_CFLAGS@ $(am__append_20)
+BZIP2_LIBS = @BZIP2_LIBS@ $(am__append_21)
 BZIP2_PREFIX = @BZIP2_PREFIX@
 BZIP2_VERSION = @BZIP2_VERSION@
 CC = @CC@
@@ -589,8 +590,9 @@ CPPFLAGS = @CPPFLAGS@
 CPU_COUNT = @CPU_COUNT@
 CSCOPE = @CSCOPE@
 CTAGS = @CTAGS@
-CURL_CFLAGS = @CURL_CFLAGS@ $(am__append_1) $(am__append_3)
-CURL_LIBS = @CURL_LIBS@ $(am__append_2) $(am__append_4)
+CURL_CFLAGS = @CURL_CFLAGS@ $(am__append_1) $(am__append_4)
+CURL_LIBS = @CURL_LIBS@ $(am__append_2) $(am__append_3) \
+	$(am__append_5)
 CURL_PREFIX = @CURL_PREFIX@
 CURL_VERSION = @CURL_VERSION@
 CXX = @CXX@
@@ -620,16 +622,16 @@ ETAGS = @ETAGS@
 EXEEXT = @EXEEXT@
 EXTRA_WIN_LIBS = @EXTRA_WIN_LIBS@
 FFMPEG_VERSION = @FFMPEG_VERSION@
-FMT_CFLAGS = @FMT_CFLAGS@ $(am__append_23)
-FMT_LIBS = @FMT_LIBS@ $(am__append_24)
+FMT_CFLAGS = @FMT_CFLAGS@ $(am__append_24)
+FMT_LIBS = @FMT_LIBS@ $(am__append_25)
 FMT_PREFIX = @FMT_PREFIX@
 FMT_VERSION = @FMT_VERSION@
-FREETYPE2_CFLAGS = @FREETYPE2_CFLAGS@ $(am__append_25)
-FREETYPE2_LIBS = @FREETYPE2_LIBS@ $(am__append_26)
+FREETYPE2_CFLAGS = @FREETYPE2_CFLAGS@ $(am__append_26)
+FREETYPE2_LIBS = @FREETYPE2_LIBS@ $(am__append_27)
 FREETYPE2_PREFIX = @FREETYPE2_PREFIX@
 FREETYPE2_VERSION = @FREETYPE2_VERSION@
 GETCONF = @GETCONF@
-GLM_CFLAGS = @GLM_CFLAGS@ $(am__append_16)
+GLM_CFLAGS = @GLM_CFLAGS@ $(am__append_17)
 GLM_PREFIX = @GLM_PREFIX@
 GLM_VERSION = @GLM_VERSION@
 GLU_CFLAGS = @GLU_CFLAGS@
@@ -644,17 +646,17 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
-LIBARCHIVE_CFLAGS = @LIBARCHIVE_CFLAGS@ $(am__append_29)
-LIBARCHIVE_LIBS = @LIBARCHIVE_LIBS@ $(am__append_30)
+LIBARCHIVE_CFLAGS = @LIBARCHIVE_CFLAGS@ $(am__append_30)
+LIBARCHIVE_LIBS = @LIBARCHIVE_LIBS@ $(am__append_31)
 LIBARCHIVE_PREFIX = @LIBARCHIVE_PREFIX@
 LIBARCHIVE_VERSION = @LIBARCHIVE_VERSION@
-LIBJPEG_CFLAGS = @LIBJPEG_CFLAGS@ $(am__append_14)
-LIBJPEG_LIBS = @LIBJPEG_LIBS@ $(am__append_15)
+LIBJPEG_CFLAGS = @LIBJPEG_CFLAGS@ $(am__append_15)
+LIBJPEG_LIBS = @LIBJPEG_LIBS@ $(am__append_16)
 LIBJPEG_PREFIX = @LIBJPEG_PREFIX@
 LIBJPEG_VERSION = @LIBJPEG_VERSION@
 LIBOBJS = @LIBOBJS@
-LIBPNG_CFLAGS = @LIBPNG_CFLAGS@ $(am__append_17)
-LIBPNG_LIBS = @LIBPNG_LIBS@ $(am__append_18)
+LIBPNG_CFLAGS = @LIBPNG_CFLAGS@ $(am__append_18)
+LIBPNG_LIBS = @LIBPNG_LIBS@ $(am__append_19)
 LIBPNG_PREFIX = @LIBPNG_PREFIX@
 LIBPNG_VERSION = @LIBPNG_VERSION@
 LIBPREFIX = @LIBPREFIX@
@@ -662,8 +664,8 @@ LIBS = @LIBS@
 LLVMMINGW = @LLVMMINGW@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
-LZMA_CFLAGS = @LZMA_CFLAGS@ $(am__append_27)
-LZMA_LIBS = @LZMA_LIBS@ $(am__append_28)
+LZMA_CFLAGS = @LZMA_CFLAGS@ $(am__append_28)
+LZMA_LIBS = @LZMA_LIBS@ $(am__append_29)
 LZMA_PREFIX = @LZMA_PREFIX@
 LZMA_VERSION = @LZMA_VERSION@
 MAKEFLAGS = @MAKEFLAGS@
@@ -672,8 +674,8 @@ MESON = @MESON@
 MIMALLOC_PREFIX = @MIMALLOC_PREFIX@
 MIMALLOC_VERSION = @MIMALLOC_VERSION@
 MKDIR_P = @MKDIR_P@
-MPG123_CFLAGS = @MPG123_CFLAGS@ $(am__append_7)
-MPG123_LIBS = @MPG123_LIBS@ $(am__append_8)
+MPG123_CFLAGS = @MPG123_CFLAGS@ $(am__append_8)
+MPG123_LIBS = @MPG123_LIBS@ $(am__append_9)
 MPG123_PREFIX = @MPG123_PREFIX@
 MPG123_VERSION = @MPG123_VERSION@
 NASM = @NASM@
@@ -702,8 +704,8 @@ PKG_CONFIG_PATH_CUSTOM = @PKG_CONFIG_PATH_CUSTOM@
 PKG_CONFIG_SYSTEM_INCLUDE_PATH = @PKG_CONFIG_SYSTEM_INCLUDE_PATH@
 PKG_CONFIG_SYSTEM_LIBRARY_PATH = @PKG_CONFIG_SYSTEM_LIBRARY_PATH@
 RANLIB = @RANLIB@
-SDL3_CFLAGS = @SDL3_CFLAGS@ $(am__append_5)
-SDL3_LIBS = @SDL3_LIBS@ $(am__append_6)
+SDL3_CFLAGS = @SDL3_CFLAGS@ $(am__append_6)
+SDL3_LIBS = @SDL3_LIBS@ $(am__append_7)
 SDL3_MIXER_PREFIX = @SDL3_MIXER_PREFIX@
 SDL3_MIXER_VERSION = @SDL3_MIXER_VERSION@
 SDL3_PREFIX = @SDL3_PREFIX@
@@ -735,8 +737,8 @@ XI_CFLAGS = @XI_CFLAGS@
 XI_LIBS = @XI_LIBS@
 XRANDR_CFLAGS = @XRANDR_CFLAGS@
 XRANDR_LIBS = @XRANDR_LIBS@
-ZLIB_CFLAGS = @ZLIB_CFLAGS@ $(am__append_21)
-ZLIB_LIBS = @ZLIB_LIBS@ $(am__append_22)
+ZLIB_CFLAGS = @ZLIB_CFLAGS@ $(am__append_22)
+ZLIB_LIBS = @ZLIB_LIBS@ $(am__append_23)
 ZLIB_PREFIX = @ZLIB_PREFIX@
 ZLIB_VERSION = @ZLIB_VERSION@
 abs_builddir = @abs_builddir@
@@ -1006,7 +1008,7 @@ CLEANFILES = \
 @USE_BASS_TRUE@	$(DEPS_CACHE)/bass-$(BASS_VERSION)/bassfx/lib/$(SYSNAME)/$(host_cpu)/$(LIBPREFIX)bass_fx$(DLLEXT) \
 @USE_BASS_TRUE@	$(DEPS_CACHE)/bass-$(BASS_VERSION)/bassmix/lib/$(SYSNAME)/$(host_cpu)/$(LIBPREFIX)bassmix$(DLLEXT) \
 @USE_BASS_TRUE@	$(DEPS_CACHE)/bass-$(BASS_VERSION)/bassloud/lib/$(SYSNAME)/$(host_cpu)/$(LIBPREFIX)bassloud$(DLLEXT) \
-@USE_BASS_TRUE@	$(am__append_13)
+@USE_BASS_TRUE@	$(am__append_14)
 
 #####################################################################################################################################################
 #####################################################################################################################################################
@@ -1109,7 +1111,7 @@ neosu_LDFLAGS := \
 
 # windows' loader has no concept of rpaths (so keep all built/required libs in the same level as the main exe)
 # otherwise we can tuck them away neatly in lib/ (besides ffmpeg, for self-inflicted reasons (dlopen in SoLoud, which won't find stuff in rpath))
-LIBDEST := $(am__append_31)
+LIBDEST := $(am__append_32)
 
 # TODO: distribution package files
 EXTRA_DIST := \
@@ -4928,24 +4930,24 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle/cacert.pem:
 	$(MKDIR_P) $(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle && \
 	$(WGET) -qO $(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle/cacert.pem "https://curl.se/ca/cacert.pem"
 
-$(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsi686.zip:
+$(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsi686.tar.xz:
 	$(MKDIR_P) $(DEPS_CACHE)/curl-$(CURL_VERSION) && \
-	$(WGET) -qO $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsi686.zip "https://curl.se/windows/dl-$(CURL_VERSION)_2/curl-$(CURL_VERSION)_2-win32-mingw.zip"
+	$(WGET) -qO $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsi686.tar.xz "https://github.com/whrvt/static-curl/releases/download/$(CURL_VERSION)/curl-windows-i686-dev-$(CURL_VERSION).tar.xz"
 
 $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsx86_64.zip:
 	$(MKDIR_P) $(DEPS_CACHE)/curl-$(CURL_VERSION) && \
 	$(WGET) -qO $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsx86_64.zip "https://curl.se/windows/dl-$(CURL_VERSION)_2/curl-$(CURL_VERSION)_2-win64-mingw.zip"
 
-$(DEPS_CACHE)/curl-$(CURL_VERSION)-windows-binary.source: $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsi686.zip $\
+$(DEPS_CACHE)/curl-$(CURL_VERSION)-windows-binary.source: $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsi686.tar.xz $\
 											$(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsx86_64.zip
 	cd $(DEPS_CACHE)/curl-$(CURL_VERSION) && \
-	$(MKDIR_P) windowsi686/bin && $(UNZIP) -qjo curl-windowsi686.zip "*/bin/*.dll" -d windowsi686/bin && \
-	$(MKDIR_P) windowsi686/lib && $(UNZIP) -qjo curl-windowsi686.zip "*/lib/*.a" -d windowsi686/lib && \
-	$(MKDIR_P) windowsi686/include && $(UNZIP) -qo curl-windowsi686.zip "*/include/*" -d windowsi686/include && mv windowsi686/include/*/*/* windowsi686/include/ && \
+	rm -rf windowsi686 && \
+	$(MKDIR_P) windowsi686 && $(TAR) xf curl-windowsi686.tar.xz -C windowsi686 --strip-components=1 --wildcards --no-anchored include lib/'*'.a && \
+	rm -rf windowsx86_64 && \
 	$(MKDIR_P) windowsx86_64/bin && $(UNZIP) -qjo curl-windowsx86_64.zip "*/bin/*.dll" -d windowsx86_64/bin && \
 	$(MKDIR_P) windowsx86_64/lib && $(UNZIP) -qjo curl-windowsx86_64.zip "*/lib/*.a" -d windowsx86_64/lib && \
 	$(MKDIR_P) windowsx86_64/include && $(UNZIP) -qo curl-windowsx86_64.zip "*/include/*" -d windowsx86_64/include && mv windowsx86_64/include/*/*/* windowsx86_64/include/ && \
-	rm -rf windows*/lib/libz.a && \
+	rm -rf windows*/lib/libz.a windows*/lib/zlib*.a && \
 	touch $@
 
 $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-linuxi686.tar.xz:
@@ -4964,7 +4966,6 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source: $(DEPS_CACHE)/curl-$(CUR
 	$(MKDIR_P) linuxi686 && $(TAR) xf curl-linuxi686.tar.xz -C linuxi686 --strip-components=1 --wildcards --no-anchored include lib/'*'.a && \
 	rm -rf linux*/lib/libz.a && \
 	touch $@
-
 @BUILD_CURL_TRUE@@WIN_PLATFORM_TRUE@$(DEPS_PREFIX)/curl-$(CURL_VERSION).built: $(DEPS_CACHE)/curl-$(CURL_VERSION)-windows-binary.source
 @BUILD_CURL_TRUE@@WIN_PLATFORM_TRUE@	$(MKDIR_P) $(DEPS_PREFIX)
 @BUILD_CURL_TRUE@@WIN_PLATFORM_TRUE@	touch $@
@@ -5043,7 +5044,9 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source: $(DEPS_CACHE)/curl-$(CUR
 @BUILD_MPG123_TRUE@	rm -rf $(DEPS_PREFIX)/mpg123
 @BUILD_MPG123_TRUE@	$(MKDIR_P) $(DEPS_PREFIX) $(DEPS_PREFIX)/include $(DEPS_PREFIX)/lib/pkgconfig $(DEPS_PREFIX)/mpg123/build
 @BUILD_MPG123_TRUE@	$(TAR) xf $(DEPS_CACHE)/mpg123-$(MPG123_VERSION).tar.gz -C $(DEPS_PREFIX)/mpg123 --strip-components=1 && \
-@BUILD_MPG123_TRUE@	cd $(DEPS_PREFIX)/mpg123 && autoreconf -fiv && cd $(DEPS_PREFIX)/mpg123/build && \
+@BUILD_MPG123_TRUE@	cd $(DEPS_PREFIX)/mpg123 && \
+@BUILD_MPG123_TRUE@	$(if $(ubercompat),$(SED) -i -e 's|.*ThreadErrorMode.*||g' -e 's|mode_ok|0|' src/compat/compat_dl.c,true) && \
+@BUILD_MPG123_TRUE@	autoreconf -fiv && cd $(DEPS_PREFIX)/mpg123/build && \
 @BUILD_MPG123_TRUE@	PKG_CONFIG="$(PKG_CONFIG)" \
 @BUILD_MPG123_TRUE@		../configure lt_cv_prog_gnu_ld=yes --host=$(host) --prefix="$(DEPS_PREFIX)" $(if $(STATICBUILD),--enable-static --disable-shared,--enable-shared --disable-static) \
 @BUILD_MPG123_TRUE@		--disable-components --enable-libmpg123 --with-audio=dummy --disable-modules \
@@ -5313,7 +5316,8 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source: $(DEPS_CACHE)/curl-$(CUR
 @BUILD_LIBARCHIVE_TRUE@	$(MKDIR_P) $(DEPS_PREFIX)/libarchive/build $(DEPS_PREFIX)/lib/pkgconfig
 @BUILD_LIBARCHIVE_TRUE@	$(TAR) xf $(DEPS_CACHE)/libarchive-$(LIBARCHIVE_VERSION).tar.gz -C $(DEPS_PREFIX)/libarchive --strip-components=1 && \
 @BUILD_LIBARCHIVE_TRUE@	cd $(DEPS_PREFIX)/libarchive && \
-@BUILD_LIBARCHIVE_TRUE@	$(SED) -i -e 's|time_t ctime_sec, mtime_sec;|int64_t ctime_sec, mtime_sec;|' libarchive/archive_match.c && cd build && \
+@BUILD_LIBARCHIVE_TRUE@	$(SED) -i -e 's|time_t ctime_sec, mtime_sec;|int64_t ctime_sec, mtime_sec;|' libarchive/archive_match.c && \
+@BUILD_LIBARCHIVE_TRUE@	cd build && \
 @BUILD_LIBARCHIVE_TRUE@	PKG_CONFIG="$(PKG_CONFIG)" \
 @BUILD_LIBARCHIVE_TRUE@	../configure lt_cv_prog_gnu_ld=yes --host=$(host) --build=$(build) --prefix="$(DEPS_PREFIX)" \
 @BUILD_LIBARCHIVE_TRUE@		$(if $(STATICBUILD),--enable-static --disable-shared,--enable-shared --disable-static) \
@@ -5322,7 +5326,7 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source: $(DEPS_CACHE)/curl-$(CUR
 @BUILD_LIBARCHIVE_TRUE@		--without-nettle --without-mbedtls --without-lzo2 --without-lz4 --without-libiconv-prefix \
 @BUILD_LIBARCHIVE_TRUE@		--without-iconv --without-libb2 --without-zstd --with-lzma --with-zlib --with-bz2lib \
 @BUILD_LIBARCHIVE_TRUE@		CC="$(CC)" RANLIB="$(RANLIB)" AR="$(AR)" CXX="$(CXX)" LD="$(LD)" \
-@BUILD_LIBARCHIVE_TRUE@		CFLAGS="$(CFLAGS) -I$(DEPS_PREFIX)/include $(LZMA_CFLAGS) $(BZIP2_CFLAGS) $(ZLIB_CFLAGS)" \
+@BUILD_LIBARCHIVE_TRUE@		CFLAGS="$(CFLAGS) -I$(DEPS_PREFIX)/include $(LZMA_CFLAGS) $(BZIP2_CFLAGS) $(ZLIB_CFLAGS) -D_POSIX_C_SOURCE" \
 @BUILD_LIBARCHIVE_TRUE@		LDFLAGS="$(LDFLAGS) -L$(DEPS_PREFIX)/lib $(LZMA_LIBS) $(BZIP2_LIBS) $(ZLIB_LIBS)" && \
 @BUILD_LIBARCHIVE_TRUE@	$(MAKE) $(MAKEFLAGS) && \
 @BUILD_LIBARCHIVE_TRUE@	$(MAKE) $(MAKEFLAGS) install

@@ -44,6 +44,8 @@ class OpenGLRenderTarget final : public RenderTarget {
     int iFrameBufferBackup{0};
     unsigned int iTextureUnitBackup{0};
     std::array<int, 4> iViewportBackup{};
+
+    static int iMaxMultiSamples;
 };
 
 #endif
