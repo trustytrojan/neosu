@@ -6,6 +6,7 @@ neosu_SOURCES = \
 	libraries/glad/glad.cpp \
 	libraries/lodepng.cpp \
 	libraries/sha256.cpp \
+	src/App/Osu/AvatarManager.cpp \
 	src/App/Osu/BackgroundImageHandler.cpp \
 	src/App/Osu/Bancho.cpp \
 	src/App/Osu/BanchoAes.cpp \

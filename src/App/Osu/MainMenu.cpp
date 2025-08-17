@@ -270,9 +270,7 @@ void MainMenu::draw() {
     // load server icon
     if(bancho->is_online() && bancho->server_icon_url.length() > 0 && bancho->server_icon == nullptr) {
         std::string icon_path = fmt::format(MCENGINE_DATA_DIR "avatars/{}", bancho->endpoint);
-        if(!env->directoryExists(icon_path)) {
-            env->createDirectory(icon_path);
-        }
+        // If we are online, the avatars/<server> directory is already created
         icon_path.append("/server_icon");
 
         float progress = -1.f;
@@ -288,7 +286,7 @@ void MainMenu::draw() {
                 fclose(file);
             }
 
-            bancho->server_icon = resourceManager->loadImageAbs(icon_path, icon_path, true /* mipmapped */);
+            bancho->server_icon = resourceManager->loadImageAbs(icon_path, icon_path);
         }
     }
 

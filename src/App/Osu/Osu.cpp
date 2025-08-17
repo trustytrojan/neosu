@@ -5,6 +5,7 @@
 #include <utility>
 
 #include "AnimationHandler.h"
+#include "AvatarManager.h"
 #include "BackgroundImageHandler.h"
 #include "Bancho.h"
 #include "BanchoNetworking.h"
@@ -64,6 +65,7 @@
 #include "UserStatsScreen.h"
 #include "VolumeOverlay.h"
 
+#include "crypto.h"
 #include "score.h"
 
 #include "shaders.h"
@@ -78,7 +80,9 @@ Shader *flashlight_shader = nullptr;
 Osu::Osu() {
     osu = this;
 
-    srand(time(nullptr));
+    u32 seed{};
+    crypto::rng::get_bytes(reinterpret_cast<u8 *>(&seed), 4);
+    srand(seed);
 
     bancho->neosu_version = UString::fmt("{:.2f}-" NEOSU_STREAM, cv::version.getFloat());
     bancho->user_agent = UString::format("Mozilla/5.0 (compatible; neosu/%s; +https://" NEOSU_DOMAIN "/)",
@@ -191,6 +195,7 @@ Osu::Osu() {
     this->notificationOverlay = new NotificationOverlay();
     this->score = new LiveScore(false);
     this->updateHandler = new UpdateHandler();
+    this->avatarManager = std::make_unique<AvatarManager>();
 
     // load main menu icon before skin
     resourceManager->loadImage("neosu.png", "NEOSU_LOGO");
@@ -599,6 +604,9 @@ void Osu::update() {
     if(this->skin != nullptr) this->skin->update();
 
     this->fposu->update();
+
+    // only update if not playing
+    if(!this->isInPlayModeAndNotPaused()) this->avatarManager->update();
 
     bool propagate_clicks = true;
     for(int i = 0; i < this->screens.size() && propagate_clicks; i++) {

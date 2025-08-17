@@ -119,7 +119,7 @@ void ResourceManager::loadResource(Resource *res, bool load) {
     const bool isManaged = (this->nextLoadUnmanagedStack.size() < 1 || !this->nextLoadUnmanagedStack.top());
     if(isManaged) addManagedResource(res);
 
-    const bool isNextLoadAsync = bNextLoadAsync;
+    const bool isNextLoadAsync = this->bNextLoadAsync;
 
     // flags must be reset on every load, to not carry over
     resetFlags();
@@ -151,10 +151,10 @@ size_t ResourceManager::getNumLoadingWorkAsyncDestroy() const {
 void ResourceManager::resetFlags() {
     if(this->nextLoadUnmanagedStack.size() > 0) this->nextLoadUnmanagedStack.pop();
 
-    bNextLoadAsync = false;
+    this->bNextLoadAsync = false;
 }
 
-void ResourceManager::requestNextLoadAsync() { bNextLoadAsync = true; }
+void ResourceManager::requestNextLoadAsync() { this->bNextLoadAsync = true; }
 
 void ResourceManager::requestNextLoadUnmanaged() { this->nextLoadUnmanagedStack.push(true); }
 

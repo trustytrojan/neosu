@@ -7,6 +7,7 @@
 #include "score.h"
 
 class CWindowManager;
+class AvatarManager;
 
 class VolumeOverlay;
 class UserCard;
@@ -112,6 +113,7 @@ class Osu final : public MouseListener, public KeyboardListener {
     [[nodiscard]] inline RankingScreen *getRankingScreen() const { return this->rankingScreen; }
     [[nodiscard]] inline LiveScore *getScore() const { return this->score; }
     [[nodiscard]] inline UpdateHandler *getUpdateHandler() const { return this->updateHandler; }
+    [[nodiscard]] inline const std::unique_ptr<AvatarManager> &getAvatarManager() const { return this->avatarManager; }
 
     [[nodiscard]] inline RenderTarget *getPlayfieldBuffer() const { return this->playfieldBuffer; }
     [[nodiscard]] inline RenderTarget *getSliderFrameBuffer() const { return this->sliderFrameBuffer; }
@@ -313,6 +315,9 @@ class Osu final : public MouseListener, public KeyboardListener {
     bool bFireResolutionChangedScheduled;
     bool bFireDelayedFontReloadAndResolutionChangeToFixDesyncedUIScaleScheduled;
     std::atomic<bool> should_pause_background_threads = false;
+
+   private:
+    std::unique_ptr<AvatarManager> avatarManager{nullptr};
 };
 
 extern Osu *osu;

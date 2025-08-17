@@ -107,8 +107,8 @@ class OpenGLLegacyInterface : public Graphics {
     // persistent vars
     bool bAntiAliasing{true};
     Color color{0xffffffff};
-    float fZ{1};
-    float fClearZ{1};
+    //float fZ{1};
+    //float fClearZ{1};
 
     // synchronization
     std::unique_ptr<OpenGLSync> syncobj{nullptr};

@@ -77,14 +77,10 @@ void Bancho::handle_packet(Packet *packet) {
             this->print_new_channels = true;
 
             std::string avatar_dir = fmt::format(MCENGINE_DATA_DIR "avatars/{}", this->endpoint);
-            if(!env->directoryExists(avatar_dir)) {
-                env->createDirectory(avatar_dir);
-            }
+            env->createDirectory(avatar_dir);
 
             std::string replays_dir = fmt::format(MCENGINE_DATA_DIR "replays/{}", this->endpoint);
-            if(!env->directoryExists(replays_dir)) {
-                env->createDirectory(replays_dir);
-            }
+            env->createDirectory(replays_dir);
 
             osu->onUserCardChange(this->username);
 

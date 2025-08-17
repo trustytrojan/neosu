@@ -154,6 +154,7 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	libraries/glad/neosu-glad.$(OBJEXT) \
 	libraries/neosu-lodepng.$(OBJEXT) \
 	libraries/neosu-sha256.$(OBJEXT) \
+	src/App/Osu/neosu-AvatarManager.$(OBJEXT) \
 	src/App/Osu/neosu-BackgroundImageHandler.$(OBJEXT) \
 	src/App/Osu/neosu-Bancho.$(OBJEXT) \
 	src/App/Osu/neosu-BanchoAes.$(OBJEXT) \
@@ -323,6 +324,7 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	libraries/$(DEPDIR)/neosu-lodepng.Po \
 	libraries/$(DEPDIR)/neosu-sha256.Po \
 	libraries/glad/$(DEPDIR)/neosu-glad.Po \
+	src/App/Osu/$(DEPDIR)/neosu-AvatarManager.Po \
 	src/App/Osu/$(DEPDIR)/neosu-BackgroundImageHandler.Po \
 	src/App/Osu/$(DEPDIR)/neosu-Bancho.Po \
 	src/App/Osu/$(DEPDIR)/neosu-BanchoAes.Po \
@@ -810,6 +812,7 @@ neosu_SOURCES = \
 	libraries/glad/glad.cpp \
 	libraries/lodepng.cpp \
 	libraries/sha256.cpp \
+	src/App/Osu/AvatarManager.cpp \
 	src/App/Osu/BackgroundImageHandler.cpp \
 	src/App/Osu/Bancho.cpp \
 	src/App/Osu/BanchoAes.cpp \
@@ -1248,6 +1251,9 @@ src/App/Osu/$(am__dirstamp):
 src/App/Osu/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) src/App/Osu/$(DEPDIR)
 	@: >>src/App/Osu/$(DEPDIR)/$(am__dirstamp)
+src/App/Osu/neosu-AvatarManager.$(OBJEXT):  \
+	src/App/Osu/$(am__dirstamp) \
+	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/neosu-BackgroundImageHandler.$(OBJEXT):  \
 	src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
@@ -1721,6 +1727,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@libraries/$(DEPDIR)/neosu-lodepng.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@libraries/$(DEPDIR)/neosu-sha256.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@libraries/glad/$(DEPDIR)/neosu-glad.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-AvatarManager.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-BackgroundImageHandler.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-Bancho.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-BanchoAes.Po@am__quote@ # am--include-marker
@@ -1972,6 +1979,20 @@ libraries/neosu-sha256.obj: libraries/sha256.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='libraries/sha256.cpp' object='libraries/neosu-sha256.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o libraries/neosu-sha256.obj `if test -f 'libraries/sha256.cpp'; then $(CYGPATH_W) 'libraries/sha256.cpp'; else $(CYGPATH_W) '$(srcdir)/libraries/sha256.cpp'; fi`
+
+src/App/Osu/neosu-AvatarManager.o: src/App/Osu/AvatarManager.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-AvatarManager.o -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-AvatarManager.Tpo -c -o src/App/Osu/neosu-AvatarManager.o `test -f 'src/App/Osu/AvatarManager.cpp' || echo '$(srcdir)/'`src/App/Osu/AvatarManager.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/$(DEPDIR)/neosu-AvatarManager.Tpo src/App/Osu/$(DEPDIR)/neosu-AvatarManager.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/AvatarManager.cpp' object='src/App/Osu/neosu-AvatarManager.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-AvatarManager.o `test -f 'src/App/Osu/AvatarManager.cpp' || echo '$(srcdir)/'`src/App/Osu/AvatarManager.cpp
+
+src/App/Osu/neosu-AvatarManager.obj: src/App/Osu/AvatarManager.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-AvatarManager.obj -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-AvatarManager.Tpo -c -o src/App/Osu/neosu-AvatarManager.obj `if test -f 'src/App/Osu/AvatarManager.cpp'; then $(CYGPATH_W) 'src/App/Osu/AvatarManager.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/AvatarManager.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/$(DEPDIR)/neosu-AvatarManager.Tpo src/App/Osu/$(DEPDIR)/neosu-AvatarManager.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/AvatarManager.cpp' object='src/App/Osu/neosu-AvatarManager.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-AvatarManager.obj `if test -f 'src/App/Osu/AvatarManager.cpp'; then $(CYGPATH_W) 'src/App/Osu/AvatarManager.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/AvatarManager.cpp'; fi`
 
 src/App/Osu/neosu-BackgroundImageHandler.o: src/App/Osu/BackgroundImageHandler.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-BackgroundImageHandler.o -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-BackgroundImageHandler.Tpo -c -o src/App/Osu/neosu-BackgroundImageHandler.o `test -f 'src/App/Osu/BackgroundImageHandler.cpp' || echo '$(srcdir)/'`src/App/Osu/BackgroundImageHandler.cpp
@@ -4329,6 +4350,7 @@ distclean: distclean-am
 	-rm -f libraries/$(DEPDIR)/neosu-lodepng.Po
 	-rm -f libraries/$(DEPDIR)/neosu-sha256.Po
 	-rm -f libraries/glad/$(DEPDIR)/neosu-glad.Po
+	-rm -f src/App/Osu/$(DEPDIR)/neosu-AvatarManager.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-BackgroundImageHandler.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Bancho.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-BanchoAes.Po
@@ -4528,6 +4550,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f libraries/$(DEPDIR)/neosu-lodepng.Po
 	-rm -f libraries/$(DEPDIR)/neosu-sha256.Po
 	-rm -f libraries/glad/$(DEPDIR)/neosu-glad.Po
+	-rm -f src/App/Osu/$(DEPDIR)/neosu-AvatarManager.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-BackgroundImageHandler.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Bancho.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-BanchoAes.Po
