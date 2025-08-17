@@ -15,7 +15,7 @@ class SongButton : public CarouselButton {
 
     void draw() override;
 
-    void triggerContextMenu(Vector2 pos);
+    void triggerContextMenu(vec2 pos);
 
     void sortChildren();
 

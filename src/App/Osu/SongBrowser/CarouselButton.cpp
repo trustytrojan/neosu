@@ -69,8 +69,8 @@ void CarouselButton::draw() {
     // debug inner bounding box
     if(cv::debug.getBool()) {
         // scaling
-        const Vector2 pos = this->getActualPos();
-        const Vector2 size = this->getActualSize();
+        const vec2 pos = this->getActualPos();
+        const vec2 size = this->getActualSize();
 
         g->setColor(0xffff00ff);
         g->drawLine(pos.x, pos.y, pos.x + size.x, pos.y);
@@ -110,8 +110,8 @@ void CarouselButton::mouse_update(bool *propagate_clicks) {
     // HACKHACK: absolutely disgusting
     // temporarily fool CBaseUIElement with modified position and size
     {
-        Vector2 posBackup = this->vPos;
-        Vector2 sizeBackup = this->vSize;
+        vec2 posBackup = this->vPos;
+        vec2 sizeBackup = this->vSize;
 
         this->vPos = this->getActualPos();
         this->vSize = this->getActualSize();
@@ -149,8 +149,8 @@ void CarouselButton::updateLayoutEx() {
 
     Image *menuButtonBackground = osu->getSkin()->getMenuButtonBackground();
     {
-        const Vector2 minimumSize =
-            Vector2(699.0f, 103.0f) * (osu->getSkin()->isMenuButtonBackground2x() ? 2.0f : 1.0f);
+        const vec2 minimumSize =
+            vec2(699.0f, 103.0f) * (osu->getSkin()->isMenuButtonBackground2x() ? 2.0f : 1.0f);
         const float minimumScale = Osu::getImageScaleToFitResolution(menuButtonBackground, minimumSize);
         this->fScale = Osu::getImageScale(menuButtonBackground->getSize() * minimumScale, 64.0f) * uiScale;
     }
@@ -309,11 +309,11 @@ void CarouselButton::setTargetRelPosY(float targetRelPosY) {
     this->setRelPosY(this->fTargetRelPosY);
 }
 
-Vector2 CarouselButton::getActualOffset() const {
+vec2 CarouselButton::getActualOffset() const {
     const float hd2xMultiplier = osu->getSkin()->isMenuButtonBackground2x() ? 2.0f : 1.0f;
     const float correctedMarginPixelsY =
         (2 * marginPixelsY + osu->getSkin()->getMenuButtonBackground()->getHeight() / hd2xMultiplier - 103.0f) / 2.0f;
-    return Vector2((int)(marginPixelsX * this->fScale * hd2xMultiplier),
+    return vec2((int)(marginPixelsX * this->fScale * hd2xMultiplier),
                    (int)(correctedMarginPixelsY * this->fScale * hd2xMultiplier));
 }
 

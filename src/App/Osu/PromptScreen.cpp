@@ -30,7 +30,7 @@ PromptScreen::PromptScreen() : OsuScreen() {
     this->addBaseUIElement(this->cancel_btn);
 }
 
-void PromptScreen::onResolutionChange(Vector2 newResolution) {
+void PromptScreen::onResolutionChange(vec2 newResolution) {
     const float xmiddle = newResolution.x / 2;
     const float ymiddle = newResolution.y / 2;
 

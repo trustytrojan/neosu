@@ -61,7 +61,7 @@ struct Matrix2 : public glm::mat2 {
         static_cast<glm::mat2&>(*this)[1][index] = row[1];
     }
 
-    void setRow(int index, const Vector2& v) {
+    void setRow(int index, const vec2& v) {
         static_cast<glm::mat2&>(*this)[0][index] = v.x;
         static_cast<glm::mat2&>(*this)[1][index] = v.y;
     }
@@ -71,7 +71,7 @@ struct Matrix2 : public glm::mat2 {
         static_cast<glm::mat2&>(*this)[index][1] = col[1];
     }
 
-    void setColumn(int index, const Vector2& v) {
+    void setColumn(int index, const vec2& v) {
         static_cast<glm::mat2&>(*this)[index][0] = v.x;
         static_cast<glm::mat2&>(*this)[index][1] = v.y;
     }
@@ -120,7 +120,7 @@ struct Matrix2 : public glm::mat2 {
         return *this;
     }
 
-    Vector2 operator*(const Vector2& rhs) const {
+    vec2 operator*(const vec2& rhs) const {
         glm::vec2 result = static_cast<const glm::mat2&>(*this) * static_cast<const glm::vec2&>(rhs);
         return {result};
     }
@@ -142,7 +142,7 @@ struct Matrix2 : public glm::mat2 {
 
     friend Matrix2 operator-(const Matrix2& m);
     friend Matrix2 operator*(float scalar, const Matrix2& m);
-    friend Vector2 operator*(const Vector2& vec, const Matrix2& m);
+    friend vec2 operator*(const vec2& vec, const Matrix2& m);
     friend std::ostream& operator<<(std::ostream& os, const Matrix2& m);
 };
 
@@ -150,7 +150,7 @@ inline Matrix2 operator-(const Matrix2& m) { return {-static_cast<const glm::mat
 
 inline Matrix2 operator*(float s, const Matrix2& m) { return {s * static_cast<const glm::mat2&>(m)}; }
 
-inline Vector2 operator*(const Vector2& v, const Matrix2& m) {
+inline vec2 operator*(const vec2& v, const Matrix2& m) {
     glm::vec2 result = static_cast<const glm::vec2&>(v) * static_cast<const glm::mat2&>(m);
     return {result};
 }
@@ -200,7 +200,7 @@ struct Matrix3 : public glm::mat3 {
         static_cast<glm::mat3&>(*this)[2][index] = row[2];
     }
 
-    void setRow(int index, const Vector3& v) {
+    void setRow(int index, const vec3& v) {
         static_cast<glm::mat3&>(*this)[0][index] = v.x;
         static_cast<glm::mat3&>(*this)[1][index] = v.y;
         static_cast<glm::mat3&>(*this)[2][index] = v.z;
@@ -212,7 +212,7 @@ struct Matrix3 : public glm::mat3 {
         static_cast<glm::mat3&>(*this)[index][2] = col[2];
     }
 
-    void setColumn(int index, const Vector3& v) {
+    void setColumn(int index, const vec3& v) {
         static_cast<glm::mat3&>(*this)[index][0] = v.x;
         static_cast<glm::mat3&>(*this)[index][1] = v.y;
         static_cast<glm::mat3&>(*this)[index][2] = v.z;
@@ -261,7 +261,7 @@ struct Matrix3 : public glm::mat3 {
         return *this;
     }
 
-    Vector3 operator*(const Vector3& rhs) const {
+    vec3 operator*(const vec3& rhs) const {
         glm::vec3 result = static_cast<const glm::mat3&>(*this) * static_cast<const glm::vec3&>(rhs);
         return {result};
     }
@@ -280,7 +280,7 @@ struct Matrix3 : public glm::mat3 {
 
     friend Matrix3 operator-(const Matrix3& m);
     friend Matrix3 operator*(float scalar, const Matrix3& m);
-    friend Vector3 operator*(const Vector3& vec, const Matrix3& m);
+    friend vec3 operator*(const vec3& vec, const Matrix3& m);
     friend std::ostream& operator<<(std::ostream& os, const Matrix3& m);
 };
 
@@ -288,7 +288,7 @@ inline Matrix3 operator-(const Matrix3& m) { return {-static_cast<const glm::mat
 
 inline Matrix3 operator*(float s, const Matrix3& m) { return {s * static_cast<const glm::mat3&>(m)}; }
 
-inline Vector3 operator*(const Vector3& v, const Matrix3& m) {
+inline vec3 operator*(const vec3& v, const Matrix3& m) {
     glm::vec3 result = static_cast<const glm::vec3&>(v) * static_cast<const glm::mat3&>(m);
     return {result};
 }
@@ -350,14 +350,14 @@ struct Matrix4 : public glm::mat4 {
         static_cast<glm::mat4&>(*this)[3][index] = row[3];
     }
 
-    void setRow(int index, const Vector4& v) {
+    void setRow(int index, const vec4& v) {
         static_cast<glm::mat4&>(*this)[0][index] = v.x;
         static_cast<glm::mat4&>(*this)[1][index] = v.y;
         static_cast<glm::mat4&>(*this)[2][index] = v.z;
         static_cast<glm::mat4&>(*this)[3][index] = v.w;
     }
 
-    void setRow(int index, const Vector3& v) {
+    void setRow(int index, const vec3& v) {
         static_cast<glm::mat4&>(*this)[0][index] = v.x;
         static_cast<glm::mat4&>(*this)[1][index] = v.y;
         static_cast<glm::mat4&>(*this)[2][index] = v.z;
@@ -370,14 +370,14 @@ struct Matrix4 : public glm::mat4 {
         static_cast<glm::mat4&>(*this)[index][3] = col[3];
     }
 
-    void setColumn(int index, const Vector4& v) {
+    void setColumn(int index, const vec4& v) {
         static_cast<glm::mat4&>(*this)[index][0] = v.x;
         static_cast<glm::mat4&>(*this)[index][1] = v.y;
         static_cast<glm::mat4&>(*this)[index][2] = v.z;
         static_cast<glm::mat4&>(*this)[index][3] = v.w;
     }
 
-    void setColumn(int index, const Vector3& v) {
+    void setColumn(int index, const vec3& v) {
         static_cast<glm::mat4&>(*this)[index][0] = v.x;
         static_cast<glm::mat4&>(*this)[index][1] = v.y;
         static_cast<glm::mat4&>(*this)[index][2] = v.z;
@@ -458,9 +458,9 @@ struct Matrix4 : public glm::mat4 {
         return *this;
     }
 
-    Matrix4& translate(const Vector3& v) { return translate(v.x, v.y, v.z); }
+    Matrix4& translate(const vec3& v) { return translate(v.x, v.y, v.z); }
 
-    Matrix4& rotate(float angle, const Vector3& axis) { return rotate(angle, axis.x, axis.y, axis.z); }
+    Matrix4& rotate(float angle, const vec3& axis) { return rotate(angle, axis.x, axis.y, axis.z); }
 
     Matrix4& rotate(float angle, float x, float y, float z) {
         float c = cosf(glm::radians(angle));  // cosine
@@ -596,13 +596,13 @@ struct Matrix4 : public glm::mat4 {
         return *this;
     }
 
-    Vector4 operator*(const Vector4& rhs) const {
+    vec4 operator*(const vec4& rhs) const {
         glm::vec4 result = static_cast<const glm::mat4&>(*this) * static_cast<const glm::vec4&>(rhs);
         return {result};
     }
 
-    Vector3 operator*(const Vector3& rhs) const {
-        // treat Vector3 as homogeneous coordinate with w=1, but only return x,y,z
+    vec3 operator*(const vec3& rhs) const {
+        // treat vec3 as homogeneous coordinate with w=1, but only return x,y,z
         glm::vec4 v(rhs.x, rhs.y, rhs.z, 1.0f);
         glm::vec4 result = static_cast<const glm::mat4&>(*this) * v;
         return {result.x, result.y, result.z};
@@ -622,8 +622,8 @@ struct Matrix4 : public glm::mat4 {
 
     friend Matrix4 operator-(const Matrix4& m);
     friend Matrix4 operator*(float scalar, const Matrix4& m);
-    friend Vector3 operator*(const Vector3& vec, const Matrix4& m);
-    friend Vector4 operator*(const Vector4& vec, const Matrix4& m);
+    friend vec3 operator*(const vec3& vec, const Matrix4& m);
+    friend vec4 operator*(const vec4& vec, const Matrix4& m);
     friend std::ostream& operator<<(std::ostream& os, const Matrix4& m);
 
    private:
@@ -634,12 +634,12 @@ inline Matrix4 operator-(const Matrix4& m) { return {-static_cast<const glm::mat
 
 inline Matrix4 operator*(float s, const Matrix4& m) { return {s * static_cast<const glm::mat4&>(m)}; }
 
-inline Vector4 operator*(const Vector4& v, const Matrix4& m) {
+inline vec4 operator*(const vec4& v, const Matrix4& m) {
     glm::vec4 result = static_cast<const glm::vec4&>(v) * static_cast<const glm::mat4&>(m);  // row-major mult
     return {result};
 }
 
-inline Vector3 operator*(const Vector3& v, const Matrix4& m) {
+inline vec3 operator*(const vec3& v, const Matrix4& m) {
     glm::vec4 vec(v.x, v.y, v.z, 1.0f);
     glm::vec4 result = vec * static_cast<const glm::mat4&>(m);  // row-major mult
     return {result.x, result.y, result.z};

@@ -18,10 +18,10 @@ class CBaseUIElement : public KeyboardListener {
         : sName(std::move(name)),
           rect(xPos, yPos, xSize, ySize),
           relRect(this->rect),
-          vPos(const_cast<Vector2 &>(this->rect.getPos())),
-          vSize(const_cast<Vector2 &>(this->rect.getSize())),
-          vmPos(const_cast<Vector2 &>(this->relRect.getPos())),
-          vmSize(const_cast<Vector2 &>(this->relRect.getSize())) {}
+          vPos(const_cast<vec2 &>(this->rect.getPos())),
+          vSize(const_cast<vec2 &>(this->rect.getSize())),
+          vmPos(const_cast<vec2 &>(this->relRect.getPos())),
+          vmSize(const_cast<vec2 &>(this->relRect.getSize())) {}
     ~CBaseUIElement() override { ; }
 
     // main
@@ -39,13 +39,13 @@ class CBaseUIElement : public KeyboardListener {
 
     [[nodiscard]] constexpr const McRect &getRect() const { return this->rect; }
 
-    [[nodiscard]] constexpr const Vector2 &getPos() const { return this->vPos; }
-    [[nodiscard]] constexpr const Vector2 &getSize() const { return this->vSize; }
+    [[nodiscard]] constexpr const vec2 &getPos() const { return this->vPos; }
+    [[nodiscard]] constexpr const vec2 &getSize() const { return this->vSize; }
 
     [[nodiscard]] constexpr const McRect &getRelRect() const { return this->relRect; }
 
-    [[nodiscard]] constexpr const Vector2 &getRelPos() const { return this->vmPos; }
-    [[nodiscard]] constexpr const Vector2 &getRelSize() const { return this->vmSize; }
+    [[nodiscard]] constexpr const vec2 &getRelPos() const { return this->vmPos; }
+    [[nodiscard]] constexpr const vec2 &getRelSize() const { return this->vmSize; }
 
     virtual bool isActive() { return this->bActive || this->isBusy(); }
     virtual bool isVisible() { return this->bVisible; }
@@ -65,7 +65,7 @@ class CBaseUIElement : public KeyboardListener {
     virtual bool isMouseInside() { return this->bMouseInside && this->isVisible(); }
 
     virtual CBaseUIElement *setPos(float xPos, float yPos) {
-        Vector2 newPos{xPos, yPos};
+        vec2 newPos{xPos, yPos};
         if(newPos != this->vPos) {
             this->vPos = newPos;
             this->onMoved();
@@ -86,7 +86,7 @@ class CBaseUIElement : public KeyboardListener {
         }
         return this;
     }
-    virtual CBaseUIElement *setPos(Vector2 position) { return this->setPos(position.x, position.y); }
+    virtual CBaseUIElement *setPos(vec2 position) { return this->setPos(position.x, position.y); }
 
     virtual CBaseUIElement *setRelPos(float xPos, float yPos) {
         this->vmPos.x = xPos;
@@ -101,10 +101,10 @@ class CBaseUIElement : public KeyboardListener {
         this->vmPos.y = yPos;
         return this;
     }
-    virtual CBaseUIElement *setRelPos(Vector2 position) { return this->setRelPos(position.x, position.y); }
+    virtual CBaseUIElement *setRelPos(vec2 position) { return this->setRelPos(position.x, position.y); }
 
     virtual CBaseUIElement *setSize(float xSize, float ySize) {
-        Vector2 newSize{xSize, ySize};
+        vec2 newSize{xSize, ySize};
         if(newSize != this->vSize) {
             this->vSize = newSize;
             this->onResized();
@@ -128,7 +128,7 @@ class CBaseUIElement : public KeyboardListener {
         }
         return this;
     }
-    virtual CBaseUIElement *setSize(Vector2 size) { return this->setSize(size.x, size.y); }
+    virtual CBaseUIElement *setSize(vec2 size) { return this->setSize(size.x, size.y); }
 
     virtual CBaseUIElement *setRect(McRect rect) {
         this->rect = rect;
@@ -217,10 +217,10 @@ class CBaseUIElement : public KeyboardListener {
     McRect rect;
     McRect relRect;
 
-    Vector2 &vPos;    // reference to rect.vMin
-    Vector2 &vSize;   // reference to rect.vSize
-    Vector2 &vmPos;   // reference to relRect.vMin
-    Vector2 &vmSize;  // reference to relRect.vSize
+    vec2 &vPos;    // reference to rect.vMin
+    vec2 &vSize;   // reference to rect.vSize
+    vec2 &vmPos;   // reference to relRect.vMin
+    vec2 &vmSize;  // reference to relRect.vSize
 
     const char* disabled_reason = nullptr;
 

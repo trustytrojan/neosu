@@ -19,7 +19,7 @@ class CWindowManager : public KeyboardListener {
     void onKeyUp(KeyboardEvent &e) override;
     void onChar(KeyboardEvent &e) override;
 
-    void onResolutionChange(Vector2 newResolution);
+    void onResolutionChange(vec2 newResolution);
 
     void openAll();
     void closeAll();

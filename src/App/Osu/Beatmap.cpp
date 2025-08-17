@@ -181,7 +181,7 @@ void Beatmap::drawBackground() {
         if(cv::draw_beatmap_background_image.getBool() && backgroundImage != nullptr &&
            (cv::background_dim.getFloat() < 1.0f || this->fBreakBackgroundFade > 0.0f)) {
             const float scale = Osu::getImageScaleToFillResolution(backgroundImage, osu->getScreenSize());
-            const Vector2 centerTrans = (osu->getScreenSize() / 2.0f);
+            const vec2 centerTrans = (osu->getScreenSize() / 2.0f);
 
             const float backgroundFadeDimMultiplier = 1.0f - (cv::background_dim.getFloat() - 0.3f);
             const auto dim =
@@ -585,7 +585,7 @@ bool Beatmap::start() {
 
     static const int OSU_COORD_WIDTH = 512;
     static const int OSU_COORD_HEIGHT = 384;
-    osu->flashlight_position = Vector2{OSU_COORD_WIDTH / 2, OSU_COORD_HEIGHT / 2};
+    osu->flashlight_position = vec2{OSU_COORD_WIDTH / 2, OSU_COORD_HEIGHT / 2};
 
     // reset everything, including deleting any previously loaded hitobjects from another diff which we might just have
     // played
@@ -1464,7 +1464,7 @@ bool Beatmap::sortHitObjectByStartTimeComp(HitObject const *a, HitObject const *
     if(a->combo_number != b->combo_number) return a->combo_number < b->combo_number;
 
     auto aPosAtStartTime = a->getRawPosAt(a->click_time), bPosAtClickTime = b->getRawPosAt(b->click_time);
-    if(aPosAtStartTime != bPosAtClickTime) return aPosAtStartTime < bPosAtClickTime;
+    if(aPosAtStartTime != bPosAtClickTime) return vec::all(vec::lessThan(aPosAtStartTime, bPosAtClickTime));
 
     return false;  // equivalent
 }
@@ -1478,7 +1478,7 @@ bool Beatmap::sortHitObjectByEndTimeComp(HitObject const *a, HitObject const *b)
 
     auto aPosAtEndTime = a->getRawPosAt(a->click_time + a->duration),
          bPosAtClickTime = b->getRawPosAt(b->click_time + b->duration);
-    if(aPosAtEndTime != bPosAtClickTime) return aPosAtEndTime < bPosAtClickTime;
+    if(aPosAtEndTime != bPosAtClickTime) return vec::all(vec::lessThan(aPosAtEndTime, bPosAtClickTime));
 
     return false;  // equivalent
 }
@@ -1755,8 +1755,8 @@ void Beatmap::draw() {
     // draw first person crosshair
     if(cv::mod_fps.getBool()) {
         const int length = 15;
-        Vector2 center =
-            this->osuCoords2Pixels(Vector2(GameRules::OSU_COORD_WIDTH / 2, GameRules::OSU_COORD_HEIGHT / 2));
+        vec2 center =
+            this->osuCoords2Pixels(vec2(GameRules::OSU_COORD_WIDTH / 2, GameRules::OSU_COORD_HEIGHT / 2));
         g->setColor(0xff777777);
         g->drawLine(center.x, (int)(center.y - length), center.x, (int)(center.y + length + 1));
         g->drawLine((int)(center.x - length), center.y, (int)(center.x + length + 1), center.y);
@@ -1782,7 +1782,7 @@ void Beatmap::draw() {
     if(cv::debug_hiterrorbar_misaims.getBool()) {
         for(auto &misaimObject : this->misaimObjects) {
             g->setColor(0xbb00ff00);
-            Vector2 pos = this->osuCoords2Pixels(misaimObject->getRawPosAt(0));
+            vec2 pos = this->osuCoords2Pixels(misaimObject->getRawPosAt(0));
             g->fillRect(pos.x - 50, pos.y - 50, 100, 100);
         }
     }
@@ -1915,15 +1915,15 @@ void Beatmap::drawFollowPoints() {
             const long objectStartTime = this->hitobjects[index]->click_time;
             const long timeDiff = objectStartTime - lastObjectEndTime;
 
-            const Vector2 startPoint =
+            const vec2 startPoint =
                 this->osuCoords2Pixels(this->hitobjects[lastObjectIndex]->getRawPosAt(lastObjectEndTime));
-            const Vector2 endPoint = this->osuCoords2Pixels(this->hitobjects[index]->getRawPosAt(objectStartTime));
+            const vec2 endPoint = this->osuCoords2Pixels(this->hitobjects[index]->getRawPosAt(objectStartTime));
 
             const f32 xDiff = endPoint.x - startPoint.x;
             const f32 yDiff = endPoint.y - startPoint.y;
-            const Vector2 diff = endPoint - startPoint;
+            const vec2 diff = endPoint - startPoint;
             const f32 dist =
-                std::round(diff.length() * 100.0f) / 100.0f;  // rounded to avoid flicker with playfield rotations
+                std::round(vec::length(diff) * 100.0f) / 100.0f;  // rounded to avoid flicker with playfield rotations
 
             // draw all points between the two objects
             const int followPointSeparation = Osu::getUIScale(32) * followPointSeparationMultiplier;
@@ -1931,8 +1931,8 @@ void Beatmap::drawFollowPoints() {
                 j += followPointSeparation) {
                 const f32 animRatio = ((f32)j / dist);
 
-                const Vector2 animPosStart = startPoint + (animRatio - 0.1f) * diff;
-                const Vector2 finalPos = startPoint + animRatio * diff;
+                const vec2 animPosStart = startPoint + (animRatio - 0.1f) * diff;
+                const vec2 finalPos = startPoint + animRatio * diff;
 
                 const long fadeInTime = (long)(lastObjectEndTime + animRatio * timeDiff) - followPointApproachTime;
                 const long fadeOutTime = (long)(lastObjectEndTime + animRatio * timeDiff);
@@ -1946,7 +1946,7 @@ void Beatmap::drawFollowPoints() {
                 // NOTE: only internal osu default skin uses scale + move transforms here, it is impossible to achieve
                 // this effect with user skins
                 const f32 scale = cv::followpoints_anim.getBool() ? 1.5f - 0.5f * followAnimPercent : 1.0f;
-                const Vector2 followPos = cv::followpoints_anim.getBool()
+                const vec2 followPos = cv::followpoints_anim.getBool()
                                               ? animPosStart + (finalPos - animPosStart) * followAnimPercent
                                               : finalPos;
 
@@ -2624,7 +2624,7 @@ void Beatmap::update2() {
             percent = (f32)ms_since_last_frame / (f32)next_frame.milliseconds_since_last_frame;
         }
 
-        this->interpolatedMousePos = Vector2{std::lerp(current_frame.x, next_frame.x, percent),
+        this->interpolatedMousePos = vec2{std::lerp(current_frame.x, next_frame.x, percent),
                                              std::lerp(current_frame.y, next_frame.y, percent)};
 
         if(cv::playfield_mirror_horizontal.getBool())
@@ -2635,7 +2635,7 @@ void Beatmap::update2() {
         if(cv::playfield_rotation.getFloat() != 0.0f) {
             this->interpolatedMousePos.x -= GameRules::OSU_COORD_WIDTH / 2;
             this->interpolatedMousePos.y -= GameRules::OSU_COORD_HEIGHT / 2;
-            Vector3 coords3 = Vector3(this->interpolatedMousePos.x, this->interpolatedMousePos.y, 0);
+            vec3 coords3 = vec3(this->interpolatedMousePos.x, this->interpolatedMousePos.y, 0);
             Matrix4 rot;
             rot.rotateZ(cv::playfield_rotation.getFloat());
             coords3 = coords3 * rot;
@@ -3211,13 +3211,13 @@ void Beatmap::write_frame() {
     if(delta < 0) return;
     if(delta == 0 && this->last_keys == this->current_keys) return;
 
-    Vector2 pos = this->pixels2OsuCoords(this->getCursorPos());
+    vec2 pos = this->pixels2OsuCoords(this->getCursorPos());
     if(cv::playfield_mirror_horizontal.getBool()) pos.y = GameRules::OSU_COORD_HEIGHT - pos.y;
     if(cv::playfield_mirror_vertical.getBool()) pos.x = GameRules::OSU_COORD_WIDTH - pos.x;
     if(cv::playfield_rotation.getFloat() != 0.0f) {
         pos.x -= GameRules::OSU_COORD_WIDTH / 2;
         pos.y -= GameRules::OSU_COORD_HEIGHT / 2;
-        Vector3 coords3 = Vector3(pos.x, pos.y, 0);
+        vec3 coords3 = vec3(pos.x, pos.y, 0);
         Matrix4 rot;
         rot.rotateZ(-cv::playfield_rotation.getFloat());
         coords3 = coords3 * rot;
@@ -3361,7 +3361,7 @@ bool Beatmap::isActuallyLoading() {
     return (!soundEngine->isReady() || !this->music->isAsyncReady() || this->bIsPreLoading);
 }
 
-Vector2 Beatmap::pixels2OsuCoords(Vector2 pixelCoords) const {
+vec2 Beatmap::pixels2OsuCoords(vec2 pixelCoords) const {
     // un-first-person
     if(cv::mod_fps.getBool()) {
         // HACKHACK: this is the worst hack possible (engine->isDrawing()), but it works
@@ -3378,7 +3378,7 @@ Vector2 Beatmap::pixels2OsuCoords(Vector2 pixelCoords) const {
     return pixelCoords;
 }
 
-Vector2 Beatmap::osuCoords2Pixels(Vector2 coords) const {
+vec2 Beatmap::osuCoords2Pixels(vec2 coords) const {
     if(osu->getModHR()) coords.y = GameRules::OSU_COORD_HEIGHT - coords.y;
     if(cv::playfield_mirror_horizontal.getBool()) coords.y = GameRules::OSU_COORD_HEIGHT - coords.y;
     if(cv::playfield_mirror_vertical.getBool()) coords.x = GameRules::OSU_COORD_WIDTH - coords.x;
@@ -3397,7 +3397,7 @@ Vector2 Beatmap::osuCoords2Pixels(Vector2 coords) const {
     // wobble2
     if(cv::mod_wobble2.getBool()) {
         const f32 speedMultiplierCompensation = 1.0f / this->getSpeedMultiplier();
-        Vector2 centerDelta = coords - Vector2(GameRules::OSU_COORD_WIDTH, GameRules::OSU_COORD_HEIGHT) / 2;
+        vec2 centerDelta = coords - vec2(GameRules::OSU_COORD_WIDTH, GameRules::OSU_COORD_HEIGHT) / 2.f;
         coords.x += centerDelta.x * 0.25f *
                     std::sin((this->iCurMusicPos / 1000.0f) * 5 * speedMultiplierCompensation *
                              cv::mod_wobble_frequency.getFloat()) *
@@ -3413,7 +3413,7 @@ Vector2 Beatmap::osuCoords2Pixels(Vector2 coords) const {
         coords.x -= GameRules::OSU_COORD_WIDTH / 2;
         coords.y -= GameRules::OSU_COORD_HEIGHT / 2;
 
-        Vector3 coords3 = Vector3(coords.x, coords.y, 0);
+        vec3 coords3 = vec3(coords.x, coords.y, 0);
         Matrix4 rot;
         rot.rotateZ(this->fPlayfieldRotation + cv::playfield_rotation.getFloat());
 
@@ -3438,7 +3438,7 @@ Vector2 Beatmap::osuCoords2Pixels(Vector2 coords) const {
         coords.x -= GameRules::OSU_COORD_WIDTH / 2;
         coords.y -= GameRules::OSU_COORD_HEIGHT / 2;
 
-        Vector3 coords3 = Vector3(coords.x, coords.y, 0);
+        vec3 coords3 = vec3(coords.x, coords.y, 0);
         Matrix4 rot;
         rot.rotateZ(failTimePercentInv * 60.0f);
 
@@ -3466,7 +3466,7 @@ Vector2 Beatmap::osuCoords2Pixels(Vector2 coords) const {
     return coords;
 }
 
-Vector2 Beatmap::osuCoords2RawPixels(Vector2 coords) const {
+vec2 Beatmap::osuCoords2RawPixels(vec2 coords) const {
     // scale and offset
     coords *= this->fScaleFactor;
     coords += this->vPlayfieldOffset;  // the offset is already scaled, just add it
@@ -3474,7 +3474,7 @@ Vector2 Beatmap::osuCoords2RawPixels(Vector2 coords) const {
     return coords;
 }
 
-Vector2 Beatmap::osuCoords2LegacyPixels(Vector2 coords) const {
+vec2 Beatmap::osuCoords2LegacyPixels(vec2 coords) const {
     if(osu->getModHR()) coords.y = GameRules::OSU_COORD_HEIGHT - coords.y;
     if(cv::playfield_mirror_horizontal.getBool()) coords.y = GameRules::OSU_COORD_HEIGHT - coords.y;
     if(cv::playfield_mirror_vertical.getBool()) coords.x = GameRules::OSU_COORD_WIDTH - coords.x;
@@ -3484,7 +3484,7 @@ Vector2 Beatmap::osuCoords2LegacyPixels(Vector2 coords) const {
         coords.x -= GameRules::OSU_COORD_WIDTH / 2;
         coords.y -= GameRules::OSU_COORD_HEIGHT / 2;
 
-        Vector3 coords3 = Vector3(coords.x, coords.y, 0);
+        vec3 coords3 = vec3(coords.x, coords.y, 0);
         Matrix4 rot;
         rot.rotateZ(this->fPlayfieldRotation + cv::playfield_rotation.getFloat());
 
@@ -3503,7 +3503,7 @@ Vector2 Beatmap::osuCoords2LegacyPixels(Vector2 coords) const {
     return coords;
 }
 
-Vector2 Beatmap::getMousePos() const {
+vec2 Beatmap::getMousePos() const {
     if((this->is_watching && !this->bIsPaused) || bancho->spectating) {
         return this->interpolatedMousePos;
     } else {
@@ -3511,7 +3511,7 @@ Vector2 Beatmap::getMousePos() const {
     }
 }
 
-Vector2 Beatmap::getCursorPos() const {
+vec2 Beatmap::getCursorPos() const {
     if(cv::mod_fps.getBool() && !this->bIsPaused) {
         if(osu->getModAuto() || osu->getModAutopilot()) {
             return this->vAutoCursorPos;
@@ -3521,9 +3521,9 @@ Vector2 Beatmap::getCursorPos() const {
     } else if(osu->getModAuto() || osu->getModAutopilot()) {
         return this->vAutoCursorPos;
     } else {
-        Vector2 pos = this->getMousePos();
+        vec2 pos = this->getMousePos();
         if(cv::mod_shirone.getBool() && osu->getScore()->getCombo() > 0) {
-            return pos + Vector2(std::sin((this->iCurMusicPos / 20.0f) * 1.15f) *
+            return pos + vec2(std::sin((this->iCurMusicPos / 20.0f) * 1.15f) *
                                      ((f32)osu->getScore()->getCombo() / cv::mod_shirone_combo.getFloat()),
                                  std::cos((this->iCurMusicPos / 20.0f) * 1.3f) *
                                      ((f32)osu->getScore()->getCombo() / cv::mod_shirone_combo.getFloat()));
@@ -3533,7 +3533,7 @@ Vector2 Beatmap::getCursorPos() const {
     }
 }
 
-Vector2 Beatmap::getFirstPersonCursorDelta() const {
+vec2 Beatmap::getFirstPersonCursorDelta() const {
     return this->vPlayfieldCenter -
            (osu->getModAuto() || osu->getModAutopilot() ? this->vAutoCursorPos : this->getMousePos());
 }
@@ -3710,9 +3710,9 @@ void Beatmap::updateAutoCursorPos() {
     // general
     long prevTime = 0;
     long nextTime = this->hitobjects[0]->click_time;
-    Vector2 prevPos = this->vAutoCursorPos;
-    Vector2 curPos = this->vAutoCursorPos;
-    Vector2 nextPos = this->vAutoCursorPos;
+    vec2 prevPos = this->vAutoCursorPos;
+    vec2 curPos = this->vAutoCursorPos;
+    vec2 nextPos = this->vAutoCursorPos;
     bool haveCurPos = false;
 
     // dance
@@ -3849,7 +3849,7 @@ void Beatmap::updateAutoCursorPos() {
         percent = std::clamp<f32>(percent, 0.0f, 1.0f);
 
         // scaled distance (not osucoords)
-        f32 distance = (nextPos - prevPos).length();
+        f32 distance = vec::length((nextPos - prevPos));
         if(distance > this->fHitcircleDiameter * 1.05f)  // snap only if not in a stream (heuristic)
         {
             int numIterations = std::clamp<int>(
@@ -3866,14 +3866,14 @@ void Beatmap::updateAutoCursorPos() {
         this->vAutoCursorPos = prevPos + (nextPos - prevPos) * percent;
 
         if(cv::auto_cursordance.getBool() && !osu->getModAutopilot()) {
-            Vector3 dir = Vector3(nextPos.x, nextPos.y, 0) - Vector3(prevPos.x, prevPos.y, 0);
-            Vector3 center = dir * 0.5f;
+            vec3 dir = vec3(nextPos.x, nextPos.y, 0) - vec3(prevPos.x, prevPos.y, 0);
+            vec3 center = dir * 0.5f;
             Matrix4 worldMatrix;
             worldMatrix.translate(center);
             worldMatrix.rotate((1.0f - percent) * 180.0f * (this->iAutoCursorDanceIndex % 2 == 0 ? 1 : -1), 0, 0, 1);
-            Vector3 fancyAutoCursorPos = worldMatrix * center;
+            vec3 fancyAutoCursorPos = worldMatrix * center;
             this->vAutoCursorPos =
-                prevPos + (nextPos - prevPos) * 0.5f + Vector2(fancyAutoCursorPos.x, fancyAutoCursorPos.y);
+                prevPos + (nextPos - prevPos) * 0.5f + vec2(fancyAutoCursorPos.x, fancyAutoCursorPos.y);
         }
     }
 }
@@ -3968,24 +3968,23 @@ void Beatmap::calculateStacks() {
                     if(objectI->click_time - (approachTime * stackLeniency) > (objectN->click_time + objectN->duration))
                         break;
 
-                    Vector2 objectNEndPosition = objectN->getOriginalRawPosAt(objectN->click_time + objectN->duration);
+                    vec2 objectNEndPosition = objectN->getOriginalRawPosAt(objectN->click_time + objectN->duration);
                     if(objectN->duration != 0 &&
-                       (objectNEndPosition - objectI->getOriginalRawPosAt(objectI->click_time)).length() <
+                       vec::length(objectNEndPosition - objectI->getOriginalRawPosAt(objectI->click_time)) <
                            STACK_LENIENCE) {
                         int offset = objectI->getStack() - objectN->getStack() + 1;
                         for(int j = n + 1; j <= i; j++) {
-                            if((objectNEndPosition -
-                                this->hitobjects[j]->getOriginalRawPosAt(this->hitobjects[j]->click_time))
-                                   .length() < STACK_LENIENCE)
+                            if(vec::length((objectNEndPosition - this->hitobjects[j]->getOriginalRawPosAt(
+                                                                     this->hitobjects[j]->click_time))) <
+                               STACK_LENIENCE)
                                 this->hitobjects[j]->setStack(this->hitobjects[j]->getStack() - offset);
                         }
 
                         break;
                     }
 
-                    if((objectN->getOriginalRawPosAt(objectN->click_time) -
-                        objectI->getOriginalRawPosAt(objectI->click_time))
-                           .length() < STACK_LENIENCE) {
+                    if(vec::length((objectN->getOriginalRawPosAt(objectN->click_time) -
+                                    objectI->getOriginalRawPosAt(objectI->click_time))) < STACK_LENIENCE) {
                         objectN->setStack(objectI->getStack() + 1);
                         objectI = objectN;
                     }
@@ -4000,10 +3999,10 @@ void Beatmap::calculateStacks() {
 
                     if(objectI->click_time - (approachTime * stackLeniency) > objectN->click_time) break;
 
-                    if(((objectN->duration != 0 ? objectN->getOriginalRawPosAt(objectN->click_time + objectN->duration)
-                                                : objectN->getOriginalRawPosAt(objectN->click_time)) -
-                        objectI->getOriginalRawPosAt(objectI->click_time))
-                           .length() < STACK_LENIENCE) {
+                    if(vec::length(((objectN->duration != 0
+                                         ? objectN->getOriginalRawPosAt(objectN->click_time + objectN->duration)
+                                         : objectN->getOriginalRawPosAt(objectN->click_time)) -
+                                    objectI->getOriginalRawPosAt(objectI->click_time))) < STACK_LENIENCE) {
                         objectN->setStack(objectI->getStack() + 1);
                         objectI = objectN;
                     }
@@ -4033,16 +4032,15 @@ void Beatmap::calculateStacks() {
 
                 // "The start position of the hitobject, or the position at the end of the path if the hitobject is a
                 // slider"
-                Vector2 position2 =
+                vec2 position2 =
                     isSlider ? sliderPointer->getOriginalRawPosAt(sliderPointer->click_time + sliderPointer->duration)
                              : currHitObject->getOriginalRawPosAt(currHitObject->click_time);
 
-                if((objectJ->getOriginalRawPosAt(objectJ->click_time) -
-                    currHitObject->getOriginalRawPosAt(currHitObject->click_time))
-                       .length() < 3) {
+                if(vec::length((objectJ->getOriginalRawPosAt(objectJ->click_time) -
+                    currHitObject->getOriginalRawPosAt(currHitObject->click_time))) < 3) {
                     currHitObject->setStack(currHitObject->getStack() + 1);
                     startTime = objectJ->click_time + objectJ->duration;
-                } else if((objectJ->getOriginalRawPosAt(objectJ->click_time) - position2).length() < 3) {
+                } else if(vec::length((objectJ->getOriginalRawPosAt(objectJ->click_time) - position2)) < 3) {
                     // "Case for sliders - bump notes down and right, rather than up and left."
                     sliderStack++;
                     objectJ->setStack(objectJ->getStack() - sliderStack);

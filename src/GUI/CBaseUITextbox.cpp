@@ -149,7 +149,7 @@ void CBaseUITextbox::mouse_update(bool *propagate_clicks) {
         this->bActive = true;
     }
 
-    const Vector2 mousepos = mouse->getPos();
+    const vec2 mousepos = mouse->getPos();
     const bool mleft = mouse->isLeftDown();
     const bool mright = mouse->isRightDown();
 

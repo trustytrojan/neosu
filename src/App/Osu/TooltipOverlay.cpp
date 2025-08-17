@@ -27,7 +27,7 @@ void TooltipOverlay::draw() {
 
         McFont* font = resourceManager->getFont("FONT_DEFAULT");
 
-        const Vector2 offset = Vector2(10, 10) * dpiScale;
+        const vec2 offset = vec2(10, 10) * dpiScale;
         const int margin = 5 * dpiScale;
         const int lineSpacing = 8 * dpiScale;
         const float alpha = this->fAnim * this->fAnim * this->fAnim;
@@ -40,7 +40,7 @@ void TooltipOverlay::draw() {
         const int height =
             font->getHeight() * this->lines.size() + lineSpacing * (this->lines.size() - 1) + 3 * dpiScale;
 
-        Vector2 cursorPos = mouse->getPos();
+        vec2 cursorPos = mouse->getPos();
 
         // clamp to right edge
         if(cursorPos.x + width + offset.x + 2 * margin > osu->getScreenWidth())

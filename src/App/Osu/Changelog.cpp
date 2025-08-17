@@ -576,8 +576,8 @@ void Changelog::updateLayout() {
 
     const float dpiScale = Osu::getUIScale();
 
-    this->setSize(osu->getScreenSize() + Vector2(2, 2));
-    this->scrollView->setSize(osu->getScreenSize() + Vector2(2, 2));
+    this->setSize(osu->getScreenSize() + vec2(2, 2));
+    this->scrollView->setSize(osu->getScreenSize() + vec2(2, 2));
 
     float yCounter = 0;
     for(const CHANGELOG_UI &changelog : this->changelogs) {

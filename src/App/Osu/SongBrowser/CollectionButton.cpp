@@ -39,8 +39,8 @@ void CollectionButton::draw() {
     Skin *skin = osu->getSkin();
 
     // scaling
-    const Vector2 pos = this->getActualPos();
-    const Vector2 size = this->getActualSize();
+    const vec2 pos = this->getActualPos();
+    const vec2 size = this->getActualSize();
 
     // draw title
     UString titleString = this->sCollectionName.c_str();
@@ -79,7 +79,7 @@ void CollectionButton::onSelected(bool wasSelected, bool autoSelectBottomMostChi
 
 void CollectionButton::onRightMouseUpInside() { this->triggerContextMenu(mouse->getPos()); }
 
-void CollectionButton::triggerContextMenu(Vector2 pos) {
+void CollectionButton::triggerContextMenu(vec2 pos) {
     if(osu->getSongBrowser()->getGroupingMode() != SongBrowser::GROUP::GROUP_COLLECTIONS) return;
 
     if(this->contextMenu != nullptr) {

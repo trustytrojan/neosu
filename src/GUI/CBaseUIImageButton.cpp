@@ -12,7 +12,7 @@ CBaseUIImageButton::CBaseUIImageButton(std::string imageResourceName, float xPos
     this->setImageResourceName(std::move(imageResourceName));
 
     this->fRot = 0.0f;
-    this->vScale = Vector2(1, 1);
+    this->vScale = vec2(1, 1);
     this->bScaleToFit = false;
     this->bKeepAspectRatio = true;
 }
@@ -44,7 +44,7 @@ CBaseUIImageButton *CBaseUIImageButton::setImageResourceName(std::string imageRe
     this->sImageResourceName = std::move(imageResourceName);
 
     Image *image = resourceManager->getImage(this->sImageResourceName);
-    if(image != nullptr) this->setSize(Vector2(image->getWidth(), image->getHeight()));
+    if(image != nullptr) this->setSize(vec2(image->getWidth(), image->getHeight()));
 
     return this;
 }
@@ -55,14 +55,14 @@ void CBaseUIImageButton::onResized() {
     Image *image = resourceManager->getImage(this->sImageResourceName);
     if(this->bScaleToFit && image != nullptr) {
         if(!this->bKeepAspectRatio) {
-            this->vScale = Vector2(this->vSize.x / image->getWidth(), this->vSize.y / image->getHeight());
+            this->vScale = vec2(this->vSize.x / image->getWidth(), this->vSize.y / image->getHeight());
             this->vSize.x = (int)(image->getWidth() * this->vScale.x);
             this->vSize.y = (int)(image->getHeight() * this->vScale.y);
         } else {
             float scaleFactor = this->vSize.x / image->getWidth() < this->vSize.y / image->getHeight()
                                     ? this->vSize.x / image->getWidth()
                                     : this->vSize.y / image->getHeight();
-            this->vScale = Vector2(scaleFactor, scaleFactor);
+            this->vScale = vec2(scaleFactor, scaleFactor);
             this->vSize.x = (int)(image->getWidth() * this->vScale.x);
             this->vSize.y = (int)(image->getHeight() * this->vScale.y);
         }

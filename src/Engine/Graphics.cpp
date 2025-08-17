@@ -131,7 +131,7 @@ void Graphics::push3DScene(McRect region) {
     Matrix4 trans = Matrix4().translate(-(float)region.getWidth() / 2 - region.getX(),
                                         -(float)region.getHeight() / 2 - region.getY(), 0);
     this->scene_world_matrix =
-        Camera::buildMatrixLookAt(Vector3(0, 0, -hc), Vector3(0, 0, 0), Vector3(0, -1, 0)) * trans;
+        Camera::buildMatrixLookAt(vec3(0, 0, -hc), vec3(0, 0, 0), vec3(0, -1, 0)) * trans;
 
     // force transform update
     this->updateTransform(true);
@@ -163,7 +163,7 @@ void Graphics::rotate3DScene(float rotx, float roty, float rotz) {
 
     // first translate to the center of the 3d region, then rotate, then translate back
     Matrix4 rot;
-    Vector3 centerVec = Vector3(this->scene_region.getX() + this->scene_region.getWidth() / 2 + this->v3dSceneOffset.x,
+    vec3 centerVec = vec3(this->scene_region.getX() + this->scene_region.getWidth() / 2 + this->v3dSceneOffset.x,
                                 this->scene_region.getY() + this->scene_region.getHeight() / 2 + this->v3dSceneOffset.y,
                                 this->v3dSceneOffset.z);
     rot.translate(-centerVec);
@@ -182,7 +182,7 @@ void Graphics::rotate3DScene(float rotx, float roty, float rotz) {
     this->updateTransform(true);
 }
 
-void Graphics::offset3DScene(float x, float y, float z) { this->v3dSceneOffset = Vector3(x, y, z); }
+void Graphics::offset3DScene(float x, float y, float z) { this->v3dSceneOffset = vec3(x, y, z); }
 
 void Graphics::updateTransform(bool force) {
     if(!this->bTransformUpToDate || force) {

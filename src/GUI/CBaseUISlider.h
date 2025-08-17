@@ -81,8 +81,8 @@ class CBaseUISlider : public CBaseUIElement {
 
     SliderChangeCallback sliderChangeCallback;
 
-    Vector2 vBlockSize, vBlockPos;
-    Vector2 vGrabBackup;
+    vec2 vBlockSize, vBlockPos{0.f};
+    vec2 vGrabBackup{0.f};
 
     float fMinValue, fMaxValue, fCurValue, fCurPercent;
     float fPrevValue;

@@ -85,7 +85,7 @@ void NotificationOverlay::mouse_update(bool *propagate_clicks) {
     chat_toasts_visible |= osu->pauseMenu->isVisible();
 
     bool a_toast_is_hovered = false;
-    Vector2 screen{Osu::g_vInternalResolution};
+    vec2 screen{Osu::g_vInternalResolution};
     f64 bottom_y = screen.y - TOAST_SCREEN_BOTTOM_MARGIN;
     for(auto t : this->toasts) {
         if(t->type == ToastElement::TYPE::CHAT && !chat_toasts_visible) continue;

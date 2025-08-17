@@ -30,9 +30,9 @@ CBaseUIScrollView::CBaseUIScrollView(float xPos, float yPos, float xSize, float 
 
     this->bScrolling = false;
     this->bScrollbarScrolling = false;
-    this->vScrollPos = Vector2(1, 1);
-    this->vVelocity = Vector2(0, 0);
-    this->vScrollSize = Vector2(1, 1);
+    this->vScrollPos = vec2(1, 1);
+    this->vVelocity = vec2(0, 0);
+    this->vScrollSize = vec2(1, 1);
 
     this->bVerticalScrolling = true;
     this->bHorizontalScrolling = true;
@@ -147,7 +147,7 @@ void CBaseUIScrollView::mouse_update(bool *propagate_clicks) {
 
     const bool wasContainerBusyBeforeUpdate = this->container->isBusy();
     if(this->bBusy) {
-        const Vector2 deltaToAdd = (mouse->getPos() - this->vMouseBackup2);
+        const vec2 deltaToAdd = (mouse->getPos() - this->vMouseBackup2);
         // debugLog("+ ({:f}, {:f})\n", deltaToAdd.x, deltaToAdd.y);
 
         anim->moveQuadOut(&this->vKineticAverage.x, deltaToAdd.x, cv::ui_scrollview_kinetic_approach_time.getFloat(),
@@ -219,12 +219,12 @@ void CBaseUIScrollView::mouse_update(bool *propagate_clicks) {
         this->bScrolling = false;
         this->bActive = false;
 
-        Vector2 delta = this->vKineticAverage;
+        vec2 delta = this->vKineticAverage;
 
         // calculate remaining kinetic energy
         if(!this->bScrollbarScrolling)
             this->vVelocity = cv::ui_scrollview_kinetic_energy_multiplier.getFloat() * delta *
-                                  (engine->getFrameTime() != 0.0 ? 1.0 / engine->getFrameTime() : 60.0) / 60.0 +
+                                  (engine->getFrameTime() != 0.0 ? 1.0 / engine->getFrameTime() : 60.0) / 60.0f +
                               this->vScrollPos;
 
         // debugLog("kinetic = ({:f}, {:f}), velocity = ({:f}, {:f}), frametime = {:f}\n", delta.x, delta.y, this->vVelocity.x,
@@ -254,7 +254,7 @@ void CBaseUIScrollView::mouse_update(bool *propagate_clicks) {
         this->container->setPos(this->vPos + this->vScrollPos);
     } else  // no longer scrolling, smooth the remaining velocity
     {
-        this->vKineticAverage.zero();
+        this->vKineticAverage = {0.f, 0.f};
 
         // rubber banding + kinetic scrolling
 
@@ -331,7 +331,7 @@ void CBaseUIScrollView::mouse_update(bool *propagate_clicks) {
 
     // HACKHACK: if an animation was started and ended before any setpos could get fired, manually update the position
     if(this->container->getPos() !=
-       (this->vPos + Vector2(std::round(this->vScrollPos.x), std::round(this->vScrollPos.y)))) {
+       (this->vPos + vec2(std::round(this->vScrollPos.x), std::round(this->vScrollPos.y)))) {
         this->container->setPos(this->vPos.x + std::round(this->vScrollPos.x),
                                 this->vPos.y + std::round(this->vScrollPos.y));
         this->updateScrollbars();
@@ -558,7 +558,7 @@ CBaseUIScrollView *CBaseUIScrollView::setScrollSizeToContent(int border) {
     auto oldScrollPos = this->vScrollPos;
     bool wasAtBottom = (this->vSize.y - this->vScrollPos.y) >= this->vScrollSize.y;
 
-    this->vScrollSize.zero();
+    this->vScrollSize = {0.f, 0.f};
 
     const std::vector<CBaseUIElement *> &elements = this->container->getElements();
     for(auto e : elements) {

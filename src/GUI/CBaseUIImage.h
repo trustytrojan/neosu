@@ -48,7 +48,7 @@ class CBaseUIImage : public CBaseUIElement {
         this->vScale.y = yScale;
         return this;
     }
-    CBaseUIImage *setScale(Vector2 scale) {
+    CBaseUIImage *setScale(vec2 scale) {
         this->vScale.x = scale.x;
         this->vScale.y = scale.y;
         return this;
@@ -59,13 +59,13 @@ class CBaseUIImage : public CBaseUIElement {
     }
 
     [[nodiscard]] inline float getRotationDeg() const { return this->fRot; }
-    [[nodiscard]] inline Vector2 getScale() const { return this->vScale; }
+    [[nodiscard]] inline vec2 getScale() const { return this->vScale; }
     [[nodiscard]] inline Image *getImage() const { return this->image; }
 
    private:
     Image *image;
 
-    Vector2 vScale;
+    vec2 vScale{0.f};
 
     float fRot;
 

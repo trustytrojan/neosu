@@ -33,12 +33,12 @@ void VertexArrayObject::destroy() {
 }
 
 void VertexArrayObject::clear() {
-    this->vertices = std::vector<Vector3>();
+    this->vertices = std::vector<vec3>();
     for(auto& texcoord : this->texcoords) {
-        texcoord = std::vector<Vector2>();
+        texcoord = std::vector<vec2>();
     }
-    this->texcoords = std::vector<std::vector<Vector2>>();
-    this->normals = std::vector<Vector3>();
+    this->texcoords = std::vector<std::vector<vec2>>();
+    this->normals = std::vector<vec3>();
     this->colors = std::vector<Color>();
 
     this->partialUpdateVertexIndices = std::vector<int>();
@@ -62,7 +62,7 @@ void VertexArrayObject::empty() {
     // NOTE: do NOT set m_iNumVertices to 0! (also don't change m_bHasTexcoords)
 }
 
-void VertexArrayObject::addVertex(Vector2 v) {
+void VertexArrayObject::addVertex(vec2 v) {
     this->vertices.emplace_back(v.x, v.y, 0);
     this->iNumVertices = this->vertices.size();
 }
@@ -72,7 +72,7 @@ void VertexArrayObject::addVertex(float x, float y, float z) {
     this->iNumVertices = this->vertices.size();
 }
 
-void VertexArrayObject::addVertex(Vector3 v) {
+void VertexArrayObject::addVertex(vec3 v) {
     this->vertices.push_back(v);
     this->iNumVertices = this->vertices.size();
 }
@@ -83,19 +83,19 @@ void VertexArrayObject::addTexcoord(float u, float v, unsigned int textureUnit) 
     this->bHasTexcoords = true;
 }
 
-void VertexArrayObject::addTexcoord(Vector2 uv, unsigned int textureUnit) {
+void VertexArrayObject::addTexcoord(vec2 uv, unsigned int textureUnit) {
     this->updateTexcoordArraySize(textureUnit);
     this->texcoords[textureUnit].push_back(uv);
     this->bHasTexcoords = true;
 }
 
-void VertexArrayObject::addNormal(Vector3 normal) { this->normals.push_back(normal); }
+void VertexArrayObject::addNormal(vec3 normal) { this->normals.push_back(normal); }
 
 void VertexArrayObject::addNormal(float x, float y, float z) { this->normals.emplace_back(x, y, z); }
 
 void VertexArrayObject::addColor(Color color) { this->colors.push_back(color); }
 
-void VertexArrayObject::setVertex(int index, Vector2 v) {
+void VertexArrayObject::setVertex(int index, vec2 v) {
     if(index < 0 || index > (this->vertices.size() - 1)) return;
 
     this->vertices[index].x = v.x;
@@ -104,7 +104,7 @@ void VertexArrayObject::setVertex(int index, Vector2 v) {
     this->partialUpdateVertexIndices.push_back(index);
 }
 
-void VertexArrayObject::setVertex(int index, Vector3 v) {
+void VertexArrayObject::setVertex(int index, vec3 v) {
     if(index < 0 || index > (this->vertices.size() - 1)) return;
 
     this->vertices[index].x = v.x;

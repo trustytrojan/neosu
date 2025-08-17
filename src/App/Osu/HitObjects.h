@@ -17,9 +17,9 @@ enum class HitObjectType : uint8_t {
 
 class HitObject {
    public:
-    static void drawHitResult(Beatmap *beatmap, Vector2 rawPos, LiveScore::HIT result, float animPercentInv,
+    static void drawHitResult(Beatmap *beatmap, vec2 rawPos, LiveScore::HIT result, float animPercentInv,
                               float hitDeltaRangePercent);
-    static void drawHitResult(Skin *skin, float hitcircleDiameter, float rawHitcircleDiameter, Vector2 rawPos,
+    static void drawHitResult(Skin *skin, float hitcircleDiameter, float rawHitcircleDiameter, vec2 rawPos,
                               LiveScore::HIT result, float animPercentInv, float hitDeltaRangePercent);
 
    public:
@@ -45,7 +45,7 @@ class HitObject {
     i32 combo_number;
     bool is_end_of_combo = false;
 
-    void addHitResult(LiveScore::HIT result, long delta, bool isEndOfCombo, Vector2 posRaw, float targetDelta = 0.0f,
+    void addHitResult(LiveScore::HIT result, long delta, bool isEndOfCombo, vec2 posRaw, float targetDelta = 0.0f,
                       float targetAngle = 0.0f, bool ignoreOnHitErrorBar = false, bool ignoreCombo = false,
                       bool ignoreHealth = false, bool addObjectDurationToSkinAnimationTimeStartOffset = true);
     void misAimed() { this->bMisAim = true; }
@@ -55,9 +55,9 @@ class HitObject {
     void setAutopilotDelta(long delta) { this->iAutopilotDelta = delta; }
     void setBlocked(bool blocked) { this->bBlocked = blocked; }
 
-    [[nodiscard]] virtual Vector2 getRawPosAt(long pos) const = 0;          // with stack calculation modifications
-    [[nodiscard]] virtual Vector2 getOriginalRawPosAt(long pos) const = 0;  // without stack calculations
-    [[nodiscard]] virtual Vector2 getAutoCursorPos(long curPos) const = 0;
+    [[nodiscard]] virtual vec2 getRawPosAt(long pos) const = 0;          // with stack calculation modifications
+    [[nodiscard]] virtual vec2 getOriginalRawPosAt(long pos) const = 0;  // without stack calculations
+    [[nodiscard]] virtual vec2 getAutoCursorPos(long curPos) const = 0;
 
     [[nodiscard]] inline int getStack() const { return this->iStack; }
     [[nodiscard]] inline int getColorCounter() const { return this->iColorCounter; }
@@ -80,7 +80,7 @@ class HitObject {
     static float lerp3f(float a, float b, float c, float percent);
 
     struct HITRESULTANIM {
-        Vector2 rawPos;
+        vec2 rawPos{0.f};
         long delta;
         float time;
         LiveScore::HIT result;
@@ -124,42 +124,42 @@ class HitObject {
 class Circle final : public HitObject {
    public:
     // main
-    static void drawApproachCircle(Beatmap *beatmap, Vector2 rawPos, int number, int colorCounter, int colorOffset,
+    static void drawApproachCircle(Beatmap *beatmap, vec2 rawPos, int number, int colorCounter, int colorOffset,
                                    float colorRGBMultiplier, float approachScale, float alpha,
                                    bool overrideHDApproachCircle = false);
-    static void drawCircle(Beatmap *beatmap, Vector2 rawPos, int number, int colorCounter, int colorOffset,
+    static void drawCircle(Beatmap *beatmap, vec2 rawPos, int number, int colorCounter, int colorOffset,
                            float colorRGBMultiplier, float approachScale, float alpha, float numberAlpha,
                            bool drawNumber = true, bool overrideHDApproachCircle = false);
-    static void drawCircle(Skin *skin, Vector2 pos, float hitcircleDiameter, float numberScale, float overlapScale,
+    static void drawCircle(Skin *skin, vec2 pos, float hitcircleDiameter, float numberScale, float overlapScale,
                            int number, int colorCounter, int colorOffset, float colorRGBMultiplier, float approachScale,
                            float alpha, float numberAlpha, bool drawNumber = true,
                            bool overrideHDApproachCircle = false);
-    static void drawCircle(Skin *skin, Vector2 pos, float hitcircleDiameter, Color color, float alpha = 1.0f);
-    static void drawSliderStartCircle(Beatmap *beatmap, Vector2 rawPos, int number, int colorCounter, int colorOffset,
+    static void drawCircle(Skin *skin, vec2 pos, float hitcircleDiameter, Color color, float alpha = 1.0f);
+    static void drawSliderStartCircle(Beatmap *beatmap, vec2 rawPos, int number, int colorCounter, int colorOffset,
                                       float colorRGBMultiplier, float approachScale, float alpha, float numberAlpha,
                                       bool drawNumber = true, bool overrideHDApproachCircle = false);
-    static void drawSliderStartCircle(Skin *skin, Vector2 pos, float hitcircleDiameter, float numberScale,
+    static void drawSliderStartCircle(Skin *skin, vec2 pos, float hitcircleDiameter, float numberScale,
                                       float hitcircleOverlapScale, int number, int colorCounter = 0,
                                       int colorOffset = 0, float colorRGBMultiplier = 1.0f, float approachScale = 1.0f,
                                       float alpha = 1.0f, float numberAlpha = 1.0f, bool drawNumber = true,
                                       bool overrideHDApproachCircle = false);
-    static void drawSliderEndCircle(Beatmap *beatmap, Vector2 rawPos, int number, int colorCounter, int colorOffset,
+    static void drawSliderEndCircle(Beatmap *beatmap, vec2 rawPos, int number, int colorCounter, int colorOffset,
                                     float colorRGBMultiplier, float approachScale, float alpha, float numberAlpha,
                                     bool drawNumber = true, bool overrideHDApproachCircle = false);
-    static void drawSliderEndCircle(Skin *skin, Vector2 pos, float hitcircleDiameter, float numberScale,
+    static void drawSliderEndCircle(Skin *skin, vec2 pos, float hitcircleDiameter, float numberScale,
                                     float overlapScale, int number = 0, int colorCounter = 0, int colorOffset = 0,
                                     float colorRGBMultiplier = 1.0f, float approachScale = 1.0f, float alpha = 1.0f,
                                     float numberAlpha = 1.0f, bool drawNumber = true,
                                     bool overrideHDApproachCircle = false);
 
     // split helper functions
-    static void drawApproachCircle(Skin *skin, Vector2 pos, Color comboColor, float hitcircleDiameter,
+    static void drawApproachCircle(Skin *skin, vec2 pos, Color comboColor, float hitcircleDiameter,
                                    float approachScale, float alpha, bool modHD, bool overrideHDApproachCircle);
-    static void drawHitCircleOverlay(SkinImage *hitCircleOverlayImage, Vector2 pos, float circleOverlayImageScale,
+    static void drawHitCircleOverlay(SkinImage *hitCircleOverlayImage, vec2 pos, float circleOverlayImageScale,
                                      float alpha, float colorRGBMultiplier);
-    static void drawHitCircle(Image *hitCircleImage, Vector2 pos, Color comboColor, float circleImageScale,
+    static void drawHitCircle(Image *hitCircleImage, vec2 pos, Color comboColor, float circleImageScale,
                               float alpha);
-    static void drawHitCircleNumber(Skin *skin, float numberScale, float overlapScale, Vector2 pos, int number,
+    static void drawHitCircleNumber(Skin *skin, float numberScale, float overlapScale, vec2 pos, int number,
                                     float numberAlpha, float colorRGBMultiplier);
 
    public:
@@ -174,9 +174,9 @@ class Circle final : public HitObject {
     void updateStackPosition(float stackOffset) override;
     void miss(long curPos) override;
 
-    [[nodiscard]] Vector2 getRawPosAt(long /*pos*/) const override { return this->vRawPos; }
-    [[nodiscard]] Vector2 getOriginalRawPosAt(long /*pos*/) const override { return this->vOriginalRawPos; }
-    [[nodiscard]] Vector2 getAutoCursorPos(long curPos) const override;
+    [[nodiscard]] vec2 getRawPosAt(long /*pos*/) const override { return this->vRawPos; }
+    [[nodiscard]] vec2 getOriginalRawPosAt(long /*pos*/) const override { return this->vOriginalRawPos; }
+    [[nodiscard]] vec2 getAutoCursorPos(long curPos) const override;
 
     void onClickEvent(std::vector<Click> &clicks) override;
     void onReset(long curPos) override;
@@ -190,8 +190,8 @@ class Circle final : public HitObject {
 
     bool bWaiting;
 
-    Vector2 vRawPos;
-    Vector2 vOriginalRawPos;  // for live mod changing
+    vec2 vRawPos{0.f};
+    vec2 vOriginalRawPos{0.f};  // for live mod changing
 
     float fHitAnimation;
     float fShakeAnimation;
@@ -209,7 +209,7 @@ class Slider final : public HitObject {
     };
 
    public:
-    Slider(char stype, int repeat, float pixelLength, std::vector<Vector2> points, std::vector<int> hitSounds,
+    Slider(char stype, int repeat, float pixelLength, std::vector<vec2> points, std::vector<int> hitSounds,
            std::vector<float> ticks, float sliderTime, float sliderTimeWithoutRepeats, long time, int sampleType,
            int comboNumber, bool isEndOfCombo, int colorCounter, int colorOffset, BeatmapInterface *beatmap);
     ~Slider() override;
@@ -225,9 +225,9 @@ class Slider final : public HitObject {
         return 2 + std::max((this->iRepeat - 1), 0) + (std::max((this->iRepeat - 1), 0) + 1) * this->ticks.size();
     }
 
-    [[nodiscard]] Vector2 getRawPosAt(long pos) const override;
-    [[nodiscard]] Vector2 getOriginalRawPosAt(long pos) const override;
-    [[nodiscard]] inline Vector2 getAutoCursorPos(long /*curPos*/) const override { return this->vCurPoint; }
+    [[nodiscard]] vec2 getRawPosAt(long pos) const override;
+    [[nodiscard]] vec2 getOriginalRawPosAt(long pos) const override;
+    [[nodiscard]] inline vec2 getAutoCursorPos(long /*curPos*/) const override { return this->vCurPoint; }
 
     void onClickEvent(std::vector<Click> &clicks) override;
     void onReset(long curPos) override;
@@ -236,7 +236,7 @@ class Slider final : public HitObject {
 
     [[nodiscard]] inline bool isStartCircleFinished() const { return this->bStartFinished; }
     [[nodiscard]] inline int getRepeat() const { return this->iRepeat; }
-    [[nodiscard]] inline std::vector<Vector2> getRawPoints() const { return this->points; }
+    [[nodiscard]] inline std::vector<vec2> getRawPoints() const { return this->points; }
     [[nodiscard]] inline float getPixelLength() const { return this->fPixelLength; }
     [[nodiscard]] inline const std::vector<SLIDERCLICK> &getClicks() const { return this->clicks; }
 
@@ -266,7 +266,7 @@ class Slider final : public HitObject {
         bool finished;
     };
 
-    std::vector<Vector2> points;
+    std::vector<vec2> points;
     std::vector<int> hitSounds;
 
     std::vector<SLIDERTICK> ticks;  // ticks (drawing)
@@ -277,8 +277,8 @@ class Slider final : public HitObject {
     SliderCurve *curve;
     VertexArrayObject *vao;
 
-    Vector2 vCurPoint;
-    Vector2 vCurPointRaw;
+    vec2 vCurPoint{0.f};
+    vec2 vCurPointRaw{0.f};
 
     long iStrictTrackingModLastClickHeldTime;
 
@@ -335,9 +335,9 @@ class Spinner final : public HitObject {
     void updateStackPosition(float /*stackOffset*/) override { ; }
     void miss(long /*curPos*/) override { ; }
 
-    [[nodiscard]] Vector2 getRawPosAt(long /*pos*/) const override { return this->vRawPos; }
-    [[nodiscard]] Vector2 getOriginalRawPosAt(long /*pos*/) const override { return this->vOriginalRawPos; }
-    [[nodiscard]] Vector2 getAutoCursorPos(long curPos) const override;
+    [[nodiscard]] vec2 getRawPosAt(long /*pos*/) const override { return this->vRawPos; }
+    [[nodiscard]] vec2 getOriginalRawPosAt(long /*pos*/) const override { return this->vOriginalRawPos; }
+    [[nodiscard]] vec2 getAutoCursorPos(long curPos) const override;
 
     void onReset(long curPos) override;
 
@@ -345,8 +345,8 @@ class Spinner final : public HitObject {
     void onHit();
     void rotate(float rad);
 
-    Vector2 vRawPos;
-    Vector2 vOriginalRawPos;
+    vec2 vRawPos{0.f};
+    vec2 vOriginalRawPos{0.f};
 
     // bool bClickedOnce;
     float fPercent;

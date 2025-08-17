@@ -22,7 +22,7 @@ UIUserContextMenuScreen::UIUserContextMenuScreen() : OsuScreen() {
     this->addBaseUIElement(this->menu);
 }
 
-void UIUserContextMenuScreen::onResolutionChange(Vector2 newResolution) {
+void UIUserContextMenuScreen::onResolutionChange(vec2 newResolution) {
     this->setSize(newResolution);
     OsuScreen::onResolutionChange(newResolution);
 }

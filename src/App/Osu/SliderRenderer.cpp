@@ -39,22 +39,22 @@ float s_fBoundingBoxMinY = (std::numeric_limits<float>::max)();
 float s_fBoundingBoxMaxY = 0.0f;
 
 // forward decls
-void drawFillSliderBodyPeppy(const std::vector<Vector2> &points, VertexArrayObject *circleMesh, float radius,
+void drawFillSliderBodyPeppy(const std::vector<vec2> &points, VertexArrayObject *circleMesh, float radius,
                              int drawFromIndex, int drawUpToIndex, Shader *shader = nullptr);
 void checkUpdateVars(float hitcircleDiameter);
 void resetRenderTargetBoundingBox();
 
 }  // namespace
 
-VertexArrayObject *generateVAO(const std::vector<Vector2> &points, float hitcircleDiameter, Vector3 translation,
+VertexArrayObject *generateVAO(const std::vector<vec2> &points, float hitcircleDiameter, vec3 translation,
                                bool skipOOBPoints) {
     resourceManager->requestNextLoadUnmanaged();
     VertexArrayObject *vao = resourceManager->createVertexArrayObject();
 
     checkUpdateVars(hitcircleDiameter);
 
-    const Vector3 xOffset = Vector3(hitcircleDiameter, 0, 0);
-    const Vector3 yOffset = Vector3(0, hitcircleDiameter, 0);
+    const vec3 xOffset = vec3(hitcircleDiameter, 0, 0);
+    const vec3 yOffset = vec3(0, hitcircleDiameter, 0);
 
     const bool debugSquareVao = cv::slider_debug_draw_square_vao.getBool();
 
@@ -69,17 +69,17 @@ VertexArrayObject *generateVAO(const std::vector<Vector2> &points, float hitcirc
         }
 
         if(!debugSquareVao) {
-            const std::vector<Vector3> &meshVertices = s_UNIT_CIRCLE_VAO_TRIANGLES->getVertices();
-            const std::vector<std::vector<Vector2>> &meshTexCoords = s_UNIT_CIRCLE_VAO_TRIANGLES->getTexcoords();
+            const std::vector<vec3> &meshVertices = s_UNIT_CIRCLE_VAO_TRIANGLES->getVertices();
+            const std::vector<std::vector<vec2>> &meshTexCoords = s_UNIT_CIRCLE_VAO_TRIANGLES->getTexcoords();
             for(int v = 0; v < meshVertices.size(); v++) {
-                vao->addVertex(meshVertices[v] + Vector3(point.x, point.y, 0) + translation);
+                vao->addVertex(meshVertices[v] + vec3(point.x, point.y, 0) + translation);
                 vao->addTexcoord(meshTexCoords[0][v]);
             }
         } else {
-            const Vector3 topLeft = Vector3(point.x, point.y, 0) - xOffset / 2.0f - yOffset / 2.0f + translation;
-            const Vector3 topRight = topLeft + xOffset;
-            const Vector3 bottomLeft = topLeft + yOffset;
-            const Vector3 bottomRight = bottomLeft + xOffset;
+            const vec3 topLeft = vec3(point.x, point.y, 0) - xOffset / 2.0f - yOffset / 2.0f + translation;
+            const vec3 topRight = topLeft + xOffset;
+            const vec3 bottomLeft = topLeft + yOffset;
+            const vec3 bottomRight = bottomLeft + xOffset;
 
             vao->addVertex(topLeft);
             vao->addTexcoord(0, 0);
@@ -109,7 +109,7 @@ VertexArrayObject *generateVAO(const std::vector<Vector2> &points, float hitcirc
     return vao;
 }
 
-void draw(const std::vector<Vector2> &points, const std::vector<Vector2> &alwaysPoints, float hitcircleDiameter,
+void draw(const std::vector<vec2> &points, const std::vector<vec2> &alwaysPoints, float hitcircleDiameter,
           float from, float to, Color undimmedColor, float colorRGBMultiplier, float alpha, long sliderTimeForRainbow) {
     if(cv::slider_alpha_multiplier.getFloat() <= 0.0f || alpha <= 0.0f) return;
 
@@ -141,7 +141,7 @@ void draw(const std::vector<Vector2> &points, const std::vector<Vector2> &always
             osu->getSkin()->getHitCircle()->bind();
             {
                 for(int i = drawFromIndex; i < drawUpToIndex; i++) {
-                    const Vector2 point = points[i] * circleImageScaleInv;
+                    const vec2 point = points[i] * circleImageScaleInv;
 
                     static VertexArrayObject vao(Graphics::PRIMITIVE::PRIMITIVE_QUADS);
                     vao.empty();
@@ -255,7 +255,7 @@ void draw(const std::vector<Vector2> &points, const std::vector<Vector2> &always
                                           s_fBoundingBoxMaxY - s_fBoundingBoxMinY);
 }
 
-void draw(VertexArrayObject *vao, const std::vector<Vector2> &alwaysPoints, Vector2 translation, float scale,
+void draw(VertexArrayObject *vao, const std::vector<vec2> &alwaysPoints, vec2 translation, float scale,
           float hitcircleDiameter, float from, float to, Color undimmedColor, float colorRGBMultiplier, float alpha,
           long sliderTimeForRainbow, bool doEnableRenderTarget, bool doDisableRenderTarget,
           bool doDrawSliderFrameBufferToScreen) {
@@ -376,7 +376,7 @@ void draw(VertexArrayObject *vao, const std::vector<Vector2> &alwaysPoints, Vect
 
 namespace {  // static
 
-void drawFillSliderBodyPeppy(const std::vector<Vector2> &points, VertexArrayObject *circleMesh, float radius,
+void drawFillSliderBodyPeppy(const std::vector<vec2> &points, VertexArrayObject *circleMesh, float radius,
                              int drawFromIndex, int drawUpToIndex, Shader * /*shader*/) {
     if(drawFromIndex < 0) drawFromIndex = 0;
     if(drawUpToIndex < 0) drawUpToIndex = points.size();
@@ -485,9 +485,9 @@ void checkUpdateVars(float hitcircleDiameter) {
         s_UNIT_CIRCLE_VAO_DIAMETER = hitcircleDiameter;
         s_UNIT_CIRCLE_VAO->clear();
         for(int i = 0; i < s_UNIT_CIRCLE.size() / 5; i++) {
-            Vector3 vertexPos = Vector3((radius * s_UNIT_CIRCLE[i * 5 + 2]), (radius * s_UNIT_CIRCLE[i * 5 + 3]),
+            vec3 vertexPos = vec3((radius * s_UNIT_CIRCLE[i * 5 + 2]), (radius * s_UNIT_CIRCLE[i * 5 + 3]),
                                         s_UNIT_CIRCLE[i * 5 + 4]);
-            Vector2 vertexTexcoord = Vector2(s_UNIT_CIRCLE[i * 5 + 0], s_UNIT_CIRCLE[i * 5 + 1]);
+            vec2 vertexTexcoord = vec2(s_UNIT_CIRCLE[i * 5 + 0], s_UNIT_CIRCLE[i * 5 + 1]);
 
             s_UNIT_CIRCLE_VAO->addVertex(vertexPos);
             s_UNIT_CIRCLE_VAO->addTexcoord(vertexTexcoord);
@@ -501,25 +501,25 @@ void checkUpdateVars(float hitcircleDiameter) {
         // pure triangles (needed for VertexArrayObject, because we can't merge multiple triangle fan meshes into one
         // VertexArrayObject)
         s_UNIT_CIRCLE_VAO_TRIANGLES->clear();
-        Vector3 startVertex =
-            Vector3((radius * s_UNIT_CIRCLE[0 * 5 + 2]), (radius * s_UNIT_CIRCLE[0 * 5 + 3]), s_UNIT_CIRCLE[0 * 5 + 4]);
-        Vector2 startUV = Vector2(s_UNIT_CIRCLE[0 * 5 + 0], s_UNIT_CIRCLE[0 * 5 + 1]);
+        vec3 startVertex =
+            vec3((radius * s_UNIT_CIRCLE[0 * 5 + 2]), (radius * s_UNIT_CIRCLE[0 * 5 + 3]), s_UNIT_CIRCLE[0 * 5 + 4]);
+        vec2 startUV = vec2(s_UNIT_CIRCLE[0 * 5 + 0], s_UNIT_CIRCLE[0 * 5 + 1]);
         for(int i = 1; i < s_UNIT_CIRCLE.size() / 5 - 1; i++) {
             // center
             s_UNIT_CIRCLE_VAO_TRIANGLES->addVertex(startVertex);
             s_UNIT_CIRCLE_VAO_TRIANGLES->addTexcoord(startUV);
 
             // pizza slice edge 1
-            s_UNIT_CIRCLE_VAO_TRIANGLES->addVertex(Vector3(
+            s_UNIT_CIRCLE_VAO_TRIANGLES->addVertex(vec3(
                 (radius * s_UNIT_CIRCLE[i * 5 + 2]), (radius * s_UNIT_CIRCLE[i * 5 + 3]), s_UNIT_CIRCLE[i * 5 + 4]));
-            s_UNIT_CIRCLE_VAO_TRIANGLES->addTexcoord(Vector2(s_UNIT_CIRCLE[i * 5 + 0], s_UNIT_CIRCLE[i * 5 + 1]));
+            s_UNIT_CIRCLE_VAO_TRIANGLES->addTexcoord(vec2(s_UNIT_CIRCLE[i * 5 + 0], s_UNIT_CIRCLE[i * 5 + 1]));
 
             // pizza slice edge 2
-            s_UNIT_CIRCLE_VAO_TRIANGLES->addVertex(Vector3((radius * s_UNIT_CIRCLE[(i + 1) * 5 + 2]),
+            s_UNIT_CIRCLE_VAO_TRIANGLES->addVertex(vec3((radius * s_UNIT_CIRCLE[(i + 1) * 5 + 2]),
                                                            (radius * s_UNIT_CIRCLE[(i + 1) * 5 + 3]),
                                                            s_UNIT_CIRCLE[(i + 1) * 5 + 4]));
             s_UNIT_CIRCLE_VAO_TRIANGLES->addTexcoord(
-                Vector2(s_UNIT_CIRCLE[(i + 1) * 5 + 0], s_UNIT_CIRCLE[(i + 1) * 5 + 1]));
+                vec2(s_UNIT_CIRCLE[(i + 1) * 5 + 0], s_UNIT_CIRCLE[(i + 1) * 5 + 1]));
         }
     }
 }

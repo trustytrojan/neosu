@@ -45,7 +45,7 @@ void OpenGLVertexArrayObject::init() {
                         break;
                 }
 
-                glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector3) * offsetIndex, sizeof(Vector3) * numContinuousIndices,
+                glBufferSubData(GL_ARRAY_BUFFER, sizeof(vec3) * offsetIndex, sizeof(vec3) * numContinuousIndices,
                                 &(this->vertices[offsetIndex]));
             }
             this->partialUpdateVertexIndices.clear();
@@ -95,7 +95,7 @@ void OpenGLVertexArrayObject::init() {
     {
         glGenBuffers(1, &this->iVertexBuffer);
         glBindBuffer(GL_ARRAY_BUFFER, this->iVertexBuffer);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3) * this->vertices.size(), &(this->vertices[0]),
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vec3) * this->vertices.size(), &(this->vertices[0]),
                      SDLGLInterface::usageToOpenGLMap[this->usage]);
 
         if(cv::r_opengl_legacy_vao_use_vertex_array.getBool()) {
@@ -114,7 +114,7 @@ void OpenGLVertexArrayObject::init() {
 
         glGenBuffers(1, &this->iTexcoordBuffer);
         glBindBuffer(GL_ARRAY_BUFFER, this->iTexcoordBuffer);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Vector2) * this->texcoords[0].size(), &(this->texcoords[0][0]),
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vec2) * this->texcoords[0].size(), &(this->texcoords[0][0]),
                      SDLGLInterface::usageToOpenGLMap[this->usage]);
 
         if(cv::r_opengl_legacy_vao_use_vertex_array.getBool()) {
@@ -154,7 +154,7 @@ void OpenGLVertexArrayObject::init() {
 
         glGenBuffers(1, &this->iNormalBuffer);
         glBindBuffer(GL_ARRAY_BUFFER, this->iNormalBuffer);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3) * this->normals.size(), &(this->normals[0]),
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vec3) * this->normals.size(), &(this->normals[0]),
                      SDLGLInterface::usageToOpenGLMap[this->usage]);
 
         if(cv::r_opengl_legacy_vao_use_vertex_array.getBool()) {

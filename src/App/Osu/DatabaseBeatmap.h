@@ -106,7 +106,7 @@ class DatabaseBeatmap final {
         int number;
         int colorCounter;
         int colorOffset;
-        std::vector<Vector2> points;
+        std::vector<vec2> points;
         std::vector<int> hitSounds;
 
         float sliderTime;

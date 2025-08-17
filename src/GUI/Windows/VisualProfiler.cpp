@@ -97,7 +97,7 @@ void VisualProfiler::draw() {
                     const double time = engine->getTime();
                     const double timeRunning = engine->getTimeRunning();
                     const double dilation = (timeRunning - time);
-                    const Vector2 envMousePos = env->getMousePos();
+                    const vec2 envMousePos = env->getMousePos();
 
                     addTextLine(UString::format("ConVars: %zu", convar->getConVarArray().size()), textFont,
                                 this->textLines);

@@ -41,13 +41,13 @@ class RankingScreen : public ScreenBackable {
     void updateLayout() override;
     void onBack() override;
 
-    void drawModImage(SkinImage *image, Vector2 &pos, Vector2 &max);
+    void drawModImage(SkinImage *image, vec2 &pos, vec2 &max);
 
     void setGrade(FinishedScore::Grade grade);
     void setIndex(int index);
 
     UString getPPString();
-    Vector2 getPPPosRaw();
+    vec2 getPPPosRaw();
 
     CBaseUIScrollView *rankings;
 

@@ -40,7 +40,7 @@ class OpenGLLegacyInterface : public Graphics {
                       Color bottomLeftColor, Color bottomRightColor) final;
 
     void drawQuad(int x, int y, int width, int height) final;
-    void drawQuad(Vector2 topLeft, Vector2 topRight, Vector2 bottomRight, Vector2 bottomLeft, Color topLeftColor,
+    void drawQuad(vec2 topLeft, vec2 topRight, vec2 bottomRight, vec2 bottomLeft, Color topLeftColor,
                   Color topRightColor, Color bottomRightColor, Color bottomLeftColor) final;
 
     // 2d resource drawing
@@ -77,10 +77,10 @@ class OpenGLLegacyInterface : public Graphics {
     std::vector<u8> getScreenshot(bool withAlpha = false) final;
 
     // renderer info
-    Vector2 getResolution() const final { return this->vResolution; }
+    vec2 getResolution() const final { return this->vResolution; }
 
     // callbacks
-    void onResolutionChange(Vector2 newResolution) final;
+    void onResolutionChange(vec2 newResolution) final;
 
     // factory
     Image *createImage(std::string filePath, bool mipmapped, bool keepInSystemMemory) final;
@@ -102,7 +102,7 @@ class OpenGLLegacyInterface : public Graphics {
 
     // renderer
     bool bInScene{false};
-    Vector2 vResolution;
+    vec2 vResolution{0.f};
 
     // persistent vars
     bool bAntiAliasing{true};

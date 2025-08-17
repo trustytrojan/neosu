@@ -31,7 +31,7 @@ constexpr const int ModFPoSu::SUBDIVISIONS;
 ModFPoSu::ModFPoSu() {
     // vars
     this->fCircumLength = 0.0f;
-    this->camera = new Camera(Vector3(0, 0, 0), Vector3(0, 0, -1));
+    this->camera = new Camera(vec3(0, 0, 0), vec3(0, 0, -1));
     this->bKeyLeftDown = false;
     this->bKeyUpDown = false;
     this->bKeyRightDown = false;
@@ -84,7 +84,7 @@ void ModFPoSu::draw() {
 
     osu->getSliderFrameBuffer()->enable();
     {
-        const Vector2 resolutionBackup = g->getResolution();
+        const vec2 resolutionBackup = g->getResolution();
         g->onResolutionChange(
             osu->getSliderFrameBuffer()
                 ->getSize());  // set renderer resolution to game resolution (to correctly support letterboxing etc.)
@@ -106,7 +106,7 @@ void ModFPoSu::draw() {
                             static VertexArrayObject vao(Graphics::PRIMITIVE::PRIMITIVE_LINES);
                             vao.empty();
                             {
-                                Vector3 pos = Vector3(0, 0, 0);
+                                vec3 pos = vec3(0, 0, 0);
                                 float length = 1.0f;
 
                                 vao.addColor(0xffff0000);
@@ -268,7 +268,7 @@ void ModFPoSu::update() {
         // regular mouse position mode
 
         // calculate mouse delta
-        Vector2 rawDelta = mouse->getRawDelta();
+        vec2 rawDelta = mouse->getRawDelta();
 
         // apply fposu mouse sensitivity multiplier
         const double countsPerCm = (double)cv::fposu_mouse_dpi.getInt() / 2.54;
@@ -289,7 +289,7 @@ void ModFPoSu::update() {
         if(rawDelta.y != 0.0f) this->camera->rotateX(rawDelta.y * (cv::fposu_invert_vertical.getBool() ? 1.0f : -1.0f));
 
         // calculate ray-mesh intersection and set new mouse pos
-        Vector2 newMousePos = this->intersectRayMesh(this->camera->getPos(), this->camera->getViewDirection());
+        vec2 newMousePos = this->intersectRayMesh(this->camera->getPos(), this->camera->getViewDirection());
 
         const bool osCursorVisible = (env->isCursorVisible() || !env->isCursorInWindow() || !engine->hasFocus());
 
@@ -306,7 +306,7 @@ void ModFPoSu::update() {
         this->handleInputOverrides(false);  // we don't need raw deltas for absolute mode
 
         // absolute mouse position mode (or auto)
-        Vector2 mousePos = mouse->getPos();
+        vec2 mousePos = mouse->getPos();
         auto beatmap = osu->getSelectedBeatmap();
         if(isAutoCursor && !beatmap->isPaused()) {
             mousePos = beatmap->getCursorPos();
@@ -324,15 +324,15 @@ void ModFPoSu::noclipMove() {
     const float friction = cv::fposu_noclipfriction.getFloat();
 
     // build direction vector based on player key inputs
-    Vector3 wishdir;
+    vec3 wishdir{0.f};
     {
-        wishdir += (this->bKeyUpDown ? this->camera->getViewDirection() : Vector3());
-        wishdir -= (this->bKeyDownDown ? this->camera->getViewDirection() : Vector3());
-        wishdir += (this->bKeyLeftDown ? this->camera->getViewRight() : Vector3());
-        wishdir -= (this->bKeyRightDown ? this->camera->getViewRight() : Vector3());
+        wishdir += (this->bKeyUpDown ? this->camera->getViewDirection() : vec3());
+        wishdir -= (this->bKeyDownDown ? this->camera->getViewDirection() : vec3());
+        wishdir += (this->bKeyLeftDown ? this->camera->getViewRight() : vec3());
+        wishdir -= (this->bKeyRightDown ? this->camera->getViewRight() : vec3());
         wishdir +=
-            (this->bKeySpaceDown ? (this->bKeySpaceUpDown ? Vector3(0.0f, 1.0f, 0.0f) : Vector3(0.0f, -1.0f, 0.0f))
-                                 : Vector3());
+            (this->bKeySpaceDown ? (this->bKeySpaceUpDown ? vec3(0.0f, 1.0f, 0.0f) : vec3(0.0f, -1.0f, 0.0f))
+                                 : vec3());
     }
 
     // normalize
@@ -362,7 +362,7 @@ void ModFPoSu::noclipMove() {
                 this->vVelocity *= newSpeed;
             }
         } else
-            this->vVelocity.zero();
+            this->vVelocity = {0.f, 0.f, 0.f};
     }
 
     // accelerate
@@ -378,10 +378,10 @@ void ModFPoSu::noclipMove() {
     }
 
     // clamp to max speed
-    if(this->vVelocity.length() > noclipSpeed) this->vVelocity.setLength(noclipSpeed);
+    if(this->vVelocity.length() > noclipSpeed) vec::setLength(this->vVelocity, noclipSpeed);
 
     // move
-    this->camera->setPos(this->camera->getPos() + this->vVelocity * engine->getFrameTime());
+    this->camera->setPos(this->camera->getPos() + this->vVelocity * static_cast<float>(engine->getFrameTime()));
 }
 
 void ModFPoSu::onKeyDown(KeyboardEvent &key) {
@@ -451,7 +451,7 @@ void ModFPoSu::handleInputOverrides(bool rawDeltasRequired) {
     }
 }
 
-void ModFPoSu::setMousePosCompensated(Vector2 newMousePos) {
+void ModFPoSu::setMousePosCompensated(vec2 newMousePos) {
     this->handleInputOverrides(true);  // outside of absolute mode, we need raw mouse deltas
 
     // NOTE: letterboxing uses Mouse::setOffset() to offset the virtual engine cursor coordinate system, so we have to
@@ -461,24 +461,24 @@ void ModFPoSu::setMousePosCompensated(Vector2 newMousePos) {
     mouse->onPosChange(newMousePos);
 }
 
-Vector2 ModFPoSu::intersectRayMesh(Vector3 pos, Vector3 dir) {
+vec2 ModFPoSu::intersectRayMesh(vec3 pos, vec3 dir) {
     auto begin = this->meshList.begin();
     auto next = ++this->meshList.begin();
     int face = 0;
     while(next != this->meshList.end()) {
-        const Vector4 topLeft = (this->modelMatrix * Vector4((*begin).a.x, (*begin).a.y, (*begin).a.z, 1.0f));
-        const Vector4 right = (this->modelMatrix * Vector4((*next).a.x, (*next).a.y, (*next).a.z, 1.0f));
-        const Vector4 down = (this->modelMatrix * Vector4((*begin).b.x, (*begin).b.y, (*begin).b.z, 1.0f));
-        // const Vector3 normal = (modelMatrix * (*begin).normal).normalize();
+        const vec4 topLeft = (this->modelMatrix * vec4((*begin).a.x, (*begin).a.y, (*begin).a.z, 1.0f));
+        const vec4 right = (this->modelMatrix * vec4((*next).a.x, (*next).a.y, (*next).a.z, 1.0f));
+        const vec4 down = (this->modelMatrix * vec4((*begin).b.x, (*begin).b.y, (*begin).b.z, 1.0f));
+        // const vec3 normal = (modelMatrix * (*begin).normal).normalize();
 
-        const Vector3 TopLeft = Vector3(topLeft.x, topLeft.y, topLeft.z);
-        const Vector3 Right = Vector3(right.x, right.y, right.z);
-        const Vector3 Down = Vector3(down.x, down.y, down.z);
+        const vec3 TopLeft = vec3(topLeft.x, topLeft.y, topLeft.z);
+        const vec3 Right = vec3(right.x, right.y, right.z);
+        const vec3 Down = vec3(down.x, down.y, down.z);
 
-        const Vector3 calculatedNormal = (Right - TopLeft).cross(Down - TopLeft);
+        const vec3 calculatedNormal = glm::cross((Right - TopLeft), (Down - TopLeft));
 
-        const float denominator = calculatedNormal.dot(dir);
-        const float numerator = -calculatedNormal.dot(pos - TopLeft);
+        const float denominator = vec::dot(calculatedNormal, dir);
+        const float numerator = -vec::dot(calculatedNormal, pos - TopLeft);
 
         // WARNING: this is a full line trace (i.e. backwards and forwards infinitely far)
         if(denominator == 0.0f) {
@@ -489,14 +489,14 @@ Vector2 ModFPoSu::intersectRayMesh(Vector3 pos, Vector3 dir) {
         }
 
         const float t = numerator / denominator;
-        const Vector3 intersectionPoint = pos + dir * t;
+        const vec3 intersectionPoint = pos + dir * t;
 
-        if(std::abs(calculatedNormal.dot(intersectionPoint - TopLeft)) < 1e-6f) {
-            const float u = (intersectionPoint - TopLeft).dot(Right - TopLeft);
-            const float v = (intersectionPoint - TopLeft).dot(Down - TopLeft);
+        if(std::abs(vec::dot(calculatedNormal, intersectionPoint - TopLeft)) < 1e-6f) {
+            const float u = vec::dot(intersectionPoint - TopLeft, Right - TopLeft);
+            const float v = vec::dot(intersectionPoint - TopLeft, Down - TopLeft);
 
-            if(u >= 0 && u <= (Right - TopLeft).dot(Right - TopLeft)) {
-                if(v >= 0 && v <= (Down - TopLeft).dot(Down - TopLeft)) {
+            if(u >= 0 && u <= vec::dot(Right - TopLeft, Right - TopLeft)) {
+                if(v >= 0 && v <= vec::dot(Down - TopLeft, Down - TopLeft)) {
                     if(denominator > 0.0f)  // only allow forwards trace
                     {
                         const float rightLength = (Right - TopLeft).length();
@@ -507,8 +507,8 @@ Vector2 ModFPoSu::intersectRayMesh(Vector3 pos, Vector3 dir) {
                             (float)osu->getScreenWidth() / std::pow(2.0f, (float)SUBDIVISIONS);
                         const float distanceInFace = distancePerFace * x;
 
-                        const Vector2 newMousePos =
-                            Vector2((distancePerFace * face) + distanceInFace, y * osu->getScreenHeight());
+                        const vec2 newMousePos =
+                            vec2((distancePerFace * face) + distanceInFace, y * osu->getScreenHeight());
 
                         return newMousePos;
                     }
@@ -521,10 +521,10 @@ Vector2 ModFPoSu::intersectRayMesh(Vector3 pos, Vector3 dir) {
         face++;
     }
 
-    return Vector2(0, 0);
+    return vec2(0, 0);
 }
 
-Vector3 ModFPoSu::calculateUnProjectedVector(Vector2 pos) {
+vec3 ModFPoSu::calculateUnProjectedVector(vec2 pos) {
     // calculate 3d position of 2d cursor on screen mesh
     const float cursorXPercent = std::clamp<float>(pos.x / (float)osu->getScreenWidth(), 0.0f, 1.0f);
     const float cursorYPercent = std::clamp<float>(pos.y / (float)osu->getScreenHeight(), 0.0f, 1.0f);
@@ -532,10 +532,10 @@ Vector3 ModFPoSu::calculateUnProjectedVector(Vector2 pos) {
     auto begin = this->meshList.begin();
     auto next = ++this->meshList.begin();
     while(next != this->meshList.end()) {
-        Vector3 topLeft = (*begin).a;
-        Vector3 bottomLeft = (*begin).b;
-        Vector3 topRight = (*next).a;
-        // Vector3 bottomRight = (*next).b;
+        vec3 topLeft = (*begin).a;
+        vec3 bottomLeft = (*begin).b;
+        vec3 topRight = (*next).a;
+        // vec3 bottomRight = (*next).b;
 
         const float leftTC = (*begin).textureCoordinate;
         const float rightTC = (*next).textureCoordinate;
@@ -545,25 +545,25 @@ Vector3 ModFPoSu::calculateUnProjectedVector(Vector2 pos) {
         if(cursorXPercent >= leftTC && cursorXPercent <= rightTC && cursorYPercent >= bottomTC &&
            cursorYPercent <= topTC) {
             const float tcRightPercent = (cursorXPercent - leftTC) / std::abs(leftTC - rightTC);
-            Vector3 right = (topRight - topLeft);
-            right.setLength(right.length() * tcRightPercent);
+            vec3 right = (topRight - topLeft);
+            vec::setLength(right, right.length() * tcRightPercent);
 
             const float tcDownPercent = (cursorYPercent - bottomTC) / std::abs(topTC - bottomTC);
-            Vector3 down = (bottomLeft - topLeft);
-            down.setLength(down.length() * tcDownPercent);
+            vec3 down = (bottomLeft - topLeft);
+            vec::setLength(down, down.length() * tcDownPercent);
 
-            const Vector3 modelPos = (topLeft + right + down);
+            const vec3 modelPos = (topLeft + right + down);
 
-            const Vector4 worldPos = this->modelMatrix * Vector4(modelPos.x, modelPos.y, modelPos.z, 1.0f);
+            const vec4 worldPos = this->modelMatrix * vec4(modelPos.x, modelPos.y, modelPos.z, 1.0f);
 
-            return Vector3(worldPos.x, worldPos.y, worldPos.z);
+            return vec3(worldPos.x, worldPos.y, worldPos.z);
         }
 
         begin++;
         next++;
     }
 
-    return Vector3(-0.5f, 0.5f, -0.5f);
+    return vec3(-0.5f, 0.5f, -0.5f);
 }
 
 void ModFPoSu::makePlayfield() {
@@ -574,10 +574,10 @@ void ModFPoSu::makePlayfield() {
     const float bottomTC = 0.0f;
     const float dist = -cv::fposu_distance.getFloat();
 
-    VertexPair vp1 = VertexPair(Vector3(-0.5, 0.5, dist), Vector3(-0.5, -0.5, dist), 0);
-    VertexPair vp2 = VertexPair(Vector3(0.5, 0.5, dist), Vector3(0.5, -0.5, dist), 1);
+    VertexPair vp1 = VertexPair(vec3(-0.5, 0.5, dist), vec3(-0.5, -0.5, dist), 0);
+    VertexPair vp2 = VertexPair(vec3(0.5, 0.5, dist), vec3(0.5, -0.5, dist), 1);
 
-    this->fEdgeDistance = Vector3(0, 0, 0).distance(Vector3(-0.5, 0.0, dist));
+    this->fEdgeDistance = vec::distance(vec3(0, 0, 0), vec3(-0.5, 0.0, dist));
 
     this->meshList.push_back(vp1);
     this->meshList.push_back(vp2);
@@ -590,10 +590,10 @@ void ModFPoSu::makePlayfield() {
     begin = this->meshList.begin();
     auto next = ++this->meshList.begin();
     while(next != this->meshList.end()) {
-        Vector3 topLeft = (*begin).a;
-        Vector3 bottomLeft = (*begin).b;
-        Vector3 topRight = (*next).a;
-        Vector3 bottomRight = (*next).b;
+        vec3 topLeft = (*begin).a;
+        vec3 bottomLeft = (*begin).b;
+        vec3 topRight = (*next).a;
+        vec3 bottomRight = (*next).b;
 
         const float leftTC = (*begin).textureCoordinate;
         const float rightTC = (*next).textureCoordinate;
@@ -728,19 +728,19 @@ void ModFPoSu::onNoclipChange() {
         this->camera->setPos(this->vPrevNoclipCameraPos);
     else {
         this->vPrevNoclipCameraPos = this->camera->getPos();
-        this->camera->setPos(Vector3(0, 0, 0));
+        this->camera->setPos(vec3(0, 0, 0));
     }
 }
 
 float ModFPoSu::subdivide(std::list<VertexPair> &meshList, const std::list<VertexPair>::iterator &begin,
                           const std::list<VertexPair>::iterator &end, int n, float edgeDistance) {
-    const Vector3 a = Vector3((*begin).a.x, 0.0f, (*begin).a.z);
-    const Vector3 b = Vector3((*end).a.x, 0.0f, (*end).a.z);
-    Vector3 middlePoint = Vector3(std::lerp(a.x, b.x, 0.5f), std::lerp(a.y, b.y, 0.5f), std::lerp(a.z, b.z, 0.5f));
+    const vec3 a = vec3((*begin).a.x, 0.0f, (*begin).a.z);
+    const vec3 b = vec3((*end).a.x, 0.0f, (*end).a.z);
+    vec3 middlePoint = vec3(std::lerp(a.x, b.x, 0.5f), std::lerp(a.y, b.y, 0.5f), std::lerp(a.z, b.z, 0.5f));
 
-    if(cv::fposu_curved.getBool()) middlePoint.setLength(edgeDistance);
+    if(cv::fposu_curved.getBool()) vec::setLength(middlePoint, edgeDistance);
 
-    Vector3 top, bottom;
+    vec3 top, bottom{0.f};
     top = bottom = middlePoint;
 
     top.y = (*begin).a.y;
@@ -757,18 +757,18 @@ float ModFPoSu::subdivide(std::list<VertexPair> &meshList, const std::list<Verte
         circumLength += subdivide(meshList, begin, newPos, n - 1, edgeDistance);
         circumLength += subdivide(meshList, newPos, end, n - 1, edgeDistance);
     } else {
-        circumLength += (*begin).a.distance(newVP.a);
-        circumLength += newVP.a.distance((*end).a);
+        circumLength += vec::distance((*begin).a, newVP.a);
+        circumLength += vec::distance(newVP.a, (*end).a);
     }
 
     return circumLength;
 }
 
-Vector3 ModFPoSu::normalFromTriangle(Vector3 p1, Vector3 p2, Vector3 p3) {
-    const Vector3 u = (p2 - p1);
-    const Vector3 v = (p3 - p1);
+vec3 ModFPoSu::normalFromTriangle(vec3 p1, vec3 p2, vec3 p3) {
+    const vec3 u = (p2 - p1);
+    const vec3 v = (p3 - p1);
 
-    return u.cross(v).normalize();
+    return vec::normalize(vec::cross(u, v));
 }
 
 ModFPoSu3DModel::ModFPoSu3DModel(const UString &objFilePathOrContents, Image *texture, bool source) {
@@ -803,10 +803,10 @@ ModFPoSu3DModel::ModFPoSu3DModel(const UString &objFilePathOrContents, Image *te
         };
 
         // load model data
-        std::vector<Vector3> rawVertices;
-        std::vector<Vector2> rawTexcoords;
+        std::vector<vec3> rawVertices;
+        std::vector<vec2> rawTexcoords;
         std::vector<Color> rawColors;
-        std::vector<Vector3> rawNormals;
+        std::vector<vec3> rawNormals;
         std::vector<RAW_FACE> rawFaces;
         {
             UString fileContents;
@@ -834,8 +834,8 @@ ModFPoSu3DModel::ModFPoSu3DModel(const UString &objFilePathOrContents, Image *te
             std::string line;
             while(std::getline(iss, line)) {
                 if(line.starts_with("v ")) {
-                    Vector3 vertex;
-                    Vector3 rgb;
+                    vec3 vertex{0.f};
+                    vec3 rgb{0.f};
 
                     if(sscanf(line.c_str(), "v %f %f %f %f %f %f ", &vertex.x, &vertex.y, &vertex.z, &rgb.x, &rgb.y,
                               &rgb.z) == 6) {
@@ -844,11 +844,11 @@ ModFPoSu3DModel::ModFPoSu3DModel(const UString &objFilePathOrContents, Image *te
                     } else if(sscanf(line.c_str(), "v %f %f %f ", &vertex.x, &vertex.y, &vertex.z) == 3)
                         rawVertices.push_back(vertex);
                 } else if(line.starts_with("vt ")) {
-                    Vector2 uv;
+                    vec2 uv{0.f};
                     if(sscanf(line.c_str(), "vt %f %f ", &uv.x, &uv.y) == 2)
                         rawTexcoords.emplace_back(uv.x, 1.0f - uv.y);
                 } else if(line.starts_with("vn ")) {
-                    Vector3 normal;
+                    vec3 normal{0.f};
                     if(sscanf(line.c_str(), "vn %f %f %f ", &normal.x, &normal.y, &normal.z) == 3)
                         rawNormals.push_back(normal);
                 } else if(line.starts_with("f ")) {

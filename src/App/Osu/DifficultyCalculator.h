@@ -45,10 +45,10 @@ class OsuDifficultyHitObject {
     };
 
    public:
-    OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time);               // circle
-    OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time, i32 endTime);  // spinner
-    OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time, i32 endTime, f32 spanDuration, i8 osuSliderCurveType,
-                           const std::vector<Vector2> &controlPoints, f32 pixelLength,
+    OsuDifficultyHitObject(TYPE type, vec2 pos, i32 time);               // circle
+    OsuDifficultyHitObject(TYPE type, vec2 pos, i32 time, i32 endTime);  // spinner
+    OsuDifficultyHitObject(TYPE type, vec2 pos, i32 time, i32 endTime, f32 spanDuration, i8 osuSliderCurveType,
+                           const std::vector<vec2> &controlPoints, f32 pixelLength,
                            std::vector<SLIDER_SCORING_TIME> scoringTimes, i32 repeats,
                            bool calculateSliderCurveInConstructor);  // slider
     ~OsuDifficultyHitObject();
@@ -63,7 +63,7 @@ class OsuDifficultyHitObject {
     void updateCurveStackPosition(f32 stackOffset);
 
     // for stacking calculations, always returns the unstacked original position at that point in time
-    Vector2 getOriginalRawPosAt(i32 pos);
+    vec2 getOriginalRawPosAt(i32 pos);
 
     f32 getT(i32 pos, bool raw);
 
@@ -71,7 +71,7 @@ class OsuDifficultyHitObject {
 
     // circles (base)
     TYPE type{};
-    Vector2 pos{};
+    vec2 pos{0.f};
     i32 time{};
 
     // spinners + sliders
@@ -87,11 +87,11 @@ class OsuDifficultyHitObject {
     // custom
     SliderCurve *curve{nullptr};
     bool scheduledCurveAlloc{false};
-    std::vector<Vector2> scheduledCurveAllocControlPoints;
+    std::vector<vec2> scheduledCurveAllocControlPoints;
     f32 scheduledCurveAllocStackOffset{};
 
     i32 stack{};
-    Vector2 originalPos{};
+    vec2 originalPos{0.f};
 };
 
 class DifficultyCalculator {
@@ -156,7 +156,7 @@ class DifficultyCalculator {
         double raw_speed_strain;
         double rhythm;
 
-        Vector2 norm_start;  // start position normalized on radius
+        vec2 norm_start{0.f};  // start position normalized on radius
 
         double angle;  // precalc
 
@@ -169,7 +169,7 @@ class DifficultyCalculator {
         double strain_time;  // strain temp
 
         bool lazyCalcFinished;  // precalc temp
-        Vector2 lazyEndPos;     // precalc temp
+        vec2 lazyEndPos{0.f};     // precalc temp
         double lazyTravelDist;  // precalc temp
         double lazyTravelTime;  // precalc temp
         double travelTime;      // precalc temp

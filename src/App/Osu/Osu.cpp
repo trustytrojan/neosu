@@ -72,7 +72,7 @@
 
 Osu *osu = nullptr;
 
-Vector2 Osu::g_vInternalResolution;
+vec2 Osu::g_vInternalResolution{0.f};
 
 Shader *actual_flashlight_shader = nullptr;
 Shader *flashlight_shader = nullptr;
@@ -420,17 +420,17 @@ void Osu::draw() {
         auto actual_flashlight_enabled = cv::mod_actual_flashlight.getBool();
         if(cv::mod_flashlight.getBool() || actual_flashlight_enabled) {
             // Convert screen mouse -> osu mouse pos
-            Vector2 cursorPos = beatmap->getCursorPos();
-            Vector2 mouse_position = cursorPos - GameRules::getPlayfieldOffset();
+            vec2 cursorPos = beatmap->getCursorPos();
+            vec2 mouse_position = cursorPos - GameRules::getPlayfieldOffset();
             mouse_position /= GameRules::getPlayfieldScaleFactor();
 
             // Update flashlight position
             double follow_delay = cv::flashlight_follow_delay.getFloat();
             double frame_time = std::min(engine->getFrameTime(), follow_delay);
-            double t = frame_time / follow_delay;
+            float t = frame_time / follow_delay;
             t = t * (2.f - t);
             this->flashlight_position += t * (mouse_position - this->flashlight_position);
-            Vector2 flashlightPos =
+            vec2 flashlightPos =
                 this->flashlight_position * GameRules::getPlayfieldScaleFactor() + GameRules::getPlayfieldOffset();
 
             float base_fl_radius = cv::flashlight_radius.getFloat() * GameRules::getPlayfieldScaleFactor();
@@ -557,7 +557,7 @@ void Osu::draw() {
     // draw cursor
     if(this->isInPlayMode()) {
         Beatmap *beatmap = this->getSelectedBeatmap();
-        Vector2 cursorPos = beatmap->getCursorPos();
+        vec2 cursorPos = beatmap->getCursorPos();
         bool drawSecondTrail =
             (cv::mod_autoplay.getBool() || cv::mod_autopilot.getBool() || beatmap->is_watching || bancho->spectating);
         bool updateAndDrawTrail = true;
@@ -575,7 +575,7 @@ void Osu::draw() {
         // draw a scaled version from the buffer to the screen
         this->backBuffer->disable();
 
-        Vector2 offset = Vector2(g->getResolution().x / 2 - g_vInternalResolution.x / 2,
+        vec2 offset = vec2(g->getResolution().x / 2 - g_vInternalResolution.x / 2,
                                  g->getResolution().y / 2 - g_vInternalResolution.y / 2);
         g->setBlending(false);
         if(cv::letterboxing.getBool()) {
@@ -1567,7 +1567,7 @@ bool Osu::shouldFallBackToLegacySliderRenderer() {
         /* || (this->osu_playfield_rotation->getFloat() < -0.01f || m_osu_playfield_rotation->getFloat() > 0.01f)*/;
 }
 
-void Osu::onResolutionChanged(Vector2 newResolution) {
+void Osu::onResolutionChanged(vec2 newResolution) {
     debugLog("Osu::onResolutionChanged({:d}, {:d}), minimized = {:d}\n", (int)newResolution.x, (int)newResolution.y,
              (int)engine->isMinimized());
 
@@ -1668,15 +1668,15 @@ void Osu::reloadFonts() {
 
 void Osu::updateMouseSettings() {
     // mouse scaling & offset
-    Vector2 offset = Vector2(0, 0);
-    Vector2 scale = Vector2(1, 1);
+    vec2 offset = vec2(0, 0);
+    vec2 scale = vec2(1, 1);
     if((g->getResolution() != g_vInternalResolution) && cv::letterboxing.getBool()) {
-        offset = -Vector2((engine->getScreenWidth() / 2.f - g_vInternalResolution.x / 2.f) *
+        offset = -vec2((engine->getScreenWidth() / 2.f - g_vInternalResolution.x / 2.f) *
                               (1.0f + cv::letterboxing_offset_x.getFloat()),
                           (engine->getScreenHeight() / 2.f - g_vInternalResolution.y / 2.f) *
                               (1.0f + cv::letterboxing_offset_y.getFloat()));
 
-        scale = Vector2(g_vInternalResolution.x / engine->getScreenWidth(),
+        scale = vec2(g_vInternalResolution.x / engine->getScreenWidth(),
                         g_vInternalResolution.y / engine->getScreenHeight());
     }
 
@@ -1745,7 +1745,7 @@ void Osu::onInternalResolutionChanged(const UString & /*oldValue*/, const UStrin
     }
 
     const float prevUIScale = getUIScale();
-    Vector2 newInternalResolution = Vector2(width, height);
+    vec2 newInternalResolution = vec2(width, height);
 
     // clamp requested internal resolution to current renderer resolution
     // however, this could happen while we are transitioning into fullscreen. therefore only clamp when not in
@@ -2113,23 +2113,23 @@ void Osu::onUserCardChange(const UString &new_username) {
     this->userButton->setID(bancho->user_id);
 }
 
-float Osu::getImageScaleToFitResolution(Vector2 size, Vector2 resolution) {
+float Osu::getImageScaleToFitResolution(vec2 size, vec2 resolution) {
     return resolution.x / size.x > resolution.y / size.y ? resolution.y / size.y : resolution.x / size.x;
 }
 
-float Osu::getImageScaleToFitResolution(Image *img, Vector2 resolution) {
-    return getImageScaleToFitResolution(Vector2(img->getWidth(), img->getHeight()), resolution);
+float Osu::getImageScaleToFitResolution(Image *img, vec2 resolution) {
+    return getImageScaleToFitResolution(vec2(img->getWidth(), img->getHeight()), resolution);
 }
 
-float Osu::getImageScaleToFillResolution(Vector2 size, Vector2 resolution) {
+float Osu::getImageScaleToFillResolution(vec2 size, vec2 resolution) {
     return resolution.x / size.x < resolution.y / size.y ? resolution.y / size.y : resolution.x / size.x;
 }
 
-float Osu::getImageScaleToFillResolution(Image *img, Vector2 resolution) {
-    return getImageScaleToFillResolution(Vector2(img->getWidth(), img->getHeight()), resolution);
+float Osu::getImageScaleToFillResolution(Image *img, vec2 resolution) {
+    return getImageScaleToFillResolution(vec2(img->getWidth(), img->getHeight()), resolution);
 }
 
-float Osu::getImageScale(Vector2 size, float osuSize) {
+float Osu::getImageScale(vec2 size, float osuSize) {
     int swidth = osu->getScreenWidth();
     int sheight = osu->getScreenHeight();
 
@@ -2148,7 +2148,7 @@ float Osu::getImageScale(Vector2 size, float osuSize) {
 }
 
 float Osu::getImageScale(Image *img, float osuSize) {
-    return getImageScale(Vector2(img->getWidth(), img->getHeight()), osuSize);
+    return getImageScale(vec2(img->getWidth(), img->getHeight()), osuSize);
 }
 
 float Osu::getUIScale(float osuResolutionRatio) {

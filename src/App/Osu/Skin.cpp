@@ -471,7 +471,7 @@ void Skin::load() {
     // images
     this->randomizeFilePath();
     this->checkLoadImage(&this->hitCircle, "hitcircle", "OSU_SKIN_HITCIRCLE");
-    this->hitCircleOverlay2 = this->createSkinImage("hitcircleoverlay", Vector2(128, 128), 64);
+    this->hitCircleOverlay2 = this->createSkinImage("hitcircleoverlay", vec2(128, 128), 64);
     this->hitCircleOverlay2->setAnimationFramerate(2);
 
     this->randomizeFilePath();
@@ -480,7 +480,7 @@ void Skin::load() {
     this->checkLoadImage(&this->reverseArrow, "reversearrow", "OSU_SKIN_REVERSEARROW");
 
     this->randomizeFilePath();
-    this->followPoint2 = this->createSkinImage("followpoint", Vector2(16, 22), 64);
+    this->followPoint2 = this->createSkinImage("followpoint", vec2(16, 22), 64);
 
     this->randomizeFilePath();
     {
@@ -654,47 +654,47 @@ void Skin::load() {
     }
 
     this->randomizeFilePath();
-    this->playSkip = this->createSkinImage("play-skip", Vector2(193, 147), 94);
+    this->playSkip = this->createSkinImage("play-skip", vec2(193, 147), 94);
     this->randomizeFilePath();
     this->checkLoadImage(&this->playWarningArrow, "play-warningarrow", "OSU_SKIN_PLAYWARNINGARROW");
-    this->playWarningArrow2 = this->createSkinImage("play-warningarrow", Vector2(167, 129), 128);
+    this->playWarningArrow2 = this->createSkinImage("play-warningarrow", vec2(167, 129), 128);
     this->randomizeFilePath();
     this->checkLoadImage(&this->circularmetre, "circularmetre", "OSU_SKIN_CIRCULARMETRE");
     this->randomizeFilePath();
-    this->scorebarBg = this->createSkinImage("scorebar-bg", Vector2(695, 44), 27.5f);
-    this->scorebarColour = this->createSkinImage("scorebar-colour", Vector2(645, 10), 6.25f);
-    this->scorebarMarker = this->createSkinImage("scorebar-marker", Vector2(24, 24), 15.0f);
-    this->scorebarKi = this->createSkinImage("scorebar-ki", Vector2(116, 116), 72.0f);
-    this->scorebarKiDanger = this->createSkinImage("scorebar-kidanger", Vector2(116, 116), 72.0f);
-    this->scorebarKiDanger2 = this->createSkinImage("scorebar-kidanger2", Vector2(116, 116), 72.0f);
+    this->scorebarBg = this->createSkinImage("scorebar-bg", vec2(695, 44), 27.5f);
+    this->scorebarColour = this->createSkinImage("scorebar-colour", vec2(645, 10), 6.25f);
+    this->scorebarMarker = this->createSkinImage("scorebar-marker", vec2(24, 24), 15.0f);
+    this->scorebarKi = this->createSkinImage("scorebar-ki", vec2(116, 116), 72.0f);
+    this->scorebarKiDanger = this->createSkinImage("scorebar-kidanger", vec2(116, 116), 72.0f);
+    this->scorebarKiDanger2 = this->createSkinImage("scorebar-kidanger2", vec2(116, 116), 72.0f);
     this->randomizeFilePath();
-    this->sectionPassImage = this->createSkinImage("section-pass", Vector2(650, 650), 400.0f);
+    this->sectionPassImage = this->createSkinImage("section-pass", vec2(650, 650), 400.0f);
     this->randomizeFilePath();
-    this->sectionFailImage = this->createSkinImage("section-fail", Vector2(650, 650), 400.0f);
+    this->sectionFailImage = this->createSkinImage("section-fail", vec2(650, 650), 400.0f);
     this->randomizeFilePath();
-    this->inputoverlayBackground = this->createSkinImage("inputoverlay-background", Vector2(193, 55), 34.25f);
-    this->inputoverlayKey = this->createSkinImage("inputoverlay-key", Vector2(43, 46), 26.75f);
+    this->inputoverlayBackground = this->createSkinImage("inputoverlay-background", vec2(193, 55), 34.25f);
+    this->inputoverlayKey = this->createSkinImage("inputoverlay-key", vec2(43, 46), 26.75f);
 
     this->randomizeFilePath();
-    this->hit0 = this->createSkinImage("hit0", Vector2(128, 128), 42);
+    this->hit0 = this->createSkinImage("hit0", vec2(128, 128), 42);
     this->hit0->setAnimationFramerate(60);
-    this->hit50 = this->createSkinImage("hit50", Vector2(128, 128), 42);
+    this->hit50 = this->createSkinImage("hit50", vec2(128, 128), 42);
     this->hit50->setAnimationFramerate(60);
-    this->hit50g = this->createSkinImage("hit50g", Vector2(128, 128), 42);
+    this->hit50g = this->createSkinImage("hit50g", vec2(128, 128), 42);
     this->hit50g->setAnimationFramerate(60);
-    this->hit50k = this->createSkinImage("hit50k", Vector2(128, 128), 42);
+    this->hit50k = this->createSkinImage("hit50k", vec2(128, 128), 42);
     this->hit50k->setAnimationFramerate(60);
-    this->hit100 = this->createSkinImage("hit100", Vector2(128, 128), 42);
+    this->hit100 = this->createSkinImage("hit100", vec2(128, 128), 42);
     this->hit100->setAnimationFramerate(60);
-    this->hit100g = this->createSkinImage("hit100g", Vector2(128, 128), 42);
+    this->hit100g = this->createSkinImage("hit100g", vec2(128, 128), 42);
     this->hit100g->setAnimationFramerate(60);
-    this->hit100k = this->createSkinImage("hit100k", Vector2(128, 128), 42);
+    this->hit100k = this->createSkinImage("hit100k", vec2(128, 128), 42);
     this->hit100k->setAnimationFramerate(60);
-    this->hit300 = this->createSkinImage("hit300", Vector2(128, 128), 42);
+    this->hit300 = this->createSkinImage("hit300", vec2(128, 128), 42);
     this->hit300->setAnimationFramerate(60);
-    this->hit300g = this->createSkinImage("hit300g", Vector2(128, 128), 42);
+    this->hit300g = this->createSkinImage("hit300g", vec2(128, 128), 42);
     this->hit300g->setAnimationFramerate(60);
-    this->hit300k = this->createSkinImage("hit300k", Vector2(128, 128), 42);
+    this->hit300k = this->createSkinImage("hit300k", vec2(128, 128), 42);
     this->hit300k->setAnimationFramerate(60);
 
     this->randomizeFilePath();
@@ -705,29 +705,29 @@ void Skin::load() {
     this->randomizeFilePath();
     this->checkLoadImage(&this->sliderGradient, "slidergradient", "OSU_SKIN_SLIDERGRADIENT");
     this->randomizeFilePath();
-    this->sliderb = this->createSkinImage("sliderb", Vector2(128, 128), 64, false, "");
+    this->sliderb = this->createSkinImage("sliderb", vec2(128, 128), 64, false, "");
     this->sliderb->setAnimationFramerate(/*45.0f*/ 50.0f);
     this->randomizeFilePath();
     this->checkLoadImage(&this->sliderScorePoint, "sliderscorepoint", "OSU_SKIN_SLIDERSCOREPOINT");
     this->randomizeFilePath();
-    this->sliderFollowCircle2 = this->createSkinImage("sliderfollowcircle", Vector2(259, 259), 64);
+    this->sliderFollowCircle2 = this->createSkinImage("sliderfollowcircle", vec2(259, 259), 64);
     this->randomizeFilePath();
     this->checkLoadImage(
         &this->sliderStartCircle, "sliderstartcircle", "OSU_SKIN_SLIDERSTARTCIRCLE",
         !this->bIsDefaultSkin);  // !m_bIsDefaultSkin ensures that default doesn't override user, in these special cases
-    this->sliderStartCircle2 = this->createSkinImage("sliderstartcircle", Vector2(128, 128), 64, !this->bIsDefaultSkin);
+    this->sliderStartCircle2 = this->createSkinImage("sliderstartcircle", vec2(128, 128), 64, !this->bIsDefaultSkin);
     this->checkLoadImage(&this->sliderStartCircleOverlay, "sliderstartcircleoverlay",
                          "OSU_SKIN_SLIDERSTARTCIRCLEOVERLAY", !this->bIsDefaultSkin);
     this->sliderStartCircleOverlay2 =
-        this->createSkinImage("sliderstartcircleoverlay", Vector2(128, 128), 64, !this->bIsDefaultSkin);
+        this->createSkinImage("sliderstartcircleoverlay", vec2(128, 128), 64, !this->bIsDefaultSkin);
     this->sliderStartCircleOverlay2->setAnimationFramerate(2);
     this->randomizeFilePath();
     this->checkLoadImage(&this->sliderEndCircle, "sliderendcircle", "OSU_SKIN_SLIDERENDCIRCLE", !this->bIsDefaultSkin);
-    this->sliderEndCircle2 = this->createSkinImage("sliderendcircle", Vector2(128, 128), 64, !this->bIsDefaultSkin);
+    this->sliderEndCircle2 = this->createSkinImage("sliderendcircle", vec2(128, 128), 64, !this->bIsDefaultSkin);
     this->checkLoadImage(&this->sliderEndCircleOverlay, "sliderendcircleoverlay", "OSU_SKIN_SLIDERENDCIRCLEOVERLAY",
                          !this->bIsDefaultSkin);
     this->sliderEndCircleOverlay2 =
-        this->createSkinImage("sliderendcircleoverlay", Vector2(128, 128), 64, !this->bIsDefaultSkin);
+        this->createSkinImage("sliderendcircleoverlay", vec2(128, 128), 64, !this->bIsDefaultSkin);
     this->sliderEndCircleOverlay2->setAnimationFramerate(2);
 
     this->randomizeFilePath();
@@ -746,29 +746,29 @@ void Skin::load() {
     }
 
     this->randomizeFilePath();
-    this->selectionModEasy = this->createSkinImage("selection-mod-easy", Vector2(68, 66), 38);
-    this->selectionModNoFail = this->createSkinImage("selection-mod-nofail", Vector2(68, 66), 38);
-    this->selectionModHalfTime = this->createSkinImage("selection-mod-halftime", Vector2(68, 66), 38);
-    this->selectionModHardRock = this->createSkinImage("selection-mod-hardrock", Vector2(68, 66), 38);
-    this->selectionModSuddenDeath = this->createSkinImage("selection-mod-suddendeath", Vector2(68, 66), 38);
-    this->selectionModPerfect = this->createSkinImage("selection-mod-perfect", Vector2(68, 66), 38);
-    this->selectionModDoubleTime = this->createSkinImage("selection-mod-doubletime", Vector2(68, 66), 38);
-    this->selectionModNightCore = this->createSkinImage("selection-mod-nightcore", Vector2(68, 66), 38);
-    this->selectionModDayCore = this->createSkinImage("selection-mod-daycore", Vector2(68, 66), 38);
-    this->selectionModHidden = this->createSkinImage("selection-mod-hidden", Vector2(68, 66), 38);
-    this->selectionModFlashlight = this->createSkinImage("selection-mod-flashlight", Vector2(68, 66), 38);
-    this->selectionModRelax = this->createSkinImage("selection-mod-relax", Vector2(68, 66), 38);
-    this->selectionModAutopilot = this->createSkinImage("selection-mod-relax2", Vector2(68, 66), 38);
-    this->selectionModSpunOut = this->createSkinImage("selection-mod-spunout", Vector2(68, 66), 38);
-    this->selectionModAutoplay = this->createSkinImage("selection-mod-autoplay", Vector2(68, 66), 38);
-    this->selectionModNightmare = this->createSkinImage("selection-mod-nightmare", Vector2(68, 66), 38);
-    this->selectionModTarget = this->createSkinImage("selection-mod-target", Vector2(68, 66), 38);
-    this->selectionModScorev2 = this->createSkinImage("selection-mod-scorev2", Vector2(68, 66), 38);
-    this->selectionModTD = this->createSkinImage("selection-mod-touchdevice", Vector2(68, 66), 38);
-    this->selectionModCinema = this->createSkinImage("selection-mod-cinema", Vector2(68, 66), 38);
+    this->selectionModEasy = this->createSkinImage("selection-mod-easy", vec2(68, 66), 38);
+    this->selectionModNoFail = this->createSkinImage("selection-mod-nofail", vec2(68, 66), 38);
+    this->selectionModHalfTime = this->createSkinImage("selection-mod-halftime", vec2(68, 66), 38);
+    this->selectionModHardRock = this->createSkinImage("selection-mod-hardrock", vec2(68, 66), 38);
+    this->selectionModSuddenDeath = this->createSkinImage("selection-mod-suddendeath", vec2(68, 66), 38);
+    this->selectionModPerfect = this->createSkinImage("selection-mod-perfect", vec2(68, 66), 38);
+    this->selectionModDoubleTime = this->createSkinImage("selection-mod-doubletime", vec2(68, 66), 38);
+    this->selectionModNightCore = this->createSkinImage("selection-mod-nightcore", vec2(68, 66), 38);
+    this->selectionModDayCore = this->createSkinImage("selection-mod-daycore", vec2(68, 66), 38);
+    this->selectionModHidden = this->createSkinImage("selection-mod-hidden", vec2(68, 66), 38);
+    this->selectionModFlashlight = this->createSkinImage("selection-mod-flashlight", vec2(68, 66), 38);
+    this->selectionModRelax = this->createSkinImage("selection-mod-relax", vec2(68, 66), 38);
+    this->selectionModAutopilot = this->createSkinImage("selection-mod-relax2", vec2(68, 66), 38);
+    this->selectionModSpunOut = this->createSkinImage("selection-mod-spunout", vec2(68, 66), 38);
+    this->selectionModAutoplay = this->createSkinImage("selection-mod-autoplay", vec2(68, 66), 38);
+    this->selectionModNightmare = this->createSkinImage("selection-mod-nightmare", vec2(68, 66), 38);
+    this->selectionModTarget = this->createSkinImage("selection-mod-target", vec2(68, 66), 38);
+    this->selectionModScorev2 = this->createSkinImage("selection-mod-scorev2", vec2(68, 66), 38);
+    this->selectionModTD = this->createSkinImage("selection-mod-touchdevice", vec2(68, 66), 38);
+    this->selectionModCinema = this->createSkinImage("selection-mod-cinema", vec2(68, 66), 38);
 
-    this->mode_osu = this->createSkinImage("mode-osu", Vector2(32, 32), 32);
-    this->mode_osu_small = this->createSkinImage("mode-osu-small", Vector2(32, 32), 32);
+    this->mode_osu = this->createSkinImage("mode-osu", vec2(32, 32), 32);
+    this->mode_osu_small = this->createSkinImage("mode-osu-small", vec2(32, 32), 32);
 
     this->randomizeFilePath();
     this->checkLoadImage(&this->pauseContinue, "pause-continue", "OSU_SKIN_PAUSE_CONTINUE");
@@ -788,26 +788,26 @@ void Skin::load() {
     this->checkLoadImage(&this->buttonMiddle, "button-middle", "OSU_SKIN_BUTTON_MIDDLE");
     this->checkLoadImage(&this->buttonRight, "button-right", "OSU_SKIN_BUTTON_RIGHT");
     this->randomizeFilePath();
-    this->menuBackImg = this->createSkinImage("menu-back", Vector2(225, 87), 54);
+    this->menuBackImg = this->createSkinImage("menu-back", vec2(225, 87), 54);
     this->randomizeFilePath();
 
     // NOTE: scaling is ignored when drawing this specific element
-    this->selectionMode = this->createSkinImage("selection-mode", Vector2(90, 90), 38);
+    this->selectionMode = this->createSkinImage("selection-mode", vec2(90, 90), 38);
 
-    this->selectionModeOver = this->createSkinImage("selection-mode-over", Vector2(88, 90), 38);
-    this->selectionMods = this->createSkinImage("selection-mods", Vector2(74, 90), 38);
-    this->selectionModsOver = this->createSkinImage("selection-mods-over", Vector2(74, 90), 38);
-    this->selectionRandom = this->createSkinImage("selection-random", Vector2(74, 90), 38);
-    this->selectionRandomOver = this->createSkinImage("selection-random-over", Vector2(74, 90), 38);
-    this->selectionOptions = this->createSkinImage("selection-options", Vector2(74, 90), 38);
-    this->selectionOptionsOver = this->createSkinImage("selection-options-over", Vector2(74, 90), 38);
+    this->selectionModeOver = this->createSkinImage("selection-mode-over", vec2(88, 90), 38);
+    this->selectionMods = this->createSkinImage("selection-mods", vec2(74, 90), 38);
+    this->selectionModsOver = this->createSkinImage("selection-mods-over", vec2(74, 90), 38);
+    this->selectionRandom = this->createSkinImage("selection-random", vec2(74, 90), 38);
+    this->selectionRandomOver = this->createSkinImage("selection-random-over", vec2(74, 90), 38);
+    this->selectionOptions = this->createSkinImage("selection-options", vec2(74, 90), 38);
+    this->selectionOptionsOver = this->createSkinImage("selection-options-over", vec2(74, 90), 38);
 
     this->randomizeFilePath();
     this->checkLoadImage(&this->songSelectTop, "songselect-top", "OSU_SKIN_SONGSELECT_TOP");
     this->checkLoadImage(&this->songSelectBottom, "songselect-bottom", "OSU_SKIN_SONGSELECT_BOTTOM");
     this->randomizeFilePath();
     this->checkLoadImage(&this->menuButtonBackground, "menu-button-background", "OSU_SKIN_MENU_BUTTON_BACKGROUND");
-    this->menuButtonBackground2 = this->createSkinImage("menu-button-background", Vector2(699, 103), 64.0f);
+    this->menuButtonBackground2 = this->createSkinImage("menu-button-background", vec2(699, 103), 64.0f);
     this->randomizeFilePath();
     this->checkLoadImage(&this->star, "star", "OSU_SKIN_STAR");
 
@@ -827,16 +827,16 @@ void Skin::load() {
     this->checkLoadImage(&this->rankingX, "ranking-X", "OSU_SKIN_RANKING_X");
     this->checkLoadImage(&this->rankingXH, "ranking-XH", "OSU_SKIN_RANKING_XH");
 
-    this->rankingAsmall = this->createSkinImage("ranking-A-small", Vector2(34, 40), 128);
-    this->rankingBsmall = this->createSkinImage("ranking-B-small", Vector2(34, 40), 128);
-    this->rankingCsmall = this->createSkinImage("ranking-C-small", Vector2(34, 40), 128);
-    this->rankingDsmall = this->createSkinImage("ranking-D-small", Vector2(34, 40), 128);
-    this->rankingSsmall = this->createSkinImage("ranking-S-small", Vector2(34, 40), 128);
-    this->rankingSHsmall = this->createSkinImage("ranking-SH-small", Vector2(34, 40), 128);
-    this->rankingXsmall = this->createSkinImage("ranking-X-small", Vector2(34, 40), 128);
-    this->rankingXHsmall = this->createSkinImage("ranking-XH-small", Vector2(34, 40), 128);
+    this->rankingAsmall = this->createSkinImage("ranking-A-small", vec2(34, 40), 128);
+    this->rankingBsmall = this->createSkinImage("ranking-B-small", vec2(34, 40), 128);
+    this->rankingCsmall = this->createSkinImage("ranking-C-small", vec2(34, 40), 128);
+    this->rankingDsmall = this->createSkinImage("ranking-D-small", vec2(34, 40), 128);
+    this->rankingSsmall = this->createSkinImage("ranking-S-small", vec2(34, 40), 128);
+    this->rankingSHsmall = this->createSkinImage("ranking-SH-small", vec2(34, 40), 128);
+    this->rankingXsmall = this->createSkinImage("ranking-X-small", vec2(34, 40), 128);
+    this->rankingXHsmall = this->createSkinImage("ranking-XH-small", vec2(34, 40), 128);
 
-    this->rankingPerfect = this->createSkinImage("ranking-perfect", Vector2(478, 150), 128);
+    this->rankingPerfect = this->createSkinImage("ranking-perfect", vec2(478, 150), 128);
 
     this->randomizeFilePath();
     this->checkLoadImage(&this->beatmapImportSpinner, "beatmapimport-spinner", "OSU_SKIN_BEATMAP_IMPORT_SPINNER");
@@ -1497,7 +1497,7 @@ void Skin::randomizeFilePath() {
         this->sFilePath = this->filepathsForRandomSkin[rand() % this->filepathsForRandomSkin.size()];
 }
 
-SkinImage *Skin::createSkinImage(const std::string &skinElementName, Vector2 baseSizeForScaling2x, float osuSize,
+SkinImage *Skin::createSkinImage(const std::string &skinElementName, vec2 baseSizeForScaling2x, float osuSize,
                                  bool ignoreDefaultSkin, const std::string &animationSeparator) {
     auto *skinImage =
         new SkinImage(this, skinElementName, baseSizeForScaling2x, osuSize, animationSeparator, ignoreDefaultSkin);

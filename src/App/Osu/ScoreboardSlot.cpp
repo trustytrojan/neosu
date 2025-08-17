@@ -70,7 +70,7 @@ void ScoreboardSlot::draw() {
         auto bg_img = osu->getSkin()->getMenuButtonBackground2();
         float oScale = bg_img->getResolutionScale() * 0.99f;
         g->fillRect(0, start_y, avatar_width, height);
-        bg_img->draw(Vector2(avatar_width + (bg_img->getSizeBase().x / 2) * bg_scale - (470 * oScale) * bg_scale,
+        bg_img->draw(vec2(avatar_width + (bg_img->getSizeBase().x / 2) * bg_scale - (470 * oScale) * bg_scale,
                              start_y + height / 2),
                      bg_scale);
     } else {

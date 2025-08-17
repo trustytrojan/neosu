@@ -138,11 +138,11 @@ void ScoreButton::draw() {
     {
         const float scale = Osu::getImageScaleToFitResolution(
             grade->getSizeBaseRaw(),
-            Vector2(this->vSize.x * (1.0f - indexNumberWidthPercent), this->vSize.y * gradeHeightPercent));
+            vec2(this->vSize.x * (1.0f - indexNumberWidthPercent), this->vSize.y * gradeHeightPercent));
         gradeWidth = grade->getSizeBaseRaw().x * scale;
 
         g->setColor(0xffffffff);
-        grade->drawRaw(Vector2((int)(this->vPos.x + this->vSize.x * indexNumberWidthPercent + gradeWidth / 2.0f),
+        grade->drawRaw(vec2((int)(this->vPos.x + this->vSize.x * indexNumberWidthPercent + gradeWidth / 2.0f),
                                (int)(this->vPos.y + this->vSize.y / 2.0f)),
                        scale);
     }
@@ -566,7 +566,7 @@ void ScoreButton::onFocusStolen() {
 }
 
 void ScoreButton::onRightMouseUpInside() {
-    const Vector2 pos = mouse->getPos();
+    const vec2 pos = mouse->getPos();
 
     if(this->contextMenu != nullptr) {
         this->contextMenu->setPos(pos);

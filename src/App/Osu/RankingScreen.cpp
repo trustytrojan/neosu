@@ -233,10 +233,10 @@ void RankingScreen::draw() {
     ScreenBackable::draw();
 
     // draw active mods
-    const Vector2 modPosStart =
-        Vector2(this->rankings->getSize().x - osu->getUIScale(20), this->rankings->getRelPosY() + osu->getUIScale(260));
-    Vector2 modPos = modPosStart;
-    Vector2 modPosMax;
+    const vec2 modPosStart =
+        vec2(this->rankings->getSize().x - osu->getUIScale(20), this->rankings->getRelPosY() + osu->getUIScale(260));
+    vec2 modPos = modPosStart;
+    vec2 modPosMax{0.f};
     if(this->bModTD) this->drawModImage(osu->getSkin()->getSelectionModTD(), modPos, modPosMax);
     if(this->bModSS)
         this->drawModImage(osu->getSkin()->getSelectionModPerfect(), modPos, modPosMax);
@@ -270,7 +270,7 @@ void RankingScreen::draw() {
         const int backgroundMargin = 6;
         const float heightMultiplier = 1.25f;
         const int experimentalModHeight = (experimentalModFont->getHeight() * heightMultiplier);
-        const Vector2 experimentalModPos = Vector2(modPosStart.x - maxStringWidth - backgroundMargin,
+        const vec2 experimentalModPos = vec2(modPosStart.x - maxStringWidth - backgroundMargin,
                                                    std::max(modPosStart.y, modPosMax.y) + osu->getUIScale(10) +
                                                        experimentalModFont->getHeight() * heightMultiplier);
         const int backgroundWidth = maxStringWidth + 2 * backgroundMargin;
@@ -304,7 +304,7 @@ void RankingScreen::draw() {
     // draw pp
     if(cv::rankingscreen_pp.getBool()) {
         const UString ppString = this->getPPString();
-        const Vector2 ppPos = this->getPPPosRaw();
+        const vec2 ppPos = this->getPPPosRaw();
 
         g->pushTransform();
         {
@@ -319,9 +319,9 @@ void RankingScreen::draw() {
     }
 }
 
-void RankingScreen::drawModImage(SkinImage *image, Vector2 &pos, Vector2 &max) {
+void RankingScreen::drawModImage(SkinImage *image, vec2 &pos, vec2 &max) {
     g->setColor(0xffffffff);
-    image->draw(Vector2(pos.x - image->getSize().x / 2.0f, pos.y));
+    image->draw(vec2(pos.x - image->getSize().x / 2.0f, pos.y));
 
     pos.x -= osu->getUIScale(20);
 
@@ -567,7 +567,7 @@ void RankingScreen::updateLayout() {
     float btn_height = 50.f * uiScale;
     this->retry_btn->setSize(btn_width, btn_height);
     this->watch_btn->setSize(btn_width, btn_height);
-    Vector2 btn_pos(this->rankings->getSize().x * 0.98f - btn_width, this->rankings->getSize().y * 0.90f - btn_height);
+    vec2 btn_pos(this->rankings->getSize().x * 0.98f - btn_width, this->rankings->getSize().y * 0.90f - btn_height);
     this->watch_btn->setRelPos(btn_pos);
     btn_pos.y -= btn_height + 5.f * uiScale;
     this->retry_btn->setRelPos(btn_pos);
@@ -575,8 +575,8 @@ void RankingScreen::updateLayout() {
     this->update_pos();
 
     // NOTE: no uiScale for rankingPanel and rankingGrade, doesn't really work due to legacy layout expectations
-    const Vector2 hardcodedOsuRankingPanelImageSize =
-        Vector2(622, 505) * (osu->getSkin()->isRankingPanel2x() ? 2.0f : 1.0f);
+    const vec2 hardcodedOsuRankingPanelImageSize =
+        vec2(622, 505) * (osu->getSkin()->isRankingPanel2x() ? 2.0f : 1.0f);
     this->rankingPanel->setImage(osu->getSkin()->getRankingPanel());
     this->rankingPanel->setScale(Osu::getImageScale(hardcodedOsuRankingPanelImageSize, 317.0f),
                                  Osu::getImageScale(hardcodedOsuRankingPanelImageSize, 317.0f));
@@ -605,7 +605,7 @@ void RankingScreen::onBack() { this->setVisible(false); }
 void RankingScreen::setGrade(FinishedScore::Grade grade) {
     this->grade = grade;
 
-    Vector2 hardcodedOsuRankingGradeImageSize = Vector2(369, 422);
+    vec2 hardcodedOsuRankingGradeImageSize = vec2(369, 422);
     switch(grade) {
         case FinishedScore::Grade::XH:
             hardcodedOsuRankingGradeImageSize *= (osu->getSkin()->isRankingXH2x() ? 2.0f : 1.0f);
@@ -677,10 +677,10 @@ UString RankingScreen::getPPString() {
     }
 }
 
-Vector2 RankingScreen::getPPPosRaw() {
+vec2 RankingScreen::getPPPosRaw() {
     const UString ppString = this->getPPString();
     float ppStringWidth = osu->getTitleFont()->getStringWidth(ppString);
-    return Vector2(this->rankingGrade->getPos().x, cv::ui_scale.getFloat() * 10.f) +
-           Vector2(this->rankingGrade->getSize().x / 2 - (ppStringWidth / 2 + cv::ui_scale.getFloat() * 100.f),
+    return vec2(this->rankingGrade->getPos().x, cv::ui_scale.getFloat() * 10.f) +
+           vec2(this->rankingGrade->getSize().x / 2 - (ppStringWidth / 2 + cv::ui_scale.getFloat() * 100.f),
                    this->rankings->getRelPosY() + osu->getUIScale(400) + osu->getTitleFont()->getHeight() / 2);
 }

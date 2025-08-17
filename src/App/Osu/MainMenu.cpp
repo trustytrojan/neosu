@@ -369,7 +369,7 @@ void MainMenu::draw() {
     } else
         pulse = (div - fmod(engine->getTime(), div)) / div;
 
-    Vector2 size = this->vSize;
+    vec2 size = this->vSize;
     const float pulseSub = 0.05f * pulse;
     size -= size * pulseSub;
     size += size * this->fSizeAddAnim;
@@ -387,7 +387,7 @@ void MainMenu::draw() {
         const float scale =
             this->versionButton->getSize().x / osu->getSkin()->getPlayWarningArrow2()->getSizeBaseRaw().x;
 
-        const Vector2 arrowPos = Vector2(
+        const vec2 arrowPos = vec2(
             this->versionButton->getSize().x / 1.75f,
             osu->getScreenHeight() - this->versionButton->getSize().y * 2 - this->versionButton->getSize().y * scale);
 
@@ -519,46 +519,46 @@ void MainMenu::draw() {
 
             VertexArrayObject vao;
             {
-                const Vector2 pos = Vector2(mainButtonRect.getX(), mainButtonRect.getY() - offset);
+                const vec2 pos = vec2(mainButtonRect.getX(), mainButtonRect.getY() - offset);
 
-                Vector2 left = pos + Vector2(0, 0);
-                Vector2 top = pos + Vector2(width / 2, -width * std::sqrt(3.0f) / 2.0f);
-                Vector2 right = pos + Vector2(width, 0);
+                vec2 left = pos + vec2(0, 0);
+                vec2 top = pos + vec2(width / 2, -width * std::sqrt(3.0f) / 2.0f);
+                vec2 right = pos + vec2(width, 0);
 
-                Vector2 topRightDir = (top - right);
+                vec2 topRightDir = (top - right);
                 {
                     const float temp = topRightDir.x;
                     topRightDir.x = -topRightDir.y;
                     topRightDir.y = temp;
                 }
 
-                Vector2 innerLeft = left + topRightDir.normalize() * margin;
+                vec2 innerLeft = left + vec::normalize(topRightDir) * margin;
 
                 vao.addVertex(left.x, left.y);
                 vao.addVertex(top.x, top.y);
                 vao.addVertex(innerLeft.x, innerLeft.y);
 
-                Vector2 leftRightDir = (right - left);
+                vec2 leftRightDir = (right - left);
                 {
                     const float temp = leftRightDir.x;
                     leftRightDir.x = -leftRightDir.y;
                     leftRightDir.y = temp;
                 }
 
-                Vector2 innerTop = top + leftRightDir.normalize() * margin;
+                vec2 innerTop = top + vec::normalize(leftRightDir) * margin;
 
                 vao.addVertex(top.x, top.y);
                 vao.addVertex(innerTop.x, innerTop.y);
                 vao.addVertex(innerLeft.x, innerLeft.y);
 
-                Vector2 leftTopDir = (left - top);
+                vec2 leftTopDir = (left - top);
                 {
                     const float temp = leftTopDir.x;
                     leftTopDir.x = -leftTopDir.y;
                     leftTopDir.y = temp;
                 }
 
-                Vector2 innerRight = right + leftTopDir.normalize() * margin;
+                vec2 innerRight = right + vec::normalize(leftTopDir) * margin;
 
                 vao.addVertex(top.x, top.y);
                 vao.addVertex(innerRight.x, innerRight.y);
@@ -930,7 +930,7 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
     }
 
     if(this->bInMainMenuRandomAnim && this->iMainMenuRandomAnimType == 1 && anim->isAnimating(&this->fMainMenuAnim)) {
-        Vector2 mouseDelta = (this->cube->getPos() + this->cube->getSize() / 2) - mouse->getPos();
+        vec2 mouseDelta = (this->cube->getPos() + this->cube->getSize() / 2.f) - mouse->getPos();
         mouseDelta.x = std::clamp<float>(mouseDelta.x, -engine->getScreenSize().x / 2, engine->getScreenSize().x / 2);
         mouseDelta.y = std::clamp<float>(mouseDelta.y, -engine->getScreenSize().y / 2, engine->getScreenSize().y / 2);
         mouseDelta.x /= engine->getScreenSize().x;
@@ -938,7 +938,7 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
 
         const float decay = std::clamp<float>((1.0f - this->fMainMenuAnim - 0.075f) / 0.025f, 0.0f, 1.0f);
 
-        const Vector2 pushAngle = Vector2(mouseDelta.y, -mouseDelta.x) * Vector2(0.15f, 0.15f) * decay;
+        const vec2 pushAngle = vec2(mouseDelta.y, -mouseDelta.x) * vec2(0.15f, 0.15f) * decay;
 
         anim->moveQuadOut(&this->fMainMenuAnim1, pushAngle.x, 0.15f, true);
 
@@ -958,13 +958,13 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
         if(this->bMainMenuAnimFriend) this->fMainMenuAnimFriendPercent = 1.0f;
         if(!this->bMainMenuAnimFriendScheduled) this->fMainMenuAnimFriendPercent = 0.0f;
 
-        Vector2 mouseDelta = (this->cube->getPos() + this->cube->getSize() / 2) - mouse->getPos();
+        vec2 mouseDelta = (this->cube->getPos() + this->cube->getSize() / 2.f) - mouse->getPos();
         mouseDelta.x = std::clamp<float>(mouseDelta.x, -engine->getScreenSize().x / 2, engine->getScreenSize().x / 2);
         mouseDelta.y = std::clamp<float>(mouseDelta.y, -engine->getScreenSize().y / 2, engine->getScreenSize().y / 2);
         mouseDelta.x /= engine->getScreenSize().x;
         mouseDelta.y /= engine->getScreenSize().y;
 
-        const Vector2 pushAngle = Vector2(mouseDelta.x, mouseDelta.y) * 0.1f;
+        const vec2 pushAngle = vec2(mouseDelta.x, mouseDelta.y) * 0.1f;
 
         anim->moveLinear(&this->fMainMenuAnimFriendEyeFollowX, pushAngle.x, 0.25f, true);
         anim->moveLinear(&this->fMainMenuAnimFriendEyeFollowY, pushAngle.y, 0.25f, true);
@@ -1138,7 +1138,7 @@ void MainMenu::onButtonChange(ButtonIndex button, bool down) {
     this->fMainMenuAnimTime = engine->getTime() + this->fMainMenuAnimDuration;
 }
 
-void MainMenu::onResolutionChange(Vector2 /*newResolution*/) {
+void MainMenu::onResolutionChange(vec2 /*newResolution*/) {
     this->updateLayout();
     this->setMenuElementsVisible(this->bMenuElementsVisible);
 }
@@ -1183,9 +1183,9 @@ void MainMenu::updateLayout() {
 
     this->vCenter = osu->getScreenSize() / 2.0f;
     const float size = Osu::getUIScale(324.0f);
-    this->vSize = Vector2(size, size);
+    this->vSize = vec2(size, size);
 
-    this->cube->setRelPos(this->vCenter - this->vSize / 2.0f - Vector2(this->fCenterOffsetAnim, 0.0f));
+    this->cube->setRelPos(this->vCenter - this->vSize / 2.0f - vec2(this->fCenterOffsetAnim, 0.0f));
     this->cube->setSize(this->vSize);
 
     this->pauseButton->setSize(30 * dpiScale, 30 * dpiScale);
@@ -1230,7 +1230,7 @@ void MainMenu::updateLayout() {
             argb(offsetPercent * cv::main_menu_alpha.getFloat(), 0.0f, 0.0f, 0.0f));
     }
 
-    this->setSize(osu->getScreenSize() + Vector2(1, 1));
+    this->setSize(osu->getScreenSize() + vec2(1, 1));
     this->update_pos();
 }
 
@@ -1364,13 +1364,13 @@ void MainMenu::onCubePressed() {
     else {
         this->bInMainMenuRandomAnim = false;
 
-        Vector2 mouseDelta = (this->cube->getPos() + this->cube->getSize() / 2) - mouse->getPos();
+        vec2 mouseDelta = (this->cube->getPos() + this->cube->getSize() / 2.f) - mouse->getPos();
         mouseDelta.x = std::clamp<float>(mouseDelta.x, -this->cube->getSize().x / 2, this->cube->getSize().x / 2);
         mouseDelta.y = std::clamp<float>(mouseDelta.y, -this->cube->getSize().y / 2, this->cube->getSize().y / 2);
         mouseDelta.x /= this->cube->getSize().x;
         mouseDelta.y /= this->cube->getSize().y;
 
-        const Vector2 pushAngle = Vector2(mouseDelta.y, -mouseDelta.x) * Vector2(0.15f, 0.15f);
+        const vec2 pushAngle = vec2(mouseDelta.y, -mouseDelta.x) * vec2(0.15f, 0.15f);
 
         this->fMainMenuAnim = 0.001f;
         anim->moveQuadOut(&this->fMainMenuAnim, 1.0f, 0.15f + 0.4f, true);

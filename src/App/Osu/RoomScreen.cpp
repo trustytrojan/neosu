@@ -63,13 +63,13 @@ void UIModList::draw() {
     if(ModMasks::legacy_eq(*this->flags, LegacyFlags::ScoreV2)) mods.push_back(osu->getSkin()->getSelectionModScorev2());
 
     g->setColor(0xffffffff);
-    Vector2 modPos = this->vPos;
+    vec2 modPos = this->vPos;
     for(auto mod : mods) {
         float target_height = this->getSize().y;
         float scaling_factor = target_height / mod->getSize().y;
         float target_width = mod->getSize().x * scaling_factor;
 
-        Vector2 fixed_pos = modPos;
+        vec2 fixed_pos = modPos;
         fixed_pos.x += (target_width / 2);
         fixed_pos.y += (target_height / 2);
         mod->draw(fixed_pos, scaling_factor);
@@ -307,7 +307,7 @@ void RoomScreen::onChar(KeyboardEvent &key) {
     OsuScreen::onChar(key);
 }
 
-void RoomScreen::onResolutionChange(Vector2 newResolution) { this->updateLayout(newResolution); }
+void RoomScreen::onResolutionChange(vec2 newResolution) { this->updateLayout(newResolution); }
 
 CBaseUIContainer *RoomScreen::setVisible(bool visible) {
     if(this->bVisible == visible) return this;
@@ -322,7 +322,7 @@ CBaseUIContainer *RoomScreen::setVisible(bool visible) {
     return this;
 }
 
-void RoomScreen::updateSettingsLayout(Vector2 newResolution) {
+void RoomScreen::updateSettingsLayout(vec2 newResolution) {
     const bool is_host = bancho->room.is_host();
     int settings_y = 10;
 
@@ -431,7 +431,7 @@ void RoomScreen::updateSettingsLayout(Vector2 newResolution) {
     this->settings->setScrollSizeToContent();
 }
 
-void RoomScreen::updateLayout(Vector2 newResolution) {
+void RoomScreen::updateLayout(vec2 newResolution) {
     this->setSize(newResolution);
     this->updateSettingsLayout(newResolution);
 

@@ -32,11 +32,11 @@ class CBaseUIImageButton : public CBaseUIButton {
     }
 
     [[nodiscard]] inline std::string getImageResourceName() const { return this->sImageResourceName; }
-    [[nodiscard]] inline Vector2 getScale() const { return this->vScale; }
+    [[nodiscard]] inline vec2 getScale() const { return this->vScale; }
 
    protected:
     std::string sImageResourceName;
-    Vector2 vScale;
+    vec2 vScale{0.f};
 
     float fRot;
 

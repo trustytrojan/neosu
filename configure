@@ -9158,7 +9158,7 @@ fi
 
 fi
 
-NEOSU_CPPFLAGS="$NEOSU_CPPFLAGS -DCJSON_HIDE_SYMBOLS -DGLM_ENABLE_EXPERIMENTAL -DGLM_FORCE_INLINE"
+NEOSU_CPPFLAGS="$NEOSU_CPPFLAGS -DCJSON_HIDE_SYMBOLS"
 NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -Wall -Wextra -Wno-sign-compare -Wunused-parameter -Wdeprecated-declarations -Wno-error=deprecated-declarations -pthread"
 NEOSU_LDFLAGS="$NEOSU_LDFLAGS -pthread"
 

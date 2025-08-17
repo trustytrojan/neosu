@@ -123,7 +123,7 @@ void Lobby::onChar(KeyboardEvent& /*key*/) {
     // XXX: search bar
 }
 
-void Lobby::onResolutionChange(Vector2 newResolution) { this->updateLayout(newResolution); }
+void Lobby::onResolutionChange(vec2 newResolution) { this->updateLayout(newResolution); }
 
 CBaseUIContainer* Lobby::setVisible(bool visible) {
     if(visible == this->bVisible) return this;
@@ -165,7 +165,7 @@ CBaseUIContainer* Lobby::setVisible(bool visible) {
     return this;
 }
 
-void Lobby::updateLayout(Vector2 newResolution) {
+void Lobby::updateLayout(vec2 newResolution) {
     this->setSize(newResolution);
 
     this->list->freeElements();

@@ -25,7 +25,7 @@ void Mouse::draw() {
 
     // red rect = real cursor pos
     g->setColor(0xffff0000);
-    Vector2 envPos = env->getMousePos();
+    vec2 envPos = env->getMousePos();
     g->drawRect(envPos.x - size / 2, envPos.y - size / 2, size, size);
 
     // red = cursor clip
@@ -35,14 +35,14 @@ void Mouse::draw() {
     }
 
     // green = scaled & offset virtual area
-    const Vector2 scaledOffset = this->vOffset;
-    const Vector2 scaledEngineScreenSize = engine->getScreenSize() * this->vScale;
+    const vec2 scaledOffset = this->vOffset;
+    const vec2 scaledEngineScreenSize = engine->getScreenSize() * this->vScale;
     g->setColor(0xff00ff00);
     g->drawRect(-scaledOffset.x, -scaledOffset.y, scaledEngineScreenSize.x, scaledEngineScreenSize.y);
 }
 
 void Mouse::drawDebug() {
-    Vector2 pos = this->getPos();
+    vec2 pos = this->getPos();
 
     g->setColor(0xff000000);
     g->drawLine(pos.x - 1, pos.y - 1, 0 - 1, pos.y - 1);
@@ -58,7 +58,7 @@ void Mouse::drawDebug() {
 
     float rectSizePercent = 0.05f;
     float aspectRatio = (float)engine->getScreenWidth() / (float)engine->getScreenHeight();
-    Vector2 rectSize = Vector2(engine->getScreenWidth(), engine->getScreenHeight() * aspectRatio) * rectSizePercent;
+    vec2 rectSize = vec2(engine->getScreenWidth(), engine->getScreenHeight() * aspectRatio) * rectSizePercent;
 
     g->setColor(0xff000000);
     g->drawRect(pos.x - rectSize.x / 2.0f - 1, pos.y - rectSize.y / 2.0f - 1, rectSize.x, rectSize.y);
@@ -70,7 +70,7 @@ void Mouse::drawDebug() {
     UString posString = UString::format("[%i, %i]", (int)pos.x, (int)pos.y);
     float stringWidth = posFont->getStringWidth(posString);
     float stringHeight = posFont->getHeight();
-    Vector2 textOffset = Vector2(
+    vec2 textOffset = vec2(
         pos.x + rectSize.x / 2.0f + stringWidth + 5 > engine->getScreenWidth() ? -rectSize.x / 2.0f - stringWidth - 5
                                                                                : rectSize.x / 2.0f + 5,
         (pos.y + rectSize.y / 2.0f + stringHeight > engine->getScreenHeight()) ? -rectSize.y / 2.0f - stringHeight
@@ -84,15 +84,15 @@ void Mouse::drawDebug() {
 
 void Mouse::update() {
     this->resetWheelDelta();
-    this->vDelta.zero();
-    this->vRawDelta.zero();
+    this->vDelta = {0.f,0.f};
+    this->vRawDelta = {0.f,0.f};
 
     // <rel, abs> pair
     const auto envCachedMotion{env->consumeMousePositionCache()};
-    Vector2 newRel{envCachedMotion.first};
-    if(newRel.length() <= 0.f) return;  // early return for no motion
+    vec2 newRel{envCachedMotion.first};
+    if(vec::length(newRel) <= 0.f) return;  // early return for no motion
 
-    Vector2 newAbs{envCachedMotion.second};
+    vec2 newAbs{envCachedMotion.second};
 
     // vRawDelta doesn't include sensitivity or clipping, which is useful for fposu
     this->vRawDelta = newRel;
@@ -110,10 +110,10 @@ void Mouse::update() {
             const McRect &clipRect{env->getCursorClip()};
             if(!clipRect.contains(newAbs)) {
                 // re-calculate clamped cursor position
-                newAbs = Vector2{std::clamp<float>(newAbs.x, clipRect.getMinX(), clipRect.getMaxX()),
+                newAbs = vec2{std::clamp<float>(newAbs.x, clipRect.getMinX(), clipRect.getMaxX()),
                                  std::clamp<float>(newAbs.y, clipRect.getMinY(), clipRect.getMaxY())};
                 newRel = this->vPosWithoutOffsets - newAbs;
-                if(newRel.length() == 0) {
+                if(vec::length(newRel) == 0) {
                     return;  // early return for the trivial case (like if we're confined in a corner)
                 }
             }
@@ -139,7 +139,7 @@ void Mouse::resetWheelDelta() {
     this->iWheelDeltaHorizontalActual = 0;
 }
 
-void Mouse::onPosChange(Vector2 pos) {
+void Mouse::onPosChange(vec2 pos) {
     this->vPosWithoutOffsets = pos;
     this->vPos = (this->vOffset + pos);
     this->vActualPos = this->vPos;
@@ -176,17 +176,17 @@ void Mouse::onButtonChange(ButtonIndex button, bool down) {
     }
 }
 
-void Mouse::setPos(Vector2 newPos) {
+void Mouse::setPos(vec2 newPos) {
     this->vPos = newPos;
     env->setMousePos(newPos.x, newPos.y);
 }
 
-void Mouse::setOffset(Vector2 offset) {
-    Vector2 oldOffset = this->vOffset;
+void Mouse::setOffset(vec2 offset) {
+    vec2 oldOffset = this->vOffset;
     this->vOffset = offset;
 
     // update position to maintain visual position after offset change
-    Vector2 posAdjustment = this->vOffset - oldOffset;
+    vec2 posAdjustment = this->vOffset - oldOffset;
     this->vPos += posAdjustment;
     this->vActualPos += posAdjustment;
 }

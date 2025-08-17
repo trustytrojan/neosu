@@ -37,8 +37,8 @@ class Image : public Resource {
     [[nodiscard]] inline Image::TYPE getType() const { return this->type; }
     [[nodiscard]] inline i32 getWidth() const { return this->iWidth; }
     [[nodiscard]] inline i32 getHeight() const { return this->iHeight; }
-    [[nodiscard]] inline Vector2 getSize() const {
-        return Vector2{static_cast<float>(this->iWidth), static_cast<float>(this->iHeight)};
+    [[nodiscard]] inline vec2 getSize() const {
+        return vec2{static_cast<float>(this->iWidth), static_cast<float>(this->iHeight)};
     }
 
     [[nodiscard]] constexpr bool hasAlphaChannel() const { return true; }

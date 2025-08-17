@@ -24,25 +24,25 @@ class Mouse final : public InputDevice {
     void removeListener(MouseListener *mouseListener);
 
     // input handling
-    void onPosChange(Vector2 pos);
+    void onPosChange(vec2 pos);
     void onWheelVertical(int delta);
     void onWheelHorizontal(int delta);
     void onButtonChange(ButtonIndex button, bool down);
 
     // position/coordinate handling
-    void setPos(Vector2 pos);
-    void setOffset(Vector2 offset);
-    void setScale(Vector2 scale) { this->vScale = scale; }
+    void setPos(vec2 pos);
+    void setOffset(vec2 offset);
+    void setScale(vec2 scale) { this->vScale = scale; }
 
     // state getters
-    [[nodiscard]] inline const Vector2 &getPos() const { return this->vPos; }
-    [[nodiscard]] inline const Vector2 &getRealPos() const { return this->vPosWithoutOffsets; }
-    [[nodiscard]] inline const Vector2 &getActualPos() const { return this->vActualPos; }
-    [[nodiscard]] inline const Vector2 &getDelta() const { return this->vDelta; }
-    [[nodiscard]] inline const Vector2 &getRawDelta() const { return this->vRawDelta; }
+    [[nodiscard]] inline const vec2 &getPos() const { return this->vPos; }
+    [[nodiscard]] inline const vec2 &getRealPos() const { return this->vPosWithoutOffsets; }
+    [[nodiscard]] inline const vec2 &getActualPos() const { return this->vActualPos; }
+    [[nodiscard]] inline const vec2 &getDelta() const { return this->vDelta; }
+    [[nodiscard]] inline const vec2 &getRawDelta() const { return this->vRawDelta; }
 
-    [[nodiscard]] inline const Vector2 &getOffset() const { return this->vOffset; }
-    [[nodiscard]] inline const Vector2 &getScale() const { return this->vScale; }
+    [[nodiscard]] inline const vec2 &getOffset() const { return this->vOffset; }
+    [[nodiscard]] inline const vec2 &getScale() const { return this->vScale; }
     [[nodiscard]] inline const float &getSensitivity() const { return this->fSensitivity; }
 
     // button state accessors
@@ -77,11 +77,11 @@ class Mouse final : public InputDevice {
     void onRawInputChanged(float newVal);
 
     // position state
-    Vector2 vPos;                // position with offset applied
-    Vector2 vPosWithoutOffsets;  // position without offset
-    Vector2 vDelta{};            // movement delta in the current frame
-    Vector2 vRawDelta{};  // movement delta in the current frame, without consideration for clipping or sensitivity
-    Vector2 vActualPos;   // final cursor position after all transformations
+    vec2 vPos{0.f};                // position with offset applied
+    vec2 vPosWithoutOffsets{0.f};  // position without offset
+    vec2 vDelta{0.f};            // movement delta in the current frame
+    vec2 vRawDelta{0.f};  // movement delta in the current frame, without consideration for clipping or sensitivity
+    vec2 vActualPos{0.f};   // final cursor position after all transformations
 
     // mode tracking
     bool bIsRawInputDesired{false};  // whether the user wants raw (relative) input
@@ -100,8 +100,8 @@ class Mouse final : public InputDevice {
     std::vector<MouseListener *> listeners;
 
     // transform parameters
-    Vector2 vOffset{0, 0};  // offset applied to coordinates
-    Vector2 vScale{1, 1};   // scale applied to coordinates
+    vec2 vOffset{0, 0};  // offset applied to coordinates
+    vec2 vScale{1, 1};   // scale applied to coordinates
 };
 
 #endif

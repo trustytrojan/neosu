@@ -89,9 +89,9 @@ void VolumeOverlay::draw() {
     }
 
     this->volumeMaster->setPos(osu->getScreenSize() - this->volumeMaster->getSize() -
-                           Vector2(this->volumeMaster->getMinimumExtraTextWidth(), this->volumeMaster->getSize().y));
-    this->volumeEffects->setPos(this->volumeMaster->getPos() - Vector2(0, this->volumeEffects->getSize().y + 20 * sizeMultiplier));
-    this->volumeMusic->setPos(this->volumeEffects->getPos() - Vector2(0, this->volumeMusic->getSize().y + 20 * sizeMultiplier));
+                           vec2(this->volumeMaster->getMinimumExtraTextWidth(), this->volumeMaster->getSize().y));
+    this->volumeEffects->setPos(this->volumeMaster->getPos() - vec2(0, this->volumeEffects->getSize().y + 20 * sizeMultiplier));
+    this->volumeMusic->setPos(this->volumeEffects->getPos() - vec2(0, this->volumeMusic->getSize().y + 20 * sizeMultiplier));
 
     this->volumeSliderOverlayContainer->draw();
 
@@ -183,7 +183,7 @@ void VolumeOverlay::updateLayout() {
                                 this->volumeMaster->getSize().y / 1.5f);
 }
 
-void VolumeOverlay::onResolutionChange(Vector2  /*newResolution*/) { this->updateLayout(); }
+void VolumeOverlay::onResolutionChange(vec2  /*newResolution*/) { this->updateLayout(); }
 
 void VolumeOverlay::onKeyDown(KeyboardEvent &key) {
     if(!this->canChangeVolume()) return;

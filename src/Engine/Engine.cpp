@@ -67,7 +67,7 @@ Engine::Engine() {
     this->bResolutionChange = false;
     this->vScreenSize = env->getWindowSize();
     this->vNewScreenSize = this->vScreenSize;
-    this->screenRect = {Vector2{}, this->vScreenSize};
+    this->screenRect = {vec2{}, this->vScreenSize};
 
     debugLog("Engine: ScreenSize = ({}x{})\n", (int)this->vScreenSize.x, (int)this->vScreenSize.y);
 
@@ -440,17 +440,17 @@ void Engine::onRestored() {
     if(app != nullptr) app->onRestored();
 }
 
-void Engine::onResolutionChange(Vector2 newResolution) {
+void Engine::onResolutionChange(vec2 newResolution) {
     debugLog(0xff00ff00, "Engine: onResolutionChange() ({:d}, {:d}) -> ({:d}, {:d})\n", (int)this->vScreenSize.x,
              (int)this->vScreenSize.y, (int)newResolution.x, (int)newResolution.y);
 
     // NOTE: Windows [Show Desktop] button in the superbar causes (0,0)
     if(newResolution.x < 2 || newResolution.y < 2) {
         this->bIsMinimized = true;
-        newResolution = Vector2(2, 2);
+        newResolution = vec2(2, 2);
     }
 
-    this->screenRect = {Vector2{}, newResolution};
+    this->screenRect = {vec2{}, newResolution};
 
     // to avoid double resolutionChange
     this->bResolutionChange = false;
@@ -556,7 +556,7 @@ void Engine::showMessageErrorFatal(const UString &title, const UString &message)
     env->showMessageErrorFatal(title, message);
 }
 
-void Engine::requestResolutionChange(Vector2 newResolution) {
+void Engine::requestResolutionChange(vec2 newResolution) {
     if(newResolution == this->vNewScreenSize) return;
 
     this->vNewScreenSize = newResolution;
@@ -608,7 +608,7 @@ void Engine::logToConsole(std::optional<Color> color, const UString &msg) {
 void _restart(void) { engine->restart(); }
 
 void _printsize(void) {
-    Vector2 s = engine->getScreenSize();
+    vec2 s = engine->getScreenSize();
     debugLog("Engine: screenSize = ({:f}, {:f})\n", s.x, s.y);
 }
 

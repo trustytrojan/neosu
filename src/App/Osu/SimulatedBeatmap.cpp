@@ -99,7 +99,7 @@ void SimulatedBeatmap::simulate_to(i32 music_pos) {
             if(!this->bInBreak) this->live_score.addKeyCount(4);
         }
 
-        this->interpolatedMousePos = Vector2{current_frame.x, current_frame.y};
+        this->interpolatedMousePos = vec2{current_frame.x, current_frame.y};
         this->iCurMusicPos = current_frame.cur_music_pos;
 
         this->update(frame_time);
@@ -740,9 +740,9 @@ void SimulatedBeatmap::update(f64 frame_time) {
     }
 }
 
-Vector2 SimulatedBeatmap::pixels2OsuCoords(Vector2 pixelCoords) const { return pixelCoords; }
+vec2 SimulatedBeatmap::pixels2OsuCoords(vec2 pixelCoords) const { return pixelCoords; }
 
-Vector2 SimulatedBeatmap::osuCoords2Pixels(Vector2 coords) const {
+vec2 SimulatedBeatmap::osuCoords2Pixels(vec2 coords) const {
     if((ModMasks::eq(this->mods.flags, Replay::ModFlags::HardRock))) coords.y = GameRules::OSU_COORD_HEIGHT - coords.y;
 
     // wobble
@@ -759,7 +759,7 @@ Vector2 SimulatedBeatmap::osuCoords2Pixels(Vector2 coords) const {
     // wobble2
     if(ModMasks::eq(this->mods.flags, Replay::ModFlags::Wobble2)) {
         const f32 speedMultiplierCompensation = 1.0f / this->mods.speed;
-        Vector2 centerDelta = coords - Vector2(GameRules::OSU_COORD_WIDTH, GameRules::OSU_COORD_HEIGHT) / 2;
+        vec2 centerDelta = coords - vec2(GameRules::OSU_COORD_WIDTH, GameRules::OSU_COORD_HEIGHT) / 2.f;
         coords.x +=
             centerDelta.x * 0.25f *
             std::sin((this->iCurMusicPos / 1000.0f) * 5 * speedMultiplierCompensation * this->mods.wobble_frequency) *
@@ -781,9 +781,9 @@ Vector2 SimulatedBeatmap::osuCoords2Pixels(Vector2 coords) const {
     return coords;
 }
 
-Vector2 SimulatedBeatmap::osuCoords2RawPixels(Vector2 coords) const { return coords; }
+vec2 SimulatedBeatmap::osuCoords2RawPixels(vec2 coords) const { return coords; }
 
-Vector2 SimulatedBeatmap::osuCoords2LegacyPixels(Vector2 coords) const {
+vec2 SimulatedBeatmap::osuCoords2LegacyPixels(vec2 coords) const {
     if((ModMasks::eq(this->mods.flags, Replay::ModFlags::HardRock))) coords.y = GameRules::OSU_COORD_HEIGHT - coords.y;
 
     // VR center
@@ -793,9 +793,9 @@ Vector2 SimulatedBeatmap::osuCoords2LegacyPixels(Vector2 coords) const {
     return coords;
 }
 
-Vector2 SimulatedBeatmap::getCursorPos() const { return this->interpolatedMousePos; }
+vec2 SimulatedBeatmap::getCursorPos() const { return this->interpolatedMousePos; }
 
-Vector2 SimulatedBeatmap::getFirstPersonCursorDelta() const {
+vec2 SimulatedBeatmap::getFirstPersonCursorDelta() const {
     return this->vPlayfieldCenter - ((ModMasks::eq(this->mods.flags, Replay::ModFlags::Autopilot))
                                          ? this->vAutoCursorPos
                                          : this->getCursorPos());
@@ -813,9 +813,9 @@ void SimulatedBeatmap::updateAutoCursorPos() {
     // general
     long prevTime = 0;
     long nextTime = this->hitobjects[0]->click_time;
-    Vector2 prevPos = this->vAutoCursorPos;
-    Vector2 curPos = this->vAutoCursorPos;
-    Vector2 nextPos = this->vAutoCursorPos;
+    vec2 prevPos = this->vAutoCursorPos;
+    vec2 curPos = this->vAutoCursorPos;
+    vec2 nextPos = this->vAutoCursorPos;
     bool haveCurPos = false;
 
     if((ModMasks::eq(this->mods.flags, Replay::ModFlags::Autopilot))) {
@@ -863,7 +863,7 @@ void SimulatedBeatmap::updateAutoCursorPos() {
         percent = std::clamp<f32>(percent, 0.0f, 1.0f);
 
         // scaled distance (not osucoords)
-        f32 distance = (nextPos - prevPos).length();
+        f32 distance = vec::length(nextPos - prevPos);
         if(distance > this->fHitcircleDiameter * 1.05f)  // snap only if not in a stream (heuristic)
         {
             percent = 1.f;
@@ -920,12 +920,12 @@ void SimulatedBeatmap::calculateStacks() {
 
             HitObject *objectI = this->hitobjects[i];
 
-            bool isSpinner = dynamic_cast<Spinner*>(objectI) != nullptr;
+            bool isSpinner = dynamic_cast<Spinner *>(objectI) != nullptr;
 
             if(objectI->getStack() != 0 || isSpinner) continue;
 
-            bool isHitCircle = dynamic_cast<Circle*>(objectI) != nullptr;
-            bool isSlider = dynamic_cast<Slider*>(objectI) != nullptr;
+            bool isHitCircle = dynamic_cast<Circle *>(objectI) != nullptr;
+            bool isSlider = dynamic_cast<Slider *>(objectI) != nullptr;
 
             if(isHitCircle) {
                 while(--n >= 0) {
@@ -938,24 +938,22 @@ void SimulatedBeatmap::calculateStacks() {
                     if(objectI->click_time - (approachTime * stackLeniency) > (objectN->click_time + objectN->duration))
                         break;
 
-                    Vector2 objectNEndPosition = objectN->getOriginalRawPosAt(objectN->click_time + objectN->duration);
+                    vec2 objectNEndPosition = objectN->getOriginalRawPosAt(objectN->click_time + objectN->duration);
                     if(objectN->duration != 0 &&
-                       (objectNEndPosition - objectI->getOriginalRawPosAt(objectI->click_time)).length() <
+                       vec::length(objectNEndPosition - objectI->getOriginalRawPosAt(objectI->click_time)) <
                            STACK_LENIENCE) {
                         int offset = objectI->getStack() - objectN->getStack() + 1;
                         for(int j = n + 1; j <= i; j++) {
-                            if((objectNEndPosition -
-                                this->hitobjects[j]->getOriginalRawPosAt(this->hitobjects[j]->click_time))
-                                   .length() < STACK_LENIENCE)
+                            if(vec::length(objectNEndPosition - this->hitobjects[j]->getOriginalRawPosAt(
+                                                                    this->hitobjects[j]->click_time)) < STACK_LENIENCE)
                                 this->hitobjects[j]->setStack(this->hitobjects[j]->getStack() - offset);
                         }
 
                         break;
                     }
 
-                    if((objectN->getOriginalRawPosAt(objectN->click_time) -
-                        objectI->getOriginalRawPosAt(objectI->click_time))
-                           .length() < STACK_LENIENCE) {
+                    if(vec::length(objectN->getOriginalRawPosAt(objectN->click_time) -
+                                   objectI->getOriginalRawPosAt(objectI->click_time)) < STACK_LENIENCE) {
                         objectN->setStack(objectI->getStack() + 1);
                         objectI = objectN;
                     }
@@ -964,16 +962,16 @@ void SimulatedBeatmap::calculateStacks() {
                 while(--n >= 0) {
                     HitObject *objectN = this->hitobjects[n];
 
-                    bool isSpinner = dynamic_cast<Spinner*>(objectN) != nullptr;
+                    bool isSpinner = dynamic_cast<Spinner *>(objectN) != nullptr;
 
                     if(isSpinner) continue;
 
                     if(objectI->click_time - (approachTime * stackLeniency) > objectN->click_time) break;
 
-                    if(((objectN->duration != 0 ? objectN->getOriginalRawPosAt(objectN->click_time + objectN->duration)
-                                                : objectN->getOriginalRawPosAt(objectN->click_time)) -
-                        objectI->getOriginalRawPosAt(objectI->click_time))
-                           .length() < STACK_LENIENCE) {
+                    if(vec::length((objectN->duration != 0
+                                        ? objectN->getOriginalRawPosAt(objectN->click_time + objectN->duration)
+                                        : objectN->getOriginalRawPosAt(objectN->click_time)) -
+                                   objectI->getOriginalRawPosAt(objectI->click_time)) < STACK_LENIENCE) {
                         objectN->setStack(objectI->getStack() + 1);
                         objectI = objectN;
                     }
@@ -1003,16 +1001,16 @@ void SimulatedBeatmap::calculateStacks() {
 
                 // "The start position of the hitobject, or the position at the end of the path if the hitobject is a
                 // slider"
-                Vector2 position2 =
+                vec2 position2 =
                     isSlider ? sliderPointer->getOriginalRawPosAt(sliderPointer->click_time + sliderPointer->duration)
                              : currHitObject->getOriginalRawPosAt(currHitObject->click_time);
 
-                if((objectJ->getOriginalRawPosAt(objectJ->click_time) -
+                if(vec::length(objectJ->getOriginalRawPosAt(objectJ->click_time) -
                     currHitObject->getOriginalRawPosAt(currHitObject->click_time))
-                       .length() < 3) {
+                       < 3) {
                     currHitObject->setStack(currHitObject->getStack() + 1);
                     startTime = objectJ->click_time + objectJ->duration;
-                } else if((objectJ->getOriginalRawPosAt(objectJ->click_time) - position2).length() < 3) {
+                } else if(vec::length(objectJ->getOriginalRawPosAt(objectJ->click_time) - position2) < 3) {
                     // "Case for sliders - bump notes down and right, rather than up and left."
                     sliderStack++;
                     objectJ->setStack(objectJ->getStack() - sliderStack);

@@ -45,7 +45,7 @@ class Engine final : public KeyboardListener {
     void onMinimized();
     void onMaximized();
     void onRestored();
-    void onResolutionChange(Vector2 newResolution);
+    void onResolutionChange(vec2 newResolution);
     void onDPIChange();
     void onShutdown();
 
@@ -76,9 +76,9 @@ class Engine final : public KeyboardListener {
     [[nodiscard]] inline const std::vector<Keyboard *> &getKeyboards() const { return this->keyboards; }
 
     // screen
-    void requestResolutionChange(Vector2 newResolution);
+    void requestResolutionChange(vec2 newResolution);
     [[nodiscard]] constexpr McRect getScreenRect() const { return this->screenRect; }
-    [[nodiscard]] constexpr Vector2 getScreenSize() const { return this->vScreenSize; }
+    [[nodiscard]] constexpr vec2 getScreenSize() const { return this->vScreenSize; }
     [[nodiscard]] constexpr int getScreenWidth() const { return (int)this->vScreenSize.x; }
     [[nodiscard]] constexpr int getScreenHeight() const { return (int)this->vScreenSize.y; }
 
@@ -123,8 +123,8 @@ class Engine final : public KeyboardListener {
 
     // primary screen
     McRect screenRect;
-    Vector2 vScreenSize;
-    Vector2 vNewScreenSize;
+    vec2 vScreenSize{0.f};
+    vec2 vNewScreenSize{0.f};
     bool bResolutionChange;
 
     // window

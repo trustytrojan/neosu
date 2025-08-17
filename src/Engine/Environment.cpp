@@ -106,7 +106,7 @@ Environment::Environment(int argc, char *argv[]) {
     // lazy init
     m_mCursorIcons = {};
 
-    m_vLastAbsMousePos = Vector2{};
+    m_vLastAbsMousePos = vec2{};
 
     m_sCurrClipboardText = {};
     // lazy init
@@ -114,8 +114,8 @@ Environment::Environment(int argc, char *argv[]) {
     // lazy init (with initMonitors)
     m_fullDesktopBoundingBox = McRect{};
 
-    m_vLastKnownWindowPos = Vector2{};
-    m_vLastKnownWindowSize = Vector2{320, 240};
+    m_vLastKnownWindowPos = vec2{};
+    m_vLastKnownWindowSize = vec2{320, 240};
 
     m_sdldriver = SDL_GetCurrentVideoDriver();
     m_bIsX11 = (m_sdldriver == "x11");
@@ -770,24 +770,24 @@ HWND Environment::getHwnd() const {
     return hwnd;
 }
 
-Vector2 Environment::getWindowPos() const {
+vec2 Environment::getWindowPos() const {
     int x{0}, y{0};
     if(!SDL_GetWindowPosition(m_window, &x, &y)) {
         debugLog("Failed to get window position (returning cached {},{}): {:s}\n", m_vLastKnownWindowPos.x,
                  m_vLastKnownWindowPos.y, SDL_GetError());
     } else {
-        m_vLastKnownWindowPos = Vector2{static_cast<float>(x), static_cast<float>(y)};
+        m_vLastKnownWindowPos = vec2{static_cast<float>(x), static_cast<float>(y)};
     }
     return m_vLastKnownWindowPos;
 }
 
-Vector2 Environment::getWindowSize() const {
+vec2 Environment::getWindowSize() const {
     int width{320}, height{240};
     if(!SDL_GetWindowSize(m_window, &width, &height)) {
         debugLog("Failed to get window size (returning cached {},{}): {:s}\n", m_vLastKnownWindowSize.x,
                  m_vLastKnownWindowSize.y, SDL_GetError());
     } else {
-        m_vLastKnownWindowSize = Vector2{static_cast<float>(width), static_cast<float>(height)};
+        m_vLastKnownWindowSize = vec2{static_cast<float>(width), static_cast<float>(height)};
     }
     return m_vLastKnownWindowSize;
 }
@@ -803,7 +803,7 @@ int Environment::getMonitor() const {
     return display == 0 ? -1 : display;  // 0 == invalid, according to SDL
 }
 
-Vector2 Environment::getNativeScreenSize() const {
+vec2 Environment::getNativeScreenSize() const {
     SDL_DisplayID di = SDL_GetDisplayForWindow(m_window);
     return {static_cast<float>(SDL_GetDesktopDisplayMode(di)->w), static_cast<float>(SDL_GetDesktopDisplayMode(di)->h)};
 }
@@ -812,7 +812,7 @@ McRect Environment::getDesktopRect() const { return {{}, getNativeScreenSize()};
 
 McRect Environment::getWindowRect() const { return {getWindowPos(), getWindowSize()}; }
 
-bool Environment::isPointValid(Vector2 point) const {  // whether an x,y coordinate lands on an actual display
+bool Environment::isPointValid(vec2 point) const {  // whether an x,y coordinate lands on an actual display
     if(m_mMonitors.size() < 1) initMonitors();
     // check for the trivial case first
     const bool withinMinMaxBounds = m_fullDesktopBoundingBox.contains(point);
@@ -898,7 +898,7 @@ void Environment::setCursorClip(bool clip, McRect rect) {
     }
 }
 
-void Environment::setOSMousePos(Vector2 pos) {
+void Environment::setOSMousePos(vec2 pos) {
     SDL_WarpMouseInWindow(m_window, pos.x, pos.y);
     m_vLastAbsMousePos = pos;
 }
@@ -955,7 +955,7 @@ McRect Environment::SDLRectToMcRect(const SDL_Rect &sdlrect) noexcept {
             static_cast<float>(sdlrect.h)};
 }
 
-std::pair<Vector2, Vector2> Environment::consumeMousePositionCache() {
+std::pair<vec2, vec2> Environment::consumeMousePositionCache() {
     float xRel{0.f}, yRel{0.f};
     float x{m_vLastAbsMousePos.x}, y{m_vLastAbsMousePos.y};
 
@@ -995,12 +995,12 @@ void Environment::initMonitors(bool force) const {
         const SDL_DisplayID di = displays[i];
 
         McRect displayRect{};
-        Vector2 size{};
+        vec2 size{0.f};
         SDL_Rect sdlDisplayRect{};
 
         if(!SDL_GetDisplayBounds(di, &sdlDisplayRect)) {
             // fallback
-            size = Vector2{static_cast<float>(SDL_GetDesktopDisplayMode(di)->w),
+            size = vec2{static_cast<float>(SDL_GetDesktopDisplayMode(di)->w),
                            static_cast<float>(SDL_GetDesktopDisplayMode(di)->h)};
             displayRect = McRect{{}, size};
             // expand the display bounds, we just have to assume that the displays are placed left-to-right, with Y
@@ -1020,12 +1020,12 @@ void Environment::initMonitors(bool force) const {
 
     if(count < 1) {
         debugLog("WARNING: No monitors found! Adding default monitor ...\n");
-        const Vector2 windowSize = getWindowSize();
+        const vec2 windowSize = getWindowSize();
         m_mMonitors.try_emplace(1, McRect{{}, windowSize});
     }
 
     // make sure this is also valid
-    if(m_fullDesktopBoundingBox.getSize() == Vector2{0, 0}) {
+    if(m_fullDesktopBoundingBox.getSize() == vec2{0, 0}) {
         m_fullDesktopBoundingBox = getWindowRect();
     }
 }

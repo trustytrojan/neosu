@@ -34,7 +34,7 @@ CBaseUISlider::CBaseUISlider(float xPos, float yPos, float xSize, float ySize, U
     this->fMaxValue = 1.0f;
     this->fKeyDelta = 0.1f;
 
-    this->vBlockSize = Vector2(xSize < ySize ? xSize : ySize, xSize < ySize ? xSize : ySize);
+    this->vBlockSize = vec2(xSize < ySize ? xSize : ySize, xSize < ySize ? xSize : ySize);
 
     this->sliderChangeCallback = {};
 
@@ -68,17 +68,17 @@ void CBaseUISlider::draw() {
 
 void CBaseUISlider::drawBlock() {
     // draw block
-    Vector2 center =
+    vec2 center =
         this->vPos +
-        Vector2(this->vBlockSize.x / 2 + (this->vSize.x - this->vBlockSize.x) * this->getPercent(), this->vSize.y / 2);
-    Vector2 topLeft = center - this->vBlockSize / 2;
-    Vector2 topRight = center + Vector2(this->vBlockSize.x / 2 + 1, -this->vBlockSize.y / 2);
-    Vector2 halfLeft = center + Vector2(-this->vBlockSize.x / 2, 1);
-    Vector2 halfRight = center + Vector2(this->vBlockSize.x / 2 + 1, 1);
-    Vector2 bottomLeft = center + Vector2(-this->vBlockSize.x / 2, this->vBlockSize.y / 2 + 1);
-    Vector2 bottomRight = center + Vector2(this->vBlockSize.x / 2 + 1, this->vBlockSize.y / 2 + 1);
+        vec2(this->vBlockSize.x / 2 + (this->vSize.x - this->vBlockSize.x) * this->getPercent(), this->vSize.y / 2);
+    vec2 topLeft = center - this->vBlockSize / 2.f;
+    vec2 topRight = center + vec2(this->vBlockSize.x / 2 + 1, -this->vBlockSize.y / 2);
+    vec2 halfLeft = center + vec2(-this->vBlockSize.x / 2, 1);
+    vec2 halfRight = center + vec2(this->vBlockSize.x / 2 + 1, 1);
+    vec2 bottomLeft = center + vec2(-this->vBlockSize.x / 2, this->vBlockSize.y / 2 + 1);
+    vec2 bottomRight = center + vec2(this->vBlockSize.x / 2 + 1, this->vBlockSize.y / 2 + 1);
 
-    g->drawQuad(topLeft, topRight, halfRight + Vector2(0, 1), halfLeft + Vector2(0, 1), argb(255, 255, 255, 255),
+    g->drawQuad(topLeft, topRight, halfRight + vec2(0, 1), halfLeft + vec2(0, 1), argb(255, 255, 255, 255),
                 argb(255, 255, 255, 255), argb(255, 241, 241, 241), argb(255, 241, 241, 241));
 
     g->drawQuad(halfLeft, halfRight, bottomRight, bottomLeft, argb(255, 225, 225, 225), argb(255, 225, 225, 225),
@@ -89,7 +89,7 @@ void CBaseUISlider::mouse_update(bool *propagate_clicks) {
     if(!this->bVisible) return;
     CBaseUIElement::mouse_update(propagate_clicks);
 
-    Vector2 mousepos = mouse->getPos();
+    vec2 mousepos = mouse->getPos();
 
     // handle moving
     if(this->bActive) {
@@ -263,7 +263,7 @@ CBaseUISlider *CBaseUISlider::setInitialValue(float value) {
     return this;
 }
 
-void CBaseUISlider::setBlockSize(float xSize, float ySize) { this->vBlockSize = Vector2(xSize, ySize); }
+void CBaseUISlider::setBlockSize(float xSize, float ySize) { this->vBlockSize = vec2(xSize, ySize); }
 
 float CBaseUISlider::getPercent() {
     return std::clamp<float>((this->fCurValue - this->fMinValue) / (std::abs(this->fMaxValue - this->fMinValue)), 0.0f,
@@ -301,7 +301,7 @@ void CBaseUISlider::onMouseDownInside(bool  /*left*/, bool  /*right*/) {
            .contains(mouse->getPos()))
         this->vGrabBackup = mouse->getPos() - this->vBlockPos;
     else
-        this->vGrabBackup = this->vPos + this->vBlockSize / 2;
+        this->vGrabBackup = this->vPos + this->vBlockSize / 2.f;
 
     this->bBusy = true;
 }

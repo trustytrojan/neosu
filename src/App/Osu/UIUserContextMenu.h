@@ -22,7 +22,7 @@ class UIUserContextMenuScreen : public OsuScreen {
    public:
     UIUserContextMenuScreen();
 
-    void onResolutionChange(Vector2 newResolution) override;
+    void onResolutionChange(vec2 newResolution) override;
     virtual void stealFocus();
 
     void open(i32 user_id, bool is_song_browser_button = false);

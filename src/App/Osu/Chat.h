@@ -30,7 +30,7 @@ struct ChatChannel {
     bool read = true;
 
     void add_message(ChatMessage msg);
-    void updateLayout(Vector2 pos, Vector2 size);
+    void updateLayout(vec2 pos, vec2 size);
     void onChannelButtonClick(CBaseUIButton *btn);
 };
 
@@ -45,7 +45,7 @@ class Chat : public OsuScreen {
     void onKeyDown(KeyboardEvent &e) override;
     void onKeyUp(KeyboardEvent &e) override;
     void onChar(KeyboardEvent &e) override;
-    void onResolutionChange(Vector2 newResolution) override;
+    void onResolutionChange(vec2 newResolution) override;
 
     void mark_as_read(ChatChannel *chan);
     void switchToChannel(ChatChannel *chan);
@@ -54,9 +54,9 @@ class Chat : public OsuScreen {
     void addMessage(UString channel_name, const ChatMessage &msg, bool mark_unread = true);
     void addSystemMessage(UString msg);
     void removeChannel(const UString &channel_name);
-    void updateLayout(Vector2 newResolution);
-    void updateButtonLayout(Vector2 screen);
-    void updateTickerLayout(Vector2 screen);
+    void updateLayout(vec2 newResolution);
+    void updateButtonLayout(vec2 screen);
+    void updateTickerLayout(vec2 screen);
     void updateUserList();
 
     void join(const UString &channel_name);

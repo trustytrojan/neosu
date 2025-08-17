@@ -23,7 +23,7 @@ class Quaternion {
     void set(float x, float y, float z, float w);
     void normalize();
 
-    void fromAxis(const Vector3 &axis, float angleDeg);
+    void fromAxis(const vec3 &axis, float angleDeg);
     void fromEuler(float yawDeg, float pitchDeg, float rollDeg);
 
     [[nodiscard]] inline float getYaw() const {
@@ -41,7 +41,7 @@ class Quaternion {
     [[nodiscard]] Matrix3 getMatrix3() const;
 
     Quaternion operator*(const Quaternion &quat) const;
-    Vector3 operator*(const Vector3 &vec) const;
+    vec3 operator*(const vec3 &vec) const;
 
    private:
     static constexpr float EPSILON = 0.00001f;

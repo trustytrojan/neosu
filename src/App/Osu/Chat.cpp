@@ -266,7 +266,7 @@ void ChatChannel::add_message(ChatMessage msg) {
     this->ui->setScrollSizeToContent();
 }
 
-void ChatChannel::updateLayout(Vector2 pos, Vector2 size) {
+void ChatChannel::updateLayout(vec2 pos, vec2 size) {
     this->ui->freeElements();
     this->ui->setPos(pos);
     this->ui->setSize(size);
@@ -1011,7 +1011,7 @@ void Chat::removeChannel(const UString &channel_name) {
     this->updateButtonLayout(this->getSize());
 }
 
-void Chat::updateLayout(Vector2 newResolution) {
+void Chat::updateLayout(vec2 newResolution) {
     this->updateTickerLayout(newResolution);
 
     // We don't want to update while the chat is hidden, to avoid lagspikes during gameplay
@@ -1031,11 +1031,11 @@ void Chat::updateLayout(Vector2 newResolution) {
     const float chat_h = std::round(newResolution.y * 0.3f) - this->input_box_height;
     const float chat_y = newResolution.y - (chat_h + this->input_box_height);
     for(auto chan : this->channels) {
-        chan->updateLayout(Vector2{0.f, chat_y}, Vector2{chat_w, chat_h});
+        chan->updateLayout(vec2{0.f, chat_y}, vec2{chat_w, chat_h});
     }
 
-    this->input_box->setPos(Vector2{0.f, chat_y + chat_h});
-    this->input_box->setSize(Vector2{chat_w, this->input_box_height});
+    this->input_box->setPos(vec2{0.f, chat_y + chat_h});
+    this->input_box->setSize(vec2{chat_w, this->input_box_height});
 
     if(this->selected_channel == nullptr && !this->channels.empty()) {
         this->selected_channel = this->channels[0];
@@ -1047,7 +1047,7 @@ void Chat::updateLayout(Vector2 newResolution) {
     this->layout_update_scheduled = false;
 }
 
-void Chat::updateButtonLayout(Vector2 screen) {
+void Chat::updateButtonLayout(vec2 screen) {
     const float initial_x = 2;
     float total_x = initial_x;
 
@@ -1107,12 +1107,12 @@ void Chat::updateButtonLayout(Vector2 screen) {
     this->updateUserList();
 }
 
-void Chat::updateTickerLayout(Vector2 screen) {
-    this->ticker->updateLayout(Vector2{0.f, 0.f}, screen);
+void Chat::updateTickerLayout(vec2 screen) {
+    this->ticker->updateLayout(vec2{0.f, 0.f}, screen);
 
     f32 h = this->ticker->ui->getScrollSize().y + 5;
-    this->ticker->ui->setPos(Vector2{0.f, screen.y - h});
-    this->ticker->ui->setSize(Vector2{screen.x, h});
+    this->ticker->ui->setPos(vec2{0.f, screen.y - h});
+    this->ticker->ui->setSize(vec2{screen.x, h});
 }
 
 void Chat::updateUserList() {
@@ -1125,7 +1125,7 @@ void Chat::updateUserList() {
     auto screen = osu->getScreenSize();
     bool is_widescreen = ((i32)(std::max(0, (i32)((screen.x - (screen.y * 4.f / 3.f)) / 2.f))) > 0);
     auto global_scale = is_widescreen ? (screen.x / 1366.f) : 1.f;
-    auto card_size = Vector2{global_scale * 640 * 0.5f, global_scale * 150 * 0.5f};
+    auto card_size = vec2{global_scale * 640 * 0.5f, global_scale * 150 * 0.5f};
 
     auto size = this->getSize();
     size.y = this->button_container->getPos().y;
@@ -1234,7 +1234,7 @@ void Chat::onDisconnect() {
     this->updateVisibility();
 }
 
-void Chat::onResolutionChange(Vector2 newResolution) { this->updateLayout(newResolution); }
+void Chat::onResolutionChange(vec2 newResolution) { this->updateLayout(newResolution); }
 
 bool Chat::isSmallChat() {
     if(osu->room == nullptr || osu->lobby == nullptr || osu->songBrowser2 == nullptr) return false;

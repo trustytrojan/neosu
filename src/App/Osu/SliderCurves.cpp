@@ -8,16 +8,16 @@
 //	 Curve Base Class	//
 //**********************//
 
-SliderCurve *SliderCurve::createCurve(char osuSliderCurveType, std::vector<Vector2> controlPoints, float pixelLength) {
+SliderCurve *SliderCurve::createCurve(char osuSliderCurveType, std::vector<vec2> controlPoints, float pixelLength) {
     const float points_separation = cv::slider_curve_points_separation.getFloat();
     return createCurve(osuSliderCurveType, std::move(controlPoints), pixelLength, points_separation);
 }
 
-SliderCurve *SliderCurve::createCurve(char osuSliderCurveType, std::vector<Vector2> controlPoints, float pixelLength,
+SliderCurve *SliderCurve::createCurve(char osuSliderCurveType, std::vector<vec2> controlPoints, float pixelLength,
                                       float curvePointsSeparation) {
     if(osuSliderCurveType == OSUSLIDERCURVETYPE_PASSTHROUGH && controlPoints.size() == 3) {
-        Vector2 nora = controlPoints[1] - controlPoints[0];
-        Vector2 norb = controlPoints[1] - controlPoints[2];
+        vec2 nora = controlPoints[1] - controlPoints[0];
+        vec2 norb = controlPoints[1] - controlPoints[2];
 
         float temp = nora.x;
         nora.x = -nora.y;
@@ -41,7 +41,7 @@ SliderCurve *SliderCurve::createCurve(char osuSliderCurveType, std::vector<Vecto
                                            (osuSliderCurveType == OSUSLIDERCURVETYPE_LINEAR), curvePointsSeparation);
 }
 
-SliderCurve::SliderCurve(std::vector<Vector2> controlPoints, float pixelLength) {
+SliderCurve::SliderCurve(std::vector<vec2> controlPoints, float pixelLength) {
     this->controlPoints = std::move(controlPoints);
     this->fPixelLength = pixelLength;
 
@@ -52,13 +52,13 @@ SliderCurve::SliderCurve(std::vector<Vector2> controlPoints, float pixelLength) 
 void SliderCurve::updateStackPosition(float stackMulStackOffset, bool HR) {
     for(int i = 0; i < this->originalCurvePoints.size() && i < this->curvePoints.size(); i++) {
         this->curvePoints[i] =
-            this->originalCurvePoints[i] - Vector2(stackMulStackOffset, stackMulStackOffset * (HR ? -1.0f : 1.0f));
+            this->originalCurvePoints[i] - vec2(stackMulStackOffset, stackMulStackOffset * (HR ? -1.0f : 1.0f));
     }
 
     for(int s = 0; s < this->originalCurvePointSegments.size() && s < this->curvePointSegments.size(); s++) {
         for(int p = 0; p < this->originalCurvePointSegments[s].size() && p < this->curvePointSegments[s].size(); p++) {
             this->curvePointSegments[s][p] = this->originalCurvePointSegments[s][p] -
-                                             Vector2(stackMulStackOffset, stackMulStackOffset * (HR ? -1.0f : 1.0f));
+                                             vec2(stackMulStackOffset, stackMulStackOffset * (HR ? -1.0f : 1.0f));
         }
     }
 }
@@ -74,7 +74,7 @@ void SliderCurveType::init(float approxLength) {
     this->calculateCurveDistances();
 }
 
-void SliderCurveType::initCustom(std::vector<Vector2> points) {
+void SliderCurveType::initCustom(std::vector<vec2> points) {
     this->points = std::move(points);
     this->calculateCurveDistances();
 }
@@ -96,31 +96,31 @@ void SliderCurveType::calculateCurveDistances() {
     // find the distance of each point from the previous point (needed for some curve types)
     this->curveDistances.reserve(this->points.size());
     for(int i = 0; i < this->points.size(); i++) {
-        const float curDist = (i == 0) ? 0 : (this->points[i] - this->points[i - 1]).length();
+        const float curDist = (i == 0) ? 0 : vec::length(this->points[i] - this->points[i - 1]);
 
         this->curveDistances.push_back(curDist);
         this->fTotalDistance += curDist;
     }
 }
 
-SliderCurveTypeBezier2::SliderCurveTypeBezier2(const std::vector<Vector2> &points) : SliderCurveType() {
+SliderCurveTypeBezier2::SliderCurveTypeBezier2(const std::vector<vec2> &points) : SliderCurveType() {
     this->initCustom(SliderBezierApproximator().createBezier(points));
 }
 
-SliderCurveTypeCentripetalCatmullRom::SliderCurveTypeCentripetalCatmullRom(const std::vector<Vector2> &points)
+SliderCurveTypeCentripetalCatmullRom::SliderCurveTypeCentripetalCatmullRom(const std::vector<vec2> &points)
     : SliderCurveType(), time() {
     if(points.size() != 4) {
         debugLog("SliderCurveTypeCentripetalCatmullRom() Error: points.size() != 4!!!\n");
         return;
     }
 
-    this->points = std::vector<Vector2>(points);  // copy
+    this->points = std::vector<vec2>(points);  // copy
 
     float approxLength = 0;
     for(int i = 1; i < 4; i++) {
         float len = 0;
 
-        if(i > 0) len = (points[i] - points[i - 1]).length();
+        if(i > 0) len = vec::length(points[i] - points[i - 1]);
 
         if(len <= 0) len += 0.0001f;
 
@@ -133,22 +133,22 @@ SliderCurveTypeCentripetalCatmullRom::SliderCurveTypeCentripetalCatmullRom(const
     this->init(approxLength / 2.0f);
 }
 
-Vector2 SliderCurveTypeCentripetalCatmullRom::pointAt(float t) {
+vec2 SliderCurveTypeCentripetalCatmullRom::pointAt(float t) {
     t = t * (this->time[2] - this->time[1]) + this->time[1];
 
-    const Vector2 A1 = this->points[0] * ((this->time[1] - t) / (this->time[1] - this->time[0])) +
+    const vec2 A1 = this->points[0] * ((this->time[1] - t) / (this->time[1] - this->time[0])) +
                        (this->points[1] * ((t - this->time[0]) / (this->time[1] - this->time[0])));
-    const Vector2 A2 = this->points[1] * ((this->time[2] - t) / (this->time[2] - this->time[1])) +
+    const vec2 A2 = this->points[1] * ((this->time[2] - t) / (this->time[2] - this->time[1])) +
                        (this->points[2] * ((t - this->time[1]) / (this->time[2] - this->time[1])));
-    const Vector2 A3 = this->points[2] * ((this->time[3] - t) / (this->time[3] - this->time[2])) +
+    const vec2 A3 = this->points[2] * ((this->time[3] - t) / (this->time[3] - this->time[2])) +
                        (this->points[3] * ((t - this->time[2]) / (this->time[3] - this->time[2])));
 
-    const Vector2 B1 = A1 * ((this->time[2] - t) / (this->time[2] - this->time[0])) +
+    const vec2 B1 = A1 * ((this->time[2] - t) / (this->time[2] - this->time[0])) +
                        (A2 * ((t - this->time[0]) / (this->time[2] - this->time[0])));
-    const Vector2 B2 = A2 * ((this->time[3] - t) / (this->time[3] - this->time[1])) +
+    const vec2 B2 = A2 * ((this->time[3] - t) / (this->time[3] - this->time[1])) +
                        (A3 * ((t - this->time[1]) / (this->time[3] - this->time[1])));
 
-    const Vector2 C = B1 * ((this->time[2] - t) / (this->time[2] - this->time[1])) +
+    const vec2 C = B1 * ((this->time[2] - t) / (this->time[2] - this->time[1])) +
                       (B2 * ((t - this->time[1]) / (this->time[2] - this->time[1])));
 
     return C;
@@ -158,7 +158,7 @@ Vector2 SliderCurveTypeCentripetalCatmullRom::pointAt(float t) {
 //	 Curve Classes	 //
 //*******************//
 
-SliderCurveEqualDistanceMulti::SliderCurveEqualDistanceMulti(std::vector<Vector2> controlPoints, float pixelLength,
+SliderCurveEqualDistanceMulti::SliderCurveEqualDistanceMulti(std::vector<vec2> controlPoints, float pixelLength,
                                                              float curvePointsSeparation)
     : SliderCurve(std::move(controlPoints), pixelLength) {
     const int max_points = cv::slider_curve_max_points.getInt();
@@ -191,12 +191,12 @@ void SliderCurveEqualDistanceMulti::init(const std::vector<SliderCurveType *> &c
             return;
         }
     }
-    Vector2 lastCurve = curCurve->getCurvePoints()[curPoint];
+    vec2 lastCurve = curCurve->getCurvePoints()[curPoint];
 
     // length of the curve should be equal to the pixel length
     // for each distance, try to get in between the two points that are between it
-    Vector2 lastCurvePointForNextSegmentStart;
-    std::vector<Vector2> curCurvePoints;
+    vec2 lastCurvePointForNextSegmentStart{0.f};
+    std::vector<vec2> curCurvePoints;
     for(int i = 0; i < (this->iNCurve + 1); i++) {
         const float temp_dist = static_cast<float>((i * this->fPixelLength)) / static_cast<float>(this->iNCurve);
         const int prefDistance =
@@ -245,10 +245,10 @@ void SliderCurveEqualDistanceMulti::init(const std::vector<SliderCurveType *> &c
                 distanceAt += curCurve->getCurveDistances()[curPoint];
         }
 
-        const Vector2 thisCurve =
+        const vec2 thisCurve =
             (curCurve->getCurvePoints().size() > 0 && curPoint > -1 && curPoint < curCurve->getCurvePoints().size()
                  ? curCurve->getCurvePoints()[curPoint]
-                 : Vector2(0, 0));
+                 : vec2(0, 0));
 
         // interpolate the point between the two closest distances
         this->curvePoints.emplace_back(0, 0);
@@ -256,7 +256,7 @@ void SliderCurveEqualDistanceMulti::init(const std::vector<SliderCurveType *> &c
         if(distanceAt - lastDistanceAt > 1) {
             const float t = (prefDistance - lastDistanceAt) / (distanceAt - lastDistanceAt);
             this->curvePoints[i] =
-                Vector2(std::lerp(lastCurve.x, thisCurve.x, t), std::lerp(lastCurve.y, thisCurve.y, t));
+                vec2(std::lerp(lastCurve.x, thisCurve.x, t), std::lerp(lastCurve.y, thisCurve.y, t));
         } else
             this->curvePoints[i] = thisCurve;
 
@@ -288,7 +288,7 @@ void SliderCurveEqualDistanceMulti::init(const std::vector<SliderCurveType *> &c
     float segmentedLength = 0.0f;
     for(const auto &curvePointSegment : this->curvePointSegments) {
         for(int p = 0; p < curvePointSegment.size(); p++) {
-            segmentedLength += ((p == 0) ? 0 : (curvePointSegment[p] - curvePointSegment[p - 1]).length());
+            segmentedLength += ((p == 0) ? 0 : vec::length(curvePointSegment[p] - curvePointSegment[p - 1]));
         }
     }
 
@@ -300,10 +300,10 @@ void SliderCurveEqualDistanceMulti::init(const std::vector<SliderCurveType *> &c
             for(int s = this->curvePointSegments.size() - 1; s >= 0; s--) {
                 for(int p = this->curvePointSegments[s].size() - 1; p >= 0; p--) {
                     const float curLength =
-                        (p == 0) ? 0 : (this->curvePointSegments[s][p] - this->curvePointSegments[s][p - 1]).length();
+                        (p == 0) ? 0 : vec::length(this->curvePointSegments[s][p] - this->curvePointSegments[s][p - 1]);
                     if(curLength >= excess && p != 0) {
-                        Vector2 segmentVector =
-                            (this->curvePointSegments[s][p] - this->curvePointSegments[s][p - 1]).normalize();
+                        vec2 segmentVector =
+                            vec::normalize(this->curvePointSegments[s][p] - this->curvePointSegments[s][p - 1]);
                         this->curvePointSegments[s][p] = this->curvePointSegments[s][p] - segmentVector * excess;
                         excess = 0.0f;
                         break;
@@ -319,10 +319,10 @@ void SliderCurveEqualDistanceMulti::init(const std::vector<SliderCurveType *> &c
     // calculate start and end angles for possible repeats (good enough and cheaper than calculating it live every
     // frame)
     if(this->curvePoints.size() > 1) {
-        Vector2 c1 = this->curvePoints[0];
+        vec2 c1 = this->curvePoints[0];
         int cnt = 1;
-        Vector2 c2 = this->curvePoints[cnt++];
-        while(cnt <= this->iNCurve && cnt < this->curvePoints.size() && (c2 - c1).length() < 1) {
+        vec2 c2 = this->curvePoints[cnt++];
+        while(cnt <= this->iNCurve && cnt < this->curvePoints.size() && vec::length(c2 - c1) < 1) {
             c2 = this->curvePoints[cnt++];
         }
         this->fStartAngle = (float)(std::atan2(c2.y - c1.y, c2.x - c1.x) * 180 / PI);
@@ -330,10 +330,10 @@ void SliderCurveEqualDistanceMulti::init(const std::vector<SliderCurveType *> &c
 
     if(this->curvePoints.size() > 1) {
         if(this->iNCurve < this->curvePoints.size()) {
-            Vector2 c1 = this->curvePoints[this->iNCurve];
+            vec2 c1 = this->curvePoints[this->iNCurve];
             int cnt = this->iNCurve - 1;
-            Vector2 c2 = this->curvePoints[cnt--];
-            while(cnt >= 0 && (c2 - c1).length() < 1) {
+            vec2 c2 = this->curvePoints[cnt--];
+            while(cnt >= 0 && vec::length(c2 - c1) < 1) {
                 c2 = this->curvePoints[cnt--];
             }
             this->fEndAngle = (float)(std::atan2(c2.y - c1.y, c2.x - c1.x) * 180 / PI);
@@ -341,8 +341,8 @@ void SliderCurveEqualDistanceMulti::init(const std::vector<SliderCurveType *> &c
     }
 
     // backup (for dynamic updateStackPosition() recalculation)
-    this->originalCurvePoints = std::vector<Vector2>(this->curvePoints);                             // copy
-    this->originalCurvePointSegments = std::vector<std::vector<Vector2>>(this->curvePointSegments);  // copy
+    this->originalCurvePoints = std::vector<vec2>(this->curvePoints);                             // copy
+    this->originalCurvePointSegments = std::vector<std::vector<vec2>>(this->curvePointSegments);  // copy
 
     // cleanup
     for(auto i : curvesList) {
@@ -350,8 +350,8 @@ void SliderCurveEqualDistanceMulti::init(const std::vector<SliderCurveType *> &c
     }
 }
 
-Vector2 SliderCurveEqualDistanceMulti::pointAt(float t) {
-    if(this->curvePoints.size() < 1) return Vector2(0, 0);
+vec2 SliderCurveEqualDistanceMulti::pointAt(float t) {
+    if(this->curvePoints.size() < 1) return vec2(0, 0);
 
     const float indexF = t * this->iNCurve;
     const int index = (int)indexF;
@@ -360,25 +360,25 @@ Vector2 SliderCurveEqualDistanceMulti::pointAt(float t) {
             return this->curvePoints[this->iNCurve];
         else {
             debugLog("SliderCurveEqualDistanceMulti::pointAt() Error: Illegal index {:d}!!!\n", this->iNCurve);
-            return Vector2(0, 0);
+            return vec2(0, 0);
         }
     } else {
         if(index < 0 || index + 1 >= this->curvePoints.size()) {
             debugLog("SliderCurveEqualDistanceMulti::pointAt() Error: Illegal index {:d}!!!\n", index);
-            return Vector2(0, 0);
+            return vec2(0, 0);
         }
 
-        const Vector2 poi = this->curvePoints[index];
-        const Vector2 poi2 = this->curvePoints[index + 1];
+        const vec2 poi = this->curvePoints[index];
+        const vec2 poi2 = this->curvePoints[index + 1];
 
         const float t2 = indexF - index;
 
-        return Vector2(std::lerp(poi.x, poi2.x, t2), std::lerp(poi.y, poi2.y, t2));
+        return vec2(std::lerp(poi.x, poi2.x, t2), std::lerp(poi.y, poi2.y, t2));
     }
 }
 
-Vector2 SliderCurveEqualDistanceMulti::originalPointAt(float t) {
-    if(this->originalCurvePoints.size() < 1) return Vector2(0, 0);
+vec2 SliderCurveEqualDistanceMulti::originalPointAt(float t) {
+    if(this->originalCurvePoints.size() < 1) return vec2(0, 0);
 
     const float indexF = t * this->iNCurve;
     const int index = (int)indexF;
@@ -387,39 +387,39 @@ Vector2 SliderCurveEqualDistanceMulti::originalPointAt(float t) {
             return this->originalCurvePoints[this->iNCurve];
         else {
             debugLog("SliderCurveEqualDistanceMulti::originalPointAt() Error: Illegal index {:d}!!!\n", this->iNCurve);
-            return Vector2(0, 0);
+            return vec2(0, 0);
         }
     } else {
         if(index < 0 || index + 1 >= this->originalCurvePoints.size()) {
             debugLog("SliderCurveEqualDistanceMulti::originalPointAt() Error: Illegal index {:d}!!!\n", index);
-            return Vector2(0, 0);
+            return vec2(0, 0);
         }
 
-        const Vector2 poi = this->originalCurvePoints[index];
-        const Vector2 poi2 = this->originalCurvePoints[index + 1];
+        const vec2 poi = this->originalCurvePoints[index];
+        const vec2 poi2 = this->originalCurvePoints[index + 1];
 
         const float t2 = indexF - index;
 
-        return Vector2(std::lerp(poi.x, poi2.x, t2), std::lerp(poi.y, poi2.y, t2));
+        return vec2(std::lerp(poi.x, poi2.x, t2), std::lerp(poi.y, poi2.y, t2));
     }
 }
 
-SliderCurveLinearBezier::SliderCurveLinearBezier(std::vector<Vector2> controlPoints, float pixelLength, bool line,
+SliderCurveLinearBezier::SliderCurveLinearBezier(std::vector<vec2> controlPoints, float pixelLength, bool line,
                                                  float curvePointsSeparation)
     : SliderCurveEqualDistanceMulti(std::move(controlPoints), pixelLength, curvePointsSeparation) {
     const int numControlPoints = this->controlPoints.size();
 
     std::vector<SliderCurveType *> beziers;
 
-    std::vector<Vector2> points;  // temporary list of points to separate different bezier curves
+    std::vector<vec2> points;  // temporary list of points to separate different bezier curves
 
     // Beziers: splits points into different Beziers if has the same points (red points)
     // a b c - c d - d e f g
     // Lines: generate a new curve for each sequential pair
     // ab  bc  cd  de  ef  fg
-    Vector2 lastPoint;
+    vec2 lastPoint{0.f};
     for(int i = 0; i < numControlPoints; i++) {
-        const Vector2 currentPoint = this->controlPoints[i];
+        const vec2 currentPoint = this->controlPoints[i];
 
         if(line) {
             if(i > 0) {
@@ -456,14 +456,14 @@ SliderCurveLinearBezier::SliderCurveLinearBezier(std::vector<Vector2> controlPoi
     SliderCurveEqualDistanceMulti::init(beziers);
 }
 
-SliderCurveCatmull::SliderCurveCatmull(std::vector<Vector2> controlPoints, float pixelLength,
+SliderCurveCatmull::SliderCurveCatmull(std::vector<vec2> controlPoints, float pixelLength,
                                        float curvePointsSeparation)
     : SliderCurveEqualDistanceMulti(std::move(controlPoints), pixelLength, curvePointsSeparation) {
     const int numControlPoints = this->controlPoints.size();
 
     std::vector<SliderCurveType *> catmulls;
 
-    std::vector<Vector2> points;  // temporary list of points to separate different curves
+    std::vector<vec2> points;  // temporary list of points to separate different curves
 
     // repeat the first and last points as controls points
     // only if the first/last two points are different
@@ -494,7 +494,7 @@ SliderCurveCatmull::SliderCurveCatmull(std::vector<Vector2> controlPoints, float
     SliderCurveEqualDistanceMulti::init(catmulls);
 }
 
-SliderCurveCircumscribedCircle::SliderCurveCircumscribedCircle(std::vector<Vector2> controlPoints, float pixelLength,
+SliderCurveCircumscribedCircle::SliderCurveCircumscribedCircle(std::vector<vec2> controlPoints, float pixelLength,
                                                                float curvePointsSeparation)
     : SliderCurve(std::move(controlPoints), pixelLength) {
     if(this->controlPoints.size() != 3) {
@@ -503,19 +503,19 @@ SliderCurveCircumscribedCircle::SliderCurveCircumscribedCircle(std::vector<Vecto
     }
 
     // construct the three points
-    const Vector2 start = this->controlPoints[0];
-    const Vector2 mid = this->controlPoints[1];
-    const Vector2 end = this->controlPoints[2];
+    const vec2 start = this->controlPoints[0];
+    const vec2 mid = this->controlPoints[1];
+    const vec2 end = this->controlPoints[2];
 
     // find the circle center
-    const Vector2 mida = start + (mid - start) * 0.5f;
-    const Vector2 midb = end + (mid - end) * 0.5f;
+    const vec2 mida = start + (mid - start) * 0.5f;
+    const vec2 midb = end + (mid - end) * 0.5f;
 
-    Vector2 nora = mid - start;
+    vec2 nora = mid - start;
     float temp = nora.x;
     nora.x = -nora.y;
     nora.y = temp;
-    Vector2 norb = mid - end;
+    vec2 norb = mid - end;
     temp = norb.x;
     norb.x = -norb.y;
     norb.y = temp;
@@ -524,9 +524,9 @@ SliderCurveCircumscribedCircle::SliderCurveCircumscribedCircle(std::vector<Vecto
     this->vCircleCenter = this->vOriginalCircleCenter;
 
     // find the angles relative to the circle center
-    Vector2 startAngPoint = start - this->vCircleCenter;
-    Vector2 midAngPoint = mid - this->vCircleCenter;
-    Vector2 endAngPoint = end - this->vCircleCenter;
+    vec2 startAngPoint = start - this->vCircleCenter;
+    vec2 midAngPoint = mid - this->vCircleCenter;
+    vec2 endAngPoint = end - this->vCircleCenter;
 
     this->fCalculationStartAngle = (float)std::atan2(startAngPoint.y, startAngPoint.x);
     const auto midAng = (float)std::atan2(midAngPoint.y, midAngPoint.x);
@@ -547,14 +547,15 @@ SliderCurveCircumscribedCircle::SliderCurveCircumscribedCircle(std::vector<Vecto
                 this->isIn(this->fCalculationStartAngle, midAng, this->fCalculationEndAngle - (2 * PI)))
             this->fCalculationEndAngle -= 2 * PI;
         else {
-            debugLog("SliderCurveCircumscribedCircle() Error: Cannot find angles between midAng ({:.3f} {:.3f} {:.3f})\n",
-                     this->fCalculationStartAngle, midAng, this->fCalculationEndAngle);
+            debugLog(
+                "SliderCurveCircumscribedCircle() Error: Cannot find angles between midAng ({:.3f} {:.3f} {:.3f})\n",
+                this->fCalculationStartAngle, midAng, this->fCalculationEndAngle);
             return;
         }
     }
 
     // find an angle with an arc length of pixelLength along this circle
-    this->fRadius = startAngPoint.length();
+    this->fRadius = vec::length(startAngPoint);
     const float arcAng = this->fPixelLength / this->fRadius;  // len = theta * r / theta = len / r
 
     // now use it for our new end angle
@@ -587,47 +588,47 @@ SliderCurveCircumscribedCircle::SliderCurveCircumscribedCircle(std::vector<Vecto
     this->curvePointSegments.emplace_back(this->curvePoints);  // copy
 
     // backup (for dynamic updateStackPosition() recalculation)
-    this->originalCurvePoints = std::vector<Vector2>(this->curvePoints);                             // copy
-    this->originalCurvePointSegments = std::vector<std::vector<Vector2>>(this->curvePointSegments);  // copy
+    this->originalCurvePoints = std::vector<vec2>(this->curvePoints);                             // copy
+    this->originalCurvePointSegments = std::vector<std::vector<vec2>>(this->curvePointSegments);  // copy
 }
 
 void SliderCurveCircumscribedCircle::updateStackPosition(float stackMulStackOffset, bool HR) {
     SliderCurve::updateStackPosition(stackMulStackOffset, HR);
 
     this->vCircleCenter =
-        this->vOriginalCircleCenter - Vector2(stackMulStackOffset, stackMulStackOffset * (HR ? -1.0f : 1.0f));
+        this->vOriginalCircleCenter - vec2(stackMulStackOffset, stackMulStackOffset * (HR ? -1.0f : 1.0f));
 }
 
-Vector2 SliderCurveCircumscribedCircle::pointAt(float t) {
+vec2 SliderCurveCircumscribedCircle::pointAt(float t) {
     const float sanityRange =
         cv::slider_curve_max_length
             .getFloat();  // NOTE: added to fix some aspire problems (endless drawFollowPoints and star calc etc.)
     const float ang = std::lerp(this->fCalculationStartAngle, this->fCalculationEndAngle, t);
 
-    return Vector2(std::clamp<float>(std::cos(ang) * this->fRadius + this->vCircleCenter.x, -sanityRange, sanityRange),
+    return vec2(std::clamp<float>(std::cos(ang) * this->fRadius + this->vCircleCenter.x, -sanityRange, sanityRange),
                    std::clamp<float>(std::sin(ang) * this->fRadius + this->vCircleCenter.y, -sanityRange, sanityRange));
 }
 
-Vector2 SliderCurveCircumscribedCircle::originalPointAt(float t) {
+vec2 SliderCurveCircumscribedCircle::originalPointAt(float t) {
     const float sanityRange =
         cv::slider_curve_max_length
             .getFloat();  // NOTE: added to fix some aspire problems (endless drawFollowPoints and star calc etc.)
     const float ang = std::lerp(this->fCalculationStartAngle, this->fCalculationEndAngle, t);
 
-    return Vector2(
+    return vec2(
         std::clamp<float>(std::cos(ang) * this->fRadius + this->vOriginalCircleCenter.x, -sanityRange, sanityRange),
         std::clamp<float>(std::sin(ang) * this->fRadius + this->vOriginalCircleCenter.y, -sanityRange, sanityRange));
 }
 
-Vector2 SliderCurveCircumscribedCircle::intersect(Vector2 a, Vector2 ta, Vector2 b, Vector2 tb) {
+vec2 SliderCurveCircumscribedCircle::intersect(vec2 a, vec2 ta, vec2 b, vec2 tb) {
     const float des = (tb.x * ta.y - tb.y * ta.x);
     if(std::abs(des) < 0.0001f) {
         debugLog("SliderCurveCircumscribedCircle::intersect() Error: Vectors are parallel!!!\n");
-        return Vector2(0, 0);
+        return vec2(0, 0);
     }
 
     const float u = ((b.y - a.y) * ta.x + (a.x - b.x) * ta.y) / des;
-    return (b + Vector2(tb.x * u, tb.y * u));
+    return (b + vec2(tb.x * u, tb.y * u));
 }
 
 //********************//
@@ -642,24 +643,24 @@ double SliderBezierApproximator::TOLERANCE_SQ = 0.25 * 0.25;
 
 SliderBezierApproximator::SliderBezierApproximator() { this->iCount = 0; }
 
-std::vector<Vector2> SliderBezierApproximator::createBezier(const std::vector<Vector2> &controlPoints) {
+std::vector<vec2> SliderBezierApproximator::createBezier(const std::vector<vec2> &controlPoints) {
     this->iCount = controlPoints.size();
 
-    std::vector<Vector2> output;
+    std::vector<vec2> output;
     if(this->iCount == 0) return output;
 
     this->subdivisionBuffer1.resize(this->iCount);
     this->subdivisionBuffer2.resize(this->iCount * 2 - 1);
 
-    std::stack<std::vector<Vector2>> toFlatten;
-    std::stack<std::vector<Vector2>> freeBuffers;
+    std::stack<std::vector<vec2>> toFlatten;
+    std::stack<std::vector<vec2>> freeBuffers;
 
     toFlatten.emplace(controlPoints);  // copy
 
-    std::vector<Vector2> &leftChild = this->subdivisionBuffer2;
+    std::vector<vec2> &leftChild = this->subdivisionBuffer2;
 
     while(toFlatten.size() > 0) {
-        std::vector<Vector2> parent = std::move(toFlatten.top());
+        std::vector<vec2> parent = std::move(toFlatten.top());
         toFlatten.pop();
 
         if(this->isFlatEnough(parent)) {
@@ -668,7 +669,7 @@ std::vector<Vector2> SliderBezierApproximator::createBezier(const std::vector<Ve
             continue;
         }
 
-        std::vector<Vector2> rightChild;
+        std::vector<vec2> rightChild;
         if(freeBuffers.size() > 0) {
             rightChild = std::move(freeBuffers.top());
             freeBuffers.pop();
@@ -689,11 +690,11 @@ std::vector<Vector2> SliderBezierApproximator::createBezier(const std::vector<Ve
     return output;
 }
 
-bool SliderBezierApproximator::isFlatEnough(const std::vector<Vector2> &controlPoints) {
+bool SliderBezierApproximator::isFlatEnough(const std::vector<vec2> &controlPoints) {
     if(controlPoints.size() < 1) return true;
 
     for(int i = 1; i < (int)(controlPoints.size() - 1); i++) {
-        if(pow((double)(controlPoints[i - 1] - 2 * controlPoints[i] + controlPoints[i + 1]).length(), 2.0) >
+        if(pow((double)vec::length(controlPoints[i - 1] - 2.f * controlPoints[i] + controlPoints[i + 1]), 2.0) >
            TOLERANCE_SQ * 4)
             return false;
     }
@@ -701,9 +702,9 @@ bool SliderBezierApproximator::isFlatEnough(const std::vector<Vector2> &controlP
     return true;
 }
 
-void SliderBezierApproximator::subdivide(std::vector<Vector2> &controlPoints, std::vector<Vector2> &l,
-                                         std::vector<Vector2> &r) {
-    std::vector<Vector2> &midpoints = this->subdivisionBuffer1;
+void SliderBezierApproximator::subdivide(std::vector<vec2> &controlPoints, std::vector<vec2> &l,
+                                         std::vector<vec2> &r) {
+    std::vector<vec2> &midpoints = this->subdivisionBuffer1;
 
     for(int i = 0; i < this->iCount; ++i) {
         midpoints[i] = controlPoints[i];
@@ -714,14 +715,14 @@ void SliderBezierApproximator::subdivide(std::vector<Vector2> &controlPoints, st
         r[this->iCount - i - 1] = midpoints[this->iCount - i - 1];
 
         for(int j = 0; j < this->iCount - i - 1; j++) {
-            midpoints[j] = (midpoints[j] + midpoints[j + 1]) / 2;
+            midpoints[j] = (midpoints[j] + midpoints[j + 1]) / 2.f;
         }
     }
 }
 
-void SliderBezierApproximator::approximate(std::vector<Vector2> &controlPoints, std::vector<Vector2> &output) {
-    std::vector<Vector2> &l = this->subdivisionBuffer2;
-    std::vector<Vector2> &r = this->subdivisionBuffer1;
+void SliderBezierApproximator::approximate(std::vector<vec2> &controlPoints, std::vector<vec2> &output) {
+    std::vector<vec2> &l = this->subdivisionBuffer2;
+    std::vector<vec2> &r = this->subdivisionBuffer1;
 
     this->subdivide(controlPoints, l, r);
 
@@ -732,7 +733,7 @@ void SliderBezierApproximator::approximate(std::vector<Vector2> &controlPoints, 
     output.push_back(controlPoints[0]);
     for(int i = 1; i < this->iCount - 1; ++i) {
         const int index = 2 * i;
-        Vector2 p = 0.25f * (l[index - 1] + 2 * l[index] + l[index + 1]);
+        vec2 p = 0.25f * (l[index - 1] + 2.f * l[index] + l[index + 1]);
         output.push_back(p);
     }
 }

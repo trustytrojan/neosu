@@ -26,7 +26,7 @@ struct RoomUIElement : CBaseUIScrollView {
     i32 room_id;
     bool has_password;
 
-    void updateLayout(Vector2 pos, Vector2 size);
+    void updateLayout(vec2 pos, vec2 size);
     void onRoomJoinButtonClick(CBaseUIButton* btn);
 };
 
@@ -37,7 +37,7 @@ class Lobby : public OsuScreen {
     void onKeyDown(KeyboardEvent& e) override;
     void onKeyUp(KeyboardEvent& e) override;
     void onChar(KeyboardEvent& e) override;
-    void onResolutionChange(Vector2 newResolution) override;
+    void onResolutionChange(vec2 newResolution) override;
 
     // /!\ Side-effect: sends bancho packets when changing state
     CBaseUIContainer* setVisible(bool visible) override;
@@ -46,7 +46,7 @@ class Lobby : public OsuScreen {
     void joinRoom(u32 id, const UString& password);
     void updateRoom(const Room& room);
     void removeRoom(u32 room_id);
-    void updateLayout(Vector2 newResolution);
+    void updateLayout(vec2 newResolution);
 
     void on_create_room_clicked();
 

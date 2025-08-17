@@ -11,7 +11,7 @@ class CollectionButton : public CarouselButton {
 
     void draw() override;
 
-    void triggerContextMenu(Vector2 pos);
+    void triggerContextMenu(vec2 pos);
 
     [[nodiscard]] Color getActiveBackgroundColor() const override;
     [[nodiscard]] Color getInactiveBackgroundColor() const override;

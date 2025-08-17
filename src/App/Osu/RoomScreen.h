@@ -39,11 +39,11 @@ class RoomScreen : public OsuScreen {
     void onKeyDown(KeyboardEvent &e) override;
     void onKeyUp(KeyboardEvent &e) override;
     void onChar(KeyboardEvent &e) override;
-    void onResolutionChange(Vector2 newResolution) override;
+    void onResolutionChange(vec2 newResolution) override;
     CBaseUIContainer *setVisible(bool visible) override;  // does nothing
 
-    void updateLayout(Vector2 newResolution);
-    void updateSettingsLayout(Vector2 newResolution);
+    void updateLayout(vec2 newResolution);
+    void updateSettingsLayout(vec2 newResolution);
     void ragequit(bool play_sound = true);
 
     void on_map_change();

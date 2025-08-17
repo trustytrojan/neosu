@@ -66,7 +66,7 @@ class SongBrowser final : public ScreenBackable {
     void onKeyUp(KeyboardEvent &e) override;
     void onChar(KeyboardEvent &e) override;
 
-    void onResolutionChange(Vector2 newResolution) override;
+    void onResolutionChange(vec2 newResolution) override;
 
     CBaseUIContainer *setVisible(bool visible) override;
 

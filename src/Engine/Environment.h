@@ -147,11 +147,11 @@ class Environment {
     [[nodiscard]] inline const float &getDisplayRefreshRate() const { return m_fDisplayHz; }
     [[nodiscard]] inline const float &getDisplayRefreshTime() const { return m_fDisplayHzSecs; }
     [[nodiscard]] HWND getHwnd() const;
-    [[nodiscard]] Vector2 getWindowPos() const;
-    [[nodiscard]] Vector2 getWindowSize() const;
+    [[nodiscard]] vec2 getWindowPos() const;
+    [[nodiscard]] vec2 getWindowSize() const;
     [[nodiscard]] int getMonitor() const;
     [[nodiscard]] const std::map<unsigned int, McRect> &getMonitors();
-    [[nodiscard]] Vector2 getNativeScreenSize() const;
+    [[nodiscard]] vec2 getNativeScreenSize() const;
     [[nodiscard]] McRect getDesktopRect() const;
     [[nodiscard]] McRect getWindowRect() const;
     [[nodiscard]] bool isFullscreenWindowedBorderless() const { return m_bFullscreenWindowedBorderless; }
@@ -161,13 +161,13 @@ class Environment {
     [[nodiscard]] inline const bool &isWindowResizable() const { return m_bResizable; }
     [[nodiscard]] inline bool hasFocus() const { return m_bHasFocus; }
 
-    [[nodiscard]] bool isPointValid(Vector2 point) const;  // whether an x,y coordinate lands on an actual display
+    [[nodiscard]] bool isPointValid(vec2 point) const;  // whether an x,y coordinate lands on an actual display
 
     // mouse
     [[nodiscard]] inline const bool &isCursorInWindow() const { return m_bIsCursorInsideWindow; }
     [[nodiscard]] inline const bool &isCursorVisible() const { return m_bCursorVisible; }
     [[nodiscard]] inline const bool &isCursorClipped() const { return m_bCursorClipped; }
-    [[nodiscard]] inline const Vector2 &getMousePos() const { return m_vLastAbsMousePos; }
+    [[nodiscard]] inline const vec2 &getMousePos() const { return m_vLastAbsMousePos; }
     [[nodiscard]] inline const McRect &getCursorClip() const { return m_cursorClipRect; }
     [[nodiscard]] inline const CURSORTYPE &getCursor() const { return m_cursorType; }
     [[nodiscard]] inline const bool &isOSMouseInputRaw() const { return m_bActualRawInputState; }
@@ -177,8 +177,8 @@ class Environment {
     void setCursorClip(bool clip, McRect rect);
     void setRawInput(bool raw);  // enable/disable OS-level rawinput
 
-    void setOSMousePos(Vector2 pos);
-    inline void setMousePos(float x, float y) { setOSMousePos(Vector2{x, y}); }
+    void setOSMousePos(vec2 pos);
+    inline void setMousePos(float x, float y) { setOSMousePos(vec2{x, y}); }
 
     // keyboard
     UString keyCodeToString(KEYCODE keyCode);
@@ -244,19 +244,19 @@ class Environment {
     }
 
     // save the last position obtained from SDL so that we can return something sensible if the SDL API fails
-    mutable Vector2 m_vLastKnownWindowSize;
-    mutable Vector2 m_vLastKnownWindowPos;
+    mutable vec2 m_vLastKnownWindowSize{0.f};
+    mutable vec2 m_vLastKnownWindowPos{0.f};
 
     // mouse
 
     friend class Mouse;
     // <rel, abs>
-    std::pair<Vector2, Vector2> consumeMousePositionCache();
+    std::pair<vec2, vec2> consumeMousePositionCache();
     // allow Mouse to update the cached environment position post-sensitivity/clipping
     // the difference between setMousePos and this is that it doesn't actually warp the OS cursor
-    inline void updateCachedMousePos(const Vector2 &pos) { m_vLastAbsMousePos = pos; }
+    inline void updateCachedMousePos(const vec2 &pos) { m_vLastAbsMousePos = pos; }
 
-    Vector2 m_vLastAbsMousePos;
+    vec2 m_vLastAbsMousePos{0.f};
     bool m_bIsCursorInsideWindow;
     bool m_bCursorClipped;
     bool m_bCursorVisible;

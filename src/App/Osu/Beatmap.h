@@ -20,7 +20,7 @@ struct ScoreFrame;
 
 struct Click {
     long click_time;
-    Vector2 pos;
+    vec2 pos{0.f};
 };
 
 class Beatmap : public BeatmapInterface {
@@ -51,24 +51,24 @@ class Beatmap : public BeatmapInterface {
     // Returns true if the local player is loading
     bool isActuallyLoading();
 
-    [[nodiscard]] Vector2 pixels2OsuCoords(Vector2 pixelCoords) const override;  // only used for positional audio atm
-    [[nodiscard]] Vector2 osuCoords2Pixels(
-        Vector2 coords) const override;  // hitobjects should use this one (includes lots of special behaviour)
-    [[nodiscard]] Vector2 osuCoords2RawPixels(Vector2 coords)
+    [[nodiscard]] vec2 pixels2OsuCoords(vec2 pixelCoords) const override;  // only used for positional audio atm
+    [[nodiscard]] vec2 osuCoords2Pixels(
+        vec2 coords) const override;  // hitobjects should use this one (includes lots of special behaviour)
+    [[nodiscard]] vec2 osuCoords2RawPixels(vec2 coords)
         const override;  // raw transform from osu!pixels to absolute screen pixels (without any mods whatsoever)
-    [[nodiscard]] Vector2 osuCoords2LegacyPixels(Vector2 coords)
+    [[nodiscard]] vec2 osuCoords2LegacyPixels(vec2 coords)
         const override;  // only applies vanilla osu mods and static mods to the coordinates (used for generating
                          // the static slider mesh) centered at (0, 0, 0)
 
     // cursor
-    [[nodiscard]] Vector2 getMousePos() const;
-    [[nodiscard]] Vector2 getCursorPos() const override;
-    [[nodiscard]] Vector2 getFirstPersonCursorDelta() const;
-    [[nodiscard]] inline Vector2 getContinueCursorPoint() const { return this->vContinueCursorPoint; }
+    [[nodiscard]] vec2 getMousePos() const;
+    [[nodiscard]] vec2 getCursorPos() const override;
+    [[nodiscard]] vec2 getFirstPersonCursorDelta() const;
+    [[nodiscard]] inline vec2 getContinueCursorPoint() const { return this->vContinueCursorPoint; }
 
     // playfield
-    [[nodiscard]] inline Vector2 getPlayfieldSize() const { return this->vPlayfieldSize; }
-    [[nodiscard]] inline Vector2 getPlayfieldCenter() const { return this->vPlayfieldCenter; }
+    [[nodiscard]] inline vec2 getPlayfieldSize() const { return this->vPlayfieldSize; }
+    [[nodiscard]] inline vec2 getPlayfieldCenter() const { return this->vPlayfieldCenter; }
     [[nodiscard]] inline f32 getPlayfieldRotation() const { return this->fPlayfieldRotation; }
 
     // hitobjects
@@ -154,7 +154,7 @@ class Beatmap : public BeatmapInterface {
     // replay replaying (prerecorded)
     // current_keys, last_keys also reused
     std::vector<LegacyReplay::Frame> spectated_replay;
-    Vector2 interpolatedMousePos;
+    vec2 interpolatedMousePos{0.f};
     bool is_watching = false;
     long current_frame_idx = 0;
     SimulatedBeatmap *sim = nullptr;
@@ -329,8 +329,8 @@ class Beatmap : public BeatmapInterface {
     [[nodiscard]] f32 getApproachTime_full() const override;
     [[nodiscard]] f32 getRawApproachTime_full() const override;
 
-    static inline Vector2 mapNormalizedCoordsOntoUnitCircle(const Vector2 &in) {
-        return Vector2(in.x * std::sqrt(1.0f - in.y * in.y / 2.0f), in.y * std::sqrt(1.0f - in.x * in.x / 2.0f));
+    static inline vec2 mapNormalizedCoordsOntoUnitCircle(const vec2 &in) {
+        return vec2(in.x * std::sqrt(1.0f - in.y * in.y / 2.0f), in.y * std::sqrt(1.0f - in.x * in.x / 2.0f));
     }
 
     static f32 quadLerp3f(f32 left, f32 center, f32 right, f32 percent) {
@@ -361,14 +361,14 @@ class Beatmap : public BeatmapInterface {
 
     // beatmap
     bool bIsSpinnerActive;
-    Vector2 vContinueCursorPoint;
+    vec2 vContinueCursorPoint{0.f};
 
     // playfield
     f32 fPlayfieldRotation;
     f32 fScaleFactor;
-    Vector2 vPlayfieldCenter;
-    Vector2 vPlayfieldOffset;
-    Vector2 vPlayfieldSize;
+    vec2 vPlayfieldCenter{0.f};
+    vec2 vPlayfieldOffset{0.f};
+    vec2 vPlayfieldSize{0.f};
 
     // hitobject scaling
     f32 fXMultiplier;
@@ -376,7 +376,7 @@ class Beatmap : public BeatmapInterface {
     f32 fHitcircleOverlapScale;
 
     // auto
-    Vector2 vAutoCursorPos;
+    vec2 vAutoCursorPos{0.f};
     int iAutoCursorDanceIndex;
 
     // live pp/stars
@@ -413,7 +413,7 @@ class Beatmap : public BeatmapInterface {
                                 // note blocking shaking, while being rendered into the scene buffer
 
     struct SMOKETRAIL {
-        Vector2 pos;
+        vec2 pos{0.f};
         i64 time;
     };
     std::vector<SMOKETRAIL> smoke_trail;

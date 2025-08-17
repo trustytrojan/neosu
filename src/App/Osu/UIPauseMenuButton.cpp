@@ -16,7 +16,7 @@ UIPauseMenuButton::UIPauseMenuButton(std::function<Image *()> getImageFunc, floa
     : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name)) {
     this->getImageFunc = std::move(getImageFunc);
 
-    this->vScale = Vector2(1, 1);
+    this->vScale = vec2(1, 1);
     this->fScaleMultiplier = 1.1f;
 
     this->fAlpha = 1.0f;

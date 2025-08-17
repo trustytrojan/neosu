@@ -155,7 +155,7 @@ void draw_bottombar() {
 
         f32 scale = global_scale * (base_imgs[i]->is_2x ? 0.5f : 1.f);
         g->setColor(0xffffffff);
-        base_imgs[i]->drawRaw(Vector2(btns_x[i], osu->getScreenHeight()), scale, AnchorPoint::BOTTOM_LEFT);
+        base_imgs[i]->drawRaw(vec2(btns_x[i], osu->getScreenHeight()), scale, AnchorPoint::BOTTOM_LEFT);
     }
 
     // Ok, and now for the hover images... which are drawn in a weird order, same as update_bottombar()
@@ -163,25 +163,25 @@ void draw_bottombar() {
     f32 random_scale = global_scale * (random_img->is_2x ? 0.5f : 1.f);
     g->setColor(Color(0xffffffff).setA(btn_hovers[RANDOM]));
 
-    random_img->drawRaw(Vector2(btns_x[RANDOM], osu->getScreenHeight()), random_scale, AnchorPoint::BOTTOM_LEFT);
+    random_img->drawRaw(vec2(btns_x[RANDOM], osu->getScreenHeight()), random_scale, AnchorPoint::BOTTOM_LEFT);
 
     auto mods_img = osu->getSkin()->selectionModsOver;
     f32 mods_scale = global_scale * (mods_img->is_2x ? 0.5f : 1.f);
     g->setColor(Color(0xffffffff).setA(btn_hovers[MODS]));
 
-    mods_img->drawRaw(Vector2(btns_x[MODS], osu->getScreenHeight()), mods_scale, AnchorPoint::BOTTOM_LEFT);
+    mods_img->drawRaw(vec2(btns_x[MODS], osu->getScreenHeight()), mods_scale, AnchorPoint::BOTTOM_LEFT);
 
     auto mode_img = osu->getSkin()->selectionModeOver;
     f32 mode_scale = global_scale * (mode_img->is_2x ? 0.5f : 1.f);
     g->setColor(Color(0xffffffff).setA(btn_hovers[MODE]));
 
-    mode_img->drawRaw(Vector2(btns_x[MODE], osu->getScreenHeight()), mode_scale, AnchorPoint::BOTTOM_LEFT);
+    mode_img->drawRaw(vec2(btns_x[MODE], osu->getScreenHeight()), mode_scale, AnchorPoint::BOTTOM_LEFT);
 
     auto options_img = osu->getSkin()->selectionOptionsOver;
     f32 options_scale = global_scale * (options_img->is_2x ? 0.5f : 1.f);
     g->setColor(Color(0xffffffff).setA(btn_hovers[OPTIONS]));
 
-    options_img->drawRaw(Vector2(btns_x[OPTIONS], osu->getScreenHeight()), options_scale, AnchorPoint::BOTTOM_LEFT);
+    options_img->drawRaw(vec2(btns_x[OPTIONS], osu->getScreenHeight()), options_scale, AnchorPoint::BOTTOM_LEFT);
 
     // mode-osu-small (often used as overlay)
     auto mos_img = osu->getSkin()->mode_osu_small;
@@ -189,7 +189,7 @@ void draw_bottombar() {
         f32 mos_scale = global_scale * (mos_img->is_2x ? 0.5f : 1.f);
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ADDITIVE);
         g->setColor(0xffffffff);
-        mos_img->drawRaw(Vector2(btns_x[MODE] + (btns_x[MODS] - btns_x[MODE]) * 0.5f,
+        mos_img->drawRaw(vec2(btns_x[MODE] + (btns_x[MODS] - btns_x[MODE]) * 0.5f,
                                  osu->getScreenHeight() - (global_scale * 56.f)),
                          mos_scale, AnchorPoint::CENTER);
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ALPHA);

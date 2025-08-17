@@ -14,8 +14,8 @@ class Camera {
                                           float zf);  // OpenGL
     static Matrix4 buildMatrixOrtho2DDXLH(float left, float right, float bottom, float top, float zn,
                                           float zf);                            // DirectX
-    static Matrix4 buildMatrixLookAt(Vector3 eye, Vector3 target, Vector3 up);  // DEPRECATED
-    static Matrix4 buildMatrixLookAtLH(Vector3 eye, Vector3 target, Vector3 up);
+    static Matrix4 buildMatrixLookAt(vec3 eye, vec3 target, vec3 up);  // DEPRECATED
+    static Matrix4 buildMatrixLookAtLH(vec3 eye, vec3 target, vec3 up);
     static Matrix4 buildMatrixPerspectiveFov(float fovRad, float aspect, float zn,
                                              float zf);  // DEPRECATED (OpenGL specific)
     static Matrix4 buildMatrixPerspectiveFovVertical(float fovRad, float aspectRatioWidthToHeight, float zn,
@@ -30,17 +30,17 @@ class Camera {
    public:
     enum CAMERA_TYPE : uint8_t { CAMERA_TYPE_FIRST_PERSON, CAMERA_TYPE_ORBIT };
 
-    Camera(Vector3 pos = Vector3(0, 0, 0), Vector3 viewDir = Vector3(0, 0, 1), float fovDeg = 90.0f,
+    Camera(vec3 pos = vec3(0, 0, 0), vec3 viewDir = vec3(0, 0, 1), float fovDeg = 90.0f,
            CAMERA_TYPE camType = CAMERA_TYPE_FIRST_PERSON);
 
     void rotateX(float pitchDeg);
     void rotateY(float yawDeg);
 
-    void lookAt(Vector3 target);
+    void lookAt(vec3 target);
 
     // set
     void setType(CAMERA_TYPE camType);
-    void setPos(Vector3 pos);
+    void setPos(vec3 pos);
     void setFov(float fovDeg) { this->fFov = glm::radians(fovDeg); }
     void setFovRad(float fovRad) { this->fFov = fovRad; }
     void setOrbitDistance(float orbitDistance);
@@ -57,20 +57,20 @@ class Camera {
 
     // get
     [[nodiscard]] inline CAMERA_TYPE getType() const { return this->camType; }
-    [[nodiscard]] inline Vector3 getPos() const { return this->vPos; }
-    [[nodiscard]] Vector3 getNextPosition(Vector3 velocity) const;
+    [[nodiscard]] inline vec3 getPos() const { return this->vPos; }
+    [[nodiscard]] vec3 getNextPosition(vec3 velocity) const;
 
     [[nodiscard]] inline float getFov() const { return glm::degrees(this->fFov); }
     [[nodiscard]] inline float getFovRad() const { return this->fFov; }
     [[nodiscard]] inline float getOrbitDistance() const { return this->fOrbitDistance; }
 
-    [[nodiscard]] inline Vector3 getWorldXAxis() const { return this->worldRotation * this->vXAxis; }
-    [[nodiscard]] inline Vector3 getWorldYAxis() const { return this->worldRotation * this->vYAxis; }
-    [[nodiscard]] inline Vector3 getWorldZAxis() const { return this->worldRotation * this->vZAxis; }
+    [[nodiscard]] inline vec3 getWorldXAxis() const { return this->worldRotation * this->vXAxis; }
+    [[nodiscard]] inline vec3 getWorldYAxis() const { return this->worldRotation * this->vYAxis; }
+    [[nodiscard]] inline vec3 getWorldZAxis() const { return this->worldRotation * this->vZAxis; }
 
-    [[nodiscard]] inline Vector3 getViewDirection() const { return this->vViewDir; }
-    [[nodiscard]] inline Vector3 getViewUp() const { return this->vViewUp; }
-    [[nodiscard]] inline Vector3 getViewRight() const { return this->vViewRight; }
+    [[nodiscard]] inline vec3 getViewDirection() const { return this->vViewDir; }
+    [[nodiscard]] inline vec3 getViewUp() const { return this->vViewUp; }
+    [[nodiscard]] inline vec3 getViewRight() const { return this->vViewRight; }
 
     [[nodiscard]] inline float getPitch() const { return this->fPitch; }
     [[nodiscard]] inline float getYaw() const { return this->fYaw; }
@@ -78,44 +78,44 @@ class Camera {
 
     [[nodiscard]] inline Quaternion getRotation() const { return this->rotation; }
 
-    [[nodiscard]] Vector3 getProjectedVector(Vector3 point, float screenWidth, float screenHeight, float zn = 0.1f,
+    [[nodiscard]] vec3 getProjectedVector(vec3 point, float screenWidth, float screenHeight, float zn = 0.1f,
                                              float zf = 1.0f) const;
-    [[nodiscard]] Vector3 getUnProjectedVector(Vector2 point, float screenWidth, float screenHeight, float zn = 0.1f,
+    [[nodiscard]] vec3 getUnProjectedVector(vec2 point, float screenWidth, float screenHeight, float zn = 0.1f,
                                                float zf = 1.0f) const;
 
-    [[nodiscard]] bool isPointVisibleFrustum(Vector3 point) const;  // within our viewing frustum
-    [[nodiscard]] bool isPointVisiblePlane(Vector3 point) const;    // just in front of the camera plane
+    [[nodiscard]] bool isPointVisibleFrustum(vec3 point) const;  // within our viewing frustum
+    [[nodiscard]] bool isPointVisiblePlane(vec3 point) const;    // just in front of the camera plane
 
    private:
     struct CAM_PLANE {
         float a, b, c, d;
     };
 
-    static float planeDotCoord(CAM_PLANE plane, Vector3 point);
-    static float planeDotCoord(Vector3 planeNormal, Vector3 planePoint, Vector3 &pv);
+    static float planeDotCoord(CAM_PLANE plane, vec3 point);
+    static float planeDotCoord(vec3 planeNormal, vec3 planePoint, vec3 &pv);
 
     void updateVectors();
     void updateViewFrustum();
 
-    void lookAt(Vector3 eye, Vector3 target);
+    void lookAt(vec3 eye, vec3 target);
 
     // vars
     CAMERA_TYPE camType;
-    Vector3 vPos;
-    Vector3 vOrbitTarget;
+    vec3 vPos{0.f};
+    vec3 vOrbitTarget{0.f};
     float fFov;
     float fOrbitDistance;
     bool bOrbitYAxis;
 
     // base axes
-    Vector3 vWorldXAxis;
-    Vector3 vWorldYAxis;
-    Vector3 vWorldZAxis;
+    vec3 vWorldXAxis{0.f};
+    vec3 vWorldYAxis{0.f};
+    vec3 vWorldZAxis{0.f};
 
     // derived axes
-    Vector3 vXAxis;
-    Vector3 vYAxis;
-    Vector3 vZAxis;
+    vec3 vXAxis{0.f};
+    vec3 vYAxis{0.f};
+    vec3 vZAxis{0.f};
 
     // rotation
     Quaternion rotation;
@@ -125,9 +125,9 @@ class Camera {
     float fRoll;
 
     // relative coordinate system
-    Vector3 vViewDir;
-    Vector3 vViewRight;
-    Vector3 vViewUp;
+    vec3 vViewDir{0.f};
+    vec3 vViewRight{0.f};
+    vec3 vViewUp{0.f};
 
     // custom
     CAM_PLANE viewFrustum[4];

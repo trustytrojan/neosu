@@ -39,8 +39,8 @@ void UISlider::draw() {
                     (int)(this->vPos.y + this->vSize.y / 2.0f + 1));
 
     // draw sliding block
-    Vector2 blockCenter = this->vPos + this->vBlockPos + this->vBlockSize / 2;
-    Vector2 scale = Vector2(this->vBlockSize.x / img->getWidth(), this->vBlockSize.y / img->getHeight());
+    vec2 blockCenter = this->vPos + this->vBlockPos + this->vBlockSize / 2.f;
+    vec2 scale = vec2(this->vBlockSize.x / img->getWidth(), this->vBlockSize.y / img->getHeight());
 
     g->setColor(this->frameColor);
     g->pushTransform();

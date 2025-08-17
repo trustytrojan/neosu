@@ -85,12 +85,12 @@ class BeatmapInterface {
     CACHED_VIRTUAL_METHODS
 #undef X
 
-    [[nodiscard]] virtual Vector2 getCursorPos() const = 0;
+    [[nodiscard]] virtual vec2 getCursorPos() const = 0;
 
-    [[nodiscard]] virtual Vector2 pixels2OsuCoords(Vector2 pixelCoords) const = 0;
-    [[nodiscard]] virtual Vector2 osuCoords2Pixels(Vector2 coords) const = 0;
-    [[nodiscard]] virtual Vector2 osuCoords2RawPixels(Vector2 coords) const = 0;
-    [[nodiscard]] virtual Vector2 osuCoords2LegacyPixels(Vector2 coords) const = 0;
+    [[nodiscard]] virtual vec2 pixels2OsuCoords(vec2 pixelCoords) const = 0;
+    [[nodiscard]] virtual vec2 osuCoords2Pixels(vec2 coords) const = 0;
+    [[nodiscard]] virtual vec2 osuCoords2RawPixels(vec2 coords) const = 0;
+    [[nodiscard]] virtual vec2 osuCoords2LegacyPixels(vec2 coords) const = 0;
 
     f64 fHpMultiplierComboEnd = 1.0;
     f64 fHpMultiplierNormal = 1.0;

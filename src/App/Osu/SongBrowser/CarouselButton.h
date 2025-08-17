@@ -36,9 +36,9 @@ class CarouselButton : public CBaseUIButton {
     void setHideIfSelected(bool hideIfSelected) { this->bHideIfSelected = hideIfSelected; }
     void setIsSearchMatch(bool isSearchMatch) { this->bIsSearchMatch = isSearchMatch; }
 
-    [[nodiscard]] Vector2 getActualOffset() const;
-    [[nodiscard]] inline Vector2 getActualSize() const { return this->vSize - 2 * this->getActualOffset(); }
-    [[nodiscard]] inline Vector2 getActualPos() const { return this->vPos + this->getActualOffset(); }
+    [[nodiscard]] vec2 getActualOffset() const;
+    [[nodiscard]] inline vec2 getActualSize() const { return this->vSize - 2.f * this->getActualOffset(); }
+    [[nodiscard]] inline vec2 getActualPos() const { return this->vPos + this->getActualOffset(); }
     inline std::vector<SongButton *> &getChildren() { return this->children; }
 
     [[nodiscard]] virtual DatabaseBeatmap *getDatabaseBeatmap() const { return nullptr; }

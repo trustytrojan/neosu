@@ -116,7 +116,7 @@ bin_PROGRAMS = neosu$(EXEEXT)
 
 @BUILD_LIBJPEG_TRUE@am__append_15 = $(shell $(PKG_CONFIG) --cflags libturbojpeg)
 @BUILD_LIBJPEG_TRUE@am__append_16 = $(shell $(PKG_CONFIG) --libs libturbojpeg)
-@BUILD_GLM_TRUE@am__append_17 = -I$(DEPS_PREFIX)/include
+@BUILD_GLM_TRUE@am__append_17 = -I$(DEPS_PREFIX)/include -fms-extensions -DGLM_ENABLE_EXPERIMENTAL -DGLM_FORCE_INLINE -DGLM_ENABLE_LANG_EXTENSIONS -DGLM_ENABLE_CXX_20
 @BUILD_LIBPNG_TRUE@am__append_18 = $(shell $(PKG_CONFIG) --cflags libpng)
 @BUILD_LIBPNG_TRUE@am__append_19 = $(shell $(PKG_CONFIG) --libs libpng)
 @BUILD_BZIP2_TRUE@am__append_20 = $(shell $(PKG_CONFIG) --cflags bzip2)

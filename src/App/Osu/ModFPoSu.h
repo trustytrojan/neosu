@@ -42,9 +42,9 @@ class ModFPoSu {
     void noclipMove();
 
     void handleInputOverrides(bool required);
-    void setMousePosCompensated(Vector2 newMousePos);
-    Vector2 intersectRayMesh(Vector3 pos, Vector3 dir);
-    Vector3 calculateUnProjectedVector(Vector2 pos);
+    void setMousePosCompensated(vec2 newMousePos);
+    vec2 intersectRayMesh(vec3 pos, vec3 dir);
+    vec3 calculateUnProjectedVector(vec2 pos);
 
     void makePlayfield();
     void makeBackgroundCube();
@@ -56,18 +56,18 @@ class ModFPoSu {
 
    private:
     struct VertexPair {
-        Vector3 a;
-        Vector3 b;
+        vec3 a{0.f};
+        vec3 b{0.f};
         float textureCoordinate;
-        Vector3 normal;
+        vec3 normal{0.f};
 
-        VertexPair(Vector3 a, Vector3 b, float tc) : a(a), b(b), textureCoordinate(tc) { ; }
+        VertexPair(vec3 a, vec3 b, float tc) : a(a), b(b), textureCoordinate(tc) { ; }
     };
 
    private:
     static float subdivide(std::list<VertexPair> &meshList, const std::list<VertexPair>::iterator &begin,
                            const std::list<VertexPair>::iterator &end, int n, float edgeDistance);
-    static Vector3 normalFromTriangle(Vector3 p1, Vector3 p2, Vector3 p3);
+    static vec3 normalFromTriangle(vec3 p1, vec3 p2, vec3 p3);
 
    private:
     VertexArrayObject *vao;
@@ -78,14 +78,14 @@ class ModFPoSu {
 
     Matrix4 modelMatrix;
     Camera *camera;
-    Vector3 vPrevNoclipCameraPos;
+    vec3 vPrevNoclipCameraPos{0.f};
     bool bKeyLeftDown;
     bool bKeyUpDown;
     bool bKeyRightDown;
     bool bKeyDownDown;
     bool bKeySpaceDown;
     bool bKeySpaceUpDown;
-    Vector3 vVelocity;
+    vec3 vVelocity{0.f};
     bool bZoomKeyDown;
     bool bZoomed;
     float fZoomFOVAnimPercent;

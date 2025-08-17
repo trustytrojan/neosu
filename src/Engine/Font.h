@@ -40,7 +40,7 @@ class McFont final : public Resource {
 
     void drawString(const UString &text);
     void beginBatch();
-    void addToBatch(const UString &text, const Vector3 &pos, Color color = 0xffffffff);
+    void addToBatch(const UString &text, const vec3 &pos, Color color = 0xffffffff);
     void flushBatch();
 
     void setSize(int fontSize) { this->iFontSize = fontSize; }
@@ -88,7 +88,7 @@ class McFont final : public Resource {
 
     struct BatchEntry {
         UString text;
-        Vector3 pos;
+        vec3 pos{0.f};
         Color color;
     };
 
@@ -115,7 +115,7 @@ class McFont final : public Resource {
     FT_Face getFontFaceForGlyph(wchar_t ch, int &fontIndex);
     bool loadGlyphFromFace(wchar_t ch, FT_Face face, int fontIndex);
 
-    void buildGlyphGeometry(const GLYPH_METRICS &gm, const Vector3 &basePos, float advanceX, size_t &vertexCount);
+    void buildGlyphGeometry(const GLYPH_METRICS &gm, const vec3 &basePos, float advanceX, size_t &vertexCount);
     void buildStringGeometry(const UString &text, size_t &vertexCount);
 
     Channel *unpackMonoBitmap(const FT_Bitmap &bitmap);
@@ -141,8 +141,8 @@ class McFont final : public Resource {
 
     VertexArrayObject vao;
     TextBatch batchQueue;
-    std::vector<Vector3> vertices;
-    std::vector<Vector2> texcoords;
+    std::vector<vec3> vertices;
+    std::vector<vec2> texcoords;
 
     TextureAtlas *textureAtlas;
 

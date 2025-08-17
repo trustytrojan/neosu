@@ -92,39 +92,39 @@ class OptionsMenuSkinPreviewElement : public CBaseUIElement {
 
             Circle::drawCircle(
                 osu->getSkin(),
-                this->vPos + Vector2(0, this->vSize.y / 2) + Vector2(this->vSize.x * (1.0f / 5.0f), 0.0f),
+                this->vPos + vec2(0, this->vSize.y / 2) + vec2(this->vSize.x * (1.0f / 5.0f), 0.0f),
                 hitcircleDiameter, numberScale, overlapScale, number, colorCounter, colorOffset, colorRGBMultiplier,
                 approachScale, approachAlpha, approachAlpha, true, false);
             Circle::drawHitResult(
                 osu->getSkin(), hitcircleDiameter, hitcircleDiameter,
-                this->vPos + Vector2(0, this->vSize.y / 2) + Vector2(this->vSize.x * (2.0f / 5.0f), 0.0f),
+                this->vPos + vec2(0, this->vSize.y / 2) + vec2(this->vSize.x * (2.0f / 5.0f), 0.0f),
                 LiveScore::HIT::HIT_100, 0.45f, 0.33f);
             Circle::drawHitResult(
                 osu->getSkin(), hitcircleDiameter, hitcircleDiameter,
-                this->vPos + Vector2(0, this->vSize.y / 2) + Vector2(this->vSize.x * (3.0f / 5.0f), 0.0f),
+                this->vPos + vec2(0, this->vSize.y / 2) + vec2(this->vSize.x * (3.0f / 5.0f), 0.0f),
                 LiveScore::HIT::HIT_50, 0.45f, 0.66f);
             Circle::drawHitResult(
                 osu->getSkin(), hitcircleDiameter, hitcircleDiameter,
-                this->vPos + Vector2(0, this->vSize.y / 2) + Vector2(this->vSize.x * (4.0f / 5.0f), 0.0f),
+                this->vPos + vec2(0, this->vSize.y / 2) + vec2(this->vSize.x * (4.0f / 5.0f), 0.0f),
                 LiveScore::HIT::HIT_MISS, 0.45f, 1.0f);
             Circle::drawApproachCircle(
                 osu->getSkin(),
-                this->vPos + Vector2(0, this->vSize.y / 2) + Vector2(this->vSize.x * (1.0f / 5.0f), 0.0f),
+                this->vPos + vec2(0, this->vSize.y / 2) + vec2(this->vSize.x * (1.0f / 5.0f), 0.0f),
                 osu->getSkin()->getComboColorForCounter(colorCounter, colorOffset), hitcircleDiameter, approachScale,
                 approachCircleAlpha, false, false);
         } else if(this->iMode == 1) {
             const int numNumbers = 6;
             for(int i = 1; i < numNumbers + 1; i++) {
                 Circle::drawHitCircleNumber(skin, numberScale, overlapScale,
-                                            this->vPos + Vector2(0, this->vSize.y / 2) +
-                                                Vector2(this->vSize.x * ((float)i / (numNumbers + 1.0f)), 0.0f),
+                                            this->vPos + vec2(0, this->vSize.y / 2) +
+                                                vec2(this->vSize.x * ((float)i / (numNumbers + 1.0f)), 0.0f),
                                             i - 1, 1.0f, 1.0f);
             }
         } else if(this->iMode == 2) {
             const int numNumbers = 6;
             for(int i = 1; i < numNumbers + 1; i++) {
-                Vector2 pos = this->vPos + Vector2(0, this->vSize.y / 2) +
-                              Vector2(this->vSize.x * ((float)i / (numNumbers + 1.0f)), 0.0f);
+                vec2 pos = this->vPos + vec2(0, this->vSize.y / 2) +
+                              vec2(this->vSize.x * ((float)i / (numNumbers + 1.0f)), 0.0f);
 
                 g->pushTransform();
                 g->scale(scoreScale, scoreScale);
@@ -174,8 +174,8 @@ class OptionsMenuSliderPreviewElement : public CBaseUIElement {
         const int numPoints = length;
         const float pointDist = length / numPoints;
 
-        static std::vector<Vector2> emptyVector;
-        std::vector<Vector2> points;
+        static std::vector<vec2> emptyVector;
+        std::vector<vec2> points;
 
         const bool useLegacyRenderer =
             (cv::options_slider_preview_use_legacy_renderer.getBool() || cv::force_legacy_slider_renderer.getBool());
@@ -203,11 +203,11 @@ class OptionsMenuSliderPreviewElement : public CBaseUIElement {
                 const float colorRGBMultiplier = 1.0f;
 
                 Circle::drawCircle(osu->getSkin(),
-                                   points[numPoints / 2] + (!useLegacyRenderer ? this->vPos : Vector2(0, 0)),
+                                   points[numPoints / 2] + (!useLegacyRenderer ? this->vPos : vec2(0, 0)),
                                    hitcircleDiameter, numberScale, overlapScale, number, colorCounter, colorOffset,
                                    colorRGBMultiplier, approachScale, approachAlpha, approachAlpha, true, false);
                 Circle::drawApproachCircle(osu->getSkin(),
-                                           points[numPoints / 2] + (!useLegacyRenderer ? this->vPos : Vector2(0, 0)),
+                                           points[numPoints / 2] + (!useLegacyRenderer ? this->vPos : vec2(0, 0)),
                                            osu->getSkin()->getComboColorForCounter(420, 0), hitcircleDiameter,
                                            approachScale, approachCircleAlpha, false, false);
             }
@@ -234,7 +234,7 @@ class OptionsMenuSliderPreviewElement : public CBaseUIElement {
 
                             if(this->vao == nullptr)
                                 this->vao =
-                                    SliderRenderer::generateVAO(points, hitcircleDiameter, Vector3(0, 0, 0), false);
+                                    SliderRenderer::generateVAO(points, hitcircleDiameter, vec3(0, 0, 0), false);
                         }
                         SliderRenderer::draw(this->vao, emptyVector, this->vPos, 1, hitcircleDiameter, 0, 1,
                                              osu->getSkin()->getComboColorForCounter(420, 0));
@@ -250,10 +250,10 @@ class OptionsMenuSliderPreviewElement : public CBaseUIElement {
                 const float colorRGBMultiplier = 1.0f;
 
                 Circle::drawSliderStartCircle(
-                    osu->getSkin(), points[0] + (!useLegacyRenderer ? this->vPos : Vector2(0, 0)), hitcircleDiameter,
+                    osu->getSkin(), points[0] + (!useLegacyRenderer ? this->vPos : vec2(0, 0)), hitcircleDiameter,
                     numberScale, overlapScale, number, colorCounter, colorOffset, colorRGBMultiplier);
                 Circle::drawSliderEndCircle(
-                    osu->getSkin(), points[points.size() - 1] + (!useLegacyRenderer ? this->vPos : Vector2(0, 0)),
+                    osu->getSkin(), points[points.size() - 1] + (!useLegacyRenderer ? this->vPos : vec2(0, 0)),
                     hitcircleDiameter, numberScale, overlapScale, number, colorCounter, colorOffset, colorRGBMultiplier,
                     1.0f, 1.0f, 0.0f, false, false);
             }
@@ -1655,7 +1655,7 @@ void OptionsMenu::onChar(KeyboardEvent &e) {
     e.consume();
 }
 
-void OptionsMenu::onResolutionChange(Vector2 newResolution) {
+void OptionsMenu::onResolutionChange(vec2 newResolution) {
     ScreenBackable::onResolutionChange(newResolution);
 
     // HACKHACK: magic
@@ -1988,7 +1988,7 @@ void OptionsMenu::updateLayout() {
 
         if(this->elemContainers[i]->resetButton != nullptr) {
             CBaseUIButton *resetButton = this->elemContainers[i]->resetButton;
-            resetButton->setSize(Vector2(35, 50) * dpiScale);
+            resetButton->setSize(vec2(35, 50) * dpiScale);
             resetButton->setRelPosY(yCounter);
             resetButton->setRelPosX(0);
         }
@@ -2397,7 +2397,7 @@ void OptionsMenu::onSkinSelect() {
             this->options->setScrollSizeToContent();
         } else {
             // Put it 50px from top, we'll move it later
-            this->contextMenu->setPos(Vector2{0, 100});
+            this->contextMenu->setPos(vec2{0, 100});
         }
 
         this->contextMenu->begin();
@@ -2416,7 +2416,7 @@ void OptionsMenu::onSkinSelect() {
 
         if(!this->bVisible) {
             // Center context menu
-            this->contextMenu->setPos(Vector2{
+            this->contextMenu->setPos(vec2{
                 osu->getScreenWidth() / 2.f - this->contextMenu->getSize().x / 2.f,
                 osu->getScreenHeight() / 2.f - this->contextMenu->getSize().y / 2.f,
             });
@@ -2446,7 +2446,7 @@ void OptionsMenu::onSkinRandom() {
 }
 
 void OptionsMenu::onResolutionSelect() {
-    std::vector<Vector2> resolutions;
+    std::vector<vec2> resolutions;
 
     // 4:3
     resolutions.emplace_back(800, 600);
@@ -2481,7 +2481,7 @@ void OptionsMenu::onResolutionSelect() {
     resolutions.emplace_back(4096, 2160);
 
     // get custom resolutions
-    std::vector<Vector2> customResolutions;
+    std::vector<vec2> customResolutions;
     std::ifstream customres(MCENGINE_DATA_DIR "cfg" PREF_PATHSEP "customres.cfg");
     std::string curLine;
     while(std::getline(customres, curLine)) {
@@ -2498,7 +2498,7 @@ void OptionsMenu::onResolutionSelect() {
     }
 
     // native resolution at the end
-    Vector2 nativeResolution = env->getNativeScreenSize();
+    vec2 nativeResolution = env->getNativeScreenSize();
     bool containsNativeResolution = false;
     for(auto resolution : resolutions) {
         if(resolution == nativeResolution) {

@@ -11,7 +11,7 @@ class UIButton;
 class PromptScreen : public OsuScreen {
    public:
     PromptScreen();
-    void onResolutionChange(Vector2 newResolution) override;
+    void onResolutionChange(vec2 newResolution) override;
 
     void draw() override;
     void mouse_update(bool *propagate_clicks) override;

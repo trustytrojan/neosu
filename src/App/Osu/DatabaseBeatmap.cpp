@@ -334,13 +334,13 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                     if(!intScan) {
                         f32 fX, fY;
                         floatScan = (Parsing::parse(curLineChar, &fX, &fY, &time, &type, &hitSound) != nullptr);
-                        if (floatScan) {
+                        if(floatScan) {
                             x = (std::isfinite(fX) && fX >= static_cast<float>(std::numeric_limits<int>::min()) &&
-                                fX <= static_cast<float>(std::numeric_limits<int>::max()))
+                                 fX <= static_cast<float>(std::numeric_limits<int>::max()))
                                     ? static_cast<int>(fX)
                                     : 0;
                             y = (std::isfinite(fY) && fY >= static_cast<float>(std::numeric_limits<int>::min()) &&
-                                fY <= static_cast<float>(std::numeric_limits<int>::max()))
+                                 fY <= static_cast<float>(std::numeric_limits<int>::max()))
                                     ? static_cast<int>(fY)
                                     : 0;
                         }
@@ -399,7 +399,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                                 // %s\n\nIn beatmap: %s", curLineChar, m_sFilePath.toUtf8())); return false;
                             }
 
-                            std::vector<Vector2> points;
+                            std::vector<vec2> points;
                             for(int i = 1; i < sliderTokens.size(); i++)  // NOTE: starting at 1 due to slider type char
                             {
                                 std::vector<UString> sliderXY = sliderTokens[i].split(":");
@@ -426,7 +426,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                             // sliders have both, and older beatmaps store the start point inside the control
                             // points)
                             {
-                                const Vector2 xy = Vector2(std::clamp<float>(x, -sliderSanityRange, sliderSanityRange),
+                                const vec2 xy = vec2(std::clamp<float>(x, -sliderSanityRange, sliderSanityRange),
                                                            std::clamp<float>(y, -sliderSanityRange, sliderSanityRange));
                                 if(points.size() > 0) {
                                     if(points[0] != xy) points.insert(points.begin(), xy);
@@ -720,7 +720,7 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(P
     result.diffobjects.reserve(c.hitcircles.size() + c.sliders.size() + c.spinners.size());
 
     for(auto &hitcircle : c.hitcircles) {
-        result.diffobjects.emplace_back(OsuDifficultyHitObject::TYPE::CIRCLE, Vector2(hitcircle.x, hitcircle.y),
+        result.diffobjects.emplace_back(OsuDifficultyHitObject::TYPE::CIRCLE, vec2(hitcircle.x, hitcircle.y),
                                         (long)hitcircle.time);
     }
 
@@ -734,14 +734,14 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(P
 
         if(!calculateStarsInaccurately) {
             result.diffobjects.emplace_back(
-                OsuDifficultyHitObject::TYPE::SLIDER, Vector2(slider.x, slider.y), slider.time,
+                OsuDifficultyHitObject::TYPE::SLIDER, vec2(slider.x, slider.y), slider.time,
                 slider.time + (long)slider.sliderTime, slider.sliderTimeWithoutRepeats, slider.type, slider.points,
                 slider.pixelLength, slider.scoringTimesForStarCalc, slider.repeat, calculateSliderCurveInConstructor);
         } else {
             result.diffobjects.emplace_back(
-                OsuDifficultyHitObject::TYPE::SLIDER, Vector2(slider.x, slider.y), slider.time,
+                OsuDifficultyHitObject::TYPE::SLIDER, vec2(slider.x, slider.y), slider.time,
                 slider.time + (long)slider.sliderTime, slider.sliderTimeWithoutRepeats, slider.type,
-                std::vector<Vector2>(),  // NOTE: ignore curve when calculating inaccurately
+                std::vector<vec2>(),  // NOTE: ignore curve when calculating inaccurately
                 slider.pixelLength,
                 std::vector<OsuDifficultyHitObject::SLIDER_SCORING_TIME>(),  // NOTE: ignore curve when calculating
                                                                              // inaccurately
@@ -751,7 +751,7 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(P
     }
 
     for(auto &spinner : c.spinners) {
-        result.diffobjects.emplace_back(OsuDifficultyHitObject::TYPE::SPINNER, Vector2(spinner.x, spinner.y),
+        result.diffobjects.emplace_back(OsuDifficultyHitObject::TYPE::SPINNER, vec2(spinner.x, spinner.y),
                                         (long)spinner.time, (long)spinner.endTime);
     }
 
@@ -820,24 +820,23 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(P
 
                         if(objectI->time - (approachTime * c.stackLeniency) > (objectN->endTime)) break;
 
-                        Vector2 objectNEndPosition =
+                        vec2 objectNEndPosition =
                             objectN->getOriginalRawPosAt(objectN->time + objectN->getDuration());
                         if(objectN->getDuration() != 0 &&
-                           (objectNEndPosition - objectI->getOriginalRawPosAt(objectI->time)).length() <
+                           vec::length(objectNEndPosition - objectI->getOriginalRawPosAt(objectI->time)) <
                                STACK_LENIENCE) {
                             int offset = objectI->stack - objectN->stack + 1;
                             for(int j = n + 1; j <= i; j++) {
-                                if((objectNEndPosition -
-                                    result.diffobjects[j].getOriginalRawPosAt(result.diffobjects[j].time))
-                                       .length() < STACK_LENIENCE)
+                                if(vec::length(objectNEndPosition - result.diffobjects[j].getOriginalRawPosAt(
+                                                                        result.diffobjects[j].time)) < STACK_LENIENCE)
                                     result.diffobjects[j].stack = (result.diffobjects[j].stack - offset);
                             }
 
                             break;
                         }
 
-                        if((objectN->getOriginalRawPosAt(objectN->time) - objectI->getOriginalRawPosAt(objectI->time))
-                               .length() < STACK_LENIENCE) {
+                        if(vec::length(objectN->getOriginalRawPosAt(objectN->time) -
+                                       objectI->getOriginalRawPosAt(objectI->time)) < STACK_LENIENCE) {
                             objectN->stack = (objectI->stack + 1);
                             objectI = objectN;
                         }
@@ -852,11 +851,10 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(P
 
                         if(objectI->time - (approachTime * c.stackLeniency) > objectN->time) break;
 
-                        if(((objectN->getDuration() != 0
-                                 ? objectN->getOriginalRawPosAt(objectN->time + objectN->getDuration())
-                                 : objectN->getOriginalRawPosAt(objectN->time)) -
-                            objectI->getOriginalRawPosAt(objectI->time))
-                               .length() < STACK_LENIENCE) {
+                        if(vec::length((objectN->getDuration() != 0
+                                            ? objectN->getOriginalRawPosAt(objectN->time + objectN->getDuration())
+                                            : objectN->getOriginalRawPosAt(objectN->time)) -
+                                       objectI->getOriginalRawPosAt(objectI->time)) < STACK_LENIENCE) {
                             objectN->stack = (objectI->stack + 1);
                             objectI = objectN;
                         }
@@ -885,17 +883,16 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(P
 
                     // "The start position of the hitobject, or the position at the end of the path if the hitobject is
                     // a slider"
-                    Vector2 position2 =
+                    vec2 position2 =
                         isSlider
                             ? currHitObject->getOriginalRawPosAt(currHitObject->time + currHitObject->getDuration())
                             : currHitObject->getOriginalRawPosAt(currHitObject->time);
 
-                    if((objectJ->getOriginalRawPosAt(objectJ->time) -
-                        currHitObject->getOriginalRawPosAt(currHitObject->time))
-                           .length() < 3) {
+                    if(vec::length(objectJ->getOriginalRawPosAt(objectJ->time) -
+                        currHitObject->getOriginalRawPosAt(currHitObject->time)) < 3) {
                         currHitObject->stack++;
                         startTime = objectJ->time + objectJ->getDuration();
-                    } else if((objectJ->getOriginalRawPosAt(objectJ->time) - position2).length() < 3) {
+                    } else if(vec::length(objectJ->getOriginalRawPosAt(objectJ->time) - position2) < 3) {
                         // "Case for sliders - bump notes down and right, rather than up and left."
                         sliderStack++;
                         objectJ->stack -= sliderStack;

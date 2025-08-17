@@ -75,7 +75,7 @@ void PauseMenu::draw() {
 
         if(image != osu->getSkin()->getMissingTexture()) {
             const float scale = Osu::getImageScaleToFillResolution(image, osu->getScreenSize());
-            const Vector2 centerTrans = (osu->getScreenSize() / 2);
+            const vec2 centerTrans = (osu->getScreenSize() / 2.f);
 
             g->setColor(argb(this->fDimAnim, 1.0f, 1.0f, 1.0f));
             g->pushTransform();
@@ -105,12 +105,12 @@ void PauseMenu::draw() {
 
         g->setColor(Color(arrowColor).setA(this->fWarningArrowsAnimAlpha * this->fDimAnim));
 
-        osu->getHUD()->drawWarningArrow(Vector2(this->fWarningArrowsAnimX, this->fWarningArrowsAnimY) +
-                                            Vector2(0, this->selectedButton->getSize().y / 2) - Vector2(offset, 0),
+        osu->getHUD()->drawWarningArrow(vec2(this->fWarningArrowsAnimX, this->fWarningArrowsAnimY) +
+                                            vec2(0, this->selectedButton->getSize().y / 2) - vec2(offset, 0),
                                         false, false);
         osu->getHUD()->drawWarningArrow(
-            Vector2(osu->getScreenWidth() - this->fWarningArrowsAnimX, this->fWarningArrowsAnimY) +
-                Vector2(0, this->selectedButton->getSize().y / 2) + Vector2(offset, 0),
+            vec2(osu->getScreenWidth() - this->fWarningArrowsAnimX, this->fWarningArrowsAnimY) +
+                vec2(0, this->selectedButton->getSize().y / 2) + vec2(offset, 0),
             true, false);
     }
 }
@@ -309,8 +309,8 @@ void PauseMenu::updateLayout() {
     }
 
     for(int i = 0; i < this->buttons.size(); i++) {
-        Vector2 newPos =
-            Vector2(osu->getScreenWidth() / 2.0f - maxWidth / 2, (i + 1) * height - height / 2.0f - maxHeight / 2.0f);
+        vec2 newPos =
+            vec2(osu->getScreenWidth() / 2.0f - maxWidth / 2, (i + 1) * height - height / 2.0f - maxHeight / 2.0f);
 
         const float pinch = std::max(0.0f, (height / 2.0f - maxHeight / 2.0f));
         if((float)i < half)
@@ -325,7 +325,7 @@ void PauseMenu::updateLayout() {
     this->onSelectionChange();
 }
 
-void PauseMenu::onResolutionChange(Vector2 newResolution) {
+void PauseMenu::onResolutionChange(vec2 newResolution) {
     this->setSize(newResolution);
     this->updateLayout();
 }

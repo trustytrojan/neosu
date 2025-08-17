@@ -10,7 +10,7 @@
 
 
 
-SkinImage::SkinImage(Skin *skin, const std::string& skinElementName, Vector2 baseSizeForScaling2x, float osuSize,
+SkinImage::SkinImage(Skin *skin, const std::string& skinElementName, vec2 baseSizeForScaling2x, float osuSize,
                      const std::string& animationSeparator, bool ignoreDefaultSkin) {
     this->skin = skin;
     this->vBaseSizeForScaling2x = baseSizeForScaling2x;
@@ -223,7 +223,7 @@ SkinImage::~SkinImage() {
     this->filepathsForExport.clear();
 }
 
-void SkinImage::draw(Vector2 pos, float scale) {
+void SkinImage::draw(vec2 pos, float scale) {
     if(this->images.size() < 1) return;
 
     scale *= this->getScale();  // auto scale to current resolution
@@ -269,7 +269,7 @@ void SkinImage::draw(Vector2 pos, float scale) {
     g->popTransform();
 }
 
-void SkinImage::drawRaw(Vector2 pos, float scale, AnchorPoint anchor) {
+void SkinImage::drawRaw(vec2 pos, float scale, AnchorPoint anchor) {
     if(this->images.size() < 1) return;
 
     g->pushTransform();
@@ -363,18 +363,18 @@ void SkinImage::setAnimationFrameClampUp() {
         this->iFrameCounter = this->images.size() - 1;
 }
 
-Vector2 SkinImage::getSize() {
+vec2 SkinImage::getSize() {
     if(this->images.size() > 0)
         return this->getImageForCurrentFrame().img->getSize() * this->getScale();
     else
         return this->getSizeBase();
 }
 
-Vector2 SkinImage::getSizeBase() { return this->vBaseSizeForScaling2x * this->getResolutionScale(); }
+vec2 SkinImage::getSizeBase() { return this->vBaseSizeForScaling2x * this->getResolutionScale(); }
 
-Vector2 SkinImage::getSizeBaseRaw() { return this->vBaseSizeForScaling2x * this->getImageForCurrentFrame().scale; }
+vec2 SkinImage::getSizeBaseRaw() { return this->vBaseSizeForScaling2x * this->getImageForCurrentFrame().scale; }
 
-Vector2 SkinImage::getImageSizeForCurrentFrame() { return this->getImageForCurrentFrame().img->getSize(); }
+vec2 SkinImage::getImageSizeForCurrentFrame() { return this->getImageForCurrentFrame().img->getSize(); }
 
 float SkinImage::getScale() { return this->getImageScale() * this->getResolutionScale(); }
 

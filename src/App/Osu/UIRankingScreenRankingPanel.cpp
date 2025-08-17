@@ -52,9 +52,9 @@ void UIRankingScreenRankingPanel::draw() {
     g->popTransform();
 
     // draw hit images
-    const Vector2 hitImageStartPos = Vector2(40, 100 + globalYOffsetRaw);
-    const Vector2 hitGridOffsetX = Vector2(200, 0);
-    const Vector2 hitGridOffsetY = Vector2(0, 60);
+    const vec2 hitImageStartPos = vec2(40, 100 + globalYOffsetRaw);
+    const vec2 hitGridOffsetX = vec2(200, 0);
+    const vec2 hitGridOffsetY = vec2(0, 60);
 
     this->drawHitImage(osu->getSkin()->getHit300(), scale, hitImageStartPos);
     this->drawHitImage(osu->getSkin()->getHit100(), scale, hitImageStartPos + hitGridOffsetY);
@@ -64,7 +64,7 @@ void UIRankingScreenRankingPanel::draw() {
     this->drawHitImage(osu->getSkin()->getHit0(), scale, hitImageStartPos + hitGridOffsetX + hitGridOffsetY * 2);
 
     // draw numHits
-    const Vector2 numHitStartPos = hitImageStartPos + Vector2(40, osu->getSkin()->getVersion() > 1.0f ? -16 : -25);
+    const vec2 numHitStartPos = hitImageStartPos + vec2(40, osu->getSkin()->getVersion() > 1.0f ? -16 : -25);
     scale = osu->getImageScale(osu->getSkin()->getScore0(), 17.0f) * globalScoreScale;
 
     this->drawNumHits(this->iNum300s, scale, numHitStartPos);
@@ -91,8 +91,8 @@ void UIRankingScreenRankingPanel::draw() {
     g->popTransform();
 
     // draw maxcombo label
-    Vector2 hardcodedOsuRankingMaxComboImageSize =
-        Vector2(162, 50) * (osu->getSkin()->isRankingMaxCombo2x() ? 2.0f : 1.0f);
+    vec2 hardcodedOsuRankingMaxComboImageSize =
+        vec2(162, 50) * (osu->getSkin()->isRankingMaxCombo2x() ? 2.0f : 1.0f);
     scale = osu->getImageScale(hardcodedOsuRankingMaxComboImageSize, 32.0f) * uiScale;
     g->pushTransform();
     {
@@ -117,8 +117,8 @@ void UIRankingScreenRankingPanel::draw() {
     g->popTransform();
 
     // draw accuracy label
-    Vector2 hardcodedOsuRankingAccuracyImageSize =
-        Vector2(192, 58) * (osu->getSkin()->isRankingAccuracy2x() ? 2.0f : 1.0f);
+    vec2 hardcodedOsuRankingAccuracyImageSize =
+        vec2(192, 58) * (osu->getSkin()->isRankingAccuracy2x() ? 2.0f : 1.0f);
     scale = osu->getImageScale(hardcodedOsuRankingAccuracyImageSize, 36.0f) * uiScale;
     g->pushTransform();
     {
@@ -135,25 +135,25 @@ void UIRankingScreenRankingPanel::draw() {
         scale = osu->getImageScale(osu->getSkin()->getRankingPerfect()->getSizeBaseRaw(), 94.0f) * uiScale;
         osu->getSkin()->getRankingPerfect()->drawRaw(
             this->vPos +
-                Vector2(osu->getUIScale(osu->getSkin()->getVersion() > 1.0f ? 260 : 200),
+                vec2(osu->getUIScale(osu->getSkin()->getVersion() > 1.0f ? 260 : 200),
                         osu->getUIScale(430.0f) + globalYOffset) *
-                    Vector2(1.0f, 0.97f) * uiScale -
-                Vector2(0, osu->getSkin()->getRankingPerfect()->getSizeBaseRaw().y) * scale * 0.5f,
+                    vec2(1.0f, 0.97f) * uiScale -
+                vec2(0, osu->getSkin()->getRankingPerfect()->getSizeBaseRaw().y) * scale * 0.5f,
             scale);
     }
 }
 
-void UIRankingScreenRankingPanel::drawHitImage(SkinImage *img, float  /*scale*/, Vector2 pos) {
+void UIRankingScreenRankingPanel::drawHitImage(SkinImage *img, float  /*scale*/, vec2 pos) {
     const float uiScale = /*cv::ui_scale.getFloat()*/ 1.0f;  // NOTE: commented for now, doesn't really work due to
                                                             // legacy layout expectations
 
     /// img->setAnimationFrameForce(0);
     img->draw(
-        Vector2(this->vPos.x + osu->getUIScale(pos.x) * uiScale, this->vPos.y + osu->getUIScale(pos.y) * uiScale),
+        vec2(this->vPos.x + osu->getUIScale(pos.x) * uiScale, this->vPos.y + osu->getUIScale(pos.y) * uiScale),
         uiScale);
 }
 
-void UIRankingScreenRankingPanel::drawNumHits(int numHits, float scale, Vector2 pos) {
+void UIRankingScreenRankingPanel::drawNumHits(int numHits, float scale, vec2 pos) {
     const float uiScale = /*cv::ui_scale.getFloat()*/ 1.0f;  // NOTE: commented for now, doesn't really work due to
                                                             // legacy layout expectations
 

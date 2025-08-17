@@ -9,7 +9,7 @@ class RenderTarget : public Resource {
    public:
     RenderTarget(int x, int y, int width, int height,
                  Graphics::MULTISAMPLE_TYPE multiSampleType = Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_0X)
-        : vPos(Vector2{x, y}), vSize(width, height), multiSampleType(multiSampleType) {}
+        : vPos(vec2{x, y}), vSize(width, height), multiSampleType(multiSampleType) {}
     ~RenderTarget() override { ; }
 
     virtual void draw(int x, int y);
@@ -32,7 +32,7 @@ class RenderTarget : public Resource {
         this->vPos.x = x;
         this->vPos.y = y;
     }
-    void setPos(Vector2 pos) { this->vPos = pos; }
+    void setPos(vec2 pos) { this->vPos = pos; }
     void setColor(Color color) { this->color = color; }
     void setClearColor(Color clearColor) { this->clearColor = clearColor; }
     void setClearColorOnDraw(bool clearColorOnDraw) { this->bClearColorOnDraw = clearColorOnDraw; }
@@ -41,8 +41,8 @@ class RenderTarget : public Resource {
     // get
     [[nodiscard]] float getWidth() const { return this->vSize.x; }
     [[nodiscard]] float getHeight() const { return this->vSize.y; }
-    [[nodiscard]] inline Vector2 getSize() const { return this->vSize; }
-    [[nodiscard]] inline Vector2 getPos() const { return this->vPos; }
+    [[nodiscard]] inline vec2 getSize() const { return this->vSize; }
+    [[nodiscard]] inline vec2 getPos() const { return this->vPos; }
     [[nodiscard]] inline Graphics::MULTISAMPLE_TYPE getMultiSampleType() const { return this->multiSampleType; }
 
     [[nodiscard]] inline bool isMultiSampled() const {
@@ -60,8 +60,8 @@ class RenderTarget : public Resource {
     void initAsync() override = 0;
     void destroy() override = 0;
 
-    Vector2 vPos;
-    Vector2 vSize;
+    vec2 vPos{0.f};
+    vec2 vSize{0.f};
 
     Color color{static_cast<uint32_t>(-1)};
     Color clearColor{0};

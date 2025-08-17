@@ -423,8 +423,8 @@ void ModSelector::draw() {
 
     if(bancho->is_in_a_multi_room()) {
         // get mod button element bounds
-        Vector2 modGridButtonsStart = Vector2(osu->getScreenWidth(), osu->getScreenHeight());
-        Vector2 modGridButtonsSize = Vector2(0, osu->getScreenHeight());
+        vec2 modGridButtonsStart = vec2(osu->getScreenWidth(), osu->getScreenHeight());
+        vec2 modGridButtonsSize = vec2(0, osu->getScreenHeight());
         for(auto button : this->modButtons) {
             if(button->getPos().x < modGridButtonsStart.x) modGridButtonsStart.x = button->getPos().x;
             if(button->getPos().y < modGridButtonsStart.y) modGridButtonsStart.y = button->getPos().y;
@@ -449,8 +449,8 @@ void ModSelector::draw() {
         // if we are in compact mode, draw some backgrounds under the override sliders & mod grid buttons
 
         // get override slider element bounds
-        Vector2 overrideSlidersStart = Vector2(osu->getScreenWidth(), 0);
-        Vector2 overrideSlidersSize;
+        vec2 overrideSlidersStart = vec2(osu->getScreenWidth(), 0);
+        vec2 overrideSlidersSize{0.f};
         for(auto &overrideSlider : this->overrideSliders) {
             CBaseUIButton *desc = overrideSlider.desc;
             CBaseUILabel *label = overrideSlider.label;
@@ -465,8 +465,8 @@ void ModSelector::draw() {
         overrideSlidersSize.x -= overrideSlidersStart.x;
 
         // get mod button element bounds
-        Vector2 modGridButtonsStart = Vector2(osu->getScreenWidth(), osu->getScreenHeight());
-        Vector2 modGridButtonsSize = Vector2(0, osu->getScreenHeight());
+        vec2 modGridButtonsStart = vec2(osu->getScreenWidth(), osu->getScreenHeight());
+        vec2 modGridButtonsSize = vec2(0, osu->getScreenHeight());
         for(auto button : this->modButtons) {
             if(button->getPos().x < modGridButtonsStart.x) modGridButtonsStart.x = button->getPos().x;
             if(button->getPos().y < modGridButtonsStart.y) modGridButtonsStart.y = button->getPos().y;
@@ -788,11 +788,11 @@ void ModSelector::updateLayout() {
     if(!this->isInCompactMode())  // normal layout
     {
         // mod grid buttons
-        Vector2 center = osu->getScreenSize() / 2.0f;
-        Vector2 size = osu->getSkin()->getSelectionModEasy()->getSizeBase() * uiScale;
-        Vector2 offset = Vector2(size.x * 1.0f, size.y * 0.25f);
-        Vector2 start =
-            Vector2(center.x - (size.x * this->iGridWidth) / 2.0f - (offset.x * (this->iGridWidth - 1)) / 2.0f,
+        vec2 center = osu->getScreenSize() / 2.0f;
+        vec2 size = osu->getSkin()->getSelectionModEasy()->getSizeBase() * uiScale;
+        vec2 offset = vec2(size.x * 1.0f, size.y * 0.25f);
+        vec2 start =
+            vec2(center.x - (size.x * this->iGridWidth) / 2.0f - (offset.x * (this->iGridWidth - 1)) / 2.0f,
                     center.y - (size.y * this->iGridHeight) / 2.0f - (offset.y * (this->iGridHeight - 1)) / 2.0f);
 
         for(int x = 0; x < this->iGridWidth; x++) {
@@ -800,7 +800,7 @@ void ModSelector::updateLayout() {
                 UIModSelectorModButton *button = this->getModButtonOnGrid(x, y);
 
                 if(button != nullptr) {
-                    button->setPos(start + Vector2(size.x * x + offset.x * x, size.y * y + offset.y * y));
+                    button->setPos(start + vec2(size.x * x + offset.x * x, size.y * y + offset.y * y));
                     button->setBaseScale(1.0f * uiScale, 1.0f * uiScale);
                     button->setSize(size);
                 }
@@ -814,8 +814,8 @@ void ModSelector::updateLayout() {
         const int overrideSliderOffsetY =
             ((start.y - this->overrideSliders.size() * overrideSliderHeight) / (this->overrideSliders.size() - 1)) *
             0.35f;
-        const Vector2 overrideSliderStart =
-            Vector2(osu->getScreenWidth() / 2 - overrideSliderWidth / 2,
+        const vec2 overrideSliderStart =
+            vec2(osu->getScreenWidth() / 2 - overrideSliderWidth / 2,
                     start.y / 2 - (this->overrideSliders.size() * overrideSliderHeight +
                                    (this->overrideSliders.size() - 1) * overrideSliderOffsetY) /
                                       1.75f);
@@ -850,9 +850,9 @@ void ModSelector::updateLayout() {
         // action buttons
         float actionMinY = start.y + size.y * this->iGridHeight +
                            offset.y * (this->iGridHeight - 1);  // exact bottom of the mod buttons
-        Vector2 actionSize = Vector2(osu->getUIScale(448.0f) * uiScale, size.y * 0.75f);
+        vec2 actionSize = vec2(osu->getUIScale(448.0f) * uiScale, size.y * 0.75f);
         float actionOffsetY = actionSize.y * 0.5f;
-        Vector2 actionStart = Vector2(
+        vec2 actionStart = vec2(
             osu->getScreenWidth() / 2.0f - actionSize.x / 2.0f,
             actionMinY + (osu->getScreenHeight() - actionMinY) / 2.0f -
                 (actionSize.y * this->actionButtons.size() + actionOffsetY * (this->actionButtons.size() - 1)) / 2.0f);
@@ -869,31 +869,31 @@ void ModSelector::updateLayout() {
 
         this->nonVanillaWarning->setVisible(!convar->isVanilla() && bancho->can_submit_scores());
         this->nonVanillaWarning->setSizeToContent();
-        this->nonVanillaWarning->setSize(Vector2(osu->getScreenWidth(), 20 * uiScale));
+        this->nonVanillaWarning->setSize(vec2(osu->getScreenWidth(), 20 * uiScale));
         this->nonVanillaWarning->setPos(
             0, modGridMaxY + std::abs(actionStart.y - modGridMaxY) / 2 - this->nonVanillaWarning->getSize().y);
 
         this->scoreMultiplierLabel->setVisible(true);
         this->scoreMultiplierLabel->setSizeToContent();
-        this->scoreMultiplierLabel->setSize(Vector2(osu->getScreenWidth(), 30 * uiScale));
+        this->scoreMultiplierLabel->setSize(vec2(osu->getScreenWidth(), 30 * uiScale));
         this->scoreMultiplierLabel->setPos(0, this->nonVanillaWarning->getPos().y + 20 * uiScale);
     } else  // compact in-beatmap mode
     {
         // mod grid buttons
-        Vector2 center = osu->getScreenSize() / 2.0f;
-        Vector2 blockSize = osu->getSkin()->getSelectionModEasy()->getSizeBase() * uiScale;
-        Vector2 offset = Vector2(blockSize.x * 0.15f, blockSize.y * 0.05f);
-        Vector2 size = Vector2((blockSize.x * this->iGridWidth) + (offset.x * (this->iGridWidth - 1)),
+        vec2 center = osu->getScreenSize() / 2.0f;
+        vec2 blockSize = osu->getSkin()->getSelectionModEasy()->getSizeBase() * uiScale;
+        vec2 offset = vec2(blockSize.x * 0.15f, blockSize.y * 0.05f);
+        vec2 size = vec2((blockSize.x * this->iGridWidth) + (offset.x * (this->iGridWidth - 1)),
                                (blockSize.y * this->iGridHeight) + (offset.y * (this->iGridHeight - 1)));
         center.y = osu->getScreenHeight() - size.y / 2 - offset.y * 3.0f;
-        Vector2 start = Vector2(center.x - size.x / 2.0f, center.y - size.y / 2.0f);
+        vec2 start = vec2(center.x - size.x / 2.0f, center.y - size.y / 2.0f);
 
         for(int x = 0; x < this->iGridWidth; x++) {
             for(int y = 0; y < this->iGridHeight; y++) {
                 UIModSelectorModButton *button = this->getModButtonOnGrid(x, y);
 
                 if(button != nullptr) {
-                    button->setPos(start + Vector2(blockSize.x * x + offset.x * x, blockSize.y * y + offset.y * y));
+                    button->setPos(start + vec2(blockSize.x * x + offset.x * x, blockSize.y * y + offset.y * y));
                     button->setBaseScale(1 * uiScale, 1 * uiScale);
                     button->setSize(blockSize);
                 }
@@ -905,7 +905,7 @@ void ModSelector::updateLayout() {
         int overrideSliderWidth = osu->getUIScale(250.0f);
         int overrideSliderHeight = 25 * dpiScale;
         int overrideSliderOffsetY = 5 * dpiScale;
-        Vector2 overrideSliderStart = Vector2(osu->getScreenWidth() / 2 - overrideSliderWidth / 2, 5 * dpiScale);
+        vec2 overrideSliderStart = vec2(osu->getScreenWidth() / 2 - overrideSliderWidth / 2, 5 * dpiScale);
         for(int i = 0; i < this->overrideSliders.size(); i++) {
             this->overrideSliders[i].desc->setSizeToContent(5 * dpiScale, 0);
             this->overrideSliders[i].desc->setSizeY(overrideSliderHeight);
@@ -1495,7 +1495,7 @@ void ModSelector::onCheckboxChange(CBaseUICheckbox *checkbox) {
     osu->updateMods();
 }
 
-void ModSelector::onResolutionChange(Vector2 newResolution) {
+void ModSelector::onResolutionChange(vec2 newResolution) {
     this->setSize(newResolution);
     this->overrideSliderContainer->setSize(newResolution);
     this->experimentalContainer->setSizeY(newResolution.y + 1);

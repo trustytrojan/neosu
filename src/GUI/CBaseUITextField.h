@@ -44,7 +44,7 @@ class CBaseUITextField : public CBaseUIScrollView {
             this->textColor = textColor;
             return this;
         }
-        CBaseUIElement *setParentSize(Vector2 parentSize) {
+        CBaseUIElement *setParentSize(vec2 parentSize) {
             this->vParentSize = parentSize;
             this->onResized();
             return this;
@@ -62,7 +62,7 @@ class CBaseUITextField : public CBaseUIScrollView {
 
         UString sText;
         McFont *font;
-        Vector2 vParentSize;
+        vec2 vParentSize{0.f};
 
         Color textColor;
 

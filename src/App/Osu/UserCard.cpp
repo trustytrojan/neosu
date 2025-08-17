@@ -65,7 +65,7 @@ void UserCard::draw() {
         g->pushTransform();
         {
             const float scale =
-                Osu::getImageScaleToFillResolution(osu->getSkin()->getUserIcon(), Vector2(iconWidth, iconHeight));
+                Osu::getImageScaleToFillResolution(osu->getSkin()->getUserIcon(), vec2(iconWidth, iconHeight));
             g->scale(scale, scale);
             g->translate(this->vPos.x + iconWidth / 2 + 1, this->vPos.y + iconHeight / 2 + 1);
             g->drawImage(osu->getSkin()->getUserIcon());
@@ -181,11 +181,11 @@ void UserCard::draw() {
 
             const float performanceDeltaStringWidth = deltaFont->getStringWidth(performanceDeltaString) * scale;
 
-            const Vector2 backgroundSize =
-                Vector2(performanceDeltaStringWidth + border, deltaFont->getHeight() * scale + border * 3);
-            const Vector2 pos =
-                Vector2(this->vPos.x + this->vSize.x - performanceDeltaStringWidth - border, this->vPos.y + border);
-            const Vector2 textPos = Vector2(pos.x, pos.y + deltaFont->getHeight() * scale);
+            const vec2 backgroundSize =
+                vec2(performanceDeltaStringWidth + border, deltaFont->getHeight() * scale + border * 3);
+            const vec2 pos =
+                vec2(this->vPos.x + this->vSize.x - performanceDeltaStringWidth - border, this->vPos.y + border);
+            const vec2 textPos = vec2(pos.x, pos.y + deltaFont->getHeight() * scale);
 
             // background (to ensure readability even with stupid long usernames)
             g->setColor(argb(1.0f - (1.0f - this->fPPDeltaAnim) * (1.0f - this->fPPDeltaAnim), 0.f, 0.f, 0.f));

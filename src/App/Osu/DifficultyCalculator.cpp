@@ -10,15 +10,15 @@
 #include "Osu.h"
 #include "SliderCurves.h"
 
-OsuDifficultyHitObject::OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time)
+OsuDifficultyHitObject::OsuDifficultyHitObject(TYPE type, vec2 pos, i32 time)
     : OsuDifficultyHitObject(type, pos, time, time) {}
 
-OsuDifficultyHitObject::OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time, i32 endTime)
-    : OsuDifficultyHitObject(type, pos, time, endTime, 0.0f, '\0', std::vector<Vector2>(), 0.0f,
+OsuDifficultyHitObject::OsuDifficultyHitObject(TYPE type, vec2 pos, i32 time, i32 endTime)
+    : OsuDifficultyHitObject(type, pos, time, endTime, 0.0f, '\0', std::vector<vec2>(), 0.0f,
                              std::vector<SLIDER_SCORING_TIME>(), 0, true) {}
 
-OsuDifficultyHitObject::OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time, i32 endTime, f32 spanDuration,
-                                               i8 osuSliderCurveType, const std::vector<Vector2> &controlPoints,
+OsuDifficultyHitObject::OsuDifficultyHitObject(TYPE type, vec2 pos, i32 time, i32 endTime, f32 spanDuration,
+                                               i8 osuSliderCurveType, const std::vector<vec2> &controlPoints,
                                                f32 pixelLength, std::vector<SLIDER_SCORING_TIME> scoringTimes,
                                                i32 repeats, bool calculateSliderCurveInConstructor) {
     this->type = type;
@@ -134,7 +134,7 @@ OsuDifficultyHitObject &OsuDifficultyHitObject::operator=(OsuDifficultyHitObject
 void OsuDifficultyHitObject::updateStackPosition(f32 stackOffset) {
     this->scheduledCurveAllocStackOffset = stackOffset;
 
-    this->pos = this->originalPos - Vector2(this->stack * stackOffset, this->stack * stackOffset);
+    this->pos = this->originalPos - vec2(this->stack * stackOffset, this->stack * stackOffset);
 
     this->updateCurveStackPosition(stackOffset);
 }
@@ -143,7 +143,7 @@ void OsuDifficultyHitObject::updateCurveStackPosition(f32 stackOffset) {
     if(this->curve != nullptr) this->curve->updateStackPosition(this->stack * stackOffset, false);
 }
 
-Vector2 OsuDifficultyHitObject::getOriginalRawPosAt(i32 pos) {
+vec2 OsuDifficultyHitObject::getOriginalRawPosAt(i32 pos) {
     // NOTE: the delayed curve creation has been deliberately disabled here for stacking purposes for beatmaps with
     // insane slider counts for performance reasons NOTE: this means that these aspire maps will have incorrect stars
     // due to incorrect slider stacking, but the delta is below 0.02 even for the most insane maps which currently exist
@@ -266,11 +266,11 @@ f64 DifficultyCalculator::calculateStarDiffForHitObjectsInt(std::vector<DiffObje
 
             slider.lazyEndPos = slider.ho->curve->pointAt(endTimeMin);
 
-            Vector2 cursor_pos = slider.ho->pos;
+            vec2 cursor_pos = slider.ho->pos;
             f64 scaling_factor = 50.0 / circleRadius;
 
             for(size_t i = 0; i < slider.ho->scoringTimes.size(); i++) {
-                Vector2 diff;
+                vec2 diff{0.f};
 
                 if(slider.ho->scoringTimes[i].type == OsuDifficultyHitObject::SLIDER_SCORING_TIME::TYPE::END) {
                     // NOTE: In lazer, the position of the slider end is at the visual end, but the time is at the
@@ -288,15 +288,15 @@ f64 DifficultyCalculator::calculateStarDiffForHitObjectsInt(std::vector<DiffObje
                     diff = slider.ho->curve->pointAt(progress) - cursor_pos;
                 }
 
-                f64 diff_len = scaling_factor * diff.length();
+                f64 diff_len = scaling_factor * vec::length(diff);
 
                 f64 req_diff = 90.0;
 
                 if(i == slider.ho->scoringTimes.size() - 1) {
                     // Slider end
-                    Vector2 lazy_diff = slider.lazyEndPos - cursor_pos;
-                    if(lazy_diff.length() < diff.length()) diff = lazy_diff;
-                    diff_len = scaling_factor * diff.length();
+                    vec2 lazy_diff = slider.lazyEndPos - cursor_pos;
+                    if(vec::length(lazy_diff) < vec::length(diff)) diff = lazy_diff;
+                    diff_len = scaling_factor * vec::length(diff);
                 } else if(slider.ho->scoringTimes[i].type ==
                           OsuDifficultyHitObject::SLIDER_SCORING_TIME::TYPE::REPEAT) {
                     // Slider repeat
@@ -315,7 +315,7 @@ f64 DifficultyCalculator::calculateStarDiffForHitObjectsInt(std::vector<DiffObje
             slider.lazyCalcFinished = true;
         }
 
-        static Vector2 getEndCursorPosition(DiffObject &hitObject, f32 circleRadius) {
+        static vec2 getEndCursorPosition(DiffObject &hitObject, f32 circleRadius) {
             if(hitObject.ho->type == OsuDifficultyHitObject::TYPE::SLIDER) {
                 computeSliderCursorPosition(hitObject, circleRadius);
                 return hitObject
@@ -385,11 +385,11 @@ f64 DifficultyCalculator::calculateStarDiffForHitObjectsInt(std::vector<DiffObje
                    prev1.ho->type == OsuDifficultyHitObject::TYPE::SPINNER)
                     continue;
 
-                const Vector2 lastCursorPosition = DistanceCalc::getEndCursorPosition(prev1, circleRadiusInOsuPixels);
+                const vec2 lastCursorPosition = DistanceCalc::getEndCursorPosition(prev1, circleRadiusInOsuPixels);
 
                 f64 cur_strain_time =
                     (f64)std::max(cur.ho->time - prev1.ho->time, 25);  // strain_time isn't initialized here
-                cur.jumpDistance = (cur.norm_start - lastCursorPosition * radius_scaling_factor).length();
+                cur.jumpDistance = vec::length((cur.norm_start - lastCursorPosition * radius_scaling_factor));
                 cur.minJumpDistance = cur.jumpDistance;
                 cur.minJumpTime = cur_strain_time;
 
@@ -401,8 +401,9 @@ f64 DifficultyCalculator::calculateStarDiffForHitObjectsInt(std::vector<DiffObje
                     // NOTE: the curve can be null if controlPoints.size() < 1 because the OsuDifficultyHitObject()
                     // constructor will then not set scheduledCurveAlloc to true (which is perfectly fine and correct)
                     f32 tail_jump_dist =
-                        (prev1.ho->curve ? prev1.ho->curve->pointAt(prev1.ho->repeats % 2 ? 1.0 : 0.0) : prev1.ho->pos)
-                            .distance(cur.ho->pos) *
+                        vec::distance((prev1.ho->curve ? prev1.ho->curve->pointAt(prev1.ho->repeats % 2 ? 1.0 : 0.0)
+                                                       : prev1.ho->pos),
+                                      cur.ho->pos) *
                         radius_scaling_factor;
                     cur.minJumpDistance = std::max(
                         0.0f, std::min((f32)cur.minJumpDistance - (maximum_slider_radius - assumed_slider_radius),
@@ -414,7 +415,7 @@ f64 DifficultyCalculator::calculateStarDiffForHitObjectsInt(std::vector<DiffObje
                     DiffObject &prev2 = diffObjects[i - 2];
                     if(prev2.ho->type == OsuDifficultyHitObject::TYPE::SPINNER) continue;
 
-                    const Vector2 lastLastCursorPosition =
+                    const vec2 lastLastCursorPosition =
                         DistanceCalc::getEndCursorPosition(prev2, circleRadiusInOsuPixels);
 
                     // MCKAY:
@@ -429,10 +430,10 @@ f64 DifficultyCalculator::calculateStarDiffForHitObjectsInt(std::vector<DiffObje
                         }
                     }
 
-                    const Vector2 v1 = lastLastCursorPosition - prev1.ho->pos;
-                    const Vector2 v2 = cur.ho->pos - lastCursorPosition;
+                    const vec2 v1 = lastLastCursorPosition - prev1.ho->pos;
+                    const vec2 v2 = cur.ho->pos - lastCursorPosition;
 
-                    const f64 dot = v1.dot(v2);
+                    const f64 dot = vec::dot(v1, v2);
                     const f64 det = (v1.x * v2.y) - (v1.y * v2.x);
 
                     cur.angle = std::fabs(std::atan2(det, dot));
@@ -512,7 +513,8 @@ f64 DifficultyCalculator::calculatePPv2(u32 modsLegacy, f64 timescale, f64 ar, f
 
     i32 totalHits = c300 + c100 + c50 + misses;
     f64 accuracy = (totalHits > 0 ? (f64)(c300 * 300 + c100 * 100 + c50 * 50) / (f64)(totalHits * 300) : 0.0);
-    i32 amountHitObjectsWithAccuracy = (ModMasks::legacy_eq(modsLegacy, LegacyFlags::ScoreV2) ? (numCircles + numSliders) : numCircles);
+    i32 amountHitObjectsWithAccuracy =
+        (ModMasks::legacy_eq(modsLegacy, LegacyFlags::ScoreV2) ? (numCircles + numSliders) : numCircles);
 
     // calculateEffectiveMissCount @
     // https://github.com/ppy/osu/blob/master/osu.Game.Rulesets.Osu/Difficulty/OsuPerformanceCalculator.cs required
@@ -566,9 +568,8 @@ f64 DifficultyCalculator::calculatePPv2(u32 modsLegacy, f64 timescale, f64 ar, f
         if(!(ModMasks::legacy_eq(modsLegacy, LegacyFlags::Relax))) {
             if(ar > 10.33)
                 approachRateFactor =
-                    0.3 *
-                    (ar - 10.33);  // from 0.3 to 0.4 see https://github.com/ppy/osu-performance/pull/125/ // and
-                                   // completely changed the logic in https://github.com/ppy/osu-performance/pull/135/
+                    0.3 * (ar - 10.33);  // from 0.3 to 0.4 see https://github.com/ppy/osu-performance/pull/125/ // and
+            // completely changed the logic in https://github.com/ppy/osu-performance/pull/135/
             else if(ar < 8.0)
                 approachRateFactor =
                     0.05 * (8.0 - ar);  // from 0.01 to 0.1 see https://github.com/ppy/osu-performance/pull/125/
@@ -775,8 +776,7 @@ double DifficultyCalculator::DiffObject::calculate_difficulty(const Skills::Skil
         // make previous peak strain decay until the current object
         while(cur.ho->time > interval_end) {
             if(incremental) {
-                highestStrainsRef->insert(
-                    std::ranges::upper_bound(*highestStrainsRef, max_strain), max_strain);
+                highestStrainsRef->insert(std::ranges::upper_bound(*highestStrainsRef, max_strain), max_strain);
             } else {
                 highestStrainsRef->push_back(max_strain);
             }

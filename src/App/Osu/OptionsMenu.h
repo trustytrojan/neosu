@@ -40,7 +40,7 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     void onKeyDown(KeyboardEvent &e) override;
     void onChar(KeyboardEvent &e) override;
 
-    void onResolutionChange(Vector2 newResolution) override;
+    void onResolutionChange(vec2 newResolution) override;
 
     void onKey(KeyboardEvent &e) override;
 

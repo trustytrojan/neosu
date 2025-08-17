@@ -35,23 +35,23 @@ class HUD : public OsuScreen {
     void draw() override;
     void drawDummy();
 
-    void drawCursor(Vector2 pos, float alphaMultiplier = 1.0f, bool secondTrail = false,
+    void drawCursor(vec2 pos, float alphaMultiplier = 1.0f, bool secondTrail = false,
                     bool updateAndDrawTrail = true);
     void drawCursorTrail(
-        Vector2 pos, float alphaMultiplier = 1.0f,
+        vec2 pos, float alphaMultiplier = 1.0f,
         bool secondTrail = false);  // NOTE: only use if drawCursor() with updateAndDrawTrail = false (FPoSu)
     void drawCursorRipples();
     void drawFps();
     void drawHitErrorBar(Beatmap *beatmap);
-    void drawPlayfieldBorder(Vector2 playfieldCenter, Vector2 playfieldSize, float hitcircleDiameter);
-    void drawPlayfieldBorder(Vector2 playfieldCenter, Vector2 playfieldSize, float hitcircleDiameter, float borderSize);
+    void drawPlayfieldBorder(vec2 playfieldCenter, vec2 playfieldSize, float hitcircleDiameter);
+    void drawPlayfieldBorder(vec2 playfieldCenter, vec2 playfieldSize, float hitcircleDiameter, float borderSize);
     void drawLoadingSmall(const UString &text);
     void drawBeatmapImportSpinner();
     void drawScoreNumber(unsigned long long number, float scale = 1.0f, bool drawLeadingZeroes = false);
     void drawComboNumber(unsigned long long number, float scale = 1.0f, bool drawLeadingZeroes = false);
     void drawComboSimple(int combo, float scale = 1.0f);          // used by RankingScreen
     void drawAccuracySimple(float accuracy, float scale = 1.0f);  // used by RankingScreen
-    void drawWarningArrow(Vector2 pos, bool flipVertically, bool originLeft = true);
+    void drawWarningArrow(vec2 pos, bool flipVertically, bool originLeft = true);
 
     std::vector<SCORE_ENTRY> getCurrentScores();
     void resetScoreboard();
@@ -67,7 +67,7 @@ class HUD : public OsuScreen {
     void addTarget(float delta, float angle);
     void animateInputoverlay(int key, bool down);
 
-    void addCursorRipple(Vector2 pos);
+    void addCursorRipple(vec2 pos);
     void animateCursorExpand();
     void animateCursorShrink();
     void animateKiBulge();
@@ -90,19 +90,19 @@ class HUD : public OsuScreen {
     f32 live_stars = 0.0;
 
     struct CURSORTRAIL {
-        Vector2 pos;
+        vec2 pos{0.f};
         float time;
         float alpha;
         float scale;
     };
 
     struct CURSORRIPPLE {
-        Vector2 pos;
+        vec2 pos{0.f};
         float time;
     };
 
     float getCursorScaleFactor();
-    void addCursorTrailPosition(std::vector<CURSORTRAIL> &trail, Vector2 pos);
+    void addCursorTrailPosition(std::vector<CURSORTRAIL> &trail, vec2 pos);
 
    private:
     struct HITERROR {
@@ -123,9 +123,9 @@ class HUD : public OsuScreen {
         float endPercent;
     };
 
-    void drawCursorTrailInt(Shader *trailShader, std::vector<CURSORTRAIL> &trail, Vector2 pos,
+    void drawCursorTrailInt(Shader *trailShader, std::vector<CURSORTRAIL> &trail, vec2 pos,
                             float alphaMultiplier = 1.0f, bool emptyTrailFrame = false);
-    void drawCursorTrailRaw(float alpha, Vector2 pos);
+    void drawCursorTrailRaw(float alpha, vec2 pos);
     void drawFps(McFont *font, float fps);
     void drawAccuracy(float accuracy);
     void drawCombo(int combo);
@@ -133,10 +133,10 @@ class HUD : public OsuScreen {
     void drawHPBar(double health, float alpha, float breakAnim);
 
     void drawWarningArrows(float hitcircleDiameter = 0.0f);
-    void drawContinue(Vector2 cursor, float hitcircleDiameter = 0.0f);
+    void drawContinue(vec2 cursor, float hitcircleDiameter = 0.0f);
     void drawHitErrorBar(float hitWindow300, float hitWindow100, float hitWindow50, float hitWindowMiss, int ur);
     void drawHitErrorBarInt(float hitWindow300, float hitWindow100, float hitWindow50, float hitWindowMiss);
-    void drawHitErrorBarInt2(Vector2 center, int ur);
+    void drawHitErrorBarInt2(vec2 center, int ur);
     void drawProgressBar(float percent, bool waiting);
     void drawStatistics(int misses, int sliderbreaks, int maxPossibleCombo, float liveStars, float totalStars, int bpm,
                         float ar, float cs, float od, float hp, int nps, int nd, int ur, float pp, float ppfc,

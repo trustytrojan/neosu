@@ -15,20 +15,20 @@ class VertexArrayObject : public Resource {
     void clear();
     void empty();
 
-    void addVertex(Vector2 v);
-    void addVertex(Vector3 v);
+    void addVertex(vec2 v);
+    void addVertex(vec3 v);
     void addVertex(float x, float y, float z = 0);
 
-    void addTexcoord(Vector2 uv, unsigned int textureUnit = 0);
+    void addTexcoord(vec2 uv, unsigned int textureUnit = 0);
     void addTexcoord(float u, float v, unsigned int textureUnit = 0);
 
-    void addNormal(Vector3 normal);
+    void addNormal(vec3 normal);
     void addNormal(float x, float y, float z);
 
     void addColor(Color color);
 
-    void setVertex(int index, Vector2 v);
-    void setVertex(int index, Vector3 v);
+    void setVertex(int index, vec2 v);
+    void setVertex(int index, vec3 v);
     void setVertex(int index, float x, float y, float z = 0);
 
     void setColor(int index, Color color);
@@ -43,9 +43,9 @@ class VertexArrayObject : public Resource {
     [[nodiscard]] inline Graphics::PRIMITIVE getPrimitive() const { return this->primitive; }
     [[nodiscard]] inline Graphics::USAGE_TYPE getUsage() const { return this->usage; }
 
-    [[nodiscard]] const std::vector<Vector3> &getVertices() const { return this->vertices; }
-    [[nodiscard]] const std::vector<std::vector<Vector2>> &getTexcoords() const { return this->texcoords; }
-    [[nodiscard]] const std::vector<Vector3> &getNormals() const { return this->normals; }
+    [[nodiscard]] const std::vector<vec3> &getVertices() const { return this->vertices; }
+    [[nodiscard]] const std::vector<std::vector<vec2>> &getTexcoords() const { return this->texcoords; }
+    [[nodiscard]] const std::vector<vec3> &getNormals() const { return this->normals; }
     [[nodiscard]] const std::vector<Color> &getColors() const { return this->colors; }
 
     [[nodiscard]] inline unsigned int getNumVertices() const { return this->iNumVertices; }
@@ -69,9 +69,9 @@ class VertexArrayObject : public Resource {
 
     void updateTexcoordArraySize(unsigned int textureUnit);
 
-    std::vector<Vector3> vertices;
-    std::vector<std::vector<Vector2>> texcoords;
-    std::vector<Vector3> normals;
+    std::vector<vec3> vertices;
+    std::vector<std::vector<vec2>> texcoords;
+    std::vector<vec3> normals;
     std::vector<Color> colors;
 
     std::vector<int> partialUpdateVertexIndices;

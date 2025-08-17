@@ -197,16 +197,16 @@ class GameRules {
                    : (osu_screen_width / (float)OSU_COORD_WIDTH);
     }
 
-    static forceinline Vector2 getPlayfieldSize() {
+    static forceinline vec2 getPlayfieldSize() {
         const float scaleFactor = getPlayfieldScaleFactor();
 
         return {(float)OSU_COORD_WIDTH * scaleFactor, (float)OSU_COORD_HEIGHT * scaleFactor};
     }
 
-    static inline Vector2 getPlayfieldOffset() {
+    static inline vec2 getPlayfieldOffset() {
         const float &osu_screen_width = osu->getScreenSize().x;
         const float &osu_screen_height = osu->getScreenSize().y;
-        const Vector2 playfield_size = getPlayfieldSize();
+        const vec2 playfield_size = getPlayfieldSize();
         const float bottom_border_size = cv::playfield_border_bottom_percent.getFloat() * osu_screen_height;
 
         // first person mode doesn't need any offsets, cursor/crosshair should be centered on screen
@@ -217,9 +217,9 @@ class GameRules {
                 (osu_screen_height - playfield_size.y) / 2.0f + playfield_y_offset};
     }
 
-    static inline Vector2 getPlayfieldCenter() {
+    static inline vec2 getPlayfieldCenter() {
         const float scaleFactor = getPlayfieldScaleFactor();
-        const Vector2 playfieldOffset = getPlayfieldOffset();
+        const vec2 playfieldOffset = getPlayfieldOffset();
 
         return {(OSU_COORD_WIDTH / 2.f) * scaleFactor + playfieldOffset.x,
                 (OSU_COORD_HEIGHT / 2.f) * scaleFactor + playfieldOffset.y};

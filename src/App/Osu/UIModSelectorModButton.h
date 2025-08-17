@@ -36,7 +36,7 @@ class UIModSelectorModButton : public CBaseUIButton {
     int iState;
     float fEnabledScaleMultiplier;
     float fEnabledRotationDeg;
-    Vector2 vBaseScale;
+    vec2 vBaseScale{0.f};
 
     struct STATE {
         ConVar *cvar;
@@ -46,7 +46,7 @@ class UIModSelectorModButton : public CBaseUIButton {
     };
     std::vector<STATE> states;
 
-    Vector2 vScale;
+    vec2 vScale{0.f};
     float fRot;
     std::function<SkinImage *()> getActiveImageFunc;
 

@@ -515,7 +515,7 @@ void ConsoleBox::onChar(KeyboardEvent &e) {
     }
 }
 
-void ConsoleBox::onResolutionChange(Vector2 newResolution) {
+void ConsoleBox::onResolutionChange(vec2 newResolution) {
     const float dpiScale = this->getDPIScale();
 
     this->textbox->setSize(newResolution.x - 10 * dpiScale, this->textbox->getRelSize().y * dpiScale);

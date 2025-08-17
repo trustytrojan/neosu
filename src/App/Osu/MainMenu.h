@@ -54,7 +54,7 @@ class MainMenu : public OsuScreen, public MouseListener {
 
     void onButtonChange(ButtonIndex button, bool down) override;
 
-    void onResolutionChange(Vector2 newResolution) override;
+    void onResolutionChange(vec2 newResolution) override;
 
     CBaseUIContainer *setVisible(bool visible) override;
 
@@ -93,8 +93,8 @@ class MainMenu : public OsuScreen, public MouseListener {
     bool bHasClickedUpdate;
     bool shuffling = false;
 
-    Vector2 vSize;
-    Vector2 vCenter;
+    vec2 vSize{0.f};
+    vec2 vCenter{0.f};
     float fSizeAddAnim;
     float fCenterOffsetAnim;
 

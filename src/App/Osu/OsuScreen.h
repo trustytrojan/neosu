@@ -8,5 +8,5 @@ class OsuScreen : public CBaseUIContainer {
    public:
     OsuScreen() { this->bVisible = false; }
 
-    virtual void onResolutionChange(Vector2 newResolution) { (void)newResolution; }
+    virtual void onResolutionChange(vec2 newResolution) { (void)newResolution; }
 };

@@ -60,7 +60,7 @@ CBaseUIWindow::CBaseUIWindow(float xPos, float yPos, float xSize, float ySize, c
     this->titleColor = 0xffffffff;
 
     // events
-    this->vResizeLimit = Vector2(100, 90) * dpiScale;
+    this->vResizeLimit = vec2(100, 90) * dpiScale;
     this->bMoving = false;
     this->bResizing = false;
     this->iResizeType = RESIZETYPE::UNKNOWN;
@@ -450,7 +450,7 @@ CBaseUIWindow *CBaseUIWindow::setSizeToContent(int horizontalBorderSize, int ver
     const std::vector<CBaseUIElement *> &elements = this->container->getElements();
     if(elements.size() < 1) return this;
 
-    Vector2 newSize = Vector2(horizontalBorderSize, verticalBorderSize);
+    vec2 newSize = vec2(horizontalBorderSize, verticalBorderSize);
 
     for(auto el : elements) {
         int xReach = el->getRelPos().x + el->getSize().x + horizontalBorderSize;
@@ -529,7 +529,7 @@ void CBaseUIWindow::onResized() {
     /// m_shadow->setSize(this->vSize.x+m_shadow->getRadius()*2, this->vSize.y+m_shadow->getRadius()*2+4);
 }
 
-void CBaseUIWindow::onResolutionChange(Vector2 newResolution) {
+void CBaseUIWindow::onResolutionChange(vec2 newResolution) {
     if(this->bCoherenceMode) this->setSize(newResolution.x - 1, newResolution.y - 1);
 }
 

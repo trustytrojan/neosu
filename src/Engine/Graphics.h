@@ -108,7 +108,7 @@ class Graphics {
     inline void drawLine(int x1, int y1, int x2, int y2) {
         this->drawLinef((float)x1 + 0.5f, (float)y1 + 0.5f, (float)x2 + 0.5f, (float)y2 + 0.5f);
     }
-    inline void drawLine(Vector2 pos1, Vector2 pos2) { this->drawLinef(pos1.x, pos1.y, pos2.x, pos2.y); }
+    inline void drawLine(vec2 pos1, vec2 pos2) { this->drawLinef(pos1.x, pos1.y, pos2.x, pos2.y); }
     inline void drawRectf(float x, float y, float width, float height, Color top, Color right, Color bottom,
                           Color left) {
         this->drawRectf(x, y, width, height, true, top, right, bottom, left);
@@ -128,7 +128,7 @@ class Graphics {
                               Color bottomLeftColor, Color bottomRightColor) = 0;
 
     virtual void drawQuad(int x, int y, int width, int height) = 0;
-    virtual void drawQuad(Vector2 topLeft, Vector2 topRight, Vector2 bottomRight, Vector2 bottomLeft,
+    virtual void drawQuad(vec2 topLeft, vec2 topRight, vec2 bottomRight, vec2 bottomLeft,
                           Color topLeftColor, Color topRightColor, Color bottomRightColor, Color bottomLeftColor) = 0;
 
     // 2d resource drawing
@@ -166,7 +166,7 @@ class Graphics {
     virtual std::vector<u8> getScreenshot(bool withAlpha = false) = 0;
 
     // renderer info
-    [[nodiscard]] virtual Vector2 getResolution() const = 0;
+    [[nodiscard]] virtual vec2 getResolution() const = 0;
     virtual UString getVendor() = 0;
     virtual UString getModel() = 0;
     virtual UString getVersion() = 0;
@@ -174,7 +174,7 @@ class Graphics {
     virtual int getVRAMRemaining() = 0;
 
     // callbacks
-    virtual void onResolutionChange(Vector2 newResolution) = 0;
+    virtual void onResolutionChange(vec2 newResolution) = 0;
 
     // factory
     virtual Image *createImage(std::string filePath, bool mipmapped, bool keepInSystemMemory) = 0;
@@ -196,19 +196,19 @@ class Graphics {
     // 2D
     // TODO: rename these to translate2D() etc.
     void translate(float x, float y, float z = 0);
-    void translate(Vector2 translation) { this->translate(translation.x, translation.y); }
-    void translate(Vector3 translation) { this->translate(translation.x, translation.y, translation.z); }
+    void translate(vec2 translation) { this->translate(translation.x, translation.y); }
+    void translate(vec3 translation) { this->translate(translation.x, translation.y, translation.z); }
     void rotate(float deg, float x = 0, float y = 0, float z = 1);
-    void rotate(float deg, Vector3 axis) { this->rotate(deg, axis.x, axis.y, axis.z); }
+    void rotate(float deg, vec3 axis) { this->rotate(deg, axis.x, axis.y, axis.z); }
     void scale(float x, float y, float z = 1);
-    void scale(Vector2 scaling) { this->scale(scaling.x, scaling.y, 1); }
-    void scale(Vector3 scaling) { this->scale(scaling.x, scaling.y, scaling.z); }
+    void scale(vec2 scaling) { this->scale(scaling.x, scaling.y, 1); }
+    void scale(vec3 scaling) { this->scale(scaling.x, scaling.y, scaling.z); }
 
     // 3D
     void translate3D(float x, float y, float z);
-    void translate3D(Vector3 translation) { this->translate3D(translation.x, translation.y, translation.z); }
+    void translate3D(vec3 translation) { this->translate3D(translation.x, translation.y, translation.z); }
     void rotate3D(float deg, float x, float y, float z);
-    void rotate3D(float deg, Vector3 axis) { this->rotate3D(deg, axis.x, axis.y, axis.z); }
+    void rotate3D(float deg, vec3 axis) { this->rotate3D(deg, axis.x, axis.y, axis.z); }
     void setWorldMatrix(Matrix4 &worldMatrix);
     void setWorldMatrixMul(Matrix4 &worldMatrix);
     void setProjectionMatrix(Matrix4 &projectionMatrix);
@@ -239,7 +239,7 @@ class Graphics {
     // 3d gui scenes
     std::stack<bool> scene_stack;
     McRect scene_region;
-    Vector3 v3dSceneOffset;
+    vec3 v3dSceneOffset{0.f};
     Matrix4 scene_world_matrix;
     Matrix4 scene_projection_matrix;
 

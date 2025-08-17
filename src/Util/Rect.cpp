@@ -4,16 +4,15 @@
 McRect McRect::intersect(const McRect &rect) const {
     McRect intersection;
 
-    Vector2 thisMax = this->vMin + this->vSize;
-    Vector2 rectMax = rect.vMin + rect.vSize;
+    vec2 thisMax = this->vMin + this->vSize;
+    vec2 rectMax = rect.vMin + rect.vSize;
 
-    intersection.vMin = glm::max(static_cast<const glm::vec2 &>(this->vMin), static_cast<const glm::vec2 &>(rect.vMin));
-    Vector2 intersectMax = glm::min(static_cast<const glm::vec2 &>(thisMax), static_cast<const glm::vec2 &>(rectMax));
+    intersection.vMin = vec::max(this->vMin, rect.vMin);
+    vec2 intersectMax = vec::min(thisMax, rectMax);
 
-    if(glm::any(glm::greaterThan(static_cast<const glm::vec2 &>(intersection.vMin),
-                                 static_cast<const glm::vec2 &>(intersectMax)))) {
-        intersection.vMin.zero();
-        intersection.vSize.zero();
+    if(vec::any(vec::greaterThan(intersection.vMin, intersectMax))) {
+        intersection.vMin = {0.f, 0.f};
+        intersection.vSize = {0.f, 0.f};
     } else {
         intersection.vSize = intersectMax - intersection.vMin;
     }
@@ -24,24 +23,22 @@ McRect McRect::intersect(const McRect &rect) const {
 McRect McRect::Union(const McRect &rect) const {
     McRect result;
 
-    Vector2 thisMax = this->vMin + this->vSize;
-    Vector2 rectMax = rect.vMin + rect.vSize;
+    vec2 thisMax = this->vMin + this->vSize;
+    vec2 rectMax = rect.vMin + rect.vSize;
 
-    result.vMin = glm::min(static_cast<const glm::vec2 &>(this->vMin), static_cast<const glm::vec2 &>(rect.vMin));
-    Vector2 resultMax = glm::max(static_cast<const glm::vec2 &>(thisMax), static_cast<const glm::vec2 &>(rectMax));
+    result.vMin = vec::min(this->vMin, rect.vMin);
+    vec2 resultMax = vec::max(thisMax, rectMax);
     result.vSize = resultMax - result.vMin;
 
     return result;
 }
 
 bool McRect::intersects(const McRect &rect) const {
-    Vector2 thisMax = this->vMin + this->vSize;
-    Vector2 rectMax = rect.vMin + rect.vSize;
+    vec2 thisMax = this->vMin + this->vSize;
+    vec2 rectMax = rect.vMin + rect.vSize;
 
-    Vector2 intersectMin =
-        glm::max(static_cast<const glm::vec2 &>(this->vMin), static_cast<const glm::vec2 &>(rect.vMin));
-    Vector2 intersectMax = glm::min(static_cast<const glm::vec2 &>(thisMax), static_cast<const glm::vec2 &>(rectMax));
+    vec2 intersectMin = vec::max(this->vMin, rect.vMin);
+    vec2 intersectMax = vec::min(thisMax, rectMax);
 
-    return glm::all(
-        glm::lessThan(static_cast<const glm::vec2 &>(intersectMin), static_cast<const glm::vec2 &>(intersectMax)));
+    return vec::all(vec::lessThan(intersectMin, intersectMax));
 }

@@ -56,8 +56,8 @@ void SongDifficultyButton::draw() {
     Skin* skin = osu->getSkin();
 
     // scaling
-    const Vector2 pos = this->getActualPos();
-    const Vector2 size = this->getActualSize();
+    const vec2 pos = this->getActualPos();
+    const vec2 size = this->getActualSize();
 
     // draw background image
     this->drawBeatmapBackgroundThumbnail(

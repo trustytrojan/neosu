@@ -41,13 +41,13 @@ class RenderTarget;
 
 class Osu final : public MouseListener, public KeyboardListener {
    public:
-    static constexpr const Vector2 osuBaseResolution{640.0f, 480.0f};
+    static constexpr const vec2 osuBaseResolution{640.0f, 480.0f};
 
-    static float getImageScaleToFitResolution(Image *img, Vector2 resolution);
-    static float getImageScaleToFitResolution(Vector2 size, Vector2 resolution);
-    static float getImageScaleToFillResolution(Vector2 size, Vector2 resolution);
-    static float getImageScaleToFillResolution(Image *img, Vector2 resolution);
-    static float getImageScale(Vector2 size, float osuSize);
+    static float getImageScaleToFitResolution(Image *img, vec2 resolution);
+    static float getImageScaleToFitResolution(vec2 size, vec2 resolution);
+    static float getImageScaleToFillResolution(vec2 size, vec2 resolution);
+    static float getImageScaleToFillResolution(Image *img, vec2 resolution);
+    static float getImageScale(vec2 size, float osuSize);
     static float getImageScale(Image *img, float osuSize);
     static float getUIScale(float osuResolutionRatio);
     static float getUIScale();  // NOTE: includes premultiplied dpi scale!
@@ -71,7 +71,7 @@ class Osu final : public MouseListener, public KeyboardListener {
 
     void onButtonChange(ButtonIndex button, bool down) override;
 
-    void onResolutionChanged(Vector2 newResolution);
+    void onResolutionChanged(vec2 newResolution);
     void onDPIChanged();
 
     void onFocusGained();
@@ -92,7 +92,7 @@ class Osu final : public MouseListener, public KeyboardListener {
 
     void reloadSkin() { this->onSkinReload(); }
 
-    [[nodiscard]] inline Vector2 getScreenSize() const { return g_vInternalResolution; }
+    [[nodiscard]] inline vec2 getScreenSize() const { return g_vInternalResolution; }
     [[nodiscard]] inline int getScreenWidth() const { return (int)g_vInternalResolution.x; }
     [[nodiscard]] inline int getScreenHeight() const { return (int)g_vInternalResolution.y; }
 
@@ -169,7 +169,7 @@ class Osu final : public MouseListener, public KeyboardListener {
     void updateMouseSettings();
     void updateWindowsKeyDisable();
 
-    static Vector2 g_vInternalResolution;
+    static vec2 g_vInternalResolution;
 
     void updateModsForConVarTemplate(const UString &oldValue, const UString &newValue) {
         (void)oldValue;
@@ -252,8 +252,8 @@ class Osu final : public MouseListener, public KeyboardListener {
     RenderTarget *AAFrameBuffer;
     RenderTarget *frameBuffer;
     RenderTarget *frameBuffer2;
-    Vector2 vInternalResolution;
-    Vector2 flashlight_position;
+    vec2 vInternalResolution{0.f};
+    vec2 flashlight_position{0.f};
 
     // mods
     Replay::Mods previous_mods;

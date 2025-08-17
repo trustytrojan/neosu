@@ -31,7 +31,7 @@ class ModSelector : public OsuScreen {
     void onKeyDown(KeyboardEvent &key) override;
     void onKeyUp(KeyboardEvent &key) override;
 
-    void onResolutionChange(Vector2 newResolution) override;
+    void onResolutionChange(vec2 newResolution) override;
 
     CBaseUIContainer *setVisible(bool visible) override;
 

@@ -285,7 +285,7 @@ void OpenGLLegacyInterface::drawQuad(int x, int y, int width, int height) {
     glEnd();
 }
 
-void OpenGLLegacyInterface::drawQuad(Vector2 topLeft, Vector2 topRight, Vector2 bottomRight, Vector2 bottomLeft,
+void OpenGLLegacyInterface::drawQuad(vec2 topLeft, vec2 topRight, vec2 bottomRight, vec2 bottomLeft,
                                      Color topLeftColor, Color topRightColor, Color bottomRightColor,
                                      Color bottomLeftColor) {
     updateTransform();
@@ -319,7 +319,7 @@ void OpenGLLegacyInterface::drawImage(Image *image, AnchorPoint anchor, float ed
     if(!image->isReady()) return;
     if(this->color.A() == 0) return;
 
-    bool clipRectSpecified = clipRect.getSize().length() != 0;
+    const bool clipRectSpecified = vec::length(clipRect.getSize()) != 0;
     bool smoothedEdges = edgeSoftness > 0.0f;
 
     // initialize shader on first use
@@ -451,9 +451,9 @@ void OpenGLLegacyInterface::drawVAO(VertexArrayObject *vao) {
         return;
     }
 
-    const std::vector<Vector3> &vertices = vao->getVertices();
-    const std::vector<Vector3> &normals = vao->getNormals();
-    const std::vector<std::vector<Vector2>> &texcoords = vao->getTexcoords();
+    const std::vector<vec3> &vertices = vao->getVertices();
+    const std::vector<vec3> &normals = vao->getNormals();
+    const std::vector<std::vector<vec2>> &texcoords = vao->getTexcoords();
     const std::vector<Color> &colors = vao->getColors();
 
     glBegin(SDLGLInterface::primitiveToOpenGLMap[vao->getPrimitive()]);
@@ -640,7 +640,7 @@ std::vector<u8> OpenGLLegacyInterface::getScreenshot(bool withAlpha) {
     return result;
 }
 
-void OpenGLLegacyInterface::onResolutionChange(Vector2 newResolution) {
+void OpenGLLegacyInterface::onResolutionChange(vec2 newResolution) {
     // rebuild viewport
     this->vResolution = newResolution;
     glViewport(0, 0, this->vResolution.x, this->vResolution.y);

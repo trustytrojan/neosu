@@ -116,7 +116,7 @@ SDL_AppResult SDLMain::initialize() {
     {
         float x{0.f}, y{0.f};
         SDL_GetGlobalMouseState(&x, &y);
-        Vector2 posInWindow = Vector2{x, y} - getWindowPos();
+        vec2 posInWindow = vec2{x, y} - getWindowPos();
 
         setOSMousePos(posInWindow);
         mouse->onPosChange(posInWindow);
@@ -260,7 +260,7 @@ SDL_AppResult SDLMain::handleEvent(SDL_Event *event) {
                     m_bHasFocus = true;
                     m_fDisplayHzSecs = 1.0f / (m_fDisplayHz = queryDisplayHz());
                     m_engine->requestResolutionChange(
-                        Vector2(static_cast<float>(event->window.data1), static_cast<float>(event->window.data2)));
+                        vec2(static_cast<float>(event->window.data1), static_cast<float>(event->window.data2)));
                     setFgFPS();
                     break;
 
@@ -401,7 +401,7 @@ bool SDLMain::createWindow() {
     }
 
     // set this size as the initial fallback window size (for Environment::getWindowSize())
-    m_vLastKnownWindowSize = Vector2{static_cast<float>(windowCreateWidth), static_cast<float>(windowCreateHeight)};
+    m_vLastKnownWindowSize = vec2{static_cast<float>(windowCreateWidth), static_cast<float>(windowCreateHeight)};
 
     SDL_PropertiesID props = SDL_CreateProperties();
     // if constexpr (Env::cfg(REND::DX11))

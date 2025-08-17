@@ -114,14 +114,14 @@ void SongButton::drawBeatmapBackgroundThumbnail(Image *image) {
     if(image == nullptr || !image->isReady()) return;
 
     // scaling
-    const Vector2 pos = this->getActualPos();
-    const Vector2 size = this->getActualSize();
+    const vec2 pos = this->getActualPos();
+    const vec2 size = this->getActualSize();
 
     const f32 thumbnailYRatio = osu->getSongBrowser()->thumbnailYRatio;
     const f32 beatmapBackgroundScale =
-        Osu::getImageScaleToFillResolution(image, Vector2(size.y * thumbnailYRatio, size.y)) * 1.05f;
+        Osu::getImageScaleToFillResolution(image, vec2(size.y * thumbnailYRatio, size.y)) * 1.05f;
 
-    Vector2 centerOffset = Vector2((size.y * thumbnailYRatio) / 2.0f, size.y / 2.0f);
+    vec2 centerOffset = vec2((size.y * thumbnailYRatio) / 2.0f, size.y / 2.0f);
     McRect clipRect = McRect(pos.x - 2, pos.y + 1, (size.y * thumbnailYRatio) + 5, size.y + 2);
 
     g->setColor(argb(alpha, 1.f, 1.f, 1.f));
@@ -136,8 +136,8 @@ void SongButton::drawBeatmapBackgroundThumbnail(Image *image) {
 
     // debug cliprect bounding box
     if(cv::debug.getBool()) {
-        Vector2 clipRectPos = Vector2(clipRect.getX(), clipRect.getY() - 1);
-        Vector2 clipRectSize = Vector2(clipRect.getWidth(), clipRect.getHeight());
+        vec2 clipRectPos = vec2(clipRect.getX(), clipRect.getY() - 1);
+        vec2 clipRectSize = vec2(clipRect.getWidth(), clipRect.getHeight());
 
         g->setColor(0xffffff00);
         g->drawLine(clipRectPos.x, clipRectPos.y, clipRectPos.x + clipRectSize.x, clipRectPos.y);
@@ -151,23 +151,23 @@ void SongButton::drawBeatmapBackgroundThumbnail(Image *image) {
 
 void SongButton::drawGrade() {
     // scaling
-    const Vector2 pos = this->getActualPos();
-    const Vector2 size = this->getActualSize();
+    const vec2 pos = this->getActualPos();
+    const vec2 size = this->getActualSize();
 
     SkinImage *grade = ScoreButton::getGradeImage(this->grade);
     g->pushTransform();
     {
         const float scale = this->calculateGradeScale();
         g->setColor(0xffffffff);
-        grade->drawRaw(Vector2(pos.x + this->fGradeOffset, pos.y + size.y / 2), scale, AnchorPoint::LEFT);
+        grade->drawRaw(vec2(pos.x + this->fGradeOffset, pos.y + size.y / 2), scale, AnchorPoint::LEFT);
     }
     g->popTransform();
 }
 
 void SongButton::drawTitle(float deselectedAlpha, bool forceSelectedStyle) {
     // scaling
-    const Vector2 pos = this->getActualPos();
-    const Vector2 size = this->getActualSize();
+    const vec2 pos = this->getActualPos();
+    const vec2 size = this->getActualSize();
 
     const float titleScale = (size.y * this->fTitleScale) / this->font->getHeight();
     g->setColor((this->bSelected || forceSelectedStyle) ? osu->getSkin()->getSongSelectActiveText()
@@ -187,8 +187,8 @@ void SongButton::drawTitle(float deselectedAlpha, bool forceSelectedStyle) {
 
 void SongButton::drawSubTitle(float deselectedAlpha, bool forceSelectedStyle) {
     // scaling
-    const Vector2 pos = this->getActualPos();
-    const Vector2 size = this->getActualSize();
+    const vec2 pos = this->getActualPos();
+    const vec2 size = this->getActualSize();
 
     const float titleScale = (size.y * this->fTitleScale) / this->font->getHeight();
     const float subTitleScale = (size.y * this->fSubTitleScale) / this->font->getHeight();
@@ -217,7 +217,7 @@ void SongButton::updateLayoutEx() {
     CarouselButton::updateLayoutEx();
 
     // scaling
-    const Vector2 size = this->getActualSize();
+    const vec2 size = this->getActualSize();
 
     this->fTextOffset = 0.0f;
     this->fGradeOffset = 0.0f;
@@ -267,7 +267,7 @@ void SongButton::onSelected(bool wasSelected, bool autoSelectBottomMostChild, bo
 
 void SongButton::onRightMouseUpInside() { this->triggerContextMenu(mouse->getPos()); }
 
-void SongButton::triggerContextMenu(Vector2 pos) {
+void SongButton::triggerContextMenu(vec2 pos) {
     if(this->contextMenu != nullptr) {
         this->contextMenu->setPos(pos);
         this->contextMenu->setRelPos(pos);
@@ -400,9 +400,9 @@ void SongButton::onCreateNewCollectionConfirmed(const UString &text, int id) {
 }
 
 float SongButton::calculateGradeScale() {
-    const Vector2 size = this->getActualSize();
+    const vec2 size = this->getActualSize();
     SkinImage *grade = ScoreButton::getGradeImage(this->grade);
-    return Osu::getImageScaleToFitResolution(grade->getSizeBaseRaw(), Vector2(size.x, size.y * this->fGradeScale));
+    return Osu::getImageScaleToFitResolution(grade->getSizeBaseRaw(), vec2(size.x, size.y * this->fGradeScale));
 }
 
 float SongButton::calculateGradeWidth() {

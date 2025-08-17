@@ -633,7 +633,7 @@ void SongBrowser::draw() {
         }
 
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ADDITIVE);
-        osu->getSkin()->mode_osu->drawRaw(Vector2(osu->getScreenWidth() / 2, osu->getScreenHeight() / 2),
+        osu->getSkin()->mode_osu->drawRaw(vec2(osu->getScreenWidth() / 2, osu->getScreenHeight() / 2),
                                           mode_osu_scale, AnchorPoint::CENTER);
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ALPHA);
     }
@@ -738,7 +738,7 @@ void SongBrowser::draw() {
                     const double speedStrainHeight = speedStrain * strainHeightMultiplier;
                     // const double strainHeight = strain * strainHeightMultiplier;
 
-                    Vector2 topLeftCenter = Vector2(
+                    vec2 topLeftCenter = vec2(
                         highestStrainIndex * strainWidth + strainWidth / 2.0f,
                         osu->getScreenHeight() - (get_bottombar_height() + aimStrainHeight + speedStrainHeight));
 
@@ -1188,7 +1188,7 @@ void SongBrowser::onChar(KeyboardEvent &e) {
     this->scheduleSearchUpdate();
 }
 
-void SongBrowser::onResolutionChange(Vector2 newResolution) { ScreenBackable::onResolutionChange(newResolution); }
+void SongBrowser::onResolutionChange(vec2 newResolution) { ScreenBackable::onResolutionChange(newResolution); }
 
 CBaseUIContainer *SongBrowser::setVisible(bool visible) {
     if(bancho->spectating && visible) return this;  // don't allow song browser to be visible while spectating
@@ -3028,8 +3028,8 @@ void SongBrowser::onSelectionOptions() {
     if(this->selectedButton != nullptr) {
         this->scrollToSongButton(this->selectedButton);
 
-        const Vector2 heuristicSongButtonPositionAfterSmoothScrollFinishes =
-            (this->carousel->getPos() + this->carousel->getSize() / 2);
+        const vec2 heuristicSongButtonPositionAfterSmoothScrollFinishes =
+            (this->carousel->getPos() + this->carousel->getSize() / 2.f);
 
         auto *songButtonPointer = dynamic_cast<SongButton *>(this->selectedButton);
         auto *collectionButtonPointer = dynamic_cast<CollectionButton *>(this->selectedButton);

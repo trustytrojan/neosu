@@ -27,7 +27,7 @@ void UIBackButton::draw() {
     {
         g->setColor(0xffffffff);
         osu->getSkin()->getMenuBack2()->draw(
-            this->vPos + (osu->getSkin()->getMenuBack2()->getSize() / 2) * this->fImageScale, this->fImageScale);
+            this->vPos + (osu->getSkin()->getMenuBack2()->getSize() / 2.f) * this->fImageScale, this->fImageScale);
     }
     g->popTransform();
 
@@ -70,7 +70,7 @@ void UIBackButton::onMouseOutside() {
 
 void UIBackButton::updateLayout() {
     const float uiScale = cv::ui_scale.getFloat();
-    Vector2 newSize = osu->getSkin()->getMenuBack2()->getSize() * uiScale;
+    vec2 newSize = osu->getSkin()->getMenuBack2()->getSize() * uiScale;
     this->fImageScale = (newSize.y / osu->getSkin()->getMenuBack2()->getSize().y);
     this->setSize(newSize);
 }

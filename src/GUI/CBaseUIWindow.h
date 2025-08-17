@@ -43,7 +43,7 @@ class CBaseUIWindow : public CBaseUIElement {
         return this;
     }
     CBaseUIWindow *setResizeLimit(int maxWidth, int maxHeight) {
-        this->vResizeLimit = Vector2(maxWidth, maxHeight);
+        this->vResizeLimit = vec2(maxWidth, maxHeight);
         return this;
     }
     CBaseUIWindow *setResizeable(bool resizeable) {
@@ -105,7 +105,7 @@ class CBaseUIWindow : public CBaseUIElement {
     void onMoved() override;
     void onResized() override;
 
-    virtual void onResolutionChange(Vector2 newResolution);
+    virtual void onResolutionChange(vec2 newResolution);
 
     void onEnabled() override;
     void onDisabled() override;
@@ -136,12 +136,12 @@ class CBaseUIWindow : public CBaseUIElement {
     int iTitleBarHeight;
 
     // resizing
-    Vector2 vResizeLimit;
-    Vector2 vLastSize;
+    vec2 vResizeLimit{0.f};
+    vec2 vLastSize{0.f};
 
     // moving
-    Vector2 vMousePosBackup;
-    Vector2 vLastPos;
+    vec2 vMousePosBackup{0.f};
+    vec2 vLastPos{0.f};
 
     // colors
     Color frameColor;

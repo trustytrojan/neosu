@@ -122,7 +122,7 @@ void CWindowManager::addWindow(CBaseUIWindow *window) {
     }
 }
 
-void CWindowManager::onResolutionChange(Vector2 newResolution) {
+void CWindowManager::onResolutionChange(vec2 newResolution) {
     for(auto &window : this->windows) {
         window->onResolutionChange(newResolution);
     }

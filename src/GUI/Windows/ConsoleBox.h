@@ -24,7 +24,7 @@ class ConsoleBox : public CBaseUIElement {
     void onKeyDown(KeyboardEvent &e) override;
     void onChar(KeyboardEvent &e) override;
 
-    void onResolutionChange(Vector2 newResolution);
+    void onResolutionChange(vec2 newResolution);
 
     void processCommand(const std::string& command);
     void execConfigFile(std::string filename);

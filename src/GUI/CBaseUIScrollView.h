@@ -95,8 +95,8 @@ class CBaseUIScrollView : public CBaseUIElement {
     [[nodiscard]] inline CBaseUIContainer *getContainer() const { return this->container; }
     [[nodiscard]] inline float getRelPosY() const { return this->vScrollPos.y; }
     [[nodiscard]] inline float getRelPosX() const { return this->vScrollPos.x; }
-    [[nodiscard]] inline Vector2 getScrollSize() const { return this->vScrollSize; }
-    [[nodiscard]] inline Vector2 getVelocity() const { return (this->vScrollPos - this->vVelocity); }
+    [[nodiscard]] inline vec2 getScrollSize() const { return this->vScrollSize; }
+    [[nodiscard]] inline vec2 getVelocity() const { return (this->vScrollPos - this->vVelocity); }
 
     [[nodiscard]] inline bool isScrolling() const { return this->bScrolling; }
     bool isBusy() override;
@@ -131,9 +131,9 @@ class CBaseUIScrollView : public CBaseUIElement {
     Color frameDarkColor;
     Color scrollbarColor;
 
-    Vector2 vScrollPos;
-    Vector2 vScrollPosBackup;
-    Vector2 vMouseBackup;
+    vec2 vScrollPos{0.f};
+    vec2 vScrollPosBackup{0.f};
+    vec2 vMouseBackup{0.f};
 
     float fScrollMouseWheelMultiplier;
     float fScrollbarSizeMultiplier;
@@ -141,11 +141,11 @@ class CBaseUIScrollView : public CBaseUIElement {
     McRect horizontalScrollbar;
 
     // scroll logic
-    Vector2 vScrollSize;
-    Vector2 vMouseBackup2;
-    Vector2 vMouseBackup3;
-    Vector2 vVelocity;
-    Vector2 vKineticAverage;
+    vec2 vScrollSize{0.f};
+    vec2 vMouseBackup2{0.f};
+    vec2 vMouseBackup3{0.f};
+    vec2 vVelocity{0.f};
+    vec2 vKineticAverage{0.f};
 
     int iPrevScrollDeltaX;
     int iScrollResistance;

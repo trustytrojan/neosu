@@ -526,7 +526,7 @@ bool McFont::createAndPackAtlas(const std::vector<wchar_t> &glyphs) {
     return true;
 }
 
-void McFont::buildGlyphGeometry(const GLYPH_METRICS &gm, const Vector3 &basePos, float advanceX, size_t &vertexCount) {
+void McFont::buildGlyphGeometry(const GLYPH_METRICS &gm, const vec3 &basePos, float advanceX, size_t &vertexCount) {
     const auto atlasWidth = static_cast<float>(this->textureAtlas->getAtlasImage()->getWidth());
     const auto atlasHeight = static_cast<float>(this->textureAtlas->getAtlasImage()->getHeight());
 
@@ -542,16 +542,16 @@ void McFont::buildGlyphGeometry(const GLYPH_METRICS &gm, const Vector3 &basePos,
     const float texSizeY = static_cast<float>(gm.sizePixelsY) / atlasHeight;
 
     // corners of the "quad"
-    Vector3 bottomLeft = Vector3(x, y + sy, z);
-    Vector3 topLeft = Vector3(x, y, z);
-    Vector3 topRight = Vector3(x + sx, y, z);
-    Vector3 bottomRight = Vector3(x + sx, y + sy, z);
+    vec3 bottomLeft = vec3(x, y + sy, z);
+    vec3 topLeft = vec3(x, y, z);
+    vec3 topRight = vec3(x + sx, y, z);
+    vec3 bottomRight = vec3(x + sx, y + sy, z);
 
     // texcoords
-    Vector2 texBottomLeft = Vector2(texX, texY);
-    Vector2 texTopLeft = Vector2(texX, texY + texSizeY);
-    Vector2 texTopRight = Vector2(texX + texSizeX, texY + texSizeY);
-    Vector2 texBottomRight = Vector2(texX + texSizeX, texY);
+    vec2 texBottomLeft = vec2(texX, texY);
+    vec2 texTopLeft = vec2(texX, texY + texSizeY);
+    vec2 texTopRight = vec2(texX + texSizeX, texY + texSizeY);
+    vec2 texBottomRight = vec2(texX + texSizeX, texY);
 
     const size_t idx = vertexCount;
 
@@ -598,7 +598,7 @@ void McFont::buildStringGeometry(const UString &text, size_t &vertexCount) {
 
     for(size_t i = 0; i < maxGlyphs; i++) {
         const GLYPH_METRICS &gm = getGlyphMetrics(text[i]);
-        buildGlyphGeometry(gm, Vector3(), advanceX, vertexCount);
+        buildGlyphGeometry(gm, vec3(), advanceX, vertexCount);
         advanceX += gm.advance_x;
     }
 }
@@ -636,7 +636,7 @@ void McFont::beginBatch() {
     this->batchQueue.usedEntries = 0;  // don't clear/reallocate, reuse the entries instead
 }
 
-void McFont::addToBatch(const UString &text, const Vector3 &pos, Color color) {
+void McFont::addToBatch(const UString &text, const vec3 &pos, Color color) {
     size_t verts{};
     if(!this->batchActive || (verts = text.length() * VERTS_PER_VAO) == 0) return;
     this->batchQueue.totalVerts += verts;

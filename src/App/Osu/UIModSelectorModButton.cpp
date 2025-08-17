@@ -24,7 +24,7 @@ UIModSelectorModButton::UIModSelectorModButton(ModSelector *osuModSelector, floa
     : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), "") {
     this->osuModSelector = osuModSelector;
     this->iState = 0;
-    this->vScale = this->vBaseScale = Vector2(1, 1);
+    this->vScale = this->vBaseScale = vec2(1, 1);
     this->fRot = 0.0f;
 
     this->fEnabledScaleMultiplier = 1.25f;
@@ -57,7 +57,7 @@ void UIModSelectorModButton::draw() {
                 glLogicOp(GL_COPY_INVERTED);
             }
 
-            this->getActiveImageFunc()->draw(this->vPos + this->vSize / 2);
+            this->getActiveImageFunc()->draw(this->vPos + this->vSize / 2.f);
 
             if(draw_inverted_colors) {
                 glDisable(GL_COLOR_LOGIC_OP);
