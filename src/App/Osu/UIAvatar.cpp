@@ -15,7 +15,13 @@ UIAvatar::UIAvatar(i32 player_id, float xPos, float yPos, float xSize, float ySi
 
     this->setClickCallback(SA::MakeDelegate<&UIAvatar::onAvatarClicked>(this));
 
+    // add to load queue
     osu->getAvatarManager()->add_avatar(this->player_id_for_endpoint);
+}
+
+UIAvatar::~UIAvatar() {
+    // remove from load queue
+    osu->getAvatarManager()->remove_avatar(this->player_id_for_endpoint);
 }
 
 void UIAvatar::draw_avatar(float alpha) {

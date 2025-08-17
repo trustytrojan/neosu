@@ -6,7 +6,7 @@
 class UIAvatar final : public CBaseUIButton {
    public:
     UIAvatar(i32 player_id, float xPos, float yPos, float xSize, float ySize);
-    ~UIAvatar() override = default;
+    ~UIAvatar() override;
 
     UIAvatar &operator=(const UIAvatar &) = delete;
     UIAvatar &operator=(UIAvatar &&) = delete;

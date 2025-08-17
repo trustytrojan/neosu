@@ -20,8 +20,11 @@ class AvatarManager final {
     // this is run during Osu::update(), while not in unpaused gameplay
     void update();
 
-    // called by UIAvatar to add new user id/folder avatar pairs to the loading queue (and tracking)
+    // called by UIAvatar ctor to add new user id/folder avatar pairs to the loading queue (and tracking)
     void add_avatar(const std::pair<i32, std::string>& id_folder);
+
+    // called by ~UIAvatar dtor (removes it from pending queue, to not load/download images we don't need)
+    void remove_avatar(const std::pair<i32, std::string>& id_folder);
 
     // may return null if avatar is still loading
     [[nodiscard]] Image* get_avatar(const std::pair<i32, std::string>& id_folder);
@@ -45,7 +48,7 @@ class AvatarManager final {
     // all AvatarEntries added through add_avatar remain alive forever, but the actual Image resource
     // it references will be unloaded (by priority of access time) to keep VRAM/RAM usage sustainable
     std::map<std::pair<i32, std::string>, AvatarEntry> avatars;
-    std::deque<std::pair<i32, std::string>> download_queue;
+    std::deque<std::pair<i32, std::string>> load_queue;
     std::set<std::pair<i32, std::string>> id_blacklist;
     std::set<std::pair<i32, std::string>> newly_downloaded;
 };

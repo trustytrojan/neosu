@@ -21,7 +21,7 @@ Image* AvatarManager::get_avatar(const std::pair<i32, std::string>& id_folder) {
     AvatarEntry& entry = it->second;
     entry.last_access_time = engine->getTime();
 
-    // lazy load if not in memory
+    // lazy load if not in memory (won't block)
     if(!entry.image) {
         this->load_avatar_image(entry);
     }
@@ -33,7 +33,7 @@ Image* AvatarManager::get_avatar(const std::pair<i32, std::string>& id_folder) {
 // this is run during Osu::update(), while not in unpaused gameplay
 void AvatarManager::update() {
     // nothing to do
-    if(this->download_queue.empty()) {
+    if(this->load_queue.empty()) {
         return;
     }
 
@@ -47,31 +47,33 @@ void AvatarManager::update() {
     // remove oldest avatars if we have too many loaded
     this->prune_oldest_avatars();
 
-    // process download queue
-    const auto& id_folder = this->download_queue.front();
+    // process download queue (we might not drain it fully due to only checking download progress once,
+    // but we'll check again next update)
+    for(int i = 0; i < this->load_queue.size(); i++) {
+        const auto& id_folder = this->load_queue.front();
 
-    // we don't have to do an "expired" check if we just downloaded it
-    bool exists_on_disk = this->newly_downloaded.contains(id_folder);
-    if(!exists_on_disk) {
-        struct stat attr;
-        if(stat(id_folder.second.c_str(), &attr) == 0) {
-            time_t now = time(nullptr);
-            struct tm expiration_date = *localtime(&attr.st_mtime);
-            expiration_date.tm_mday += 7;
-            if(now <= mktime(&expiration_date)) {
-                exists_on_disk = true;
+        // we don't have to do an "expired" check if we just downloaded it
+        bool exists_on_disk = this->newly_downloaded.contains(id_folder);
+        if(!exists_on_disk) {
+            struct stat attr;
+            if(stat(id_folder.second.c_str(), &attr) == 0) {
+                time_t now = time(nullptr);
+                struct tm expiration_date = *localtime(&attr.st_mtime);
+                expiration_date.tm_mday += 7;
+                if(now <= mktime(&expiration_date)) {
+                    exists_on_disk = true;
+                }
             }
         }
-    }
 
-    // if we have the file or the download just finished, create the entry
-    // and load it right away (we're probably going to need it soon if we just loaded it)
-    if(exists_on_disk || this->download_avatar(id_folder)) {
-        this->avatars[id_folder] = {
-            .file_path = id_folder.second, .image = nullptr, .last_access_time = 0.0, .is_downloading = false};
-        this->load_avatar_image(this->avatars[id_folder]);
+        // if we have the file or the download just finished, create the entry
+        // but only actually load it when it's needed (in get_avatar)
+        if(exists_on_disk || this->download_avatar(id_folder)) {
+            this->avatars[id_folder] = {
+                .file_path = id_folder.second, .image = nullptr, .last_access_time = 0.0, .is_downloading = false};
 
-        this->download_queue.pop_front();  // remove it from the queue
+            this->load_queue.pop_front();  // remove it from the queue
+        }
     }
 }
 
@@ -87,8 +89,16 @@ void AvatarManager::add_avatar(const std::pair<i32, std::string>& id_folder) {
     }
 
     // avoid duplicates in queue
-    if(std::ranges::find(this->download_queue, id_folder) == this->download_queue.end()) {
-        this->download_queue.push_back(id_folder);
+    if(std::ranges::find(this->load_queue, id_folder) == this->load_queue.end()) {
+        this->load_queue.push_back(id_folder);
+    }
+}
+
+void AvatarManager::remove_avatar(const std::pair<i32, std::string>& id_folder) {
+    // dequeue if it's waiting to be loaded, that's all
+    auto it = std::ranges::find(this->load_queue, id_folder);
+    if(it != this->load_queue.end()) {
+        this->load_queue.erase(it);
     }
 }
 
@@ -158,7 +168,7 @@ void AvatarManager::clear() {
     }
 
     this->avatars.clear();
-    this->download_queue.clear();
+    this->load_queue.clear();
     this->id_blacklist.clear();
     this->newly_downloaded.clear();
 }
