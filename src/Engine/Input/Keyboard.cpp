@@ -44,7 +44,6 @@ void Keyboard::onKeyDown(KEYCODE keyCode) {
         case KEY_RCONTROL:
             this->bControlDown = true;
             break;
-        case 0xffe7:  // linux (XK_Meta_L)
         case KEY_LALT:
         case KEY_RALT:
             this->bAltDown = true;
@@ -76,7 +75,6 @@ void Keyboard::onKeyUp(KEYCODE keyCode) {
         case KEY_RCONTROL:
             this->bControlDown = false;
             break;
-        case 0xffe7:  // linux (XK_Meta_L)
         case KEY_LALT:
         case KEY_RALT:
             this->bAltDown = false;

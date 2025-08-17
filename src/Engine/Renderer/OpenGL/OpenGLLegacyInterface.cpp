@@ -71,7 +71,9 @@ void OpenGLLegacyInterface::beginScene() {
     // push main transforms
     pushTransform();
     setProjectionMatrix(defaultProjectionMatrix);
-    translate(cv::r_globaloffset_x.getFloat(), cv::r_globaloffset_y.getFloat());
+    if(cv::r_globaloffset_x.getFloat() != cv::r_globaloffset_x.getDefaultFloat() ||
+       cv::r_globaloffset_y.getFloat() != cv::r_globaloffset_y.getDefaultFloat())
+        translate(cv::r_globaloffset_x.getFloat(), cv::r_globaloffset_y.getFloat());
 
     // and apply them
     updateTransform();
@@ -107,15 +109,8 @@ void OpenGLLegacyInterface::setColor(Color color) {
     if(color == this->color) return;
 
     this->color = color;
-    // glColor4f(((unsigned char)(this->color >> 16))  / 255.0f, ((unsigned char)(this->color >> 8)) / 255.0f,
-    // ((unsigned char)(this->color >> 0)) / 255.0f, ((unsigned char)(this->color >> 24)) / 255.0f);
-    glColor4ub(this->color.R(), this->color.G(), this->color.B(), this->color.A());
-}
 
-void OpenGLLegacyInterface::setAlpha(float alpha) {
-    Color newColor = this->color;
-    newColor.setA(alpha);
-    setColor(newColor);
+    glColor4ub(this->color.R(), this->color.G(), this->color.B(), this->color.A());
 }
 
 void OpenGLLegacyInterface::drawPixels(int x, int y, int width, int height, Graphics::DRAWPIXELS_TYPE type,
@@ -285,9 +280,8 @@ void OpenGLLegacyInterface::drawQuad(int x, int y, int width, int height) {
     glEnd();
 }
 
-void OpenGLLegacyInterface::drawQuad(vec2 topLeft, vec2 topRight, vec2 bottomRight, vec2 bottomLeft,
-                                     Color topLeftColor, Color topRightColor, Color bottomRightColor,
-                                     Color bottomLeftColor) {
+void OpenGLLegacyInterface::drawQuad(vec2 topLeft, vec2 topRight, vec2 bottomRight, vec2 bottomLeft, Color topLeftColor,
+                                     Color topRightColor, Color bottomRightColor, Color bottomLeftColor) {
     updateTransform();
 
     glBegin(GL_QUADS);
@@ -574,6 +568,15 @@ void OpenGLLegacyInterface::setDepthBuffer(bool enabled) {
     else
         glDisable(GL_DEPTH_TEST);
 }
+
+void OpenGLLegacyInterface::setDepthWriting(bool enabled) {
+    if(enabled)
+        glDepthMask(GL_TRUE);
+    else
+        glDepthMask(GL_FALSE);
+}
+
+void OpenGLLegacyInterface::setColorWriting(bool r, bool g, bool b, bool a) { glColorMask(r, g, b, a); }
 
 void OpenGLLegacyInterface::setCulling(bool culling) {
     if(culling)

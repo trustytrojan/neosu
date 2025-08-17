@@ -46,18 +46,18 @@ void OpenGLShader::destroy() {
 void OpenGLShader::enable() {
     if(!this->bReady) return;
 
-    // use the state cache instead of querying gl directly
-    this->iProgramBackup = OpenGLStateCache::getCurrentProgram();
-    glUseProgramObjectARB(this->iProgram);
+    int currentProgram = OpenGLStateCache::getCurrentProgram();
+    if(currentProgram == this->iProgram) return;  // already active
 
-    // update cache
+    this->iProgramBackup = currentProgram;
+    glUseProgram(this->iProgram);
     OpenGLStateCache::setCurrentProgram(this->iProgram);
 }
 
 void OpenGLShader::disable() {
     if(!this->bReady) return;
 
-    glUseProgramObjectARB(this->iProgramBackup);
+    glUseProgram(this->iProgramBackup);
 
     // update cache
     OpenGLStateCache::setCurrentProgram(this->iProgramBackup);

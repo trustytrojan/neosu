@@ -44,7 +44,30 @@ void drawFillSliderBodyPeppy(const std::vector<vec2> &points, VertexArrayObject 
 void checkUpdateVars(float hitcircleDiameter);
 void resetRenderTargetBoundingBox();
 
+struct UniformCache {
+    // convar-dependent settings (updated by convar callbacks)
+    int style{-1};
+    float bodyAlphaMultiplier{-1.0f};
+    float bodyColorSaturation{-1.0f};
+    float borderSizeMultiplier{-1.0f};
+    float borderFeather{-1.0f};
+
+    // uniforms that change often (colors)
+    Color lastBorderColor{0};
+    Color lastBodyColor{0};
+
+    bool needsConfigUpdate{true};  // for convar-based uniforms
+};
+
+UniformCache s_uniformCache;
+// helper function to update color uniforms (after ->enable-ing the shader)
+void updateColorUniforms(const Color &borderColor, const Color &bodyColor);
+// check if convar-dependent uniforms need to be updated (after ->enable-ing the shader)
+void updateConfigUniforms();
 }  // namespace
+
+// invalidate config uniforms (convar callbacks)
+void onUniformConfigChanged() { s_uniformCache.needsConfigUpdate = true; }
 
 VertexArrayObject *generateVAO(const std::vector<vec2> &points, float hitcircleDiameter, vec3 translation,
                                bool skipOOBPoints) {
@@ -109,8 +132,8 @@ VertexArrayObject *generateVAO(const std::vector<vec2> &points, float hitcircleD
     return vao;
 }
 
-void draw(const std::vector<vec2> &points, const std::vector<vec2> &alwaysPoints, float hitcircleDiameter,
-          float from, float to, Color undimmedColor, float colorRGBMultiplier, float alpha, long sliderTimeForRainbow) {
+void draw(const std::vector<vec2> &points, const std::vector<vec2> &alwaysPoints, float hitcircleDiameter, float from,
+          float to, Color undimmedColor, float colorRGBMultiplier, float alpha, long sliderTimeForRainbow) {
     if(cv::slider_alpha_multiplier.getFloat() <= 0.0f || alpha <= 0.0f) return;
 
     checkUpdateVars(hitcircleDiameter);
@@ -206,15 +229,8 @@ void draw(const std::vector<vec2> &points, const std::vector<vec2> &alwaysPoints
 
             if(!cv::slider_use_gradient_image.getBool()) {
                 s_BLEND_SHADER->enable();
-                s_BLEND_SHADER->setUniform1i("style", cv::slider_osu_next_style.getBool() ? 1 : 0);
-                s_BLEND_SHADER->setUniform1f("bodyAlphaMultiplier", cv::slider_body_alpha_multiplier.getFloat());
-                s_BLEND_SHADER->setUniform1f("bodyColorSaturation", cv::slider_body_color_saturation.getFloat());
-                s_BLEND_SHADER->setUniform1f("borderSizeMultiplier", cv::slider_border_size_multiplier.getFloat());
-                s_BLEND_SHADER->setUniform1f("borderFeather", cv::slider_border_feather.getFloat());
-                s_BLEND_SHADER->setUniform3f("colBorder", dimmedBorderColor.Rf(), dimmedBorderColor.Gf(),
-                                             dimmedBorderColor.Bf());
-                s_BLEND_SHADER->setUniform3f("colBody", dimmedBodyColor.Rf(), dimmedBodyColor.Gf(),
-                                             dimmedBodyColor.Bf());
+                updateConfigUniforms();
+                updateColorUniforms(dimmedBorderColor, dimmedBodyColor);
             }
 
             g->setColor(argb(1.0f, colorRGBMultiplier, colorRGBMultiplier,
@@ -324,15 +340,8 @@ void draw(VertexArrayObject *vao, const std::vector<vec2> &alwaysPoints, vec2 tr
 
             if(!cv::slider_use_gradient_image.getBool()) {
                 s_BLEND_SHADER->enable();
-                s_BLEND_SHADER->setUniform1i("style", cv::slider_osu_next_style.getBool() ? 1 : 0);
-                s_BLEND_SHADER->setUniform1f("bodyAlphaMultiplier", cv::slider_body_alpha_multiplier.getFloat());
-                s_BLEND_SHADER->setUniform1f("bodyColorSaturation", cv::slider_body_color_saturation.getFloat());
-                s_BLEND_SHADER->setUniform1f("borderSizeMultiplier", cv::slider_border_size_multiplier.getFloat());
-                s_BLEND_SHADER->setUniform1f("borderFeather", cv::slider_border_feather.getFloat());
-                s_BLEND_SHADER->setUniform3f("colBorder", dimmedBorderColor.Rf(), dimmedBorderColor.Gf(),
-                                             dimmedBorderColor.Bf());
-                s_BLEND_SHADER->setUniform3f("colBody", dimmedBodyColor.Rf(), dimmedBodyColor.Gf(),
-                                             dimmedBodyColor.Bf());
+                updateConfigUniforms();
+                updateColorUniforms(dimmedBorderColor, dimmedBodyColor);
             }
 
             g->setColor(argb(1.0f, colorRGBMultiplier, colorRGBMultiplier,
@@ -377,7 +386,7 @@ void draw(VertexArrayObject *vao, const std::vector<vec2> &alwaysPoints, vec2 tr
 namespace {  // static
 
 void drawFillSliderBodyPeppy(const std::vector<vec2> &points, VertexArrayObject *circleMesh, float radius,
-                             int drawFromIndex, int drawUpToIndex, Shader * /*shader*/) {
+                             int drawFromIndex, int drawUpToIndex, Shader *shader) {
     if(drawFromIndex < 0) drawFromIndex = 0;
     if(drawUpToIndex < 0) drawUpToIndex = points.size();
 
@@ -396,6 +405,13 @@ void drawFillSliderBodyPeppy(const std::vector<vec2> &points, VertexArrayObject 
                 continue;
 
             g->translate(x - startX, y - startY, 0);
+            if constexpr(Env::cfg(REND::DX11)) {
+                if(shader) {
+                    g->forceUpdateTransform();
+                    Matrix4 mvp = g->getMVP();
+                    shader->setUniformMatrix4fv("mvp", mvp);
+                }
+            }
 
             g->drawVAO(circleMesh);
 
@@ -486,7 +502,7 @@ void checkUpdateVars(float hitcircleDiameter) {
         s_UNIT_CIRCLE_VAO->clear();
         for(int i = 0; i < s_UNIT_CIRCLE.size() / 5; i++) {
             vec3 vertexPos = vec3((radius * s_UNIT_CIRCLE[i * 5 + 2]), (radius * s_UNIT_CIRCLE[i * 5 + 3]),
-                                        s_UNIT_CIRCLE[i * 5 + 4]);
+                                  s_UNIT_CIRCLE[i * 5 + 4]);
             vec2 vertexTexcoord = vec2(s_UNIT_CIRCLE[i * 5 + 0], s_UNIT_CIRCLE[i * 5 + 1]);
 
             s_UNIT_CIRCLE_VAO->addVertex(vertexPos);
@@ -510,14 +526,14 @@ void checkUpdateVars(float hitcircleDiameter) {
             s_UNIT_CIRCLE_VAO_TRIANGLES->addTexcoord(startUV);
 
             // pizza slice edge 1
-            s_UNIT_CIRCLE_VAO_TRIANGLES->addVertex(vec3(
-                (radius * s_UNIT_CIRCLE[i * 5 + 2]), (radius * s_UNIT_CIRCLE[i * 5 + 3]), s_UNIT_CIRCLE[i * 5 + 4]));
+            s_UNIT_CIRCLE_VAO_TRIANGLES->addVertex(vec3((radius * s_UNIT_CIRCLE[i * 5 + 2]),
+                                                        (radius * s_UNIT_CIRCLE[i * 5 + 3]), s_UNIT_CIRCLE[i * 5 + 4]));
             s_UNIT_CIRCLE_VAO_TRIANGLES->addTexcoord(vec2(s_UNIT_CIRCLE[i * 5 + 0], s_UNIT_CIRCLE[i * 5 + 1]));
 
             // pizza slice edge 2
             s_UNIT_CIRCLE_VAO_TRIANGLES->addVertex(vec3((radius * s_UNIT_CIRCLE[(i + 1) * 5 + 2]),
-                                                           (radius * s_UNIT_CIRCLE[(i + 1) * 5 + 3]),
-                                                           s_UNIT_CIRCLE[(i + 1) * 5 + 4]));
+                                                        (radius * s_UNIT_CIRCLE[(i + 1) * 5 + 3]),
+                                                        s_UNIT_CIRCLE[(i + 1) * 5 + 4]));
             s_UNIT_CIRCLE_VAO_TRIANGLES->addTexcoord(
                 vec2(s_UNIT_CIRCLE[(i + 1) * 5 + 0], s_UNIT_CIRCLE[(i + 1) * 5 + 1]));
         }
@@ -530,6 +546,57 @@ void resetRenderTargetBoundingBox() {
     s_fBoundingBoxMinY = (std::numeric_limits<float>::max)();
     s_fBoundingBoxMaxY = 0.0f;
 }
+
+// helper function to update color uniforms
+void updateColorUniforms(const Color &borderColor, const Color &bodyColor) {
+    if(s_uniformCache.lastBorderColor != borderColor) {
+        s_BLEND_SHADER->setUniform3f("colBorder", borderColor.Rf(), borderColor.Gf(), borderColor.Bf());
+        s_uniformCache.lastBorderColor = borderColor;
+    }
+
+    if(s_uniformCache.lastBodyColor != bodyColor) {
+        s_BLEND_SHADER->setUniform3f("colBody", bodyColor.Rf(), bodyColor.Gf(), bodyColor.Bf());
+        s_uniformCache.lastBodyColor = bodyColor;
+    }
+}
+
+void updateConfigUniforms() {
+    if(!s_BLEND_SHADER || !s_uniformCache.needsConfigUpdate) return;
+
+    const int newStyle = cv::slider_osu_next_style.getBool() ? 1 : 0;
+    const float newBodyAlpha = cv::slider_body_alpha_multiplier.getFloat();
+    const float newBodySat = cv::slider_body_color_saturation.getFloat();
+    const float newBorderSize = cv::slider_border_size_multiplier.getFloat();
+    const float newBorderFeather = cv::slider_border_feather.getFloat();
+
+    if(s_uniformCache.style != newStyle) {
+        s_BLEND_SHADER->setUniform1i("style", newStyle);
+        s_uniformCache.style = newStyle;
+    }
+
+    if(s_uniformCache.bodyAlphaMultiplier != newBodyAlpha) {
+        s_BLEND_SHADER->setUniform1f("bodyAlphaMultiplier", newBodyAlpha);
+        s_uniformCache.bodyAlphaMultiplier = newBodyAlpha;
+    }
+
+    if(s_uniformCache.bodyColorSaturation != newBodySat) {
+        s_BLEND_SHADER->setUniform1f("bodyColorSaturation", newBodySat);
+        s_uniformCache.bodyColorSaturation = newBodySat;
+    }
+
+    if(s_uniformCache.borderSizeMultiplier != newBorderSize) {
+        s_BLEND_SHADER->setUniform1f("borderSizeMultiplier", newBorderSize);
+        s_uniformCache.borderSizeMultiplier = newBorderSize;
+    }
+
+    if(s_uniformCache.borderFeather != newBorderFeather) {
+        s_BLEND_SHADER->setUniform1f("borderFeather", newBorderFeather);
+        s_uniformCache.borderFeather = newBorderFeather;
+    }
+
+    s_uniformCache.needsConfigUpdate = false;
+}
+
 }  // namespace
 
 }  // namespace SliderRenderer

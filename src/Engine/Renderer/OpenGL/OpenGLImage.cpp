@@ -32,8 +32,10 @@ void OpenGLImage::init() {
 
     // create texture object
     if(this->GLTexture == 0) {
-        // DEPRECATED LEGACY (1)
-        if constexpr(Env::cfg(REND::GL)) glEnable(GL_TEXTURE_2D);
+        // FFP compatibility (part 1)
+        if constexpr(Env::cfg(REND::GL)) {
+            glEnable(GL_TEXTURE_2D);
+        }
 
         // create texture and bind
         glGenTextures(1, &this->GLTexture);
@@ -67,14 +69,20 @@ void OpenGLImage::init() {
         return;
     }
 
-    // free memory
-    if(!this->bKeepInSystemMemory) this->rawImage.clear();
+    // free from RAM (it's now in VRAM)
+    if(!this->bKeepInSystemMemory) {
+        this->rawImage.clear();
+    }
 
     this->bReady = true;
 
-    if(this->filterMode != Graphics::FILTER_MODE::FILTER_MODE_LINEAR) setFilterMode(this->filterMode);
+    if(this->filterMode != Graphics::FILTER_MODE::FILTER_MODE_LINEAR) {
+        setFilterMode(this->filterMode);
+    }
 
-    if(this->wrapMode != Graphics::WRAP_MODE::WRAP_MODE_CLAMP) setWrapMode(this->wrapMode);
+    if(this->wrapMode != Graphics::WRAP_MODE::WRAP_MODE_CLAMP) {
+        setWrapMode(this->wrapMode);
+    }
 }
 
 void OpenGLImage::initAsync() {
@@ -107,8 +115,10 @@ void OpenGLImage::bind(unsigned int textureUnit) {
     // set texture
     glBindTexture(GL_TEXTURE_2D, this->GLTexture);
 
-    // DEPRECATED LEGACY (2)
-    if constexpr(Env::cfg(REND::GL)) glEnable(GL_TEXTURE_2D);
+    // FFP compatibility (part 2)
+    if constexpr(Env::cfg(REND::GL)) {
+        glEnable(GL_TEXTURE_2D);
+    }
 }
 
 void OpenGLImage::unbind() {

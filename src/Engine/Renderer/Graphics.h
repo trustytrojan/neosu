@@ -83,7 +83,7 @@ class Graphics {
     friend class Engine;
 
     Graphics();
-    virtual ~Graphics() {}
+    virtual ~Graphics() = default;
 
     // scene
     virtual void beginScene() = 0;
@@ -128,11 +128,12 @@ class Graphics {
                               Color bottomLeftColor, Color bottomRightColor) = 0;
 
     virtual void drawQuad(int x, int y, int width, int height) = 0;
-    virtual void drawQuad(vec2 topLeft, vec2 topRight, vec2 bottomRight, vec2 bottomLeft,
-                          Color topLeftColor, Color topRightColor, Color bottomRightColor, Color bottomLeftColor) = 0;
+    virtual void drawQuad(vec2 topLeft, vec2 topRight, vec2 bottomRight, vec2 bottomLeft, Color topLeftColor,
+                          Color topRightColor, Color bottomRightColor, Color bottomLeftColor) = 0;
 
     // 2d resource drawing
-    virtual void drawImage(Image *image, AnchorPoint anchor = AnchorPoint::CENTER, float edgeSoftness = 0.0f, McRect clipRect = {}) = 0;
+    virtual void drawImage(Image *image, AnchorPoint anchor = AnchorPoint::CENTER, float edgeSoftness = 0.0f,
+                           McRect clipRect = {}) = 0;
     virtual void drawString(McFont *font, const UString &text) = 0;
 
     // 3d type drawing
@@ -155,6 +156,9 @@ class Graphics {
     virtual void setBlending(bool enabled) = 0;
     virtual void setBlendMode(BLEND_MODE blendMode) = 0;
     virtual void setDepthBuffer(bool enabled) = 0;
+    virtual void setDepthWriting(bool enabled) = 0;
+    virtual void setColorWriting(bool r, bool g, bool b, bool a) = 0;
+    inline void setColorWriting(bool enabled) { this->setColorWriting(enabled, enabled, enabled, enabled); }
     virtual void setCulling(bool enabled) = 0;
     virtual void setVSync(bool enabled) = 0;
     virtual void setAntialiasing(bool enabled) = 0;
@@ -192,6 +196,7 @@ class Graphics {
     // matrices & transforms
     void pushTransform();
     void popTransform();
+    void forceUpdateTransform();
 
     // 2D
     // TODO: rename these to translate2D() etc.
@@ -215,6 +220,7 @@ class Graphics {
 
     Matrix4 getWorldMatrix();
     Matrix4 getProjectionMatrix();
+    inline Matrix4 getMVP() const { return this->MP; }
 
     // 3d gui scenes
     void push3DScene(McRect region);
@@ -237,12 +243,17 @@ class Graphics {
     std::stack<Matrix4> projectionTransformStack;
 
     // 3d gui scenes
-    std::stack<bool> scene_stack;
-    McRect scene_region;
-    vec3 v3dSceneOffset{0.f};
-    Matrix4 scene_world_matrix;
-    Matrix4 scene_projection_matrix;
+    std::stack<bool> scene3d_stack;
+    Matrix4 scene3d_world_matrix;
+    Matrix4 scene3d_projection_matrix;
 
+    // transforms
+    Matrix4 projectionMatrix;
+    Matrix4 worldMatrix;
+    Matrix4 MP;
+
+    McRect scene3d_region;
+    vec3 v3dSceneOffset{0.f};
     bool bTransformUpToDate;
     bool bIs3dScene;
 };

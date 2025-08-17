@@ -67,7 +67,7 @@ void CarouselButton::draw() {
     this->drawMenuButtonBackground();
 
     // debug inner bounding box
-    if(cv::debug.getBool()) {
+    if(cv::debug_osu.getBool()) {
         // scaling
         const vec2 pos = this->getActualPos();
         const vec2 size = this->getActualSize();
@@ -80,7 +80,7 @@ void CarouselButton::draw() {
     }
 
     // debug outer/actual bounding box
-    if(cv::debug.getBool()) {
+    if(cv::debug_osu.getBool()) {
         g->setColor(0xffff0000);
         g->drawLine(this->vPos.x, this->vPos.y, this->vPos.x + this->vSize.x, this->vPos.y);
         g->drawLine(this->vPos.x, this->vPos.y, this->vPos.x, this->vPos.y + this->vSize.y);

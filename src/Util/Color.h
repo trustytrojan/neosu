@@ -120,6 +120,18 @@ constexpr Color rgba(R r, G g, B b, A a)
 	return argb(a, r, g, b);
 }
 
+// for opengl
+constexpr Color rgba(Color argbcol)
+{
+	return argb(argbcol.R(), argbcol.G(), argbcol.B(), argbcol.A());
+}
+
+// for opengl
+constexpr Color abgr(Color argbcol)
+{
+	return argb(argbcol.A(), argbcol.B(), argbcol.G(), argbcol.R());
+}
+
 template <typename R, typename G, typename B, typename A>
 [[deprecated("parameters should have compatible types")]]
 constexpr Color rgba(R r, G g, B b, A a)

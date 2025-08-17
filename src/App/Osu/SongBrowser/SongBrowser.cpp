@@ -642,7 +642,7 @@ void SongBrowser::draw() {
     this->scoreBrowser->draw();
     this->localBestContainer->draw();
 
-    if(cv::debug.getBool()) {
+    if(cv::debug_osu.getBool()) {
         this->scoreBrowser->getContainer()->draw_debug();
     }
 
@@ -786,9 +786,9 @@ void SongBrowser::draw() {
 
     // draw top bar
     this->topbarLeft->draw();
-    if(cv::debug.getBool()) this->topbarLeft->draw_debug();
+    if(cv::debug_osu.getBool()) this->topbarLeft->draw_debug();
     this->topbarRight->draw();
-    if(cv::debug.getBool()) this->topbarRight->draw_debug();
+    if(cv::debug_osu.getBool()) this->topbarRight->draw_debug();
 
     // draw search
     this->search->setSearchString(this->sSearchString, cv::songbrowser_search_hardcoded_filter.getString().c_str());
@@ -1633,7 +1633,7 @@ void SongBrowser::addSongButtonToAlphanumericGroup(SongButton *btn, std::vector<
         children = &group[27]->getChildren();
     }
 
-    if(cv::debug.getBool()) {
+    if(cv::debug_osu.getBool()) {
         debugLog("Inserting {:s}\n", name.c_str());
     }
 

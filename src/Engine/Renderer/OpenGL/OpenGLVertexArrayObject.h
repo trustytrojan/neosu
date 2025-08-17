@@ -26,8 +26,6 @@ private:
 	void initAsync() override;
 	void destroy() override;
 
-	static inline Color ARGBtoABGR(Color color) {return ((color & 0xff000000) >> 0) | ((color & 0x00ff0000) >> 16) | ((color & 0x0000ff00) << 0) | ((color & 0x000000ff) << 16);}
-
 	unsigned int iVertexBuffer;
 	unsigned int iTexcoordBuffer;
 	unsigned int iColorBuffer;

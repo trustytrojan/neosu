@@ -9,7 +9,6 @@
 #include "ResourceManager.h"
 
 class Image;
-
 class Beatmap;
 class DatabaseBeatmap;
 typedef DatabaseBeatmap BeatmapDifficulty;
@@ -23,7 +22,7 @@ class ConVar;
 class PauseButton : public CBaseUIButton {
    public:
     PauseButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
-        : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), std::move(text)){}
+        : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), std::move(text)) {}
 
     void draw() override;
     inline void setPaused(bool paused) { this->bIsPaused = paused; }
@@ -46,8 +45,8 @@ class MainMenu : public OsuScreen, public MouseListener {
     void draw() override;
     void mouse_update(bool *propagate_clicks) override;
 
-    BeatmapDifficulty* preloaded_beatmap = nullptr;
-    BeatmapSet* preloaded_beatmapset = nullptr;
+    BeatmapDifficulty *preloaded_beatmap = nullptr;
+    BeatmapSet *preloaded_beatmapset = nullptr;
     void selectRandomBeatmap();
 
     void onKeyDown(KeyboardEvent &e) override;
@@ -67,6 +66,10 @@ class MainMenu : public OsuScreen, public MouseListener {
     float button_sound_cooldown{0.f};
 
     void drawVersionInfo();
+    void drawMainButton();
+    void drawLogoImage(const McRect &mainButtonRect);
+    void drawFriend(const McRect &mainButtonRect, float pulse, bool haveTimingpoints);
+    std::pair<bool, float> getTimingpointPulseAmount();  // for main menu cube anim
     void updateLayout();
 
     void animMainButton();
@@ -105,7 +108,7 @@ class MainMenu : public OsuScreen, public MouseListener {
     std::vector<MainButton *> menuElements;
 
     PauseButton *pauseButton;
-    UIButton* updateAvailableButton = nullptr;
+    UIButton *updateAvailableButton = nullptr;
     CBaseUIButton *versionButton;
 
     bool bDrawVersionNotificationArrow;
@@ -142,7 +145,7 @@ class MainMenu : public OsuScreen, public MouseListener {
     float fBackgroundFadeInTime;
 
     Image *logo_img;
-    Shader* background_shader = nullptr;
+    Shader *background_shader = nullptr;
 
     struct SongsFolderEnumerator : public Resource {
         ~SongsFolderEnumerator() override = default;

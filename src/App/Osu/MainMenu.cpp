@@ -264,82 +264,273 @@ MainMenu::~MainMenu() {
     if(this->bWasCleanShutdown) this->writeVersionFile();
 }
 
-void MainMenu::draw() {
-    if(!this->bVisible) return;
+void MainMenu::drawFriend(const McRect &mainButtonRect, float pulse, bool haveTimingpoints) {
+    {
+        const float width = mainButtonRect.getWidth() * 0.11f * 2.0f * (1.0f - pulse * 0.05f);
 
-    // load server icon
-    if(bancho->is_online() && bancho->server_icon_url.length() > 0 && bancho->server_icon == nullptr) {
-        std::string icon_path = fmt::format(MCENGINE_DATA_DIR "avatars/{}", bancho->endpoint);
-        // If we are online, the avatars/<server> directory is already created
-        icon_path.append("/server_icon");
+        const float margin = width * 0.4f;
 
-        float progress = -1.f;
-        std::vector<u8> data;
-        int response_code;
-        Downloader::download(bancho->server_icon_url.toUtf8(), &progress, data, &response_code);
-        if(progress == -1.f) bancho->server_icon_url = "";
-        if(!data.empty()) {
-            FILE *file = fopen(icon_path.c_str(), "wb");
-            if(file != nullptr) {
-                fwrite(data.data(), data.size(), 1, file);
-                fflush(file);
-                fclose(file);
-            }
+        const float offset = mainButtonRect.getWidth() * 0.02f;
 
-            bancho->server_icon = resourceManager->loadImageAbs(icon_path, icon_path);
-        }
-    }
+        VertexArrayObject vao;
+        {
+            const vec2 pos = vec2(mainButtonRect.getX(), mainButtonRect.getY() - offset);
 
-    // menu-background
-    if(cv::draw_menu_background.getBool()) {
-        Image *backgroundImage = osu->getSkin()->getMenuBackground();
-        if(backgroundImage != nullptr && backgroundImage != osu->getSkin()->getMissingTexture() &&
-           backgroundImage->isReady()) {
-            const float scale = Osu::getImageScaleToFillResolution(backgroundImage, osu->getScreenSize());
+            vec2 left = pos + vec2(0, 0);
+            vec2 top = pos + vec2(width / 2, -width * std::sqrt(3.0f) / 2.0f);
+            vec2 right = pos + vec2(width, 0);
 
-            g->setColor(Color(0xffffffff).setA(this->fStartupAnim));
-
-            g->pushTransform();
+            vec2 topRightDir = (top - right);
             {
-                g->scale(scale, scale);
-                g->translate(osu->getScreenWidth() / 2, osu->getScreenHeight() / 2);
-                g->drawImage(backgroundImage);
+                const float temp = topRightDir.x;
+                topRightDir.x = -topRightDir.y;
+                topRightDir.y = temp;
             }
-            g->popTransform();
+
+            vec2 innerLeft = left + vec::normalize(topRightDir) * margin;
+
+            vao.addVertex(left.x, left.y);
+            vao.addVertex(top.x, top.y);
+            vao.addVertex(innerLeft.x, innerLeft.y);
+
+            vec2 leftRightDir = (right - left);
+            {
+                const float temp = leftRightDir.x;
+                leftRightDir.x = -leftRightDir.y;
+                leftRightDir.y = temp;
+            }
+
+            vec2 innerTop = top + vec::normalize(leftRightDir) * margin;
+
+            vao.addVertex(top.x, top.y);
+            vao.addVertex(innerTop.x, innerTop.y);
+            vao.addVertex(innerLeft.x, innerLeft.y);
+
+            vec2 leftTopDir = (left - top);
+            {
+                const float temp = leftTopDir.x;
+                leftTopDir.x = -leftTopDir.y;
+                leftTopDir.y = temp;
+            }
+
+            vec2 innerRight = right + vec::normalize(leftTopDir) * margin;
+
+            vao.addVertex(top.x, top.y);
+            vao.addVertex(innerRight.x, innerRight.y);
+            vao.addVertex(innerTop.x, innerTop.y);
+
+            vao.addVertex(top.x, top.y);
+            vao.addVertex(right.x, right.y);
+            vao.addVertex(innerRight.x, innerRight.y);
+
+            vao.addVertex(left.x, left.y);
+            vao.addVertex(innerLeft.x, innerLeft.y);
+            vao.addVertex(innerRight.x, innerRight.y);
+
+            vao.addVertex(left.x, left.y);
+            vao.addVertex(innerRight.x, innerRight.y);
+            vao.addVertex(right.x, right.y);
         }
+
+        // left
+        g->setColor(Color(0xffc8faf1).setA(this->fMainMenuAnimFriendPercent * cv::main_menu_alpha.getFloat()));
+
+        g->drawVAO(&vao);
+
+        // right
+        g->pushTransform();
+        {
+            g->translate(mainButtonRect.getWidth() - width, 0);
+            g->drawVAO(&vao);
+        }
+        g->popTransform();
     }
 
-    // XXX: Should do fade transition between beatmap backgrounds when switching to next song
-    float alpha = 1.0f;
-    if(cv::songbrowser_background_fade_in_duration.getFloat() > 0.0f) {
-        // handle fadein trigger after handler is finished loading
-        const bool ready = osu->getSelectedBeatmap()->getSelectedDifficulty2() != nullptr &&
-                           osu->getBackgroundImageHandler()->getLoadBackgroundImage(
-                               osu->getSelectedBeatmap()->getSelectedDifficulty2()) != nullptr &&
-                           osu->getBackgroundImageHandler()
-                               ->getLoadBackgroundImage(osu->getSelectedBeatmap()->getSelectedDifficulty2())
-                               ->isReady();
+    float headBob = 0.0f;
+    {
+        float customPulse = 0.0f;
+        if(pulse > 0.5f)
+            customPulse = (pulse - 0.5f) / 0.5f;
+        else
+            customPulse = (0.5f - pulse) / 0.5f;
 
-        if(!ready)
-            this->fBackgroundFadeInTime = engine->getTime();
-        else if(this->fBackgroundFadeInTime > 0.0f && engine->getTime() > this->fBackgroundFadeInTime) {
-            alpha = std::clamp<float>((engine->getTime() - this->fBackgroundFadeInTime) /
-                                          cv::songbrowser_background_fade_in_duration.getFloat(),
-                                      0.0f, 1.0f);
-            alpha = 1.0f - (1.0f - alpha) * (1.0f - alpha);
-        }
+        customPulse = 1.0f - customPulse;
+
+        if(!haveTimingpoints) customPulse = 1.0f;
+
+        headBob = (customPulse) * (customPulse);
+        headBob *= this->fMainMenuAnimFriendPercent;
     }
 
-    // background_shader->enable();
-    // background_shader->setUniform1f("time", engine->getTime());
-    // background_shader->setUniform2f("resolution", osu->getScreenWidth(), osu->getScreenHeight());
-    SongBrowser::drawSelectedBeatmapBackgroundImage(alpha);
-    // background_shader->disable();
+    const float mouthEyeOffsetY = mainButtonRect.getWidth() * 0.18f + headBob * mainButtonRect.getWidth() * 0.075f;
 
-    // main button stuff
-    bool haveTimingpoints = false;
-    const float div = 1.25f;
+    // mouth
+    {
+        const float width = mainButtonRect.getWidth() * 0.10f;
+        const float height = mainButtonRect.getHeight() * 0.03f * 1.75f;
+
+        const float length = width * std::sqrt(2.0f) * 2;
+
+        const float offsetY = mainButtonRect.getHeight() / 2.0f + mouthEyeOffsetY;
+
+        g->pushTransform();
+        {
+            g->rotate(135);
+            g->translate(mainButtonRect.getX() + length / 2 + mainButtonRect.getWidth() / 2 -
+                             this->fMainMenuAnimFriendEyeFollowX * mainButtonRect.getWidth() * 0.5f,
+                         mainButtonRect.getY() + offsetY -
+                             this->fMainMenuAnimFriendEyeFollowY * mainButtonRect.getWidth() * 0.5f);
+
+            g->setColor(Color(0xff000000).setA(cv::main_menu_alpha.getFloat()));
+
+            g->fillRectf(0, 0, width, height);
+            g->fillRectf(width - height / 2.0f, 0, height, width);
+            g->fillRectf(width - height / 2.0f, width - height / 2.0f, width, height);
+            g->fillRectf(width * 2 - height, width - height / 2.0f, height, width + height / 2);
+        }
+        g->popTransform();
+    }
+
+    // eyes
+    {
+        const float width = mainButtonRect.getWidth() * 0.22f;
+        const float height = mainButtonRect.getHeight() * 0.03f * 2;
+
+        const float offsetX = mainButtonRect.getWidth() * 0.18f;
+        const float offsetY = mainButtonRect.getHeight() * 0.21f + mouthEyeOffsetY;
+
+        const float rotation = 25.0f;
+
+        // left
+        g->pushTransform();
+        {
+            g->translate(-width, 0);
+            g->rotate(-rotation);
+            g->translate(width, 0);
+            g->translate(
+                mainButtonRect.getX() + offsetX - this->fMainMenuAnimFriendEyeFollowX * mainButtonRect.getWidth(),
+                mainButtonRect.getY() + offsetY - this->fMainMenuAnimFriendEyeFollowY * mainButtonRect.getWidth());
+
+            g->setColor(Color(0xff000000).setA(cv::main_menu_alpha.getFloat()));
+
+            g->fillRectf(0, 0, width, height);
+        }
+        g->popTransform();
+
+        // right
+        g->pushTransform();
+        {
+            g->rotate(rotation);
+            g->translate(
+                mainButtonRect.getX() + mainButtonRect.getWidth() - offsetX - width -
+                    this->fMainMenuAnimFriendEyeFollowX * mainButtonRect.getWidth(),
+                mainButtonRect.getY() + offsetY - this->fMainMenuAnimFriendEyeFollowY * mainButtonRect.getWidth());
+
+            g->setColor(Color(0xff000000).setA(cv::main_menu_alpha.getFloat()));
+
+            g->fillRectf(0, 0, width, height);
+        }
+        g->popTransform();
+
+        // tear
+        g->setColor(Color(0xff000000).setA(cv::main_menu_alpha.getFloat()));
+
+        g->fillRectf(mainButtonRect.getX() + offsetX + width * 0.375f -
+                         this->fMainMenuAnimFriendEyeFollowX * mainButtonRect.getWidth(),
+                     mainButtonRect.getY() + offsetY + width / 2.0f -
+                         this->fMainMenuAnimFriendEyeFollowY * mainButtonRect.getWidth(),
+                     height * 0.75f, width * 0.375f);
+    }
+
+    // hands
+    {
+        const float size = mainButtonRect.getWidth() * 0.2f;
+
+        const float offset = -size * 0.75f;
+
+        float customPulse = 0.0f;
+        if(pulse > 0.5f)
+            customPulse = (pulse - 0.5f) / 0.5f;
+        else
+            customPulse = (0.5f - pulse) / 0.5f;
+
+        customPulse = 1.0f - customPulse;
+
+        if(!haveTimingpoints) customPulse = 1.0f;
+
+        const float animLeftMultiplier = (this->iMainMenuAnimBeatCounter % 2 == 0 ? 1.0f : 0.1f);
+        const float animRightMultiplier = (this->iMainMenuAnimBeatCounter % 2 == 1 ? 1.0f : 0.1f);
+
+        const float animMoveUp = std::lerp((1.0f - customPulse) * (1.0f - customPulse), (1.0f - customPulse), 0.35f) *
+                                 this->fMainMenuAnimFriendPercent;
+
+        const float animLeftMoveUp = animMoveUp * animLeftMultiplier;
+        const float animRightMoveUp = animMoveUp * animRightMultiplier;
+
+        const float animLeftMoveLeft = animRightMoveUp * (this->iMainMenuAnimBeatCounter % 2 == 1 ? 1.0f : 0.0f);
+        const float animRightMoveRight = animLeftMoveUp * (this->iMainMenuAnimBeatCounter % 2 == 0 ? 1.0f : 0.0f);
+
+        // left
+        g->setColor(Color(0xffd5f6fd).setA(this->fMainMenuAnimFriendPercent * cv::main_menu_alpha.getFloat()));
+
+        g->pushTransform();
+        {
+            g->rotate(40 - (1.0f - customPulse) * 10 + animLeftMoveLeft * animLeftMoveLeft * 20);
+            g->translate(mainButtonRect.getX() - size - offset -
+                             animLeftMoveLeft * mainButtonRect.getWidth() * -0.025f -
+                             animLeftMoveUp * mainButtonRect.getWidth() * 0.25f,
+                         mainButtonRect.getY() + mainButtonRect.getHeight() - size -
+                             animLeftMoveUp * mainButtonRect.getHeight() * 0.85f,
+                         -0.5f);
+            g->fillRectf(0, 0, size, size);
+        }
+        g->popTransform();
+
+        // right
+        g->pushTransform();
+        {
+            g->rotate(50 + (1.0f - customPulse) * 10 - animRightMoveRight * animRightMoveRight * 20);
+            g->translate(mainButtonRect.getX() + mainButtonRect.getWidth() + size + offset +
+                             animRightMoveRight * mainButtonRect.getWidth() * -0.025f +
+                             animRightMoveUp * mainButtonRect.getWidth() * 0.25f,
+                         mainButtonRect.getY() + mainButtonRect.getHeight() - size -
+                             animRightMoveUp * mainButtonRect.getHeight() * 0.85f,
+                         -0.5f);
+            g->fillRectf(0, 0, size, size);
+        }
+        g->popTransform();
+    }
+}
+
+void MainMenu::drawLogoImage(const McRect &mainButtonRect) {
+    auto logo = this->logo_img;
+    if(bancho->server_icon != nullptr && bancho->server_icon->isReady() && cv::main_menu_use_server_logo.getBool()) {
+        logo = bancho->server_icon;
+    }
+
+    float alpha = (1.0f - this->fMainMenuAnimFriendPercent) * (1.0f - this->fMainMenuAnimFriendPercent) *
+                  (1.0f - this->fMainMenuAnimFriendPercent);
+
+    float xscale = mainButtonRect.getWidth() / static_cast<float>(logo->getWidth());
+    float yscale = mainButtonRect.getHeight() / static_cast<float>(logo->getHeight());
+    float scale = std::min(xscale, yscale) * 0.8f;
+
+    g->pushTransform();
+    g->setColor(argb(alpha, 1.0f, 1.0f, 1.0f));
+    g->scale(scale, scale);
+
+    g->translate(this->vCenter.x - this->fCenterOffsetAnim, this->vCenter.y);
+
+    g->drawImage(logo);
+    g->popTransform();
+}
+
+std::pair<bool, float> MainMenu::getTimingpointPulseAmount() {
+    constexpr const float div = 1.25f;
+
     float pulse = 0.0f;
+    bool haveTimingpoints = false;
+
     if(osu->getSelectedBeatmap()->getSelectedDifficulty2() != nullptr &&
        osu->getSelectedBeatmap()->getMusic() != nullptr && osu->getSelectedBeatmap()->getMusic()->isPlaying()) {
         haveTimingpoints = true;
@@ -369,78 +560,29 @@ void MainMenu::draw() {
     } else
         pulse = (div - fmod(engine->getTime(), div)) / div;
 
+    return {haveTimingpoints, pulse};
+}
+
+// the cube
+void MainMenu::drawMainButton() {
+    const auto [haveTimingpoints, pulse] = this->getTimingpointPulseAmount();
+
     vec2 size = this->vSize;
     const float pulseSub = 0.05f * pulse;
     size -= size * pulseSub;
     size += size * this->fSizeAddAnim;
     size *= this->fStartupAnim;
-    McRect mainButtonRect = McRect(this->vCenter.x - size.x / 2.0f - this->fCenterOffsetAnim,
-                                   this->vCenter.y - size.y / 2.0f, size.x, size.y);
 
-    // draw notification arrow for changelog (version button)
-    if(this->bDrawVersionNotificationArrow) {
-        float animation = std::fmod((float)(engine->getTime()) * 3.2f, 2.0f);
-        if(animation > 1.0f) animation = 2.0f - animation;
-        animation = -animation * (animation - 2);  // quad out
-        float offset = osu->getUIScale(45.0f * animation);
+    const McRect mainButtonRect{this->vCenter.x - size.x / 2.0f - this->fCenterOffsetAnim,
+                                this->vCenter.y - size.y / 2.0f, size.x, size.y};
 
-        const float scale =
-            this->versionButton->getSize().x / osu->getSkin()->getPlayWarningArrow2()->getSizeBaseRaw().x;
-
-        const vec2 arrowPos = vec2(
-            this->versionButton->getSize().x / 1.75f,
-            osu->getScreenHeight() - this->versionButton->getSize().y * 2 - this->versionButton->getSize().y * scale);
-
-        UString notificationText = "Changelog";
-        g->setColor(0xffffffff);
-        g->pushTransform();
-        {
-            McFont *smallFont = osu->getSubTitleFont();
-            g->translate(arrowPos.x - smallFont->getStringWidth(notificationText) / 2.0f,
-                         (-offset * 2) * scale + arrowPos.y -
-                             (osu->getSkin()->getPlayWarningArrow2()->getSizeBaseRaw().y * scale) / 1.5f,
-                         0);
-            g->drawString(smallFont, notificationText);
-        }
-        g->popTransform();
-
-        g->setColor(0xffffffff);
-        g->pushTransform();
-        {
-            g->rotate(90.0f);
-            g->translate(0, -offset * 2, 0);
-            osu->getSkin()->getPlayWarningArrow2()->drawRaw(arrowPos, scale);
-        }
-        g->popTransform();
-    }
-
-    // draw container
-    OsuScreen::draw();
-
-    // draw update check button
-    if(this->updateAvailableButton != nullptr) {
-        using enum UpdateHandler::STATUS;
-        const auto status = osu->getUpdateHandler()->getStatus();
-        const bool drawAnim = (status == STATUS_DOWNLOAD_COMPLETE);
-        if(drawAnim) {
-            g->push3DScene(McRect(this->updateAvailableButton->getPos().x, this->updateAvailableButton->getPos().y,
-                                  this->updateAvailableButton->getSize().x, this->updateAvailableButton->getSize().y));
-            g->rotate3DScene(this->fUpdateButtonAnim * 360.0f, 0, 0);
-        }
-        this->updateAvailableButton->draw();
-        if(drawAnim) {
-            g->pop3DScene();
-        }
-    }
-
-    // draw main button
+    // draw main button cube
     bool drawing_full_cube = (this->fMainMenuAnim > 0.0f && this->fMainMenuAnim != 1.0f) ||
                              (haveTimingpoints && this->fMainMenuAnimFriendPercent > 0.0f);
 
     float inset = 0.0f;
     if(drawing_full_cube) {
         inset = (1.0f - 0.5f * this->fMainMenuAnimFriendPercent);
-
         osu->getAAFrameBuffer()->enable();
 
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_PREMUL_ALPHA);
@@ -484,9 +626,10 @@ void MainMenu::draw() {
                          this->fMainMenuAnim3 * 360.0f + friendRotation);
     }
 
-    const Color cubeColor = argb(1.0f, std::lerp(0.0f, 0.5f, this->fMainMenuAnimFriendPercent),
-                                 std::lerp(0.0f, 0.768f, this->fMainMenuAnimFriendPercent),
-                                 std::lerp(0.0f, 0.965f, this->fMainMenuAnimFriendPercent));
+    const Color cubeColor =
+        argb(cv::main_menu_alpha.getFloat(), std::lerp(0.0f, 0.5f, this->fMainMenuAnimFriendPercent),
+             std::lerp(0.0f, 0.768f, this->fMainMenuAnimFriendPercent),
+             std::lerp(0.0f, 0.965f, this->fMainMenuAnimFriendPercent));
     const Color cubeBorderColor = argb(1.0f, std::lerp(1.0f, 0.5f, this->fMainMenuAnimFriendPercent),
                                        std::lerp(1.0f, 0.768f, this->fMainMenuAnimFriendPercent),
                                        std::lerp(1.0f, 0.965f, this->fMainMenuAnimFriendPercent));
@@ -495,7 +638,7 @@ void MainMenu::draw() {
     g->setLineWidth(2.0f);
     g->pushTransform();
     g->translate(0, 0, inset);
-    g->setColor(Color(cubeColor).setA(cv::main_menu_alpha.getFloat()));
+    g->setColor(cubeColor);
 
     g->fillRectf(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
                  mainButtonRect.getHeight() - 2 * inset);
@@ -507,275 +650,15 @@ void MainMenu::draw() {
     g->setLineWidth(1.0f);
 
     // friend
-    const bool drawing_friend = this->fMainMenuAnimFriendPercent > 0.0f;
-    if(drawing_friend) {
-        // ears
-        {
-            const float width = mainButtonRect.getWidth() * 0.11f * 2.0f * (1.0f - pulse * 0.05f);
-
-            const float margin = width * 0.4f;
-
-            const float offset = mainButtonRect.getWidth() * 0.02f;
-
-            VertexArrayObject vao;
-            {
-                const vec2 pos = vec2(mainButtonRect.getX(), mainButtonRect.getY() - offset);
-
-                vec2 left = pos + vec2(0, 0);
-                vec2 top = pos + vec2(width / 2, -width * std::sqrt(3.0f) / 2.0f);
-                vec2 right = pos + vec2(width, 0);
-
-                vec2 topRightDir = (top - right);
-                {
-                    const float temp = topRightDir.x;
-                    topRightDir.x = -topRightDir.y;
-                    topRightDir.y = temp;
-                }
-
-                vec2 innerLeft = left + vec::normalize(topRightDir) * margin;
-
-                vao.addVertex(left.x, left.y);
-                vao.addVertex(top.x, top.y);
-                vao.addVertex(innerLeft.x, innerLeft.y);
-
-                vec2 leftRightDir = (right - left);
-                {
-                    const float temp = leftRightDir.x;
-                    leftRightDir.x = -leftRightDir.y;
-                    leftRightDir.y = temp;
-                }
-
-                vec2 innerTop = top + vec::normalize(leftRightDir) * margin;
-
-                vao.addVertex(top.x, top.y);
-                vao.addVertex(innerTop.x, innerTop.y);
-                vao.addVertex(innerLeft.x, innerLeft.y);
-
-                vec2 leftTopDir = (left - top);
-                {
-                    const float temp = leftTopDir.x;
-                    leftTopDir.x = -leftTopDir.y;
-                    leftTopDir.y = temp;
-                }
-
-                vec2 innerRight = right + vec::normalize(leftTopDir) * margin;
-
-                vao.addVertex(top.x, top.y);
-                vao.addVertex(innerRight.x, innerRight.y);
-                vao.addVertex(innerTop.x, innerTop.y);
-
-                vao.addVertex(top.x, top.y);
-                vao.addVertex(right.x, right.y);
-                vao.addVertex(innerRight.x, innerRight.y);
-
-                vao.addVertex(left.x, left.y);
-                vao.addVertex(innerLeft.x, innerLeft.y);
-                vao.addVertex(innerRight.x, innerRight.y);
-
-                vao.addVertex(left.x, left.y);
-                vao.addVertex(innerRight.x, innerRight.y);
-                vao.addVertex(right.x, right.y);
-            }
-
-            // left
-            g->setColor(Color(0xffc8faf1).setA(this->fMainMenuAnimFriendPercent * cv::main_menu_alpha.getFloat()));
-
-            g->drawVAO(&vao);
-
-            // right
-            g->pushTransform();
-            {
-                g->translate(mainButtonRect.getWidth() - width, 0);
-                g->drawVAO(&vao);
-            }
-            g->popTransform();
-        }
-
-        float headBob = 0.0f;
-        {
-            float customPulse = 0.0f;
-            if(pulse > 0.5f)
-                customPulse = (pulse - 0.5f) / 0.5f;
-            else
-                customPulse = (0.5f - pulse) / 0.5f;
-
-            customPulse = 1.0f - customPulse;
-
-            if(!haveTimingpoints) customPulse = 1.0f;
-
-            headBob = (customPulse) * (customPulse);
-            headBob *= this->fMainMenuAnimFriendPercent;
-        }
-
-        const float mouthEyeOffsetY = mainButtonRect.getWidth() * 0.18f + headBob * mainButtonRect.getWidth() * 0.075f;
-
-        // mouth
-        {
-            const float width = mainButtonRect.getWidth() * 0.10f;
-            const float height = mainButtonRect.getHeight() * 0.03f * 1.75f;
-
-            const float length = width * std::sqrt(2.0f) * 2;
-
-            const float offsetY = mainButtonRect.getHeight() / 2.0f + mouthEyeOffsetY;
-
-            g->pushTransform();
-            {
-                g->rotate(135);
-                g->translate(mainButtonRect.getX() + length / 2 + mainButtonRect.getWidth() / 2 -
-                                 this->fMainMenuAnimFriendEyeFollowX * mainButtonRect.getWidth() * 0.5f,
-                             mainButtonRect.getY() + offsetY -
-                                 this->fMainMenuAnimFriendEyeFollowY * mainButtonRect.getWidth() * 0.5f);
-
-                g->setColor(Color(0xff000000).setA(cv::main_menu_alpha.getFloat()));
-
-                g->fillRectf(0, 0, width, height);
-                g->fillRectf(width - height / 2.0f, 0, height, width);
-                g->fillRectf(width - height / 2.0f, width - height / 2.0f, width, height);
-                g->fillRectf(width * 2 - height, width - height / 2.0f, height, width + height / 2);
-            }
-            g->popTransform();
-        }
-
-        // eyes
-        {
-            const float width = mainButtonRect.getWidth() * 0.22f;
-            const float height = mainButtonRect.getHeight() * 0.03f * 2;
-
-            const float offsetX = mainButtonRect.getWidth() * 0.18f;
-            const float offsetY = mainButtonRect.getHeight() * 0.21f + mouthEyeOffsetY;
-
-            const float rotation = 25.0f;
-
-            // left
-            g->pushTransform();
-            {
-                g->translate(-width, 0);
-                g->rotate(-rotation);
-                g->translate(width, 0);
-                g->translate(
-                    mainButtonRect.getX() + offsetX - this->fMainMenuAnimFriendEyeFollowX * mainButtonRect.getWidth(),
-                    mainButtonRect.getY() + offsetY - this->fMainMenuAnimFriendEyeFollowY * mainButtonRect.getWidth());
-
-                g->setColor(Color(0xff000000).setA(cv::main_menu_alpha.getFloat()));
-
-                g->fillRectf(0, 0, width, height);
-            }
-            g->popTransform();
-
-            // right
-            g->pushTransform();
-            {
-                g->rotate(rotation);
-                g->translate(
-                    mainButtonRect.getX() + mainButtonRect.getWidth() - offsetX - width -
-                        this->fMainMenuAnimFriendEyeFollowX * mainButtonRect.getWidth(),
-                    mainButtonRect.getY() + offsetY - this->fMainMenuAnimFriendEyeFollowY * mainButtonRect.getWidth());
-
-                g->setColor(Color(0xff000000).setA(cv::main_menu_alpha.getFloat()));
-
-                g->fillRectf(0, 0, width, height);
-            }
-            g->popTransform();
-
-            // tear
-            g->setColor(Color(0xff000000).setA(cv::main_menu_alpha.getFloat()));
-
-            g->fillRectf(mainButtonRect.getX() + offsetX + width * 0.375f -
-                             this->fMainMenuAnimFriendEyeFollowX * mainButtonRect.getWidth(),
-                         mainButtonRect.getY() + offsetY + width / 2.0f -
-                             this->fMainMenuAnimFriendEyeFollowY * mainButtonRect.getWidth(),
-                         height * 0.75f, width * 0.375f);
-        }
-
-        // hands
-        {
-            const float size = mainButtonRect.getWidth() * 0.2f;
-
-            const float offset = -size * 0.75f;
-
-            float customPulse = 0.0f;
-            if(pulse > 0.5f)
-                customPulse = (pulse - 0.5f) / 0.5f;
-            else
-                customPulse = (0.5f - pulse) / 0.5f;
-
-            customPulse = 1.0f - customPulse;
-
-            if(!haveTimingpoints) customPulse = 1.0f;
-
-            const float animLeftMultiplier = (this->iMainMenuAnimBeatCounter % 2 == 0 ? 1.0f : 0.1f);
-            const float animRightMultiplier = (this->iMainMenuAnimBeatCounter % 2 == 1 ? 1.0f : 0.1f);
-
-            const float animMoveUp =
-                std::lerp((1.0f - customPulse) * (1.0f - customPulse), (1.0f - customPulse), 0.35f) *
-                this->fMainMenuAnimFriendPercent;
-
-            const float animLeftMoveUp = animMoveUp * animLeftMultiplier;
-            const float animRightMoveUp = animMoveUp * animRightMultiplier;
-
-            const float animLeftMoveLeft = animRightMoveUp * (this->iMainMenuAnimBeatCounter % 2 == 1 ? 1.0f : 0.0f);
-            const float animRightMoveRight = animLeftMoveUp * (this->iMainMenuAnimBeatCounter % 2 == 0 ? 1.0f : 0.0f);
-
-            // left
-            g->setColor(Color(0xffd5f6fd).setA(this->fMainMenuAnimFriendPercent * cv::main_menu_alpha.getFloat()));
-
-            g->pushTransform();
-            {
-                g->rotate(40 - (1.0f - customPulse) * 10 + animLeftMoveLeft * animLeftMoveLeft * 20);
-                g->translate(mainButtonRect.getX() - size - offset -
-                                 animLeftMoveLeft * mainButtonRect.getWidth() * -0.025f -
-                                 animLeftMoveUp * mainButtonRect.getWidth() * 0.25f,
-                             mainButtonRect.getY() + mainButtonRect.getHeight() - size -
-                                 animLeftMoveUp * mainButtonRect.getHeight() * 0.85f,
-                             -0.5f);
-                g->fillRectf(0, 0, size, size);
-            }
-            g->popTransform();
-
-            // right
-            g->pushTransform();
-            {
-                g->rotate(50 + (1.0f - customPulse) * 10 - animRightMoveRight * animRightMoveRight * 20);
-                g->translate(mainButtonRect.getX() + mainButtonRect.getWidth() + size + offset +
-                                 animRightMoveRight * mainButtonRect.getWidth() * -0.025f +
-                                 animRightMoveUp * mainButtonRect.getWidth() * 0.25f,
-                             mainButtonRect.getY() + mainButtonRect.getHeight() - size -
-                                 animRightMoveUp * mainButtonRect.getHeight() * 0.85f,
-                             -0.5f);
-                g->fillRectf(0, 0, size, size);
-            }
-            g->popTransform();
-        }
+    if(this->fMainMenuAnimFriendPercent > 0.0f) {
+        this->drawFriend(mainButtonRect, pulse, haveTimingpoints);
     }
 
     // neosu/server logo
-    {
-        auto logo = this->logo_img;
-        if(bancho->server_icon != nullptr && bancho->server_icon->isReady() &&
-           cv::main_menu_use_server_logo.getBool()) {
-            logo = bancho->server_icon;
-        }
-
-        float alpha = (1.0f - this->fMainMenuAnimFriendPercent) * (1.0f - this->fMainMenuAnimFriendPercent) *
-                      (1.0f - this->fMainMenuAnimFriendPercent);
-
-        float xscale = mainButtonRect.getWidth() / static_cast<float>(logo->getWidth());
-        float yscale = mainButtonRect.getHeight() / static_cast<float>(logo->getHeight());
-        float scale = std::min(xscale, yscale) * 0.8f;
-
-        g->pushTransform();
-        g->setColor(argb(alpha, 1.0f, 1.0f, 1.0f));
-        g->scale(scale, scale);
-
-        g->translate(this->vCenter.x - this->fCenterOffsetAnim, this->vCenter.y);
-
-        g->drawImage(logo);
-        g->popTransform();
-    }
+    this->drawLogoImage(mainButtonRect);
 
     if(drawing_full_cube) {
         g->setLineWidth(2.0f);
-
         // back side
         g->rotate3DScene(0, -180, 0);
         g->pushTransform();
@@ -873,6 +756,115 @@ void MainMenu::draw() {
     }
 }
 
+void MainMenu::draw() {
+    if(!this->bVisible) return;
+
+    // menu-background
+    if(cv::draw_menu_background.getBool()) {
+        Image *backgroundImage = osu->getSkin()->getMenuBackground();
+        if(backgroundImage != nullptr && backgroundImage != osu->getSkin()->getMissingTexture() &&
+           backgroundImage->isReady()) {
+            const float scale = Osu::getImageScaleToFillResolution(backgroundImage, osu->getScreenSize());
+
+            g->setColor(Color(0xffffffff).setA(this->fStartupAnim));
+
+            g->pushTransform();
+            {
+                g->scale(scale, scale);
+                g->translate(osu->getScreenWidth() / 2, osu->getScreenHeight() / 2);
+                g->drawImage(backgroundImage);
+            }
+            g->popTransform();
+        }
+    }
+
+    // XXX: Should do fade transition between beatmap backgrounds when switching to next song
+    float alpha = 1.0f;
+    if(cv::songbrowser_background_fade_in_duration.getFloat() > 0.0f) {
+        // handle fadein trigger after handler is finished loading
+        const bool ready = osu->getSelectedBeatmap()->getSelectedDifficulty2() != nullptr &&
+                           osu->getBackgroundImageHandler()->getLoadBackgroundImage(
+                               osu->getSelectedBeatmap()->getSelectedDifficulty2()) != nullptr &&
+                           osu->getBackgroundImageHandler()
+                               ->getLoadBackgroundImage(osu->getSelectedBeatmap()->getSelectedDifficulty2())
+                               ->isReady();
+
+        if(!ready)
+            this->fBackgroundFadeInTime = engine->getTime();
+        else if(this->fBackgroundFadeInTime > 0.0f && engine->getTime() > this->fBackgroundFadeInTime) {
+            alpha = std::clamp<float>((engine->getTime() - this->fBackgroundFadeInTime) /
+                                          cv::songbrowser_background_fade_in_duration.getFloat(),
+                                      0.0f, 1.0f);
+            alpha = 1.0f - (1.0f - alpha) * (1.0f - alpha);
+        }
+    }
+
+    // background_shader->enable();
+    // background_shader->setUniform1f("time", engine->getTime());
+    // background_shader->setUniform2f("resolution", osu->getScreenWidth(), osu->getScreenHeight());
+    SongBrowser::drawSelectedBeatmapBackgroundImage(alpha);
+    // background_shader->disable();
+
+    // draw notification arrow for changelog (version button)
+    if(this->bDrawVersionNotificationArrow) {
+        float animation = std::fmod((float)(engine->getTime()) * 3.2f, 2.0f);
+        if(animation > 1.0f) animation = 2.0f - animation;
+        animation = -animation * (animation - 2);  // quad out
+        float offset = osu->getUIScale(45.0f * animation);
+
+        const float scale =
+            this->versionButton->getSize().x / osu->getSkin()->getPlayWarningArrow2()->getSizeBaseRaw().x;
+
+        const vec2 arrowPos = vec2(
+            this->versionButton->getSize().x / 1.75f,
+            osu->getScreenHeight() - this->versionButton->getSize().y * 2 - this->versionButton->getSize().y * scale);
+
+        UString notificationText = "Changelog";
+        g->setColor(0xffffffff);
+        g->pushTransform();
+        {
+            McFont *smallFont = osu->getSubTitleFont();
+            g->translate(arrowPos.x - smallFont->getStringWidth(notificationText) / 2.0f,
+                         (-offset * 2) * scale + arrowPos.y -
+                             (osu->getSkin()->getPlayWarningArrow2()->getSizeBaseRaw().y * scale) / 1.5f,
+                         0);
+            g->drawString(smallFont, notificationText);
+        }
+        g->popTransform();
+
+        g->setColor(0xffffffff);
+        g->pushTransform();
+        {
+            g->rotate(90.0f);
+            g->translate(0, -offset * 2, 0);
+            osu->getSkin()->getPlayWarningArrow2()->drawRaw(arrowPos, scale);
+        }
+        g->popTransform();
+    }
+
+    // draw container
+    OsuScreen::draw();
+
+    // draw update check button
+    if(this->updateAvailableButton != nullptr) {
+        using enum UpdateHandler::STATUS;
+        const auto status = osu->getUpdateHandler()->getStatus();
+        const bool drawAnim = (status == STATUS_DOWNLOAD_COMPLETE);
+        if(drawAnim) {
+            g->push3DScene(McRect(this->updateAvailableButton->getPos().x, this->updateAvailableButton->getPos().y,
+                                  this->updateAvailableButton->getSize().x, this->updateAvailableButton->getSize().y));
+            g->rotate3DScene(this->fUpdateButtonAnim * 360.0f, 0, 0);
+        }
+        this->updateAvailableButton->draw();
+        if(drawAnim) {
+            g->pop3DScene();
+        }
+    }
+
+    // draw button/cube
+    this->drawMainButton();
+}
+
 void MainMenu::mouse_update(bool *propagate_clicks) {
     if(!this->bVisible) return;
 
@@ -909,10 +901,12 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
     }
 
     // handle delayed shutdown
+    bool shutting_down = false;
     if(this->fShutdownScheduledTime != 0.0f &&
        (engine->getTime() > this->fShutdownScheduledTime || !anim->isAnimating(&this->fCenterOffsetAnim))) {
         engine->shutdown();
         this->fShutdownScheduledTime = 0.0f;
+        shutting_down = true;
     }
 
     // main button autohide + anim
@@ -1043,6 +1037,30 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
                     diff2->loadMetadata(false);
                 }
             }
+        }
+    }
+
+    // load server icon
+    if(!shutting_down && bancho->is_online() && bancho->server_icon_url.length() > 0 &&
+       bancho->server_icon == nullptr) {
+        std::string icon_path = fmt::format(MCENGINE_DATA_DIR "avatars/{}", bancho->endpoint);
+        // If we are online, the avatars/<server> directory is already created
+        icon_path.append("/server_icon");
+
+        float progress = -1.f;
+        std::vector<u8> data;
+        int response_code;
+        Downloader::download(bancho->server_icon_url.toUtf8(), &progress, data, &response_code);
+        if(progress == -1.f) bancho->server_icon_url = "";
+        if(!data.empty()) {
+            FILE *file = fopen(icon_path.c_str(), "wb");
+            if(file != nullptr) {
+                fwrite(data.data(), data.size(), 1, file);
+                fflush(file);
+                fclose(file);
+            }
+
+            bancho->server_icon = resourceManager->loadImageAbs(icon_path, icon_path);
         }
     }
 }

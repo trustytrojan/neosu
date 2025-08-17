@@ -220,7 +220,7 @@ void Beatmap::drawBackground() {
             cv::hud_scorebar_hide_during_breaks.getBool() ? (1.0f - this->fBreakBackgroundFade) : 1.0f,
             osu->getHUD()->getScoreBarBreakAnim());
 
-    if(cv::debug.getBool()) {
+    if(cv::debug_osu.getBool()) {
         int y = 50;
 
         if(this->bIsPaused) {
@@ -2196,7 +2196,7 @@ void Beatmap::update() {
     // handle preloading (only for distributed slider vertexbuffer generation atm)
     bool was_preloading = this->bIsPreLoading;
     if(this->bIsPreLoading) {
-        if(cv::debug.getBool() && this->iPreLoadingIndex == 0)
+        if(cv::debug_osu.getBool() && this->iPreLoadingIndex == 0)
             debugLog("Beatmap: Preloading slider vertexbuffers ...\n");
 
         f64 startTime = engine->getTimeReal();
@@ -3253,7 +3253,7 @@ void Beatmap::write_frame() {
 }
 
 void Beatmap::onModUpdate(bool rebuildSliderVertexBuffers, bool recomputeDrainRate) {
-    if(cv::debug.getBool()) debugLog("Beatmap::onModUpdate() @ {:f}\n", engine->getTime());
+    if(cv::debug_osu.getBool()) debugLog("Beatmap::onModUpdate() @ {:f}\n", engine->getTime());
 
     this->updatePlayfieldMetrics();
     this->updateHitobjectMetrics();
@@ -3304,7 +3304,7 @@ void Beatmap::onModUpdate(bool rebuildSliderVertexBuffers, bool recomputeDrainRa
 }
 
 void Beatmap::resetLiveStarsTasks() {
-    if(cv::debug.getBool()) debugLog("Beatmap::resetLiveStarsTasks() called\n");
+    if(cv::debug_osu.getBool()) debugLog("Beatmap::resetLiveStarsTasks() called\n");
 
     osu->getHUD()->live_pp = 0.0;
     osu->getHUD()->live_stars = 0.0;

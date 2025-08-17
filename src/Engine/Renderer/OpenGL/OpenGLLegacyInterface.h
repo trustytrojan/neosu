@@ -25,7 +25,11 @@ class OpenGLLegacyInterface : public Graphics {
 
     // color
     void setColor(Color color) final;
-    void setAlpha(float alpha) final;
+    inline void setAlpha(float alpha) final {
+        if(this->color.Af() == alpha) return;
+        Color newColor = this->color;
+        this->setColor(newColor.setA(alpha));
+    }
 
     // 2d primitive drawing
     void drawPixels(int x, int y, int width, int height, Graphics::DRAWPIXELS_TYPE type, const void *pixels) final;
@@ -44,7 +48,8 @@ class OpenGLLegacyInterface : public Graphics {
                   Color topRightColor, Color bottomRightColor, Color bottomLeftColor) final;
 
     // 2d resource drawing
-    void drawImage(Image *image, AnchorPoint anchor = AnchorPoint::CENTER, float edgeSoftness = 0.0f, McRect clipRect = {}) final;
+    void drawImage(Image *image, AnchorPoint anchor = AnchorPoint::CENTER, float edgeSoftness = 0.0f,
+                   McRect clipRect = {}) final;
     void drawString(McFont *font, const UString &text) final;
 
     // 3d type drawing
@@ -67,6 +72,8 @@ class OpenGLLegacyInterface : public Graphics {
     void setBlending(bool enabled) final;
     void setBlendMode(BLEND_MODE blendMode) final;
     void setDepthBuffer(bool enabled) final;
+    void setDepthWriting(bool enabled) final;
+    void setColorWriting(bool r, bool g, bool b, bool a) final;
     void setCulling(bool culling) final;
     void setAntialiasing(bool aa) final;
     void setWireframe(bool enabled) final;

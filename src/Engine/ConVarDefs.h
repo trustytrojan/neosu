@@ -81,6 +81,9 @@ extern void disconnect();
 #define CFUNC(func) SA::delegate<decltype(func)>::template create<func>()
 #include "KeyBindings.h"
 #include "BanchoNetworking.h"  // defines some things we need like OSU_VERSION_DATEONLY
+namespace SliderRenderer {
+extern void onUniformConfigChanged();
+}
 #else
 #define CONVAR(name, ...) extern ConVar _CV(name)
 #define CFUNC(func)
@@ -332,7 +335,7 @@ CONVAR(database_ignore_version, "database_ignore_version", true, FCVAR_BANCHO_CO
        "ignore upper version limit and force load the db file (may crash)");
 CONVAR(database_version, "database_version", OSU_VERSION_DATEONLY, FCVAR_BANCHO_COMPATIBLE,
        "maximum supported osu!.db version, above this will use fallback loader");
-CONVAR(debug, "debug", false, FCVAR_BANCHO_COMPATIBLE);
+CONVAR(debug_osu, "debug_osu", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(debug_db, "debug_db", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(debug_async_db, "debug_async_db", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(debug_anim, "debug_anim", false, FCVAR_BANCHO_COMPATIBLE);
@@ -991,8 +994,8 @@ CONVAR(skip_time, "skip_time", 5000.0f, FCVAR_LOCKED,
        "Timeframe in ms within a beatmap which allows skipping if it doesn't contain any hitobjects");
 CONVAR(slider_alpha_multiplier, "slider_alpha_multiplier", 1.0f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(slider_ball_tint_combo_color, "slider_ball_tint_combo_color", true, FCVAR_BANCHO_COMPATIBLE);
-CONVAR(slider_body_alpha_multiplier, "slider_body_alpha_multiplier", 1.0f, FCVAR_BANCHO_COMPATIBLE);
-CONVAR(slider_body_color_saturation, "slider_body_color_saturation", 1.0f, FCVAR_BANCHO_COMPATIBLE);
+CONVAR(slider_body_alpha_multiplier, "slider_body_alpha_multiplier", 1.0f, FCVAR_BANCHO_COMPATIBLE, CFUNC(SliderRenderer::onUniformConfigChanged));
+CONVAR(slider_body_color_saturation, "slider_body_color_saturation", 1.0f, FCVAR_BANCHO_COMPATIBLE, CFUNC(SliderRenderer::onUniformConfigChanged));
 CONVAR(slider_body_fade_out_time_multiplier, "slider_body_fade_out_time_multiplier", 1.0f, FCVAR_BANCHO_COMPATIBLE,
        "multiplies osu_hitobject_fade_out_time");
 CONVAR(slider_body_lazer_fadeout_style, "slider_body_lazer_fadeout_style", true, FCVAR_BANCHO_COMPATIBLE,
@@ -1001,8 +1004,8 @@ CONVAR(slider_body_lazer_fadeout_style, "slider_body_lazer_fadeout_style", true,
 CONVAR(slider_body_smoothsnake, "slider_body_smoothsnake", true, FCVAR_BANCHO_COMPATIBLE,
        "draw 1 extra interpolated circle mesh at the start & end of every slider for extra smooth snaking/shrinking");
 CONVAR(slider_body_unit_circle_subdivisions, "slider_body_unit_circle_subdivisions", 42, FCVAR_BANCHO_COMPATIBLE);
-CONVAR(slider_border_feather, "slider_border_feather", 0.0f, FCVAR_BANCHO_COMPATIBLE);
-CONVAR(slider_border_size_multiplier, "slider_border_size_multiplier", 1.0f, FCVAR_BANCHO_COMPATIBLE);
+CONVAR(slider_border_feather, "slider_border_feather", 0.0f, FCVAR_BANCHO_COMPATIBLE, CFUNC(SliderRenderer::onUniformConfigChanged));
+CONVAR(slider_border_size_multiplier, "slider_border_size_multiplier", 1.0f, FCVAR_BANCHO_COMPATIBLE, CFUNC(SliderRenderer::onUniformConfigChanged));
 CONVAR(slider_border_tint_combo_color, "slider_border_tint_combo_color", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(slider_curve_max_length, "slider_curve_max_length", 65536 / 2, FCVAR_LOCKED,
        "maximum slider length in osu!pixels (i.e. pixelLength). also used to clamp all "
@@ -1042,7 +1045,7 @@ CONVAR(slider_max_repeats, "slider_max_repeats", 9000, FCVAR_LOCKED | FCVAR_GAME
        "maximum number of repeats allowed per slider (clamp range)");
 CONVAR(slider_max_ticks, "slider_max_ticks", 2048, FCVAR_LOCKED | FCVAR_GAMEPLAY,
        "maximum number of ticks allowed per slider (clamp range)");
-CONVAR(slider_osu_next_style, "slider_osu_next_style", false, FCVAR_BANCHO_COMPATIBLE);
+CONVAR(slider_osu_next_style, "slider_osu_next_style", false, FCVAR_BANCHO_COMPATIBLE, CFUNC(SliderRenderer::onUniformConfigChanged));
 CONVAR(slider_rainbow, "slider_rainbow", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(slider_reverse_arrow_alpha_multiplier, "slider_reverse_arrow_alpha_multiplier", 1.0f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(slider_reverse_arrow_animated, "slider_reverse_arrow_animated", true, FCVAR_BANCHO_COMPATIBLE,

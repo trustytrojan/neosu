@@ -135,7 +135,7 @@ void SongButton::drawBeatmapBackgroundThumbnail(Image *image) {
     g->popTransform();
 
     // debug cliprect bounding box
-    if(cv::debug.getBool()) {
+    if(cv::debug_osu.getBool()) {
         vec2 clipRectPos = vec2(clipRect.getX(), clipRect.getY() - 1);
         vec2 clipRectSize = vec2(clipRect.getWidth(), clipRect.getHeight());
 

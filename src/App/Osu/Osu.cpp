@@ -1685,7 +1685,7 @@ void Osu::updateMouseSettings() {
 }
 
 void Osu::updateWindowsKeyDisable() {
-    if(cv::debug.getBool()) debugLog("Osu::updateWindowsKeyDisable()\n");
+    if(cv::debug_osu.getBool()) debugLog("Osu::updateWindowsKeyDisable()\n");
     const bool isPlayerPlaying =
         engine->hasFocus() && this->isInPlayMode() &&
         (!this->getSelectedBeatmap()->isPaused() || this->getSelectedBeatmap()->isRestartScheduled()) &&

@@ -28,11 +28,7 @@ class OpenGLShader final : public Shader {
     void setUniformMatrix4fv(const std::string_view &name, Matrix4 &matrix) override;
     void setUniformMatrix4fv(const std::string_view &name, float *v) override;
 
-    // ILLEGAL:
-    int getAttribLocation(const std::string_view &name);
-    int getAndCacheUniformLocation(const std::string_view &name);
-
-   private:
+   protected:
     void init() override;
     void initAsync() override;
     void destroy() override;
@@ -42,7 +38,9 @@ class OpenGLShader final : public Shader {
     int createShaderFromString(const std::string &shaderSource, int shaderType);
     int createShaderFromFile(const std::string &fileName, int shaderType);
 
-   private:
+    int getAttribLocation(const std::string_view &name);
+    int getAndCacheUniformLocation(const std::string_view &name);
+
     std::string sVsh;
     std::string sFsh;
 

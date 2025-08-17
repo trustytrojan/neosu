@@ -947,7 +947,7 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
     // reset
     this->timingpoints.clear();
 
-    if(cv::debug.getBool()) debugLog("DatabaseBeatmap::loadMetadata() : {:s}\n", this->sFilePath.c_str());
+    if(cv::debug_osu.getBool()) debugLog("DatabaseBeatmap::loadMetadata() : {:s}\n", this->sFilePath.c_str());
 
     std::vector<u8> fileBuffer;
     u8 *beatmapFile{nullptr};
@@ -1128,7 +1128,7 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
 
     // general sanity checks
     if((this->timingpoints.size() < 1)) {
-        if(cv::debug.getBool()) debugLog("DatabaseBeatmap::loadMetadata() : no timingpoints in beatmap!\n");
+        if(cv::debug_osu.getBool()) debugLog("DatabaseBeatmap::loadMetadata() : no timingpoints in beatmap!\n");
         return false;  // nothing more to do here
     }
 
@@ -1144,7 +1144,7 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
         }
 
         if(this->iMostCommonBPM == 0) {
-            if(cv::debug.getBool()) debugLog("DatabaseBeatmap::loadMetadata() : calculating BPM range ...\n");
+            if(cv::debug_osu.getBool()) debugLog("DatabaseBeatmap::loadMetadata() : calculating BPM range ...\n");
             BPMInfo bpm{};
             if(this->timingpoints.size() > 0) {
                 zarray<BPMTuple> bpm_calculation_buffer(this->timingpoints.size());

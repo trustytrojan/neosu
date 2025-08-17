@@ -57,7 +57,7 @@ void OpenGLVertexArrayObject::init() {
             for(size_t i = 0; i < this->partialUpdateColorIndices.size(); i++) {
                 const int offsetIndex = this->partialUpdateColorIndices[i];
 
-                this->colors[offsetIndex] = ARGBtoABGR(this->colors[offsetIndex]);
+                this->colors[offsetIndex] = abgr(this->colors[offsetIndex]);
 
                 // group by continuous chunks to reduce calls
                 int numContinuousIndices = 1;
@@ -67,7 +67,7 @@ void OpenGLVertexArrayObject::init() {
                         i++;
 
                         this->colors[this->partialUpdateColorIndices[i]] =
-                            ARGBtoABGR(this->colors[this->partialUpdateColorIndices[i]]);
+                            abgr(this->colors[this->partialUpdateColorIndices[i]]);
                     } else
                         break;
                 }
@@ -131,7 +131,7 @@ void OpenGLVertexArrayObject::init() {
         this->iNumColors = this->colors.size();
 
         for(auto& color : this->colors) {
-            color = ARGBtoABGR(color);
+            color = abgr(color);
         }
 
         glGenBuffers(1, &this->iColorBuffer);

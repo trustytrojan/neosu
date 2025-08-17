@@ -21,4 +21,6 @@ void draw(VertexArrayObject *vao, const std::vector<vec2> &alwaysPoints, vec2 tr
           float colorRGBMultiplier = 1.0f, float alpha = 1.0f, long sliderTimeForRainbow = 0,
           bool doEnableRenderTarget = true, bool doDisableRenderTarget = true,
           bool doDrawSliderFrameBufferToScreen = true);
+// for convar callbacks
+void onUniformConfigChanged();
 };  // namespace SliderRenderer
