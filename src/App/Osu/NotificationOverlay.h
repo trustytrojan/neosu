@@ -45,7 +45,7 @@ class NotificationOverlay : public OsuScreen {
     void onKeyUp(KeyboardEvent &e) override;
     void onChar(KeyboardEvent &e) override;
 
-    using ToastClickCallback = SA::delegate<void()>;
+    using ToastClickCallback = std::function<void()>;
     void addToast(const UString &text, Color borderColor, const ToastClickCallback &callback = {},
                   ToastElement::TYPE type = ToastElement::TYPE::SYSTEM);
     void addNotification(UString text, Color textColor = 0xffffffff, bool waitForKey = false, float duration = -1.0f);

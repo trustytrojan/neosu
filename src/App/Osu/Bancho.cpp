@@ -146,13 +146,13 @@ void Bancho::handle_packet(Packet *packet) {
         if(action != user->action) {
             // TODO @kiwec: i think client is supposed to regularly poll for friend stats
             if(user->is_friend() && cv::notify_friend_status_change.getBool() && action < NB_ACTIONS) {
-                std::string actions[] = {
+                static constexpr auto actions = std::array{
                     "idle",   "afk",     "playing",    "editing", "modding", "in a multiplayer lobby", "spectating",
                     "vibing", "testing", "submitting", "pausing", "testing", "multiplaying",           "browsing maps",
                 };
-                auto text = UString::format("%s is now %s", user->name.toUtf8(), actions[action].c_str());
-                auto open_dms = [stats_user_id] {
-                    UserInfo *user = BANCHO::User::get_user_info(stats_user_id);
+                auto text = UString::format("%s is now %s", user->name.toUtf8(), actions[action]);
+                auto open_dms = [uid = stats_user_id]() -> void {
+                    UserInfo *user = BANCHO::User::get_user_info(uid);
                     osu->chat->openChannel(user->name);
                 };
                 osu->notificationOverlay->addToast(text, STATUS_TOAST, open_dms, ToastElement::TYPE::CHAT);

@@ -267,7 +267,7 @@ void NotificationOverlay::addNotification(UString text, Color textColor, bool wa
 void NotificationOverlay::addToast(const UString &text, Color borderColor, const ToastClickCallback &callback,
                                    ToastElement::TYPE type) {
     auto toast = new ToastElement(text, borderColor, type);
-    if(!callback.isNull()) {
+    if(!!callback) {
         toast->setClickCallback(callback);
     }
     this->toasts.push_back(toast);
