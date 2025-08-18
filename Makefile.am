@@ -639,7 +639,7 @@ $(DEPS_PREFIX)/zlib-$(ZLIB_VERSION).built: $(DEPS_CACHE)/zlib-$(ZLIB_VERSION).so
 	$(TAR) xf $(DEPS_CACHE)/zlib-$(ZLIB_VERSION).tar.gz -C $(DEPS_PREFIX)/zlib --strip-components=1 && \
 	cd $(DEPS_PREFIX)/zlib/build && PKG_CONFIG="$(PKG_CONFIG)" \
 		$(if $(findstring linux,$(host_os)),,uname=mingw CHOST=$(host)) RANLIB="$(RANLIB)" AR="$(AR)" CC="$(CC)" CXX="$(CXX)" LD="$(LD)" CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" LDFLAGS="$(LDFLAGS)" \
-		../configure --zlib-compat --prefix="$(DEPS_PREFIX)" $(if $(STATICBUILD),--static,) && \
+		../configure --zlib-compat --prefix="$(DEPS_PREFIX)" $(if $(or $(DISABLE_NATIVE),$(ENABLE_DEBUG)),--without-optimizations,) $(if $(STATICBUILD),--static,) && \
 	$(MAKE) $(MAKEFLAGS) install && \
 	$(SED) -i 's|sharedlibdir=.*|sharedlibdir=$${libdir}|' $(DEPS_PREFIX)/lib/pkgconfig/zlib.pc && \
 	$(PKG_CONFIG) --exists --print-errors zlib
