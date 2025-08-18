@@ -265,6 +265,7 @@ MainMenu::~MainMenu() {
 }
 
 void MainMenu::drawFriend(const McRect &mainButtonRect, float pulse, bool haveTimingpoints) {
+    // ears
     {
         const float width = mainButtonRect.getWidth() * 0.11f * 2.0f * (1.0f - pulse * 0.05f);
 
@@ -651,7 +652,9 @@ void MainMenu::drawMainButton() {
 
     // friend
     if(this->fMainMenuAnimFriendPercent > 0.0f) {
+        g->setCulling(false);  // ears get culled when rotating otherwise
         this->drawFriend(mainButtonRect, pulse, haveTimingpoints);
+        g->setCulling(true);
     }
 
     // neosu/server logo

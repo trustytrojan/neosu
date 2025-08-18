@@ -564,13 +564,6 @@ void SDLMain::setupLogging() {
 #include "WinDebloatDefs.h"
 #include <objbase.h>
 #include "dynutils.h"
-using pImmDisableIME = BOOL(WINAPI *)(DWORD);
-enum PROCESS_DPI_AWARENESS {
-    PROCESS_DPI_UNAWARE = 0,
-    PROCESS_SYSTEM_DPI_AWARE = 1,
-    PROCESS_PER_MONITOR_DPI_AWARE = 2,
-};
-using pSetProcessDpiAwareness = HRESULT(WINAPI *)(PROCESS_DPI_AWARENESS);
 #endif
 
 void SDLMain::doEarlyCmdlineOverrides() {
@@ -584,7 +577,7 @@ void SDLMain::doEarlyCmdlineOverrides() {
         auto *imm32_handle =
             reinterpret_cast<lib_obj *>(LoadLibraryEx(TEXT("imm32.dll"), NULL, LOAD_LIBRARY_SEARCH_SYSTEM32));
         if(imm32_handle) {
-            auto disable_ime_func = load_func<pImmDisableIME>(imm32_handle, "ImmDisableIME");
+            auto disable_ime_func = load_func<BOOL WINAPI(DWORD)>(imm32_handle, "ImmDisableIME");
             if(disable_ime_func) disable_ime_func(-1);
             unload_lib(imm32_handle);
         }
@@ -593,9 +586,9 @@ void SDLMain::doEarlyCmdlineOverrides() {
     if(!m_mArgMap.contains("-nodpi")) {
         auto *user32_handle = reinterpret_cast<lib_obj *>(GetModuleHandle(TEXT("user32.dll")));
         if(user32_handle) {
-            auto spdpi_aware_func = load_func<pSetProcessDpiAwareness>(user32_handle, "SetProcessDPIAware");
+            auto spdpi_aware_func = load_func<BOOL WINAPI(VOID)>(user32_handle, "SetProcessDPIAware");
             if(spdpi_aware_func) {
-                spdpi_aware_func(PROCESS_PER_MONITOR_DPI_AWARE);
+                spdpi_aware_func();
             }
         }
     }

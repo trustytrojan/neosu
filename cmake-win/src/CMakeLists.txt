@@ -182,7 +182,6 @@ target_link_options(neosu PRIVATE
 
 target_link_directories(neosu PRIVATE
     ${DEPS_INSTALL_DIR}/lib
-    ${DEPS_INSTALL_DIR}/lib/$<IF:$<EQUAL:${CMAKE_SIZEOF_VOID_P},8>,x86_64,x86> # discord sdk libdir
     ${BZIP2_STATIC_LIBRARY_DIRS}
     ${LIBARCHIVE_STATIC_LIBRARY_DIRS}
 )
@@ -216,7 +215,6 @@ target_link_libraries(neosu PRIVATE
     SoundTouch::SoundTouch
     SoLoud::soloud
     MPG123::libmpg123
-    discord_game_sdk.dll.lib
     ${DEPS_INSTALL_DIR}/lib/bz2_static.lib # cool awesome
     ${LIBARCHIVE_STATIC_LIBRARIES}
     comctl32

@@ -33,9 +33,10 @@ void OpenGLRenderTarget::init() {
         } else {
             glGetIntegerv(GL_MAX_SAMPLES, &iMaxMultiSamples);
         }
-        if(iMaxMultiSamples == 0) {
-            this->multiSampleType = Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_0X;
-        }
+    }
+
+    if(iMaxMultiSamples == 0) {
+        this->multiSampleType = Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_0X;
     }
 
     switch(this->multiSampleType) {

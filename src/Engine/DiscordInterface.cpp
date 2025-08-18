@@ -11,6 +11,7 @@ static bool initialized = false;
 #include "Engine.h"
 #include "Osu.h"
 #include "Sound.h"
+#include "dynutils.h"
 
 #define DISCORD_CLIENT_ID 1288141291686989846
 
@@ -27,9 +28,9 @@ struct Application {
     DiscordUserId user_id;
 } dapp{};
 
-struct IDiscordActivityEvents activities_events {};
-struct IDiscordRelationshipEvents relationships_events {};
-struct IDiscordUserEvents users_events {};
+struct IDiscordActivityEvents activities_events{};
+struct IDiscordRelationshipEvents relationships_events{};
+struct IDiscordUserEvents users_events{};
 
 #ifdef _WIN64
 void on_discord_log(void * /*cdata*/, enum EDiscordLogLevel level, const char *message) {
@@ -40,13 +41,28 @@ void on_discord_log(void * /*cdata*/, enum EDiscordLogLevel level, const char *m
         Engine::logRaw("[Discord] {:s}\n", message);
     }
 }
+
 #endif
+
+dynutils::lib_obj *discord_handle{nullptr};
 
 }  // namespace
 #endif
 
 void init_discord_sdk() {
 #ifdef _WIN32
+    discord_handle = dynutils::load_lib("discord_game_sdk");
+    if(!discord_handle) {
+        debugLog("Failed to load Discord SDK! (error {:s})\n", dynutils::get_error());
+        return;
+    }
+
+    auto pDiscordCreate = dynutils::load_func<decltype(DiscordCreate)>(discord_handle, "DiscordCreate");
+    if(!pDiscordCreate) {
+        debugLog("Failed to load DiscordCreate from discord_game_sdk.dll! (error {:s})\n", dynutils::get_error());
+        return;
+    }
+
     memset(&dapp, 0, sizeof(dapp));
     memset(&activities_events, 0, sizeof(activities_events));
     memset(&relationships_events, 0, sizeof(relationships_events));
@@ -55,7 +71,7 @@ void init_discord_sdk() {
     // users_events.on_current_user_update = OnUserUpdated;
     // relationships_events.on_refresh = OnRelationshipsRefresh;
 
-    struct DiscordCreateParams params {};
+    struct DiscordCreateParams params{};
     params.client_id = DISCORD_CLIENT_ID;
     params.flags = DiscordCreateFlags_NoRequireDiscord;
     params.event_data = &dapp;
@@ -63,14 +79,14 @@ void init_discord_sdk() {
     params.relationship_events = &relationships_events;
     params.user_events = &users_events;
 
-    int res = DiscordCreate(DISCORD_VERSION, &params, &dapp.core);
+    int res = pDiscordCreate(DISCORD_VERSION, &params, &dapp.core);
     if(res != DiscordResult_Ok) {
         debugLog("Failed to initialize Discord SDK! (error {:d})\n", res);
         return;
     }
 
 #ifdef _WIN64
-    dapp.core->set_log_hook(dapp.core, DiscordLogLevel_Warn, NULL, on_discord_log);
+    dapp.core->set_log_hook(dapp.core, DiscordLogLevel_Warn, nullptr, on_discord_log);
 #endif
     dapp.activities = dapp.core->get_activity_manager(dapp.core);
 
@@ -96,12 +112,17 @@ void tick_discord_sdk() {
 #ifdef _WIN32
     dapp.core->run_callbacks(dapp.core);
 #else
-        // not enabled on linux cuz the sdk is broken there
+    // not enabled on linux cuz the sdk is broken there
 #endif
 }
 
 void destroy_discord_sdk() {
     // not doing anything because it will fucking CRASH if you close discord first
+#ifdef _WIN32
+    if(discord_handle) {
+        dynutils::unload_lib(discord_handle);
+    }
+#endif
 }
 
 void clear_discord_presence() {
@@ -109,11 +130,11 @@ void clear_discord_presence() {
 
 #ifdef _WIN32
     // TODO @kiwec: test if this works
-    struct DiscordActivity activity {};
+    struct DiscordActivity activity{};
     memset(&activity, 0, sizeof(activity));
-    dapp.activities->update_activity(dapp.activities, &activity, NULL, NULL);
+    dapp.activities->update_activity(dapp.activities, &activity, nullptr, nullptr);
 #else
-        // not enabled on linux cuz the sdk is broken there
+    // not enabled on linux cuz the sdk is broken there
 #endif
 }
 
@@ -150,8 +171,8 @@ void set_discord_presence([[maybe_unused]] struct DiscordActivity *activity) {
 
     auto diff2 = osu->getSelectedBeatmap()->getSelectedDifficulty2();
     auto music = osu->getSelectedBeatmap()->getMusic();
-    bool listening = diff2 != NULL && music != NULL && music->isPlaying();
-    bool playing = diff2 != NULL && osu->isInPlayMode();
+    bool listening = diff2 != nullptr && music != nullptr && music->isPlaying();
+    bool playing = diff2 != nullptr && osu->isInPlayMode();
     if(listening || playing) {
         auto url = UString::format("https://assets.ppy.sh/beatmaps/%d/covers/list@2x.jpg?%d", diff2->getSetID(),
                                    diff2->getID());
@@ -166,9 +187,9 @@ void set_discord_presence([[maybe_unused]] struct DiscordActivity *activity) {
         }
     }
 
-    dapp.activities->update_activity(dapp.activities, activity, NULL, NULL);
+    dapp.activities->update_activity(dapp.activities, activity, nullptr, nullptr);
 #else
-        // not enabled on linux cuz the sdk is broken there
+    // not enabled on linux cuz the sdk is broken there
 #endif
 }
 
