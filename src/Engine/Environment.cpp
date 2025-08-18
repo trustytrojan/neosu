@@ -156,8 +156,6 @@ Graphics *Environment::createRenderer() {
 }
 
 void Environment::shutdown() {
-    // need to disable this since sensTransformFunc accesses &mouse->getSensitivity(), which will become invalidated
-    // when the mouse device is free'd on engine shutdown
     setRawInput(false);
 
     SDL_Event event;

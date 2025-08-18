@@ -84,8 +84,8 @@ void Mouse::drawDebug() {
 
 void Mouse::update() {
     this->resetWheelDelta();
-    this->vDelta = {0.f,0.f};
-    this->vRawDelta = {0.f,0.f};
+    this->vDelta = {0.f, 0.f};
+    this->vRawDelta = {0.f, 0.f};
 
     // <rel, abs> pair
     const auto envCachedMotion{env->consumeMousePositionCache()};
@@ -111,7 +111,7 @@ void Mouse::update() {
             if(!clipRect.contains(newAbs)) {
                 // re-calculate clamped cursor position
                 newAbs = vec2{std::clamp<float>(newAbs.x, clipRect.getMinX(), clipRect.getMaxX()),
-                                 std::clamp<float>(newAbs.y, clipRect.getMinY(), clipRect.getMaxY())};
+                              std::clamp<float>(newAbs.y, clipRect.getMinY(), clipRect.getMaxY())};
                 newRel = this->vPosWithoutOffsets - newAbs;
                 if(vec::length(newRel) == 0) {
                     return;  // early return for the trivial case (like if we're confined in a corner)
@@ -215,7 +215,7 @@ void Mouse::removeListener(MouseListener *mouseListener) {
 void Mouse::onRawInputChanged(float newval) {
     this->bIsRawInputDesired = !!static_cast<int>(newval);
     env->setRawInput(this->bIsRawInputDesired);  // request environment to change the real OS cursor state (may or may
-                                          // not take effect immediately)
+                                                 // not take effect immediately)
 
     // non-rawinput with sensitivity != 1 is unsupported
     if(!this->bIsRawInputDesired && (this->fSensitivity < 0.999f || this->fSensitivity > 1.001f)) {

@@ -101,6 +101,7 @@ class ConVar {
     explicit ConVar(const std::string_view &name) {
         this->sName = this->sDefaultValue = this->sDefaultDefaultValue = name;
         this->type = CONVAR_TYPE::CONVAR_TYPE_STRING;
+        this->iDefaultFlags = this->iFlags = FCVAR_NOSAVE;
         this->addConVar(this);
     };
 
@@ -110,6 +111,7 @@ class ConVar {
         requires std::is_invocable_v<Callback> || std::is_invocable_v<Callback, const UString &> ||
                  std::is_invocable_v<Callback, float>
     {
+        flags |= FCVAR_NOSAVE;
         this->initCallback(name, flags, ""sv, callback);
         this->addConVar(this);
     }

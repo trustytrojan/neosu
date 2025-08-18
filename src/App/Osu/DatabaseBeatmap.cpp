@@ -127,11 +127,11 @@ DatabaseBeatmap::DatabaseBeatmap(std::vector<DatabaseBeatmap *> *difficulties, B
 
 DatabaseBeatmap::~DatabaseBeatmap() {
     if(this->difficulties != nullptr) {
-        for(auto diff : (*this->difficulties)) {
+        for(auto &diff : *this->difficulties) {
             assert(diff->difficulties == nullptr);
-            delete diff;
+            SAFE_DELETE(diff);
         }
-        delete this->difficulties;
+        SAFE_DELETE(this->difficulties);
     }
 }
 
