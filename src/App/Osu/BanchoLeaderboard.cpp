@@ -7,7 +7,7 @@
 #include "Database.h"
 #include "Engine.h"
 #include "ModSelector.h"
-#include "SString.h"
+#include "Parsing.h"
 #include "SongBrowser/SongBrowser.h"
 
 #include <cstdlib>
@@ -106,41 +106,41 @@ void process_leaderboard_response(Packet response) {
     std::vector<FinishedScore> scores;
     char *body = (char *)response.memory;
 
-    char *ranked_status = SString::strtok_x('|', &body);
+    char *ranked_status = Parsing::strtok_x('|', &body);
     info.ranked_status = strtol(ranked_status, nullptr, 10);
 
-    char *server_has_osz2 = SString::strtok_x('|', &body);
+    char *server_has_osz2 = Parsing::strtok_x('|', &body);
     info.server_has_osz2 = !strcmp(server_has_osz2, "true");
 
-    char *beatmap_id = SString::strtok_x('|', &body);
+    char *beatmap_id = Parsing::strtok_x('|', &body);
     info.beatmap_id = strtoul(beatmap_id, nullptr, 10);
 
-    char *beatmap_set_id = SString::strtok_x('|', &body);
+    char *beatmap_set_id = Parsing::strtok_x('|', &body);
     info.beatmap_set_id = strtoul(beatmap_set_id, nullptr, 10);
 
-    char *nb_scores = SString::strtok_x('|', &body);
+    char *nb_scores = Parsing::strtok_x('|', &body);
     info.nb_scores = static_cast<i32>(strtol(nb_scores, nullptr, 10));
 
-    char *fa_track_id = SString::strtok_x('|', &body);
+    char *fa_track_id = Parsing::strtok_x('|', &body);
     (void)fa_track_id;
 
-    char *fa_license_text = SString::strtok_x('\n', &body);
+    char *fa_license_text = Parsing::strtok_x('\n', &body);
     (void)fa_license_text;
 
-    char *online_offset = SString::strtok_x('\n', &body);
+    char *online_offset = Parsing::strtok_x('\n', &body);
     info.online_offset = static_cast<i32>(strtol(online_offset, nullptr, 10));
 
-    char *map_name = SString::strtok_x('\n', &body);
+    char *map_name = Parsing::strtok_x('\n', &body);
     (void)map_name;
 
-    char *user_ratings = SString::strtok_x('\n', &body);
+    char *user_ratings = Parsing::strtok_x('\n', &body);
     (void)user_ratings;  // no longer used
 
-    char *pb_score = SString::strtok_x('\n', &body);
+    char *pb_score = Parsing::strtok_x('\n', &body);
     (void)pb_score;
 
     char* score_line = nullptr;
-    while((score_line = SString::strtok_x('\n', &body))[0] != '\0') {
+    while((score_line = Parsing::strtok_x('\n', &body))[0] != '\0') {
         FinishedScore score = parse_score(score_line);
         score.beatmap_hash = beatmap_hash;
         scores.push_back(score);

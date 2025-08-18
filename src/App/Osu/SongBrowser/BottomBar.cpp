@@ -47,6 +47,13 @@ void press_bottombar_button(i32 btn_index) {
     }
 }
 
+f32 bottombar_get_hardcoded_height() {
+    const auto &screen = osu->getScreenSize();
+    bool is_widescreen = ((i32)(std::max(0, (i32)((screen.x - (screen.y * 4.f / 3.f)) / 2.f))) > 0);
+    f32 scale = is_widescreen ? (screen.x / 1366.f) : 1.f;
+    return scale * 101.f;
+}
+
 f32 get_bottombar_height() {
     f32 max = 0.f;
     for(float btn_height : btn_heights) {

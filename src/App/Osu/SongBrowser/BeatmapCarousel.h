@@ -6,6 +6,7 @@
 class SongBrowser;
 
 class BeatmapCarousel : public CBaseUIScrollView {
+    NOCOPY_NOMOVE(BeatmapCarousel)
    public:
     BeatmapCarousel(SongBrowser *browser, float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0,
                     const UString &name = "")
@@ -16,11 +17,6 @@ class BeatmapCarousel : public CBaseUIScrollView {
         this->setScrollResistance(15);
     }
     ~BeatmapCarousel() override;
-
-    BeatmapCarousel &operator=(const BeatmapCarousel &) = delete;
-    BeatmapCarousel &operator=(BeatmapCarousel &&) = delete;
-    BeatmapCarousel(const BeatmapCarousel &) = delete;
-    BeatmapCarousel(BeatmapCarousel &&) = delete;
 
     void onKeyUp(KeyboardEvent &e) override;
     void onKeyDown(KeyboardEvent &e) override;

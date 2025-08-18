@@ -5,6 +5,8 @@
 #include "cbase.h"
 
 class AnimationHandler {
+    NOCOPY_NOMOVE(AnimationHandler)
+
    public:
     AnimationHandler();
     ~AnimationHandler();

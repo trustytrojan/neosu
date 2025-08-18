@@ -54,8 +54,8 @@ void BeatmapCarousel::mouse_update(bool *propagate_clicks) {
         }
 
         if(this->browser_ptr->bSongBrowserRightClickScrolling) {
-            const int scrollingTo = -((mouse->getPos().y - 2 - this->getPos().y) / this->getSize().y) *
-                                    (this->getScrollSize().y /* HACK: WTF? */ * 1.1);
+            const int scrollingTo =
+                -((mouse->getPos().y - 2 - this->getPos().y) / this->getSize().y) * this->getScrollSize().y;
             this->scrollToY(scrollingTo);
         }
     }

@@ -26,6 +26,8 @@ class Sound;
 class TextureAtlas;
 class AsyncResourceLoader;
 class ResourceManager final {
+    NOCOPY_NOMOVE(ResourceManager)
+
    public:
     static constexpr auto PATH_DEFAULT_IMAGES = "materials/";
     static constexpr auto PATH_DEFAULT_FONTS = "fonts/";
@@ -42,7 +44,7 @@ class ResourceManager final {
         requestNextLoadUnmanaged();
         loadResource(rs, true);
     }
-    void destroyResource(Resource *rs, bool forceBlocking = false); // forceBlocking: don't allow async destroy
+    void destroyResource(Resource *rs, bool forceBlocking = false);  // forceBlocking: don't allow async destroy
     void destroyResources();
 
     // async reload
@@ -66,8 +68,7 @@ class ResourceManager final {
     Image *loadImageAbs(std::string absoluteFilepath, std::string resourceName, bool mipmapped = false,
                         bool keepInSystemMemory = false);
     Image *loadImageAbsUnnamed(std::string absoluteFilepath, bool mipmapped = false, bool keepInSystemMemory = false);
-    Image *createImage(i32 width, i32 height, bool mipmapped = false,
-                       bool keepInSystemMemory = false);
+    Image *createImage(i32 width, i32 height, bool mipmapped = false, bool keepInSystemMemory = false);
 
     // fonts
     McFont *loadFont(std::string filepath, std::string resourceName, int fontSize = 16, bool antialiasing = true,
@@ -137,8 +138,8 @@ class ResourceManager final {
         if(it != this->mNameToResourceMap.end()) return it->second->as<T>();
         if(cv::debug_rm.getBool())
             debugLog(R"(ResourceManager WARNING: Resource "{:s}" does not exist!)"
-                      "\n",
-                      resourceName);
+                     "\n",
+                     resourceName);
         return nullptr;
     }
     template <typename T>
@@ -148,8 +149,8 @@ class ResourceManager final {
         if(it == this->mNameToResourceMap.end()) return nullptr;
         if(cv::debug_rm.getBool())
             debugLog(R"(ResourceManager NOTICE: Resource "{:s}" already loaded.)"
-                      "\n",
-                      resourceName);
+                     "\n",
+                     resourceName);
         // handle flags (reset them)
         resetFlags();
         return it->second->as<T>();
@@ -166,7 +167,7 @@ class ResourceManager final {
     void removeResourceFromTypedVector(Resource *res);
 
     // async loading system
-    AsyncResourceLoader *asyncLoader;
+    std::unique_ptr<AsyncResourceLoader> asyncLoader;
 
     // flags
     bool bNextLoadAsync;

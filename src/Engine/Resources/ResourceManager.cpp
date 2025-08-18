@@ -19,7 +19,7 @@ ResourceManager::ResourceManager() {
     this->bNextLoadAsync = false;
 
     // reserve space for typed vectors
-    this->vImages.reserve(64);
+    this->vImages.reserve(256);
     this->vFonts.reserve(16);
     this->vSounds.reserve(64);
     this->vShaders.reserve(32);
@@ -28,15 +28,14 @@ ResourceManager::ResourceManager() {
     this->vVertexArrayObjects.reserve(32);
 
     // create async loader
-    this->asyncLoader = new AsyncResourceLoader();
+    this->asyncLoader = std::make_unique<AsyncResourceLoader>();
 }
 
 ResourceManager::~ResourceManager() {
     // release all not-currently-being-loaded resources
     destroyResources();
 
-    // shutdown async loader (handles thread cleanup)
-    delete this->asyncLoader;
+    // async loader shutdown handles thread cleanup
 }
 
 void ResourceManager::update() {

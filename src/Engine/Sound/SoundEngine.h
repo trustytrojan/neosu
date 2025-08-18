@@ -16,6 +16,8 @@ class Sound;
 using SOUNDHANDLE = uint32_t;
 
 class SoundEngine {
+    NOCOPY_NOMOVE(SoundEngine)
+
     friend class Sound;
 
    public:
@@ -44,12 +46,6 @@ class SoundEngine {
 
     SoundEngine() = default;
     virtual ~SoundEngine() { this->restartCBs = {}; }
-
-    SoundEngine &operator=(const SoundEngine &) = delete;
-    SoundEngine &operator=(SoundEngine &&) = delete;
-
-    SoundEngine(const SoundEngine &) = delete;
-    SoundEngine(SoundEngine &&) = delete;
 
     // Factory method to create the appropriate sound engine
     static SoundEngine *createSoundEngine(SndEngineType type = BASS);

@@ -10,6 +10,20 @@
 
 namespace Parsing {
 
+// Since strtok_r SUCKS I'll just make my own
+// Returns the token start, and edits str to after the token end (unless '\0').
+inline char* strtok_x(char d, char** str) {
+    char* old = *str;
+    while(**str != '\0' && **str != d) {
+        (*str)++;
+    }
+    if(**str != '\0') {
+        **str = '\0';
+        (*str)++;
+    }
+    return old;
+}
+
 template <typename T>
 const char* parse(const char* str, T* arg) {
     char* end_ptr = nullptr;

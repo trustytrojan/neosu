@@ -2,6 +2,7 @@
 // Copyright (c) 2025, WH, All rights reserved.
 
 #include "config.h"
+#include "noinclude.h"
 
 #include <cstdint>
 #include <type_traits>

@@ -1,5 +1,4 @@
 #pragma once
-// Copyright (c) 2025, WH, All rights reserved.
 #include <algorithm>
 #include <atomic>
 #include <chrono>
@@ -15,13 +14,16 @@
 
 class ConVar;
 
-// everything is public because the class data should only be accessed by ResourceManager and the resource threads
-// themselves
 class AsyncResourceLoader final {
+    NOCOPY_NOMOVE(AsyncResourceLoader)
+
+    friend class ResourceManager;
+
    public:
     AsyncResourceLoader();
     ~AsyncResourceLoader();
 
+   private:
     // main interface for ResourceManager
     inline void resetMaxPerUpdate() { this->bMaxLoadsResetPending = true; }
     inline void setMaxPerUpdate(size_t num) { this->iLoadsPerUpdate = std::clamp<size_t>(num, 1, 512); }

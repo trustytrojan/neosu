@@ -9,20 +9,6 @@
 
 namespace SString {
 
-// Since strtok_r SUCKS I'll just make my own
-// Returns the token start, and edits str to after the token end (unless '\0').
-inline char* strtok_x(char d, char** str) {
-    char* old = *str;
-    while(**str != '\0' && **str != d) {
-        (*str)++;
-    }
-    if(**str != '\0') {
-        **str = '\0';
-        (*str)++;
-    }
-    return old;
-}
-
 // alphanumeric string comparator that ignores special characters at the start of strings
 inline bool alnum_comp(const std::string& a, const std::string& b) {
     int i = 0;

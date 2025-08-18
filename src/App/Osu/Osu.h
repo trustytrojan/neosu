@@ -40,6 +40,8 @@ class McFont;
 class RenderTarget;
 
 class Osu final : public MouseListener, public KeyboardListener {
+    NOCOPY_NOMOVE(Osu)
+
    public:
     static constexpr const vec2 osuBaseResolution{640.0f, 480.0f};
 
@@ -54,11 +56,6 @@ class Osu final : public MouseListener, public KeyboardListener {
 
     Osu();
     ~Osu() override;
-
-    Osu &operator=(const Osu &) = delete;
-    Osu &operator=(Osu &&) = delete;
-    Osu(const Osu &) = delete;
-    Osu(Osu &&) = delete;
 
     void draw();
     void update();

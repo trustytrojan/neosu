@@ -6,9 +6,14 @@
 #include "KeyboardListener.h"
 
 class Keyboard final : public InputDevice {
+    NOCOPY_NOMOVE(Keyboard)
+
    public:
     Keyboard();
-    ~Keyboard() override { ; }
+    ~Keyboard() override = default;
+
+    void draw() override {}
+    void update() override {}
 
     void addListener(KeyboardListener *keyboardListener, bool insertOnTop = false);
     void removeListener(KeyboardListener *keyboardListener);

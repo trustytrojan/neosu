@@ -20,7 +20,7 @@
 #include "Osu.h"
 #include "SongBrowser/SongBrowser.h"
 #include "score.h"
-#include "SString.h"
+#include "Parsing.h"
 
 namespace proto = BANCHO::Proto;
 namespace LegacyReplay {
@@ -87,16 +87,16 @@ std::vector<Frame> get_frames(u8* replay_data, i32 replay_size) {
         while(*line) {
             Frame frame;
 
-            char* ms = SString::strtok_x('|', &line);
+            char* ms = Parsing::strtok_x('|', &line);
             frame.milliseconds_since_last_frame = strtoll(ms, nullptr, 10);
 
-            char* x = SString::strtok_x('|', &line);
+            char* x = Parsing::strtok_x('|', &line);
             frame.x = strtof(x, nullptr);
 
-            char* y = SString::strtok_x('|', &line);
+            char* y = Parsing::strtok_x('|', &line);
             frame.y = strtof(y, nullptr);
 
-            char* flags = SString::strtok_x(',', &line);
+            char* flags = Parsing::strtok_x(',', &line);
             frame.key_flags = strtoul(flags, nullptr, 10);
 
             if(frame.milliseconds_since_last_frame != -12345) {

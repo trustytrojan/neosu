@@ -1,12 +1,11 @@
 #pragma once
 // Copyright (c) 2012, PG, All rights reserved.
 
-#include "types.h"
-// ^ import order matters
-
 #include <stack>
 #include <vector>
 
+#include "noinclude.h"
+#include "types.h"
 #include "Color.h"
 #include "Matrices.h"
 #include "Rect.h"
@@ -34,6 +33,8 @@ enum class AnchorPoint : uint8_t {
 };
 
 class Graphics {
+    NOCOPY_NOMOVE(Graphics)
+
    public:
     enum class PRIMITIVE : uint8_t {
         PRIMITIVE_LINES,

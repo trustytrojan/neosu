@@ -2213,9 +2213,10 @@ void SongBrowser::updateLayout() {
     this->updateScoreBrowserLayout();
 
     // song browser
-    this->carousel->setPos(this->topbarLeft->getPos().x + this->topbarLeft->getSize().x + 1, 0);
+    this->carousel->setPos(this->topbarLeft->getPos().x + this->topbarLeft->getSize().x + 1, this->topbarRight->getPos().y + (this->topbarRight->getSize().y * 0.9));
     this->carousel->setSize(osu->getScreenWidth() - (this->topbarLeft->getPos().x + this->topbarLeft->getSize().x),
-                            osu->getScreenHeight());
+                            (osu->getScreenHeight() - this->carousel->getPos().y - (bottombar_get_hardcoded_height() * 0.75f)));
+
     this->updateSongButtonLayout();
 
     this->search->setPos(osu->getScreenWidth() / 2, this->topbarRight->getSize().y + 8 * dpiScale);

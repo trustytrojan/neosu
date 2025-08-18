@@ -296,6 +296,8 @@ Osu::Osu() {
     }
 
     // load subsystems, add them to the screens array
+    this->userButton = new UserCard(bancho->user_id);
+
     this->songBrowser2 = new SongBrowser();
     this->volumeOverlay = new VolumeOverlay();
     this->tooltipOverlay = new TooltipOverlay();
@@ -315,8 +317,6 @@ Osu::Osu() {
     this->prompt = new PromptScreen();
     this->user_actions = new UIUserContextMenuScreen();
     this->spectatorScreen = new SpectatorScreen();
-
-    this->userButton = new UserCard(bancho->user_id);
 
     // the order in this vector will define in which order events are handled/consumed
     this->screens.push_back(this->volumeOverlay);

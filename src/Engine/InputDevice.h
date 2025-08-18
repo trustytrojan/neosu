@@ -5,12 +5,14 @@
 #include "cbase.h"
 
 class InputDevice {
-   public:
-    InputDevice() { ; }
-    virtual ~InputDevice() { ; }
+    NOCOPY_NOMOVE(InputDevice)
 
-    virtual void update() { ; }
-    virtual void draw() { ; }
+   public:
+    InputDevice() = default;
+    virtual ~InputDevice() = default;
+
+    virtual void update() = 0;
+    virtual void draw() = 0;
 };
 
 #endif

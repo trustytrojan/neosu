@@ -10,9 +10,11 @@
 #include <array>
 
 class Mouse final : public InputDevice {
+    NOCOPY_NOMOVE(Mouse)
+
    public:
     Mouse();
-    ~Mouse() override { ; }
+    ~Mouse() override = default;
 
     void draw() override;
     void update() override;

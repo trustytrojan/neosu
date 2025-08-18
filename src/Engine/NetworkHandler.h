@@ -24,6 +24,8 @@ typedef void CURL;
 typedef int64_t curl_off_t;
 
 class NetworkHandler {
+    NOCOPY_NOMOVE(NetworkHandler)
+
    public:
     // async request options
     struct RequestOptions {
@@ -50,11 +52,6 @@ class NetworkHandler {
 
     NetworkHandler();
     ~NetworkHandler();
-
-    NetworkHandler(const NetworkHandler&) = delete;
-    NetworkHandler& operator=(const NetworkHandler&) = delete;
-    NetworkHandler(NetworkHandler&&) = delete;
-    NetworkHandler& operator=(NetworkHandler&&) = delete;
 
     // synchronous API
     UString httpGet(const UString& url, long timeout = 5, long connectTimeout = 5);

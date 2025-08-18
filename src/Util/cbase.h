@@ -26,24 +26,8 @@
 #define PATH_MAX MAX_PATH
 #endif
 
-constexpr void runtime_assert(bool cond, const char *reason)
-{
-	if (cond) return;
-	std::fprintf(stderr, "%s\n", reason);
-	std::abort();
+constexpr void runtime_assert(bool cond, const char* reason) {
+    if(cond) return;
+    std::fprintf(stderr, "%s\n", reason);
+    std::abort();
 }
-
-#define SAFE_DELETE(p)  \
-    {                   \
-        if(p) {         \
-            delete(p);  \
-            (p) = NULL; \
-        }               \
-    }
-
-#define PI 3.1415926535897932384626433832795
-#define PIOVER180 0.01745329251994329576923690768489
-
-// UTIL
-
-inline bool isInt(float f) { return (f == static_cast<float>(static_cast<int>(f))); }

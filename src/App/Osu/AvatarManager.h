@@ -8,14 +8,11 @@
 #include "Image.h"
 
 class AvatarManager final {
+    NOCOPY_NOMOVE(AvatarManager)
+
    public:
     AvatarManager() = default;
     ~AvatarManager() { this->clear(); }
-
-    AvatarManager& operator=(const AvatarManager&) = delete;
-    AvatarManager& operator=(AvatarManager&&) = delete;
-    AvatarManager(const AvatarManager&) = delete;
-    AvatarManager(AvatarManager&&) = delete;
 
     // this is run during Osu::update(), while not in unpaused gameplay
     void update();
