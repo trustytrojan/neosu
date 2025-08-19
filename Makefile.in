@@ -5094,8 +5094,8 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source: $(DEPS_CACHE)/curl-$(CUR
 
 @USE_SOLOUD_TRUE@$(DEPS_PREFIX)/SoLoud-$(SOLOUD_VERSION).built: $(DEPS_CACHE)/SoLoud-$(SOLOUD_VERSION).source $(DEPS_CACHE)/ffmpeg-$(FFMPEG_VERSION).source $(DEPS_PREFIX)/SDL3-$(SDL3_VERSION).built $(DEPS_PREFIX)/mpg123-$(MPG123_VERSION).built
 @USE_SOLOUD_TRUE@	rm -rf $(DEPS_PREFIX)/SoLoud
-@USE_SOLOUD_TRUE@	$(MKDIR_P) $(DEPS_PREFIX) $(DEPS_PREFIX)/include $(DEPS_PREFIX)/lib/pkgconfig
-@USE_SOLOUD_TRUE@	git clone /mnt/lgbtr/prog-btr/soloud $(DEPS_PREFIX)/SoLoud && \
+@USE_SOLOUD_TRUE@	$(MKDIR_P) $(DEPS_PREFIX) $(DEPS_PREFIX)/include $(DEPS_PREFIX)/lib/pkgconfig $(DEPS_PREFIX)/SoLoud/build
+@USE_SOLOUD_TRUE@	$(TAR) xf $(DEPS_CACHE)/SoLoud-$(SOLOUD_VERSION).tar.gz -C $(DEPS_PREFIX)/SoLoud --strip-components=1 && \
 @USE_SOLOUD_TRUE@	cd $(DEPS_PREFIX)/SoLoud && \
 @USE_SOLOUD_TRUE@	PKG_CONFIG="$(PKG_CONFIG)" LDFLAGS="$(LDFLAGS)" \
 @USE_SOLOUD_TRUE@	$(CMAKE) -S . -B build -G "$(CMAKE_GEN)" \
