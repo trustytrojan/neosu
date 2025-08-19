@@ -80,12 +80,23 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     CBaseUITextbox *osuFolderTextbox;
 
    private:
-    enum class RenderCondition : uint8_t {
-        NONE,
-        ASIO_ENABLED,
-        WASAPI_ENABLED,
-        SCORE_SUBMISSION_POLICY,
-        PASSWORD_AUTH,
+    struct RenderCondition {
+        enum r : uint8_t { NONE, ASIO_ENABLED, WASAPI_ENABLED, SCORE_SUBMISSION_POLICY, PASSWORD_AUTH } rc{NONE};
+        std::function<bool()> shouldrender{nullptr};
+
+        RenderCondition() = default;
+        RenderCondition(r rc) : rc(rc) {}
+        RenderCondition(std::function<bool()> shouldrender) : shouldrender(std::move(shouldrender)) {}
+
+        ~RenderCondition() = default;
+        RenderCondition &operator=(const RenderCondition &) = default;
+        RenderCondition &operator=(RenderCondition &&) = default;
+        RenderCondition(const RenderCondition &) = default;
+        RenderCondition(RenderCondition &&) = default;
+
+        auto operator()() { return this->shouldrender ? this->shouldrender() : true; }
+
+        bool operator==(const RenderCondition &other) const { return this->rc != NONE && this->rc == other.rc; };
     };
 
     enum class OPTIONS_MENU_ELEMENT_TYPE : int8_t {

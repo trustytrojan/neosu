@@ -330,7 +330,7 @@ bool McFont::loadFallbackFont(const UString &fontPath, bool isSystemFont) {
     }
 
     // don't set font size here, will be set when the face is used by individual font instances
-    s_sharedFallbackFonts.push_back({fontPath, face, isSystemFont});
+    s_sharedFallbackFonts.push_back({.fontPath = fontPath, .face = face, .isSystemFont = isSystemFont});
     return true;
 }
 

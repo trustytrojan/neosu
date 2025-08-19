@@ -62,6 +62,10 @@ class SoLoudSoundEngine final : public SoundEngine {
     std::map<int, SoLoud::DeviceInfo> mSoloudDevices;
 
     bool bReady{false};
+    bool bWasBackendEverReady{false};
+
+    // for backend
+    static OutputDriver getMAorSDLCV();
 };
 
 // raw pointer access to the s_SLInstance singleton, for SoLoudSound to use

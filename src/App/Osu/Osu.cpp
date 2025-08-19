@@ -2229,7 +2229,6 @@ void Osu::setupSoloud() {
     };
     soundEngine->setDeviceChangeBeforeCallback(outputChangedBeforeCallback);
     soundEngine->setDeviceChangeAfterCallback(outputChangedAfterCallback);
-    soundEngine->initializeOutputDevice(soundEngine->getWantedDevice());
 
     // this sets convar callbacks for things that require a soundengine reinit, do it
     // only after init so config files don't restart it over and over again

@@ -1,5 +1,6 @@
 // Copyright (c) 2014, PG, All rights reserved.
 #include "BassSoundEngine.h"
+#include "SString.h"
 #include "SoLoudSoundEngine.h"
 #include "SoundEngine.h"
 
@@ -33,10 +34,24 @@ std::vector<SoundEngine::OUTPUT_DEVICE> SoundEngine::getOutputDevices() {
 
 SoundEngine::OUTPUT_DEVICE SoundEngine::getWantedDevice() {
     auto wanted_name = cv::snd_output_device.getString();
+
+    OUTPUT_DEVICE partial_match_fallback;
+    bool fallback_found = false;
+
     for(auto device : this->outputDevices) {
-        if(device.enabled && device.name.utf8View() == wanted_name) {
+        if(device.enabled && (device.name.utf8View() == wanted_name)) {
             return device;
+        } else if(!fallback_found && wanted_name.length() > 2 &&
+                  (SString::contains_ncase(wanted_name, device.name.toUtf8()) ||
+                   SString::contains_ncase(device.name.toUtf8(), wanted_name))) {
+            // accept the first partial match (both ways) (if any) as a fallback
+            fallback_found = true;
+            partial_match_fallback = device;
         }
+    }
+
+    if(fallback_found) {
+        return partial_match_fallback;
     }
 
     debugLog("Could not find sound device '{:s}', initializing default one instead.\n", wanted_name);

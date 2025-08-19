@@ -90,26 +90,21 @@ class OptionsMenuSkinPreviewElement : public CBaseUIElement {
             const int colorOffset = 0;
             const float colorRGBMultiplier = 1.0f;
 
-            Circle::drawCircle(
-                osu->getSkin(),
-                this->vPos + vec2(0, this->vSize.y / 2) + vec2(this->vSize.x * (1.0f / 5.0f), 0.0f),
-                hitcircleDiameter, numberScale, overlapScale, number, colorCounter, colorOffset, colorRGBMultiplier,
-                approachScale, approachAlpha, approachAlpha, true, false);
-            Circle::drawHitResult(
-                osu->getSkin(), hitcircleDiameter, hitcircleDiameter,
-                this->vPos + vec2(0, this->vSize.y / 2) + vec2(this->vSize.x * (2.0f / 5.0f), 0.0f),
-                LiveScore::HIT::HIT_100, 0.45f, 0.33f);
-            Circle::drawHitResult(
-                osu->getSkin(), hitcircleDiameter, hitcircleDiameter,
-                this->vPos + vec2(0, this->vSize.y / 2) + vec2(this->vSize.x * (3.0f / 5.0f), 0.0f),
-                LiveScore::HIT::HIT_50, 0.45f, 0.66f);
-            Circle::drawHitResult(
-                osu->getSkin(), hitcircleDiameter, hitcircleDiameter,
-                this->vPos + vec2(0, this->vSize.y / 2) + vec2(this->vSize.x * (4.0f / 5.0f), 0.0f),
-                LiveScore::HIT::HIT_MISS, 0.45f, 1.0f);
+            Circle::drawCircle(osu->getSkin(),
+                               this->vPos + vec2(0, this->vSize.y / 2) + vec2(this->vSize.x * (1.0f / 5.0f), 0.0f),
+                               hitcircleDiameter, numberScale, overlapScale, number, colorCounter, colorOffset,
+                               colorRGBMultiplier, approachScale, approachAlpha, approachAlpha, true, false);
+            Circle::drawHitResult(osu->getSkin(), hitcircleDiameter, hitcircleDiameter,
+                                  this->vPos + vec2(0, this->vSize.y / 2) + vec2(this->vSize.x * (2.0f / 5.0f), 0.0f),
+                                  LiveScore::HIT::HIT_100, 0.45f, 0.33f);
+            Circle::drawHitResult(osu->getSkin(), hitcircleDiameter, hitcircleDiameter,
+                                  this->vPos + vec2(0, this->vSize.y / 2) + vec2(this->vSize.x * (3.0f / 5.0f), 0.0f),
+                                  LiveScore::HIT::HIT_50, 0.45f, 0.66f);
+            Circle::drawHitResult(osu->getSkin(), hitcircleDiameter, hitcircleDiameter,
+                                  this->vPos + vec2(0, this->vSize.y / 2) + vec2(this->vSize.x * (4.0f / 5.0f), 0.0f),
+                                  LiveScore::HIT::HIT_MISS, 0.45f, 1.0f);
             Circle::drawApproachCircle(
-                osu->getSkin(),
-                this->vPos + vec2(0, this->vSize.y / 2) + vec2(this->vSize.x * (1.0f / 5.0f), 0.0f),
+                osu->getSkin(), this->vPos + vec2(0, this->vSize.y / 2) + vec2(this->vSize.x * (1.0f / 5.0f), 0.0f),
                 osu->getSkin()->getComboColorForCounter(colorCounter, colorOffset), hitcircleDiameter, approachScale,
                 approachCircleAlpha, false, false);
         } else if(this->iMode == 1) {
@@ -124,7 +119,7 @@ class OptionsMenuSkinPreviewElement : public CBaseUIElement {
             const int numNumbers = 6;
             for(int i = 1; i < numNumbers + 1; i++) {
                 vec2 pos = this->vPos + vec2(0, this->vSize.y / 2) +
-                              vec2(this->vSize.x * ((float)i / (numNumbers + 1.0f)), 0.0f);
+                           vec2(this->vSize.x * ((float)i / (numNumbers + 1.0f)), 0.0f);
 
                 g->pushTransform();
                 g->scale(scoreScale, scoreScale);
@@ -252,10 +247,10 @@ class OptionsMenuSliderPreviewElement : public CBaseUIElement {
                 Circle::drawSliderStartCircle(
                     osu->getSkin(), points[0] + (!useLegacyRenderer ? this->vPos : vec2(0, 0)), hitcircleDiameter,
                     numberScale, overlapScale, number, colorCounter, colorOffset, colorRGBMultiplier);
-                Circle::drawSliderEndCircle(
-                    osu->getSkin(), points[points.size() - 1] + (!useLegacyRenderer ? this->vPos : vec2(0, 0)),
-                    hitcircleDiameter, numberScale, overlapScale, number, colorCounter, colorOffset, colorRGBMultiplier,
-                    1.0f, 1.0f, 0.0f, false, false);
+                Circle::drawSliderEndCircle(osu->getSkin(),
+                                            points[points.size() - 1] + (!useLegacyRenderer ? this->vPos : vec2(0, 0)),
+                                            hitcircleDiameter, numberScale, overlapScale, number, colorCounter,
+                                            colorOffset, colorRGBMultiplier, 1.0f, 1.0f, 0.0f, false, false);
             }
         }
     }
@@ -674,6 +669,45 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
         this->outputDeviceSelectButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onOutputDeviceSelect>(this));
 
         this->outputDeviceLabel = (CBaseUILabel *)outputDeviceSelect.baseElems[1];
+
+        {
+            OPTIONS_ELEMENT *soloudBackendSelect = this->addButtonButtonLabel("MiniAudio", "SDL", "");
+            static const auto &MAButton = static_cast<UIButton *>(soloudBackendSelect->baseElems[0]);
+            static const auto &SDLButton = static_cast<UIButton *>(soloudBackendSelect->baseElems[1]);
+            const auto &driverLabel = static_cast<CBaseUILabel *>(soloudBackendSelect->baseElems[2]);
+            driverLabel->setVisible(false);  // who cares
+
+            soloudBackendSelect->cvars[MAButton] = &cv::snd_soloud_backend;
+            soloudBackendSelect->cvars[SDLButton] = &cv::snd_soloud_backend;
+            soloudBackendSelect->render_condition = {[&]() -> bool {
+                bool ret =
+                    soundEngine ? soundEngine->getOutputDriverType() >= SoundEngine::OutputDriver::SOLOUD_MA : false;
+                return ret;
+            }};
+
+            static auto setActiveColors = [&]() -> void {
+                const std::string &current = cv::snd_soloud_backend.getString();
+                const bool MAactive = !SString::contains_ncase(current, "sdl");
+
+                constexpr const auto inactiveGrey = rgba(173, 172, 172, 255);
+                constexpr const auto activeGreen = rgba(61, 182, 61, 255);
+
+                MAButton->setColor(MAactive ? activeGreen : inactiveGrey);
+                SDLButton->setColor(MAactive ? inactiveGrey : activeGreen);
+            };
+
+            // set default active colors
+            setActiveColors();
+
+            MAButton->setClickCallback(
+                [](CBaseUIButton *btn) -> void { cv::snd_soloud_backend.setValue(btn->getName()); });
+            SDLButton->setClickCallback(
+                [](CBaseUIButton *btn) -> void { cv::snd_soloud_backend.setValue(btn->getName()); });
+
+            // need to use a change callback here because we already have a single-arg callback for the convar...
+            cv::snd_soloud_backend.setCallback(
+                [&](const UString & /**/, const UString & /**/) -> void { setActiveColors(); });
+        }
 
         // Dirty...
         auto wasapi_idx = this->elemContainers.size();
@@ -1848,7 +1882,7 @@ void OptionsMenu::updateLayout() {
     bool subSectionTitleMatch = false;
     const std::string search = this->sSearchString.length() > 0 ? this->sSearchString.c_str() : "";
     for(int i = 0; i < this->elemContainers.size(); i++) {
-        if(!this->elemContainers[i]) continue;
+        if(!this->elemContainers[i] || !this->elemContainers[i]->render_condition()) continue;
         if(this->elemContainers[i]->render_condition == RenderCondition::ASIO_ENABLED &&
            !(soundEngine->getOutputDriverType() == SoundEngine::OutputDriver::BASS_ASIO))
             continue;
@@ -2566,6 +2600,7 @@ void OptionsMenu::onOutputDeviceSelect() {
 
 void OptionsMenu::onOutputDeviceSelect2(const UString &outputDeviceName, int /*id*/) {
     if(outputDeviceName == soundEngine->getOutputDeviceName()) {
+        if(this->outputDeviceLabel != nullptr) this->outputDeviceLabel->setText(soundEngine->getOutputDeviceName());
         debugLog("SoundEngine::setOutputDevice() \"{:s}\" already is the current device.\n", outputDeviceName.toUtf8());
         return;
     }
@@ -2574,6 +2609,7 @@ void OptionsMenu::onOutputDeviceSelect2(const UString &outputDeviceName, int /*i
         if(device.name != outputDeviceName) continue;
 
         soundEngine->setOutputDevice(device);
+        if(this->outputDeviceLabel != nullptr) this->outputDeviceLabel->setText(soundEngine->getOutputDeviceName());
         return;
     }
 

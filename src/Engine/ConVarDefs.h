@@ -1207,7 +1207,7 @@ CONVAR(ui_top_ranks_max, "ui_top_ranks_max", 200, FCVAR_BANCHO_COMPATIBLE,
 CONVAR(ui_window_animspeed, "ui_window_animspeed", 0.29f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(ui_window_shadow_radius, "ui_window_shadow_radius", 13.0f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(universal_offset, "universal_offset", 0.0f, FCVAR_BANCHO_COMPATIBLE);
-CONVAR(universal_offset_hardcoded, "universal_offset_hardcoded", 0.0f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
+CONVAR(universal_offset_hardcoded, "universal_offset_hardcoded", 0.0f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_INTERNAL);
 CONVAR(use_https, "use_https", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(use_ppv3, "use_ppv3", false, FCVAR_BANCHO_COMPATIBLE, "use ppv3 instead of ppv2 (experimental)");
 CONVAR(user_draw_accuracy, "user_draw_accuracy", true, FCVAR_BANCHO_COMPATIBLE);

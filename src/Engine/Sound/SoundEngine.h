@@ -26,8 +26,8 @@ class SoundEngine {
         BASS,         // directsound/wasapi non-exclusive mode/alsa
         BASS_WASAPI,  // exclusive mode
         BASS_ASIO,    // exclusive move
-        SOLOUD        // opaque, for now, even though there are multiple possible backends for soloud internally
-        // TODO: expose them
+        SOLOUD_MA,    // miniaudio (which has an assortment of output backends internally)
+        SOLOUD_SDL    // SDL3 (ditto, multiple output backends internally)
     };
 
    protected:
@@ -111,6 +111,5 @@ class SoundEngine {
 
     float fMasterVolume{1.0f};
 
-    std::array<AudioOutputChangedCallback, 2>
-        restartCBs;  // first to exec before restart, second to exec after restart
+    std::array<AudioOutputChangedCallback, 2> restartCBs;  // first to exec before restart, second to exec after restart
 };
