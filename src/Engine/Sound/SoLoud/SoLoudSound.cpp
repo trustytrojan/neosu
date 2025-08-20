@@ -21,7 +21,7 @@ void SoLoudSound::init() {
 
     if(!this->audioSource)
         debugLog(0xffdd3333, "Couldn't load sound \"{}\", stream = {}, file = {}\n", this->sFilePath, this->bStream,
-                  this->sFilePath);
+                 this->sFilePath);
     else
         this->bReady = true;
 }
@@ -42,43 +42,12 @@ void SoLoudSound::initAsync() {
         this->audioSource = nullptr;
     }
 
-    // load file into memory first to handle unicode paths properly (windows shenanigans)
-    std::vector<u8> fileBuffer;
-    size_t fileSize{0};
-
-    if constexpr(Env::cfg(OS::WINDOWS)) {
-        File file(this->sFilePath);
-
-        if(!file.canRead()) {
-            debugLog("Sound Error: Cannot open file {:s}\n", this->sFilePath);
-            return;
-        }
-
-        fileSize = file.getFileSize();
-        if(fileSize == 0) {
-            debugLog("Sound Error: File is empty {:s}\n", this->sFilePath);
-            return;
-        }
-
-        fileBuffer = file.takeFileBuffer();
-        if(fileBuffer.empty()) {
-            debugLog("Sound Error: Failed to read file data {:s}\n", this->sFilePath);
-            return;
-        }
-        // file is closed here
-    }
-
     // create the appropriate audio source based on streaming flag
     SoLoud::result result = SoLoud::SO_NO_ERROR;
     if(this->bStream) {
         // use SLFXStream for streaming audio (music, etc.) includes rate/pitch processing like BASS_FX_TempoCreate
         auto *stream = new SoLoud::SLFXStream(cv::snd_soloud_prefer_ffmpeg.getInt() > 0);
-
-        // use loadToMem for streaming to handle unicode paths on windows
-        if constexpr(Env::cfg(OS::WINDOWS))
-            result = stream->loadMem(reinterpret_cast<const u8*>(fileBuffer.data()), fileSize, true, false);
-        else
-            result = stream->load(this->sFilePath.c_str());
+        result = stream->load(this->sFilePath.c_str());
 
         if(result == SoLoud::SO_NO_ERROR) {
             this->audioSource = stream;
@@ -99,13 +68,23 @@ void SoLoudSound::initAsync() {
             return;
         }
     } else {
+#ifdef MCENGINE_PLATFORM_WINDOWS
+        // soloud's load(const char*) wrapper doesn't handle unicode paths, so help it out here
+        UString uPath{this->sFilePath};
+        SoLoud::DiskFile df(_wfopen(uPath.wc_str(), L"rb"));
+#else
+        SoLoud::DiskFile df(fopen(this->sFilePath.c_str(), "rb"));
+#endif
+        if(!df.mFileHandle) {  // fopen failed
+            debugLog("Sound Error: SoLoud::Wav::load() error {} on file {:s}\n", result, this->sFilePath);
+            return;
+        }
+
         // use Wav for non-streaming audio (hit sounds, effects, etc.)
         auto *wav = new SoLoud::Wav(cv::snd_soloud_prefer_ffmpeg.getInt() > 1);
-
-        if constexpr(Env::cfg(OS::WINDOWS))
-            result = wav->loadMem(reinterpret_cast<const u8*>(fileBuffer.data()), fileSize, true, false);
-        else
-            result = wav->load(this->sFilePath.c_str());
+        // the file's contents are immediately read into an internal buffer, so we don't have to leave it open
+        // this is untrue for streams, but the SLFXStream wrapper handles wide path conversion internally
+        result = wav->loadFile(&df);
 
         if(result == SoLoud::SO_NO_ERROR) {
             this->audioSource = wav;
@@ -173,8 +152,8 @@ u32 SoLoudSound::setPosition(f64 percent) {
 
     if(cv::debug_snd.getBool())
         debugLog("seeking to {:.2f} percent (position: {}ms, length: {}ms)\n", percent,
-                  static_cast<unsigned long>(positionInSeconds * 1000),
-                  static_cast<unsigned long>(streamLengthInSeconds * 1000));
+                 static_cast<unsigned long>(positionInSeconds * 1000),
+                 static_cast<unsigned long>(streamLengthInSeconds * 1000));
 
     // seek
     soloud->seek(this->handle, positionInSeconds);
@@ -245,7 +224,7 @@ void SoLoudSound::setSpeed(float speed) {
 
         if(cv::debug_snd.getBool())
             debugLog("SoLoudSound: Speed change {:s}: {:f}->{:f} (nightcore_enjoyer={})\n", this->sFilePath,
-                      previousSpeed, this->fSpeed, cv::nightcore_enjoyer.getBool());
+                     previousSpeed, this->fSpeed, cv::nightcore_enjoyer.getBool());
     }
 }
 
@@ -271,7 +250,7 @@ void SoLoudSound::setPitch(float pitch) {
 
         if(cv::debug_snd.getBool())
             debugLog("SoLoudSound: Pitch change {:s}: {:f}->{:f} (stream, updated live)\n", this->sFilePath,
-                      previousPitch, this->fPitch);
+                     previousPitch, this->fPitch);
     }
 }
 

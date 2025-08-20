@@ -13,6 +13,7 @@
 
 #include <soloud_error.h>
 #include <soloud_wavstream.h>
+#include <soloud_file.h>
 
 namespace cv
 {
@@ -105,7 +106,19 @@ result SLFXStream::load(const char *aFilename)
 	if (!mSource)
 		return INVALID_PARAMETER;
 
-	result result = mSource->load(aFilename);
+#ifdef MCENGINE_PLATFORM_WINDOWS
+	UString uPath{aFilename};
+	mpDiskFile = std::make_unique<DiskFile>(_wfopen(uPath.wc_str(), L"rb"));
+#else
+	mpDiskFile = std::make_unique<DiskFile>(fopen(aFilename, "rb"));
+#endif
+
+	if (!mpDiskFile.get() || !mpDiskFile->mFileHandle) {
+		mpDiskFile.reset();
+		return FILE_LOAD_FAILED;
+	}
+
+	result result = mSource->loadFile(mpDiskFile.get());
 	if (result == SO_NO_ERROR)
 	{
 		// copy properties from the loaded wav stream
@@ -143,7 +156,19 @@ result SLFXStream::loadToMem(const char *aFilename)
 	if (!mSource)
 		return INVALID_PARAMETER;
 
-	result result = mSource->loadToMem(aFilename);
+#ifdef MCENGINE_PLATFORM_WINDOWS
+	UString uPath{aFilename};
+	mpDiskFile = std::make_unique<DiskFile>(_wfopen(uPath.wc_str(), L"rb"));
+#else
+	mpDiskFile = std::make_unique<DiskFile>(fopen(aFilename, "rb"));
+#endif
+
+	if (!mpDiskFile.get() || !mpDiskFile->mFileHandle) {
+		mpDiskFile.reset();
+		return FILE_LOAD_FAILED;
+	}
+
+	result result = mSource->loadFileToMem(mpDiskFile.get());
 	if (result == SO_NO_ERROR)
 	{
 		// copy properties from the loaded wav stream

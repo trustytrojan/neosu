@@ -22,6 +22,7 @@ namespace SoLoud
 {
 class WavStream;
 class File;
+class DiskFile;
 class SLFXStream;
 class SoundTouchFilterInstance;
 
@@ -144,6 +145,11 @@ protected:
 
 	// track the active instance for position queries
 	mutable SoundTouchFilterInstance *mActiveInstance;
+
+private:
+	// to use as a wrapper for loading with unicode paths on Windows,
+	// since SoLoud's API doesn't support that natively
+	std::unique_ptr<DiskFile> mpDiskFile{nullptr};
 };
 
 } // namespace SoLoud
