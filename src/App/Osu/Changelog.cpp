@@ -30,12 +30,12 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG v40_02;
     v40_02.title = "40.02";
     v40_02.changes = {
-        R"()",
+        R"(- Reduced input lag by 1 frame)",
     };
     changelogs.push_back(v40_02);
 
     CHANGELOG v40_01;
-    v40_01.title = "40.01";
+    v40_01.title = "40.01 (2025-08-16)";
     v40_01.changes = {
         R"(- Added cursor smoke)",
         R"(- Added a new command line launch option to enable global MSAA)",

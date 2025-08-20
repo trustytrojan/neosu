@@ -243,6 +243,8 @@ CONVAR(bleedingedge, "bleedingedge", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIV
 CONVAR(is_bleedingedge, "is_bleedingedge", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_HIDDEN,
        "used by the updater to tell if it should nag the user to 'update' to the correct release stream");
 CONVAR(bug_flicker_log, "bug_flicker_log", false, FCVAR_BANCHO_COMPATIBLE);
+CONVAR(cbf, "cbf", false, FCVAR_BANCHO_COMPATIBLE,
+       "click between frames. disabled by default because it's currently broken");
 CONVAR(chat_auto_hide, "chat_auto_hide", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "automatically hide chat during gameplay");
 CONVAR(chat_highlight_words, "chat_highlight_words", "", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,

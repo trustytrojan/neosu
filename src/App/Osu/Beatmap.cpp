@@ -2544,6 +2544,14 @@ void Beatmap::update2() {
         }
     }
 
+    // When CBF is disabled, set click timing and position to the current frame's
+    if(!cv::cbf.getBool() && !this->is_watching && !bancho->spectating) {
+        for(auto &click : this->clicks) {
+            click.click_time = this->iCurMusicPosWithOffsets;
+            click.pos = this->getCursorPos();
+        }
+    }
+
     if((this->is_watching || bancho->spectating) && this->spectated_replay.size() >= 2) {
         LegacyReplay::Frame current_frame = this->spectated_replay[this->current_frame_idx];
         LegacyReplay::Frame next_frame = this->spectated_replay[this->current_frame_idx + 1];
