@@ -112,7 +112,7 @@ void Mouse::update() {
                 // re-calculate clamped cursor position
                 newAbs = vec2{std::clamp<float>(newAbs.x, clipRect.getMinX(), clipRect.getMaxX()),
                               std::clamp<float>(newAbs.y, clipRect.getMinY(), clipRect.getMaxY())};
-                newRel = this->vPosWithoutOffsets - newAbs;
+                newRel = newAbs - this->vPosWithoutOffsets;
                 if(vec::length(newRel) == 0) {
                     return;  // early return for the trivial case (like if we're confined in a corner)
                 }

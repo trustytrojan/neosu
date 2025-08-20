@@ -7,6 +7,8 @@
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 
+#include "fmt/format.h"
+
 using glm::vec2;
 using glm::vec3;
 using glm::vec4;
@@ -53,3 +55,84 @@ void setLength(T &vec, const V &len) {
 }
 
 }  // namespace vec
+
+namespace fmt {
+template <>
+struct formatter<vec2> {
+    template <typename ParseContext>
+    constexpr auto parse(ParseContext &ctx) const {
+        return ctx.begin();
+    }
+
+    template <typename FormatContext>
+    auto format(const vec2 &p, FormatContext &ctx) const {
+        return format_to(ctx.out(), "({:.2f}, {:.2f})", p.x, p.y);
+    }
+};
+
+template <>
+struct formatter<vec2d> {
+    template <typename ParseContext>
+    constexpr auto parse(ParseContext &ctx) const {
+        return ctx.begin();
+    }
+
+    template <typename FormatContext>
+    auto format(const vec2d &p, FormatContext &ctx) const {
+        return format_to(ctx.out(), "({:.2f}, {:.2f})", p.x, p.y);
+    }
+};
+
+template <>
+struct formatter<vec3> {
+    template <typename ParseContext>
+    constexpr auto parse(ParseContext &ctx) const {
+        return ctx.begin();
+    }
+
+    template <typename FormatContext>
+    auto format(const vec3 &p, FormatContext &ctx) const {
+        return format_to(ctx.out(), "({:.2f}, {:.2f}, {:.2f})", p.x, p.y, p.z);
+    }
+};
+
+template <>
+struct formatter<vec3d> {
+    template <typename ParseContext>
+    constexpr auto parse(ParseContext &ctx) const {
+        return ctx.begin();
+    }
+
+    template <typename FormatContext>
+    auto format(const vec3d &p, FormatContext &ctx) const {
+        return format_to(ctx.out(), "({:.2f}, {:.2f}, {:.2f})", p.x, p.y, p.z);
+    }
+};
+
+template <>
+struct formatter<vec4> {
+    template <typename ParseContext>
+    constexpr auto parse(ParseContext &ctx) const {
+        return ctx.begin();
+    }
+
+    template <typename FormatContext>
+    auto format(const vec4 &p, FormatContext &ctx) const {
+        return format_to(ctx.out(), "({:.2f}, {:.2f}, {:.2f}, {:.2f})", p.x, p.y, p.z, p.w);
+    }
+};
+
+template <>
+struct formatter<vec4d> {
+    template <typename ParseContext>
+    constexpr auto parse(ParseContext &ctx) const {
+        return ctx.begin();
+    }
+
+    template <typename FormatContext>
+    auto format(const vec4d &p, FormatContext &ctx) const {
+        return format_to(ctx.out(), "({:.2f}, {:.2f}, {:.2f}, {:.2f})", p.x, p.y, p.z, p.w);
+    }
+};
+
+}  // namespace fmt
