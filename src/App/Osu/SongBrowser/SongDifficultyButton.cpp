@@ -164,7 +164,7 @@ void SongDifficultyButton::mouse_update(bool* propagate_clicks) {
 }
 
 void SongDifficultyButton::onClicked(bool left, bool right) {
-    soundEngine->play(osu->getSkin()->selectDifficulty);
+    soundEngine->play(osu->getSkin()->getSelectDifficultySound());
 
     // NOTE: Intentionally not calling Button::onClicked(left, right), since that one plays another sound
     CBaseUIButton::onClicked(left, right);

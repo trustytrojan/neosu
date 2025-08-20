@@ -35,7 +35,7 @@ class UserStatsScreen : public ScreenBackable {
     void onDeleteAllScoresConfirmed(UString text, int id);
 
     UserCard *m_userCard = nullptr;
-    UIContextMenu *m_contextMenu = nullptr;
+    std::unique_ptr<UIContextMenu> m_contextMenu{nullptr};
 
     CBaseUIScrollView *m_scores = nullptr;
     std::vector<ScoreButton *> m_scoreButtons;

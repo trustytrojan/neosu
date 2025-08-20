@@ -105,6 +105,7 @@ class Engine final : public KeyboardListener {
     [[nodiscard]] constexpr Console *getConsole() const { return this->console; }
     [[nodiscard]] constexpr CBaseUIContainer *getGUI() const { return this->guiContainer; }
 
+   private:
     // input devices
     std::vector<Mouse *> mice;
     std::vector<Keyboard *> keyboards;
@@ -235,3 +236,6 @@ void _focus(void);
 void _center(void);
 void _errortest(void);
 void _dpiinfo(void);
+
+// black and purple placeholder texture, valid from engine startup to shutdown
+extern Image *MISSING_TEXTURE;

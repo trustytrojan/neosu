@@ -109,7 +109,7 @@ void UIButton::onMouseInside() {
     this->fBrightness = 1.0f;
 
     if(button_sound_cooldown + 0.05f < engine->getTime()) {
-        soundEngine->play(osu->getSkin()->hoverButton);
+        soundEngine->play(osu->getSkin()->getHoverButtonSound());
         button_sound_cooldown = engine->getTime();
     }
 }
@@ -123,7 +123,7 @@ void UIButton::onClicked(bool left, bool right) {
 
     this->animateClickColor();
 
-    soundEngine->play(osu->getSkin()->clickButton);
+    soundEngine->play(osu->getSkin()->getClickButtonSound());
 }
 
 void UIButton::onFocusStolen() {

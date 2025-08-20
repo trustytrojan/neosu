@@ -31,7 +31,7 @@ constexpr const int ModFPoSu::SUBDIVISIONS;
 ModFPoSu::ModFPoSu() {
     // vars
     this->fCircumLength = 0.0f;
-    this->camera = new Camera(vec3(0, 0, 0), vec3(0, 0, -1));
+    this->camera = std::make_unique<Camera>(vec3(0, 0, 0), vec3(0, 0, -1));
     this->bKeyLeftDown = false;
     this->bKeyUpDown = false;
     this->bKeyRightDown = false;
@@ -331,8 +331,7 @@ void ModFPoSu::noclipMove() {
         wishdir += (this->bKeyLeftDown ? this->camera->getViewRight() : vec3());
         wishdir -= (this->bKeyRightDown ? this->camera->getViewRight() : vec3());
         wishdir +=
-            (this->bKeySpaceDown ? (this->bKeySpaceUpDown ? vec3(0.0f, 1.0f, 0.0f) : vec3(0.0f, -1.0f, 0.0f))
-                                 : vec3());
+            (this->bKeySpaceDown ? (this->bKeySpaceUpDown ? vec3(0.0f, 1.0f, 0.0f) : vec3(0.0f, -1.0f, 0.0f)) : vec3());
     }
 
     // normalize

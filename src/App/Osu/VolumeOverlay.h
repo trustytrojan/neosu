@@ -3,6 +3,7 @@
 
 class CBaseUIContainer;
 class UIVolumeSlider;
+class Skin;
 
 class VolumeOverlay : public OsuScreen {
    public:
@@ -25,6 +26,7 @@ class VolumeOverlay : public OsuScreen {
     void onVolumeChange(int multiplier);
     void onMasterVolumeChange(float newValue);
     void onEffectVolumeChange();
+    void updateEffectVolume(Skin *skin);
     void onMusicVolumeChange();
 
     float fLastVolume;
@@ -33,7 +35,7 @@ class VolumeOverlay : public OsuScreen {
     bool bVolumeInactiveToActiveScheduled = false;
     float fVolumeInactiveToActiveAnim = 0.f;
 
-    CBaseUIContainer* volumeSliderOverlayContainer = nullptr;
+    std::unique_ptr<CBaseUIContainer> volumeSliderOverlayContainer{nullptr};
     UIVolumeSlider* volumeMaster = nullptr;
     UIVolumeSlider* volumeEffects = nullptr;
     UIVolumeSlider* volumeMusic = nullptr;

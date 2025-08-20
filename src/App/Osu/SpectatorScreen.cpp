@@ -78,7 +78,7 @@ void start_spectating(i32 user_id) {
     osu->mainMenu->setVisible(false);
     if(osu->room->isVisible()) osu->room->ragequit(false);
 
-    soundEngine->play(osu->getSkin()->menuHit);
+    soundEngine->play(osu->getSkin()->getMenuHit());
 }
 
 void stop_spectating() {
@@ -101,7 +101,7 @@ void stop_spectating() {
     BANCHO::Net::send_packet(packet);
 
     osu->mainMenu->setVisible(true);
-    soundEngine->play(osu->getSkin()->menuBack);
+    soundEngine->play(osu->getSkin()->getMenuBackSound());
 }
 
 SpectatorScreen::SpectatorScreen() {

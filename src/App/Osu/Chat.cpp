@@ -75,7 +75,7 @@ ChatChannel::~ChatChannel() {
 
 void ChatChannel::onChannelButtonClick(CBaseUIButton * /*btn*/) {
     if(this->chat == nullptr) return;
-    soundEngine->play(osu->getSkin()->clickButton);
+    soundEngine->play(osu->getSkin()->getClickButtonSound());
     this->chat->switchToChannel(this);
 }
 
@@ -680,7 +680,7 @@ void Chat::onKeyDown(KeyboardEvent &key) {
                 this->send_message(this->input_box->getText());
             }
 
-            soundEngine->play(osu->getSkin()->messageSent);
+            soundEngine->play(osu->getSkin()->getMessageSentSound());
             this->input_box->clear();
         }
         this->tab_completion_prefix = "";
@@ -720,7 +720,7 @@ void Chat::onKeyDown(KeyboardEvent &key) {
             this->switchToChannel(new_chan);
         }
 
-        soundEngine->play(osu->getSkin()->clickButton);
+        soundEngine->play(osu->getSkin()->getClickButtonSound());
 
         return;
     }
@@ -755,8 +755,8 @@ void Chat::onKeyDown(KeyboardEvent &key) {
             this->input_box->updateTextPos();
             this->input_box->tickCaret();
 
-            Sound *sounds[] = {osu->getSkin()->typing1, osu->getSkin()->typing2, osu->getSkin()->typing3,
-                               osu->getSkin()->typing4};
+            Sound *sounds[] = {osu->getSkin()->getTyping1Sound(), osu->getSkin()->getTyping2Sound(), osu->getSkin()->getTyping3Sound(),
+                               osu->getSkin()->getTyping4Sound()};
             soundEngine->play(sounds[rand() % 4]);
         }
 
@@ -857,7 +857,7 @@ void Chat::addChannel(const UString &channel_name, bool switch_to) {
     this->updateLayout(osu->getScreenSize());
 
     if(this->isVisible()) {
-        soundEngine->play(osu->getSkin()->expand);
+        soundEngine->play(osu->getSkin()->getExpandSound());
     }
 }
 
@@ -912,7 +912,7 @@ void Chat::addMessage(UString channel_name, const ChatMessage &msg, bool mark_un
         if(cv::chat_ping_on_mention.getBool()) {
             // Yes, osu! really does use "match-start.wav" for when you get pinged
             // XXX: Use it as fallback, allow neosu-targeting skins to have custom ping sound
-            soundEngine->play(osu->getSkin()->matchStart);
+            soundEngine->play(osu->getSkin()->getMatchStartSound());
         }
     }
 
@@ -926,7 +926,7 @@ void Chat::addMessage(UString channel_name, const ChatMessage &msg, bool mark_un
     if(mentioned && cv::chat_ping_on_mention.getBool()) {
         // Yes, osu! really does use "match-start.wav" for when you get pinged
         // XXX: Use it as fallback, allow neosu-targeting skins to have custom ping sound
-        soundEngine->play(osu->getSkin()->matchStart);
+        soundEngine->play(osu->getSkin()->getMatchStartSound());
     }
 
     this->addChannel(channel_name);
@@ -1196,7 +1196,7 @@ void Chat::leave(const UString &channel_name) {
 
     this->removeChannel(channel_name);
 
-    soundEngine->play(osu->getSkin()->closeChatTab);
+    soundEngine->play(osu->getSkin()->getCloseChatTabSound());
 }
 
 void Chat::send_message(const UString &msg) {
@@ -1279,7 +1279,7 @@ void Chat::updateVisibility() {
 CBaseUIContainer *Chat::setVisible(bool visible) {
     if(visible == this->bVisible) return this;
 
-    soundEngine->play(osu->getSkin()->clickButton);
+    soundEngine->play(osu->getSkin()->getClickButtonSound());
 
     if(visible && bancho->user_id <= 0) {
         osu->optionsMenu->askForLoginDetails();

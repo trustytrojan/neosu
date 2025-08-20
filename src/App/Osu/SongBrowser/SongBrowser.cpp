@@ -536,8 +536,6 @@ SongBrowser::~SongBrowser() {
 
     SAFE_DELETE(this->localBestButton);
     SAFE_DELETE(this->localBestLabel);
-    // SAFE_DELETE(this->localBestContainer); // FIXME: this is leaked but idk how to free it without crashing on exit
-    // :D
     SAFE_DELETE(this->scoreBrowserScoresStillLoadingElement);
     SAFE_DELETE(this->scoreBrowserNoRecordsYetElement);
 
@@ -547,6 +545,7 @@ SongBrowser::~SongBrowser() {
     SAFE_DELETE(this->topbarLeft);
     SAFE_DELETE(this->topbarRight);
     SAFE_DELETE(this->scoreBrowser);
+    SAFE_DELETE(this->localBestContainer);
     db.reset();
 
     // Memory leak on shutdown, maybe
@@ -1198,7 +1197,7 @@ CBaseUIContainer *SongBrowser::setVisible(bool visible) {
     this->bShiftPressed = false;  // seems to get stuck sometimes otherwise
 
     if(this->bVisible) {
-        soundEngine->play(osu->getSkin()->expand);
+        soundEngine->play(osu->getSkin()->getExpandSound());
         RichPresence::onSongBrowser();
 
         this->updateLayout();
@@ -3011,12 +3010,12 @@ void SongBrowser::onSelectionMode() {
 }
 
 void SongBrowser::onSelectionMods() {
-    soundEngine->play(osu->getSkin()->expand);
+    soundEngine->play(osu->getSkin()->getExpandSound());
     osu->toggleModSelection(this->bF1Pressed);
 }
 
 void SongBrowser::onSelectionRandom() {
-    soundEngine->play(osu->getSkin()->clickButton);
+    soundEngine->play(osu->getSkin()->getClickButtonSound());
     if(this->bShiftPressed)
         this->bPreviousRandomBeatmapScheduled = true;
     else
@@ -3024,7 +3023,7 @@ void SongBrowser::onSelectionRandom() {
 }
 
 void SongBrowser::onSelectionOptions() {
-    soundEngine->play(osu->getSkin()->clickButton);
+    soundEngine->play(osu->getSkin()->getClickButtonSound());
 
     if(this->selectedButton != nullptr) {
         this->scrollToSongButton(this->selectedButton);
@@ -3052,7 +3051,7 @@ void SongBrowser::onScoreClicked(CBaseUIButton *button) {
     osu->getSongBrowser()->setVisible(false);
     osu->getRankingScreen()->setVisible(true);
 
-    soundEngine->play(osu->getSkin()->menuHit);
+    soundEngine->play(osu->getSkin()->getMenuHit());
 }
 
 void SongBrowser::onScoreContextMenu(ScoreButton *scoreButton, int id) {

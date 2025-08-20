@@ -52,14 +52,14 @@ void UIBackButton::mouse_update(bool *propagate_clicks) {
 void UIBackButton::onMouseDownInside(bool left, bool right) {
     CBaseUIButton::onMouseDownInside(left, right);
 
-    soundEngine->play(osu->getSkin()->backButtonClick);
+    soundEngine->play(osu->getSkin()->getBackButtonClickSound());
 }
 
 void UIBackButton::onMouseInside() {
     CBaseUIButton::onMouseInside();
 
     anim->moveQuadOut(&this->fAnimation, 1.0f, 0.1f, 0.0f, true);
-    soundEngine->play(osu->getSkin()->backButtonHover);
+    soundEngine->play(osu->getSkin()->getBackButtonHoverSound());
 }
 
 void UIBackButton::onMouseOutside() {

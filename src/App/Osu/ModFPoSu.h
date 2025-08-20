@@ -29,7 +29,7 @@ class ModFPoSu {
     void onKeyDown(KeyboardEvent &key);
     void onKeyUp(KeyboardEvent &key);
 
-    [[nodiscard]] inline const Camera *getCamera() const { return this->camera; }
+    //[[nodiscard]] inline const Camera *getCamera() const { return this->camera; }
 
     [[nodiscard]] inline float getEdgeDistance() const { return this->fEdgeDistance; }
     [[nodiscard]] inline bool isCrosshairIntersectingScreen() const { return this->bCrosshairIntersectsScreen; }
@@ -77,7 +77,7 @@ class ModFPoSu {
     float fCircumLength;
 
     Matrix4 modelMatrix;
-    Camera *camera;
+    std::unique_ptr<Camera> camera{nullptr};
     vec3 vPrevNoclipCameraPos{0.f};
     bool bKeyLeftDown;
     bool bKeyUpDown;

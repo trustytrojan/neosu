@@ -1,6 +1,7 @@
 #pragma once
 // Copyright (c) 2014, PG, All rights reserved.
 
+#include <memory>
 #include "Resource.h"
 #include "PlaybackInterpolator.h"
 

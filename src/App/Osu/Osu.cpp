@@ -296,7 +296,7 @@ Osu::Osu() {
     }
 
     // load subsystems, add them to the screens array
-    this->userButton = new UserCard(bancho->user_id);
+    this->userButton = std::make_unique<UserCard>(bancho->user_id);
 
     this->songBrowser2 = new SongBrowser();
     this->volumeOverlay = new VolumeOverlay();
@@ -791,7 +791,7 @@ void Osu::update() {
 
     // skin async loading
     if(this->bSkinLoadScheduled) {
-        if(this->skinScheduledToLoad != nullptr && this->skinScheduledToLoad->isReady()) {
+        if(this->skin->isReady() && this->skinScheduledToLoad != nullptr && this->skinScheduledToLoad->isReady()) {
             this->bSkinLoadScheduled = false;
 
             if(this->skin != this->skinScheduledToLoad) SAFE_DELETE(this->skin);

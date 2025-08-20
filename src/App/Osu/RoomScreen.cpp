@@ -316,7 +316,7 @@ CBaseUIContainer *RoomScreen::setVisible(bool visible) {
     this->bVisible = visible;
 
     if(visible) {
-        soundEngine->play(osu->getSkin()->menuBack);
+        soundEngine->play(osu->getSkin()->getMenuBackSound());
     }
 
     return this;
@@ -502,7 +502,7 @@ void RoomScreen::ragequit(bool play_sound) {
     Replay::Mods::use(osu->previous_mods);
 
     if(play_sound) {
-        soundEngine->play(osu->getSkin()->menuBack);
+        soundEngine->play(osu->getSkin()->getMenuBackSound());
     }
 }
 
@@ -596,17 +596,17 @@ void RoomScreen::on_room_updated(Room room) {
     if(bancho->is_playing_a_multi_map() || !bancho->is_in_a_multi_room()) return;
 
     if(bancho->room.nb_players < room.nb_players) {
-        soundEngine->play(osu->getSkin()->roomJoined);
+        soundEngine->play(osu->getSkin()->getRoomJoinedSound());
     } else if(bancho->room.nb_players > room.nb_players) {
-        soundEngine->play(osu->getSkin()->roomQuit);
+        soundEngine->play(osu->getSkin()->getRoomQuitSound());
     }
     if(bancho->room.nb_ready() < room.nb_ready()) {
-        soundEngine->play(osu->getSkin()->roomReady);
+        soundEngine->play(osu->getSkin()->getRoomReadySound());
     } else if(bancho->room.nb_ready() > room.nb_ready()) {
-        soundEngine->play(osu->getSkin()->roomNotReady);
+        soundEngine->play(osu->getSkin()->getRoomNotReadySound());
     }
     if(!bancho->room.all_players_ready() && room.all_players_ready()) {
-        soundEngine->play(osu->getSkin()->matchConfirm);
+        soundEngine->play(osu->getSkin()->getMatchConfirmSound());
     }
 
     bool was_host = bancho->room.is_host();
@@ -661,7 +661,7 @@ void RoomScreen::on_match_started(Room room) {
         osu->songBrowser2->bHasSelectedAndIsPlaying = true;
         osu->chat->updateVisibility();
 
-        soundEngine->play(osu->getSkin()->matchStart);
+        soundEngine->play(osu->getSkin()->getMatchStartSound());
     } else {
         this->ragequit();  // map failed to load
     }

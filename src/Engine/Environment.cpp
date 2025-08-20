@@ -985,7 +985,7 @@ void Environment::initMonitors(bool force) const {
         m_mMonitors.clear();
 
     int count = -1;
-    const SDL_DisplayID *displays = SDL_GetDisplays(&count);
+    SDL_DisplayID *displays = SDL_GetDisplays(&count);
 
     m_fullDesktopBoundingBox = {};  // the min/max coordinates, for "valid point" lookups (checked first before
                                     // iterating through actual monitor rects)
@@ -1026,6 +1026,8 @@ void Environment::initMonitors(bool force) const {
     if(m_fullDesktopBoundingBox.getSize() == vec2{0, 0}) {
         m_fullDesktopBoundingBox = getWindowRect();
     }
+
+    SDL_free(displays);
 }
 
 // TODO: filter?

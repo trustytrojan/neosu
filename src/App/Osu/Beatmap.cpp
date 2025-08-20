@@ -725,7 +725,7 @@ bool Beatmap::start() {
     osu->updateConfineCursor();
     osu->updateWindowsKeyDisable();
 
-    soundEngine->play(osu->getSkin()->expand);
+    soundEngine->play(osu->getSkin()->getExpandSound());
 
     // NOTE: loading failures are handled dynamically in update(), so temporarily assume everything has worked in here
     return true;

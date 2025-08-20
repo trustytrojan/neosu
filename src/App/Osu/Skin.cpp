@@ -24,8 +24,6 @@
 #define OSU_BITMASK_HITFINISH 0x4
 #define OSU_BITMASK_HITCLAP 0x8
 
-Image *Skin::m_missingTexture = nullptr;
-
 void Skin::unpack(const char *filepath) {
     auto skin_name = env->getFileNameFromFilePath(filepath);
     debugLog("Extracting {:s}...\n", skin_name.c_str());
@@ -98,167 +96,7 @@ Skin::Skin(const UString &name, std::string filepath, bool isDefaultSkin) {
     this->sFilePath = std::move(filepath);
     this->bIsDefaultSkin = isDefaultSkin;
 
-    this->bReady = false;
-
-    if(m_missingTexture == nullptr) m_missingTexture = resourceManager->getImage("MISSING_TEXTURE");
-
     // vars
-    this->hitCircle = m_missingTexture;
-    this->approachCircle = m_missingTexture;
-    this->reverseArrow = m_missingTexture;
-
-    this->default0 = m_missingTexture;
-    this->default1 = m_missingTexture;
-    this->default2 = m_missingTexture;
-    this->default3 = m_missingTexture;
-    this->default4 = m_missingTexture;
-    this->default5 = m_missingTexture;
-    this->default6 = m_missingTexture;
-    this->default7 = m_missingTexture;
-    this->default8 = m_missingTexture;
-    this->default9 = m_missingTexture;
-
-    this->score0 = m_missingTexture;
-    this->score1 = m_missingTexture;
-    this->score2 = m_missingTexture;
-    this->score3 = m_missingTexture;
-    this->score4 = m_missingTexture;
-    this->score5 = m_missingTexture;
-    this->score6 = m_missingTexture;
-    this->score7 = m_missingTexture;
-    this->score8 = m_missingTexture;
-    this->score9 = m_missingTexture;
-    this->scoreX = m_missingTexture;
-    this->scorePercent = m_missingTexture;
-    this->scoreDot = m_missingTexture;
-
-    this->combo0 = m_missingTexture;
-    this->combo1 = m_missingTexture;
-    this->combo2 = m_missingTexture;
-    this->combo3 = m_missingTexture;
-    this->combo4 = m_missingTexture;
-    this->combo5 = m_missingTexture;
-    this->combo6 = m_missingTexture;
-    this->combo7 = m_missingTexture;
-    this->combo8 = m_missingTexture;
-    this->combo9 = m_missingTexture;
-    this->comboX = m_missingTexture;
-
-    this->playWarningArrow = m_missingTexture;
-    this->circularmetre = m_missingTexture;
-
-    this->particle50 = m_missingTexture;
-    this->particle100 = m_missingTexture;
-    this->particle300 = m_missingTexture;
-
-    this->sliderGradient = m_missingTexture;
-    this->sliderScorePoint = m_missingTexture;
-    this->sliderStartCircle = m_missingTexture;
-    this->sliderStartCircleOverlay = m_missingTexture;
-    this->sliderEndCircle = m_missingTexture;
-    this->sliderEndCircleOverlay = m_missingTexture;
-
-    this->spinnerBackground = m_missingTexture;
-    this->spinnerCircle = m_missingTexture;
-    this->spinnerApproachCircle = m_missingTexture;
-    this->spinnerBottom = m_missingTexture;
-    this->spinnerMiddle = m_missingTexture;
-    this->spinnerMiddle2 = m_missingTexture;
-    this->spinnerTop = m_missingTexture;
-    this->spinnerSpin = m_missingTexture;
-    this->spinnerClear = m_missingTexture;
-
-    this->defaultCursor = m_missingTexture;
-    this->cursor = m_missingTexture;
-    this->cursorMiddle = m_missingTexture;
-    this->cursorTrail = m_missingTexture;
-    this->cursorRipple = m_missingTexture;
-    this->cursorSmoke = m_missingTexture;
-
-    this->pauseContinue = m_missingTexture;
-    this->pauseReplay = m_missingTexture;
-    this->pauseRetry = m_missingTexture;
-    this->pauseBack = m_missingTexture;
-    this->pauseOverlay = m_missingTexture;
-    this->failBackground = m_missingTexture;
-    this->unpause = m_missingTexture;
-
-    this->buttonLeft = m_missingTexture;
-    this->buttonMiddle = m_missingTexture;
-    this->buttonRight = m_missingTexture;
-    this->defaultButtonLeft = m_missingTexture;
-    this->defaultButtonMiddle = m_missingTexture;
-    this->defaultButtonRight = m_missingTexture;
-
-    this->songSelectTop = m_missingTexture;
-    this->songSelectBottom = m_missingTexture;
-    this->menuButtonBackground = m_missingTexture;
-    this->star = m_missingTexture;
-    this->rankingPanel = m_missingTexture;
-    this->rankingGraph = m_missingTexture;
-    this->rankingTitle = m_missingTexture;
-    this->rankingMaxCombo = m_missingTexture;
-    this->rankingAccuracy = m_missingTexture;
-    this->rankingA = m_missingTexture;
-    this->rankingB = m_missingTexture;
-    this->rankingC = m_missingTexture;
-    this->rankingD = m_missingTexture;
-    this->rankingS = m_missingTexture;
-    this->rankingSH = m_missingTexture;
-    this->rankingX = m_missingTexture;
-    this->rankingXH = m_missingTexture;
-
-    this->beatmapImportSpinner = m_missingTexture;
-    this->loadingSpinner = m_missingTexture;
-    this->circleEmpty = m_missingTexture;
-    this->circleFull = m_missingTexture;
-    this->seekTriangle = m_missingTexture;
-    this->userIcon = m_missingTexture;
-    this->backgroundCube = m_missingTexture;
-    this->menuBackground = m_missingTexture;
-    this->skybox = m_missingTexture;
-
-    this->normalHitNormal = nullptr;
-    this->normalHitWhistle = nullptr;
-    this->normalHitFinish = nullptr;
-    this->normalHitClap = nullptr;
-
-    this->normalSliderTick = nullptr;
-    this->normalSliderSlide = nullptr;
-    this->normalSliderWhistle = nullptr;
-
-    this->softHitNormal = nullptr;
-    this->softHitWhistle = nullptr;
-    this->softHitFinish = nullptr;
-    this->softHitClap = nullptr;
-
-    this->softSliderTick = nullptr;
-    this->softSliderSlide = nullptr;
-    this->softSliderWhistle = nullptr;
-
-    this->drumHitNormal = nullptr;
-    this->drumHitWhistle = nullptr;
-    this->drumHitFinish = nullptr;
-    this->drumHitClap = nullptr;
-
-    this->drumSliderTick = nullptr;
-    this->drumSliderSlide = nullptr;
-    this->drumSliderWhistle = nullptr;
-
-    this->spinnerBonus = nullptr;
-    this->spinnerSpinSound = nullptr;
-
-    this->combobreak = nullptr;
-    this->failsound = nullptr;
-    this->applause = nullptr;
-    this->menuHit = nullptr;
-    this->menuHover = nullptr;
-    this->checkOn = nullptr;
-    this->checkOff = nullptr;
-    this->shutter = nullptr;
-    this->sectionPassSound = nullptr;
-    this->sectionFailSound = nullptr;
-
     this->spinnerApproachCircleColor = 0xffffffff;
     this->sliderBorderColor = 0xffffffff;
     this->sliderBallColor = 0xffffffff;  // NOTE: 0xff02aaff is a hardcoded special case for osu!'s default skin, but it
@@ -268,65 +106,7 @@ Skin::Skin(const UString &name, std::string filepath, bool isDefaultSkin) {
     this->songSelectInactiveText = 0xffffffff;
     this->inputOverlayText = 0xff000000;
 
-    // scaling
-    this->bCursor2x = false;
-    this->bCursorTrail2x = false;
-    this->bCursorRipple2x = false;
-    this->bCursorSmoke2x = false;
-    this->bApproachCircle2x = false;
-    this->bReverseArrow2x = false;
-    this->bHitCircle2x = false;
-    this->bIsDefault02x = false;
-    this->bIsDefault12x = false;
-    this->bIsScore02x = false;
-    this->bIsCombo02x = false;
-    this->bSpinnerApproachCircle2x = false;
-    this->bSpinnerBottom2x = false;
-    this->bSpinnerCircle2x = false;
-    this->bSpinnerTop2x = false;
-    this->bSpinnerMiddle2x = false;
-    this->bSpinnerMiddle22x = false;
-    this->bSliderScorePoint2x = false;
-    this->bSliderStartCircle2x = false;
-    this->bSliderEndCircle2x = false;
-
-    this->bCircularmetre2x = false;
-
-    this->bPauseContinue2x = false;
-
-    this->bMenuButtonBackground2x = false;
-    this->bStar2x = false;
-    this->bRankingPanel2x = false;
-    this->bRankingMaxCombo2x = false;
-    this->bRankingAccuracy2x = false;
-    this->bRankingA2x = false;
-    this->bRankingB2x = false;
-    this->bRankingC2x = false;
-    this->bRankingD2x = false;
-    this->bRankingS2x = false;
-    this->bRankingSH2x = false;
-    this->bRankingX2x = false;
-    this->bRankingXH2x = false;
-
-    // skin.ini
-    this->fVersion = 1;
-    this->fAnimationFramerate = 0.0f;
-    this->bCursorCenter = true;
-    this->bCursorRotate = true;
-    this->bCursorExpand = true;
-
-    this->bSliderBallFlip = true;
-    this->bAllowSliderBallTint = false;
-    this->iSliderStyle = 2;
-    this->bHitCircleOverlayAboveNumber = true;
-    this->bSliderTrackOverride = false;
-
-    this->iHitCircleOverlap = 0;
-    this->iScoreOverlap = 0;
-    this->iComboOverlap = 0;
-
     // custom
-    this->iSampleSet = 1;
     this->iSampleVolume = (int)(cv::volume_effects.getFloat() * 100.0f);
 
     this->bIsRandom = cv::skin_random.getBool();
@@ -341,7 +121,7 @@ Skin::Skin(const UString &name, std::string filepath, bool isDefaultSkin) {
 
 Skin::~Skin() {
     for(auto &resource : this->resources) {
-        if(resource != (Resource *)m_missingTexture) resourceManager->destroyResource(resource);
+        if(resource && resource != (Resource *)MISSING_TEXTURE) resourceManager->destroyResource(resource);
     }
     this->resources.clear();
 
@@ -350,9 +130,8 @@ Skin::~Skin() {
     }
     this->images.clear();
 
-    this->sounds.clear();
-
     this->filepathsForExport.clear();
+    // sounds are managed by resourcemanager, not unloaded here
 }
 
 void Skin::update() {
@@ -361,7 +140,7 @@ void Skin::update() {
         this->bReady = true;
 
         // force effect volume update
-        osu->volumeOverlay->onEffectVolumeChange();
+        osu->volumeOverlay->updateEffectVolume(this);
     }
 
     // shitty check to not animate while paused with hitobjects in background
@@ -377,6 +156,11 @@ void Skin::update() {
 bool Skin::isReady() {
     if(this->bReady) return true;
 
+    // default skin sounds aren't added to the resources vector... so check explicitly for that
+    for(auto &sound : this->sounds) {
+        if(resourceManager->isLoadingResource(sound)) return false;
+    }
+
     for(auto &resource : this->resources) {
         if(resourceManager->isLoadingResource(resource)) return false;
     }
@@ -386,7 +170,6 @@ bool Skin::isReady() {
     }
 
     // (ready is set in update())
-
     return true;
 }
 
@@ -488,46 +271,46 @@ void Skin::load() {
         std::string hitCircleStringFinal = hitCirclePrefix;
         hitCircleStringFinal.append("-0");
         this->checkLoadImage(&this->default0, hitCircleStringFinal, "OSU_SKIN_DEFAULT0");
-        if(this->default0 == m_missingTexture)
+        if(this->default0 == MISSING_TEXTURE)
             this->checkLoadImage(&this->default0, "default-0",
                                  "OSU_SKIN_DEFAULT0");  // special cases: fallback to default skin hitcircle numbers if
                                                         // the defined prefix doesn't point to any valid files
         hitCircleStringFinal = hitCirclePrefix;
         hitCircleStringFinal.append("-1");
         this->checkLoadImage(&this->default1, hitCircleStringFinal, "OSU_SKIN_DEFAULT1");
-        if(this->default1 == m_missingTexture) this->checkLoadImage(&this->default1, "default-1", "OSU_SKIN_DEFAULT1");
+        if(this->default1 == MISSING_TEXTURE) this->checkLoadImage(&this->default1, "default-1", "OSU_SKIN_DEFAULT1");
         hitCircleStringFinal = hitCirclePrefix;
         hitCircleStringFinal.append("-2");
         this->checkLoadImage(&this->default2, hitCircleStringFinal, "OSU_SKIN_DEFAULT2");
-        if(this->default2 == m_missingTexture) this->checkLoadImage(&this->default2, "default-2", "OSU_SKIN_DEFAULT2");
+        if(this->default2 == MISSING_TEXTURE) this->checkLoadImage(&this->default2, "default-2", "OSU_SKIN_DEFAULT2");
         hitCircleStringFinal = hitCirclePrefix;
         hitCircleStringFinal.append("-3");
         this->checkLoadImage(&this->default3, hitCircleStringFinal, "OSU_SKIN_DEFAULT3");
-        if(this->default3 == m_missingTexture) this->checkLoadImage(&this->default3, "default-3", "OSU_SKIN_DEFAULT3");
+        if(this->default3 == MISSING_TEXTURE) this->checkLoadImage(&this->default3, "default-3", "OSU_SKIN_DEFAULT3");
         hitCircleStringFinal = hitCirclePrefix;
         hitCircleStringFinal.append("-4");
         this->checkLoadImage(&this->default4, hitCircleStringFinal, "OSU_SKIN_DEFAULT4");
-        if(this->default4 == m_missingTexture) this->checkLoadImage(&this->default4, "default-4", "OSU_SKIN_DEFAULT4");
+        if(this->default4 == MISSING_TEXTURE) this->checkLoadImage(&this->default4, "default-4", "OSU_SKIN_DEFAULT4");
         hitCircleStringFinal = hitCirclePrefix;
         hitCircleStringFinal.append("-5");
         this->checkLoadImage(&this->default5, hitCircleStringFinal, "OSU_SKIN_DEFAULT5");
-        if(this->default5 == m_missingTexture) this->checkLoadImage(&this->default5, "default-5", "OSU_SKIN_DEFAULT5");
+        if(this->default5 == MISSING_TEXTURE) this->checkLoadImage(&this->default5, "default-5", "OSU_SKIN_DEFAULT5");
         hitCircleStringFinal = hitCirclePrefix;
         hitCircleStringFinal.append("-6");
         this->checkLoadImage(&this->default6, hitCircleStringFinal, "OSU_SKIN_DEFAULT6");
-        if(this->default6 == m_missingTexture) this->checkLoadImage(&this->default6, "default-6", "OSU_SKIN_DEFAULT6");
+        if(this->default6 == MISSING_TEXTURE) this->checkLoadImage(&this->default6, "default-6", "OSU_SKIN_DEFAULT6");
         hitCircleStringFinal = hitCirclePrefix;
         hitCircleStringFinal.append("-7");
         this->checkLoadImage(&this->default7, hitCircleStringFinal, "OSU_SKIN_DEFAULT7");
-        if(this->default7 == m_missingTexture) this->checkLoadImage(&this->default7, "default-7", "OSU_SKIN_DEFAULT7");
+        if(this->default7 == MISSING_TEXTURE) this->checkLoadImage(&this->default7, "default-7", "OSU_SKIN_DEFAULT7");
         hitCircleStringFinal = hitCirclePrefix;
         hitCircleStringFinal.append("-8");
         this->checkLoadImage(&this->default8, hitCircleStringFinal, "OSU_SKIN_DEFAULT8");
-        if(this->default8 == m_missingTexture) this->checkLoadImage(&this->default8, "default-8", "OSU_SKIN_DEFAULT8");
+        if(this->default8 == MISSING_TEXTURE) this->checkLoadImage(&this->default8, "default-8", "OSU_SKIN_DEFAULT8");
         hitCircleStringFinal = hitCirclePrefix;
         hitCircleStringFinal.append("-9");
         this->checkLoadImage(&this->default9, hitCircleStringFinal, "OSU_SKIN_DEFAULT9");
-        if(this->default9 == m_missingTexture) this->checkLoadImage(&this->default9, "default-9", "OSU_SKIN_DEFAULT9");
+        if(this->default9 == MISSING_TEXTURE) this->checkLoadImage(&this->default9, "default-9", "OSU_SKIN_DEFAULT9");
     }
 
     this->randomizeFilePath();
@@ -536,63 +319,63 @@ void Skin::load() {
         std::string scoreStringFinal = scorePrefix;
         scoreStringFinal.append("-0");
         this->checkLoadImage(&this->score0, scoreStringFinal, "OSU_SKIN_SCORE0");
-        if(this->score0 == m_missingTexture)
+        if(this->score0 == MISSING_TEXTURE)
             this->checkLoadImage(&this->score0, "score-0",
                                  "OSU_SKIN_SCORE0");  // special cases: fallback to default skin score numbers if the
                                                       // defined prefix doesn't point to any valid files
         scoreStringFinal = scorePrefix;
         scoreStringFinal.append("-1");
         this->checkLoadImage(&this->score1, scoreStringFinal, "OSU_SKIN_SCORE1");
-        if(this->score1 == m_missingTexture) this->checkLoadImage(&this->score1, "score-1", "OSU_SKIN_SCORE1");
+        if(this->score1 == MISSING_TEXTURE) this->checkLoadImage(&this->score1, "score-1", "OSU_SKIN_SCORE1");
         scoreStringFinal = scorePrefix;
         scoreStringFinal.append("-2");
         this->checkLoadImage(&this->score2, scoreStringFinal, "OSU_SKIN_SCORE2");
-        if(this->score2 == m_missingTexture) this->checkLoadImage(&this->score2, "score-2", "OSU_SKIN_SCORE2");
+        if(this->score2 == MISSING_TEXTURE) this->checkLoadImage(&this->score2, "score-2", "OSU_SKIN_SCORE2");
         scoreStringFinal = scorePrefix;
         scoreStringFinal.append("-3");
         this->checkLoadImage(&this->score3, scoreStringFinal, "OSU_SKIN_SCORE3");
-        if(this->score3 == m_missingTexture) this->checkLoadImage(&this->score3, "score-3", "OSU_SKIN_SCORE3");
+        if(this->score3 == MISSING_TEXTURE) this->checkLoadImage(&this->score3, "score-3", "OSU_SKIN_SCORE3");
         scoreStringFinal = scorePrefix;
         scoreStringFinal.append("-4");
         this->checkLoadImage(&this->score4, scoreStringFinal, "OSU_SKIN_SCORE4");
-        if(this->score4 == m_missingTexture) this->checkLoadImage(&this->score4, "score-4", "OSU_SKIN_SCORE4");
+        if(this->score4 == MISSING_TEXTURE) this->checkLoadImage(&this->score4, "score-4", "OSU_SKIN_SCORE4");
         scoreStringFinal = scorePrefix;
         scoreStringFinal.append("-5");
         this->checkLoadImage(&this->score5, scoreStringFinal, "OSU_SKIN_SCORE5");
-        if(this->score5 == m_missingTexture) this->checkLoadImage(&this->score5, "score-5", "OSU_SKIN_SCORE5");
+        if(this->score5 == MISSING_TEXTURE) this->checkLoadImage(&this->score5, "score-5", "OSU_SKIN_SCORE5");
         scoreStringFinal = scorePrefix;
         scoreStringFinal.append("-6");
         this->checkLoadImage(&this->score6, scoreStringFinal, "OSU_SKIN_SCORE6");
-        if(this->score6 == m_missingTexture) this->checkLoadImage(&this->score6, "score-6", "OSU_SKIN_SCORE6");
+        if(this->score6 == MISSING_TEXTURE) this->checkLoadImage(&this->score6, "score-6", "OSU_SKIN_SCORE6");
         scoreStringFinal = scorePrefix;
         scoreStringFinal.append("-7");
         this->checkLoadImage(&this->score7, scoreStringFinal, "OSU_SKIN_SCORE7");
-        if(this->score7 == m_missingTexture) this->checkLoadImage(&this->score7, "score-7", "OSU_SKIN_SCORE7");
+        if(this->score7 == MISSING_TEXTURE) this->checkLoadImage(&this->score7, "score-7", "OSU_SKIN_SCORE7");
         scoreStringFinal = scorePrefix;
         scoreStringFinal.append("-8");
         this->checkLoadImage(&this->score8, scoreStringFinal, "OSU_SKIN_SCORE8");
-        if(this->score8 == m_missingTexture) this->checkLoadImage(&this->score8, "score-8", "OSU_SKIN_SCORE8");
+        if(this->score8 == MISSING_TEXTURE) this->checkLoadImage(&this->score8, "score-8", "OSU_SKIN_SCORE8");
         scoreStringFinal = scorePrefix;
         scoreStringFinal.append("-9");
         this->checkLoadImage(&this->score9, scoreStringFinal, "OSU_SKIN_SCORE9");
-        if(this->score9 == m_missingTexture) this->checkLoadImage(&this->score9, "score-9", "OSU_SKIN_SCORE9");
+        if(this->score9 == MISSING_TEXTURE) this->checkLoadImage(&this->score9, "score-9", "OSU_SKIN_SCORE9");
 
         scoreStringFinal = scorePrefix;
         scoreStringFinal.append("-x");
         this->checkLoadImage(&this->scoreX, scoreStringFinal, "OSU_SKIN_SCOREX");
-        // if (this->scoreX == m_missingTexture) checkLoadImage(&m_scoreX, "score-x", "OSU_SKIN_SCOREX"); // special
+        // if (this->scoreX == MISSING_TEXTURE) checkLoadImage(&m_scoreX, "score-x", "OSU_SKIN_SCOREX"); // special
         // case: ScorePrefix'd skins don't get default fallbacks, instead missing extraneous things like the X are
         // simply not drawn
         scoreStringFinal = scorePrefix;
         scoreStringFinal.append("-percent");
         this->checkLoadImage(&this->scorePercent, scoreStringFinal, "OSU_SKIN_SCOREPERCENT");
-        // if (this->scorePercent == m_missingTexture) checkLoadImage(&m_scorePercent, "score-percent",
+        // if (this->scorePercent == MISSING_TEXTURE) checkLoadImage(&m_scorePercent, "score-percent",
         // "OSU_SKIN_SCOREPERCENT"); // special case: ScorePrefix'd skins don't get default fallbacks, instead missing
         // extraneous things like the X are simply not drawn
         scoreStringFinal = scorePrefix;
         scoreStringFinal.append("-dot");
         this->checkLoadImage(&this->scoreDot, scoreStringFinal, "OSU_SKIN_SCOREDOT");
-        // if (this->scoreDot == m_missingTexture) checkLoadImage(&m_scoreDot, "score-dot", "OSU_SKIN_SCOREDOT"); //
+        // if (this->scoreDot == MISSING_TEXTURE) checkLoadImage(&m_scoreDot, "score-dot", "OSU_SKIN_SCOREDOT"); //
         // special case: ScorePrefix'd skins don't get default fallbacks, instead missing extraneous things like the X
         // are simply not drawn
     }
@@ -605,51 +388,51 @@ void Skin::load() {
         std::string comboStringFinal = comboPrefix;
         comboStringFinal.append("-0");
         this->checkLoadImage(&this->combo0, comboStringFinal, "OSU_SKIN_COMBO0");
-        if(this->combo0 == m_missingTexture)
+        if(this->combo0 == MISSING_TEXTURE)
             this->checkLoadImage(&this->combo0, "score-0",
                                  "OSU_SKIN_COMBO0");  // special cases: fallback to default skin combo numbers if the
                                                       // defined prefix doesn't point to any valid files
         comboStringFinal = comboPrefix;
         comboStringFinal.append("-1");
         this->checkLoadImage(&this->combo1, comboStringFinal, "OSU_SKIN_COMBO1");
-        if(this->combo1 == m_missingTexture) this->checkLoadImage(&this->combo1, "score-1", "OSU_SKIN_COMBO1");
+        if(this->combo1 == MISSING_TEXTURE) this->checkLoadImage(&this->combo1, "score-1", "OSU_SKIN_COMBO1");
         comboStringFinal = comboPrefix;
         comboStringFinal.append("-2");
         this->checkLoadImage(&this->combo2, comboStringFinal, "OSU_SKIN_COMBO2");
-        if(this->combo2 == m_missingTexture) this->checkLoadImage(&this->combo2, "score-2", "OSU_SKIN_COMBO2");
+        if(this->combo2 == MISSING_TEXTURE) this->checkLoadImage(&this->combo2, "score-2", "OSU_SKIN_COMBO2");
         comboStringFinal = comboPrefix;
         comboStringFinal.append("-3");
         this->checkLoadImage(&this->combo3, comboStringFinal, "OSU_SKIN_COMBO3");
-        if(this->combo3 == m_missingTexture) this->checkLoadImage(&this->combo3, "score-3", "OSU_SKIN_COMBO3");
+        if(this->combo3 == MISSING_TEXTURE) this->checkLoadImage(&this->combo3, "score-3", "OSU_SKIN_COMBO3");
         comboStringFinal = comboPrefix;
         comboStringFinal.append("-4");
         this->checkLoadImage(&this->combo4, comboStringFinal, "OSU_SKIN_COMBO4");
-        if(this->combo4 == m_missingTexture) this->checkLoadImage(&this->combo4, "score-4", "OSU_SKIN_COMBO4");
+        if(this->combo4 == MISSING_TEXTURE) this->checkLoadImage(&this->combo4, "score-4", "OSU_SKIN_COMBO4");
         comboStringFinal = comboPrefix;
         comboStringFinal.append("-5");
         this->checkLoadImage(&this->combo5, comboStringFinal, "OSU_SKIN_COMBO5");
-        if(this->combo5 == m_missingTexture) this->checkLoadImage(&this->combo5, "score-5", "OSU_SKIN_COMBO5");
+        if(this->combo5 == MISSING_TEXTURE) this->checkLoadImage(&this->combo5, "score-5", "OSU_SKIN_COMBO5");
         comboStringFinal = comboPrefix;
         comboStringFinal.append("-6");
         this->checkLoadImage(&this->combo6, comboStringFinal, "OSU_SKIN_COMBO6");
-        if(this->combo6 == m_missingTexture) this->checkLoadImage(&this->combo6, "score-6", "OSU_SKIN_COMBO6");
+        if(this->combo6 == MISSING_TEXTURE) this->checkLoadImage(&this->combo6, "score-6", "OSU_SKIN_COMBO6");
         comboStringFinal = comboPrefix;
         comboStringFinal.append("-7");
         this->checkLoadImage(&this->combo7, comboStringFinal, "OSU_SKIN_COMBO7");
-        if(this->combo7 == m_missingTexture) this->checkLoadImage(&this->combo7, "score-7", "OSU_SKIN_COMBO7");
+        if(this->combo7 == MISSING_TEXTURE) this->checkLoadImage(&this->combo7, "score-7", "OSU_SKIN_COMBO7");
         comboStringFinal = comboPrefix;
         comboStringFinal.append("-8");
         this->checkLoadImage(&this->combo8, comboStringFinal, "OSU_SKIN_COMBO8");
-        if(this->combo8 == m_missingTexture) this->checkLoadImage(&this->combo8, "score-8", "OSU_SKIN_COMBO8");
+        if(this->combo8 == MISSING_TEXTURE) this->checkLoadImage(&this->combo8, "score-8", "OSU_SKIN_COMBO8");
         comboStringFinal = comboPrefix;
         comboStringFinal.append("-9");
         this->checkLoadImage(&this->combo9, comboStringFinal, "OSU_SKIN_COMBO9");
-        if(this->combo9 == m_missingTexture) this->checkLoadImage(&this->combo9, "score-9", "OSU_SKIN_COMBO9");
+        if(this->combo9 == MISSING_TEXTURE) this->checkLoadImage(&this->combo9, "score-9", "OSU_SKIN_COMBO9");
 
         comboStringFinal = comboPrefix;
         comboStringFinal.append("-x");
         this->checkLoadImage(&this->comboX, comboStringFinal, "OSU_SKIN_COMBOX");
-        // if (this->comboX == m_missingTexture) m_comboX = m_scoreX; // special case: ComboPrefix'd skins don't get
+        // if (this->comboX == MISSING_TEXTURE) m_comboX = m_scoreX; // special case: ComboPrefix'd skins don't get
         // default fallbacks, instead missing extraneous things like the X are simply not drawn
     }
 
@@ -776,10 +559,10 @@ void Skin::load() {
     this->checkLoadImage(&this->pauseRetry, "pause-retry", "OSU_SKIN_PAUSE_RETRY");
     this->checkLoadImage(&this->pauseBack, "pause-back", "OSU_SKIN_PAUSE_BACK");
     this->checkLoadImage(&this->pauseOverlay, "pause-overlay", "OSU_SKIN_PAUSE_OVERLAY");
-    if(this->pauseOverlay == m_missingTexture)
+    if(this->pauseOverlay == MISSING_TEXTURE)
         this->checkLoadImage(&this->pauseOverlay, "pause-overlay", "OSU_SKIN_PAUSE_OVERLAY", true, "jpg");
     this->checkLoadImage(&this->failBackground, "fail-background", "OSU_SKIN_FAIL_BACKGROUND");
-    if(this->failBackground == m_missingTexture)
+    if(this->failBackground == MISSING_TEXTURE)
         this->checkLoadImage(&this->failBackground, "fail-background", "OSU_SKIN_FAIL_BACKGROUND", true, "jpg");
     this->checkLoadImage(&this->unpause, "unpause", "OSU_SKIN_UNPAUSE");
 
@@ -860,116 +643,103 @@ void Skin::load() {
     // sounds
 
     // samples
-    this->checkLoadSound(&this->normalHitNormal, "normal-hitnormal", "OSU_SKIN_NORMALHITNORMAL_SND", true, true, false,
-                         true, 0.8f);
-    this->checkLoadSound(&this->normalHitWhistle, "normal-hitwhistle", "OSU_SKIN_NORMALHITWHISTLE_SND", true, true,
-                         false, true, 0.85f);
-    this->checkLoadSound(&this->normalHitFinish, "normal-hitfinish", "OSU_SKIN_NORMALHITFINISH_SND", true, true);
-    this->checkLoadSound(&this->normalHitClap, "normal-hitclap", "OSU_SKIN_NORMALHITCLAP_SND", true, true, false, true,
-                         0.85f);
+    this->loadSound(this->normalHitNormal, "normal-hitnormal", "OSU_SKIN_NORMALHITNORMAL_SND", true, true, false, true,
+                    0.8f);
+    this->loadSound(this->normalHitWhistle, "normal-hitwhistle", "OSU_SKIN_NORMALHITWHISTLE_SND", true, true, false,
+                    true, 0.85f);
+    this->loadSound(this->normalHitFinish, "normal-hitfinish", "OSU_SKIN_NORMALHITFINISH_SND", true, true);
+    this->loadSound(this->normalHitClap, "normal-hitclap", "OSU_SKIN_NORMALHITCLAP_SND", true, true, false, true,
+                    0.85f);
 
-    this->checkLoadSound(&this->normalSliderTick, "normal-slidertick", "OSU_SKIN_NORMALSLIDERTICK_SND", true, true);
-    this->checkLoadSound(&this->normalSliderSlide, "normal-sliderslide", "OSU_SKIN_NORMALSLIDERSLIDE_SND", false, true,
-                         true);
-    this->checkLoadSound(&this->normalSliderWhistle, "normal-sliderwhistle", "OSU_SKIN_NORMALSLIDERWHISTLE_SND", true,
-                         true);
+    this->loadSound(this->normalSliderTick, "normal-slidertick", "OSU_SKIN_NORMALSLIDERTICK_SND", true, true);
+    this->loadSound(this->normalSliderSlide, "normal-sliderslide", "OSU_SKIN_NORMALSLIDERSLIDE_SND", false, true, true);
+    this->loadSound(this->normalSliderWhistle, "normal-sliderwhistle", "OSU_SKIN_NORMALSLIDERWHISTLE_SND", true, true);
 
-    this->checkLoadSound(&this->softHitNormal, "soft-hitnormal", "OSU_SKIN_SOFTHITNORMAL_SND", true, true, false, true,
-                         0.8f);
-    this->checkLoadSound(&this->softHitWhistle, "soft-hitwhistle", "OSU_SKIN_SOFTHITWHISTLE_SND", true, true, false,
-                         true, 0.85f);
-    this->checkLoadSound(&this->softHitFinish, "soft-hitfinish", "OSU_SKIN_SOFTHITFINISH_SND", true, true);
-    this->checkLoadSound(&this->softHitClap, "soft-hitclap", "OSU_SKIN_SOFTHITCLAP_SND", true, true, false, true,
-                         0.85f);
+    this->loadSound(this->softHitNormal, "soft-hitnormal", "OSU_SKIN_SOFTHITNORMAL_SND", true, true, false, true, 0.8f);
+    this->loadSound(this->softHitWhistle, "soft-hitwhistle", "OSU_SKIN_SOFTHITWHISTLE_SND", true, true, false, true,
+                    0.85f);
+    this->loadSound(this->softHitFinish, "soft-hitfinish", "OSU_SKIN_SOFTHITFINISH_SND", true, true);
+    this->loadSound(this->softHitClap, "soft-hitclap", "OSU_SKIN_SOFTHITCLAP_SND", true, true, false, true, 0.85f);
 
-    this->checkLoadSound(&this->softSliderTick, "soft-slidertick", "OSU_SKIN_SOFTSLIDERTICK_SND", true, true);
-    this->checkLoadSound(&this->softSliderSlide, "soft-sliderslide", "OSU_SKIN_SOFTSLIDERSLIDE_SND", false, true, true);
-    this->checkLoadSound(&this->softSliderWhistle, "soft-sliderwhistle", "OSU_SKIN_SOFTSLIDERWHISTLE_SND", true, true);
+    this->loadSound(this->softSliderTick, "soft-slidertick", "OSU_SKIN_SOFTSLIDERTICK_SND", true, true);
+    this->loadSound(this->softSliderSlide, "soft-sliderslide", "OSU_SKIN_SOFTSLIDERSLIDE_SND", false, true, true);
+    this->loadSound(this->softSliderWhistle, "soft-sliderwhistle", "OSU_SKIN_SOFTSLIDERWHISTLE_SND", true, true);
 
-    this->checkLoadSound(&this->drumHitNormal, "drum-hitnormal", "OSU_SKIN_DRUMHITNORMAL_SND", true, true, false, true,
-                         0.8f);
-    this->checkLoadSound(&this->drumHitWhistle, "drum-hitwhistle", "OSU_SKIN_DRUMHITWHISTLE_SND", true, true, false,
-                         true, 0.85f);
-    this->checkLoadSound(&this->drumHitFinish, "drum-hitfinish", "OSU_SKIN_DRUMHITFINISH_SND", true, true);
-    this->checkLoadSound(&this->drumHitClap, "drum-hitclap", "OSU_SKIN_DRUMHITCLAP_SND", true, true, false, true,
-                         0.85f);
+    this->loadSound(this->drumHitNormal, "drum-hitnormal", "OSU_SKIN_DRUMHITNORMAL_SND", true, true, false, true, 0.8f);
+    this->loadSound(this->drumHitWhistle, "drum-hitwhistle", "OSU_SKIN_DRUMHITWHISTLE_SND", true, true, false, true,
+                    0.85f);
+    this->loadSound(this->drumHitFinish, "drum-hitfinish", "OSU_SKIN_DRUMHITFINISH_SND", true, true);
+    this->loadSound(this->drumHitClap, "drum-hitclap", "OSU_SKIN_DRUMHITCLAP_SND", true, true, false, true, 0.85f);
 
-    this->checkLoadSound(&this->drumSliderTick, "drum-slidertick", "OSU_SKIN_DRUMSLIDERTICK_SND", true, true);
-    this->checkLoadSound(&this->drumSliderSlide, "drum-sliderslide", "OSU_SKIN_DRUMSLIDERSLIDE_SND", false, true, true);
-    this->checkLoadSound(&this->drumSliderWhistle, "drum-sliderwhistle", "OSU_SKIN_DRUMSLIDERWHISTLE_SND", true, true);
+    this->loadSound(this->drumSliderTick, "drum-slidertick", "OSU_SKIN_DRUMSLIDERTICK_SND", true, true);
+    this->loadSound(this->drumSliderSlide, "drum-sliderslide", "OSU_SKIN_DRUMSLIDERSLIDE_SND", false, true, true);
+    this->loadSound(this->drumSliderWhistle, "drum-sliderwhistle", "OSU_SKIN_DRUMSLIDERWHISTLE_SND", true, true);
 
-    this->checkLoadSound(&this->spinnerBonus, "spinnerbonus", "OSU_SKIN_SPINNERBONUS_SND", true, true);
-    this->checkLoadSound(&this->spinnerSpinSound, "spinnerspin", "OSU_SKIN_SPINNERSPIN_SND", false, true, true);
+    this->loadSound(this->spinnerBonus, "spinnerbonus", "OSU_SKIN_SPINNERBONUS_SND", true, true);
+    this->loadSound(this->spinnerSpinSound, "spinnerspin", "OSU_SKIN_SPINNERSPIN_SND", false, true, true);
 
     // others
-    this->checkLoadSound(&this->combobreak, "combobreak", "OSU_SKIN_COMBOBREAK_SND", true, true);
-    this->checkLoadSound(&this->failsound, "failsound", "OSU_SKIN_FAILSOUND_SND");
-    this->checkLoadSound(&this->applause, "applause", "OSU_SKIN_APPLAUSE_SND");
-    this->checkLoadSound(&this->menuHit, "menuhit", "OSU_SKIN_MENUHIT_SND", true, true);
-    this->checkLoadSound(&this->menuHover, "menuclick", "OSU_SKIN_MENUCLICK_SND", true, true);
-    this->checkLoadSound(&this->checkOn, "check-on", "OSU_SKIN_CHECKON_SND", true, true);
-    this->checkLoadSound(&this->checkOff, "check-off", "OSU_SKIN_CHECKOFF_SND", true, true);
-    this->checkLoadSound(&this->shutter, "shutter", "OSU_SKIN_SHUTTER_SND", true, true);
-    this->checkLoadSound(&this->sectionPassSound, "sectionpass", "OSU_SKIN_SECTIONPASS_SND");
-    this->checkLoadSound(&this->sectionFailSound, "sectionfail", "OSU_SKIN_SECTIONFAIL_SND");
+    this->loadSound(this->combobreak, "combobreak", "OSU_SKIN_COMBOBREAK_SND", true, true);
+    this->loadSound(this->failsound, "failsound", "OSU_SKIN_FAILSOUND_SND");
+    this->loadSound(this->applause, "applause", "OSU_SKIN_APPLAUSE_SND");
+    this->loadSound(this->menuHit, "menuhit", "OSU_SKIN_MENUHIT_SND", true, true);
+    this->loadSound(this->menuHover, "menuclick", "OSU_SKIN_MENUCLICK_SND", true, true);
+    this->loadSound(this->checkOn, "check-on", "OSU_SKIN_CHECKON_SND", true, true);
+    this->loadSound(this->checkOff, "check-off", "OSU_SKIN_CHECKOFF_SND", true, true);
+    this->loadSound(this->shutter, "shutter", "OSU_SKIN_SHUTTER_SND", true, true);
+    this->loadSound(this->sectionPassSound, "sectionpass", "OSU_SKIN_SECTIONPASS_SND");
+    this->loadSound(this->sectionFailSound, "sectionfail", "OSU_SKIN_SECTIONFAIL_SND");
 
     // UI feedback
-    this->checkLoadSound(&this->messageSent, "key-confirm", "OSU_SKIN_MESSAGE_SENT_SND", true, true, false);
-    this->checkLoadSound(&this->deletingText, "key-delete", "OSU_SKIN_DELETING_TEXT_SND", true, true, false);
-    this->checkLoadSound(&this->movingTextCursor, "key-movement", "OSU_MOVING_TEXT_CURSOR_SND", true, true, false);
-    this->checkLoadSound(&this->typing1, "key-press-1", "OSU_TYPING_1_SND", true, true, false);
-    this->checkLoadSound(&this->typing2, "key-press-2", "OSU_TYPING_2_SND", true, true, false, false);
-    this->checkLoadSound(&this->typing3, "key-press-3", "OSU_TYPING_3_SND", true, true, false, false);
-    this->checkLoadSound(&this->typing4, "key-press-4", "OSU_TYPING_4_SND", true, true, false, false);
-    this->checkLoadSound(&this->menuBack, "menuback", "OSU_MENU_BACK_SND", true, true, false, false);
-    this->checkLoadSound(&this->closeChatTab, "click-close", "OSU_CLOSE_CHAT_TAB_SND", true, true, false, false);
-    this->checkLoadSound(&this->clickButton, "click-short-confirm", "OSU_CLICK_BUTTON_SND", true, true, false, false);
-    this->checkLoadSound(&this->hoverButton, "click-short", "OSU_HOVER_BUTTON_SND", true, true, false, false);
-    this->checkLoadSound(&this->backButtonClick, "back-button-click", "OSU_BACK_BUTTON_CLICK_SND", true, true, false,
-                         false);
-    this->checkLoadSound(&this->backButtonHover, "back-button-hover", "OSU_BACK_BUTTON_HOVER_SND", true, true, false,
-                         false);
-    this->checkLoadSound(&this->clickMainMenuCube, "menu-play-click", "OSU_CLICK_MAIN_MENU_CUBE_SND", true, true, false,
-                         false);
-    this->checkLoadSound(&this->hoverMainMenuCube, "menu-play-hover", "OSU_HOVER_MAIN_MENU_CUBE_SND", true, true, false,
-                         false);
-    this->checkLoadSound(&this->clickSingleplayer, "menu-freeplay-click", "OSU_CLICK_SINGLEPLAYER_SND", true, true,
-                         false, false);
-    this->checkLoadSound(&this->hoverSingleplayer, "menu-freeplay-hover", "OSU_HOVER_SINGLEPLAYER_SND", true, true,
-                         false, false);
-    this->checkLoadSound(&this->clickMultiplayer, "menu-multiplayer-click", "OSU_CLICK_MULTIPLAYER_SND", true, true,
-                         false, false);
-    this->checkLoadSound(&this->hoverMultiplayer, "menu-multiplayer-hover", "OSU_HOVER_MULTIPLAYER_SND", true, true,
-                         false, false);
-    this->checkLoadSound(&this->clickOptions, "menu-options-click", "OSU_CLICK_OPTIONS_SND", true, true, false, false);
-    this->checkLoadSound(&this->hoverOptions, "menu-options-hover", "OSU_HOVER_OPTIONS_SND", true, true, false, false);
-    this->checkLoadSound(&this->clickExit, "menu-exit-click", "OSU_CLICK_EXIT_SND", true, true, false, false);
-    this->checkLoadSound(&this->hoverExit, "menu-exit-hover", "OSU_HOVER_EXIT_SND", true, true, false, false);
-    this->checkLoadSound(&this->expand, "select-expand", "OSU_EXPAND_SND", true, true, false);
-    this->checkLoadSound(&this->selectDifficulty, "select-difficulty", "OSU_SELECT_DIFFICULTY_SND", true, true, false,
-                         false);
-    this->checkLoadSound(&this->sliderbar, "sliderbar", "OSU_DRAG_SLIDER_SND", true, true, false);
-    this->checkLoadSound(&this->matchConfirm, "match-confirm", "OSU_ALL_PLAYERS_READY_SND", true, true, false);
-    this->checkLoadSound(&this->roomJoined, "match-join", "OSU_ROOM_JOINED_SND", true, true, false);
-    this->checkLoadSound(&this->roomQuit, "match-leave", "OSU_ROOM_QUIT_SND", true, true, false);
-    this->checkLoadSound(&this->roomNotReady, "match-notready", "OSU_ROOM_NOT_READY_SND", true, true, false);
-    this->checkLoadSound(&this->roomReady, "match-ready", "OSU_ROOM_READY_SND", true, true, false);
-    this->checkLoadSound(&this->matchStart, "match-start", "OSU_MATCH_START_SND", true, true, false);
+    this->loadSound(this->messageSent, "key-confirm", "OSU_SKIN_MESSAGE_SENT_SND", true, true, false);
+    this->loadSound(this->deletingText, "key-delete", "OSU_SKIN_DELETING_TEXT_SND", true, true, false);
+    this->loadSound(this->movingTextCursor, "key-movement", "OSU_MOVING_TEXT_CURSOR_SND", true, true, false);
+    this->loadSound(this->typing1, "key-press-1", "OSU_TYPING_1_SND", true, true, false);
+    this->loadSound(this->typing2, "key-press-2", "OSU_TYPING_2_SND", true, true, false, false);
+    this->loadSound(this->typing3, "key-press-3", "OSU_TYPING_3_SND", true, true, false, false);
+    this->loadSound(this->typing4, "key-press-4", "OSU_TYPING_4_SND", true, true, false, false);
+    this->loadSound(this->menuBack, "menuback", "OSU_MENU_BACK_SND", true, true, false, false);
+    this->loadSound(this->closeChatTab, "click-close", "OSU_CLOSE_CHAT_TAB_SND", true, true, false, false);
+    this->loadSound(this->clickButton, "click-short-confirm", "OSU_CLICK_BUTTON_SND", true, true, false, false);
+    this->loadSound(this->hoverButton, "click-short", "OSU_HOVER_BUTTON_SND", true, true, false, false);
+    this->loadSound(this->backButtonClick, "back-button-click", "OSU_BACK_BUTTON_CLICK_SND", true, true, false, false);
+    this->loadSound(this->backButtonHover, "back-button-hover", "OSU_BACK_BUTTON_HOVER_SND", true, true, false, false);
+    this->loadSound(this->clickMainMenuCube, "menu-play-click", "OSU_CLICK_MAIN_MENU_CUBE_SND", true, true, false,
+                    false);
+    this->loadSound(this->hoverMainMenuCube, "menu-play-hover", "OSU_HOVER_MAIN_MENU_CUBE_SND", true, true, false,
+                    false);
+    this->loadSound(this->clickSingleplayer, "menu-freeplay-click", "OSU_CLICK_SINGLEPLAYER_SND", true, true, false,
+                    false);
+    this->loadSound(this->hoverSingleplayer, "menu-freeplay-hover", "OSU_HOVER_SINGLEPLAYER_SND", true, true, false,
+                    false);
+    this->loadSound(this->clickMultiplayer, "menu-multiplayer-click", "OSU_CLICK_MULTIPLAYER_SND", true, true, false,
+                    false);
+    this->loadSound(this->hoverMultiplayer, "menu-multiplayer-hover", "OSU_HOVER_MULTIPLAYER_SND", true, true, false,
+                    false);
+    this->loadSound(this->clickOptions, "menu-options-click", "OSU_CLICK_OPTIONS_SND", true, true, false, false);
+    this->loadSound(this->hoverOptions, "menu-options-hover", "OSU_HOVER_OPTIONS_SND", true, true, false, false);
+    this->loadSound(this->clickExit, "menu-exit-click", "OSU_CLICK_EXIT_SND", true, true, false, false);
+    this->loadSound(this->hoverExit, "menu-exit-hover", "OSU_HOVER_EXIT_SND", true, true, false, false);
+    this->loadSound(this->expand, "select-expand", "OSU_EXPAND_SND", true, true, false);
+    this->loadSound(this->selectDifficulty, "select-difficulty", "OSU_SELECT_DIFFICULTY_SND", true, true, false, false);
+    this->loadSound(this->sliderbar, "sliderbar", "OSU_DRAG_SLIDER_SND", true, true, false);
+    this->loadSound(this->matchConfirm, "match-confirm", "OSU_ALL_PLAYERS_READY_SND", true, true, false);
+    this->loadSound(this->roomJoined, "match-join", "OSU_ROOM_JOINED_SND", true, true, false);
+    this->loadSound(this->roomQuit, "match-leave", "OSU_ROOM_QUIT_SND", true, true, false);
+    this->loadSound(this->roomNotReady, "match-notready", "OSU_ROOM_NOT_READY_SND", true, true, false);
+    this->loadSound(this->roomReady, "match-ready", "OSU_ROOM_READY_SND", true, true, false);
+    this->loadSound(this->matchStart, "match-start", "OSU_MATCH_START_SND", true, true, false);
 
-    this->checkLoadSound(&this->pauseLoop, "pause-loop", "OSU_PAUSE_LOOP_SND", false, false, true, true);
-    this->checkLoadSound(&this->pauseHover, "pause-hover", "OSU_PAUSE_HOVER_SND", true, true, false, false);
-    this->checkLoadSound(&this->clickPauseBack, "pause-back-click", "OSU_CLICK_QUIT_SONG_SND", true, true, false,
-                         false);
-    this->checkLoadSound(&this->hoverPauseBack, "pause-back-hover", "OSU_HOVER_QUIT_SONG_SND", true, true, false,
-                         false);
-    this->checkLoadSound(&this->clickPauseContinue, "pause-continue-click", "OSU_CLICK_RESUME_SONG_SND", true, true,
-                         false, false);
-    this->checkLoadSound(&this->hoverPauseContinue, "pause-continue-hover", "OSU_HOVER_RESUME_SONG_SND", true, true,
-                         false, false);
-    this->checkLoadSound(&this->clickPauseRetry, "pause-retry-click", "OSU_CLICK_RETRY_SONG_SND", true, true, false,
-                         false);
-    this->checkLoadSound(&this->hoverPauseRetry, "pause-retry-hover", "OSU_HOVER_RETRY_SONG_SND", true, true, false,
-                         false);
+    this->loadSound(this->pauseLoop, "pause-loop", "OSU_PAUSE_LOOP_SND", false, false, true, true);
+    this->loadSound(this->pauseHover, "pause-hover", "OSU_PAUSE_HOVER_SND", true, true, false, false);
+    this->loadSound(this->clickPauseBack, "pause-back-click", "OSU_CLICK_QUIT_SONG_SND", true, true, false, false);
+    this->loadSound(this->hoverPauseBack, "pause-back-hover", "OSU_HOVER_QUIT_SONG_SND", true, true, false, false);
+    this->loadSound(this->clickPauseContinue, "pause-continue-click", "OSU_CLICK_RESUME_SONG_SND", true, true, false,
+                    false);
+    this->loadSound(this->hoverPauseContinue, "pause-continue-hover", "OSU_HOVER_RESUME_SONG_SND", true, true, false,
+                    false);
+    this->loadSound(this->clickPauseRetry, "pause-retry-click", "OSU_CLICK_RETRY_SONG_SND", true, true, false, false);
+    this->loadSound(this->hoverPauseRetry, "pause-retry-hover", "OSU_HOVER_RETRY_SONG_SND", true, true, false, false);
 
     if(this->clickButton == nullptr) this->clickButton = this->menuHit;
     if(this->hoverButton == nullptr) this->hoverButton = this->menuHover;
@@ -1512,7 +1282,7 @@ SkinImage *Skin::createSkinImage(const std::string &skinElementName, vec2 baseSi
 
 void Skin::checkLoadImage(Image **addressOfPointer, const std::string &skinElementName, const std::string &resourceName,
                           bool ignoreDefaultSkin, const std::string &fileExtension, bool forceLoadMipmaps) {
-    if(*addressOfPointer != m_missingTexture) return;  // we are already loaded
+    if(*addressOfPointer != MISSING_TEXTURE) return;  // we are already loaded
 
     // NOTE: only the default skin is loaded with a resource name (it must never be unloaded by other instances), and it
     // is NOT added to the resources vector
@@ -1623,19 +1393,18 @@ void Skin::checkLoadImage(Image **addressOfPointer, const std::string &skinEleme
     }
 }
 
-void Skin::checkLoadSound(Sound **addressOfPointer, const std::string &skinElementName, std::string resourceName,
-                          bool isOverlayable, bool isSample, bool loop, bool fallback_to_default,
-                          float hardcodedVolumeMultiplier) {
-    if(*addressOfPointer != nullptr) return;  // we are already loaded
-
-    // NOTE: only the default skin is loaded with a resource name (it must never be unloaded by other instances), and it
-    // is NOT added to the resources vector
+void Skin::loadSound(Sound *&sndRef, const std::string &skinElementName, std::string resourceName, bool isOverlayable,
+                     bool isSample, bool loop, bool fallback_to_default, float hardcodedVolumeMultiplier) {
+    if(sndRef != nullptr) return;  // we are already loaded
 
     // random skin support
     this->randomizeFilePath();
 
-    auto try_load_sound = [=](const std::string &base_path, const std::string &filename,
-                              const std::string &resource_name, bool loop) {
+    bool was_first_load = false;
+
+    auto try_load_sound = [isSample, isOverlayable, &was_first_load](const std::string &base_path, const std::string &filename,
+                                                    bool loop, const std::string &resource_name,
+                                                    bool default_skin) -> Sound * {
         const char *extensions[] = {".wav", ".mp3", ".ogg", ".flac"};
         for(auto &extension : extensions) {
             std::string fn = filename;
@@ -1646,60 +1415,326 @@ void Skin::checkLoadSound(Sound **addressOfPointer, const std::string &skinEleme
 
             // this check will fix up the filename casing
             if(env->fileExists(path)) {
+                Sound *existing_sound = resourceManager->getSound(resource_name);
+
+                // default already loaded, just return it
+                if(default_skin && existing_sound) return existing_sound;
+
+                was_first_load = true;
+
+                // user skin, destroy old sound resource (blocking)
+                if(existing_sound) resourceManager->destroyResource(existing_sound, true);
+
                 if(cv::skin_async.getBool()) {
                     resourceManager->requestNextLoadAsync();
                 }
+
+                // load sound here
                 return resourceManager->loadSoundAbs(path, resource_name, !isSample, isOverlayable, loop);
             }
         }
-
-        return (Sound *)nullptr;
+        return nullptr;
     };
 
-    // load default skin
-    if(fallback_to_default) {
+    // load user skin
+    bool loaded_user_skin = false;
+    if(cv::skin_use_skin_hitsounds.getBool() || !isSample) {
+        sndRef = try_load_sound(this->sFilePath, skinElementName, loop, resourceName, false);
+        loaded_user_skin = (sndRef != nullptr);
+    }
+
+    if(fallback_to_default && !loaded_user_skin) {
         std::string defaultpath = MCENGINE_DATA_DIR "materials/default/";
         std::string defaultResourceName = std::move(resourceName);
         defaultResourceName.append("_DEFAULT");
-        *addressOfPointer = try_load_sound(defaultpath, skinElementName, defaultResourceName, loop);
+        sndRef = try_load_sound(defaultpath, skinElementName, loop, defaultResourceName, true);
     }
 
-    // load user skin
-    Sound *skin_sound = nullptr;
-    if(cv::skin_use_skin_hitsounds.getBool() || !isSample) {
-        skin_sound = try_load_sound(this->sFilePath, skinElementName, "", loop);
-        if(skin_sound != nullptr) {
-            *addressOfPointer = skin_sound;
-        }
-    }
-
-    Sound *sound = *addressOfPointer;
-    if(sound == nullptr) {
+    // failed both default and user
+    if(sndRef == nullptr) {
         debugLog("Skin Warning: NULL sound {:s}!\n", skinElementName.c_str());
         return;
     }
 
     // force reload default skin sound anyway if the custom skin does not include it (e.g. audio device change)
-    if(skin_sound == nullptr) {
-        resourceManager->reloadResource(sound, cv::skin_async.getBool());
-    } else {
-        this->resources.push_back(sound);
+    if(!loaded_user_skin && !was_first_load) {
+        resourceManager->reloadResource(sndRef, cv::skin_async.getBool());
     }
 
     if(isSample) {
-        SOUND_SAMPLE sample;
-        sample.sound = sound;
-        sample.hardcodedVolumeMultiplier = (hardcodedVolumeMultiplier >= 0.0f ? hardcodedVolumeMultiplier : 1.0f);
-        this->soundSamples.push_back(sample);
+        this->soundSamples.push_back({
+            .sound = sndRef,
+            .hardcodedVolumeMultiplier = (hardcodedVolumeMultiplier >= 0.0f ? hardcodedVolumeMultiplier : 1.0f),
+        });
     }
 
-    this->sounds.push_back(sound);
+    this->sounds.push_back(sndRef);
 
     // export
-    this->filepathsForExport.push_back(sound->getFilePath());
+    this->filepathsForExport.push_back(sndRef->getFilePath());
 }
 
 bool Skin::compareFilenameWithSkinElementName(const std::string &filename, const std::string &skinElementName) {
     if(filename.length() == 0 || skinElementName.length() == 0) return false;
     return filename.substr(0, filename.find_last_of('.')) == skinElementName;
+}
+
+Sound *Skin::getSpinnerBonus() const {
+    //
+    return this->spinnerBonus;
+}
+
+Sound *Skin::getSpinnerSpinSound() const {
+    //
+    return this->spinnerSpinSound;
+}
+
+Sound *Skin::getCombobreak() const {
+    //
+    return this->combobreak;
+}
+
+Sound *Skin::getFailsound() const {
+    //
+    return this->failsound;
+}
+
+Sound *Skin::getApplause() const {
+    //
+    return this->applause;
+}
+
+Sound *Skin::getMenuHit() const {
+    //
+    return this->menuHit;
+}
+
+Sound *Skin::getMenuHover() const {
+    //
+    return this->menuHover;
+}
+
+Sound *Skin::getCheckOn() const {
+    //
+    return this->checkOn;
+}
+
+Sound *Skin::getCheckOff() const {
+    //
+    return this->checkOff;
+}
+
+Sound *Skin::getShutter() const {
+    //
+    return this->shutter;
+}
+
+Sound *Skin::getSectionPassSound() const {
+    //
+    return this->sectionPassSound;
+}
+
+Sound *Skin::getSectionFailSound() const {
+    //
+    return this->sectionFailSound;
+}
+
+Sound *Skin::getExpandSound() const {
+    //
+    return this->expand;
+}
+
+Sound *Skin::getMessageSentSound() const {
+    //
+    return this->messageSent;
+}
+
+Sound *Skin::getDeletingTextSound() const {
+    //
+    return this->deletingText;
+}
+
+Sound *Skin::getMovingTextCursorSound() const {
+    //
+    return this->movingTextCursor;
+}
+
+Sound *Skin::getTyping1Sound() const {
+    //
+    return this->typing1;
+}
+
+Sound *Skin::getTyping2Sound() const {
+    //
+    return this->typing2;
+}
+
+Sound *Skin::getTyping3Sound() const {
+    //
+    return this->typing3;
+}
+
+Sound *Skin::getTyping4Sound() const {
+    //
+    return this->typing4;
+}
+
+Sound *Skin::getMenuBackSound() const {
+    //
+    return this->menuBack;
+}
+
+Sound *Skin::getCloseChatTabSound() const {
+    //
+    return this->closeChatTab;
+}
+
+Sound *Skin::getHoverButtonSound() const {
+    //
+    return this->hoverButton;
+}
+
+Sound *Skin::getClickButtonSound() const {
+    //
+    return this->clickButton;
+}
+
+Sound *Skin::getClickMainMenuCubeSound() const {
+    //
+    return this->clickMainMenuCube;
+}
+
+Sound *Skin::getHoverMainMenuCubeSound() const {
+    //
+    return this->hoverMainMenuCube;
+}
+
+Sound *Skin::getClickSingleplayerSound() const {
+    //
+    return this->clickSingleplayer;
+}
+
+Sound *Skin::getHoverSingleplayerSound() const {
+    //
+    return this->hoverSingleplayer;
+}
+
+Sound *Skin::getClickMultiplayerSound() const {
+    //
+    return this->clickMultiplayer;
+}
+
+Sound *Skin::getHoverMultiplayerSound() const {
+    //
+    return this->hoverMultiplayer;
+}
+
+Sound *Skin::getClickOptionsSound() const {
+    //
+    return this->clickOptions;
+}
+
+Sound *Skin::getHoverOptionsSound() const {
+    //
+    return this->hoverOptions;
+}
+
+Sound *Skin::getClickExitSound() const {
+    //
+    return this->clickExit;
+}
+
+Sound *Skin::getHoverExitSound() const {
+    //
+    return this->hoverExit;
+}
+
+Sound *Skin::getPauseLoopSound() const {
+    //
+    return this->pauseLoop;
+}
+
+Sound *Skin::getPauseHoverSound() const {
+    //
+    return this->pauseHover;
+}
+
+Sound *Skin::getClickPauseBackSound() const {
+    //
+    return this->clickPauseBack;
+}
+
+Sound *Skin::getHoverPauseBackSound() const {
+    //
+    return this->hoverPauseBack;
+}
+
+Sound *Skin::getClickPauseContinueSound() const {
+    //
+    return this->clickPauseContinue;
+}
+
+Sound *Skin::getHoverPauseContinueSound() const {
+    //
+    return this->hoverPauseContinue;
+}
+
+Sound *Skin::getClickPauseRetrySound() const {
+    //
+    return this->clickPauseRetry;
+}
+
+Sound *Skin::getHoverPauseRetrySound() const {
+    //
+    return this->hoverPauseRetry;
+}
+
+Sound *Skin::getBackButtonClickSound() const {
+    //
+    return this->backButtonClick;
+}
+
+Sound *Skin::getBackButtonHoverSound() const {
+    //
+    return this->backButtonHover;
+}
+
+Sound *Skin::getSelectDifficultySound() const {
+    //
+    return this->selectDifficulty;
+}
+
+Sound *Skin::getSliderbarSound() const {
+    //
+    return this->sliderbar;
+}
+
+Sound *Skin::getMatchConfirmSound() const {
+    //
+    return this->matchConfirm;
+}
+
+Sound *Skin::getRoomJoinedSound() const {
+    //
+    return this->roomJoined;
+}
+
+Sound *Skin::getRoomQuitSound() const {
+    //
+    return this->roomQuit;
+}
+
+Sound *Skin::getRoomNotReadySound() const {
+    //
+    return this->roomNotReady;
+}
+
+Sound *Skin::getRoomReadySound() const {
+    //
+    return this->roomReady;
+}
+
+Sound *Skin::getMatchStartSound() const {
+    //
+    return this->matchStart;
 }

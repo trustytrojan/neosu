@@ -312,7 +312,7 @@ Sound *ResourceManager::loadSound(std::string filepath, std::string resourceName
 
     // create instance and load it
     filepath.insert(0, ResourceManager::PATH_DEFAULT_SOUNDS);
-    Sound *snd = Sound::createSound(filepath, stream, overlayable, loop);
+    auto *snd{Sound::createSound(filepath, stream, overlayable, loop)};
     setResourceName(snd, resourceName);
 
     loadResource(snd, true);
@@ -326,7 +326,7 @@ Sound *ResourceManager::loadSoundAbs(std::string filepath, std::string resourceN
     if(res != nullptr) return res;
 
     // create instance and load it
-    Sound *snd = Sound::createSound(std::move(filepath), stream, overlayable, loop);
+    auto *snd{Sound::createSound(std::move(filepath), stream, overlayable, loop)};
     setResourceName(snd, resourceName);
 
     loadResource(snd, true);

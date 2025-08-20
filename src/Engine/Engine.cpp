@@ -19,6 +19,8 @@
 #include "Timing.h"
 #include "VisualProfiler.h"
 
+Image *MISSING_TEXTURE = nullptr;
+
 std::unique_ptr<Mouse> mouse = nullptr;
 std::unique_ptr<Keyboard> keyboard = nullptr;
 std::unique_ptr<App> app = nullptr;
@@ -221,17 +223,17 @@ void Engine::loadApp() {
 
     // load other default resources and things which are not strictly necessary
     {
-        Image *missingTexture = resourceManager->createImage(512, 512);
-        resourceManager->setResourceName(missingTexture, "MISSING_TEXTURE");
+        MISSING_TEXTURE = resourceManager->createImage(512, 512);
+        resourceManager->setResourceName(MISSING_TEXTURE, "MISSING_TEXTURE");
         for(int x = 0; x < 512; x++) {
             for(int y = 0; y < 512; y++) {
                 int rowCounter = (x / 64);
                 int columnCounter = (y / 64);
                 Color color = (((rowCounter + columnCounter) % 2 == 0) ? rgb(255, 0, 221) : rgb(0, 0, 0));
-                missingTexture->setPixel(x, y, color);
+                MISSING_TEXTURE->setPixel(x, y, color);
             }
         }
-        missingTexture->load();
+        MISSING_TEXTURE->load();
 
         // create engine gui
         this->guiContainer = new CBaseUIContainer(0, 0, engine->getScreenWidth(), engine->getScreenHeight(), "");

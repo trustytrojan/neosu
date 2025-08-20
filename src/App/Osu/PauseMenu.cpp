@@ -136,7 +136,7 @@ void PauseMenu::onContinueClicked() {
     if(!this->bContinueEnabled) return;
     if(anim->isAnimating(&this->fDimAnim)) return;
 
-    soundEngine->play(osu->getSkin()->clickPauseContinue);
+    soundEngine->play(osu->getSkin()->getClickPauseContinueSound());
     osu->getSelectedBeatmap()->pause();
 
     this->scheduleVisibilityChange(false);
@@ -146,7 +146,7 @@ void PauseMenu::onRetryClicked() {
     if(bancho->is_playing_a_multi_map()) return;  // sanity
     if(anim->isAnimating(&this->fDimAnim)) return;
 
-    soundEngine->play(osu->getSkin()->clickPauseRetry);
+    soundEngine->play(osu->getSkin()->getClickPauseRetrySound());
     osu->getSelectedBeatmap()->restart();
 
     this->scheduleVisibilityChange(false);
@@ -155,7 +155,7 @@ void PauseMenu::onRetryClicked() {
 void PauseMenu::onBackClicked() {
     if(anim->isAnimating(&this->fDimAnim)) return;
 
-    soundEngine->play(osu->getSkin()->clickPauseBack);
+    soundEngine->play(osu->getSkin()->getClickPauseBackSound());
     osu->getSelectedBeatmap()->stop(true);
 
     this->scheduleVisibilityChange(false);
@@ -340,7 +340,7 @@ CBaseUIContainer *PauseMenu::setVisible(bool visible) {
 
     if(!bancho->is_playing_a_multi_map()) {
         if(visible) {
-            soundEngine->play(osu->getSkin()->pauseLoop);
+            soundEngine->play(osu->getSkin()->getPauseLoopSound());
 
             if(this->bContinueEnabled) {
                 RichPresence::setBanchoStatus("Taking a break", PAUSED);
@@ -359,7 +359,7 @@ CBaseUIContainer *PauseMenu::setVisible(bool visible) {
                 RichPresence::setBanchoStatus("Failed", SUBMITTING);
             }
         } else {
-            soundEngine->stop(osu->getSkin()->pauseLoop);
+            soundEngine->stop(osu->getSkin()->getPauseLoopSound());
 
             RichPresence::onPlayStart();
 

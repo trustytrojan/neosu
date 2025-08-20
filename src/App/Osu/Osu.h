@@ -149,7 +149,10 @@ class Osu final : public MouseListener, public KeyboardListener {
     [[nodiscard]] inline std::vector<ConVar *> getExperimentalMods() const { return this->experimentalMods; }
 
     bool isInPlayMode();
-    [[nodiscard]] inline bool isSkinLoading() const { return this->bSkinLoadScheduled; }
+    [[nodiscard]] inline bool isSkinLoading() const {
+        return this->bSkinLoadScheduled ||
+               (this->skin && this->skinScheduledToLoad && this->skin != this->skinScheduledToLoad);
+    }
 
     [[nodiscard]] inline bool isSkipScheduled() const { return this->bSkipScheduled; }
     [[nodiscard]] inline bool isSeeking() const { return this->bSeeking; }
@@ -238,7 +241,7 @@ class Osu final : public MouseListener, public KeyboardListener {
     ModFPoSu *fposu = nullptr;
     SpectatorScreen *spectatorScreen = nullptr;
 
-    UserCard *userButton = nullptr;
+    std::unique_ptr<UserCard> userButton{nullptr};
 
     std::vector<OsuScreen *> screens;
 

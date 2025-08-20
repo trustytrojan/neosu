@@ -30,7 +30,7 @@ UserStatsScreen::UserStatsScreen() : ScreenBackable() {
     this->m_userCard = new UserCard(0);
     this->addBaseUIElement(this->m_userCard);
 
-    this->m_contextMenu = new UIContextMenu();
+    this->m_contextMenu = std::make_unique<UIContextMenu>();
     this->m_contextMenu->setVisible(true);
 
     this->m_scores = new CBaseUIScrollView();
@@ -105,7 +105,7 @@ void UserStatsScreen::rebuildScoreButtons() {
             title.append("]");
         }
 
-        auto *button = new ScoreButton(this->m_contextMenu, 0, 0, 300, 100, ScoreButton::STYLE::TOP_RANKS);
+        auto *button = new ScoreButton(this->m_contextMenu.get(), 0, 0, 300, 100, ScoreButton::STYLE::TOP_RANKS);
         button->map_hash = score->beatmap_hash;
         button->setScore(*score, diff, ++i, title, weight);
         button->setClickCallback([](CBaseUIButton *button) {

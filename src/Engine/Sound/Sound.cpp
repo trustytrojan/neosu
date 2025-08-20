@@ -1,6 +1,7 @@
 // Copyright (c) 2014, PG, All rights reserved.
 #include "Sound.h"
 
+#include <memory>
 #include <utility>
 #include "ConVar.h"
 

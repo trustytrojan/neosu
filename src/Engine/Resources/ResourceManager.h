@@ -77,10 +77,10 @@ class ResourceManager final {
                      int fontSize = 16, bool antialiasing = true, int fontDPI = 96);
 
     // sounds
-    Sound *loadSound(std::string filepath, std::string resourceName, bool stream = false, bool overlayable = false,
-                     bool loop = false);
-    Sound *loadSoundAbs(std::string filepath, std::string resourceName, bool stream = false, bool overlayable = false,
-                        bool loop = false);
+    Sound *loadSound(std::string filepath, std::string resourceName, bool stream = false,
+                                     bool overlayable = false, bool loop = false);
+    Sound *loadSoundAbs(std::string filepath, std::string resourceName, bool stream = false,
+                                        bool overlayable = false, bool loop = false);
 
     // shaders
     Shader *loadShader(std::string vertexShaderFilePath, std::string fragmentShaderFilePath, std::string resourceName);
@@ -135,7 +135,14 @@ class ResourceManager final {
     [[nodiscard]] T *tryGet(std::string &resourceName) const {
         if(resourceName.empty()) return nullptr;
         auto it = this->mNameToResourceMap.find(resourceName);
-        if(it != this->mNameToResourceMap.end()) return it->second->as<T>();
+        if(it != this->mNameToResourceMap.end()) {
+            if (!it->second) {
+                auto* p_this = const_cast<ResourceManager*>(this);
+                p_this->mNameToResourceMap.erase(it);
+            } else {
+                return it->second->as<T>();
+            }
+        }
         if(cv::debug_rm.getBool())
             debugLog(R"(ResourceManager WARNING: Resource "{:s}" does not exist!)"
                      "\n",
@@ -147,6 +154,10 @@ class ResourceManager final {
         if(resourceName.empty()) return nullptr;
         auto it = this->mNameToResourceMap.find(resourceName);
         if(it == this->mNameToResourceMap.end()) return nullptr;
+        else if (!it->second) {
+            this->mNameToResourceMap.erase(it);
+            return nullptr;
+        }
         if(cv::debug_rm.getBool())
             debugLog(R"(ResourceManager NOTICE: Resource "{:s}" already loaded.)"
                      "\n",

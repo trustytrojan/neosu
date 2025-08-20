@@ -249,7 +249,7 @@ void CarouselButton::deselect() { this->bSelected = false; }
 void CarouselButton::resetAnimations() { this->setMoveAwayState(MOVE_AWAY_STATE::MOVE_CENTER, false); }
 
 void CarouselButton::onClicked(bool left, bool right) {
-    soundEngine->play(osu->getSkin()->selectDifficulty);
+    soundEngine->play(osu->getSkin()->getSelectDifficultySound());
 
     CBaseUIButton::onClicked(left, right);
 

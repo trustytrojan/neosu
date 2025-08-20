@@ -2,6 +2,8 @@
 // Copyright (c) 2015, PG, All rights reserved.
 #include "cbase.h"
 
+extern Image *MISSING_TEXTURE;
+
 class Image;
 class Sound;
 class Resource;
@@ -9,12 +11,14 @@ class ConVar;
 
 class SkinImage;
 
-class Skin {
+class Skin final {
+    NOCOPY_NOMOVE(Skin)
+
    public:
     static void unpack(const char *filepath);
 
     Skin(const UString &name, std::string filepath, bool isDefaultSkin = false);
-    virtual ~Skin();
+    ~Skin();
 
     void update();
 
@@ -45,279 +49,316 @@ class Skin {
     void randomizeFilePath();
 
     // drawable helpers
-    inline std::string getName() { return this->sName; }
-    inline std::string getFilePath() { return this->sFilePath; }
+    [[nodiscard]] inline std::string getName() const { return this->sName; }
+    [[nodiscard]] inline std::string getFilePath() const { return this->sFilePath; }
 
     // raw
-    inline Image *getMissingTexture() { return Skin::m_missingTexture; }
+    [[nodiscard]] inline Image *getMissingTexture() const { return MISSING_TEXTURE; }
 
-    inline Image *getHitCircle() { return this->hitCircle; }
-    inline SkinImage *getHitCircleOverlay2() { return this->hitCircleOverlay2; }
-    inline Image *getApproachCircle() { return this->approachCircle; }
-    inline Image *getReverseArrow() { return this->reverseArrow; }
-    inline SkinImage *getFollowPoint2() { return this->followPoint2; }
+    [[nodiscard]] inline Image *getHitCircle() const { return this->hitCircle; }
+    [[nodiscard]] inline SkinImage *getHitCircleOverlay2() const { return this->hitCircleOverlay2; }
+    [[nodiscard]] inline Image *getApproachCircle() const { return this->approachCircle; }
+    [[nodiscard]] inline Image *getReverseArrow() const { return this->reverseArrow; }
+    [[nodiscard]] inline SkinImage *getFollowPoint2() const { return this->followPoint2; }
 
-    inline Image *getDefault0() { return this->default0; }
-    inline Image *getDefault1() { return this->default1; }
-    inline Image *getDefault2() { return this->default2; }
-    inline Image *getDefault3() { return this->default3; }
-    inline Image *getDefault4() { return this->default4; }
-    inline Image *getDefault5() { return this->default5; }
-    inline Image *getDefault6() { return this->default6; }
-    inline Image *getDefault7() { return this->default7; }
-    inline Image *getDefault8() { return this->default8; }
-    inline Image *getDefault9() { return this->default9; }
+    [[nodiscard]] inline Image *getDefault0() const { return this->default0; }
+    [[nodiscard]] inline Image *getDefault1() const { return this->default1; }
+    [[nodiscard]] inline Image *getDefault2() const { return this->default2; }
+    [[nodiscard]] inline Image *getDefault3() const { return this->default3; }
+    [[nodiscard]] inline Image *getDefault4() const { return this->default4; }
+    [[nodiscard]] inline Image *getDefault5() const { return this->default5; }
+    [[nodiscard]] inline Image *getDefault6() const { return this->default6; }
+    [[nodiscard]] inline Image *getDefault7() const { return this->default7; }
+    [[nodiscard]] inline Image *getDefault8() const { return this->default8; }
+    [[nodiscard]] inline Image *getDefault9() const { return this->default9; }
 
-    inline Image *getScore0() { return this->score0; }
-    inline Image *getScore1() { return this->score1; }
-    inline Image *getScore2() { return this->score2; }
-    inline Image *getScore3() { return this->score3; }
-    inline Image *getScore4() { return this->score4; }
-    inline Image *getScore5() { return this->score5; }
-    inline Image *getScore6() { return this->score6; }
-    inline Image *getScore7() { return this->score7; }
-    inline Image *getScore8() { return this->score8; }
-    inline Image *getScore9() { return this->score9; }
-    inline Image *getScoreX() { return this->scoreX; }
-    inline Image *getScorePercent() { return this->scorePercent; }
-    inline Image *getScoreDot() { return this->scoreDot; }
+    [[nodiscard]] inline Image *getScore0() const { return this->score0; }
+    [[nodiscard]] inline Image *getScore1() const { return this->score1; }
+    [[nodiscard]] inline Image *getScore2() const { return this->score2; }
+    [[nodiscard]] inline Image *getScore3() const { return this->score3; }
+    [[nodiscard]] inline Image *getScore4() const { return this->score4; }
+    [[nodiscard]] inline Image *getScore5() const { return this->score5; }
+    [[nodiscard]] inline Image *getScore6() const { return this->score6; }
+    [[nodiscard]] inline Image *getScore7() const { return this->score7; }
+    [[nodiscard]] inline Image *getScore8() const { return this->score8; }
+    [[nodiscard]] inline Image *getScore9() const { return this->score9; }
+    [[nodiscard]] inline Image *getScoreX() const { return this->scoreX; }
+    [[nodiscard]] inline Image *getScorePercent() const { return this->scorePercent; }
+    [[nodiscard]] inline Image *getScoreDot() const { return this->scoreDot; }
 
-    inline Image *getCombo0() { return this->combo0; }
-    inline Image *getCombo1() { return this->combo1; }
-    inline Image *getCombo2() { return this->combo2; }
-    inline Image *getCombo3() { return this->combo3; }
-    inline Image *getCombo4() { return this->combo4; }
-    inline Image *getCombo5() { return this->combo5; }
-    inline Image *getCombo6() { return this->combo6; }
-    inline Image *getCombo7() { return this->combo7; }
-    inline Image *getCombo8() { return this->combo8; }
-    inline Image *getCombo9() { return this->combo9; }
-    inline Image *getComboX() { return this->comboX; }
+    [[nodiscard]] inline Image *getCombo0() const { return this->combo0; }
+    [[nodiscard]] inline Image *getCombo1() const { return this->combo1; }
+    [[nodiscard]] inline Image *getCombo2() const { return this->combo2; }
+    [[nodiscard]] inline Image *getCombo3() const { return this->combo3; }
+    [[nodiscard]] inline Image *getCombo4() const { return this->combo4; }
+    [[nodiscard]] inline Image *getCombo5() const { return this->combo5; }
+    [[nodiscard]] inline Image *getCombo6() const { return this->combo6; }
+    [[nodiscard]] inline Image *getCombo7() const { return this->combo7; }
+    [[nodiscard]] inline Image *getCombo8() const { return this->combo8; }
+    [[nodiscard]] inline Image *getCombo9() const { return this->combo9; }
+    [[nodiscard]] inline Image *getComboX() const { return this->comboX; }
 
-    inline SkinImage *getPlaySkip() { return this->playSkip; }
-    inline Image *getPlayWarningArrow() { return this->playWarningArrow; }
-    inline SkinImage *getPlayWarningArrow2() { return this->playWarningArrow2; }
-    inline Image *getCircularmetre() { return this->circularmetre; }
-    inline SkinImage *getScorebarBg() { return this->scorebarBg; }
-    inline SkinImage *getScorebarColour() { return this->scorebarColour; }
-    inline SkinImage *getScorebarMarker() { return this->scorebarMarker; }
-    inline SkinImage *getScorebarKi() { return this->scorebarKi; }
-    inline SkinImage *getScorebarKiDanger() { return this->scorebarKiDanger; }
-    inline SkinImage *getScorebarKiDanger2() { return this->scorebarKiDanger2; }
-    inline SkinImage *getSectionPassImage() { return this->sectionPassImage; }
-    inline SkinImage *getSectionFailImage() { return this->sectionFailImage; }
-    inline SkinImage *getInputoverlayBackground() { return this->inputoverlayBackground; }
-    inline SkinImage *getInputoverlayKey() { return this->inputoverlayKey; }
+    [[nodiscard]] inline SkinImage *getPlaySkip() const { return this->playSkip; }
+    [[nodiscard]] inline Image *getPlayWarningArrow() const { return this->playWarningArrow; }
+    [[nodiscard]] inline SkinImage *getPlayWarningArrow2() const { return this->playWarningArrow2; }
+    [[nodiscard]] inline Image *getCircularmetre() const { return this->circularmetre; }
+    [[nodiscard]] inline SkinImage *getScorebarBg() const { return this->scorebarBg; }
+    [[nodiscard]] inline SkinImage *getScorebarColour() const { return this->scorebarColour; }
+    [[nodiscard]] inline SkinImage *getScorebarMarker() const { return this->scorebarMarker; }
+    [[nodiscard]] inline SkinImage *getScorebarKi() const { return this->scorebarKi; }
+    [[nodiscard]] inline SkinImage *getScorebarKiDanger() const { return this->scorebarKiDanger; }
+    [[nodiscard]] inline SkinImage *getScorebarKiDanger2() const { return this->scorebarKiDanger2; }
+    [[nodiscard]] inline SkinImage *getSectionPassImage() const { return this->sectionPassImage; }
+    [[nodiscard]] inline SkinImage *getSectionFailImage() const { return this->sectionFailImage; }
+    [[nodiscard]] inline SkinImage *getInputoverlayBackground() const { return this->inputoverlayBackground; }
+    [[nodiscard]] inline SkinImage *getInputoverlayKey() const { return this->inputoverlayKey; }
 
-    inline SkinImage *getHit0() { return this->hit0; }
-    inline SkinImage *getHit50() { return this->hit50; }
-    inline SkinImage *getHit50g() { return this->hit50g; }
-    inline SkinImage *getHit50k() { return this->hit50k; }
-    inline SkinImage *getHit100() { return this->hit100; }
-    inline SkinImage *getHit100g() { return this->hit100g; }
-    inline SkinImage *getHit100k() { return this->hit100k; }
-    inline SkinImage *getHit300() { return this->hit300; }
-    inline SkinImage *getHit300g() { return this->hit300g; }
-    inline SkinImage *getHit300k() { return this->hit300k; }
+    [[nodiscard]] inline SkinImage *getHit0() const { return this->hit0; }
+    [[nodiscard]] inline SkinImage *getHit50() const { return this->hit50; }
+    [[nodiscard]] inline SkinImage *getHit50g() const { return this->hit50g; }
+    [[nodiscard]] inline SkinImage *getHit50k() const { return this->hit50k; }
+    [[nodiscard]] inline SkinImage *getHit100() const { return this->hit100; }
+    [[nodiscard]] inline SkinImage *getHit100g() const { return this->hit100g; }
+    [[nodiscard]] inline SkinImage *getHit100k() const { return this->hit100k; }
+    [[nodiscard]] inline SkinImage *getHit300() const { return this->hit300; }
+    [[nodiscard]] inline SkinImage *getHit300g() const { return this->hit300g; }
+    [[nodiscard]] inline SkinImage *getHit300k() const { return this->hit300k; }
 
-    inline Image *getParticle50() { return this->particle50; }
-    inline Image *getParticle100() { return this->particle100; }
-    inline Image *getParticle300() { return this->particle300; }
+    [[nodiscard]] inline Image *getParticle50() const { return this->particle50; }
+    [[nodiscard]] inline Image *getParticle100() const { return this->particle100; }
+    [[nodiscard]] inline Image *getParticle300() const { return this->particle300; }
 
-    inline Image *getSliderGradient() { return this->sliderGradient; }
-    inline SkinImage *getSliderb() { return this->sliderb; }
-    inline SkinImage *getSliderFollowCircle2() { return this->sliderFollowCircle2; }
-    inline Image *getSliderScorePoint() { return this->sliderScorePoint; }
-    inline Image *getSliderStartCircle() { return this->sliderStartCircle; }
-    inline SkinImage *getSliderStartCircle2() { return this->sliderStartCircle2; }
-    inline Image *getSliderStartCircleOverlay() { return this->sliderStartCircleOverlay; }
-    inline SkinImage *getSliderStartCircleOverlay2() { return this->sliderStartCircleOverlay2; }
-    inline Image *getSliderEndCircle() { return this->sliderEndCircle; }
-    inline SkinImage *getSliderEndCircle2() { return this->sliderEndCircle2; }
-    inline Image *getSliderEndCircleOverlay() { return this->sliderEndCircleOverlay; }
-    inline SkinImage *getSliderEndCircleOverlay2() { return this->sliderEndCircleOverlay2; }
+    [[nodiscard]] inline Image *getSliderGradient() const { return this->sliderGradient; }
+    [[nodiscard]] inline SkinImage *getSliderb() const { return this->sliderb; }
+    [[nodiscard]] inline SkinImage *getSliderFollowCircle2() const { return this->sliderFollowCircle2; }
+    [[nodiscard]] inline Image *getSliderScorePoint() const { return this->sliderScorePoint; }
+    [[nodiscard]] inline Image *getSliderStartCircle() const { return this->sliderStartCircle; }
+    [[nodiscard]] inline SkinImage *getSliderStartCircle2() const { return this->sliderStartCircle2; }
+    [[nodiscard]] inline Image *getSliderStartCircleOverlay() const { return this->sliderStartCircleOverlay; }
+    [[nodiscard]] inline SkinImage *getSliderStartCircleOverlay2() const { return this->sliderStartCircleOverlay2; }
+    [[nodiscard]] inline Image *getSliderEndCircle() const { return this->sliderEndCircle; }
+    [[nodiscard]] inline SkinImage *getSliderEndCircle2() const { return this->sliderEndCircle2; }
+    [[nodiscard]] inline Image *getSliderEndCircleOverlay() const { return this->sliderEndCircleOverlay; }
+    [[nodiscard]] inline SkinImage *getSliderEndCircleOverlay2() const { return this->sliderEndCircleOverlay2; }
 
-    inline Image *getSpinnerBackground() { return this->spinnerBackground; }
-    inline Image *getSpinnerCircle() { return this->spinnerCircle; }
-    inline Image *getSpinnerApproachCircle() { return this->spinnerApproachCircle; }
-    inline Image *getSpinnerBottom() { return this->spinnerBottom; }
-    inline Image *getSpinnerMiddle() { return this->spinnerMiddle; }
-    inline Image *getSpinnerMiddle2() { return this->spinnerMiddle2; }
-    inline Image *getSpinnerTop() { return this->spinnerTop; }
-    inline Image *getSpinnerSpin() { return this->spinnerSpin; }
-    inline Image *getSpinnerClear() { return this->spinnerClear; }
+    [[nodiscard]] inline Image *getSpinnerBackground() const { return this->spinnerBackground; }
+    [[nodiscard]] inline Image *getSpinnerCircle() const { return this->spinnerCircle; }
+    [[nodiscard]] inline Image *getSpinnerApproachCircle() const { return this->spinnerApproachCircle; }
+    [[nodiscard]] inline Image *getSpinnerBottom() const { return this->spinnerBottom; }
+    [[nodiscard]] inline Image *getSpinnerMiddle() const { return this->spinnerMiddle; }
+    [[nodiscard]] inline Image *getSpinnerMiddle2() const { return this->spinnerMiddle2; }
+    [[nodiscard]] inline Image *getSpinnerTop() const { return this->spinnerTop; }
+    [[nodiscard]] inline Image *getSpinnerSpin() const { return this->spinnerSpin; }
+    [[nodiscard]] inline Image *getSpinnerClear() const { return this->spinnerClear; }
 
-    inline Image *getDefaultCursor() { return this->defaultCursor; }
-    inline Image *getCursor() { return this->cursor; }
-    inline Image *getCursorMiddle() { return this->cursorMiddle; }
-    inline Image *getCursorTrail() { return this->cursorTrail; }
-    inline Image *getCursorRipple() { return this->cursorRipple; }
-    inline Image *getCursorSmoke() { return this->cursorSmoke; }
+    [[nodiscard]] inline Image *getDefaultCursor() const { return this->defaultCursor; }
+    [[nodiscard]] inline Image *getCursor() const { return this->cursor; }
+    [[nodiscard]] inline Image *getCursorMiddle() const { return this->cursorMiddle; }
+    [[nodiscard]] inline Image *getCursorTrail() const { return this->cursorTrail; }
+    [[nodiscard]] inline Image *getCursorRipple() const { return this->cursorRipple; }
+    [[nodiscard]] inline Image *getCursorSmoke() const { return this->cursorSmoke; }
 
-    inline SkinImage *getSelectionModEasy() { return this->selectionModEasy; }
-    inline SkinImage *getSelectionModNoFail() { return this->selectionModNoFail; }
-    inline SkinImage *getSelectionModHalfTime() { return this->selectionModHalfTime; }
-    inline SkinImage *getSelectionModDayCore() { return this->selectionModDayCore; }
-    inline SkinImage *getSelectionModHardRock() { return this->selectionModHardRock; }
-    inline SkinImage *getSelectionModSuddenDeath() { return this->selectionModSuddenDeath; }
-    inline SkinImage *getSelectionModPerfect() { return this->selectionModPerfect; }
-    inline SkinImage *getSelectionModDoubleTime() { return this->selectionModDoubleTime; }
-    inline SkinImage *getSelectionModNightCore() { return this->selectionModNightCore; }
-    inline SkinImage *getSelectionModHidden() { return this->selectionModHidden; }
-    inline SkinImage *getSelectionModFlashlight() { return this->selectionModFlashlight; }
-    inline SkinImage *getSelectionModRelax() { return this->selectionModRelax; }
-    inline SkinImage *getSelectionModAutopilot() { return this->selectionModAutopilot; }
-    inline SkinImage *getSelectionModSpunOut() { return this->selectionModSpunOut; }
-    inline SkinImage *getSelectionModAutoplay() { return this->selectionModAutoplay; }
-    inline SkinImage *getSelectionModNightmare() { return this->selectionModNightmare; }
-    inline SkinImage *getSelectionModTarget() { return this->selectionModTarget; }
-    inline SkinImage *getSelectionModScorev2() { return this->selectionModScorev2; }
-    inline SkinImage *getSelectionModTD() { return this->selectionModTD; }
+    [[nodiscard]] inline SkinImage *getSelectionModEasy() const { return this->selectionModEasy; }
+    [[nodiscard]] inline SkinImage *getSelectionModNoFail() const { return this->selectionModNoFail; }
+    [[nodiscard]] inline SkinImage *getSelectionModHalfTime() const { return this->selectionModHalfTime; }
+    [[nodiscard]] inline SkinImage *getSelectionModDayCore() const { return this->selectionModDayCore; }
+    [[nodiscard]] inline SkinImage *getSelectionModHardRock() const { return this->selectionModHardRock; }
+    [[nodiscard]] inline SkinImage *getSelectionModSuddenDeath() const { return this->selectionModSuddenDeath; }
+    [[nodiscard]] inline SkinImage *getSelectionModPerfect() const { return this->selectionModPerfect; }
+    [[nodiscard]] inline SkinImage *getSelectionModDoubleTime() const { return this->selectionModDoubleTime; }
+    [[nodiscard]] inline SkinImage *getSelectionModNightCore() const { return this->selectionModNightCore; }
+    [[nodiscard]] inline SkinImage *getSelectionModHidden() const { return this->selectionModHidden; }
+    [[nodiscard]] inline SkinImage *getSelectionModFlashlight() const { return this->selectionModFlashlight; }
+    [[nodiscard]] inline SkinImage *getSelectionModRelax() const { return this->selectionModRelax; }
+    [[nodiscard]] inline SkinImage *getSelectionModAutopilot() const { return this->selectionModAutopilot; }
+    [[nodiscard]] inline SkinImage *getSelectionModSpunOut() const { return this->selectionModSpunOut; }
+    [[nodiscard]] inline SkinImage *getSelectionModAutoplay() const { return this->selectionModAutoplay; }
+    [[nodiscard]] inline SkinImage *getSelectionModNightmare() const { return this->selectionModNightmare; }
+    [[nodiscard]] inline SkinImage *getSelectionModTarget() const { return this->selectionModTarget; }
+    [[nodiscard]] inline SkinImage *getSelectionModScorev2() const { return this->selectionModScorev2; }
+    [[nodiscard]] inline SkinImage *getSelectionModTD() const { return this->selectionModTD; }
 
-    inline Image *getPauseContinue() { return this->pauseContinue; }
-    inline Image *getPauseRetry() { return this->pauseRetry; }
-    inline Image *getPauseBack() { return this->pauseBack; }
-    inline Image *getPauseOverlay() { return this->pauseOverlay; }
-    inline Image *getFailBackground() { return this->failBackground; }
-    inline Image *getUnpause() { return this->unpause; }
+    [[nodiscard]] inline Image *getPauseContinue() const { return this->pauseContinue; }
+    [[nodiscard]] inline Image *getPauseRetry() const { return this->pauseRetry; }
+    [[nodiscard]] inline Image *getPauseBack() const { return this->pauseBack; }
+    [[nodiscard]] inline Image *getPauseOverlay() const { return this->pauseOverlay; }
+    [[nodiscard]] inline Image *getFailBackground() const { return this->failBackground; }
+    [[nodiscard]] inline Image *getUnpause() const { return this->unpause; }
 
-    inline Image *getButtonLeft() { return this->buttonLeft; }
-    inline Image *getButtonMiddle() { return this->buttonMiddle; }
-    inline Image *getButtonRight() { return this->buttonRight; }
-    inline Image *getDefaultButtonLeft() { return this->defaultButtonLeft; }
-    inline Image *getDefaultButtonMiddle() { return this->defaultButtonMiddle; }
-    inline Image *getDefaultButtonRight() { return this->defaultButtonRight; }
-    inline SkinImage *getMenuBack2() { return this->menuBackImg; }
+    [[nodiscard]] inline Image *getButtonLeft() const { return this->buttonLeft; }
+    [[nodiscard]] inline Image *getButtonMiddle() const { return this->buttonMiddle; }
+    [[nodiscard]] inline Image *getButtonRight() const { return this->buttonRight; }
+    [[nodiscard]] inline Image *getDefaultButtonLeft() const { return this->defaultButtonLeft; }
+    [[nodiscard]] inline Image *getDefaultButtonMiddle() const { return this->defaultButtonMiddle; }
+    [[nodiscard]] inline Image *getDefaultButtonRight() const { return this->defaultButtonRight; }
+    [[nodiscard]] inline SkinImage *getMenuBack2() const { return this->menuBackImg; }
 
-    inline Image *getMenuButtonBackground() { return this->menuButtonBackground; }
-    inline SkinImage *getMenuButtonBackground2() { return this->menuButtonBackground2; }
-    inline Image *getStar() { return this->star; }
-    inline Image *getRankingPanel() { return this->rankingPanel; }
-    inline Image *getRankingGraph() { return this->rankingGraph; }
-    inline Image *getRankingTitle() { return this->rankingTitle; }
-    inline Image *getRankingMaxCombo() { return this->rankingMaxCombo; }
-    inline Image *getRankingAccuracy() { return this->rankingAccuracy; }
-    inline Image *getRankingA() { return this->rankingA; }
-    inline Image *getRankingB() { return this->rankingB; }
-    inline Image *getRankingC() { return this->rankingC; }
-    inline Image *getRankingD() { return this->rankingD; }
-    inline Image *getRankingS() { return this->rankingS; }
-    inline Image *getRankingSH() { return this->rankingSH; }
-    inline Image *getRankingX() { return this->rankingX; }
-    inline Image *getRankingXH() { return this->rankingXH; }
-    inline SkinImage *getRankingAsmall() { return this->rankingAsmall; }
-    inline SkinImage *getRankingBsmall() { return this->rankingBsmall; }
-    inline SkinImage *getRankingCsmall() { return this->rankingCsmall; }
-    inline SkinImage *getRankingDsmall() { return this->rankingDsmall; }
-    inline SkinImage *getRankingSsmall() { return this->rankingSsmall; }
-    inline SkinImage *getRankingSHsmall() { return this->rankingSHsmall; }
-    inline SkinImage *getRankingXsmall() { return this->rankingXsmall; }
-    inline SkinImage *getRankingXHsmall() { return this->rankingXHsmall; }
-    inline SkinImage *getRankingPerfect() { return this->rankingPerfect; }
+    [[nodiscard]] inline Image *getMenuButtonBackground() const { return this->menuButtonBackground; }
+    [[nodiscard]] inline SkinImage *getMenuButtonBackground2() const { return this->menuButtonBackground2; }
+    [[nodiscard]] inline Image *getStar() const { return this->star; }
+    [[nodiscard]] inline Image *getRankingPanel() const { return this->rankingPanel; }
+    [[nodiscard]] inline Image *getRankingGraph() const { return this->rankingGraph; }
+    [[nodiscard]] inline Image *getRankingTitle() const { return this->rankingTitle; }
+    [[nodiscard]] inline Image *getRankingMaxCombo() const { return this->rankingMaxCombo; }
+    [[nodiscard]] inline Image *getRankingAccuracy() const { return this->rankingAccuracy; }
+    [[nodiscard]] inline Image *getRankingA() const { return this->rankingA; }
+    [[nodiscard]] inline Image *getRankingB() const { return this->rankingB; }
+    [[nodiscard]] inline Image *getRankingC() const { return this->rankingC; }
+    [[nodiscard]] inline Image *getRankingD() const { return this->rankingD; }
+    [[nodiscard]] inline Image *getRankingS() const { return this->rankingS; }
+    [[nodiscard]] inline Image *getRankingSH() const { return this->rankingSH; }
+    [[nodiscard]] inline Image *getRankingX() const { return this->rankingX; }
+    [[nodiscard]] inline Image *getRankingXH() const { return this->rankingXH; }
+    [[nodiscard]] inline SkinImage *getRankingAsmall() const { return this->rankingAsmall; }
+    [[nodiscard]] inline SkinImage *getRankingBsmall() const { return this->rankingBsmall; }
+    [[nodiscard]] inline SkinImage *getRankingCsmall() const { return this->rankingCsmall; }
+    [[nodiscard]] inline SkinImage *getRankingDsmall() const { return this->rankingDsmall; }
+    [[nodiscard]] inline SkinImage *getRankingSsmall() const { return this->rankingSsmall; }
+    [[nodiscard]] inline SkinImage *getRankingSHsmall() const { return this->rankingSHsmall; }
+    [[nodiscard]] inline SkinImage *getRankingXsmall() const { return this->rankingXsmall; }
+    [[nodiscard]] inline SkinImage *getRankingXHsmall() const { return this->rankingXHsmall; }
+    [[nodiscard]] inline SkinImage *getRankingPerfect() const { return this->rankingPerfect; }
 
-    inline Image *getBeatmapImportSpinner() { return this->beatmapImportSpinner; }
-    inline Image *getLoadingSpinner() { return this->loadingSpinner; }
-    inline Image *getCircleEmpty() { return this->circleEmpty; }
-    inline Image *getCircleFull() { return this->circleFull; }
-    inline Image *getSeekTriangle() { return this->seekTriangle; }
-    inline Image *getUserIcon() { return this->userIcon; }
-    inline Image *getBackgroundCube() { return this->backgroundCube; }
-    inline Image *getMenuBackground() { return this->menuBackground; }
-    inline Image *getSkybox() { return this->skybox; }
+    [[nodiscard]] inline Image *getBeatmapImportSpinner() const { return this->beatmapImportSpinner; }
+    [[nodiscard]] inline Image *getLoadingSpinner() const { return this->loadingSpinner; }
+    [[nodiscard]] inline Image *getCircleEmpty() const { return this->circleEmpty; }
+    [[nodiscard]] inline Image *getCircleFull() const { return this->circleFull; }
+    [[nodiscard]] inline Image *getSeekTriangle() const { return this->seekTriangle; }
+    [[nodiscard]] inline Image *getUserIcon() const { return this->userIcon; }
+    [[nodiscard]] inline Image *getBackgroundCube() const { return this->backgroundCube; }
+    [[nodiscard]] inline Image *getMenuBackground() const { return this->menuBackground; }
+    [[nodiscard]] inline Image *getSkybox() const { return this->skybox; }
 
-    inline Sound *getSpinnerBonus() { return this->spinnerBonus; }
-    inline Sound *getSpinnerSpinSound() { return this->spinnerSpinSound; }
+    [[nodiscard]] Sound *getSpinnerBonus() const;
+    [[nodiscard]] Sound *getSpinnerSpinSound() const;
+    [[nodiscard]] Sound *getCombobreak() const;
+    [[nodiscard]] Sound *getFailsound() const;
+    [[nodiscard]] Sound *getApplause() const;
+    [[nodiscard]] Sound *getMenuHit() const;
+    [[nodiscard]] Sound *getMenuHover() const;
+    [[nodiscard]] Sound *getCheckOn() const;
+    [[nodiscard]] Sound *getCheckOff() const;
+    [[nodiscard]] Sound *getShutter() const;
+    [[nodiscard]] Sound *getSectionPassSound() const;
+    [[nodiscard]] Sound *getSectionFailSound() const;
+    [[nodiscard]] Sound *getExpandSound() const;
+    [[nodiscard]] Sound *getMessageSentSound() const;
+    [[nodiscard]] Sound *getDeletingTextSound() const;
+    [[nodiscard]] Sound *getMovingTextCursorSound() const;
+    [[nodiscard]] Sound *getTyping1Sound() const;
+    [[nodiscard]] Sound *getTyping2Sound() const;
+    [[nodiscard]] Sound *getTyping3Sound() const;
+    [[nodiscard]] Sound *getTyping4Sound() const;
+    [[nodiscard]] Sound *getMenuBackSound() const;
+    [[nodiscard]] Sound *getCloseChatTabSound() const;
+    [[nodiscard]] Sound *getHoverButtonSound() const;
+    [[nodiscard]] Sound *getClickButtonSound() const;
+    [[nodiscard]] Sound *getClickMainMenuCubeSound() const;
+    [[nodiscard]] Sound *getHoverMainMenuCubeSound() const;
+    [[nodiscard]] Sound *getClickSingleplayerSound() const;
+    [[nodiscard]] Sound *getHoverSingleplayerSound() const;
+    [[nodiscard]] Sound *getClickMultiplayerSound() const;
+    [[nodiscard]] Sound *getHoverMultiplayerSound() const;
+    [[nodiscard]] Sound *getClickOptionsSound() const;
+    [[nodiscard]] Sound *getHoverOptionsSound() const;
+    [[nodiscard]] Sound *getClickExitSound() const;
+    [[nodiscard]] Sound *getHoverExitSound() const;
+    [[nodiscard]] Sound *getPauseLoopSound() const;
+    [[nodiscard]] Sound *getPauseHoverSound() const;
+    [[nodiscard]] Sound *getClickPauseBackSound() const;
+    [[nodiscard]] Sound *getHoverPauseBackSound() const;
+    [[nodiscard]] Sound *getClickPauseContinueSound() const;
+    [[nodiscard]] Sound *getHoverPauseContinueSound() const;
+    [[nodiscard]] Sound *getClickPauseRetrySound() const;
+    [[nodiscard]] Sound *getHoverPauseRetrySound() const;
+    [[nodiscard]] Sound *getBackButtonClickSound() const;
+    [[nodiscard]] Sound *getBackButtonHoverSound() const;
+    [[nodiscard]] Sound *getSelectDifficultySound() const;
+    [[nodiscard]] Sound *getSliderbarSound() const;
+    [[nodiscard]] Sound *getMatchConfirmSound() const;
+    [[nodiscard]] Sound *getRoomJoinedSound() const;
+    [[nodiscard]] Sound *getRoomQuitSound() const;
+    [[nodiscard]] Sound *getRoomNotReadySound() const;
+    [[nodiscard]] Sound *getRoomReadySound() const;
+    [[nodiscard]] Sound *getMatchStartSound() const;
 
-    inline Sound *getCombobreak() { return this->combobreak; }
-    inline Sound *getFailsound() { return this->failsound; }
-    inline Sound *getApplause() { return this->applause; }
-    inline Sound *getMenuHit() { return this->menuHit; }
-    inline Sound *getMenuHover() { return this->menuHover; }
-    inline Sound *getCheckOn() { return this->checkOn; }
-    inline Sound *getCheckOff() { return this->checkOff; }
-    inline Sound *getShutter() { return this->shutter; }
-    inline Sound *getSectionPassSound() { return this->sectionPassSound; }
-    inline Sound *getSectionFailSound() { return this->sectionFailSound; }
+    [[nodiscard]] inline bool isCursor2x() const { return this->bCursor2x; }
+    [[nodiscard]] inline bool isCursorTrail2x() const { return this->bCursorTrail2x; }
+    [[nodiscard]] inline bool isCursorRipple2x() const { return this->bCursorRipple2x; }
+    [[nodiscard]] inline bool isCursorSmoke2x() const { return this->bCursorSmoke2x; }
+    [[nodiscard]] inline bool isApproachCircle2x() const { return this->bApproachCircle2x; }
+    [[nodiscard]] inline bool isReverseArrow2x() const { return this->bReverseArrow2x; }
+    [[nodiscard]] inline bool isHitCircle2x() const { return this->bHitCircle2x; }
+    [[nodiscard]] inline bool isDefault02x() const { return this->bIsDefault02x; }
+    [[nodiscard]] inline bool isDefault12x() const { return this->bIsDefault12x; }
+    [[nodiscard]] inline bool isScore02x() const { return this->bIsScore02x; }
+    [[nodiscard]] inline bool isCombo02x() const { return this->bIsCombo02x; }
+    [[nodiscard]] inline bool isSpinnerApproachCircle2x() const { return this->bSpinnerApproachCircle2x; }
+    [[nodiscard]] inline bool isSpinnerBottom2x() const { return this->bSpinnerBottom2x; }
+    [[nodiscard]] inline bool isSpinnerCircle2x() const { return this->bSpinnerCircle2x; }
+    [[nodiscard]] inline bool isSpinnerTop2x() const { return this->bSpinnerTop2x; }
+    [[nodiscard]] inline bool isSpinnerMiddle2x() const { return this->bSpinnerMiddle2x; }
+    [[nodiscard]] inline bool isSpinnerMiddle22x() const { return this->bSpinnerMiddle22x; }
+    [[nodiscard]] inline bool isSliderScorePoint2x() const { return this->bSliderScorePoint2x; }
+    [[nodiscard]] inline bool isSliderStartCircle2x() const { return this->bSliderStartCircle2x; }
+    [[nodiscard]] inline bool isSliderEndCircle2x() const { return this->bSliderEndCircle2x; }
 
-    inline bool isCursor2x() { return this->bCursor2x; }
-    inline bool isCursorTrail2x() { return this->bCursorTrail2x; }
-    inline bool isCursorRipple2x() { return this->bCursorRipple2x; }
-    inline bool isCursorSmoke2x() { return this->bCursorSmoke2x; }
-    inline bool isApproachCircle2x() { return this->bApproachCircle2x; }
-    inline bool isReverseArrow2x() { return this->bReverseArrow2x; }
-    inline bool isHitCircle2x() { return this->bHitCircle2x; }
-    inline bool isDefault02x() { return this->bIsDefault02x; }
-    inline bool isDefault12x() { return this->bIsDefault12x; }
-    inline bool isScore02x() { return this->bIsScore02x; }
-    inline bool isCombo02x() { return this->bIsCombo02x; }
-    inline bool isSpinnerApproachCircle2x() { return this->bSpinnerApproachCircle2x; }
-    inline bool isSpinnerBottom2x() { return this->bSpinnerBottom2x; }
-    inline bool isSpinnerCircle2x() { return this->bSpinnerCircle2x; }
-    inline bool isSpinnerTop2x() { return this->bSpinnerTop2x; }
-    inline bool isSpinnerMiddle2x() { return this->bSpinnerMiddle2x; }
-    inline bool isSpinnerMiddle22x() { return this->bSpinnerMiddle22x; }
-    inline bool isSliderScorePoint2x() { return this->bSliderScorePoint2x; }
-    inline bool isSliderStartCircle2x() { return this->bSliderStartCircle2x; }
-    inline bool isSliderEndCircle2x() { return this->bSliderEndCircle2x; }
+    [[nodiscard]] inline bool isCircularmetre2x() const { return this->bCircularmetre2x; }
 
-    inline bool isCircularmetre2x() { return this->bCircularmetre2x; }
+    [[nodiscard]] inline bool isPauseContinue2x() const { return this->bPauseContinue2x; }
 
-    inline bool isPauseContinue2x() { return this->bPauseContinue2x; }
-
-    inline bool isMenuButtonBackground2x() { return this->bMenuButtonBackground2x; }
-    inline bool isStar2x() { return this->bStar2x; }
-    inline bool isRankingPanel2x() { return this->bRankingPanel2x; }
-    inline bool isRankingMaxCombo2x() { return this->bRankingMaxCombo2x; }
-    inline bool isRankingAccuracy2x() { return this->bRankingAccuracy2x; }
-    inline bool isRankingA2x() { return this->bRankingA2x; }
-    inline bool isRankingB2x() { return this->bRankingB2x; }
-    inline bool isRankingC2x() { return this->bRankingC2x; }
-    inline bool isRankingD2x() { return this->bRankingD2x; }
-    inline bool isRankingS2x() { return this->bRankingS2x; }
-    inline bool isRankingSH2x() { return this->bRankingSH2x; }
-    inline bool isRankingX2x() { return this->bRankingX2x; }
-    inline bool isRankingXH2x() { return this->bRankingXH2x; }
+    [[nodiscard]] inline bool isMenuButtonBackground2x() const { return this->bMenuButtonBackground2x; }
+    [[nodiscard]] inline bool isStar2x() const { return this->bStar2x; }
+    [[nodiscard]] inline bool isRankingPanel2x() const { return this->bRankingPanel2x; }
+    [[nodiscard]] inline bool isRankingMaxCombo2x() const { return this->bRankingMaxCombo2x; }
+    [[nodiscard]] inline bool isRankingAccuracy2x() const { return this->bRankingAccuracy2x; }
+    [[nodiscard]] inline bool isRankingA2x() const { return this->bRankingA2x; }
+    [[nodiscard]] inline bool isRankingB2x() const { return this->bRankingB2x; }
+    [[nodiscard]] inline bool isRankingC2x() const { return this->bRankingC2x; }
+    [[nodiscard]] inline bool isRankingD2x() const { return this->bRankingD2x; }
+    [[nodiscard]] inline bool isRankingS2x() const { return this->bRankingS2x; }
+    [[nodiscard]] inline bool isRankingSH2x() const { return this->bRankingSH2x; }
+    [[nodiscard]] inline bool isRankingX2x() const { return this->bRankingX2x; }
+    [[nodiscard]] inline bool isRankingXH2x() const { return this->bRankingXH2x; }
 
     // skin.ini
-    inline float getVersion() { return this->fVersion; }
-    inline float getAnimationFramerate() { return this->fAnimationFramerate; }
+    [[nodiscard]] inline float getVersion() const { return this->fVersion; }
+    [[nodiscard]] inline float getAnimationFramerate() const { return this->fAnimationFramerate; }
     Color getComboColorForCounter(int i, int offset);
     void setBeatmapComboColors(std::vector<Color> colors);
-    inline Color getSpinnerApproachCircleColor() { return this->spinnerApproachCircleColor; }
-    inline Color getSliderBorderColor() { return this->sliderBorderColor; }
-    inline Color getSliderTrackOverride() { return this->sliderTrackOverride; }
-    inline Color getSliderBallColor() { return this->sliderBallColor; }
+    [[nodiscard]] inline Color getSpinnerApproachCircleColor() const { return this->spinnerApproachCircleColor; }
+    [[nodiscard]] inline Color getSliderBorderColor() const { return this->sliderBorderColor; }
+    [[nodiscard]] inline Color getSliderTrackOverride() const { return this->sliderTrackOverride; }
+    [[nodiscard]] inline Color getSliderBallColor() const { return this->sliderBallColor; }
 
-    inline Color getSongSelectActiveText() { return this->songSelectActiveText; }
-    inline Color getSongSelectInactiveText() { return this->songSelectInactiveText; }
+    [[nodiscard]] inline Color getSongSelectActiveText() const { return this->songSelectActiveText; }
+    [[nodiscard]] inline Color getSongSelectInactiveText() const { return this->songSelectInactiveText; }
 
-    inline Color getInputOverlayText() { return this->inputOverlayText; }
+    [[nodiscard]] inline Color getInputOverlayText() const { return this->inputOverlayText; }
 
-    inline bool getCursorCenter() { return this->bCursorCenter; }
-    inline bool getCursorRotate() { return this->bCursorRotate; }
-    inline bool getCursorExpand() { return this->bCursorExpand; }
+    [[nodiscard]] inline bool getCursorCenter() const { return this->bCursorCenter; }
+    [[nodiscard]] inline bool getCursorRotate() const { return this->bCursorRotate; }
+    [[nodiscard]] inline bool getCursorExpand() const { return this->bCursorExpand; }
 
-    inline bool getSliderBallFlip() { return this->bSliderBallFlip; }
-    inline bool getAllowSliderBallTint() { return this->bAllowSliderBallTint; }
-    inline int getSliderStyle() { return this->iSliderStyle; }
-    inline bool getHitCircleOverlayAboveNumber() { return this->bHitCircleOverlayAboveNumber; }
-    inline bool isSliderTrackOverridden() { return this->bSliderTrackOverride; }
+    [[nodiscard]] inline bool getSliderBallFlip() const { return this->bSliderBallFlip; }
+    [[nodiscard]] inline bool getAllowSliderBallTint() const { return this->bAllowSliderBallTint; }
+    [[nodiscard]] inline int getSliderStyle() const { return this->iSliderStyle; }
+    [[nodiscard]] inline bool getHitCircleOverlayAboveNumber() const { return this->bHitCircleOverlayAboveNumber; }
+    [[nodiscard]] inline bool isSliderTrackOverridden() const { return this->bSliderTrackOverride; }
 
-    inline std::string getComboPrefix() { return this->sComboPrefix; }
-    inline int getComboOverlap() { return this->iComboOverlap; }
+    [[nodiscard]] inline std::string getComboPrefix() const { return this->sComboPrefix; }
+    [[nodiscard]] inline int getComboOverlap() const { return this->iComboOverlap; }
 
-    inline std::string getScorePrefix() { return this->sScorePrefix; }
-    inline int getScoreOverlap() { return this->iScoreOverlap; }
+    [[nodiscard]] inline std::string getScorePrefix() const { return this->sScorePrefix; }
+    [[nodiscard]] inline int getScoreOverlap() const { return this->iScoreOverlap; }
 
-    inline std::string getHitCirclePrefix() { return this->sHitCirclePrefix; }
-    inline int getHitCircleOverlap() { return this->iHitCircleOverlap; }
+    [[nodiscard]] inline std::string getHitCirclePrefix() const { return this->sHitCirclePrefix; }
+    [[nodiscard]] inline int getHitCircleOverlap() const { return this->iHitCircleOverlap; }
 
     // custom
-    [[nodiscard]] inline bool useSmoothCursorTrail() const { return this->cursorMiddle != m_missingTexture; }
+    [[nodiscard]] inline bool useSmoothCursorTrail() const { return this->cursorMiddle != MISSING_TEXTURE; }
     [[nodiscard]] inline bool isDefaultSkin() const { return this->bIsDefaultSkin; }
     [[nodiscard]] inline int getSampleSet() const { return this->iSampleSet; }
-
-    static Image *m_missingTexture;
 
     struct SOUND_SAMPLE {
         Sound *sound;
@@ -335,16 +376,16 @@ class Skin {
                         bool ignoreDefaultSkin = false, const std::string &fileExtension = "png",
                         bool forceLoadMipmaps = false);
 
-    void checkLoadSound(Sound **addressOfPointer, const std::string &skinElementName, std::string resourceName,
-                        bool isOverlayable = false, bool isSample = false, bool loop = false,
-                        bool fallback_to_default = true, float hardcodedVolumeMultiplier = -1.0f);
+    void loadSound(Sound *&sndRef, const std::string &skinElementName, std::string resourceName,
+                   bool isOverlayable = false, bool isSample = false, bool loop = false,
+                   bool fallback_to_default = true, float hardcodedVolumeMultiplier = -1.0f);
 
     void onEffectVolumeChange(const UString &oldValue, const UString &newValue);
     void onIgnoreBeatmapSampleVolumeChange();
 
-    bool bReady;
+    bool bReady{false};
     bool bIsDefaultSkin;
-    f32 animationSpeedMultiplier = 1.f;
+    f32 animationSpeedMultiplier{1.f};
     std::string sName;
     std::string sFilePath;
     std::string sSkinIniFilePath;
@@ -354,307 +395,194 @@ class Skin {
     std::vector<SkinImage *> images;
 
     // images
-    Image *hitCircle;
-    SkinImage *hitCircleOverlay2;
-    Image *approachCircle;
-    Image *reverseArrow;
-    SkinImage *followPoint2;
+    Image *hitCircle{MISSING_TEXTURE};
+    SkinImage *hitCircleOverlay2{nullptr};
+    Image *approachCircle{MISSING_TEXTURE};
+    Image *reverseArrow{MISSING_TEXTURE};
+    SkinImage *followPoint2{nullptr};
 
-    Image *default0;
-    Image *default1;
-    Image *default2;
-    Image *default3;
-    Image *default4;
-    Image *default5;
-    Image *default6;
-    Image *default7;
-    Image *default8;
-    Image *default9;
+    Image *default0{MISSING_TEXTURE};
+    Image *default1{MISSING_TEXTURE};
+    Image *default2{MISSING_TEXTURE};
+    Image *default3{MISSING_TEXTURE};
+    Image *default4{MISSING_TEXTURE};
+    Image *default5{MISSING_TEXTURE};
+    Image *default6{MISSING_TEXTURE};
+    Image *default7{MISSING_TEXTURE};
+    Image *default8{MISSING_TEXTURE};
+    Image *default9{MISSING_TEXTURE};
 
-    Image *score0;
-    Image *score1;
-    Image *score2;
-    Image *score3;
-    Image *score4;
-    Image *score5;
-    Image *score6;
-    Image *score7;
-    Image *score8;
-    Image *score9;
-    Image *scoreX;
-    Image *scorePercent;
-    Image *scoreDot;
+    Image *score0{MISSING_TEXTURE};
+    Image *score1{MISSING_TEXTURE};
+    Image *score2{MISSING_TEXTURE};
+    Image *score3{MISSING_TEXTURE};
+    Image *score4{MISSING_TEXTURE};
+    Image *score5{MISSING_TEXTURE};
+    Image *score6{MISSING_TEXTURE};
+    Image *score7{MISSING_TEXTURE};
+    Image *score8{MISSING_TEXTURE};
+    Image *score9{MISSING_TEXTURE};
+    Image *scoreX{MISSING_TEXTURE};
+    Image *scorePercent{MISSING_TEXTURE};
+    Image *scoreDot{MISSING_TEXTURE};
 
-    Image *combo0;
-    Image *combo1;
-    Image *combo2;
-    Image *combo3;
-    Image *combo4;
-    Image *combo5;
-    Image *combo6;
-    Image *combo7;
-    Image *combo8;
-    Image *combo9;
-    Image *comboX;
+    Image *combo0{MISSING_TEXTURE};
+    Image *combo1{MISSING_TEXTURE};
+    Image *combo2{MISSING_TEXTURE};
+    Image *combo3{MISSING_TEXTURE};
+    Image *combo4{MISSING_TEXTURE};
+    Image *combo5{MISSING_TEXTURE};
+    Image *combo6{MISSING_TEXTURE};
+    Image *combo7{MISSING_TEXTURE};
+    Image *combo8{MISSING_TEXTURE};
+    Image *combo9{MISSING_TEXTURE};
+    Image *comboX{MISSING_TEXTURE};
 
-    SkinImage *playSkip;
-    Image *playWarningArrow;
-    SkinImage *playWarningArrow2;
-    Image *circularmetre;
-    SkinImage *scorebarBg;
-    SkinImage *scorebarColour;
-    SkinImage *scorebarMarker;
-    SkinImage *scorebarKi;
-    SkinImage *scorebarKiDanger;
-    SkinImage *scorebarKiDanger2;
-    SkinImage *sectionPassImage;
-    SkinImage *sectionFailImage;
-    SkinImage *inputoverlayBackground;
-    SkinImage *inputoverlayKey;
+    SkinImage *playSkip{nullptr};
+    Image *playWarningArrow{MISSING_TEXTURE};
+    SkinImage *playWarningArrow2{nullptr};
+    Image *circularmetre{MISSING_TEXTURE};
+    SkinImage *scorebarBg{nullptr};
+    SkinImage *scorebarColour{nullptr};
+    SkinImage *scorebarMarker{nullptr};
+    SkinImage *scorebarKi{nullptr};
+    SkinImage *scorebarKiDanger{nullptr};
+    SkinImage *scorebarKiDanger2{nullptr};
+    SkinImage *sectionPassImage{nullptr};
+    SkinImage *sectionFailImage{nullptr};
+    SkinImage *inputoverlayBackground{nullptr};
+    SkinImage *inputoverlayKey{nullptr};
 
-    SkinImage *hit0;
-    SkinImage *hit50;
-    SkinImage *hit50g;
-    SkinImage *hit50k;
-    SkinImage *hit100;
-    SkinImage *hit100g;
-    SkinImage *hit100k;
-    SkinImage *hit300;
-    SkinImage *hit300g;
-    SkinImage *hit300k;
+    SkinImage *hit0{nullptr};
+    SkinImage *hit50{nullptr};
+    SkinImage *hit50g{nullptr};
+    SkinImage *hit50k{nullptr};
+    SkinImage *hit100{nullptr};
+    SkinImage *hit100g{nullptr};
+    SkinImage *hit100k{nullptr};
+    SkinImage *hit300{nullptr};
+    SkinImage *hit300g{nullptr};
+    SkinImage *hit300k{nullptr};
 
-    Image *particle50;
-    Image *particle100;
-    Image *particle300;
+    Image *particle50{MISSING_TEXTURE};
+    Image *particle100{MISSING_TEXTURE};
+    Image *particle300{MISSING_TEXTURE};
 
-    Image *sliderGradient;
-    SkinImage *sliderb;
-    SkinImage *sliderFollowCircle2;
-    Image *sliderScorePoint;
-    Image *sliderStartCircle;
-    SkinImage *sliderStartCircle2;
-    Image *sliderStartCircleOverlay;
-    SkinImage *sliderStartCircleOverlay2;
-    Image *sliderEndCircle;
-    SkinImage *sliderEndCircle2;
-    Image *sliderEndCircleOverlay;
-    SkinImage *sliderEndCircleOverlay2;
+    Image *sliderGradient{MISSING_TEXTURE};
+    SkinImage *sliderb{nullptr};
+    SkinImage *sliderFollowCircle2{nullptr};
+    Image *sliderScorePoint{MISSING_TEXTURE};
+    Image *sliderStartCircle{MISSING_TEXTURE};
+    SkinImage *sliderStartCircle2{nullptr};
+    Image *sliderStartCircleOverlay{MISSING_TEXTURE};
+    SkinImage *sliderStartCircleOverlay2{nullptr};
+    Image *sliderEndCircle{MISSING_TEXTURE};
+    SkinImage *sliderEndCircle2{nullptr};
+    Image *sliderEndCircleOverlay{MISSING_TEXTURE};
+    SkinImage *sliderEndCircleOverlay2{nullptr};
 
-    Image *spinnerBackground;
-    Image *spinnerCircle;
-    Image *spinnerApproachCircle;
-    Image *spinnerBottom;
-    Image *spinnerMiddle;
-    Image *spinnerMiddle2;
-    Image *spinnerTop;
-    Image *spinnerSpin;
-    Image *spinnerClear;
+    Image *spinnerBackground{MISSING_TEXTURE};
+    Image *spinnerCircle{MISSING_TEXTURE};
+    Image *spinnerApproachCircle{MISSING_TEXTURE};
+    Image *spinnerBottom{MISSING_TEXTURE};
+    Image *spinnerMiddle{MISSING_TEXTURE};
+    Image *spinnerMiddle2{MISSING_TEXTURE};
+    Image *spinnerTop{MISSING_TEXTURE};
+    Image *spinnerSpin{MISSING_TEXTURE};
+    Image *spinnerClear{MISSING_TEXTURE};
 
-    Image *defaultCursor;
-    Image *cursor;
-    Image *cursorMiddle;
-    Image *cursorTrail;
-    Image *cursorRipple;
-    Image *cursorSmoke;
+    Image *defaultCursor{MISSING_TEXTURE};
+    Image *cursor{MISSING_TEXTURE};
+    Image *cursorMiddle{MISSING_TEXTURE};
+    Image *cursorTrail{MISSING_TEXTURE};
+    Image *cursorRipple{MISSING_TEXTURE};
+    Image *cursorSmoke{MISSING_TEXTURE};
 
-    SkinImage *selectionModEasy;
-    SkinImage *selectionModNoFail;
-    SkinImage *selectionModHalfTime;
-    SkinImage *selectionModDayCore;
-    SkinImage *selectionModHardRock;
-    SkinImage *selectionModSuddenDeath;
-    SkinImage *selectionModPerfect;
-    SkinImage *selectionModDoubleTime;
-    SkinImage *selectionModNightCore;
-    SkinImage *selectionModHidden;
-    SkinImage *selectionModFlashlight;
-    SkinImage *selectionModRelax;
-    SkinImage *selectionModAutopilot;
-    SkinImage *selectionModSpunOut;
-    SkinImage *selectionModAutoplay;
-    SkinImage *selectionModNightmare;
-    SkinImage *selectionModTarget;
-    SkinImage *selectionModScorev2;
-    SkinImage *selectionModTD;
-    SkinImage *selectionModCinema;
+    SkinImage *selectionModEasy{nullptr};
+    SkinImage *selectionModNoFail{nullptr};
+    SkinImage *selectionModHalfTime{nullptr};
+    SkinImage *selectionModDayCore{nullptr};
+    SkinImage *selectionModHardRock{nullptr};
+    SkinImage *selectionModSuddenDeath{nullptr};
+    SkinImage *selectionModPerfect{nullptr};
+    SkinImage *selectionModDoubleTime{nullptr};
+    SkinImage *selectionModNightCore{nullptr};
+    SkinImage *selectionModHidden{nullptr};
+    SkinImage *selectionModFlashlight{nullptr};
+    SkinImage *selectionModRelax{nullptr};
+    SkinImage *selectionModAutopilot{nullptr};
+    SkinImage *selectionModSpunOut{nullptr};
+    SkinImage *selectionModAutoplay{nullptr};
+    SkinImage *selectionModNightmare{nullptr};
+    SkinImage *selectionModTarget{nullptr};
+    SkinImage *selectionModScorev2{nullptr};
+    SkinImage *selectionModTD{nullptr};
+    SkinImage *selectionModCinema{nullptr};
 
-    SkinImage *mode_osu;
-    SkinImage *mode_osu_small;
+    SkinImage *mode_osu{nullptr};
+    SkinImage *mode_osu_small{nullptr};
 
-    Image *pauseContinue;
-    Image *pauseReplay;
-    Image *pauseRetry;
-    Image *pauseBack;
-    Image *pauseOverlay;
-    Image *failBackground;
-    Image *unpause;
+    Image *pauseContinue{MISSING_TEXTURE};
+    Image *pauseReplay{MISSING_TEXTURE};
+    Image *pauseRetry{MISSING_TEXTURE};
+    Image *pauseBack{MISSING_TEXTURE};
+    Image *pauseOverlay{MISSING_TEXTURE};
+    Image *failBackground{MISSING_TEXTURE};
+    Image *unpause{MISSING_TEXTURE};
 
-    Image *buttonLeft;
-    Image *buttonMiddle;
-    Image *buttonRight;
-    Image *defaultButtonLeft;
-    Image *defaultButtonMiddle;
-    Image *defaultButtonRight;
-    SkinImage *menuBackImg;
-    SkinImage *selectionMode;
-    SkinImage *selectionModeOver;
-    SkinImage *selectionMods;
-    SkinImage *selectionModsOver;
-    SkinImage *selectionRandom;
-    SkinImage *selectionRandomOver;
-    SkinImage *selectionOptions;
-    SkinImage *selectionOptionsOver;
+    Image *buttonLeft{MISSING_TEXTURE};
+    Image *buttonMiddle{MISSING_TEXTURE};
+    Image *buttonRight{MISSING_TEXTURE};
+    Image *defaultButtonLeft{MISSING_TEXTURE};
+    Image *defaultButtonMiddle{MISSING_TEXTURE};
+    Image *defaultButtonRight{MISSING_TEXTURE};
+    SkinImage *menuBackImg{nullptr};
+    SkinImage *selectionMode{nullptr};
+    SkinImage *selectionModeOver{nullptr};
+    SkinImage *selectionMods{nullptr};
+    SkinImage *selectionModsOver{nullptr};
+    SkinImage *selectionRandom{nullptr};
+    SkinImage *selectionRandomOver{nullptr};
+    SkinImage *selectionOptions{nullptr};
+    SkinImage *selectionOptionsOver{nullptr};
 
-    Image *songSelectTop;
-    Image *songSelectBottom;
-    Image *menuButtonBackground;
-    SkinImage *menuButtonBackground2;
-    Image *star;
-    Image *rankingPanel;
-    Image *rankingGraph;
-    Image *rankingTitle;
-    Image *rankingMaxCombo;
-    Image *rankingAccuracy;
-    Image *rankingA;
-    Image *rankingB;
-    Image *rankingC;
-    Image *rankingD;
-    Image *rankingS;
-    Image *rankingSH;
-    Image *rankingX;
-    Image *rankingXH;
-    SkinImage *rankingAsmall;
-    SkinImage *rankingBsmall;
-    SkinImage *rankingCsmall;
-    SkinImage *rankingDsmall;
-    SkinImage *rankingSsmall;
-    SkinImage *rankingSHsmall;
-    SkinImage *rankingXsmall;
-    SkinImage *rankingXHsmall;
-    SkinImage *rankingPerfect;
+    Image *songSelectTop{MISSING_TEXTURE};
+    Image *songSelectBottom{MISSING_TEXTURE};
+    Image *menuButtonBackground{MISSING_TEXTURE};
+    SkinImage *menuButtonBackground2{nullptr};
+    Image *star{MISSING_TEXTURE};
+    Image *rankingPanel{MISSING_TEXTURE};
+    Image *rankingGraph{MISSING_TEXTURE};
+    Image *rankingTitle{MISSING_TEXTURE};
+    Image *rankingMaxCombo{MISSING_TEXTURE};
+    Image *rankingAccuracy{MISSING_TEXTURE};
+    Image *rankingA{MISSING_TEXTURE};
+    Image *rankingB{MISSING_TEXTURE};
+    Image *rankingC{MISSING_TEXTURE};
+    Image *rankingD{MISSING_TEXTURE};
+    Image *rankingS{MISSING_TEXTURE};
+    Image *rankingSH{MISSING_TEXTURE};
+    Image *rankingX{MISSING_TEXTURE};
+    Image *rankingXH{MISSING_TEXTURE};
+    SkinImage *rankingAsmall{nullptr};
+    SkinImage *rankingBsmall{nullptr};
+    SkinImage *rankingCsmall{nullptr};
+    SkinImage *rankingDsmall{nullptr};
+    SkinImage *rankingSsmall{nullptr};
+    SkinImage *rankingSHsmall{nullptr};
+    SkinImage *rankingXsmall{nullptr};
+    SkinImage *rankingXHsmall{nullptr};
+    SkinImage *rankingPerfect{nullptr};
 
-    Image *beatmapImportSpinner;
-    Image *loadingSpinner;
-    Image *circleEmpty;
-    Image *circleFull;
-    Image *seekTriangle;
-    Image *userIcon;
-    Image *backgroundCube;
-    Image *menuBackground;
-    Image *skybox;
-
-    // sounds
-    Sound *normalHitNormal;
-    Sound *normalHitWhistle;
-    Sound *normalHitFinish;
-    Sound *normalHitClap;
-
-    Sound *normalSliderTick;
-    Sound *normalSliderSlide;
-    Sound *normalSliderWhistle;
-
-    Sound *softHitNormal;
-    Sound *softHitWhistle;
-    Sound *softHitFinish;
-    Sound *softHitClap;
-
-    Sound *softSliderTick;
-    Sound *softSliderSlide;
-    Sound *softSliderWhistle;
-
-    Sound *drumHitNormal;
-    Sound *drumHitWhistle;
-    Sound *drumHitFinish;
-    Sound *drumHitClap;
-
-    Sound *drumSliderTick;
-    Sound *drumSliderSlide;
-    Sound *drumSliderWhistle;
-
-    Sound *spinnerBonus;
-    Sound *spinnerSpinSound;
-
-    // Plays when sending a message in chat
-    Sound *messageSent = nullptr;
-
-    // Plays when deleting text in a message in chat
-    Sound *deletingText = nullptr;
-
-    // Plays when changing the text cursor position
-    Sound *movingTextCursor = nullptr;
-
-    // Plays when pressing a key for chat, search, edit, etc
-    Sound *typing1 = nullptr;
-    Sound *typing2 = nullptr;
-    Sound *typing3 = nullptr;
-    Sound *typing4 = nullptr;
-
-    // Plays when returning to the previous screen
-    Sound *menuBack = nullptr;
-
-    // Plays when closing a chat tab
-    Sound *closeChatTab = nullptr;
-
-    // Plays when hovering above all selectable boxes except beatmaps or main screen buttons
-    Sound *hoverButton = nullptr;
-
-    // Plays when clicking to confirm a button or dropdown option, opening or
-    // closing chat, switching between chat tabs, or switching groups
-    Sound *clickButton = nullptr;
-
-    // Main menu sounds
-    Sound *clickMainMenuCube = nullptr;
-    Sound *hoverMainMenuCube = nullptr;
-    Sound *clickSingleplayer = nullptr;
-    Sound *hoverSingleplayer = nullptr;
-    Sound *clickMultiplayer = nullptr;
-    Sound *hoverMultiplayer = nullptr;
-    Sound *clickOptions = nullptr;
-    Sound *hoverOptions = nullptr;
-    Sound *clickExit = nullptr;
-    Sound *hoverExit = nullptr;
-
-    // Pause menu sounds
-    Sound *pauseLoop = nullptr;
-    Sound *pauseHover = nullptr;
-    Sound *clickPauseBack = nullptr;
-    Sound *hoverPauseBack = nullptr;
-    Sound *clickPauseContinue = nullptr;
-    Sound *hoverPauseContinue = nullptr;
-    Sound *clickPauseRetry = nullptr;
-    Sound *hoverPauseRetry = nullptr;
-
-    // Back button sounds
-    Sound *backButtonClick = nullptr;
-    Sound *backButtonHover = nullptr;
-
-    // Plays when switching into song selection, selecting a beatmap, opening dropdown boxes, opening chat tabs
-    Sound *expand = nullptr;
-
-    // Plays when selecting a difficulty of a beatmap
-    Sound *selectDifficulty = nullptr;
-
-    // Plays when changing the options via a slider
-    Sound *sliderbar = nullptr;
-
-    // Multiplayer sounds
-    Sound *matchConfirm = nullptr;  // all players are ready
-    Sound *roomJoined = nullptr;    // a player joined
-    Sound *roomQuit = nullptr;      // a player left
-    Sound *roomNotReady = nullptr;  // a player is no longer ready
-    Sound *roomReady = nullptr;     // a player is now ready
-    Sound *matchStart = nullptr;    // match started
-
-    Sound *combobreak;
-    Sound *failsound;
-    Sound *applause;
-    Sound *menuHit;
-    Sound *menuHover;
-    Sound *checkOn;
-    Sound *checkOff;
-    Sound *shutter;
-    Sound *sectionPassSound;
-    Sound *sectionFailSound;
+    Image *beatmapImportSpinner{MISSING_TEXTURE};
+    Image *loadingSpinner{MISSING_TEXTURE};
+    Image *circleEmpty{MISSING_TEXTURE};
+    Image *circleFull{MISSING_TEXTURE};
+    Image *seekTriangle{MISSING_TEXTURE};
+    Image *userIcon{MISSING_TEXTURE};
+    Image *backgroundCube{MISSING_TEXTURE};
+    Image *menuBackground{MISSING_TEXTURE};
+    Image *skybox{MISSING_TEXTURE};
 
     // colors
     std::vector<Color> comboColors;
@@ -670,69 +598,69 @@ class Skin {
     Color inputOverlayText;
 
     // scaling
-    bool bCursor2x;
-    bool bCursorTrail2x;
-    bool bCursorRipple2x;
-    bool bCursorSmoke2x;
-    bool bApproachCircle2x;
-    bool bReverseArrow2x;
-    bool bHitCircle2x;
-    bool bIsDefault02x;
-    bool bIsDefault12x;
-    bool bIsScore02x;
-    bool bIsCombo02x;
-    bool bSpinnerApproachCircle2x;
-    bool bSpinnerBottom2x;
-    bool bSpinnerCircle2x;
-    bool bSpinnerTop2x;
-    bool bSpinnerMiddle2x;
-    bool bSpinnerMiddle22x;
-    bool bSliderScorePoint2x;
-    bool bSliderStartCircle2x;
-    bool bSliderEndCircle2x;
+    bool bCursor2x{false};
+    bool bCursorTrail2x{false};
+    bool bCursorRipple2x{false};
+    bool bCursorSmoke2x{false};
+    bool bApproachCircle2x{false};
+    bool bReverseArrow2x{false};
+    bool bHitCircle2x{false};
+    bool bIsDefault02x{false};
+    bool bIsDefault12x{false};
+    bool bIsScore02x{false};
+    bool bIsCombo02x{false};
+    bool bSpinnerApproachCircle2x{false};
+    bool bSpinnerBottom2x{false};
+    bool bSpinnerCircle2x{false};
+    bool bSpinnerTop2x{false};
+    bool bSpinnerMiddle2x{false};
+    bool bSpinnerMiddle22x{false};
+    bool bSliderScorePoint2x{false};
+    bool bSliderStartCircle2x{false};
+    bool bSliderEndCircle2x{false};
 
-    bool bCircularmetre2x;
+    bool bCircularmetre2x{false};
 
-    bool bPauseContinue2x;
+    bool bPauseContinue2x{false};
 
-    bool bMenuButtonBackground2x;
-    bool bStar2x;
-    bool bRankingPanel2x;
-    bool bRankingMaxCombo2x;
-    bool bRankingAccuracy2x;
-    bool bRankingA2x;
-    bool bRankingB2x;
-    bool bRankingC2x;
-    bool bRankingD2x;
-    bool bRankingS2x;
-    bool bRankingSH2x;
-    bool bRankingX2x;
-    bool bRankingXH2x;
+    bool bMenuButtonBackground2x{false};
+    bool bStar2x{false};
+    bool bRankingPanel2x{false};
+    bool bRankingMaxCombo2x{false};
+    bool bRankingAccuracy2x{false};
+    bool bRankingA2x{false};
+    bool bRankingB2x{false};
+    bool bRankingC2x{false};
+    bool bRankingD2x{false};
+    bool bRankingS2x{false};
+    bool bRankingSH2x{false};
+    bool bRankingX2x{false};
+    bool bRankingXH2x{false};
 
     // skin.ini
-    float fVersion;
-    float fAnimationFramerate;
-    bool bCursorCenter;
-    bool bCursorRotate;
-    bool bCursorExpand;
+    float fVersion{1.f};
+    float fAnimationFramerate{0.f};
+    bool bCursorCenter{true};
+    bool bCursorRotate{true};
+    bool bCursorExpand{true};
 
-    bool bSliderBallFlip;
-    bool bAllowSliderBallTint;
-    int iSliderStyle;
-    bool bHitCircleOverlayAboveNumber;
-    bool bSliderTrackOverride;
+    bool bSliderBallFlip{true};
+    bool bAllowSliderBallTint{false};
+    int iSliderStyle{2};
+    bool bHitCircleOverlayAboveNumber{true};
+    bool bSliderTrackOverride{false};
 
     std::string sComboPrefix;
-    int iComboOverlap;
+    int iComboOverlap{0};
 
     std::string sScorePrefix;
-    int iScoreOverlap;
+    int iScoreOverlap{0};
 
     std::string sHitCirclePrefix;
-    int iHitCircleOverlap;
+    int iHitCircleOverlap{0};
 
     // custom
-    int iSampleSet;
+    int iSampleSet{1};
     int iSampleVolume;
 
     std::vector<std::string> filepathsForRandomSkin;
@@ -740,4 +668,118 @@ class Skin {
     bool bIsRandomElements;
 
     std::vector<std::string> filepathsForExport;
+
+   private:
+    // sounds
+    Sound *normalHitNormal{nullptr};
+    Sound *normalHitWhistle{nullptr};
+    Sound *normalHitFinish{nullptr};
+    Sound *normalHitClap{nullptr};
+
+    Sound *normalSliderTick{nullptr};
+    Sound *normalSliderSlide{nullptr};
+    Sound *normalSliderWhistle{nullptr};
+
+    Sound *softHitNormal{nullptr};
+    Sound *softHitWhistle{nullptr};
+    Sound *softHitFinish{nullptr};
+    Sound *softHitClap{nullptr};
+
+    Sound *softSliderTick{nullptr};
+    Sound *softSliderSlide{nullptr};
+    Sound *softSliderWhistle{nullptr};
+
+    Sound *drumHitNormal{nullptr};
+    Sound *drumHitWhistle{nullptr};
+    Sound *drumHitFinish{nullptr};
+    Sound *drumHitClap{nullptr};
+
+    Sound *drumSliderTick{nullptr};
+    Sound *drumSliderSlide{nullptr};
+    Sound *drumSliderWhistle{nullptr};
+
+    Sound *spinnerBonus{nullptr};
+    Sound *spinnerSpinSound{nullptr};
+
+    // Plays when sending a message in chat
+    Sound *messageSent{nullptr};
+
+    // Plays when deleting text in a message in chat
+    Sound *deletingText{nullptr};
+
+    // Plays when changing the text cursor position
+    Sound *movingTextCursor{nullptr};
+
+    // Plays when pressing a key for chat, search, edit, etc
+    Sound *typing1{nullptr};
+    Sound *typing2{nullptr};
+    Sound *typing3{nullptr};
+    Sound *typing4{nullptr};
+
+    // Plays when returning to the previous screen
+    Sound *menuBack{nullptr};
+
+    // Plays when closing a chat tab
+    Sound *closeChatTab{nullptr};
+
+    // Plays when hovering above all selectable boxes except beatmaps or main screen buttons
+    Sound *hoverButton{nullptr};
+
+    // Plays when clicking to confirm a button or dropdown option, opening or
+    // closing chat, switching between chat tabs, or switching groups
+    Sound *clickButton{nullptr};
+
+    // Main menu sounds
+    Sound *clickMainMenuCube{nullptr};
+    Sound *hoverMainMenuCube{nullptr};
+    Sound *clickSingleplayer{nullptr};
+    Sound *hoverSingleplayer{nullptr};
+    Sound *clickMultiplayer{nullptr};
+    Sound *hoverMultiplayer{nullptr};
+    Sound *clickOptions{nullptr};
+    Sound *hoverOptions{nullptr};
+    Sound *clickExit{nullptr};
+    Sound *hoverExit{nullptr};
+
+    // Pause menu sounds
+    Sound *pauseLoop{nullptr};
+    Sound *pauseHover{nullptr};
+    Sound *clickPauseBack{nullptr};
+    Sound *hoverPauseBack{nullptr};
+    Sound *clickPauseContinue{nullptr};
+    Sound *hoverPauseContinue{nullptr};
+    Sound *clickPauseRetry{nullptr};
+    Sound *hoverPauseRetry{nullptr};
+
+    // Back button sounds
+    Sound *backButtonClick{nullptr};
+    Sound *backButtonHover{nullptr};
+
+    // Plays when switching into song selection, selecting a beatmap, opening dropdown boxes, opening chat tabs
+    Sound *expand{nullptr};
+
+    // Plays when selecting a difficulty of a beatmap
+    Sound *selectDifficulty{nullptr};
+
+    // Plays when changing the options via a slider
+    Sound *sliderbar{nullptr};
+
+    // Multiplayer sounds
+    Sound *matchConfirm{nullptr};  // all players are ready
+    Sound *roomJoined{nullptr};    // a player joined
+    Sound *roomQuit{nullptr};      // a player left
+    Sound *roomNotReady{nullptr};  // a player is no longer ready
+    Sound *roomReady{nullptr};     // a player is now ready
+    Sound *matchStart{nullptr};    // match started
+
+    Sound *combobreak{nullptr};
+    Sound *failsound{nullptr};
+    Sound *applause{nullptr};
+    Sound *menuHit{nullptr};
+    Sound *menuHover{nullptr};
+    Sound *checkOn{nullptr};
+    Sound *checkOff{nullptr};
+    Sound *shutter{nullptr};
+    Sound *sectionPassSound{nullptr};
+    Sound *sectionFailSound{nullptr};
 };
