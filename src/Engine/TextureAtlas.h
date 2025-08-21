@@ -24,6 +24,10 @@ class TextureAtlas final : public Resource {
     TextureAtlas(int width = 512, int height = 512);
     ~TextureAtlas() override { destroy(); }
 
+    // resize existing atlas texture and associated image (must be loaded first)
+    // will memset() image to black immediately
+    void resize(int width, int height);
+
     // place pixels at specific coordinates (for use after packing)
     void putAt(int x, int y, int width, int height, bool flipHorizontal, bool flipVertical, Color *pixels);
 

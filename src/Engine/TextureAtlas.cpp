@@ -11,7 +11,22 @@ TextureAtlas::TextureAtlas(int width, int height) : Resource() {
     this->iHeight = height;
 
     resourceManager->requestNextLoadUnmanaged();
-    this->atlasImage = resourceManager->createImage(this->iWidth, this->iHeight);
+    this->atlasImage =
+        resourceManager->createImage(this->iWidth, this->iHeight, false, true /* keep in system memory, for faster reloads */);
+}
+
+void TextureAtlas::resize(int width, int height) {
+    // must be fully loaded
+    assert(this->bReady && "TextureAtlas was not init()");
+    assert(this->atlasImage->isReady() && "atlasImage not ready");
+
+    resourceManager->setResourceName(this, UString::format("_TA_%ix%i", width, height).toUtf8());
+
+    this->iWidth = width;
+    this->iHeight = height;
+
+    this->atlasImage->resize(width, height);
+    return;
 }
 
 void TextureAtlas::init() {

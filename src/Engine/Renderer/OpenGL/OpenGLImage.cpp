@@ -27,8 +27,19 @@ OpenGLImage::OpenGLImage(i32 width, i32 height, bool mipmapped, bool keepInSyste
 }
 
 void OpenGLImage::init() {
-    if((this->GLTexture != 0 && !this->bKeepInSystemMemory) || !(this->bAsyncReady.load()))
-        return;  // only load if we are not already loaded
+    // only load if not:
+    // 1. already uploaded to gpu, and we didn't keep the image in system memory
+    // 2. failed to async load
+    if((this->GLTexture != 0 && !this->bKeepInSystemMemory) || (!this->bAsyncReady.load() && !this->bCreatedImage)) {
+        if(cv::debug_image.getBool()) {
+            debugLog(
+                "we are already loaded, bReady: {} createdImage: {} GLTexture: {} bKeepInSystemMemory: {} bAsyncReady: "
+                "{}\n",
+                this->bReady.load(), this->bCreatedImage, this->GLTexture, this->bKeepInSystemMemory,
+                this->bAsyncReady.load());
+        }
+        return;
+    }
 
     // create texture object
     if(this->GLTexture == 0) {
@@ -92,16 +103,22 @@ void OpenGLImage::initAsync() {
         if(cv::debug_rm.getBool()) debugLog("Resource Manager: Loading {:s}\n", this->sFilePath.c_str());
 
         this->bAsyncReady = loadRawImage();
+    } else {
+        // created image is always async ready
+        this->bAsyncReady = true;
     }
 }
 
 void OpenGLImage::destroy() {
-    if(this->GLTexture != 0) {
-        glDeleteTextures(1, &this->GLTexture);
-        this->GLTexture = 0;
-    }
+    // don't delete the texture if we're keeping it in memory, for reloads
+    if(!this->bKeepInSystemMemory) {
+        if(this->GLTexture != 0) {
+            glDeleteTextures(1, &this->GLTexture);
+            this->GLTexture = 0;
+        }
 
-    this->rawImage.clear();
+        this->rawImage.clear();
+    }
 }
 
 void OpenGLImage::bind(unsigned int textureUnit) {

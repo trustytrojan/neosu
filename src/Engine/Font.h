@@ -27,7 +27,7 @@ class McFont final : public Resource {
     McFont(std::string filepath, int fontSize = 16, bool antialiasing = true, int fontDPI = 96);
     McFont(std::string filepath, const std::vector<wchar_t> &characters, int fontSize = 16, bool antialiasing = true,
            int fontDPI = 96);
-    ~McFont() override { destroy(); }
+    ~McFont() override;
 
     McFont &operator=(const McFont &) = delete;
     McFont &operator=(McFont &&) = delete;
@@ -109,7 +109,7 @@ class McFont final : public Resource {
     bool loadGlyphMetrics(wchar_t ch);
     std::unique_ptr<Color[]> createExpandedBitmapData(const FT_Bitmap &bitmap);
     void renderGlyphToAtlas(wchar_t ch, int x, int y, FT_Face face = nullptr);
-    bool createAndPackAtlas(const std::vector<wchar_t> &glyphs);
+    bool createAndPackAtlas(const std::vector<wchar_t> &glyphs, bool isRebuild);
 
     // fallback font management
     FT_Face getFontFaceForGlyph(wchar_t ch, int &fontIndex);
@@ -144,7 +144,7 @@ class McFont final : public Resource {
     std::vector<vec3> m_vertices;
     std::vector<vec2> m_texcoords;
 
-    TextureAtlas *m_textureAtlas;
+    std::unique_ptr<TextureAtlas> m_textureAtlas{nullptr};
 
     // per-instance freetype resources (only primary font face)
     FT_Face m_ftFace;  // primary font face

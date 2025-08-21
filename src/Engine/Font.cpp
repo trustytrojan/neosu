@@ -69,7 +69,6 @@ void McFont::constructor(const std::vector<wchar_t> &characters, int fontSize, b
     m_iFontSize = fontSize;
     m_bAntialiasing = antialiasing;
     m_iFontDPI = fontDPI;
-    m_textureAtlas = nullptr;
     m_fHeight = 1.0f;
     m_batchActive = false;
     m_batchQueue.totalVerts = 0;
@@ -100,6 +99,8 @@ void McFont::constructor(const std::vector<wchar_t> &characters, int fontSize, b
     }
 }
 
+McFont::~McFont() { destroy(); }
+
 void McFont::init() {
     debugLog("Loading font: {:s}\n", this->sFilePath);
 
@@ -114,7 +115,7 @@ void McFont::init() {
     }
 
     // create atlas and render all glyphs
-    if(!createAndPackAtlas(m_vGlyphs)) return;
+    if(!createAndPackAtlas(m_vGlyphs, false)) return;
 
     // precalculate average/max ASCII glyph height
     m_fHeight = 0.0f;
@@ -140,7 +141,6 @@ void McFont::destroy() {
         m_bFreeTypeInitialized = false;
     }
 
-    SAFE_DELETE(m_textureAtlas);
     m_vGlyphMetrics.clear();
     m_vPendingGlyphs.clear();
     m_fHeight = 1.0f;
@@ -305,11 +305,10 @@ void McFont::rebuildAtlas() {
         }
     }
 
-    // destroy old atlas
-    SAFE_DELETE(m_textureAtlas);
+    // don't destroy atlas, rebuild existing
 
     // create new atlas and render all glyphs
-    if(!createAndPackAtlas(allGlyphs)) {
+    if(!createAndPackAtlas(allGlyphs, true)) {
         debugLog("Font Error: Failed to rebuild atlas!\n");
         return;
     }
@@ -427,7 +426,7 @@ void McFont::renderGlyphToAtlas(wchar_t ch, int x, int y, FT_Face face) {
     FT_Done_Glyph(glyph);
 }
 
-bool McFont::createAndPackAtlas(const std::vector<wchar_t> &glyphs) {
+bool McFont::createAndPackAtlas(const std::vector<wchar_t> &glyphs, bool isRebuild) {
     if(glyphs.empty()) return true;
 
     // prepare packing rectangles
@@ -457,8 +456,14 @@ bool McFont::createAndPackAtlas(const std::vector<wchar_t> &glyphs) {
     const size_t atlasSize =
         TextureAtlas::calculateOptimalSize(packRects, ATLAS_OCCUPANCY_TARGET, MIN_ATLAS_SIZE, MAX_ATLAS_SIZE);
 
-    resourceManager->requestNextLoadUnmanaged();
-    m_textureAtlas = resourceManager->createTextureAtlas(static_cast<int>(atlasSize), static_cast<int>(atlasSize));
+    if(!isRebuild) {  // initial load
+        resourceManager->requestNextLoadUnmanaged();
+        m_textureAtlas.reset(
+            resourceManager->createTextureAtlas(static_cast<int>(atlasSize), static_cast<int>(atlasSize)));
+    } else {  // reload (still need to reupload to gpu after)
+        assert(m_textureAtlas && m_textureAtlas.get() && "TextureAtlas must be created first");
+        m_textureAtlas->resize(static_cast<int>(atlasSize), static_cast<int>(atlasSize));
+    }
 
     // pack glyphs into atlas
     if(!m_textureAtlas->packRects(packRects)) {
@@ -478,10 +483,13 @@ bool McFont::createAndPackAtlas(const std::vector<wchar_t> &glyphs) {
     }
 
     // finalize atlas texture
-    resourceManager->loadResource(m_textureAtlas);
-    m_textureAtlas->getAtlasImage()->setFilterMode(m_bAntialiasing ? Graphics::FILTER_MODE::FILTER_MODE_LINEAR
-                                                                   : Graphics::FILTER_MODE::FILTER_MODE_NONE);
-
+    if(!isRebuild) {  // initial load
+        resourceManager->loadResource(m_textureAtlas.get());
+        m_textureAtlas->getAtlasImage()->setFilterMode(m_bAntialiasing ? Graphics::FILTER_MODE::FILTER_MODE_LINEAR
+                                                                       : Graphics::FILTER_MODE::FILTER_MODE_NONE);
+    } else {  // reload, only the atlas image itself needs to be reuploaded to the GPU
+        m_textureAtlas->getAtlasImage()->reload();
+    }
     return true;
 }
 
