@@ -356,13 +356,13 @@ std::unique_ptr<Channel[]> McFont::unpackMonoBitmap(const FT_Bitmap &bitmap) {
 
     for(u32 y = 0; y < bitmap.rows; y++) {
         for(u32 byteIdx = 0; byteIdx < bitmap.pitch; byteIdx++) {
-            const Channel byteValue = bitmap.buffer[y * bitmap.pitch + byteIdx];
+            const u8 byteValue = bitmap.buffer[y * bitmap.pitch + byteIdx];
             const u32 numBitsDone = byteIdx * 8;
             const u32 rowstart = y * bitmap.width + byteIdx * 8;
 
-            const u32 bits = std::min(8u, bitmap.width - numBitsDone);
-
-            for(u32 bitIdx = 0; bitIdx < bits; bitIdx++) {
+            // why do these have to be 32bit ints exactly... ill look into it later
+            const int bits = std::min(8, static_cast<int>(bitmap.width - numBitsDone));
+            for(int bitIdx = 0; bitIdx < bits; bitIdx++) {
                 result[rowstart + bitIdx] = (byteValue & (1 << (7 - bitIdx))) ? 1 : 0;
             }
         }
