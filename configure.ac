@@ -664,13 +664,15 @@ AC_SUBST([BUNDLED_INCLUDES])
 AC_MSG_CHECKING([for shaders in $srcdir/$ASSETS_DIR/shaders])
 AS_IF([test -f "$srcdir/$ASSETS_DIR/shaders/slider_f.glsl"], [
     AC_MSG_RESULT([yes])
-    ASSEMBLER_INCLUDE_PATHS="$ASSEMBLER_INCLUDE_PATHS -Wa,-I$srcdir/$ASSETS_DIR/shaders"
+    SHADERS_INCDIR="$srcdir/$ASSETS_DIR/shaders/"
+    INCBIN_FLAGS="$INCBIN_FLAGS $SHADERS_INCDIR"
+    AC_SUBST([SHADERS_INCDIR])
 ], [
     AC_MSG_RESULT([no])
     AC_MSG_ERROR([neosu shader resources are missing!])
 ])
 
-AC_SUBST([ASSEMBLER_INCLUDE_PATHS])
+AC_SUBST([INCBIN_FLAGS])
 
 AC_MSG_CHECKING([for fonts in $srcdir/$ASSETS_DIR/fonts])
 AS_IF([test -d "$srcdir/$ASSETS_DIR/fonts"], [

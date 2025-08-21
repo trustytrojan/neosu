@@ -11,9 +11,11 @@ TextureAtlas::TextureAtlas(int width, int height) : Resource() {
     this->iHeight = height;
 
     resourceManager->requestNextLoadUnmanaged();
-    this->atlasImage =
-        resourceManager->createImage(this->iWidth, this->iHeight, false, true /* keep in system memory, for faster reloads */);
+    this->atlasImage.reset(resourceManager->createImage(this->iWidth, this->iHeight, false,
+                                                        true /* keep in system memory, for faster reloads */));
 }
+
+TextureAtlas::~TextureAtlas() { this->destroy(); }
 
 void TextureAtlas::resize(int width, int height) {
     // must be fully loaded
@@ -30,14 +32,14 @@ void TextureAtlas::resize(int width, int height) {
 }
 
 void TextureAtlas::init() {
-    resourceManager->loadResource(this->atlasImage);
+    resourceManager->loadResource(this->atlasImage.get());
 
     this->bReady = true;
 }
 
 void TextureAtlas::initAsync() { this->bAsyncReady = true; }
 
-void TextureAtlas::destroy() { SAFE_DELETE(this->atlasImage); }
+void TextureAtlas::destroy() { this->atlasImage.reset(); }
 
 void TextureAtlas::putAt(int x, int y, int width, int height, bool flipHorizontal, bool flipVertical, Color *pixels) {
     if(width < 1 || height < 1 || pixels == nullptr || this->atlasImage == nullptr) return;

@@ -5,6 +5,7 @@
 
 #include "Resource.h"
 #include <vector>
+#include <memory>
 
 struct Color;
 
@@ -22,7 +23,7 @@ class TextureAtlas final : public Resource {
     };
 
     TextureAtlas(int width = 512, int height = 512);
-    ~TextureAtlas() override { destroy(); }
+    ~TextureAtlas() override;
 
     // resize existing atlas texture and associated image (must be loaded first)
     // will memset() image to black immediately
@@ -40,7 +41,7 @@ class TextureAtlas final : public Resource {
 
     [[nodiscard]] inline int getWidth() const { return this->iWidth; }
     [[nodiscard]] inline int getHeight() const { return this->iHeight; }
-    [[nodiscard]] inline Image *getAtlasImage() const { return this->atlasImage; }
+    [[nodiscard]] inline const std::unique_ptr<Image> &getAtlasImage() const { return this->atlasImage; }
 
     // type inspection
     [[nodiscard]] Type getResType() const final { return TEXTUREATLAS; }
@@ -60,7 +61,7 @@ class TextureAtlas final : public Resource {
     int iWidth;
     int iHeight;
 
-    Image *atlasImage;
+    std::unique_ptr<Image> atlasImage;
 };
 
 #endif

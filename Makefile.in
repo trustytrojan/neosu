@@ -549,14 +549,6 @@ ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AR = @AR@
-
-#####################################################################################################################################################
-#####################################################################################################################################################
-
-#####################################################################################################################################################
-#####################################################################################################################################################
-ASSEMBLER_INCLUDE_PATHS = @ASSEMBLER_INCLUDE_PATHS@ \
-	-Wa,-I$(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle
 ASSETS_DIR = @ASSETS_DIR@
 AUDBACKENDLIST = @AUDBACKENDLIST@
 AUDIO_CFLAGS = @AUDIO_CFLAGS@ $(am__append_10) $(am__append_12) \
@@ -641,6 +633,7 @@ GLU_LIBS = @GLU_LIBS@
 GL_CFLAGS = @GL_CFLAGS@
 GL_LIBS = @GL_LIBS@
 GREP = @GREP@
+INCBIN_FLAGS = @INCBIN_FLAGS@ -I$(CACERT_INCDIR)
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -715,6 +708,7 @@ SDL3_STATIC = @SDL3_STATIC@
 SDL3_VERSION = @SDL3_VERSION@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
+SHADERS_INCDIR = @SHADERS_INCDIR@
 SHELL = @SHELL@
 SOLOUD_PREFIX = @SOLOUD_PREFIX@
 SOLOUD_VERSION = @SOLOUD_VERSION@
@@ -991,6 +985,13 @@ CLEANFILES = \
 	*~ \
 	*.bak
 
+
+#####################################################################################################################################################
+#####################################################################################################################################################
+
+#####################################################################################################################################################
+#####################################################################################################################################################
+CACERT_INCDIR := $(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle/
 @BUILD_CURL_TRUE@lb := (
 @BUILD_CURL_TRUE@lbq := '('
 @BUILD_CURL_TRUE@rb := )
@@ -1046,9 +1047,11 @@ BUILT_SOURCES := \
 
 # add all paths with sources as an include ("-I") flag
 NEOSU_INCLUDE_FLAGS := $(shell find $(srcdir)/src -not -path '*/.*' -type d -printf "-I%p ")
-neosu_CPPFLAGS := $(NEOSU_CPPFLAGS)
+
+# clang+lto for windows targets has broken assembler include paths, need to specify them manually...
+neosu_CPPFLAGS := $(NEOSU_CPPFLAGS) -DCACERT_INCDIR=\"$(CACERT_INCDIR)\" -DSHADERS_INCDIR=\"$(SHADERS_INCDIR)\"
 neosu_CXXFLAGS := \
-	$(ASSEMBLER_INCLUDE_PATHS) \
+	$(INCBIN_FLAGS) \
 	-I$(DEPS_PREFIX)/include \
 	$(BUNDLED_INCLUDES) \
 	$(NEOSU_INCLUDE_FLAGS) \

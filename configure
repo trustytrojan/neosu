@@ -771,7 +771,8 @@ PKG_CONFIG_LIBDIR
 BUILD_MISCDIR
 DEPS_CACHE
 DEPS_PREFIX
-ASSEMBLER_INCLUDE_PATHS
+INCBIN_FLAGS
+SHADERS_INCDIR
 BUNDLED_INCLUDES
 AUDIO_LIBS
 AUDIO_CFLAGS
@@ -9204,7 +9205,9 @@ then :
 
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 printf "%s\n" "yes" >&6; }
-    ASSEMBLER_INCLUDE_PATHS="$ASSEMBLER_INCLUDE_PATHS -Wa,-I$srcdir/$ASSETS_DIR/shaders"
+    SHADERS_INCDIR="$srcdir/$ASSETS_DIR/shaders/"
+    INCBIN_FLAGS="$INCBIN_FLAGS $SHADERS_INCDIR"
+
 
 else case e in #(
   e)

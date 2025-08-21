@@ -282,7 +282,8 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source: $(DEPS_CACHE)/curl-$(CUR
 ## BEGIN EXTERNAL DEPENDENCY BUILD/SETUP SECTION
 #####################################################################################################################################################
 
-ASSEMBLER_INCLUDE_PATHS += -Wa,-I$(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle
+CACERT_INCDIR := $(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle/
+INCBIN_FLAGS += -I$(CACERT_INCDIR)
 if BUILD_CURL
 lb := (
 lbq := '('
@@ -826,10 +827,11 @@ endif
 # add all paths with sources as an include ("-I") flag
 NEOSU_INCLUDE_FLAGS := $(shell find $(srcdir)/src -not -path '*/.*' -type d -printf "-I%p ")
 
-neosu_CPPFLAGS := $(NEOSU_CPPFLAGS)
+# clang+lto for windows targets has broken assembler include paths, need to specify them manually...
+neosu_CPPFLAGS := $(NEOSU_CPPFLAGS) -DCACERT_INCDIR=\"$(CACERT_INCDIR)\" -DSHADERS_INCDIR=\"$(SHADERS_INCDIR)\"
 
 neosu_CXXFLAGS := \
-	$(ASSEMBLER_INCLUDE_PATHS) \
+	$(INCBIN_FLAGS) \
 	-I$(DEPS_PREFIX)/include \
 	$(BUNDLED_INCLUDES) \
 	$(NEOSU_INCLUDE_FLAGS) \
