@@ -632,8 +632,8 @@ void SongBrowser::draw() {
         }
 
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ADDITIVE);
-        osu->getSkin()->mode_osu->drawRaw(vec2(osu->getScreenWidth() / 2, osu->getScreenHeight() / 2),
-                                          mode_osu_scale, AnchorPoint::CENTER);
+        osu->getSkin()->mode_osu->drawRaw(vec2(osu->getScreenWidth() / 2, osu->getScreenHeight() / 2), mode_osu_scale,
+                                          AnchorPoint::CENTER);
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ALPHA);
     }
 
@@ -737,9 +737,9 @@ void SongBrowser::draw() {
                     const double speedStrainHeight = speedStrain * strainHeightMultiplier;
                     // const double strainHeight = strain * strainHeightMultiplier;
 
-                    vec2 topLeftCenter = vec2(
-                        highestStrainIndex * strainWidth + strainWidth / 2.0f,
-                        osu->getScreenHeight() - (get_bottombar_height() + aimStrainHeight + speedStrainHeight));
+                    vec2 topLeftCenter =
+                        vec2(highestStrainIndex * strainWidth + strainWidth / 2.0f,
+                             osu->getScreenHeight() - (get_bottombar_height() + aimStrainHeight + speedStrainHeight));
 
                     const float margin = 5.0f * dpiScale;
 
@@ -2212,9 +2212,11 @@ void SongBrowser::updateLayout() {
     this->updateScoreBrowserLayout();
 
     // song browser
-    this->carousel->setPos(this->topbarLeft->getPos().x + this->topbarLeft->getSize().x + 1, this->topbarRight->getPos().y + (this->topbarRight->getSize().y * 0.9));
-    this->carousel->setSize(osu->getScreenWidth() - (this->topbarLeft->getPos().x + this->topbarLeft->getSize().x),
-                            (osu->getScreenHeight() - this->carousel->getPos().y - (bottombar_get_hardcoded_height() * 0.75f)));
+    this->carousel->setPos(this->topbarLeft->getPos().x + this->topbarLeft->getSize().x + 1,
+                           this->topbarRight->getPos().y + (this->topbarRight->getSize().y * 0.9));
+    this->carousel->setSize(
+        osu->getScreenWidth() - (this->topbarLeft->getPos().x + this->topbarLeft->getSize().x),
+        (osu->getScreenHeight() - this->carousel->getPos().y - (bottombar_get_hardcoded_height() * 0.75f)));
 
     this->updateSongButtonLayout();
 
@@ -3269,8 +3271,7 @@ void SongBrowser::selectRandomBeatmap() {
     if(songButtons.size() < 1) return;
 
     // remember previous
-    if(this->previousRandomBeatmaps.size() == 0 && this->beatmap != nullptr &&
-       this->beatmap->getSelectedDifficulty2() != nullptr) {
+    if(this->beatmap != nullptr && this->beatmap->getSelectedDifficulty2() != nullptr) {
         this->previousRandomBeatmaps.push_back(this->beatmap->getSelectedDifficulty2());
     }
 

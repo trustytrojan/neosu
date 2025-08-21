@@ -31,6 +31,7 @@ Changelog::Changelog() : ScreenBackable() {
     v40_02.title = "40.02";
     v40_02.changes = {
         R"(- Fixed pause loop playing after quitting a map)",
+        R"(- Fixed Shift+F2 not working in song browser)",
         R"(- Reduced input lag by 1 frame)",
     };
     changelogs.push_back(v40_02);
