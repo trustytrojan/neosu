@@ -168,7 +168,7 @@ std::unique_ptr<DirectoryCache> File::s_directoryCache;
 //------------------------------------------------------------------------------
 // public
 File::FILETYPE File::existsCaseInsensitive(std::string &filePath) {
-    if (filePath.empty()) return FILETYPE::NONE;
+    if(filePath.empty()) return FILETYPE::NONE;
 
     UString filePathUStr{filePath};
     auto fsPath = fs::path(filePathUStr.plat_str());
@@ -177,7 +177,7 @@ File::FILETYPE File::existsCaseInsensitive(std::string &filePath) {
 }
 
 File::FILETYPE File::exists(const std::string &filePath) {
-    if (filePath.empty()) return FILETYPE::NONE;
+    if(filePath.empty()) return FILETYPE::NONE;
 
     UString filePathUStr{filePath};
     const auto fsPath = fs::path(filePathUStr.plat_str());
@@ -264,7 +264,7 @@ bool File::openForReading() {
     if(fileType != File::FILETYPE::FILE) {
         if(cv::debug_file.getBool())
             debugLog("File Error: Path {:s} {:s}\n", this->sFilePath,
-                      fileType == File::FILETYPE::NONE ? "doesn't exist" : "is not a file");
+                     fileType == File::FILETYPE::NONE ? "doesn't exist" : "is not a file");
         return false;
     }
 
@@ -309,7 +309,7 @@ bool File::openForWriting() {
         fs::create_directories(path.parent_path(), ec);
         if(ec) {
             debugLog("File Error: Couldn't create parent directories for {:s} (error: {:s})\n", this->sFilePath,
-                      ec.message());
+                     ec.message());
             // continue anyway, the file open might still succeed if the directory exists
         }
     }
@@ -328,9 +328,11 @@ bool File::openForWriting() {
 }
 
 void File::write(const u8 *buffer, size_t size) {
+    if(cv::debug_file.getBool()) debugLog("{:s} (canWrite: {})\n", this->sFilePath, canWrite());
+
     if(!canWrite()) return;
 
-    this->ofstream->write(reinterpret_cast<const char*>(buffer), static_cast<std::streamsize>(size));
+    this->ofstream->write(reinterpret_cast<const char *>(buffer), static_cast<std::streamsize>(size));
 }
 
 bool File::writeLine(const std::string &line, bool insertNewline) {
@@ -362,11 +364,11 @@ std::string File::readString() {
     const auto size = getFileSize();
     if(size < 1) return "";
 
-    return {reinterpret_cast<const char*>(readFile()), size};
+    return {reinterpret_cast<const char *>(readFile()), size};
 }
 
 const u8 *File::readFile() {
-    if(cv::debug_file.getBool()) debugLog("File::readFile() on {:s}\n", this->sFilePath);
+    if(cv::debug_file.getBool()) debugLog("{:s} (canRead: {})\n", this->sFilePath, this->bReady && canRead());
 
     // return cached buffer if already read
     if(!this->vFullBuffer.empty()) return this->vFullBuffer.data();
@@ -378,14 +380,15 @@ const u8 *File::readFile() {
 
     // read entire file
     this->ifstream->seekg(0, std::ios::beg);
-    if(this->ifstream->read(reinterpret_cast<char*>(this->vFullBuffer.data()), static_cast<std::streamsize>(this->iFileSize)))
+    if(this->ifstream->read(reinterpret_cast<char *>(this->vFullBuffer.data()),
+                            static_cast<std::streamsize>(this->iFileSize)))
         return this->vFullBuffer.data();
 
     return nullptr;
 }
 
 std::vector<u8> File::takeFileBuffer() {
-    if(cv::debug_file.getBool()) debugLog("File::takeFileBuffer() on {:s}\n", this->sFilePath);
+    if(cv::debug_file.getBool()) debugLog("{:s} (canRead: {})\n", this->sFilePath, this->bReady && canRead());
 
     // if buffer is already populated, move it out
     if(!this->vFullBuffer.empty()) return std::move(this->vFullBuffer);
@@ -397,7 +400,8 @@ std::vector<u8> File::takeFileBuffer() {
 
     // read entire file
     this->ifstream->seekg(0, std::ios::beg);
-    if(this->ifstream->read(reinterpret_cast<char*>(this->vFullBuffer.data()), static_cast<std::streamsize>(this->iFileSize)))
+    if(this->ifstream->read(reinterpret_cast<char *>(this->vFullBuffer.data()),
+                            static_cast<std::streamsize>(this->iFileSize)))
         return std::move(this->vFullBuffer);
 
     // read failed, clear buffer and return empty vector

@@ -197,21 +197,25 @@ class DatabaseBeatmap final {
     [[nodiscard]] inline int getSetID() const { return this->iSetID; }
 
     [[nodiscard]] inline const std::string &getTitle() const {
-        // Disabled; too laggy to be usable for now
-        if(false && cv::prefer_cjk.getBool()) {
+        if(!this->bEmptyTitleUnicode && cv::prefer_cjk.getBool()) {
             return this->sTitleUnicode;
         } else {
             return this->sTitle;
         }
     }
+    [[nodiscard]] inline const std::string &getTitleRoman() const { return this->sTitle; }
+    [[nodiscard]] inline const std::string &getTitleUnicode() const { return this->sTitleUnicode; }
+
     [[nodiscard]] inline const std::string &getArtist() const {
-        // Disabled; too laggy to be usable for now
-        if(false && cv::prefer_cjk.getBool()) {
+        if(!this->bEmptyArtistUnicode && cv::prefer_cjk.getBool()) {
             return this->sArtistUnicode;
         } else {
             return this->sArtist;
         }
     }
+    [[nodiscard]] inline const std::string &getArtistRoman() const { return this->sArtist; }
+    [[nodiscard]] inline const std::string &getArtistUnicode() const { return this->sArtistUnicode; }
+
     [[nodiscard]] inline const std::string &getCreator() const { return this->sCreator; }
     [[nodiscard]] inline const std::string &getDifficultyName() const { return this->sDifficultyName; }
     [[nodiscard]] inline const std::string &getSource() const { return this->sSource; }
@@ -275,6 +279,9 @@ class DatabaseBeatmap final {
     std::string sFilePath;  // path to .osu file (e.g. "/path/to/beatmapfolder/beatmap.osu")
     std::string sFullSoundFilePath;
     std::string sFullBackgroundImageFilePath;
+
+    bool bEmptyArtistUnicode{false};
+    bool bEmptyTitleUnicode{false};
 
     // raw metadata
 

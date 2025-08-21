@@ -10,14 +10,8 @@ TextureAtlas::TextureAtlas(int width, int height) : Resource() {
     this->iWidth = width;
     this->iHeight = height;
 
-    this->iPadding = 1;
-
     resourceManager->requestNextLoadUnmanaged();
     this->atlasImage = resourceManager->createImage(this->iWidth, this->iHeight);
-
-    this->iCurX = this->iPadding;
-    this->iCurY = this->iPadding;
-    this->iMaxHeight = 0;
 }
 
 void TextureAtlas::init() {
@@ -35,7 +29,7 @@ void TextureAtlas::putAt(int x, int y, int width, int height, bool flipHorizonta
 
     if(x + width > this->iWidth || y + height > this->iHeight || x < 0 || y < 0) {
         debugLog("TextureAtlas::putAt( {}, {}, {}, {} ) WARNING: Out of bounds! Atlas size: {}x{}\n", x, y, width,
-                  height, this->iWidth, this->iHeight);
+                 height, this->iWidth, this->iHeight);
         return;
     }
 
@@ -52,7 +46,7 @@ void TextureAtlas::putAt(int x, int y, int width, int height, bool flipHorizonta
             // bounds checking with debug info
             if(atlasX >= this->iWidth || atlasY >= this->iHeight) {
                 debugLog("WARNING: Pixel placement out of bounds: atlas=({},{}) in {}x{}\n", atlasX, atlasY,
-                          this->iWidth, this->iHeight);
+                         this->iWidth, this->iHeight);
                 continue;
             }
 
@@ -61,7 +55,7 @@ void TextureAtlas::putAt(int x, int y, int width, int height, bool flipHorizonta
     }
 
     // mirror border pixels for padding > 1
-    if(this->iPadding > 1) {
+    if(unlikely(ATLAS_PADDING > 1)) {
         // left border
         for(int j = -1; j < height + 1; j++) {
             const int i = 0;
@@ -108,11 +102,11 @@ bool TextureAtlas::packRects(std::vector<PackRect> &rects) {
     std::ranges::sort(rects, [](const PackRect &a, const PackRect &b) { return a.height > b.height; });
 
     // initialize skyline - start with single segment covering entire width
-    std::vector<Skyline> skylines = {{.x = 0, .y = this->iPadding, .width = this->iWidth}};
+    std::vector<Skyline> skylines = {{.x = 0, .y = ATLAS_PADDING, .width = this->iWidth}};
 
     for(auto &rect : rects) {
-        const int rectWidth = rect.width + this->iPadding;
-        const int rectHeight = rect.height + this->iPadding;
+        const int rectWidth = rect.width + ATLAS_PADDING;
+        const int rectHeight = rect.height + ATLAS_PADDING;
 
         int bestHeight = this->iHeight;
         int bestIndex = -1;
@@ -142,12 +136,12 @@ bool TextureAtlas::packRects(std::vector<PackRect> &rects) {
 
         if(bestIndex == -1 || bestHeight > this->iHeight) {
             debugLog("ERROR: Packing failed for rect id={}: bestIndex={}, bestHeight={}, atlasHeight={}\n", rect.id,
-                      bestIndex, bestHeight, this->iHeight);
+                     bestIndex, bestHeight, this->iHeight);
             return false;
         }
 
         // place the rectangle
-        rect.x = bestX + this->iPadding;
+        rect.x = bestX + ATLAS_PADDING;
         rect.y = bestHeight - rectHeight;
 
         // update skyline - remove segments covered by this rectangle and add new segment
@@ -193,14 +187,14 @@ bool TextureAtlas::packRects(std::vector<PackRect> &rects) {
     return true;
 }
 
-size_t TextureAtlas::calculateOptimalSize(const std::vector<PackRect> &rects, float targetOccupancy, int padding,
-                                          size_t minSize, size_t maxSize) {
+size_t TextureAtlas::calculateOptimalSize(const std::vector<PackRect> &rects, float targetOccupancy, size_t minSize,
+                                          size_t maxSize) {
     if(rects.empty()) return minSize;
 
     // calculate total area including padding
     size_t totalArea = 0;
     for(const auto &rect : rects) {
-        totalArea += static_cast<size_t>((rect.width + padding) * (rect.height + padding));
+        totalArea += static_cast<size_t>((rect.width + ATLAS_PADDING) * (rect.height + ATLAS_PADDING));
     }
 
     // add 20% for packing inefficiency

@@ -857,6 +857,13 @@ void Database::loadMaps() {
                         diff->sArtistUnicode = diff->sArtist;
                     }
 
+                    if (SString::whitespace_only(diff->sTitleUnicode)) {
+                        diff->bEmptyTitleUnicode = true;
+                    }
+                    if (SString::whitespace_only(diff->sArtistUnicode)) {
+                        diff->bEmptyArtistUnicode = true;
+                    }
+
                     this->beatmap_difficulties[diff->sMD5Hash] = diff;
                     diffs->push_back(diff);
                     nb_neosu_maps++;
@@ -1151,6 +1158,9 @@ void Database::loadMaps() {
                 {
                     diff2->sTitle = songTitle;
                     diff2->sTitleUnicode = songTitleUnicode;
+                    if (SString::whitespace_only(diff2->sTitleUnicode)) {
+                        diff2->bEmptyTitleUnicode = true;
+                    }
                     diff2->sAudioFileName = audioFileName;
                     diff2->iLengthMS = duration;
 
@@ -1158,6 +1168,9 @@ void Database::loadMaps() {
 
                     diff2->sArtist = artistName;
                     diff2->sArtistUnicode = artistNameUnicode;
+                    if (SString::whitespace_only(diff2->sArtistUnicode)) {
+                        diff2->bEmptyArtistUnicode = true;
+                    }
                     diff2->sCreator = creatorName;
                     diff2->sDifficultyName = difficultyName;
                     diff2->sSource = songSource;

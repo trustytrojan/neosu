@@ -237,15 +237,18 @@ void handle_api_response(Packet packet) {
             }
 
             assert(packet.extra && "handle_api_response(GET_REPLAY) got invalid packet for replay data");
-            // we should look into this if it ever gets hit, shouldn't crash either way but still... a warning is a
-            // warning
+            // we should look into this if it ever gets hit, shouldn't crash either way but still... a warning is a warning
             assert(reinterpret_cast<uintptr_t>(packet.extra) % alignof(FinishedScore) == 0 &&
                    "handle_api_response(GET_REPLAY) packet.extra is not aligned");
-
+            // excuse all the preprocessor bloat
+#ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align"
+#endif
             auto *score = reinterpret_cast<FinishedScore *>(packet.extra);
+#ifdef __GNUC__
 #pragma GCC diagnostic pop
+#endif
 
             auto replay_path = UString::format(MCENGINE_DATA_DIR "replays/%s/%d.replay.lzma", score->server.c_str(),
                                                score->unixTimestamp);

@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <utility>
 
+#include "Keyboard.h"
 #include "SongBrowser.h"
 // ---
 
@@ -219,47 +220,52 @@ void InfoLabel::mouse_update(bool *propagate_clicks) {
             const float hitobjectRadiusRoundedCompensated =
                 (GameRules::getRawHitCircleDiameter(beatmap->getCS()) / 2.0f);
 
-            osu->getTooltipOverlay()->begin();
+            const auto &bmDiff2{beatmap->getSelectedDifficulty2()};
+            const auto &tooltipOverlay{osu->getTooltipOverlay()};
+            tooltipOverlay->begin();
             {
-                osu->getTooltipOverlay()->addLine(
-                    UString::format("Approach time: %.2fms", approachTimeRoundedCompensated));
-                osu->getTooltipOverlay()->addLine(UString::format("300: +-%.2fms", hitWindow300RoundedCompensated));
-                osu->getTooltipOverlay()->addLine(UString::format("100: +-%.2fms", hitWindow100RoundedCompensated));
-                osu->getTooltipOverlay()->addLine(UString::format(" 50: +-%.2fms", hitWindow50RoundedCompensated));
-                osu->getTooltipOverlay()->addLine(
-                    UString::format("Spinner difficulty: %.2f", GameRules::getSpinnerSpinsPerSecond(beatmap)));
-                osu->getTooltipOverlay()->addLine(
-                    UString::format("Hit object radius: %.2f", hitobjectRadiusRoundedCompensated));
+                tooltipOverlay->addLine(UString::fmt("Approach time: {:.2f}ms", approachTimeRoundedCompensated));
+                tooltipOverlay->addLine(UString::fmt("300: +-{:.2f}ms", hitWindow300RoundedCompensated));
+                tooltipOverlay->addLine(UString::fmt("100: +-{:.2f}ms", hitWindow100RoundedCompensated));
+                tooltipOverlay->addLine(UString::fmt(" 50: +-{:.2f}ms", hitWindow50RoundedCompensated));
+                tooltipOverlay->addLine(
+                    UString::fmt("Spinner difficulty: {:.2f}", GameRules::getSpinnerSpinsPerSecond(beatmap)));
+                tooltipOverlay->addLine(UString::fmt("Hit object radius: {:.2f}", hitobjectRadiusRoundedCompensated));
 
-                if(beatmap->getSelectedDifficulty2() != nullptr) {
-                    int numObjects = beatmap->getSelectedDifficulty2()->getNumObjects();
-                    int numCircles = beatmap->getSelectedDifficulty2()->getNumCircles();
-                    int numSliders = beatmap->getSelectedDifficulty2()->getNumSliders();
-                    unsigned long lengthMS = beatmap->getSelectedDifficulty2()->getLengthMS();
+                if(bmDiff2 != nullptr) {
+                    int numObjects{bmDiff2->getNumObjects()};
+                    int numCircles{bmDiff2->getNumCircles()};
+                    int numSliders{bmDiff2->getNumSliders()};
+                    unsigned long lengthMS{bmDiff2->getLengthMS()};
 
-                    const float opm =
-                        (lengthMS > 0 ? ((float)numObjects / (float)(lengthMS / 1000.0f / 60.0f)) : 0.0f) *
-                        beatmap->getSpeedMultiplier();
-                    const float cpm =
-                        (lengthMS > 0 ? ((float)numCircles / (float)(lengthMS / 1000.0f / 60.0f)) : 0.0f) *
-                        beatmap->getSpeedMultiplier();
-                    const float spm =
-                        (lengthMS > 0 ? ((float)numSliders / (float)(lengthMS / 1000.0f / 60.0f)) : 0.0f) *
-                        beatmap->getSpeedMultiplier();
+                    float opm{0.f}, cpm{0.f}, spm{0.f};
+                    if(lengthMS > 0) {
+                        const float durMinutes{(static_cast<float>(lengthMS) / 1000.0f / 60.0f) /
+                                               beatmap->getSpeedMultiplier()};
 
-                    osu->getTooltipOverlay()->addLine(
-                        UString::format("Circles: %i, Sliders: %i, Spinners: %i", numCircles, numSliders,
-                                        std::max(0, numObjects - numCircles - numSliders)));
-                    osu->getTooltipOverlay()->addLine(
-                        UString::format("OPM: %i, CPM: %i, SPM: %i", (int)opm, (int)cpm, (int)spm));
-                    osu->getTooltipOverlay()->addLine(UString::format("ID: %i, SetID: %i",
-                                                                      beatmap->getSelectedDifficulty2()->getID(),
-                                                                      beatmap->getSelectedDifficulty2()->getSetID()));
-                    osu->getTooltipOverlay()->addLine(
-                        UString::format("MD5: %s", beatmap->getSelectedDifficulty2()->getMD5Hash().hash.data()));
+                        opm = static_cast<float>(numObjects) / durMinutes;
+                        cpm = static_cast<float>(numCircles) / durMinutes;
+                        spm = static_cast<float>(numSliders) / durMinutes;
+                    }
+
+                    tooltipOverlay->addLine(UString::fmt("Circles: {:d}, Sliders: {:d}, Spinners: {:d}", numCircles,
+                                                         numSliders,
+                                                         std::max(0, numObjects - numCircles - numSliders)));
+                    tooltipOverlay->addLine(
+                        UString::fmt("OPM: {:d}, CPM: {:d}, SPM: {:d}", (int)opm, (int)cpm, (int)spm));
+                    tooltipOverlay->addLine(
+                        UString::fmt("ID: {:d}, SetID: {:d}", bmDiff2->getID(), bmDiff2->getSetID()));
+                    tooltipOverlay->addLine(UString::fmt("MD5: {:s}", bmDiff2->getMD5Hash().hash.data()));
+                    // mostly for debugging
+                    if(keyboard->isShiftDown()) {
+                        tooltipOverlay->addLine(UString::fmt("Title: {:s}", bmDiff2->getTitleRoman()));
+                        tooltipOverlay->addLine(UString::fmt("TitleUnicode: {:s}", bmDiff2->getTitleUnicode()));
+                        tooltipOverlay->addLine(UString::fmt("Artist: {:s}", bmDiff2->getArtistRoman()));
+                        tooltipOverlay->addLine(UString::fmt("ArtistUnicode: {:s}", bmDiff2->getArtistUnicode()));
+                    }
                 }
             }
-            osu->getTooltipOverlay()->end();
+            tooltipOverlay->end();
         }
     }
 }

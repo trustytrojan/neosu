@@ -115,7 +115,8 @@ void SoLoudSound::destroy() {
 
     // stop the sound if it's playing
     if(this->handle != 0) {
-        soloud->stop(this->handle);
+        if (soloud)
+            soloud->stop(this->handle);
         this->handle = 0;
     }
 

@@ -11,7 +11,11 @@ struct Color;
 class Image;
 
 class TextureAtlas final : public Resource {
+    NOCOPY_NOMOVE(TextureAtlas)
    public:
+    // should basically never need to be changed
+    static constexpr const int ATLAS_PADDING{1};
+
     struct PackRect {
         int x, y, width, height;
         int id;  // user-defined identifier for tracking
@@ -28,13 +32,10 @@ class TextureAtlas final : public Resource {
 
     // calculate optimal atlas size for given rectangles
     static size_t calculateOptimalSize(const std::vector<PackRect> &rects, float targetOccupancy = 0.75f,
-                                       int padding = 1, size_t minSize = 256, size_t maxSize = 4096);
-
-    void setPadding(int padding) { iPadding = padding; }
+                                       size_t minSize = 256, size_t maxSize = 4096);
 
     [[nodiscard]] inline int getWidth() const { return this->iWidth; }
     [[nodiscard]] inline int getHeight() const { return this->iHeight; }
-    [[nodiscard]] inline int getPadding() const { return this->iPadding; }
     [[nodiscard]] inline Image *getAtlasImage() const { return this->atlasImage; }
 
     // type inspection
@@ -52,17 +53,10 @@ class TextureAtlas final : public Resource {
     void initAsync() override;
     void destroy() override;
 
-    int iPadding;
-
     int iWidth;
     int iHeight;
 
     Image *atlasImage;
-
-    // legacy packing state
-    int iCurX;
-    int iCurY;
-    int iMaxHeight;
 };
 
 #endif

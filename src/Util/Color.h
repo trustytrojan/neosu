@@ -120,6 +120,11 @@ constexpr Color rgba(R r, G g, B b, A a)
 	return argb(a, r, g, b);
 }
 
+constexpr Color argb(Color rgbacol)
+{
+	return argb(rgbacol.B(), rgbacol.A(), rgbacol.R(), rgbacol.G());
+}
+
 // for opengl
 constexpr Color rgba(Color argbcol)
 {

@@ -12,6 +12,7 @@
 class Image;
 
 class OpenGLLegacyInterface : public Graphics {
+NOCOPY_NOMOVE(OpenGLLegacyInterface)
    public:
     OpenGLLegacyInterface();
     ~OpenGLLegacyInterface() override = default;

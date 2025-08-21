@@ -93,8 +93,10 @@ DatabaseBeatmap::DatabaseBeatmap(std::vector<DatabaseBeatmap *> *difficulties, B
     // set representative values for this container (i.e. use values from first difficulty)
     this->sTitle = (*this->difficulties)[0]->sTitle;
     this->sTitleUnicode = (*this->difficulties)[0]->sTitleUnicode;
+    this->bEmptyTitleUnicode = (*this->difficulties)[0]->bEmptyTitleUnicode;
     this->sArtist = (*this->difficulties)[0]->sArtist;
     this->sArtistUnicode = (*this->difficulties)[0]->sArtistUnicode;
+    this->bEmptyArtistUnicode = (*this->difficulties)[0]->bEmptyArtistUnicode;
     this->sCreator = (*this->difficulties)[0]->sCreator;
     this->sBackgroundImageFileName = (*this->difficulties)[0]->sBackgroundImageFileName;
     this->iSetID = (*this->difficulties)[0]->iSetID;
@@ -427,7 +429,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                             // points)
                             {
                                 const vec2 xy = vec2(std::clamp<float>(x, -sliderSanityRange, sliderSanityRange),
-                                                           std::clamp<float>(y, -sliderSanityRange, sliderSanityRange));
+                                                     std::clamp<float>(y, -sliderSanityRange, sliderSanityRange));
                                 if(points.size() > 0) {
                                     if(points[0] != xy) points.insert(points.begin(), xy);
                                 } else
@@ -820,8 +822,7 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(P
 
                         if(objectI->time - (approachTime * c.stackLeniency) > (objectN->endTime)) break;
 
-                        vec2 objectNEndPosition =
-                            objectN->getOriginalRawPosAt(objectN->time + objectN->getDuration());
+                        vec2 objectNEndPosition = objectN->getOriginalRawPosAt(objectN->time + objectN->getDuration());
                         if(objectN->getDuration() != 0 &&
                            vec::length(objectNEndPosition - objectI->getOriginalRawPosAt(objectI->time)) <
                                STACK_LENIENCE) {
@@ -889,7 +890,7 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(P
                             : currHitObject->getOriginalRawPosAt(currHitObject->time);
 
                     if(vec::length(objectJ->getOriginalRawPosAt(objectJ->time) -
-                        currHitObject->getOriginalRawPosAt(currHitObject->time)) < 3) {
+                                   currHitObject->getOriginalRawPosAt(currHitObject->time)) < 3) {
                         currHitObject->stack++;
                         startTime = objectJ->time + objectJ->getDuration();
                     } else if(vec::length(objectJ->getOriginalRawPosAt(objectJ->time) - position2) < 3) {
@@ -1120,8 +1121,13 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
         }
     }
 
-    if(this->sTitleUnicode.empty()) this->sTitleUnicode = this->sTitle;
-    if(this->sArtistUnicode.empty()) this->sArtistUnicode = this->sArtist;
+    // im not actually sure if we need to do this again here
+    if(SString::whitespace_only(this->sTitleUnicode)) {
+        this->bEmptyTitleUnicode = true;
+    }
+    if(SString::whitespace_only(this->sArtistUnicode)) {
+        this->bEmptyArtistUnicode = true;
+    }
 
     // gamemode filter
     if(this->iGameMode != 0) return false;  // nothing more to do here

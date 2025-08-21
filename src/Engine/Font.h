@@ -24,9 +24,9 @@ class VertexArrayObject;
 
 class McFont final : public Resource {
    public:
-    McFont(const UString &filepath, int fontSize = 16, bool antialiasing = true, int fontDPI = 96);
-    McFont(const UString &filepath, const std::vector<wchar_t> &characters, int fontSize = 16,
-           bool antialiasing = true, int fontDPI = 96);
+    McFont(std::string filepath, int fontSize = 16, bool antialiasing = true, int fontDPI = 96);
+    McFont(std::string filepath, const std::vector<wchar_t> &characters, int fontSize = 16, bool antialiasing = true,
+           int fontDPI = 96);
     ~McFont() override { destroy(); }
 
     McFont &operator=(const McFont &) = delete;
@@ -43,13 +43,13 @@ class McFont final : public Resource {
     void addToBatch(const UString &text, const vec3 &pos, Color color = 0xffffffff);
     void flushBatch();
 
-    void setSize(int fontSize) { this->iFontSize = fontSize; }
-    void setDPI(int dpi) { this->iFontDPI = dpi; }
-    void setHeight(float height) { this->fHeight = height; }
+    void setSize(int fontSize) { m_iFontSize = fontSize; }
+    void setDPI(int dpi) { m_iFontDPI = dpi; }
+    void setHeight(float height) { m_fHeight = height; }
 
-    inline int getSize() const { return this->iFontSize; }
-    inline int getDPI() const { return this->iFontDPI; }
-    inline float getHeight() const { return this->fHeight; }  // precomputed average height (fast)
+    inline int getSize() const { return m_iFontSize; }
+    inline int getDPI() const { return m_iFontDPI; }
+    inline float getHeight() const { return m_fHeight; }  // precomputed average height (fast)
 
     float getStringWidth(const UString &text) const;
     float getStringHeight(const UString &text) const;
@@ -98,7 +98,7 @@ class McFont final : public Resource {
         std::vector<BatchEntry> entryList;
     };
 
-    forceinline bool hasGlyph(wchar_t ch) const { return this->vGlyphMetrics.find(ch) != this->vGlyphMetrics.end(); };
+    forceinline bool hasGlyph(wchar_t ch) const { return m_vGlyphMetrics.find(ch) != m_vGlyphMetrics.end(); };
     bool addGlyph(wchar_t ch);
     bool loadGlyphDynamic(wchar_t ch);
     bool ensureAtlasSpace(int requiredWidth, int requiredHeight);
@@ -118,7 +118,7 @@ class McFont final : public Resource {
     void buildGlyphGeometry(const GLYPH_METRICS &gm, const vec3 &basePos, float advanceX, size_t &vertexCount);
     void buildStringGeometry(const UString &text, size_t &vertexCount);
 
-    Channel *unpackMonoBitmap(const FT_Bitmap &bitmap);
+    static std::unique_ptr<Channel[]> unpackMonoBitmap(const FT_Bitmap &bitmap);
 
     // shared freetype resources
     static FT_Library s_sharedFtLibrary;
@@ -135,33 +135,33 @@ class McFont final : public Resource {
     // helper to set font size on any face for this font instance
     void setFaceSize(FT_Face face) const;
 
-    std::vector<wchar_t> vGlyphs;
-    std::unordered_map<wchar_t, bool> vGlyphExistence;
-    std::unordered_map<wchar_t, GLYPH_METRICS> vGlyphMetrics;
+    std::vector<wchar_t> m_vGlyphs;
+    std::unordered_map<wchar_t, bool> m_vGlyphExistence;
+    std::unordered_map<wchar_t, GLYPH_METRICS> m_vGlyphMetrics;
 
-    VertexArrayObject vao;
-    TextBatch batchQueue;
-    std::vector<vec3> vertices;
-    std::vector<vec2> texcoords;
+    VertexArrayObject m_vao;
+    TextBatch m_batchQueue;
+    std::vector<vec3> m_vertices;
+    std::vector<vec2> m_texcoords;
 
-    TextureAtlas *textureAtlas;
+    TextureAtlas *m_textureAtlas;
 
     // per-instance freetype resources (only primary font face)
-    FT_Face ftFace;  // primary font face
+    FT_Face m_ftFace;  // primary font face
 
-    int iFontSize;
-    int iFontDPI;
-    float fHeight;
-    GLYPH_METRICS errorGlyph;
+    int m_iFontSize;
+    int m_iFontDPI;
+    float m_fHeight;
+    GLYPH_METRICS m_errorGlyph;
 
     // atlas management
-    std::vector<wchar_t> vPendingGlyphs;
+    std::vector<wchar_t> m_vPendingGlyphs;
 
-    mutable bool bAtlasNeedsRebuild;
+    mutable bool m_bAtlasNeedsRebuild;
 
-    bool batchActive;
-    bool bFreeTypeInitialized;
-    bool bAntialiasing;
+    bool m_batchActive;
+    bool m_bFreeTypeInitialized;
+    bool m_bAntialiasing;
 };
 
 #endif

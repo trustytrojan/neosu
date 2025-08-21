@@ -249,13 +249,16 @@ Image::Image(i32 width, i32 height, bool mipmapped, bool keepInSystemMemory) : R
 
     this->bCreatedImage = true;
 
-    // reserve and fill with pink pixels
+    // reserve
     this->rawImage.resize(static_cast<u64>(this->iWidth) * this->iHeight * Image::NUM_CHANNELS);
-    for(u64 i = 0; i < static_cast<u64>(this->iWidth) * this->iHeight; i++) {
-        this->rawImage.push_back(255);
-        this->rawImage.push_back(0);
-        this->rawImage.push_back(255);
-        this->rawImage.push_back(255);
+    if(cv::debug_image.getBool()) {
+        // fill with pink pixels
+        for(u64 i = 0; i < static_cast<u64>(this->iWidth) * this->iHeight; i++) {
+            this->rawImage.push_back(255);
+            this->rawImage.push_back(0);
+            this->rawImage.push_back(255);
+            this->rawImage.push_back(255);
+        }
     }
 
     // special case: filled rawimage is always already async ready
@@ -409,24 +412,26 @@ bool Image::loadRawImage() {
 }
 
 Color Image::getPixel(i32 x, i32 y) const {
-    const u64 indexBegin = Image::NUM_CHANNELS * y * this->iWidth + Image::NUM_CHANNELS * x;
+    if(unlikely(x < 0 || y < 0 || this->rawImage.size() < 1)) return 0xffffff00;
+
     const u64 indexEnd = Image::NUM_CHANNELS * y * this->iWidth + Image::NUM_CHANNELS * x + Image::NUM_CHANNELS;
+    if(unlikely(indexEnd > this->rawImage.size())) return 0xffffff00;
+    const u64 indexBegin = Image::NUM_CHANNELS * y * this->iWidth + Image::NUM_CHANNELS * x;
 
-    if(this->rawImage.size() < 1 || x < 0 || y < 0 || indexEnd > this->rawImage.size()) return 0xffffff00;
-
-    Channel r = this->rawImage[indexBegin + 0];
-    Channel g = this->rawImage[indexBegin + 1];
-    Channel b = this->rawImage[indexBegin + 2];
-    Channel a = this->rawImage[indexBegin + 3];
+    const Channel &r{this->rawImage[indexBegin + 0]};
+    const Channel &g{this->rawImage[indexBegin + 1]};
+    const Channel &b{this->rawImage[indexBegin + 2]};
+    const Channel &a{this->rawImage[indexBegin + 3]};
 
     return argb(a, r, g, b);
 }
 
 void Image::setPixel(i32 x, i32 y, Color color) {
-    const u64 indexBegin = Image::NUM_CHANNELS * y * this->iWidth + Image::NUM_CHANNELS * x;
-    const u64 indexEnd = Image::NUM_CHANNELS * y * this->iWidth + Image::NUM_CHANNELS * x + Image::NUM_CHANNELS;
+    if(unlikely(x < 0 || y < 0 || this->rawImage.size() < 1)) return;
 
-    if(this->rawImage.size() < 1 || x < 0 || y < 0 || indexEnd > this->rawImage.size()) return;
+    const u64 indexEnd = Image::NUM_CHANNELS * y * this->iWidth + Image::NUM_CHANNELS * x + Image::NUM_CHANNELS;
+    if(unlikely(indexEnd > this->rawImage.size())) return;
+    const u64 indexBegin = Image::NUM_CHANNELS * y * this->iWidth + Image::NUM_CHANNELS * x;
 
     this->rawImage[indexBegin + 0] = color.R();
     this->rawImage[indexBegin + 1] = color.G();

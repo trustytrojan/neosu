@@ -565,14 +565,7 @@ void Engine::requestResolutionChange(vec2 newResolution) {
     this->bResolutionChange = true;
 }
 
-void Engine::setFrameTime(double delta) {
-    // NOTE: clamp to between 10000 fps and 1 fps, very small/big timesteps could cause problems
-    // NOTE: special case for loading screen and first app frame
-    if(this->iFrameCount < 3)
-        this->dFrameTime = delta;
-    else
-        this->dFrameTime = std::clamp<double>(delta, 0.0001, 1.0);
-}
+void Engine::setFrameTime(double delta) { this->dFrameTime = std::max<double>(delta, 0.0001); }
 
 void Engine::onEngineThrottleChanged(float newVal) {
     const bool enable = !!static_cast<int>(newVal);
