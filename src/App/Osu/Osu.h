@@ -191,8 +191,6 @@ class Osu final : public MouseListener, public KeyboardListener {
     void updateAnimationSpeed();
 
     void onSpeedChange(const UString &newValue);
-    void onDTPresetChange();
-    void onHTPresetChange();
     void onThumbnailsToggle();
 
     void onPlayfieldChange();

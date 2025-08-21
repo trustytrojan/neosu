@@ -22,11 +22,11 @@ class SimulatedBeatmap : public BeatmapInterface {
     [[nodiscard]] vec2 pixels2OsuCoords(vec2 pixelCoords) const override;  // only used for positional audio atm
     [[nodiscard]] vec2 osuCoords2Pixels(
         vec2 coords) const override;  // hitobjects should use this one (includes lots of special behaviour)
-    [[nodiscard]] vec2 osuCoords2RawPixels(
-        vec2 coords) const override;  // raw transform from osu!pixels to absolute screen pixels (without any mods whatsoever)
-    [[nodiscard]] vec2 osuCoords2LegacyPixels(
-        vec2 coords) const override;  // only applies vanilla osu mods and static mods to the coordinates (used for generating
-                                // the static slider mesh) centered at (0, 0, 0)
+    [[nodiscard]] vec2 osuCoords2RawPixels(vec2 coords)
+        const override;  // raw transform from osu!pixels to absolute screen pixels (without any mods whatsoever)
+    [[nodiscard]] vec2 osuCoords2LegacyPixels(vec2 coords)
+        const override;  // only applies vanilla osu mods and static mods to the coordinates (used for generating
+                         // the static slider mesh) centered at (0, 0, 0)
 
     // cursor
     [[nodiscard]] vec2 getCursorPos() const override;
@@ -76,8 +76,8 @@ class SimulatedBeatmap : public BeatmapInterface {
 
     // HitObject and other helper functions
     LiveScore::HIT addHitResult(HitObject *hitObject, LiveScore::HIT hit, i32 delta, bool isEndOfCombo = false,
-                                        bool ignoreOnHitErrorBar = false, bool hitErrorBarOnly = false,
-                                        bool ignoreCombo = false, bool ignoreScore = false, bool ignoreHealth = false) override;
+                                bool ignoreOnHitErrorBar = false, bool hitErrorBarOnly = false,
+                                bool ignoreCombo = false, bool ignoreScore = false, bool ignoreHealth = false) override;
     void addSliderBreak() override;
     void addHealth(f64 percent, bool isFromHitResult);
 
@@ -99,7 +99,7 @@ class SimulatedBeatmap : public BeatmapInterface {
     // breaks
     std::vector<DatabaseBeatmap::BREAK> breaks;
     bool bInBreak = false;
-    HitObject* currentHitObject = nullptr;
+    HitObject *currentHitObject = nullptr;
     i32 iNextHitObjectTime = 0;
     i32 iPreviousHitObjectTime = 0;
 
@@ -123,7 +123,7 @@ class SimulatedBeatmap : public BeatmapInterface {
     [[nodiscard]] Replay::Mods getMods_full() const override { return this->mods; }
     [[nodiscard]] u32 getModsLegacy_full() const override { return this->mods.to_legacy(); }
     [[nodiscard]] u32 getScoreV1DifficultyMultiplier_full() const override;
-    [[nodiscard]] f32 getSpeedMultiplier_full() const override { return this->mods.speed; }
+    [[nodiscard]] f32 getSpeedMultiplier() const override { return this->mods.speed; }
     [[nodiscard]] f32 getRawAR_full() const override;
     [[nodiscard]] f32 getAR_full() const override;
     [[nodiscard]] f32 getCS_full() const override;

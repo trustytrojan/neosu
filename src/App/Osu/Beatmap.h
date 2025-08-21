@@ -85,6 +85,7 @@ class Beatmap : public BeatmapInterface {
     [[nodiscard]] inline f32 getAimSliderFactor() const { return this->fAimSliderFactor; }
     [[nodiscard]] inline f32 getSpeedStars() const { return this->fSpeedStars; }
     [[nodiscard]] inline f32 getSpeedNotes() const { return this->fSpeedNotes; }
+    [[nodiscard]] f32 getSpeedMultiplier() const override;
 
     // hud
     [[nodiscard]] inline bool isSpinnerActive() const { return this->bIsSpinnerActive; }
@@ -319,7 +320,6 @@ class Beatmap : public BeatmapInterface {
     [[nodiscard]] u32 getScoreV1DifficultyMultiplier_full() const override;
     [[nodiscard]] Replay::Mods getMods_full() const override;
     [[nodiscard]] u32 getModsLegacy_full() const override;
-    [[nodiscard]] f32 getSpeedMultiplier_full() const override;
     [[nodiscard]] f32 getRawAR_full() const override;
     [[nodiscard]] f32 getAR_full() const override;
     [[nodiscard]] f32 getCS_full() const override;

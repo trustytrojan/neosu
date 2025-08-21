@@ -9,7 +9,6 @@ class HitObject;
     X(u32, getScoreV1DifficultyMultiplier, 0.01) \
     X(Replay::Mods, getMods, 0.01)               \
     X(u32, getModsLegacy, 0.01)                  \
-    X(f32, getSpeedMultiplier, 0.01)             \
     X(f32, getRawAR, 0.01)                       \
     X(f32, getRawOD, 0.01)                       \
     X(f32, getAR, 0.01)                          \
@@ -76,6 +75,7 @@ class BeatmapInterface {
     [[nodiscard]] virtual bool isClickHeld() const = 0;
     [[nodiscard]] virtual bool isKey1Down() const = 0;
     [[nodiscard]] virtual bool isKey2Down() const = 0;
+    [[nodiscard]] virtual f32 getSpeedMultiplier() const = 0;
 
     virtual void addScorePoints(int points, bool isSpinner = false) = 0;
     virtual void addSliderBreak() = 0;

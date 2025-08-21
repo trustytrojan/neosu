@@ -1122,7 +1122,7 @@ int Beatmap::getMostCommonBPM() const {
         return 0;
 }
 
-f32 Beatmap::getSpeedMultiplier_full() const {
+f32 Beatmap::getSpeedMultiplier() const {
     if(cv::speed_override.getFloat() >= 0.0f) {
         return std::max(cv::speed_override.getFloat(), 0.05f);
     } else {
@@ -1755,8 +1755,7 @@ void Beatmap::draw() {
     // draw first person crosshair
     if(cv::mod_fps.getBool()) {
         const int length = 15;
-        vec2 center =
-            this->osuCoords2Pixels(vec2(GameRules::OSU_COORD_WIDTH / 2, GameRules::OSU_COORD_HEIGHT / 2));
+        vec2 center = this->osuCoords2Pixels(vec2(GameRules::OSU_COORD_WIDTH / 2, GameRules::OSU_COORD_HEIGHT / 2));
         g->setColor(0xff777777);
         g->drawLine(center.x, (int)(center.y - length), center.x, (int)(center.y + length + 1));
         g->drawLine((int)(center.x - length), center.y, (int)(center.x + length + 1), center.y);
@@ -1947,8 +1946,8 @@ void Beatmap::drawFollowPoints() {
                 // this effect with user skins
                 const f32 scale = cv::followpoints_anim.getBool() ? 1.5f - 0.5f * followAnimPercent : 1.0f;
                 const vec2 followPos = cv::followpoints_anim.getBool()
-                                              ? animPosStart + (finalPos - animPosStart) * followAnimPercent
-                                              : finalPos;
+                                           ? animPosStart + (finalPos - animPosStart) * followAnimPercent
+                                           : finalPos;
 
                 // bullshit performance optimization: only draw followpoints if within screen bounds (plus a bit of a
                 // margin) there is only one beatmap where this matters currently: https://osu.ppy.sh/b/1145513
@@ -2632,8 +2631,8 @@ void Beatmap::update2() {
             percent = (f32)ms_since_last_frame / (f32)next_frame.milliseconds_since_last_frame;
         }
 
-        this->interpolatedMousePos = vec2{std::lerp(current_frame.x, next_frame.x, percent),
-                                             std::lerp(current_frame.y, next_frame.y, percent)};
+        this->interpolatedMousePos =
+            vec2{std::lerp(current_frame.x, next_frame.x, percent), std::lerp(current_frame.y, next_frame.y, percent)};
 
         if(cv::playfield_mirror_horizontal.getBool())
             this->interpolatedMousePos.y = GameRules::OSU_COORD_HEIGHT - this->interpolatedMousePos.y;
@@ -3532,9 +3531,9 @@ vec2 Beatmap::getCursorPos() const {
         vec2 pos = this->getMousePos();
         if(cv::mod_shirone.getBool() && osu->getScore()->getCombo() > 0) {
             return pos + vec2(std::sin((this->iCurMusicPos / 20.0f) * 1.15f) *
-                                     ((f32)osu->getScore()->getCombo() / cv::mod_shirone_combo.getFloat()),
-                                 std::cos((this->iCurMusicPos / 20.0f) * 1.3f) *
-                                     ((f32)osu->getScore()->getCombo() / cv::mod_shirone_combo.getFloat()));
+                                  ((f32)osu->getScore()->getCombo() / cv::mod_shirone_combo.getFloat()),
+                              std::cos((this->iCurMusicPos / 20.0f) * 1.3f) *
+                                  ((f32)osu->getScore()->getCombo() / cv::mod_shirone_combo.getFloat()));
         } else {
             return pos;
         }
@@ -4045,7 +4044,7 @@ void Beatmap::calculateStacks() {
                              : currHitObject->getOriginalRawPosAt(currHitObject->click_time);
 
                 if(vec::length((objectJ->getOriginalRawPosAt(objectJ->click_time) -
-                    currHitObject->getOriginalRawPosAt(currHitObject->click_time))) < 3) {
+                                currHitObject->getOriginalRawPosAt(currHitObject->click_time))) < 3) {
                     currHitObject->setStack(currHitObject->getStack() + 1);
                     startTime = objectJ->click_time + objectJ->duration;
                 } else if(vec::length((objectJ->getOriginalRawPosAt(objectJ->click_time) - position2)) < 3) {

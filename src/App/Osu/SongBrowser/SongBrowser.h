@@ -87,7 +87,6 @@ class SongBrowser final : public ScreenBackable {
         this->selectRandomBeatmap();
         this->playSelectedDifficulty();
     }
-    void recalculateStarsForSelectedBeatmap(bool force = false);
 
     void refreshBeatmaps();
     void addBeatmapSet(BeatmapSet *beatmap);
@@ -107,9 +106,7 @@ class SongBrowser final : public ScreenBackable {
         return this->collectionButtons;
     }
 
-    [[nodiscard]] inline const std::unique_ptr<BeatmapCarousel> &getCarousel() const {
-        return this->carousel;
-    }
+    [[nodiscard]] inline const std::unique_ptr<BeatmapCarousel> &getCarousel() const { return this->carousel; }
 
     [[nodiscard]] inline bool isInSearch() const { return this->bInSearch; }
     [[nodiscard]] inline bool isRightClickScrolling() const { return this->bSongBrowserRightClickScrolling; }
@@ -219,7 +216,7 @@ class SongBrowser final : public ScreenBackable {
     CBaseUIScrollView *scoreBrowser;
     CBaseUIElement *scoreBrowserScoresStillLoadingElement;
     CBaseUIElement *scoreBrowserNoRecordsYetElement;
-    CBaseUIContainer *localBestContainer;
+    std::unique_ptr<CBaseUIContainer> localBestContainer{nullptr};
     CBaseUILabel *localBestLabel;
     ScoreButton *localBestButton = nullptr;
     bool score_resort_scheduled = false;

@@ -242,8 +242,10 @@ Osu::Osu() {
     cv::playfield_mirror_vertical.setCallback(SA::MakeDelegate<&Osu::updateModsForConVarTemplate>(this));
     cv::playfield_rotation.setCallback(SA::MakeDelegate<&Osu::onPlayfieldChange>(this));
     cv::speed_override.setCallback(SA::MakeDelegate<&Osu::onSpeedChange>(this));
-    cv::mod_doubletime_dummy.setCallback(SA::MakeDelegate<&Osu::onDTPresetChange>(this));
-    cv::mod_halftime_dummy.setCallback(SA::MakeDelegate<&Osu::onHTPresetChange>(this));
+    cv::mod_doubletime_dummy.setCallback(
+        [] { cv::speed_override.setValue(cv::mod_doubletime_dummy.getBool() ? "1.5" : "-1.0"); });
+    cv::mod_halftime_dummy.setCallback(
+        [] { cv::speed_override.setValue(cv::mod_halftime_dummy.getBool() ? "0.75" : "-1.0"); });
     cv::draw_songbrowser_thumbnails.setCallback(SA::MakeDelegate<&Osu::onThumbnailsToggle>(this));
     cv::bleedingedge.setCallback(SA::MakeDelegate<&UpdateHandler::onBleedingEdgeChanged>(this->updateHandler));
 
@@ -576,7 +578,7 @@ void Osu::draw() {
         this->backBuffer->disable();
 
         vec2 offset = vec2(g->getResolution().x / 2 - g_vInternalResolution.x / 2,
-                                 g->getResolution().y / 2 - g_vInternalResolution.y / 2);
+                           g->getResolution().y / 2 - g_vInternalResolution.y / 2);
         g->setBlending(false);
         if(cv::letterboxing.getBool()) {
             this->backBuffer->draw(offset.x * (1.0f + cv::letterboxing_offset_x.getFloat()),
@@ -894,11 +896,6 @@ void Osu::updateMods() {
 
     osu->getScore()->mods = Replay::Mods::from_cvars();
     osu->getScore()->setCheated();
-
-    if(this->songBrowser2 != nullptr) {
-        // Update pp/stars display for current map
-        this->songBrowser2->recalculateStarsForSelectedBeatmap(true);
-    }
 
     if(this->isInPlayMode()) {
         // notify the possibly running beatmap of mod changes
@@ -1672,12 +1669,12 @@ void Osu::updateMouseSettings() {
     vec2 scale = vec2(1, 1);
     if((g->getResolution() != g_vInternalResolution) && cv::letterboxing.getBool()) {
         offset = -vec2((engine->getScreenWidth() / 2.f - g_vInternalResolution.x / 2.f) *
-                              (1.0f + cv::letterboxing_offset_x.getFloat()),
-                          (engine->getScreenHeight() / 2.f - g_vInternalResolution.y / 2.f) *
-                              (1.0f + cv::letterboxing_offset_y.getFloat()));
+                           (1.0f + cv::letterboxing_offset_x.getFloat()),
+                       (engine->getScreenHeight() / 2.f - g_vInternalResolution.y / 2.f) *
+                           (1.0f + cv::letterboxing_offset_y.getFloat()));
 
         scale = vec2(g_vInternalResolution.x / engine->getScreenWidth(),
-                        g_vInternalResolution.y / engine->getScreenHeight());
+                     g_vInternalResolution.y / engine->getScreenHeight());
     }
 
     mouse->setOffset(offset);
@@ -1875,28 +1872,22 @@ void Osu::onSpeedChange(const UString &newValue) {
     this->getSelectedBeatmap()->setSpeed(speed >= 0.0f ? speed : this->getSelectedBeatmap()->getSpeedMultiplier());
     this->updateAnimationSpeed();
 
-    // HACKHACK: Update DT/HT buttons, speed slider etc
-    cv::mod_doubletime_dummy.setValue(speed == 1.5f, false);
-    osu->getModSelector()->modButtonDoubletime->setOn(speed == 1.5f, true);
-    cv::mod_halftime_dummy.setValue(speed == 0.75f, false);
-    osu->getModSelector()->modButtonHalftime->setOn(speed == 0.75f, true);
-    osu->getModSelector()->updateButtons(true);
-    osu->getModSelector()->updateScoreMultiplierLabelText();
-    osu->getModSelector()->updateOverrideSliderLabels();
-}
+    // Update mod menu UI
+    {
+        // DT/HT buttons
+        cv::mod_doubletime_dummy.setValue(speed == 1.5f, false);
+        osu->getModSelector()->modButtonDoubletime->setOn(speed == 1.5f, true);
+        cv::mod_halftime_dummy.setValue(speed == 0.75f, false);
+        osu->getModSelector()->modButtonHalftime->setOn(speed == 0.75f, true);
+        osu->getModSelector()->updateButtons(true);
 
-void Osu::onDTPresetChange() {
-    cv::speed_override.setValue(cv::mod_doubletime_dummy.getBool() ? 1.5f : -1.f);
-    osu->getModSelector()->speedSlider->setValue(
-        cv::speed_override.getFloat() == -1 ? cv::speed_override.getFloat() : cv::speed_override.getFloat() + 1.0f,
-        false, false);
-}
+        // Speed slider ('+1' to compensate for turn-off area of the override sliders)
+        osu->getModSelector()->speedSlider->setValue(speed + 1.f, true, false);
+        osu->getModSelector()->updateOverrideSliderLabels();
 
-void Osu::onHTPresetChange() {
-    cv::speed_override.setValue(cv::mod_halftime_dummy.getBool() ? 0.75f : -1.f);
-    osu->getModSelector()->speedSlider->setValue(
-        cv::speed_override.getFloat() == -1 ? cv::speed_override.getFloat() : cv::speed_override.getFloat() + 1.0f,
-        false, false);
+        // Score multiplier
+        osu->getModSelector()->updateScoreMultiplierLabelText();
+    }
 }
 
 void Osu::onThumbnailsToggle() {

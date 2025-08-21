@@ -458,7 +458,7 @@ SongBrowser::SongBrowser()  // NOLINT(cert-msc51-cpp, cert-msc32-c)
 
     // NOTE: we don't add localBestContainer to the screen; we draw and update it manually so that
     //       it can be drawn under skins which overlay the scores list.
-    this->localBestContainer = new CBaseUIContainer(0, 0, 0, 0, "");
+    this->localBestContainer = std::make_unique<CBaseUIContainer>(0, 0, 0, 0, "");
     this->localBestContainer->setVisible(false);
     this->localBestLabel = new CBaseUILabel(0, 0, 0, 0, "", "Personal Best (from local scores)");
     this->localBestLabel->setDrawBackground(false);
@@ -534,6 +534,7 @@ SongBrowser::~SongBrowser() {
     }
     this->scoreButtonCache.clear();
 
+    this->localBestContainer->invalidate();  // contained elements freed manually below
     SAFE_DELETE(this->localBestButton);
     SAFE_DELETE(this->localBestLabel);
     SAFE_DELETE(this->scoreBrowserScoresStillLoadingElement);
@@ -545,7 +546,6 @@ SongBrowser::~SongBrowser() {
     SAFE_DELETE(this->topbarLeft);
     SAFE_DELETE(this->topbarRight);
     SAFE_DELETE(this->scoreBrowser);
-    SAFE_DELETE(this->localBestContainer);
     db.reset();
 
     // Memory leak on shutdown, maybe
@@ -940,30 +940,6 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
         db->peppy_overrides_mtx.unlock();
 
         maps.clear();
-    }
-
-    // selected mods pp calc
-    auto diff2 = this->beatmap->getSelectedDifficulty2();
-    lct_set_map(diff2);
-    if(diff2 != nullptr && diff2->pp.pp == -1.0) {
-        auto mods = osu->getScore()->mods;
-
-        pp_calc_request request;
-        request.mods_legacy = mods.to_legacy();
-        request.speed = mods.speed;
-        request.AR = mods.get_naive_ar(diff2);
-        request.OD = mods.get_naive_od(diff2);
-        request.CS = diff2->getCS();
-        if(mods.cs_override != -1.f) request.CS = mods.cs_override;
-        request.rx = ModMasks::eq(mods.flags, Replay::ModFlags::Relax);
-        request.td = ModMasks::eq(mods.flags, Replay::ModFlags::TouchDevice);
-        request.comboMax = -1;
-        request.numMisses = 0;
-        request.num300s = diff2->getNumObjects();
-        request.num100s = 0;
-        request.num50s = 0;
-
-        diff2->pp = lct_get_pp(request);
     }
 
     // auto-download
@@ -1397,9 +1373,6 @@ void SongBrowser::onDifficultySelected(DatabaseBeatmap *diff2, bool play) {
 
     // update web button
     this->webButton->setVisible(this->songInfo->getBeatmapID() > 0);
-
-    // trigger dynamic star calc (including current mods etc.)
-    this->recalculateStarsForSelectedBeatmap();
 }
 
 void SongBrowser::refreshBeatmaps() {
@@ -3239,12 +3212,6 @@ void SongBrowser::highlightScore(u64 unixTimestamp) {
             break;
         }
     }
-}
-
-void SongBrowser::recalculateStarsForSelectedBeatmap(bool /*force*/) {
-    if(this->beatmap->getSelectedDifficulty2() == nullptr) return;
-
-    this->beatmap->getSelectedDifficulty2()->pp.pp = -1.0;
 }
 
 void SongBrowser::selectSongButton(CarouselButton *songButton) {

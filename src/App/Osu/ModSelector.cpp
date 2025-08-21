@@ -51,7 +51,9 @@ class ModSelectorOverrideSliderDescButton : public CBaseUIButton {
 
         if(this->isMouseInside() && this->sTooltipText.length() > 0) {
             osu->getTooltipOverlay()->begin();
-            { osu->getTooltipOverlay()->addLine(this->sTooltipText); }
+            {
+                osu->getTooltipOverlay()->addLine(this->sTooltipText);
+            }
             osu->getTooltipOverlay()->end();
         }
     }
@@ -518,8 +520,8 @@ void ModSelector::draw() {
             {
                 g->rotate(90);
                 g->translate(
-                    (int)(experimentalTextHeight / 3.0f +
-                          std::max(0.0f, experimentalModsAnimationTranslation + this->experimentalContainer->getSize().x)),
+                    (int)(experimentalTextHeight / 3.0f + std::max(0.0f, experimentalModsAnimationTranslation +
+                                                                             this->experimentalContainer->getSize().x)),
                     (int)(osu->getScreenHeight() / 2 - experimentalTextWidth / 2));
                 g->setColor(Color(0xff777777).setA(1.0f - this->fExperimentalAnimation * this->fExperimentalAnimation));
 
@@ -531,7 +533,7 @@ void ModSelector::draw() {
             {
                 g->rotate(90);
                 g->translate((int)(rectHeight + std::max(0.0f, experimentalModsAnimationTranslation +
-                                                              this->experimentalContainer->getSize().x)),
+                                                                   this->experimentalContainer->getSize().x)),
                              (int)(osu->getScreenHeight() / 2 - rectWidth / 2));
                 g->drawRect(0, 0, rectWidth, rectHeight);
             }
@@ -589,7 +591,9 @@ void ModSelector::mouse_update(bool *propagate_clicks) {
             for(auto &overrideSlider : this->overrideSliders) {
                 if(overrideSlider.slider->isBusy()) {
                     osu->getTooltipOverlay()->begin();
-                    { osu->getTooltipOverlay()->addLine("Hold [ALT] to slide in 0.01 increments."); }
+                    {
+                        osu->getTooltipOverlay()->addLine("Hold [ALT] to slide in 0.01 increments.");
+                    }
                     osu->getTooltipOverlay()->end();
 
                     if(keyboard->isAltDown()) this->bShowOverrideSliderALTHint = false;
@@ -633,10 +637,7 @@ void ModSelector::mouse_update(bool *propagate_clicks) {
             this->bWaitForSpeedChangeFinished = false;
             this->bWaitForHPChangeFinished = false;
 
-            {
-                if(osu->isInPlayMode()) osu->getSelectedBeatmap()->onModUpdate();
-                osu->getSongBrowser()->recalculateStarsForSelectedBeatmap(true);
-            }
+            if(osu->isInPlayMode()) osu->getSelectedBeatmap()->onModUpdate();
         }
 
         // handle dynamic live pp calculation updates (when CS or Speed/BPM changes)
@@ -647,10 +648,7 @@ void ModSelector::mouse_update(bool *propagate_clicks) {
             this->bWaitForSpeedChangeFinished = false;
             this->bWaitForHPChangeFinished = false;
 
-            {
-                if(osu->isInPlayMode()) osu->getSelectedBeatmap()->onModUpdate();
-                osu->getSongBrowser()->recalculateStarsForSelectedBeatmap(true);
-            }
+            if(osu->isInPlayMode()) osu->getSelectedBeatmap()->onModUpdate();
         }
 
         // handle dynamic HP drain updates
@@ -791,9 +789,8 @@ void ModSelector::updateLayout() {
         vec2 center = osu->getScreenSize() / 2.0f;
         vec2 size = osu->getSkin()->getSelectionModEasy()->getSizeBase() * uiScale;
         vec2 offset = vec2(size.x * 1.0f, size.y * 0.25f);
-        vec2 start =
-            vec2(center.x - (size.x * this->iGridWidth) / 2.0f - (offset.x * (this->iGridWidth - 1)) / 2.0f,
-                    center.y - (size.y * this->iGridHeight) / 2.0f - (offset.y * (this->iGridHeight - 1)) / 2.0f);
+        vec2 start = vec2(center.x - (size.x * this->iGridWidth) / 2.0f - (offset.x * (this->iGridWidth - 1)) / 2.0f,
+                          center.y - (size.y * this->iGridHeight) / 2.0f - (offset.y * (this->iGridHeight - 1)) / 2.0f);
 
         for(int x = 0; x < this->iGridWidth; x++) {
             for(int y = 0; y < this->iGridHeight; y++) {
@@ -816,9 +813,9 @@ void ModSelector::updateLayout() {
             0.35f;
         const vec2 overrideSliderStart =
             vec2(osu->getScreenWidth() / 2 - overrideSliderWidth / 2,
-                    start.y / 2 - (this->overrideSliders.size() * overrideSliderHeight +
-                                   (this->overrideSliders.size() - 1) * overrideSliderOffsetY) /
-                                      1.75f);
+                 start.y / 2 - (this->overrideSliders.size() * overrideSliderHeight +
+                                (this->overrideSliders.size() - 1) * overrideSliderOffsetY) /
+                                   1.75f);
         for(int i = 0; i < this->overrideSliders.size(); i++) {
             this->overrideSliders[i].desc->setSizeToContent(5 * dpiScale, 0);
             this->overrideSliders[i].desc->setSizeY(overrideSliderHeight);
@@ -884,7 +881,7 @@ void ModSelector::updateLayout() {
         vec2 blockSize = osu->getSkin()->getSelectionModEasy()->getSizeBase() * uiScale;
         vec2 offset = vec2(blockSize.x * 0.15f, blockSize.y * 0.05f);
         vec2 size = vec2((blockSize.x * this->iGridWidth) + (offset.x * (this->iGridWidth - 1)),
-                               (blockSize.y * this->iGridHeight) + (offset.y * (this->iGridHeight - 1)));
+                         (blockSize.y * this->iGridHeight) + (offset.y * (this->iGridHeight - 1)));
         center.y = osu->getScreenHeight() - size.y / 2 - offset.y * 3.0f;
         vec2 start = vec2(center.x - size.x / 2.0f, center.y - size.y / 2.0f);
 
@@ -1004,7 +1001,7 @@ void ModSelector::updateExperimentalLayout() {
 }
 
 UIModSelectorModButton *ModSelector::setModButtonOnGrid(int x, int y, int state, bool initialState, ConVar *modCvar,
-                                                        UString modName, const UString& tooltipText,
+                                                        UString modName, const UString &tooltipText,
                                                         std::function<SkinImage *()> getImageFunc) {
     UIModSelectorModButton *modButton = this->getModButtonOnGrid(x, y);
 
@@ -1025,8 +1022,9 @@ UIModSelectorModButton *ModSelector::getModButtonOnGrid(int x, int y) {
         return nullptr;
 }
 
-ModSelector::OVERRIDE_SLIDER ModSelector::addOverrideSlider(UString text, const UString& labelText, ConVar *cvar, float min,
-                                                            float max, UString tooltipText, ConVar *lockCvar) {
+ModSelector::OVERRIDE_SLIDER ModSelector::addOverrideSlider(UString text, const UString &labelText, ConVar *cvar,
+                                                            float min, float max, UString tooltipText,
+                                                            ConVar *lockCvar) {
     int height = 25;
 
     OVERRIDE_SLIDER os;
@@ -1072,7 +1070,7 @@ ModSelector::OVERRIDE_SLIDER ModSelector::addOverrideSlider(UString text, const 
     return os;
 }
 
-UIButton *ModSelector::addActionButton(const UString& text) {
+UIButton *ModSelector::addActionButton(const UString &text) {
     auto *actionButton = new UIButton(50, 50, 100, 100, text, text);
     this->actionButtons.push_back(actionButton);
     this->addBaseUIElement(actionButton);
@@ -1080,7 +1078,7 @@ UIButton *ModSelector::addActionButton(const UString& text) {
     return actionButton;
 }
 
-CBaseUILabel *ModSelector::addExperimentalLabel(const UString& text) {
+CBaseUILabel *ModSelector::addExperimentalLabel(const UString &text) {
     auto *label = new CBaseUILabel(0, 0, 0, 25, text, text);
     label->setFont(osu->getSubTitleFont());
     label->setWidthToContent(0);
@@ -1096,7 +1094,7 @@ CBaseUILabel *ModSelector::addExperimentalLabel(const UString& text) {
     return label;
 }
 
-UICheckbox *ModSelector::addExperimentalCheckbox(const UString& text, const UString& tooltipText, ConVar *cvar) {
+UICheckbox *ModSelector::addExperimentalCheckbox(const UString &text, const UString &tooltipText, ConVar *cvar) {
     auto *checkbox = new UICheckbox(0, 0, 0, 35, text, text);
     checkbox->setTooltipText(tooltipText);
     checkbox->setWidthToContent(0);
@@ -1222,77 +1220,71 @@ void ModSelector::close() {
 
 void ModSelector::onOverrideSliderChange(CBaseUISlider *slider) {
     for(auto &overrideSlider : this->overrideSliders) {
-        if(overrideSlider.slider == slider) {
-            float sliderValue = slider->getFloat() - 1.0f;
-            const float rawSliderValue = slider->getFloat();
+        if(overrideSlider.slider != slider) continue;
 
-            // alt key allows rounding to only 1 decimal digit
-            if(!keyboard->isAltDown())
-                sliderValue = std::round(sliderValue * 10.0f) / 10.0f;
-            else
-                sliderValue = std::round(sliderValue * 100.0f) / 100.0f;
+        float sliderValue = slider->getFloat() - 1.0f;
+        const float rawSliderValue = slider->getFloat();
 
-            if(sliderValue < 0.0f) {
-                sliderValue = -1.0f;
-                overrideSlider.label->setWidthToContent(0);
+        // alt key allows rounding to only 1 decimal digit
+        if(!keyboard->isAltDown())
+            sliderValue = std::round(sliderValue * 10.0f) / 10.0f;
+        else
+            sliderValue = std::round(sliderValue * 100.0f) / 100.0f;
 
-                // HACKHACK: dirty
-                if(osu->getSelectedBeatmap()->getSelectedDifficulty2() != nullptr) {
-                    if(overrideSlider.label->getName().find("BPM") != -1) {
-                        // reset AR and OD override sliders if the bpm slider was reset
-                        if(!this->ARLock->isChecked()) this->ARSlider->setValue(0.0f, false);
-                        if(!this->ODLock->isChecked()) this->ODSlider->setValue(0.0f, false);
-                    }
-                }
+        if(sliderValue < 0.0f) {
+            sliderValue = -1.0f;
+            overrideSlider.label->setWidthToContent(0);
 
-                // usability: auto disable lock if override slider is fully set to -1.0f (disabled)
-                if(rawSliderValue == 0.0f) {
-                    if(overrideSlider.lock != nullptr && overrideSlider.lock->isChecked())
-                        overrideSlider.lock->setChecked(false);
-                }
-            } else {
-                // AR/OD lock may not be used in conjunction with BPM
+            // HACKHACK: dirty
+            if(osu->getSelectedBeatmap()->getSelectedDifficulty2() != nullptr) {
                 if(overrideSlider.label->getName().find("BPM") != -1) {
-                    this->ARLock->setChecked(false);
-                    this->ODLock->setChecked(false);
+                    // reset AR and OD override sliders if the bpm slider was reset
+                    if(!this->ARLock->isChecked()) this->ARSlider->setValue(0.0f, false);
+                    if(!this->ODLock->isChecked()) this->ODSlider->setValue(0.0f, false);
                 }
-
-                // HACKHACK: dirty
-                if(osu->getSelectedBeatmap()->getSelectedDifficulty2() != nullptr) {
-                    if(overrideSlider.label->getName().find("BPM") != -1) {
-                        // HACKHACK: force BPM slider to have a min value of 0.05 instead of 0 (because that's the
-                        // minimum for BASS) note that the BPM slider is just a 'fake' slider, it directly controls the
-                        // speed slider to do its thing (thus it needs the same limits)
-                        sliderValue = std::max(sliderValue, 0.05f);
-
-                        // speed slider may not be used in conjunction
-                        this->speedSlider->setValue(0.0f, false);
-
-                        // force early update
-                        overrideSlider.cvar->setValue(sliderValue);
-
-                        // force change all other depending sliders
-                        const float newAR = osu->getSelectedBeatmap()->getConstantApproachRateForSpeedMultiplier();
-                        const float newOD = osu->getSelectedBeatmap()->getConstantOverallDifficultyForSpeedMultiplier();
-
-                        // '+1' to compensate for turn-off area of the override sliders
-                        this->ARSlider->setValue(newAR + 1.0f, false);
-                        this->ODSlider->setValue(newOD + 1.0f, false);
-                    }
-                }
-
-                // HACKHACK: force speed slider to have a min value of 0.05 instead of 0 (because that's the minimum for
-                // BASS)
-                if(overrideSlider.desc->getText().find("Speed") != -1) sliderValue = std::max(sliderValue, 0.05f);
             }
 
-            // update convar with final value (e.g. osu_ar_override, osu_speed_override, etc.)
-            overrideSlider.cvar->setValue(sliderValue);
+            // usability: auto disable lock if override slider is fully set to -1.0f (disabled)
+            if(rawSliderValue == 0.0f) {
+                if(overrideSlider.lock != nullptr && overrideSlider.lock->isChecked())
+                    overrideSlider.lock->setChecked(false);
+            }
+        } else {
+            // HACKHACK: dirty
+            if(overrideSlider.label->getName().find("BPM") != -1) {
+                // HACKHACK: force Speed/BPM slider to have a min value of 0.05 instead of 0 (because that's the
+                // minimum for BASS) note that the BPM slider is just a 'fake' slider, it directly controls the
+                // speed slider to do its thing (thus it needs the same limits)
+                sliderValue = std::max(sliderValue, 0.05f);
 
-            this->updateOverrideSliderLabels();
+                // speed slider may not be used in conjunction
+                this->speedSlider->setValue(0.0f, false);
 
-            break;
+                // force early update
+                overrideSlider.cvar->setValue(sliderValue);
+
+                // AR/OD lock may not be used in conjunction with BPM
+                this->ARLock->setChecked(false);
+                this->ODLock->setChecked(false);
+
+                // force change all other depending sliders
+                if(osu->getSelectedBeatmap()->getSelectedDifficulty2() != nullptr) {
+                    const float newAR = osu->getSelectedBeatmap()->getConstantApproachRateForSpeedMultiplier();
+                    const float newOD = osu->getSelectedBeatmap()->getConstantOverallDifficultyForSpeedMultiplier();
+
+                    // '+1' to compensate for turn-off area of the override sliders
+                    this->ARSlider->setValue(newAR + 1.0f, false);
+                    this->ODSlider->setValue(newOD + 1.0f, false);
+                }
+            }
         }
+
+        // update convar with final value (e.g. cv::ar_override, etc.)
+        overrideSlider.cvar->setValue(sliderValue);
+
+        this->updateOverrideSliderLabels();
+
+        break;
     }
 
     osu->updateMods();
@@ -1483,10 +1475,7 @@ void ModSelector::onCheckboxChange(CBaseUICheckbox *checkbox) {
             if(experimentalMod.cvar != nullptr) experimentalMod.cvar->setValue(checkbox->isChecked());
 
             // force mod update
-            {
-                if(osu->isInPlayMode()) osu->getSelectedBeatmap()->onModUpdate();
-                osu->getSongBrowser()->recalculateStarsForSelectedBeatmap(true);
-            }
+            if(osu->isInPlayMode()) osu->getSelectedBeatmap()->onModUpdate();
 
             break;
         }

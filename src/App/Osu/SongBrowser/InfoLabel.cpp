@@ -13,6 +13,7 @@
 #include "Engine.h"
 #include "Environment.h"
 #include "GameRules.h"
+#include "LeaderboardPPCalcThread.h"
 #include "Mouse.h"
 #include "NotificationOverlay.h"
 #include "OptionsMenu.h"
@@ -246,9 +247,9 @@ void InfoLabel::mouse_update(bool *propagate_clicks) {
                         (lengthMS > 0 ? ((float)numSliders / (float)(lengthMS / 1000.0f / 60.0f)) : 0.0f) *
                         beatmap->getSpeedMultiplier();
 
-                    osu->getTooltipOverlay()->addLine(UString::format("Circles: %i, Sliders: %i, Spinners: %i",
-                                                                      numCircles, numSliders,
-                                                                      std::max(0, numObjects - numCircles - numSliders)));
+                    osu->getTooltipOverlay()->addLine(
+                        UString::format("Circles: %i, Sliders: %i, Spinners: %i", numCircles, numSliders,
+                                        std::max(0, numObjects - numCircles - numSliders)));
                     osu->getTooltipOverlay()->addLine(
                         UString::format("OPM: %i, CPM: %i, SPM: %i", (int)opm, (int)cpm, (int)spm));
                     osu->getTooltipOverlay()->addLine(UString::format("ID: %i, SetID: %i",
@@ -307,6 +308,11 @@ UString InfoLabel::buildSongInfoString() {
 }
 
 UString InfoLabel::buildDiffInfoString() {
+    auto *beatmap = osu->getSelectedBeatmap();
+    if(!beatmap) return "";
+    auto diff2 = beatmap->getSelectedDifficulty2();
+    if(!diff2) return "";
+
     bool pp_available = false;
     float CS = this->fCS;
     float AR = this->fAR;
@@ -316,21 +322,37 @@ UString InfoLabel::buildDiffInfoString() {
     float modStars = 0.f;
     float modPp = 0.f;
 
-    Beatmap *beatmap = osu->getSelectedBeatmap();
-    if(beatmap != nullptr) {
+    // pp calc for currently selected mods
+    {
+        lct_set_map(diff2);
+
+        auto mods = osu->getScore()->mods;
+        pp_calc_request request;
+        request.mods_legacy = mods.to_legacy();
+        request.speed = mods.speed;
+        request.AR = mods.get_naive_ar(diff2);
+        request.OD = mods.get_naive_od(diff2);
+        request.CS = diff2->getCS();
+        if(mods.cs_override != -1.f) request.CS = mods.cs_override;
+        request.rx = ModMasks::eq(mods.flags, Replay::ModFlags::Relax);
+        request.td = ModMasks::eq(mods.flags, Replay::ModFlags::TouchDevice);
+        request.comboMax = -1;
+        request.numMisses = 0;
+        request.num300s = diff2->getNumObjects();
+        request.num100s = 0;
+        request.num50s = 0;
+
+        auto pp = lct_get_pp(request);
+        if(pp.pp != -1.0) {
+            modStars = pp.total_stars;
+            modPp = pp.pp;
+            pp_available = true;
+        }
+
         CS = beatmap->getCS();
         AR = beatmap->getApproachRateForSpeedMultiplier();
         OD = beatmap->getOverallDifficultyForSpeedMultiplier();
         HP = beatmap->getHP();
-
-        auto diff2 = beatmap->getSelectedDifficulty2();
-        if(diff2) {
-            modStars = diff2->pp.total_stars;
-            modPp = diff2->pp.pp;
-            if(modPp != -1.0) {
-                pp_available = true;
-            }
-        }
     }
 
     const float starComparisonEpsilon = 0.01f;
