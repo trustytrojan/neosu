@@ -665,7 +665,7 @@ AC_MSG_CHECKING([for shaders in $srcdir/$ASSETS_DIR/shaders])
 AS_IF([test -f "$srcdir/$ASSETS_DIR/shaders/slider_f.glsl"], [
     AC_MSG_RESULT([yes])
     SHADERS_INCDIR="$srcdir/$ASSETS_DIR/shaders/"
-    INCBIN_FLAGS="$INCBIN_FLAGS $SHADERS_INCDIR"
+    INCBIN_FLAGS="$INCBIN_FLAGS -I$SHADERS_INCDIR"
     AC_SUBST([SHADERS_INCDIR])
 ], [
     AC_MSG_RESULT([no])

@@ -131,7 +131,10 @@ bin_PROGRAMS = neosu$(EXEEXT)
 @BUILD_LZMA_TRUE@am__append_29 = $(shell $(PKG_CONFIG) --libs liblzma)
 @BUILD_LIBARCHIVE_TRUE@am__append_30 = $(shell $(PKG_CONFIG) --cflags libarchive)
 @BUILD_LIBARCHIVE_TRUE@am__append_31 = $(shell $(PKG_CONFIG) --libs libarchive)
-@WIN_PLATFORM_FALSE@am__append_32 = lib/
+
+# mimalloc new/delete override for windows
+@WIN_PLATFORM_TRUE@am__append_32 = $(MIMALLOC_OVERRIDE_DEP)
+@WIN_PLATFORM_FALSE@am__append_33 = lib/
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -147,7 +150,109 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
+am__neosu_SOURCES_DIST = libraries/MD5.cpp libraries/base64.cpp \
+	libraries/cJSON.cpp libraries/glad/glad.cpp \
+	libraries/lodepng.cpp libraries/sha256.cpp \
+	src/App/Osu/AvatarManager.cpp \
+	src/App/Osu/BackgroundImageHandler.cpp src/App/Osu/Bancho.cpp \
+	src/App/Osu/BanchoAes.cpp src/App/Osu/BanchoLeaderboard.cpp \
+	src/App/Osu/BanchoNetworking.cpp \
+	src/App/Osu/BanchoProtocol.cpp src/App/Osu/BanchoSubmitter.cpp \
+	src/App/Osu/BanchoUsers.cpp src/App/Osu/Beatmap.cpp \
+	src/App/Osu/BeatmapInterface.cpp src/App/Osu/Changelog.cpp \
+	src/App/Osu/Chat.cpp src/App/Osu/ChatLink.cpp \
+	src/App/Osu/Collections.cpp src/App/Osu/Database.cpp \
+	src/App/Osu/DatabaseBeatmap.cpp \
+	src/App/Osu/DifficultyCalculator.cpp \
+	src/App/Osu/Downloader.cpp src/App/Osu/EnvironmentInterop.cpp \
+	src/App/Osu/HUD.cpp src/App/Osu/HitObjects.cpp \
+	src/App/Osu/Icons.cpp src/App/Osu/LegacyReplay.cpp \
+	src/App/Osu/Lobby.cpp src/App/Osu/MainMenu.cpp \
+	src/App/Osu/ModFPoSu.cpp src/App/Osu/ModSelector.cpp \
+	src/App/Osu/Multiplayer.cpp \
+	src/App/Osu/NotificationOverlay.cpp \
+	src/App/Osu/OptionsMenu.cpp src/App/Osu/Osu.cpp \
+	src/App/Osu/PauseMenu.cpp src/App/Osu/PeppyImporter.cpp \
+	src/App/Osu/PromptScreen.cpp src/App/Osu/RankingScreen.cpp \
+	src/App/Osu/Replay.cpp src/App/Osu/RichPresence.cpp \
+	src/App/Osu/RoomScreen.cpp src/App/Osu/ScoreboardSlot.cpp \
+	src/App/Osu/ScreenBackable.cpp \
+	src/App/Osu/SimulatedBeatmap.cpp src/App/Osu/Skin.cpp \
+	src/App/Osu/SkinImage.cpp src/App/Osu/SliderCurves.cpp \
+	src/App/Osu/SliderRenderer.cpp \
+	src/App/Osu/SongBrowser/BeatmapCarousel.cpp \
+	src/App/Osu/SongBrowser/BottomBar.cpp \
+	src/App/Osu/SongBrowser/CarouselButton.cpp \
+	src/App/Osu/SongBrowser/CollectionButton.cpp \
+	src/App/Osu/SongBrowser/InfoLabel.cpp \
+	src/App/Osu/SongBrowser/LeaderboardPPCalcThread.cpp \
+	src/App/Osu/SongBrowser/LoudnessCalcThread.cpp \
+	src/App/Osu/SongBrowser/MapCalcThread.cpp \
+	src/App/Osu/SongBrowser/ScoreButton.cpp \
+	src/App/Osu/SongBrowser/ScoreConverterThread.cpp \
+	src/App/Osu/SongBrowser/SongBrowser.cpp \
+	src/App/Osu/SongBrowser/SongButton.cpp \
+	src/App/Osu/SongBrowser/SongDifficultyButton.cpp \
+	src/App/Osu/SpectatorScreen.cpp src/App/Osu/TooltipOverlay.cpp \
+	src/App/Osu/UIAvatar.cpp src/App/Osu/UIBackButton.cpp \
+	src/App/Osu/UIButton.cpp src/App/Osu/UICheckbox.cpp \
+	src/App/Osu/UIContextMenu.cpp \
+	src/App/Osu/UIModSelectorModButton.cpp \
+	src/App/Osu/UIPauseMenuButton.cpp \
+	src/App/Osu/UIRankingScreenInfoLabel.cpp \
+	src/App/Osu/UIRankingScreenRankingPanel.cpp \
+	src/App/Osu/UISearchOverlay.cpp src/App/Osu/UISlider.cpp \
+	src/App/Osu/UIUserContextMenu.cpp \
+	src/App/Osu/UIVolumeSlider.cpp src/App/Osu/UpdateHandler.cpp \
+	src/App/Osu/UserCard.cpp src/App/Osu/UserCard2.cpp \
+	src/App/Osu/UserStatsScreen.cpp src/App/Osu/VolumeOverlay.cpp \
+	src/App/Osu/score.cpp src/Binary/curl_blob.cpp \
+	src/Binary/shaders.cpp src/Engine/AnimationHandler.cpp \
+	src/Engine/Archival.cpp src/Engine/ByteBufferedFile.cpp \
+	src/Engine/Camera.cpp src/Engine/ConVar.cpp \
+	src/Engine/DiscordInterface.cpp src/Engine/Engine.cpp \
+	src/Engine/Environment.cpp src/Engine/FPSLimiter.cpp \
+	src/Engine/File.cpp src/Engine/Font.cpp src/Engine/Image.cpp \
+	src/Engine/Input/KeyBindings.cpp src/Engine/Input/Keyboard.cpp \
+	src/Engine/Input/Mouse.cpp src/Engine/NetworkHandler.cpp \
+	src/Engine/Profiler.cpp src/Engine/Renderer/Graphics.cpp \
+	src/Engine/Renderer/OpenGL/OpenGLImage.cpp \
+	src/Engine/Renderer/OpenGL/OpenGLLegacyInterface.cpp \
+	src/Engine/Renderer/OpenGL/OpenGLRenderTarget.cpp \
+	src/Engine/Renderer/OpenGL/OpenGLShader.cpp \
+	src/Engine/Renderer/OpenGL/OpenGLStateCache.cpp \
+	src/Engine/Renderer/OpenGL/OpenGLSync.cpp \
+	src/Engine/Renderer/OpenGL/OpenGLVertexArrayObject.cpp \
+	src/Engine/Renderer/OpenGL/SDLGLInterface.cpp \
+	src/Engine/Renderer/RenderTarget.cpp \
+	src/Engine/Renderer/VertexArrayObject.cpp \
+	src/Engine/Resources/AsyncResourceLoader.cpp \
+	src/Engine/Resources/Resource.cpp \
+	src/Engine/Resources/ResourceManager.cpp \
+	src/Engine/Sound/BASS/BassManager.cpp \
+	src/Engine/Sound/BASS/BassSound.cpp \
+	src/Engine/Sound/BASS/BassSoundEngine.cpp \
+	src/Engine/Sound/PlaybackInterpolator.cpp \
+	src/Engine/Sound/SoLoud/SoLoudFX.cpp \
+	src/Engine/Sound/SoLoud/SoLoudSound.cpp \
+	src/Engine/Sound/SoLoud/SoLoudSoundEngine.cpp \
+	src/Engine/Sound/Sound.cpp src/Engine/Sound/SoundEngine.cpp \
+	src/Engine/TextureAtlas.cpp src/GUI/CBaseUIButton.cpp \
+	src/GUI/CBaseUICheckbox.cpp src/GUI/CBaseUIContainer.cpp \
+	src/GUI/CBaseUIElement.cpp src/GUI/CBaseUIImage.cpp \
+	src/GUI/CBaseUIImageButton.cpp src/GUI/CBaseUILabel.cpp \
+	src/GUI/CBaseUIScrollView.cpp src/GUI/CBaseUISlider.cpp \
+	src/GUI/CBaseUITextField.cpp src/GUI/CBaseUITextbox.cpp \
+	src/GUI/CBaseUIWindow.cpp src/GUI/CWindowManager.cpp \
+	src/GUI/Windows/Console.cpp src/GUI/Windows/ConsoleBox.cpp \
+	src/GUI/Windows/VisualProfiler.cpp src/Platform/main.cpp \
+	src/Platform/main_impl.cpp src/Util/Quaternion.cpp \
+	src/Util/Rect.cpp src/Util/UString.cpp src/Util/crypto.cpp \
+	src/Util/dynutils.cpp \
+	$(DEPS_PREFIX)/mimalloc/mimalloc_new_delete.cpp
 am__dirstamp = $(am__leading_dot)dirstamp
+@BUILD_MIMALLOC_TRUE@@WIN_PLATFORM_TRUE@am__objects_1 = $(DEPS_PREFIX)/mimalloc/neosu-mimalloc_new_delete.$(OBJEXT)
+@WIN_PLATFORM_TRUE@am__objects_2 = $(am__objects_1)
 am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	libraries/neosu-base64.$(OBJEXT) \
 	libraries/neosu-cJSON.$(OBJEXT) \
@@ -298,7 +403,7 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/Util/neosu-Quaternion.$(OBJEXT) \
 	src/Util/neosu-Rect.$(OBJEXT) src/Util/neosu-UString.$(OBJEXT) \
 	src/Util/neosu-crypto.$(OBJEXT) \
-	src/Util/neosu-dynutils.$(OBJEXT)
+	src/Util/neosu-dynutils.$(OBJEXT) $(am__objects_2)
 neosu_OBJECTS = $(am_neosu_OBJECTS)
 @WIN_PLATFORM_TRUE@neosu_DEPENDENCIES = neosu_resource.o
 neosu_LINK = $(CXXLD) $(neosu_CXXFLAGS) $(CXXFLAGS) $(neosu_LDFLAGS) \
@@ -318,7 +423,8 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/build-aux/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
+am__depfiles_remade = $(DEPS_PREFIX)/mimalloc/$(DEPDIR)/neosu-mimalloc_new_delete.Po \
+	libraries/$(DEPDIR)/neosu-MD5.Po \
 	libraries/$(DEPDIR)/neosu-base64.Po \
 	libraries/$(DEPDIR)/neosu-cJSON.Po \
 	libraries/$(DEPDIR)/neosu-lodepng.Po \
@@ -489,7 +595,7 @@ am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
 SOURCES = $(neosu_SOURCES)
-DIST_SOURCES = $(neosu_SOURCES)
+DIST_SOURCES = $(am__neosu_SOURCES_DIST)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -799,58 +905,35 @@ ubercompat = @ubercompat@
 AM_MAKEFLAGS := $(MAKEFLAGS)
 
 # Automatically generated by autogen.sh - DO NOT EDIT
-neosu_SOURCES = \
-	libraries/MD5.cpp \
-	libraries/base64.cpp \
-	libraries/cJSON.cpp \
-	libraries/glad/glad.cpp \
-	libraries/lodepng.cpp \
-	libraries/sha256.cpp \
+neosu_SOURCES = libraries/MD5.cpp libraries/base64.cpp \
+	libraries/cJSON.cpp libraries/glad/glad.cpp \
+	libraries/lodepng.cpp libraries/sha256.cpp \
 	src/App/Osu/AvatarManager.cpp \
-	src/App/Osu/BackgroundImageHandler.cpp \
-	src/App/Osu/Bancho.cpp \
-	src/App/Osu/BanchoAes.cpp \
-	src/App/Osu/BanchoLeaderboard.cpp \
+	src/App/Osu/BackgroundImageHandler.cpp src/App/Osu/Bancho.cpp \
+	src/App/Osu/BanchoAes.cpp src/App/Osu/BanchoLeaderboard.cpp \
 	src/App/Osu/BanchoNetworking.cpp \
-	src/App/Osu/BanchoProtocol.cpp \
-	src/App/Osu/BanchoSubmitter.cpp \
-	src/App/Osu/BanchoUsers.cpp \
-	src/App/Osu/Beatmap.cpp \
-	src/App/Osu/BeatmapInterface.cpp \
-	src/App/Osu/Changelog.cpp \
-	src/App/Osu/Chat.cpp \
-	src/App/Osu/ChatLink.cpp \
-	src/App/Osu/Collections.cpp \
-	src/App/Osu/Database.cpp \
+	src/App/Osu/BanchoProtocol.cpp src/App/Osu/BanchoSubmitter.cpp \
+	src/App/Osu/BanchoUsers.cpp src/App/Osu/Beatmap.cpp \
+	src/App/Osu/BeatmapInterface.cpp src/App/Osu/Changelog.cpp \
+	src/App/Osu/Chat.cpp src/App/Osu/ChatLink.cpp \
+	src/App/Osu/Collections.cpp src/App/Osu/Database.cpp \
 	src/App/Osu/DatabaseBeatmap.cpp \
 	src/App/Osu/DifficultyCalculator.cpp \
-	src/App/Osu/Downloader.cpp \
-	src/App/Osu/EnvironmentInterop.cpp \
-	src/App/Osu/HUD.cpp \
-	src/App/Osu/HitObjects.cpp \
-	src/App/Osu/Icons.cpp \
-	src/App/Osu/LegacyReplay.cpp \
-	src/App/Osu/Lobby.cpp \
-	src/App/Osu/MainMenu.cpp \
-	src/App/Osu/ModFPoSu.cpp \
-	src/App/Osu/ModSelector.cpp \
+	src/App/Osu/Downloader.cpp src/App/Osu/EnvironmentInterop.cpp \
+	src/App/Osu/HUD.cpp src/App/Osu/HitObjects.cpp \
+	src/App/Osu/Icons.cpp src/App/Osu/LegacyReplay.cpp \
+	src/App/Osu/Lobby.cpp src/App/Osu/MainMenu.cpp \
+	src/App/Osu/ModFPoSu.cpp src/App/Osu/ModSelector.cpp \
 	src/App/Osu/Multiplayer.cpp \
 	src/App/Osu/NotificationOverlay.cpp \
-	src/App/Osu/OptionsMenu.cpp \
-	src/App/Osu/Osu.cpp \
-	src/App/Osu/PauseMenu.cpp \
-	src/App/Osu/PeppyImporter.cpp \
-	src/App/Osu/PromptScreen.cpp \
-	src/App/Osu/RankingScreen.cpp \
-	src/App/Osu/Replay.cpp \
-	src/App/Osu/RichPresence.cpp \
-	src/App/Osu/RoomScreen.cpp \
-	src/App/Osu/ScoreboardSlot.cpp \
+	src/App/Osu/OptionsMenu.cpp src/App/Osu/Osu.cpp \
+	src/App/Osu/PauseMenu.cpp src/App/Osu/PeppyImporter.cpp \
+	src/App/Osu/PromptScreen.cpp src/App/Osu/RankingScreen.cpp \
+	src/App/Osu/Replay.cpp src/App/Osu/RichPresence.cpp \
+	src/App/Osu/RoomScreen.cpp src/App/Osu/ScoreboardSlot.cpp \
 	src/App/Osu/ScreenBackable.cpp \
-	src/App/Osu/SimulatedBeatmap.cpp \
-	src/App/Osu/Skin.cpp \
-	src/App/Osu/SkinImage.cpp \
-	src/App/Osu/SliderCurves.cpp \
+	src/App/Osu/SimulatedBeatmap.cpp src/App/Osu/Skin.cpp \
+	src/App/Osu/SkinImage.cpp src/App/Osu/SliderCurves.cpp \
 	src/App/Osu/SliderRenderer.cpp \
 	src/App/Osu/SongBrowser/BeatmapCarousel.cpp \
 	src/App/Osu/SongBrowser/BottomBar.cpp \
@@ -865,47 +948,29 @@ neosu_SOURCES = \
 	src/App/Osu/SongBrowser/SongBrowser.cpp \
 	src/App/Osu/SongBrowser/SongButton.cpp \
 	src/App/Osu/SongBrowser/SongDifficultyButton.cpp \
-	src/App/Osu/SpectatorScreen.cpp \
-	src/App/Osu/TooltipOverlay.cpp \
-	src/App/Osu/UIAvatar.cpp \
-	src/App/Osu/UIBackButton.cpp \
-	src/App/Osu/UIButton.cpp \
-	src/App/Osu/UICheckbox.cpp \
+	src/App/Osu/SpectatorScreen.cpp src/App/Osu/TooltipOverlay.cpp \
+	src/App/Osu/UIAvatar.cpp src/App/Osu/UIBackButton.cpp \
+	src/App/Osu/UIButton.cpp src/App/Osu/UICheckbox.cpp \
 	src/App/Osu/UIContextMenu.cpp \
 	src/App/Osu/UIModSelectorModButton.cpp \
 	src/App/Osu/UIPauseMenuButton.cpp \
 	src/App/Osu/UIRankingScreenInfoLabel.cpp \
 	src/App/Osu/UIRankingScreenRankingPanel.cpp \
-	src/App/Osu/UISearchOverlay.cpp \
-	src/App/Osu/UISlider.cpp \
+	src/App/Osu/UISearchOverlay.cpp src/App/Osu/UISlider.cpp \
 	src/App/Osu/UIUserContextMenu.cpp \
-	src/App/Osu/UIVolumeSlider.cpp \
-	src/App/Osu/UpdateHandler.cpp \
-	src/App/Osu/UserCard.cpp \
-	src/App/Osu/UserCard2.cpp \
-	src/App/Osu/UserStatsScreen.cpp \
-	src/App/Osu/VolumeOverlay.cpp \
-	src/App/Osu/score.cpp \
-	src/Binary/curl_blob.cpp \
-	src/Binary/shaders.cpp \
-	src/Engine/AnimationHandler.cpp \
-	src/Engine/Archival.cpp \
-	src/Engine/ByteBufferedFile.cpp \
-	src/Engine/Camera.cpp \
-	src/Engine/ConVar.cpp \
-	src/Engine/DiscordInterface.cpp \
-	src/Engine/Engine.cpp \
-	src/Engine/Environment.cpp \
-	src/Engine/FPSLimiter.cpp \
-	src/Engine/File.cpp \
-	src/Engine/Font.cpp \
-	src/Engine/Image.cpp \
-	src/Engine/Input/KeyBindings.cpp \
-	src/Engine/Input/Keyboard.cpp \
-	src/Engine/Input/Mouse.cpp \
-	src/Engine/NetworkHandler.cpp \
-	src/Engine/Profiler.cpp \
-	src/Engine/Renderer/Graphics.cpp \
+	src/App/Osu/UIVolumeSlider.cpp src/App/Osu/UpdateHandler.cpp \
+	src/App/Osu/UserCard.cpp src/App/Osu/UserCard2.cpp \
+	src/App/Osu/UserStatsScreen.cpp src/App/Osu/VolumeOverlay.cpp \
+	src/App/Osu/score.cpp src/Binary/curl_blob.cpp \
+	src/Binary/shaders.cpp src/Engine/AnimationHandler.cpp \
+	src/Engine/Archival.cpp src/Engine/ByteBufferedFile.cpp \
+	src/Engine/Camera.cpp src/Engine/ConVar.cpp \
+	src/Engine/DiscordInterface.cpp src/Engine/Engine.cpp \
+	src/Engine/Environment.cpp src/Engine/FPSLimiter.cpp \
+	src/Engine/File.cpp src/Engine/Font.cpp src/Engine/Image.cpp \
+	src/Engine/Input/KeyBindings.cpp src/Engine/Input/Keyboard.cpp \
+	src/Engine/Input/Mouse.cpp src/Engine/NetworkHandler.cpp \
+	src/Engine/Profiler.cpp src/Engine/Renderer/Graphics.cpp \
 	src/Engine/Renderer/OpenGL/OpenGLImage.cpp \
 	src/Engine/Renderer/OpenGL/OpenGLLegacyInterface.cpp \
 	src/Engine/Renderer/OpenGL/OpenGLRenderTarget.cpp \
@@ -926,34 +991,19 @@ neosu_SOURCES = \
 	src/Engine/Sound/SoLoud/SoLoudFX.cpp \
 	src/Engine/Sound/SoLoud/SoLoudSound.cpp \
 	src/Engine/Sound/SoLoud/SoLoudSoundEngine.cpp \
-	src/Engine/Sound/Sound.cpp \
-	src/Engine/Sound/SoundEngine.cpp \
-	src/Engine/TextureAtlas.cpp \
-	src/GUI/CBaseUIButton.cpp \
-	src/GUI/CBaseUICheckbox.cpp \
-	src/GUI/CBaseUIContainer.cpp \
-	src/GUI/CBaseUIElement.cpp \
-	src/GUI/CBaseUIImage.cpp \
-	src/GUI/CBaseUIImageButton.cpp \
-	src/GUI/CBaseUILabel.cpp \
-	src/GUI/CBaseUIScrollView.cpp \
-	src/GUI/CBaseUISlider.cpp \
-	src/GUI/CBaseUITextField.cpp \
-	src/GUI/CBaseUITextbox.cpp \
-	src/GUI/CBaseUIWindow.cpp \
-	src/GUI/CWindowManager.cpp \
-	src/GUI/Windows/Console.cpp \
-	src/GUI/Windows/ConsoleBox.cpp \
-	src/GUI/Windows/VisualProfiler.cpp \
-	src/Platform/main.cpp \
-	src/Platform/main_impl.cpp \
-	src/Util/Quaternion.cpp \
-	src/Util/Rect.cpp \
-	src/Util/UString.cpp \
-	src/Util/crypto.cpp \
-	src/Util/dynutils.cpp \
-$(NULL)
-
+	src/Engine/Sound/Sound.cpp src/Engine/Sound/SoundEngine.cpp \
+	src/Engine/TextureAtlas.cpp src/GUI/CBaseUIButton.cpp \
+	src/GUI/CBaseUICheckbox.cpp src/GUI/CBaseUIContainer.cpp \
+	src/GUI/CBaseUIElement.cpp src/GUI/CBaseUIImage.cpp \
+	src/GUI/CBaseUIImageButton.cpp src/GUI/CBaseUILabel.cpp \
+	src/GUI/CBaseUIScrollView.cpp src/GUI/CBaseUISlider.cpp \
+	src/GUI/CBaseUITextField.cpp src/GUI/CBaseUITextbox.cpp \
+	src/GUI/CBaseUIWindow.cpp src/GUI/CWindowManager.cpp \
+	src/GUI/Windows/Console.cpp src/GUI/Windows/ConsoleBox.cpp \
+	src/GUI/Windows/VisualProfiler.cpp src/Platform/main.cpp \
+	src/Platform/main_impl.cpp src/Util/Quaternion.cpp \
+	src/Util/Rect.cpp src/Util/UString.cpp src/Util/crypto.cpp \
+	src/Util/dynutils.cpp $(NULL) $(am__append_32)
 EXTRA_BINDEPS = \
 	assets/shaders/actual_flashlight_f.glsl \
 	assets/shaders/actual_flashlight_v.glsl \
@@ -998,10 +1048,13 @@ CACERT_INCDIR := $(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle/
 @BUILD_CURL_TRUE@rbq := ')'
 @BUILD_MIMALLOC_FALSE@MIMALLOC_DYNAMIC_LIBS := 
 @BUILD_MIMALLOC_TRUE@@WIN_PLATFORM_FALSE@MIMALLOC_DYNAMIC_LIBS := 
-@BUILD_MIMALLOC_TRUE@@WIN_PLATFORM_TRUE@MIMALLOC_DYNAMIC_LIBS := -L$(DEPS_PREFIX)/lib -Wl,--whole-archive -l:libmimalloc.dll.a -Wl,--no-whole-archive -L$(DEPS_PREFIX)/bin -lmimalloc -lmimalloc-redirect$(if $(filter x86_64,$(host_cpu)),,32)
+@BUILD_MIMALLOC_TRUE@@WIN_PLATFORM_TRUE@MIMALLOC_DYNAMIC_LIBS := -L$(DEPS_PREFIX)/bin -L$(DEPS_PREFIX)/lib -Wl,--whole-archive -l:mimalloc-redirect$(if $(filter x86_64,$(host_cpu)),,32).lib -Wl,--no-whole-archive -l:libmimalloc.dll.a -lmimalloc -lmimalloc-redirect$(if $(filter x86_64,$(host_cpu)),,32)
 @BUILD_MIMALLOC_FALSE@MIMALLOC_OBJ := 
 @BUILD_MIMALLOC_TRUE@@WIN_PLATFORM_FALSE@MIMALLOC_OBJ := $(DEPS_PREFIX)/lib/mimalloc$(if $(ENABLE_ASAN),-asan-debug,$(if $(ENABLE_DEBUG),-debug,)).o
 @BUILD_MIMALLOC_TRUE@@WIN_PLATFORM_TRUE@MIMALLOC_OBJ := 
+@BUILD_MIMALLOC_FALSE@MIMALLOC_OVERRIDE_DEP := 
+@BUILD_MIMALLOC_TRUE@@WIN_PLATFORM_FALSE@MIMALLOC_OVERRIDE_DEP := 
+@BUILD_MIMALLOC_TRUE@@WIN_PLATFORM_TRUE@MIMALLOC_OVERRIDE_DEP := $(DEPS_PREFIX)/mimalloc/mimalloc_new_delete.cpp
 @USE_SOLOUD_TRUE@FFMPEG_INSTALL_LIBS := `find $(DEPS_CACHE)/ffmpeg-$(FFMPEG_VERSION)/$(SYSNAME)$(host_cpu)/lib '(' -name '*avutil*' -o -name '*avcodec*' -o -name '*avformat*' -o -name '*swresample*' ')' -printf '%p '`
 @USE_SOLOUD_TRUE@FFMPEG_INCDIR := $(DEPS_CACHE)/ffmpeg-$(FFMPEG_VERSION)/$(SYSNAME)$(host_cpu)/include
 @WIN_PLATFORM_TRUE@DISCORDSDK_CFLAGS := -I$(DEPS_CACHE)/discordsdk-$(DISCORDSDK_VERSION)/include
@@ -1042,8 +1095,6 @@ BUILT_SOURCES := \
 	$(DEPS_PREFIX)/curl-$(CURL_VERSION).built \
 	$(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle/cacert.pem
 
-@WIN_PLATFORM_FALSE@neosu_LDADD = 
-@WIN_PLATFORM_TRUE@neosu_LDADD = neosu_resource.o
 
 # add all paths with sources as an include ("-I") flag
 NEOSU_INCLUDE_FLAGS := $(shell find $(srcdir)/src -not -path '*/.*' -type d -printf "-I%p ")
@@ -1085,9 +1136,9 @@ neosu_CXXFLAGS := \
 # Wl,--start-group with no --end-group is a stupid hack.
 neosu_LDFLAGS := \
 	$(MIMALLOC_OBJ) \
+	$(MIMALLOC_DYNAMIC_LIBS) \
 	-Wl,-rpath='$$ORIGIN/lib',-rpath='$$ORIGIN' \
 	-Wl,--start-group \
-	$(MIMALLOC_DYNAMIC_LIBS) \
 	$(CURL_LIBS) \
 	$(SDL3_LIBS) \
 	$(AUDIO_LIBS) \
@@ -1114,10 +1165,11 @@ neosu_LDFLAGS := \
 	$(LDFLAGS_EXTRA) \
 	$(WINPTHREAD_LDFLAGS) # must come last, otherwise it overrides exe .rsrc section and the program description becomes "POSIX WinThreads for Windows"
 
+@WIN_PLATFORM_TRUE@neosu_LDADD = neosu_resource.o
 
 # windows' loader has no concept of rpaths (so keep all built/required libs in the same level as the main exe)
 # otherwise we can tuck them away neatly in lib/ (besides ffmpeg, for self-inflicted reasons (dlopen in SoLoud, which won't find stuff in rpath))
-LIBDEST := $(am__append_32)
+LIBDEST := $(am__append_33)
 
 # TODO: distribution package files
 EXTRA_DIST := \
@@ -1705,6 +1757,15 @@ src/Util/neosu-crypto.$(OBJEXT): src/Util/$(am__dirstamp) \
 	src/Util/$(DEPDIR)/$(am__dirstamp)
 src/Util/neosu-dynutils.$(OBJEXT): src/Util/$(am__dirstamp) \
 	src/Util/$(DEPDIR)/$(am__dirstamp)
+$(DEPS_PREFIX)/mimalloc/$(am__dirstamp):
+	@$(MKDIR_P) $(DEPS_PREFIX)/mimalloc
+	@: >>$(DEPS_PREFIX)/mimalloc/$(am__dirstamp)
+$(DEPS_PREFIX)/mimalloc/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) $(DEPS_PREFIX)/mimalloc/$(DEPDIR)
+	@: >>$(DEPS_PREFIX)/mimalloc/$(DEPDIR)/$(am__dirstamp)
+$(DEPS_PREFIX)/mimalloc/neosu-mimalloc_new_delete.$(OBJEXT):  \
+	$(DEPS_PREFIX)/mimalloc/$(am__dirstamp) \
+	$(DEPS_PREFIX)/mimalloc/$(DEPDIR)/$(am__dirstamp)
 
 neosu$(EXEEXT): $(neosu_OBJECTS) $(neosu_DEPENDENCIES) $(EXTRA_neosu_DEPENDENCIES) 
 	@rm -f neosu$(EXEEXT)
@@ -1712,6 +1773,7 @@ neosu$(EXEEXT): $(neosu_OBJECTS) $(neosu_DEPENDENCIES) $(EXTRA_neosu_DEPENDENCIE
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
+	-rm -f $(DEPS_PREFIX)/mimalloc/*.$(OBJEXT)
 	-rm -f libraries/*.$(OBJEXT)
 	-rm -f libraries/glad/*.$(OBJEXT)
 	-rm -f src/App/Osu/*.$(OBJEXT)
@@ -1733,6 +1795,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPS_PREFIX)/mimalloc/$(DEPDIR)/neosu-mimalloc_new_delete.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@libraries/$(DEPDIR)/neosu-MD5.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@libraries/$(DEPDIR)/neosu-base64.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@libraries/$(DEPDIR)/neosu-cJSON.Po@am__quote@ # am--include-marker
@@ -4036,6 +4099,20 @@ src/Util/neosu-dynutils.obj: src/Util/dynutils.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Util/neosu-dynutils.obj `if test -f 'src/Util/dynutils.cpp'; then $(CYGPATH_W) 'src/Util/dynutils.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Util/dynutils.cpp'; fi`
 
+$(DEPS_PREFIX)/mimalloc/neosu-mimalloc_new_delete.o: $(DEPS_PREFIX)/mimalloc/mimalloc_new_delete.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT $(DEPS_PREFIX)/mimalloc/neosu-mimalloc_new_delete.o -MD -MP -MF $(DEPS_PREFIX)/mimalloc/$(DEPDIR)/neosu-mimalloc_new_delete.Tpo -c -o $(DEPS_PREFIX)/mimalloc/neosu-mimalloc_new_delete.o `test -f '$(DEPS_PREFIX)/mimalloc/mimalloc_new_delete.cpp' || echo '$(srcdir)/'`$(DEPS_PREFIX)/mimalloc/mimalloc_new_delete.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPS_PREFIX)/mimalloc/$(DEPDIR)/neosu-mimalloc_new_delete.Tpo $(DEPS_PREFIX)/mimalloc/$(DEPDIR)/neosu-mimalloc_new_delete.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(DEPS_PREFIX)/mimalloc/mimalloc_new_delete.cpp' object='$(DEPS_PREFIX)/mimalloc/neosu-mimalloc_new_delete.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o $(DEPS_PREFIX)/mimalloc/neosu-mimalloc_new_delete.o `test -f '$(DEPS_PREFIX)/mimalloc/mimalloc_new_delete.cpp' || echo '$(srcdir)/'`$(DEPS_PREFIX)/mimalloc/mimalloc_new_delete.cpp
+
+$(DEPS_PREFIX)/mimalloc/neosu-mimalloc_new_delete.obj: $(DEPS_PREFIX)/mimalloc/mimalloc_new_delete.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT $(DEPS_PREFIX)/mimalloc/neosu-mimalloc_new_delete.obj -MD -MP -MF $(DEPS_PREFIX)/mimalloc/$(DEPDIR)/neosu-mimalloc_new_delete.Tpo -c -o $(DEPS_PREFIX)/mimalloc/neosu-mimalloc_new_delete.obj `if test -f '$(DEPS_PREFIX)/mimalloc/mimalloc_new_delete.cpp'; then $(CYGPATH_W) '$(DEPS_PREFIX)/mimalloc/mimalloc_new_delete.cpp'; else $(CYGPATH_W) '$(srcdir)/$(DEPS_PREFIX)/mimalloc/mimalloc_new_delete.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPS_PREFIX)/mimalloc/$(DEPDIR)/neosu-mimalloc_new_delete.Tpo $(DEPS_PREFIX)/mimalloc/$(DEPDIR)/neosu-mimalloc_new_delete.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(DEPS_PREFIX)/mimalloc/mimalloc_new_delete.cpp' object='$(DEPS_PREFIX)/mimalloc/neosu-mimalloc_new_delete.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o $(DEPS_PREFIX)/mimalloc/neosu-mimalloc_new_delete.obj `if test -f '$(DEPS_PREFIX)/mimalloc/mimalloc_new_delete.cpp'; then $(CYGPATH_W) '$(DEPS_PREFIX)/mimalloc/mimalloc_new_delete.cpp'; else $(CYGPATH_W) '$(srcdir)/$(DEPS_PREFIX)/mimalloc/mimalloc_new_delete.cpp'; fi`
+
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
 tags: tags-am
@@ -4312,6 +4389,8 @@ clean-generic:
 distclean-generic:
 	-$(am__rm_f) $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || $(am__rm_f) $(CONFIG_CLEAN_VPATH_FILES)
+	-$(am__rm_f) $(DEPS_PREFIX)/mimalloc/$(DEPDIR)/$(am__dirstamp)
+	-$(am__rm_f) $(DEPS_PREFIX)/mimalloc/$(am__dirstamp)
 	-$(am__rm_f) libraries/$(DEPDIR)/$(am__dirstamp)
 	-$(am__rm_f) libraries/$(am__dirstamp)
 	-$(am__rm_f) libraries/glad/$(DEPDIR)/$(am__dirstamp)
@@ -4358,6 +4437,7 @@ clean-am: clean-binPROGRAMS clean-generic clean-local mostlyclean-am
 
 distclean: distclean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
+	-rm -f $(DEPS_PREFIX)/mimalloc/$(DEPDIR)/neosu-mimalloc_new_delete.Po
 	-rm -f libraries/$(DEPDIR)/neosu-MD5.Po
 	-rm -f libraries/$(DEPDIR)/neosu-base64.Po
 	-rm -f libraries/$(DEPDIR)/neosu-cJSON.Po
@@ -4558,6 +4638,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
+	-rm -f $(DEPS_PREFIX)/mimalloc/$(DEPDIR)/neosu-mimalloc_new_delete.Po
 	-rm -f libraries/$(DEPDIR)/neosu-MD5.Po
 	-rm -f libraries/$(DEPDIR)/neosu-base64.Po
 	-rm -f libraries/$(DEPDIR)/neosu-cJSON.Po
@@ -5013,6 +5094,8 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source: $(DEPS_CACHE)/curl-$(CUR
 @BUILD_CURL_FALSE@$(DEPS_PREFIX)/curl-$(CURL_VERSION).built:
 @BUILD_CURL_FALSE@	$(MKDIR_P) $(DEPS_PREFIX)
 @BUILD_CURL_FALSE@	touch $@
+@BUILD_MIMALLOC_TRUE@@WIN_PLATFORM_TRUE@$(MIMALLOC_OVERRIDE_DEP): $(DEPS_PREFIX)/mimalloc-$(MIMALLOC_VERSION).built
+@BUILD_MIMALLOC_TRUE@@WIN_PLATFORM_TRUE@	@( printf '%s' "#include \"mimalloc-new-delete.h\"" ) > $(MIMALLOC_OVERRIDE_DEP)
 @BUILD_MIMALLOC_TRUE@$(DEPS_PREFIX)/mimalloc-$(MIMALLOC_VERSION).built: $(DEPS_CACHE)/mimalloc-$(MIMALLOC_VERSION).source
 @BUILD_MIMALLOC_TRUE@	rm -rf $(DEPS_PREFIX)/mimalloc
 @BUILD_MIMALLOC_TRUE@	$(MKDIR_P) $(DEPS_PREFIX)/mimalloc && \
@@ -5026,6 +5109,7 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source: $(DEPS_CACHE)/curl-$(CUR
 @BUILD_MIMALLOC_TRUE@		-D CMAKE_SYSTEM_NAME="$(CMAKE_SYSTEM_NAME)" \
 @BUILD_MIMALLOC_TRUE@		-D CMAKE_SYSTEM_PROCESSOR="$(host_cpu)" \
 @BUILD_MIMALLOC_TRUE@		-D CMAKE_CXX_COMPILER="$(CXX)" \
+@BUILD_MIMALLOC_TRUE@		-D CMAKE_EXPORT_COMPILE_COMMANDS=ON \
 @BUILD_MIMALLOC_TRUE@		-D CMAKE_CXX_FLAGS="$(CXXFLAGS) -xc++ -Wno-array-bounds" \
 @BUILD_MIMALLOC_TRUE@		$(CMAKERCOPT) $(CMAKEIDOPT) \
 @BUILD_MIMALLOC_TRUE@		-D CMAKE_INSTALL_PREFIX="$(DEPS_PREFIX)" \
@@ -5042,6 +5126,8 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source: $(DEPS_CACHE)/curl-$(CUR
 @BUILD_MIMALLOC_TRUE@		-D MI_BUILD_OBJECT=$(if $(findstring linux,$(host_os)),ON,OFF) && \
 @BUILD_MIMALLOC_TRUE@	$(CMAKE) --build . "$(CMAKEPAROPT)" && \
 @BUILD_MIMALLOC_TRUE@	$(CMAKE) --install .
+@BUILD_MIMALLOC_TRUE@	cp $(DEPS_PREFIX)/mimalloc/bin/mimalloc-redirect*.lib $(DEPS_PREFIX)/bin/
+@BUILD_MIMALLOC_TRUE@	cp $(DEPS_PREFIX)/mimalloc/bin/mimalloc-redirect*.lib $(DEPS_PREFIX)/bin/
 @BUILD_MIMALLOC_TRUE@	touch $@
 @BUILD_MIMALLOC_FALSE@$(DEPS_PREFIX)/mimalloc-$(MIMALLOC_VERSION).built:
 @BUILD_MIMALLOC_FALSE@	$(MKDIR_P) $(DEPS_PREFIX) && touch $@
@@ -5375,6 +5461,7 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source: $(DEPS_CACHE)/curl-$(CUR
 # making sure deps are built before main compile
 $(neosu_OBJECTS): src/config.h $(BUILT_SOURCES) $(EXTRA_BINDEPS)
 
+# windows icon/resource things
 @WIN_PLATFORM_TRUE@neosu_resource.o: $(srcdir)/$(ASSETS_DIR)/resource.rc $(srcdir)/$(ASSETS_DIR)/neosu.manifest $(srcdir)/$(ASSETS_DIR)/icon.ico
 @WIN_PLATFORM_TRUE@	$(WINDRES) -I $(srcdir)/$(ASSETS_DIR) -i $(srcdir)/$(ASSETS_DIR)/resource.rc -o neosu_resource.o
 

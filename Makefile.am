@@ -316,12 +316,16 @@ endif
 
 if BUILD_MIMALLOC
 if WIN_PLATFORM
-MIMALLOC_DYNAMIC_LIBS := -L$(DEPS_PREFIX)/lib -Wl,--whole-archive -l:libmimalloc.dll.a -Wl,--no-whole-archive -L$(DEPS_PREFIX)/bin -lmimalloc -lmimalloc-redirect$(if $(filter x86_64,$(host_cpu)),,32)
+MIMALLOC_DYNAMIC_LIBS := -L$(DEPS_PREFIX)/bin -L$(DEPS_PREFIX)/lib -Wl,--whole-archive -l:mimalloc-redirect$(if $(filter x86_64,$(host_cpu)),,32).lib -Wl,--no-whole-archive -l:libmimalloc.dll.a -lmimalloc -lmimalloc-redirect$(if $(filter x86_64,$(host_cpu)),,32)
 MIMALLOC_OBJ :=
+MIMALLOC_OVERRIDE_DEP := $(DEPS_PREFIX)/mimalloc/mimalloc_new_delete.cpp
+$(MIMALLOC_OVERRIDE_DEP): $(DEPS_PREFIX)/mimalloc-$(MIMALLOC_VERSION).built
+	@( printf '%s' "#include \"mimalloc-new-delete.h\"" ) > $(MIMALLOC_OVERRIDE_DEP)
 else
 MIMALLOC_DYNAMIC_LIBS :=
 MIMALLOC_OBJ := $(DEPS_PREFIX)/lib/mimalloc$(if $(ENABLE_ASAN),-asan-debug,$(if $(ENABLE_DEBUG),-debug,)).o
-endif # WIN_PLATFORM
+MIMALLOC_OVERRIDE_DEP :=
+endif
 $(DEPS_PREFIX)/mimalloc-$(MIMALLOC_VERSION).built: $(DEPS_CACHE)/mimalloc-$(MIMALLOC_VERSION).source
 	rm -rf $(DEPS_PREFIX)/mimalloc
 	$(MKDIR_P) $(DEPS_PREFIX)/mimalloc && \
@@ -335,6 +339,7 @@ $(DEPS_PREFIX)/mimalloc-$(MIMALLOC_VERSION).built: $(DEPS_CACHE)/mimalloc-$(MIMA
 		-D CMAKE_SYSTEM_NAME="$(CMAKE_SYSTEM_NAME)" \
 		-D CMAKE_SYSTEM_PROCESSOR="$(host_cpu)" \
 		-D CMAKE_CXX_COMPILER="$(CXX)" \
+		-D CMAKE_EXPORT_COMPILE_COMMANDS=ON \
 		-D CMAKE_CXX_FLAGS="$(CXXFLAGS) -xc++ -Wno-array-bounds" \
 		$(CMAKERCOPT) $(CMAKEIDOPT) \
 		-D CMAKE_INSTALL_PREFIX="$(DEPS_PREFIX)" \
@@ -351,10 +356,13 @@ $(DEPS_PREFIX)/mimalloc-$(MIMALLOC_VERSION).built: $(DEPS_CACHE)/mimalloc-$(MIMA
 		-D MI_BUILD_OBJECT=$(if $(findstring linux,$(host_os)),ON,OFF) && \
 	$(CMAKE) --build . "$(CMAKEPAROPT)" && \
 	$(CMAKE) --install .
+	cp $(DEPS_PREFIX)/mimalloc/bin/mimalloc-redirect*.lib $(DEPS_PREFIX)/bin/
+	cp $(DEPS_PREFIX)/mimalloc/bin/mimalloc-redirect*.lib $(DEPS_PREFIX)/bin/
 	touch $@
 else
-MIMALLOC_OBJ :=
 MIMALLOC_DYNAMIC_LIBS :=
+MIMALLOC_OBJ :=
+MIMALLOC_OVERRIDE_DEP :=
 $(DEPS_PREFIX)/mimalloc-$(MIMALLOC_VERSION).built:
 	$(MKDIR_P) $(DEPS_PREFIX) && touch $@
 endif # BUILD_MIMALLOC
@@ -815,15 +823,6 @@ BUILT_SOURCES := \
 # making sure deps are built before main compile
 $(neosu_OBJECTS): src/config.h $(BUILT_SOURCES) $(EXTRA_BINDEPS)
 
-if WIN_PLATFORM
-neosu_resource.o: $(srcdir)/$(ASSETS_DIR)/resource.rc $(srcdir)/$(ASSETS_DIR)/neosu.manifest $(srcdir)/$(ASSETS_DIR)/icon.ico
-	$(WINDRES) -I $(srcdir)/$(ASSETS_DIR) -i $(srcdir)/$(ASSETS_DIR)/resource.rc -o neosu_resource.o
-
-neosu_LDADD = neosu_resource.o
-else
-neosu_LDADD =
-endif
-
 # add all paths with sources as an include ("-I") flag
 NEOSU_INCLUDE_FLAGS := $(shell find $(srcdir)/src -not -path '*/.*' -type d -printf "-I%p ")
 
@@ -864,9 +863,9 @@ neosu_CXXFLAGS := \
 # Wl,--start-group with no --end-group is a stupid hack.
 neosu_LDFLAGS := \
 	$(MIMALLOC_OBJ) \
+	$(MIMALLOC_DYNAMIC_LIBS) \
 	-Wl,-rpath='$$ORIGIN/lib',-rpath='$$ORIGIN' \
 	-Wl,--start-group \
-	$(MIMALLOC_DYNAMIC_LIBS) \
 	$(CURL_LIBS) \
 	$(SDL3_LIBS) \
 	$(AUDIO_LIBS) \
@@ -892,6 +891,17 @@ neosu_LDFLAGS := \
 	$(EXTRA_WIN_LIBS) \
 	$(LDFLAGS_EXTRA) \
 	$(WINPTHREAD_LDFLAGS) # must come last, otherwise it overrides exe .rsrc section and the program description becomes "POSIX WinThreads for Windows"
+
+if WIN_PLATFORM
+# mimalloc new/delete override for windows
+neosu_SOURCES += $(MIMALLOC_OVERRIDE_DEP)
+
+# windows icon/resource things
+neosu_resource.o: $(srcdir)/$(ASSETS_DIR)/resource.rc $(srcdir)/$(ASSETS_DIR)/neosu.manifest $(srcdir)/$(ASSETS_DIR)/icon.ico
+	$(WINDRES) -I $(srcdir)/$(ASSETS_DIR) -i $(srcdir)/$(ASSETS_DIR)/resource.rc -o neosu_resource.o
+
+neosu_LDADD = neosu_resource.o
+endif
 
 compile_commands.json: mostlyclean-compile
 	@$(BEAR) --version || { echo bear is unavailable to generate a compile_commands.json, install bear && exit 1; }
