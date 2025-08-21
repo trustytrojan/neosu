@@ -326,7 +326,7 @@ void AsyncResourceLoader::ensureThreadAvailable() {
 }
 
 void AsyncResourceLoader::cleanupIdleThreads() {
-    if(this->threadpool.size() == 0) return;
+    if(this->threadpool.size() <= MIN_NUM_THREADS) return;
 
     // only run cleanup periodically to avoid overhead
     auto now = std::chrono::steady_clock::now();
@@ -340,7 +340,7 @@ void AsyncResourceLoader::cleanupIdleThreads() {
 
     std::scoped_lock lock(this->threadsMutex);
 
-    if(this->threadpool.size() == 0) return;  // check under lock again
+    if(this->threadpool.size() <= MIN_NUM_THREADS) return;  // check under lock again
 
     const bool debug = cv::debug_rm.getBool();
 

@@ -930,7 +930,7 @@ CONVAR(r_opengl_legacy_vao_use_vertex_array, "r_opengl_legacy_vao_use_vertex_arr
        "dramatically reduces per-vao draw calls, but completely breaks legacy ffp draw calls (vertices work, but "
        "texcoords/normals/etc. are NOT in gl_MultiTexCoord0 -> requiring a shader with attributes)");
 CONVAR(debug_opengl, "debug_opengl", false, FCVAR_LOCKED);
-CONVAR(font_load_system, "font_load_system", true, FCVAR_LOCKED,
+CONVAR(font_load_system, "font_load_system", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "try to load a similar system font if a glyph is missing in the bundled fonts");
 CONVAR(r_globaloffset_x, "r_globaloffset_x", 0.0f, FCVAR_LOCKED);
 CONVAR(r_globaloffset_y, "r_globaloffset_y", 0.0f, FCVAR_LOCKED);
@@ -945,12 +945,6 @@ CONVAR(resolution_keep_aspect_ratio, "resolution_keep_aspect_ratio", false, FCVA
 CONVAR(restart_sound_engine_before_playing, "restart_sound_engine_before_playing", false, FCVAR_BANCHO_COMPATIBLE,
        "jank fix for users who experience sound issues after playing for a while");
 CONVAR(rich_presence, "rich_presence", true, FCVAR_BANCHO_COMPATIBLE, CFUNC(RichPresence::onRichPresenceChange));
-CONVAR(rm_debug_async_delay, "rm_debug_async_delay", 0.0f, FCVAR_LOCKED);
-CONVAR(rm_interrupt_on_destroy, "rm_interrupt_on_destroy", true, FCVAR_LOCKED);
-CONVAR(
-    rm_numthreads, "rm_numthreads", 3, FCVAR_BANCHO_COMPATIBLE,
-    "how many parallel resource loader threads are spawned once on startup (!), and subsequently used during runtime");
-CONVAR(rm_warnings, "rm_warnings", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(scoreboard_animations, "scoreboard_animations", true, FCVAR_BANCHO_COMPATIBLE, "animate in-game scoreboard");
 CONVAR(scores_bonus_pp, "scores_bonus_pp", true, FCVAR_BANCHO_COMPATIBLE,
        "whether to add bonus pp to total (real) pp or not");

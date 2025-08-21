@@ -86,7 +86,8 @@ void ResourceManager::destroyResource(Resource *rs, bool forceBlocking) {
             debugLog("Resource Manager: Scheduled async destroy of {:8p} : {:s}\n", static_cast<const void *>(rs),
                      rs->getName());
 
-        if(cv::rm_interrupt_on_destroy.getBool()) rs->interruptLoad();
+        // interrupt async load
+        rs->interruptLoad();
 
         this->asyncLoader->scheduleAsyncDestroy(rs);
 
@@ -95,7 +96,7 @@ void ResourceManager::destroyResource(Resource *rs, bool forceBlocking) {
         if(forceBlocking) {
             do {
                 this->asyncLoader->update(false);
-            }while(this->asyncLoader->isLoadingResource(rs));
+            } while(this->asyncLoader->isLoadingResource(rs));
         }
 
         return;
@@ -416,6 +417,7 @@ VertexArrayObject *ResourceManager::createVertexArrayObject(Graphics::PRIMITIVE 
 // add a managed resource to the main resources vector + the name map and typed vectors
 void ResourceManager::addManagedResource(Resource *res) {
     if(!res) return;
+    if(cv::debug_rm.getBool()) debugLog("ResourceManager: Adding managed {}\n", res->getName());
 
     this->vResources.push_back(res);
 

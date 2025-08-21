@@ -77,10 +77,10 @@ class ResourceManager final {
                      int fontSize = 16, bool antialiasing = true, int fontDPI = 96);
 
     // sounds
-    Sound *loadSound(std::string filepath, std::string resourceName, bool stream = false,
-                                     bool overlayable = false, bool loop = false);
-    Sound *loadSoundAbs(std::string filepath, std::string resourceName, bool stream = false,
-                                        bool overlayable = false, bool loop = false);
+    Sound *loadSound(std::string filepath, std::string resourceName, bool stream = false, bool overlayable = false,
+                     bool loop = false);
+    Sound *loadSoundAbs(std::string filepath, std::string resourceName, bool stream = false, bool overlayable = false,
+                        bool loop = false);
 
     // shaders
     Shader *loadShader(std::string vertexShaderFilePath, std::string fragmentShaderFilePath, std::string resourceName);
@@ -104,10 +104,10 @@ class ResourceManager final {
                                                bool keepInSystemMemory = false);
 
     // resource access by name
-    [[nodiscard]] Image *getImage(std::string resourceName) const { return tryGet<Image>(resourceName); }
-    [[nodiscard]] McFont *getFont(std::string resourceName) const { return tryGet<McFont>(resourceName); }
-    [[nodiscard]] Sound *getSound(std::string resourceName) const { return tryGet<Sound>(resourceName); }
-    [[nodiscard]] Shader *getShader(std::string resourceName) const { return tryGet<Shader>(resourceName); }
+    [[nodiscard]] Image *getImage(const std::string &resourceName) const { return tryGet<Image>(resourceName); }
+    [[nodiscard]] McFont *getFont(const std::string &resourceName) const { return tryGet<McFont>(resourceName); }
+    [[nodiscard]] Sound *getSound(const std::string &resourceName) const { return tryGet<Sound>(resourceName); }
+    [[nodiscard]] Shader *getShader(const std::string &resourceName) const { return tryGet<Shader>(resourceName); }
 
     // methods for getting all resources of a type
     [[nodiscard]] constexpr const std::vector<Image *> &getImages() const { return this->vImages; }
@@ -132,12 +132,12 @@ class ResourceManager final {
 
    private:
     template <typename T>
-    [[nodiscard]] T *tryGet(std::string &resourceName) const {
+    [[nodiscard]] T *tryGet(const std::string &resourceName) const {
         if(resourceName.empty()) return nullptr;
         auto it = this->mNameToResourceMap.find(resourceName);
         if(it != this->mNameToResourceMap.end()) {
-            if (!it->second) {
-                auto* p_this = const_cast<ResourceManager*>(this);
+            if(!it->second) {
+                auto *p_this = const_cast<ResourceManager *>(this);
                 p_this->mNameToResourceMap.erase(it);
             } else {
                 return it->second->as<T>();
@@ -150,11 +150,12 @@ class ResourceManager final {
         return nullptr;
     }
     template <typename T>
-    [[nodiscard]] T *checkIfExistsAndHandle(std::string &resourceName) {
+    [[nodiscard]] T *checkIfExistsAndHandle(const std::string &resourceName) {
         if(resourceName.empty()) return nullptr;
         auto it = this->mNameToResourceMap.find(resourceName);
-        if(it == this->mNameToResourceMap.end()) return nullptr;
-        else if (!it->second) {
+        if(it == this->mNameToResourceMap.end())
+            return nullptr;
+        else if(!it->second) {
             this->mNameToResourceMap.erase(it);
             return nullptr;
         }

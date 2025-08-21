@@ -68,6 +68,8 @@ class AsyncResourceLoader final {
     // set during ctor, dependent on hardware
     size_t iMaxThreads;
     static constexpr const size_t HARD_THREADCOUNT_LIMIT{32};
+    // always keep one thread around to avoid unnecessary thread creation/destruction spikes for spurious loads
+    static constexpr const size_t MIN_NUM_THREADS{1};
 
     // how many resources to load on update()
     // default is == max # threads (or 1 during gameplay)
