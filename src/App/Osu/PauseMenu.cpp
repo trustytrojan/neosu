@@ -333,6 +333,14 @@ void PauseMenu::onResolutionChange(vec2 newResolution) {
 CBaseUIContainer *PauseMenu::setVisible(bool visible) {
     this->bVisible = visible;
 
+    if(!bancho->is_playing_a_multi_map()) {
+        if(visible) {
+            soundEngine->play(osu->getSkin()->getPauseLoopSound());
+        } else {
+            soundEngine->stop(osu->getSkin()->getPauseLoopSound());
+        }
+    }
+
     auto beatmap = osu->getSelectedBeatmap();
     if(!beatmap || !osu->isInPlayMode()) return this;  // sanity
 
@@ -340,8 +348,6 @@ CBaseUIContainer *PauseMenu::setVisible(bool visible) {
 
     if(!bancho->is_playing_a_multi_map()) {
         if(visible) {
-            soundEngine->play(osu->getSkin()->getPauseLoopSound());
-
             if(this->bContinueEnabled) {
                 RichPresence::setBanchoStatus("Taking a break", PAUSED);
 
@@ -359,8 +365,6 @@ CBaseUIContainer *PauseMenu::setVisible(bool visible) {
                 RichPresence::setBanchoStatus("Failed", SUBMITTING);
             }
         } else {
-            soundEngine->stop(osu->getSkin()->getPauseLoopSound());
-
             RichPresence::onPlayStart();
 
             if(!bancho->spectators.empty()) {

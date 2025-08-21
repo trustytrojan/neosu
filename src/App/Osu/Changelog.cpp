@@ -30,6 +30,7 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG v40_02;
     v40_02.title = "40.02";
     v40_02.changes = {
+        R"(- Fixed pause loop playing after quitting a map)",
         R"(- Reduced input lag by 1 frame)",
     };
     changelogs.push_back(v40_02);
