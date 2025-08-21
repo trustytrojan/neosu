@@ -26,11 +26,19 @@ OpenGLImage::OpenGLImage(i32 width, i32 height, bool mipmapped, bool keepInSyste
     this->iTextureUnitBackup = 0;
 }
 
+OpenGLImage::~OpenGLImage() {
+    this->destroy();
+    if(this->GLTexture != 0) {
+        glDeleteTextures(1, &this->GLTexture);
+        this->GLTexture = 0;
+    }
+}
+
 void OpenGLImage::init() {
     // only load if not:
     // 1. already uploaded to gpu, and we didn't keep the image in system memory
     // 2. failed to async load
-    if((this->GLTexture != 0 && !this->bKeepInSystemMemory) || (!this->bAsyncReady.load() && !this->bCreatedImage)) {
+    if((this->GLTexture != 0 && !this->bKeepInSystemMemory) || !(this->bAsyncReady.load())) {
         if(cv::debug_image.getBool()) {
             debugLog(
                 "we are already loaded, bReady: {} createdImage: {} GLTexture: {} bKeepInSystemMemory: {} bAsyncReady: "
@@ -97,7 +105,10 @@ void OpenGLImage::init() {
 }
 
 void OpenGLImage::initAsync() {
-    if(this->GLTexture != 0) return;  // only load if we are not already loaded
+    if(this->GLTexture != 0) {
+        this->bAsyncReady = true;
+        return;  // only load if we are not already loaded
+    }
 
     if(!this->bCreatedImage) {
         if(cv::debug_rm.getBool()) debugLog("Resource Manager: Loading {:s}\n", this->sFilePath.c_str());
