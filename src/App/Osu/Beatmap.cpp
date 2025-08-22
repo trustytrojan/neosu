@@ -163,8 +163,8 @@ void Beatmap::drawDebug() {
         g->translate(5, debugFont->getHeight() + 5 - this->getMousePos().y);
         {
             for(const DatabaseBeatmap::TIMINGPOINT &t : this->selectedDifficulty2->getTimingpoints()) {
-                g->drawString(debugFont, UString::format("%li,%f,%i,%i,%i", t.offset, t.msPerBeat, t.sampleType,
-                                                         t.sampleSet, t.volume));
+                g->drawString(debugFont, UString::format("%li,%f,%i,%i,%i", t.offset, t.msPerBeat, t.sampleSet,
+                                                         t.sampleIndex, t.volume));
                 g->translate(0, debugFont->getHeight());
             }
         }
@@ -653,6 +653,9 @@ bool Beatmap::start() {
         this->breaks = std::move(result.breaks);
         osu->getSkin()->setBeatmapComboColors(std::move(result.combocolors));  // update combo colors in skin
 
+        this->current_timing_point = DatabaseBeatmap::TIMING_INFO{};
+        this->default_sample_set = result.defaultSampleSet;
+
         // load beatmap skin
         osu->getSkin()->loadBeatmapOverride(this->selectedDifficulty2->getFolder());
     }
@@ -794,6 +797,8 @@ void Beatmap::pause(bool quitIfWaiting) {
         stop_spectating();
         return;
     }
+
+    // TODO: handle sliderslide sound pause/unpause
 
     const bool isFirstPause = !this->bContinueScheduled;
 
@@ -1443,18 +1448,6 @@ void Beatmap::addHealth(f64 percent, bool isFromHitResult) {
             this->fail();
         }
     }
-}
-
-void Beatmap::updateTimingPoints(long curPos) {
-    if(curPos < 0) return;  // aspire pls >:(
-
-    /// debugLog("updateTimingPoints( {:d} )\n", curPos);
-
-    const DatabaseBeatmap::TIMING_INFO t =
-        this->selectedDifficulty2->getTimingInfoForTime(curPos + (long)cv::timingpoints_offset.getInt());
-    osu->getSkin()->setSampleSet(
-        t.sampleType);  // normal/soft/drum is stored in the sample type! the sample set number is for custom sets
-    osu->getSkin()->setSampleVolume(std::clamp<f32>(t.volume / 100.0f, 0.0f, 1.0f));
 }
 
 bool Beatmap::sortHitObjectByStartTimeComp(HitObject const *a, HitObject const *b) {
@@ -2529,7 +2522,11 @@ void Beatmap::update2() {
         cv::universal_offset_hardcoded.getInt() - this->selectedDifficulty2->getLocalOffset() -
         this->selectedDifficulty2->getOnlineOffset() -
         (this->selectedDifficulty2->getVersion() < 5 ? cv::old_beatmap_offset.getInt() : 0);
-    this->updateTimingPoints(this->iCurMusicPosWithOffsets);
+
+    if(this->iCurMusicPosWithOffsets >= 0) {
+        this->current_timing_point = this->selectedDifficulty2->getTimingInfoForTime(this->iCurMusicPosWithOffsets +
+                                                                                     cv::timingpoints_offset.getInt());
+    }
 
     // Make sure we're not too far behind the liveplay
     if(bancho->spectating) {
@@ -2972,8 +2969,6 @@ void Beatmap::update2() {
 
         // all remaining clicks which have not been consumed by any hitobjects can safely be deleted
         if(this->clicks.size() > 0) {
-            if(cv::play_hitsound_on_click_while_playing.getBool()) osu->getSkin()->playHitCircleSound(0, 0.f, 0);
-
             // nightmare mod: extra clicks = sliderbreak
             bool break_on_extra_click = (osu->getModNightmare() || cv::mod_jigsaw1.getBool());
             break_on_extra_click &= !this->bIsInSkippableSection && !this->bInBreak && !spinner_active;

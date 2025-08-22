@@ -107,16 +107,11 @@ Skin::Skin(const UString &name, std::string filepath, bool isDefaultSkin) {
     this->inputOverlayText = 0xff000000;
 
     // custom
-    this->iSampleVolume = (int)(cv::volume_effects.getFloat() * 100.0f);
-
     this->bIsRandom = cv::skin_random.getBool();
     this->bIsRandomElements = cv::skin_random_elements.getBool();
 
     // load all files
     this->load();
-
-    // convar callbacks
-    cv::ignore_beatmap_sample_volume.setCallback(SA::MakeDelegate<&Skin::onIgnoreBeatmapSampleVolumeChange>(this));
 }
 
 Skin::~Skin() {
@@ -967,33 +962,36 @@ bool Skin::parseSkinINI(std::string filepath) {
         else if(curLine.find("[Fonts]") != std::string::npos)
             curBlock = 2;
 
+        auto curLineChar = curLine.c_str();
+
         switch(curBlock) {
             // General
             case 0: {
                 std::string version;
-                if(Parsing::parse_value(curLine, "Version", &version)) {
+                if(Parsing::parse(curLineChar, "Version", ':', &version)) {
                     if((version.find("latest") != std::string::npos) || (version.find("User") != std::string::npos)) {
                         this->fVersion = 2.5f;
                     } else {
-                        Parsing::parse_value(curLine, "Version", &this->fVersion);
+                        Parsing::parse(curLineChar, "Version", ':', &this->fVersion);
                     }
                 }
 
-                Parsing::parse_value(curLine, "CursorRotate", &this->bCursorRotate);
-                Parsing::parse_value(curLine, "CursorCentre", &this->bCursorCenter);
-                Parsing::parse_value(curLine, "CursorExpand", &this->bCursorExpand);
-                Parsing::parse_value(curLine, "SliderBallFlip", &this->bSliderBallFlip);
-                Parsing::parse_value(curLine, "AllowSliderBallTint", &this->bAllowSliderBallTint);
-                Parsing::parse_value(curLine, "HitCircleOverlayAboveNumber", &this->bHitCircleOverlayAboveNumber);
+                Parsing::parse(curLineChar, "CursorRotate", ':', &this->bCursorRotate);
+                Parsing::parse(curLineChar, "CursorCentre", ':', &this->bCursorCenter);
+                Parsing::parse(curLineChar, "CursorExpand", ':', &this->bCursorExpand);
+                Parsing::parse(curLineChar, "LayeredHitSounds", ':', &this->bLayeredHitSounds);
+                Parsing::parse(curLineChar, "SliderBallFlip", ':', &this->bSliderBallFlip);
+                Parsing::parse(curLineChar, "AllowSliderBallTint", ':', &this->bAllowSliderBallTint);
+                Parsing::parse(curLineChar, "HitCircleOverlayAboveNumber", ':', &this->bHitCircleOverlayAboveNumber);
 
                 // https://osu.ppy.sh/community/forums/topics/314209
-                Parsing::parse_value(curLine, "HitCircleOverlayAboveNumer", &this->bHitCircleOverlayAboveNumber);
+                Parsing::parse(curLineChar, "HitCircleOverlayAboveNumer", ':', &this->bHitCircleOverlayAboveNumber);
 
-                if(Parsing::parse_value(curLine, "SliderStyle", &this->iSliderStyle)) {
+                if(Parsing::parse(curLineChar, "SliderStyle", ':', &this->iSliderStyle)) {
                     if(this->iSliderStyle != 1 && this->iSliderStyle != 2) this->iSliderStyle = 2;
                 }
 
-                if(Parsing::parse_value(curLine, "AnimationFramerate", &this->fAnimationFramerate)) {
+                if(Parsing::parse(curLineChar, "AnimationFramerate", ':', &this->fAnimationFramerate)) {
                     if(this->fAnimationFramerate < 0.f) this->fAnimationFramerate = 0.f;
                 }
 
@@ -1006,24 +1004,24 @@ bool Skin::parseSkinINI(std::string filepath) {
                 u8 r, g, b;
 
                 // FIXME: actually use comboNum for ordering
-                if(Parsing::parse_numbered_value(curLine, "Combo", &comboNum, &r, &g, &b)) {
+                if(Parsing::parse(curLineChar, "Combo", &comboNum, ':', &r, ',', &g, ',', &b)) {
                     if(comboNum >= 1 && comboNum <= 8) {
                         this->comboColors.push_back(rgb(r, g, b));
                     }
-                } else if(Parsing::parse_value(curLine, "SpinnerApproachCircle", &r, &g, &b))
+                } else if(Parsing::parse(curLineChar, "SpinnerApproachCircle", ':', &r, ',', &g, ',', &b))
                     this->spinnerApproachCircleColor = rgb(r, g, b);
-                else if(Parsing::parse_value(curLine, "SliderBall", &r, &g, &b))
+                else if(Parsing::parse(curLineChar, "SliderBall", ':', &r, ',', &g, ',', &b))
                     this->sliderBallColor = rgb(r, g, b);
-                else if(Parsing::parse_value(curLine, "SliderBorder", &r, &g, &b))
+                else if(Parsing::parse(curLineChar, "SliderBorder", ':', &r, ',', &g, ',', &b))
                     this->sliderBorderColor = rgb(r, g, b);
-                else if(Parsing::parse_value(curLine, "SliderTrackOverride", &r, &g, &b)) {
+                else if(Parsing::parse(curLineChar, "SliderTrackOverride", ':', &r, ',', &g, ',', &b)) {
                     this->sliderTrackOverride = rgb(r, g, b);
                     this->bSliderTrackOverride = true;
-                } else if(Parsing::parse_value(curLine, "SongSelectActiveText", &r, &g, &b))
+                } else if(Parsing::parse(curLineChar, "SongSelectActiveText", ':', &r, ',', &g, ',', &b))
                     this->songSelectActiveText = rgb(r, g, b);
-                else if(Parsing::parse_value(curLine, "SongSelectInactiveText", &r, &g, &b))
+                else if(Parsing::parse(curLineChar, "SongSelectInactiveText", ':', &r, ',', &g, ',', &b))
                     this->songSelectInactiveText = rgb(r, g, b);
-                else if(Parsing::parse_value(curLine, "InputOverlayText", &r, &g, &b))
+                else if(Parsing::parse(curLineChar, "InputOverlayText", ':', &r, ',', &g, ',', &b))
                     this->inputOverlayText = rgb(r, g, b);
 
                 break;
@@ -1031,11 +1029,11 @@ bool Skin::parseSkinINI(std::string filepath) {
 
             // Fonts
             case 2: {
-                Parsing::parse_value(curLine, "ComboOverlap", &this->iComboOverlap);
-                Parsing::parse_value(curLine, "ScoreOverlap", &this->iScoreOverlap);
-                Parsing::parse_value(curLine, "HitCircleOverlap", &this->iHitCircleOverlap);
+                Parsing::parse(curLineChar, "ComboOverlap", ':', &this->iComboOverlap);
+                Parsing::parse(curLineChar, "ScoreOverlap", ':', &this->iScoreOverlap);
+                Parsing::parse(curLineChar, "HitCircleOverlap", ':', &this->iHitCircleOverlap);
 
-                if(Parsing::parse_value(curLine, "ComboPrefix", &this->sComboPrefix)) {
+                if(Parsing::parse(curLineChar, "ComboPrefix", ':', &this->sComboPrefix)) {
                     // XXX: jank path normalization
                     for(int i = 0; i < this->sComboPrefix.length(); i++) {
                         if(this->sComboPrefix[i] == '\\') {
@@ -1045,7 +1043,7 @@ bool Skin::parseSkinINI(std::string filepath) {
                     }
                 }
 
-                if(Parsing::parse_value(curLine, "ScorePrefix", &this->sScorePrefix)) {
+                if(Parsing::parse(curLineChar, "ScorePrefix", ':', &this->sScorePrefix)) {
                     // XXX: jank path normalization
                     for(int i = 0; i < this->sScorePrefix.length(); i++) {
                         if(this->sScorePrefix[i] == '\\') {
@@ -1055,7 +1053,7 @@ bool Skin::parseSkinINI(std::string filepath) {
                     }
                 }
 
-                if(Parsing::parse_value(curLine, "HitCirclePrefix", &this->sHitCirclePrefix)) {
+                if(Parsing::parse(curLineChar, "HitCirclePrefix", ':', &this->sHitCirclePrefix)) {
                     // XXX: jank path normalization
                     for(int i = 0; i < this->sHitCirclePrefix.length(); i++) {
                         if(this->sHitCirclePrefix[i] == '\\') {
@@ -1078,36 +1076,6 @@ bool Skin::parseSkinINI(std::string filepath) {
     return true;
 }
 
-void Skin::onIgnoreBeatmapSampleVolumeChange() { this->resetSampleVolume(); }
-
-void Skin::setSampleSet(int sampleSet) {
-    if(this->iSampleSet == sampleSet) return;
-
-    /// debugLog("sample set = {:d}\n", sampleSet);
-    this->iSampleSet = sampleSet;
-}
-
-void Skin::resetSampleVolume() {
-    this->setSampleVolume(std::clamp<float>((float)this->iSampleVolume / 100.0f, 0.0f, 1.0f), true);
-}
-
-void Skin::setSampleVolume(float volume, bool force) {
-    if(cv::ignore_beatmap_sample_volume.getBool() &&
-       (int)(cv::volume_effects.getFloat() * 100.0f) == this->iSampleVolume)
-        return;
-
-    const float newSampleVolume =
-        (!cv::ignore_beatmap_sample_volume.getBool() ? volume : 1.0f) * cv::volume_effects.getFloat();
-
-    if(!force && this->iSampleVolume == (int)(newSampleVolume * 100.0f)) return;
-
-    this->iSampleVolume = (int)(newSampleVolume * 100.0f);
-    /// debugLog("sample volume = {:f}\n", sampleVolume);
-    for(auto &soundSample : this->soundSamples) {
-        soundSample.sound->setVolume(newSampleVolume * soundSample.hardcodedVolumeMultiplier);
-    }
-}
-
 Color Skin::getComboColorForCounter(int i, int offset) {
     i += cv::skin_color_index_add.getInt();
     i = std::max(i, 0);
@@ -1122,117 +1090,6 @@ Color Skin::getComboColorForCounter(int i, int offset) {
 
 void Skin::setBeatmapComboColors(std::vector<Color> colors) { this->beatmapComboColors = std::move(colors); }
 
-void Skin::playHitCircleSound(int sampleType, float pan, long delta) {
-    if(this->iSampleVolume <= 0) {
-        return;
-    }
-
-    if(!cv::sound_panning.getBool() || (cv::mod_fposu.getBool() && !cv::mod_fposu_sound_panning.getBool()) ||
-       (cv::mod_fps.getBool() && !cv::mod_fps_sound_panning.getBool())) {
-        pan = 0.0f;
-    } else {
-        pan *= cv::sound_panning_multiplier.getFloat();
-    }
-
-    f32 pitch = 0.f;
-    if(cv::snd_pitch_hitsounds.getBool()) {
-        auto bm = osu->getSelectedBeatmap();
-        if(bm) {
-            f32 range = bm->getHitWindow100();
-            pitch = (f32)delta / range * cv::snd_pitch_hitsounds_factor.getFloat();
-        }
-    }
-
-    int actualSampleSet = this->iSampleSet;
-    if(cv::skin_force_hitsound_sample_set.getInt() > 0) actualSampleSet = cv::skin_force_hitsound_sample_set.getInt();
-
-    switch(actualSampleSet) {
-        case 3:
-            soundEngine->play(this->drumHitNormal, pan, pitch);
-
-            if(sampleType & OSU_BITMASK_HITWHISTLE) soundEngine->play(this->drumHitWhistle, pan, pitch);
-            if(sampleType & OSU_BITMASK_HITFINISH) soundEngine->play(this->drumHitFinish, pan, pitch);
-            if(sampleType & OSU_BITMASK_HITCLAP) soundEngine->play(this->drumHitClap, pan, pitch);
-            break;
-        case 2:
-            soundEngine->play(this->softHitNormal, pan, pitch);
-
-            if(sampleType & OSU_BITMASK_HITWHISTLE) soundEngine->play(this->softHitWhistle, pan, pitch);
-            if(sampleType & OSU_BITMASK_HITFINISH) soundEngine->play(this->softHitFinish, pan, pitch);
-            if(sampleType & OSU_BITMASK_HITCLAP) soundEngine->play(this->softHitClap, pan, pitch);
-            break;
-        default:
-            soundEngine->play(this->normalHitNormal, pan, pitch);
-
-            if(sampleType & OSU_BITMASK_HITWHISTLE) soundEngine->play(this->normalHitWhistle, pan, pitch);
-            if(sampleType & OSU_BITMASK_HITFINISH) soundEngine->play(this->normalHitFinish, pan, pitch);
-            if(sampleType & OSU_BITMASK_HITCLAP) soundEngine->play(this->normalHitClap, pan, pitch);
-            break;
-    }
-}
-
-void Skin::playSliderTickSound(float pan) {
-    if(this->iSampleVolume <= 0) return;
-
-    if(!cv::sound_panning.getBool() || (cv::mod_fposu.getBool() && !cv::mod_fposu_sound_panning.getBool()) ||
-       (cv::mod_fps.getBool() && !cv::mod_fps_sound_panning.getBool())) {
-        pan = 0.0f;
-    } else {
-        pan *= cv::sound_panning_multiplier.getFloat();
-    }
-
-    switch(this->iSampleSet) {
-        case 3:
-            soundEngine->play(this->drumSliderTick, pan);
-            break;
-        case 2:
-            soundEngine->play(this->softSliderTick, pan);
-            break;
-        default:
-            soundEngine->play(this->normalSliderTick, pan);
-            break;
-    }
-}
-
-void Skin::playSliderSlideSound(float pan) {
-    if(!cv::sound_panning.getBool() || (cv::mod_fposu.getBool() && !cv::mod_fposu_sound_panning.getBool()) ||
-       (cv::mod_fps.getBool() && !cv::mod_fps_sound_panning.getBool())) {
-        pan = 0.0f;
-    } else {
-        pan *= cv::sound_panning_multiplier.getFloat();
-    }
-
-    switch(this->iSampleSet) {
-        case 3:
-            if(this->softSliderSlide->isPlaying()) soundEngine->stop(this->softSliderSlide);
-            if(this->normalSliderSlide->isPlaying()) soundEngine->stop(this->normalSliderSlide);
-
-            if(!this->drumSliderSlide->isPlaying())
-                soundEngine->play(this->drumSliderSlide, pan);
-            else
-                this->drumSliderSlide->setPan(pan);
-            break;
-        case 2:
-            if(this->drumSliderSlide->isPlaying()) soundEngine->stop(this->drumSliderSlide);
-            if(this->normalSliderSlide->isPlaying()) soundEngine->stop(this->normalSliderSlide);
-
-            if(!this->softSliderSlide->isPlaying())
-                soundEngine->play(this->softSliderSlide, pan);
-            else
-                this->softSliderSlide->setPan(pan);
-            break;
-        default:
-            if(this->softSliderSlide->isPlaying()) soundEngine->stop(this->softSliderSlide);
-            if(this->drumSliderSlide->isPlaying()) soundEngine->stop(this->drumSliderSlide);
-
-            if(!this->normalSliderSlide->isPlaying())
-                soundEngine->play(this->normalSliderSlide, pan);
-            else
-                this->normalSliderSlide->setPan(pan);
-            break;
-    }
-}
-
 void Skin::playSpinnerSpinSound() {
     if(this->spinnerSpinSound == nullptr) return;
 
@@ -1241,20 +1098,7 @@ void Skin::playSpinnerSpinSound() {
     }
 }
 
-void Skin::playSpinnerBonusSound() {
-    if(this->iSampleVolume > 0) {
-        soundEngine->play(this->spinnerBonus);
-    }
-}
-
-void Skin::stopSliderSlideSound(int sampleSet) {
-    if((sampleSet == -2 || sampleSet == 3) && this->drumSliderSlide->isPlaying())
-        soundEngine->stop(this->drumSliderSlide);
-    if((sampleSet == -2 || sampleSet == 2) && this->softSliderSlide->isPlaying())
-        soundEngine->stop(this->softSliderSlide);
-    if((sampleSet == -2 || sampleSet == 1 || sampleSet == 0) && this->normalSliderSlide->isPlaying())
-        soundEngine->stop(this->normalSliderSlide);
-}
+void Skin::playSpinnerBonusSound() { soundEngine->play(this->spinnerBonus); }
 
 void Skin::stopSpinnerSpinSound() {
     if(this->spinnerSpinSound == nullptr) return;
@@ -1402,9 +1246,9 @@ void Skin::loadSound(Sound *&sndRef, const std::string &skinElementName, std::st
 
     bool was_first_load = false;
 
-    auto try_load_sound = [isSample, isOverlayable, &was_first_load](const std::string &base_path, const std::string &filename,
-                                                    bool loop, const std::string &resource_name,
-                                                    bool default_skin) -> Sound * {
+    auto try_load_sound = [isSample, isOverlayable, &was_first_load](
+                              const std::string &base_path, const std::string &filename, bool loop,
+                              const std::string &resource_name, bool default_skin) -> Sound * {
         const char *extensions[] = {".wav", ".mp3", ".ogg", ".flac"};
         for(auto &extension : extensions) {
             std::string fn = filename;

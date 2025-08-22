@@ -31,18 +31,8 @@ class Skin final {
     void setAnimationSpeed(float animationSpeed) { this->animationSpeedMultiplier = animationSpeed; }
     float getAnimationSpeed() { return this->animationSpeedMultiplier; }
 
-    // samples
-    void setSampleSet(int sampleSet);
-    void setSampleVolume(float volume, bool force = false);
-    void resetSampleVolume();
-
-    void playHitCircleSound(int sampleType, float pan = 0.0f, long delta = 0);
-    void playSliderTickSound(float pan = 0.0f);
-    void playSliderSlideSound(float pan = 0.0f);
     void playSpinnerSpinSound();
     void playSpinnerBonusSound();
-
-    void stopSliderSlideSound(int sampleSet = -2);
     void stopSpinnerSpinSound();
 
     // custom
@@ -339,6 +329,7 @@ class Skin final {
     [[nodiscard]] inline bool getCursorCenter() const { return this->bCursorCenter; }
     [[nodiscard]] inline bool getCursorRotate() const { return this->bCursorRotate; }
     [[nodiscard]] inline bool getCursorExpand() const { return this->bCursorExpand; }
+    [[nodiscard]] inline bool getLayeredHitSounds() const { return this->bLayeredHitSounds; }
 
     [[nodiscard]] inline bool getSliderBallFlip() const { return this->bSliderBallFlip; }
     [[nodiscard]] inline bool getAllowSliderBallTint() const { return this->bAllowSliderBallTint; }
@@ -358,7 +349,6 @@ class Skin final {
     // custom
     [[nodiscard]] inline bool useSmoothCursorTrail() const { return this->cursorMiddle != MISSING_TEXTURE; }
     [[nodiscard]] inline bool isDefaultSkin() const { return this->bIsDefaultSkin; }
-    [[nodiscard]] inline int getSampleSet() const { return this->iSampleSet; }
 
     struct SOUND_SAMPLE {
         Sound *sound;
@@ -379,9 +369,6 @@ class Skin final {
     void loadSound(Sound *&sndRef, const std::string &skinElementName, std::string resourceName,
                    bool isOverlayable = false, bool isSample = false, bool loop = false,
                    bool fallback_to_default = true, float hardcodedVolumeMultiplier = -1.0f);
-
-    void onEffectVolumeChange(const UString &oldValue, const UString &newValue);
-    void onIgnoreBeatmapSampleVolumeChange();
 
     bool bReady{false};
     bool bIsDefaultSkin;
@@ -643,6 +630,7 @@ class Skin final {
     bool bCursorCenter{true};
     bool bCursorRotate{true};
     bool bCursorExpand{true};
+    bool bLayeredHitSounds{true};  // when true, hitnormal sounds must always be played regardless of map hitsound flags
 
     bool bSliderBallFlip{true};
     bool bAllowSliderBallTint{false};
@@ -660,9 +648,6 @@ class Skin final {
     int iHitCircleOverlap{0};
 
     // custom
-    int iSampleSet{1};
-    int iSampleVolume;
-
     std::vector<std::string> filepathsForRandomSkin;
     bool bIsRandom;
     bool bIsRandomElements;

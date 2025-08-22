@@ -124,6 +124,8 @@ class Beatmap : public BeatmapInterface {
     void setSpeed(f32 speed);
     void seekPercent(f64 percent);
     void seekPercentPlayable(f64 percent);
+    [[nodiscard]] inline DatabaseBeatmap::TIMING_INFO getTimingPoint() const { return this->current_timing_point; }
+    [[nodiscard]] inline i32 getDefaultSampleSet() const { return this->default_sample_set; }
 
     [[nodiscard]] inline Sound *getMusic() const { return this->music; }
     [[nodiscard]] u32 getTime() const;
@@ -214,7 +216,6 @@ class Beatmap : public BeatmapInterface {
     void addSliderBreak() override;
     void addScorePoints(int points, bool isSpinner = false) override;
     void addHealth(f64 percent, bool isFromHitResult);
-    void updateTimingPoints(long curPos);
 
     static bool sortHitObjectByStartTimeComp(HitObject const *a, HitObject const *b);
     static bool sortHitObjectByEndTimeComp(HitObject const *a, HitObject const *b);
@@ -278,6 +279,8 @@ class Beatmap : public BeatmapInterface {
     int iResourceLoadUpdateDelayHack;
     f32 fAfterMusicIsFinishedVirtualAudioTimeStart;
     bool bIsFirstMissSound;
+    DatabaseBeatmap::TIMING_INFO current_timing_point{};
+    i32 default_sample_set{1};
 
     // health
     bool bFailed;

@@ -889,7 +889,6 @@ CONVAR(pause_anim_duration, "pause_anim_duration", 0.15f, FCVAR_BANCHO_COMPATIBL
 CONVAR(pause_dim_alpha, "pause_dim_alpha", 0.58f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(pause_dim_background, "pause_dim_background", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(pause_on_focus_loss, "pause_on_focus_loss", true, FCVAR_BANCHO_COMPATIBLE);
-CONVAR(play_hitsound_on_click_while_playing, "play_hitsound_on_click_while_playing", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(playfield_border_bottom_percent, "playfield_border_bottom_percent", 0.0834f,
        FCVAR_BANCHO_COMPATIBLE | FCVAR_GAMEPLAY);
 CONVAR(playfield_border_top_percent, "playfield_border_top_percent", 0.117f, FCVAR_BANCHO_COMPATIBLE | FCVAR_GAMEPLAY);
@@ -989,8 +988,10 @@ CONVAR(skip_time, "skip_time", 5000.0f, FCVAR_LOCKED,
        "Timeframe in ms within a beatmap which allows skipping if it doesn't contain any hitobjects");
 CONVAR(slider_alpha_multiplier, "slider_alpha_multiplier", 1.0f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(slider_ball_tint_combo_color, "slider_ball_tint_combo_color", true, FCVAR_BANCHO_COMPATIBLE);
-CONVAR(slider_body_alpha_multiplier, "slider_body_alpha_multiplier", 1.0f, FCVAR_BANCHO_COMPATIBLE, CFUNC(SliderRenderer::onUniformConfigChanged));
-CONVAR(slider_body_color_saturation, "slider_body_color_saturation", 1.0f, FCVAR_BANCHO_COMPATIBLE, CFUNC(SliderRenderer::onUniformConfigChanged));
+CONVAR(slider_body_alpha_multiplier, "slider_body_alpha_multiplier", 1.0f, FCVAR_BANCHO_COMPATIBLE,
+       CFUNC(SliderRenderer::onUniformConfigChanged));
+CONVAR(slider_body_color_saturation, "slider_body_color_saturation", 1.0f, FCVAR_BANCHO_COMPATIBLE,
+       CFUNC(SliderRenderer::onUniformConfigChanged));
 CONVAR(slider_body_fade_out_time_multiplier, "slider_body_fade_out_time_multiplier", 1.0f, FCVAR_BANCHO_COMPATIBLE,
        "multiplies osu_hitobject_fade_out_time");
 CONVAR(slider_body_lazer_fadeout_style, "slider_body_lazer_fadeout_style", true, FCVAR_BANCHO_COMPATIBLE,
@@ -999,8 +1000,10 @@ CONVAR(slider_body_lazer_fadeout_style, "slider_body_lazer_fadeout_style", true,
 CONVAR(slider_body_smoothsnake, "slider_body_smoothsnake", true, FCVAR_BANCHO_COMPATIBLE,
        "draw 1 extra interpolated circle mesh at the start & end of every slider for extra smooth snaking/shrinking");
 CONVAR(slider_body_unit_circle_subdivisions, "slider_body_unit_circle_subdivisions", 42, FCVAR_BANCHO_COMPATIBLE);
-CONVAR(slider_border_feather, "slider_border_feather", 0.0f, FCVAR_BANCHO_COMPATIBLE, CFUNC(SliderRenderer::onUniformConfigChanged));
-CONVAR(slider_border_size_multiplier, "slider_border_size_multiplier", 1.0f, FCVAR_BANCHO_COMPATIBLE, CFUNC(SliderRenderer::onUniformConfigChanged));
+CONVAR(slider_border_feather, "slider_border_feather", 0.0f, FCVAR_BANCHO_COMPATIBLE,
+       CFUNC(SliderRenderer::onUniformConfigChanged));
+CONVAR(slider_border_size_multiplier, "slider_border_size_multiplier", 1.0f, FCVAR_BANCHO_COMPATIBLE,
+       CFUNC(SliderRenderer::onUniformConfigChanged));
 CONVAR(slider_border_tint_combo_color, "slider_border_tint_combo_color", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(slider_curve_max_length, "slider_curve_max_length", 65536 / 2, FCVAR_LOCKED,
        "maximum slider length in osu!pixels (i.e. pixelLength). also used to clamp all "
@@ -1040,7 +1043,8 @@ CONVAR(slider_max_repeats, "slider_max_repeats", 9000, FCVAR_LOCKED | FCVAR_GAME
        "maximum number of repeats allowed per slider (clamp range)");
 CONVAR(slider_max_ticks, "slider_max_ticks", 2048, FCVAR_LOCKED | FCVAR_GAMEPLAY,
        "maximum number of ticks allowed per slider (clamp range)");
-CONVAR(slider_osu_next_style, "slider_osu_next_style", false, FCVAR_BANCHO_COMPATIBLE, CFUNC(SliderRenderer::onUniformConfigChanged));
+CONVAR(slider_osu_next_style, "slider_osu_next_style", false, FCVAR_BANCHO_COMPATIBLE,
+       CFUNC(SliderRenderer::onUniformConfigChanged));
 CONVAR(slider_rainbow, "slider_rainbow", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(slider_reverse_arrow_alpha_multiplier, "slider_reverse_arrow_alpha_multiplier", 1.0f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(slider_reverse_arrow_animated, "slider_reverse_arrow_animated", true, FCVAR_BANCHO_COMPATIBLE,
@@ -1171,9 +1175,6 @@ CONVAR(start_first_main_menu_song_at_preview_point, "start_first_main_menu_song_
        FCVAR_BANCHO_COMPATIBLE);
 CONVAR(submit_after_pause, "submit_after_pause", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_GAMEPLAY);
 CONVAR(submit_scores, "submit_scores", false, FCVAR_BANCHO_COMPATIBLE);
-CONVAR(timingpoints_force, "timingpoints_force", true, FCVAR_BANCHO_COMPATIBLE,
-       "Forces the correct sample type and volume to be used, by getting the active timingpoint "
-       "through iteration EVERY TIME a hitsound is played (performance!)");
 CONVAR(timingpoints_offset, "timingpoints_offset", 5.0f, FCVAR_BANCHO_COMPATIBLE,
        "Offset in ms which is added before determining the active timingpoint for the sample "
        "type and sample volume (hitsounds) of the current frame");
@@ -1202,7 +1203,8 @@ CONVAR(ui_top_ranks_max, "ui_top_ranks_max", 200, FCVAR_BANCHO_COMPATIBLE,
 CONVAR(ui_window_animspeed, "ui_window_animspeed", 0.29f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(ui_window_shadow_radius, "ui_window_shadow_radius", 13.0f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(universal_offset, "universal_offset", 0.0f, FCVAR_BANCHO_COMPATIBLE);
-CONVAR(universal_offset_hardcoded, "universal_offset_hardcoded", 0.0f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_INTERNAL);
+CONVAR(universal_offset_hardcoded, "universal_offset_hardcoded", 0.0f,
+       FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_INTERNAL);
 CONVAR(use_https, "use_https", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(use_ppv3, "use_ppv3", false, FCVAR_BANCHO_COMPATIBLE, "use ppv3 instead of ppv2 (experimental)");
 CONVAR(user_draw_accuracy, "user_draw_accuracy", true, FCVAR_BANCHO_COMPATIBLE);

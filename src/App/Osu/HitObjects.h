@@ -15,6 +15,17 @@ enum class HitObjectType : uint8_t {
     SPINNER,
 };
 
+namespace PpyHitObjectType {
+enum {
+    CIRCLE = (1 << 0),
+    SLIDER = (1 << 1),
+    NEW_COMBO = (1 << 2),
+    SPINNER = (1 << 3),
+    // 4, 5, 6: 3-bit integer specifying how many combo colors to skip (if NEW_COMBO is set)
+    MANIA_HOLD_NOTE = (1 << 7),
+};
+}
+
 class HitObject {
    public:
     static void drawHitResult(Beatmap *beatmap, vec2 rawPos, LiveScore::HIT result, float animPercentInv,
@@ -23,7 +34,7 @@ class HitObject {
                               LiveScore::HIT result, float animPercentInv, float hitDeltaRangePercent);
 
    public:
-    HitObject(long time, int sampleType, int comboNumber, bool isEndOfCombo, int colorCounter, int colorOffset,
+    HitObject(long time, HitSamples samples, int comboNumber, bool isEndOfCombo, int colorCounter, int colorOffset,
               BeatmapInterface *beatmap);
     virtual ~HitObject() { ; }
 
@@ -93,15 +104,15 @@ class HitObject {
     HITRESULTANIM hitresultanim2;
 
    protected:
-    BeatmapInterface* bi = nullptr;
-    Beatmap* bm = nullptr;  // NULL when simulating
+    BeatmapInterface *bi = nullptr;
+    Beatmap *bm = nullptr;  // NULL when simulating
 
     long iDelta;  // this must be signed
     long iApproachTime;
     long iFadeInTime;  // extra time added before the approachTime to let the object smoothly become visible
     long iAutopilotDelta;
 
-    int iSampleType;
+    HitSamples samples;
     int iColorCounter;
     int iColorOffset;
 
@@ -153,17 +164,16 @@ class Circle final : public HitObject {
                                     bool overrideHDApproachCircle = false);
 
     // split helper functions
-    static void drawApproachCircle(Skin *skin, vec2 pos, Color comboColor, float hitcircleDiameter,
-                                   float approachScale, float alpha, bool modHD, bool overrideHDApproachCircle);
+    static void drawApproachCircle(Skin *skin, vec2 pos, Color comboColor, float hitcircleDiameter, float approachScale,
+                                   float alpha, bool modHD, bool overrideHDApproachCircle);
     static void drawHitCircleOverlay(SkinImage *hitCircleOverlayImage, vec2 pos, float circleOverlayImageScale,
                                      float alpha, float colorRGBMultiplier);
-    static void drawHitCircle(Image *hitCircleImage, vec2 pos, Color comboColor, float circleImageScale,
-                              float alpha);
+    static void drawHitCircle(Image *hitCircleImage, vec2 pos, Color comboColor, float circleImageScale, float alpha);
     static void drawHitCircleNumber(Skin *skin, float numberScale, float overlapScale, vec2 pos, int number,
                                     float numberAlpha, float colorRGBMultiplier);
 
    public:
-    Circle(int x, int y, long time, int sampleType, int comboNumber, bool isEndOfCombo, int colorCounter,
+    Circle(int x, int y, long time, HitSamples samples, int comboNumber, bool isEndOfCombo, int colorCounter,
            int colorOffset, BeatmapInterface *beatmap);
     ~Circle() override;
 
@@ -209,9 +219,10 @@ class Slider final : public HitObject {
     };
 
    public:
-    Slider(char stype, int repeat, float pixelLength, std::vector<vec2> points, std::vector<int> hitSounds,
-           std::vector<float> ticks, float sliderTime, float sliderTimeWithoutRepeats, long time, int sampleType,
-           int comboNumber, bool isEndOfCombo, int colorCounter, int colorOffset, BeatmapInterface *beatmap);
+    Slider(char stype, int repeat, float pixelLength, std::vector<vec2> points, std::vector<float> ticks,
+           float sliderTime, float sliderTimeWithoutRepeats, long time, HitSamples hoverSamples,
+           std::vector<HitSamples> edgeSamples, int comboNumber, bool isEndOfCombo, int colorCounter, int colorOffset,
+           BeatmapInterface *beatmap);
     ~Slider() override;
 
     void draw() override;
@@ -267,7 +278,7 @@ class Slider final : public HitObject {
     };
 
     std::vector<vec2> points;
-    std::vector<int> hitSounds;
+    std::vector<HitSamples> edgeSamples;
 
     std::vector<SLIDERTICK> ticks;  // ticks (drawing)
 
@@ -303,7 +314,6 @@ class Slider final : public HitObject {
 
     int iRepeat;
     int iFatFingerKey;
-    int iPrevSliderSlideSoundSampleSet;
     int iReverseArrowPos;
     int iCurRepeat;
     int iCurRepeatCounterForHitSounds;
@@ -326,7 +336,7 @@ class Slider final : public HitObject {
 
 class Spinner final : public HitObject {
    public:
-    Spinner(int x, int y, long time, int sampleType, bool isEndOfCombo, long endTime, BeatmapInterface *beatmap);
+    Spinner(int x, int y, long time, HitSamples samples, bool isEndOfCombo, long endTime, BeatmapInterface *beatmap);
     ~Spinner() override;
 
     void draw() override;

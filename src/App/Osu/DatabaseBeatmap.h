@@ -4,6 +4,7 @@
 #include <future>
 
 #include "DifficultyCalculator.h"
+#include "HitSounds.h"
 #include "Osu.h"
 #include "Overrides.h"
 #include "Resource.h"
@@ -28,15 +29,14 @@ typedef DatabaseBeatmap BeatmapSet;
 
 class DatabaseBeatmap final {
    public:
-    // raw structs
-
+    // raw structs (not editable, we're following db format directly)
     struct TIMINGPOINT {
-        double offset;
-        double msPerBeat;
+        f64 offset;
+        f64 msPerBeat;
 
-        int sampleType;
-        int sampleSet;
-        int volume;
+        i32 sampleSet;
+        i32 sampleIndex;
+        i32 volume;
 
         bool timingChange;
         bool kiai;
@@ -48,7 +48,6 @@ class DatabaseBeatmap final {
     };
 
     // custom structs
-
     struct LOAD_DIFFOBJ_RESULT {
         std::vector<OsuDifficultyHitObject> diffobjects{};
 
@@ -61,20 +60,21 @@ class DatabaseBeatmap final {
         std::vector<BREAK> breaks;
         std::vector<Color> combocolors;
 
+        i32 defaultSampleSet{1};
         int errorCode{0};
     };
 
     struct TIMING_INFO {
-        long offset;
+        i32 offset = 0;
 
-        float beatLengthBase;
-        float beatLength;
+        f32 beatLengthBase = 0.f;
+        f32 beatLength = 0.f;
 
-        float volume;
-        int sampleType;
-        int sampleSet;
+        i32 sampleSet = 0;
+        i32 sampleIndex = 0;
+        i32 volume = 0;
 
-        bool isNaN;
+        bool isNaN = false;
     };
 
     enum class BeatmapType : uint8_t {
@@ -89,11 +89,11 @@ class DatabaseBeatmap final {
     struct HITCIRCLE {
         int x, y;
         u32 time;
-        int sampleType;
         int number;
         int colorCounter;
         int colorOffset;
         bool clicked;
+        HitSamples samples;
     };
 
     struct SLIDER {
@@ -102,12 +102,12 @@ class DatabaseBeatmap final {
         int repeat;
         float pixelLength;
         u32 time;
-        int sampleType;
         int number;
         int colorCounter;
         int colorOffset;
         std::vector<vec2> points;
-        std::vector<int> hitSounds;
+        HitSamples hoverSamples;
+        std::vector<HitSamples> edgeSamples;
 
         float sliderTime;
         float sliderTimeWithoutRepeats;
@@ -119,8 +119,8 @@ class DatabaseBeatmap final {
     struct SPINNER {
         int x, y;
         u32 time;
-        int sampleType;
         u32 endTime;
+        HitSamples samples;
     };
 
     struct PRIMITIVE_CONTAINER {
@@ -140,6 +140,10 @@ class DatabaseBeatmap final {
         u32 numSliders{};
         u32 numSpinners{};
         u32 numHitobjects{};
+
+        // sample set to use if timing point doesn't specify it
+        // 1 = normal, 2 = soft, 3 = drum
+        i32 defaultSampleSet{1};
 
         i32 version{};
         i32 errorCode{0};

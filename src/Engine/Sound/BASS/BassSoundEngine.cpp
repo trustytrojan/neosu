@@ -448,6 +448,8 @@ void BassSoundEngine::shutdown() {
 }
 
 bool BassSoundEngine::play(Sound *snd, float pan, float pitch) {
+    if(!snd || !snd->isReady()) return false;
+
     auto [bassSound, channel] = GETHANDLE(BassSound, getChannel());
     if(!bassSound) {
         return false;
@@ -543,7 +545,9 @@ void BassSoundEngine::stop(Sound *snd) {
     if(!this->isReady() || snd == nullptr || !snd->isReady()) return;
 
     // This will stop all samples, then re-init to be ready for a play()
-    resourceManager->reloadResource(snd);
+    // NOTE: async reload, because... we're doing this for sliderslides...
+    //       really need to fix the BASS_FX desync (or ditch BASS) to stop this madness
+    resourceManager->reloadResource(snd, true);
 }
 
 bool BassSoundEngine::isReady() {

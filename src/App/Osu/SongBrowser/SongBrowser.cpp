@@ -458,7 +458,7 @@ SongBrowser::SongBrowser()  // NOLINT(cert-msc51-cpp, cert-msc32-c)
 
     // NOTE: we don't add localBestContainer to the screen; we draw and update it manually so that
     //       it can be drawn under skins which overlay the scores list.
-    this->localBestContainer = std::make_unique<CBaseUIContainer>(0, 0, 0, 0, "");
+    this->localBestContainer = std::make_unique<CBaseUIContainer>(0.f, 0.f, 0.f, 0.f, "");
     this->localBestContainer->setVisible(false);
     this->localBestLabel = new CBaseUILabel(0, 0, 0, 0, "", "Personal Best (from local scores)");
     this->localBestLabel->setDrawBackground(false);

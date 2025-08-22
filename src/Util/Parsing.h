@@ -102,85 +102,36 @@ const char* parse(const char* str, T* arg) {
     return end_ptr;
 }
 
-// For parsing comma-separated values
 template <typename T, typename... Extra>
-const char* parse(const char* str, T* arg, Extra*... extra) {
-    // Storing result in tmp var, so we only modify *arg once parsing fully succeeded
-    T arg_tmp;
-    str = parse(str, &arg_tmp);
-    if(str == nullptr) return nullptr;
-
-    while((*str == ' ') || (*str == '\t')) str++;
-    if(*str != ',') return nullptr;
-    str++;
+const char* parse(const char* str, T arg, Extra... extra) {
+    // Always skip whitespace
     while((*str == ' ') || (*str == '\t')) str++;
 
-    str = parse(str, extra...);
-    if(str == nullptr) return nullptr;
+    if constexpr(std::is_same_v<T, char>) {
+        // Assert char separator. Return position after separator.
+        if(*str != arg) return nullptr;
+        return str + 1;
+    } else if constexpr(std::is_same_v<T, const char*>) {
+        // Assert string label. Return position after label.
+        auto arg_len = strlen(arg);
+        if(strncmp(str, arg, arg_len) != 0) return nullptr;
+        return str + arg_len;
+    } else if constexpr(std::is_pointer_v<T>) {
+        // Storing result in tmp var, so we only modify *arg once parsing fully succeeded
+        using T_val = typename std::remove_pointer<T>::type;
+        T_val arg_tmp;
+        str = parse(str, &arg_tmp);
+        if(str == nullptr) return nullptr;
 
-    *arg = std::move(arg_tmp);
-    return str;
-}
+        str = parse(str, extra...);
+        if(str == nullptr) return nullptr;
 
-template <typename... Args>
-bool parse_with_label(const char* str, const char* label, const char separator, Args*... args) {
-    while((*str == ' ') || (*str == '\t')) str++;
-
-    auto label_len = strlen(label);
-    if(strncmp(str, label, label_len) != 0) return false;
-    str += label_len;
-
-    while((*str == ' ') || (*str == '\t')) str++;
-    if(*str != separator) return false;
-    str++;
-
-    while((*str == ' ') || (*str == '\t')) str++;
-    return parse(str, args...) != nullptr;
-}
-
-// For parsing 'Foo = Bar' lines
-template <typename... Args>
-bool parse_setting(const std::string& str, const std::string& label, Args*... args) {
-    return parse_with_label(str.c_str(), label.c_str(), '=', args...);
-}
-
-// For parsing 'Foo: Bar' lines
-template <typename... Args>
-bool parse_value(const std::string& str, const std::string& label, Args*... args) {
-    return parse_with_label(str.c_str(), label.c_str(), ':', args...);
-}
-
-template <typename First, typename... Rest>
-bool parse_with_label_numbered(const char* str, const char* label, const char separator, First* first, Rest*... rest) {
-    while((*str == ' ') || (*str == '\t')) str++;
-
-    auto label_len = strlen(label);
-    if(strncmp(str, label, label_len) != 0) return false;
-    str += label_len;
-
-    // "number" part
-    while((*str == ' ') || (*str == '\t')) str++;
-    str = parse(str, first);
-    if(!str) return false;
-
-    while((*str == ' ') || (*str == '\t')) str++;
-    if(*str != separator) return false;
-    str++;
-
-    while((*str == ' ') || (*str == '\t')) str++;
-    return parse(str, rest...) != nullptr;
-}
-
-// For parsing 'Foo# = Bar' lines (not currently used)
-template <typename... Args>
-bool parse_numbered_setting(const std::string& str, const std::string& label, Args*... args) {
-    return parse_with_label_numbered(str.c_str(), label.c_str(), '=', args...);
-}
-
-// For parsing 'Foo#: Bar' lines
-template <typename... Args>
-bool parse_numbered_value(const std::string& str, const std::string& label, Args*... args) {
-    return parse_with_label_numbered(str.c_str(), label.c_str(), ':', args...);
+        *arg = std::move(arg_tmp);
+        return str;
+    } else {
+        static_assert(Env::always_false_v<T>, "expected pointer parameter");
+        return nullptr;
+    }
 }
 
 }  // namespace Parsing

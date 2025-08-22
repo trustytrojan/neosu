@@ -201,7 +201,7 @@ i32 get_beatmapset_id_from_osu_file(const u8* osu_data, size_t s_osu_data) {
         if(line.starts_with("//")) continue;
         if(line.back() == '\r') line.pop_back();
 
-        if(Parsing::parse_value(line, "BeatmapSetID", &set_id)) {
+        if(Parsing::parse(line.c_str(), "BeatmapSetID", ':', &set_id)) {
             return set_id;
         }
     }
