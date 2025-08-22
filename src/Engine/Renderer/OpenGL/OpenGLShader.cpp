@@ -50,14 +50,14 @@ void OpenGLShader::enable() {
     if(currentProgram == this->iProgram) return;  // already active
 
     this->iProgramBackup = currentProgram;
-    glUseProgram(this->iProgram);
+    glUseProgramObjectARB(this->iProgram);
     OpenGLStateCache::setCurrentProgram(this->iProgram);
 }
 
 void OpenGLShader::disable() {
     if(!this->bReady) return;
 
-    glUseProgram(this->iProgramBackup);
+    glUseProgramObjectARB(this->iProgramBackup);
 
     // update cache
     OpenGLStateCache::setCurrentProgram(this->iProgramBackup);

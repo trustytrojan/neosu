@@ -10,44 +10,49 @@
 #include "OpenGLHeaders.h"
 
 typedef struct SDL_Window SDL_Window;
-class SDLGLInterface final : public BackendGLInterface
-{
-	friend class Environment;
-	friend class OpenGLLegacyInterface;
-	friend class OpenGLVertexArrayObject;
-	friend class OpenGLShader;
-	friend class OpenGLES32Interface;
-	friend class OpenGLES32VertexArrayObject;
-	friend class OpenGLES32Shader;
-	friend class OpenGLShader;
-public:
-	SDLGLInterface(SDL_Window *window) : BackendGLInterface(), m_window(window) {}
+class SDLGLInterface final : public BackendGLInterface {
+    friend class Environment;
+    friend class OpenGLLegacyInterface;
+    friend class OpenGLVertexArrayObject;
+    friend class OpenGLShader;
+    friend class OpenGLES32Interface;
+    friend class OpenGLES32VertexArrayObject;
+    friend class OpenGLES32Shader;
+    friend class OpenGLShader;
 
-	// scene
-	void endScene() override;
+   public:
+    SDLGLInterface(SDL_Window *window) : BackendGLInterface(), m_window(window) {}
 
-	// device settings
-	void setVSync(bool vsync) override;
+    // scene
+    void endScene() override;
 
-	// device info
-	UString getVendor() override;
-	UString getModel() override;
-	UString getVersion() override;
-	int getVRAMRemaining() override;
-	int getVRAMTotal() override;
+    // device settings
+    void setVSync(bool vsync) override;
 
-protected:
-	static std::unordered_map<Graphics::PRIMITIVE, int> primitiveToOpenGLMap;
-	static std::unordered_map<Graphics::COMPARE_FUNC, int> compareFuncToOpenGLMap;
-	static std::unordered_map<Graphics::USAGE_TYPE, unsigned int> usageToOpenGLMap;
-private:
-	static void load();
-	SDL_Window *m_window;
+    // device info
+    UString getVendor() override;
+    UString getModel() override;
+    UString getVersion() override;
+    int getVRAMRemaining() override;
+    int getVRAMTotal() override;
+
+    // debugging
+    static void setLog(bool on);
+    static void APIENTRY glDebugCB(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+                                   const GLchar *message, const void * /*userParam*/);
+
+   protected:
+    static std::unordered_map<Graphics::PRIMITIVE, int> primitiveToOpenGLMap;
+    static std::unordered_map<Graphics::COMPARE_FUNC, int> compareFuncToOpenGLMap;
+    static std::unordered_map<Graphics::USAGE_TYPE, unsigned int> usageToOpenGLMap;
+
+   private:
+    static void load();
+    SDL_Window *m_window;
 };
 
 #else
-class SDLGLInterface
-{};
+class SDLGLInterface {};
 #endif
 
 #endif

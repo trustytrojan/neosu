@@ -380,6 +380,10 @@ bool SDLMain::createWindow() {
                 SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, static_cast<int>(aaSamples));
             }
         }
+        // create gl debug context
+        if(m_mArgMap.contains("-debugctx")) {
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+        }
     }
 
     // set vulkan for linux dxvk-native, opengl otherwise (or none for windows dx11)

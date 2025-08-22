@@ -96,4 +96,90 @@ std::unordered_map<Graphics::USAGE_TYPE, unsigned int> SDLGLInterface::usageToOp
     {Graphics::USAGE_TYPE::USAGE_STREAM, GL_STREAM_DRAW},
 };
 
+namespace {
+std::string glDebugSourceString(GLenum source) {
+    switch(source) {
+        case GL_DEBUG_SOURCE_API:
+            return "API";
+        case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+            return "WINDOW_SYSTEM";
+        case GL_DEBUG_SOURCE_SHADER_COMPILER:
+            return "SHADER_COMPILER";
+        case GL_DEBUG_SOURCE_THIRD_PARTY:
+            return "THIRD_PARTY";
+        case GL_DEBUG_SOURCE_APPLICATION:
+            return "APPLICATION";
+        case GL_DEBUG_SOURCE_OTHER:
+            return "OTHER";
+        default:
+            return fmt::format("{:04x}", source);
+    }
+}
+std::string glDebugTypeString(GLenum type) {
+    switch(type) {
+        case GL_DEBUG_TYPE_ERROR:
+            return "ERROR";
+        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+            return "DEPRECATED_BEHAVIOR";
+        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+            return "UNDEFINED_BEHAVIOR";
+        case GL_DEBUG_TYPE_PORTABILITY:
+            return "PORTABILITY";
+        case GL_DEBUG_TYPE_PERFORMANCE:
+            return "PERFORMANCE";
+        case GL_DEBUG_TYPE_OTHER:
+            return "OTHER";
+        case GL_DEBUG_TYPE_MARKER:
+            return "MARKER";
+        case GL_DEBUG_TYPE_PUSH_GROUP:
+            return "PUSH_GROUP";
+        case GL_DEBUG_TYPE_POP_GROUP:
+            return "POP_GROUP";
+        default:
+            return fmt::format("{:04x}", type);
+    }
+}
+std::string glDebugSeverityString(GLenum severity) {
+    switch(severity) {
+        case GL_DEBUG_SEVERITY_HIGH:
+            return "HIGH";
+        case GL_DEBUG_SEVERITY_MEDIUM:
+            return "MEDIUM";
+        case GL_DEBUG_SEVERITY_LOW:
+            return "LOW";
+        case GL_DEBUG_SEVERITY_NOTIFICATION:
+            return "NOTIFICATION";
+        default:
+            return fmt::format("{:04x}", severity);
+    }
+}
+
+}  // namespace
+
+namespace cv {
+static ConVar debug_opengl_v("debug_opengl_v", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_HIDDEN,
+                             [](float val) -> void { SDLGLInterface::setLog(!!static_cast<int>(val)); });
+}  // namespace cv
+
+void SDLGLInterface::setLog(bool on) {
+    if(!g || !g.get() || !GLAD_GL_ARB_debug_output) return;
+    if(on) {
+        glEnable(GL_DEBUG_OUTPUT);
+    } else {
+        glDisable(GL_DEBUG_OUTPUT);
+    }
+}
+
+void APIENTRY SDLGLInterface::glDebugCB(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message,
+                        const void * /*userParam*/) {
+    Engine::logRaw("[GLDebugCB]\n");
+    Engine::logRaw("    message: {}\n", std::string(message, length));
+    Engine::logRaw("    time: {:.4f}\n", engine->getTime());
+    Engine::logRaw("    id: {}\n", id);
+    Engine::logRaw("    source: {}\n", glDebugSourceString(source));
+    Engine::logRaw("    type: {}\n", glDebugTypeString(type));
+    Engine::logRaw("    severity: {}\n", glDebugSeverityString(severity));
+}
+
+
 #endif

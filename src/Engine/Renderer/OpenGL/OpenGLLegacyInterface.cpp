@@ -57,6 +57,10 @@ OpenGLLegacyInterface::OpenGLLegacyInterface()
     // culling
     glFrontFace(GL_CCW);
 
+    // debugging
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+    glDebugMessageCallbackARB(SDLGLInterface::glDebugCB, nullptr);
+
     // initialize the state cache
     OpenGLStateCache::initialize();
 }
