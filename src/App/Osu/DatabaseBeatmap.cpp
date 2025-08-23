@@ -218,9 +218,17 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
 
                 // General
                 case 1: {
-                    if(Parsing::parse(curLineChar, "SampleSet", ':', "Normal")) c.defaultSampleSet = 1;
-                    if(Parsing::parse(curLineChar, "SampleSet", ':', "Soft")) c.defaultSampleSet = 2;
-                    if(Parsing::parse(curLineChar, "SampleSet", ':', "Drum")) c.defaultSampleSet = 3;
+                    std::string sampleSet;
+                    if(Parsing::parse(curLineChar, "SampleSet", ':', &sampleSet)) {
+                        SString::to_lower(sampleSet);
+                        if(sampleSet == "normal") {
+                            c.defaultSampleSet = 1;
+                        } else if(sampleSet == "soft") {
+                            c.defaultSampleSet = 2;
+                        } else if(sampleSet == "drum") {
+                            c.defaultSampleSet = 3;
+                        }
+                    }
 
                     Parsing::parse(curLineChar, "StackLeniency", ':', &c.stackLeniency);
                     break;
@@ -376,23 +384,24 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                         SLIDER slider;
                         slider.colorCounter = colorCounter;
                         slider.colorOffset = colorOffset;
+                        slider.x = x;
+                        slider.y = y;
+                        slider.time = time;
 
-                        std::string curves;
-                        f32 length;
+                        auto csvs = SString::split(curLine, ",");
+                        if(csvs.size() < 8) {
+                            debugLog("Invalid slider in beatmap: {:s}\n\ncurLine = {:s}\n", osuFilePath, curLineChar);
+                            break;
+                        }
+
                         std::string sEdgeSounds = "";
                         std::string sEdgeSets = "";
-                        if(!Parsing::parse(curLineChar, &slider.x, ',', &slider.y, ',', &slider.time, ',', &type, ',',
-                                           &hitSounds, ',', &curves, ',', &slider.repeat, ',', &slider.pixelLength, ',',
-                                           &sEdgeSounds, ',', &sEdgeSets, ',', &hitSamples)) {
-                            // Fall back to parsing without edge hitsounds
-                            if(!Parsing::parse(curLineChar, &slider.x, ',', &slider.y, ',', &slider.time, ',', &type,
-                                               ',', &hitSounds, ',', &curves, ',', &slider.repeat, ',',
-                                               &slider.pixelLength)) {
-                                debugLog("Invalid slider in beatmap: {:s}\n\ncurLine = {:s}\n", osuFilePath,
-                                         curLineChar);
-                                break;
-                            }
-                        }
+                        std::string curves = csvs[5];
+                        Parsing::parse(csvs[6].c_str(), &slider.repeat);
+                        Parsing::parse(csvs[7].c_str(), &slider.pixelLength);
+                        if(csvs.size() > 8) sEdgeSounds = csvs[8];
+                        if(csvs.size() > 9) sEdgeSets = csvs[9];
+                        if(csvs.size() > 10) hitSamples = csvs[10];
 
                         slider.repeat = std::clamp(slider.repeat, 0, sliderMaxRepeatRange);
                         slider.pixelLength = std::clamp(slider.pixelLength, -sliderSanityRange, sliderSanityRange);

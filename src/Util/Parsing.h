@@ -107,15 +107,20 @@ const char* parse(const char* str, T arg, Extra... extra) {
     // Always skip whitespace
     while((*str == ' ') || (*str == '\t')) str++;
 
-    if constexpr(std::is_same_v<T, char>) {
+    if constexpr(std::is_same_v<T, std::string*>) {
+        // You can only parse an std::string if it is the LAST parameter,
+        // because it will consume the WHOLE string.
+        static_assert(Env::always_false_v<T>, "cannot parse an std::string in the middle of the parsing chain");
+        return nullptr;
+    } else if constexpr(std::is_same_v<T, char>) {
         // Assert char separator. Return position after separator.
         if(*str != arg) return nullptr;
-        return str + 1;
+        return parse(str + 1, extra...);
     } else if constexpr(std::is_same_v<T, const char*>) {
         // Assert string label. Return position after label.
         auto arg_len = strlen(arg);
         if(strncmp(str, arg, arg_len) != 0) return nullptr;
-        return str + arg_len;
+        return parse(str + arg_len, extra...);
     } else if constexpr(std::is_pointer_v<T>) {
         // Storing result in tmp var, so we only modify *arg once parsing fully succeeded
         using T_val = typename std::remove_pointer<T>::type;
