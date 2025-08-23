@@ -372,7 +372,7 @@ std::unique_ptr<Channel[]> McFont::unpackMonoBitmap(const FT_Bitmap &bitmap) {
 }
 
 std::unique_ptr<Color[]> McFont::createExpandedBitmapData(const FT_Bitmap &bitmap) {
-    auto expandedData = std::make_unique<Color[]>(static_cast<size_t>(bitmap.width) * bitmap.rows);
+    auto expandedData = std::make_unique<Color[]>(static_cast<ssize_t>(bitmap.width) * bitmap.rows);
 
     std::unique_ptr<Channel[]> monoBitmapUnpacked{nullptr};
     if(!m_bAntialiasing) monoBitmapUnpacked = unpackMonoBitmap(bitmap);

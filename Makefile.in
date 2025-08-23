@@ -1052,7 +1052,7 @@ CACERT_INCDIR := $(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle/
 @BUILD_CURL_TRUE@rbq := ')'
 @BUILD_MIMALLOC_FALSE@MIMALLOC_DYNAMIC_LIBS := 
 @BUILD_MIMALLOC_TRUE@@WIN_PLATFORM_FALSE@MIMALLOC_DYNAMIC_LIBS := 
-@BUILD_MIMALLOC_TRUE@@WIN_PLATFORM_TRUE@MIMALLOC_DYNAMIC_LIBS := -L$(DEPS_PREFIX)/bin -L$(DEPS_PREFIX)/lib -Wl,--whole-archive -l:mimalloc-redirect$(if $(filter x86_64,$(host_cpu)),,32).lib -Wl,--no-whole-archive -l:libmimalloc.dll.a -lmimalloc -lmimalloc-redirect$(if $(filter x86_64,$(host_cpu)),,32)
+@BUILD_MIMALLOC_TRUE@@WIN_PLATFORM_TRUE@MIMALLOC_DYNAMIC_LIBS := -L$(DEPS_PREFIX)/bin -L$(DEPS_PREFIX)/lib -Wl,--whole-archive -Wl,--undefined=mi_redirect_enable -l:mimalloc-redirect$(if $(filter x86_64,$(host_cpu)),,32).lib -Wl,--no-whole-archive -lmimalloc -lmimalloc-redirect -l:libmimalloc.dll.a
 @BUILD_MIMALLOC_FALSE@MIMALLOC_OBJ := 
 @BUILD_MIMALLOC_TRUE@@WIN_PLATFORM_FALSE@MIMALLOC_OBJ := $(DEPS_PREFIX)/lib/mimalloc$(if $(ENABLE_ASAN),-asan-debug,$(if $(ENABLE_DEBUG),-debug,)).o
 @BUILD_MIMALLOC_TRUE@@WIN_PLATFORM_TRUE@MIMALLOC_OBJ := 
@@ -1113,8 +1113,6 @@ neosu_CXXFLAGS := \
 	$(CURL_CFLAGS) \
 	$(SDL3_CFLAGS) \
 	$(AUDIO_CFLAGS) \
-	$(X11_CFLAGS) \
-	$(XI_CFLAGS) \
 	$(XRANDR_CFLAGS) \
 	$(GL_CFLAGS) \
 	$(GLU_CFLAGS) \
@@ -1130,7 +1128,6 @@ neosu_CXXFLAGS := \
 	$(DXGI_CFLAGS) \
 	$(D3D11_CFLAGS) \
 	$(VKD3D_CFLAGS) \
-	$(BLKID_CFLAGS) \
 	$(LZMA_CFLAGS) \
 	$(DISCORDSDK_CFLAGS) \
 	$(NEOSU_CXXFLAGS) \
@@ -1146,12 +1143,6 @@ neosu_LDFLAGS := \
 	$(CURL_LIBS) \
 	$(SDL3_LIBS) \
 	$(AUDIO_LIBS) \
-	$(X11_LIBS) \
-	$(XI_LIBS) \
-	$(XRANDR_LIBS) \
-	$(GL_LIBS) \
-	$(GLU_LIBS) \
-	$(EGL_LIBS) \
 	$(FREETYPE2_LIBS) \
 	$(FMT_LIBS) \
 	$(LIBPNG_LIBS) \
@@ -1159,10 +1150,9 @@ neosu_LDFLAGS := \
 	$(BZIP2_LIBS) \
 	$(LIBJPEG_LIBS) \
 	$(ZLIB_LIBS) \
+	$(LZMA_LIBS) \
 	$(DXGI_LIBS) \
 	$(D3D11_LIBS) \
-	$(BLKID_LIBS) \
-	$(LZMA_LIBS) \
 	$(DISCORDSDK_LIBS) \
 	$(NEOSU_LDFLAGS) \
 	$(EXTRA_WIN_LIBS) \
@@ -5118,7 +5108,7 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source: $(DEPS_CACHE)/curl-$(CUR
 @BUILD_CURL_FALSE@	$(MKDIR_P) $(DEPS_PREFIX)
 @BUILD_CURL_FALSE@	touch $@
 @BUILD_MIMALLOC_TRUE@@WIN_PLATFORM_TRUE@$(MIMALLOC_OVERRIDE_DEP): $(DEPS_PREFIX)/mimalloc-$(MIMALLOC_VERSION).built
-@BUILD_MIMALLOC_TRUE@@WIN_PLATFORM_TRUE@	@( printf '%s' "#include \"mimalloc-new-delete.h\"" ) > $(MIMALLOC_OVERRIDE_DEP)
+@BUILD_MIMALLOC_TRUE@@WIN_PLATFORM_TRUE@	@( printf '%s\n%s\n%s' "#include \"mimalloc-new-delete.h\"" "extern \"C\" { __declspec(dllimport) bool mi_redirect_enable(void); }" "void __attribute__((used)) *pmi_redirect_enable = (void*)&mi_redirect_enable;" ) > $(MIMALLOC_OVERRIDE_DEP)
 @BUILD_MIMALLOC_TRUE@$(DEPS_PREFIX)/mimalloc-$(MIMALLOC_VERSION).built: $(DEPS_CACHE)/mimalloc-$(MIMALLOC_VERSION).source
 @BUILD_MIMALLOC_TRUE@	rm -rf $(DEPS_PREFIX)/mimalloc
 @BUILD_MIMALLOC_TRUE@	$(MKDIR_P) $(DEPS_PREFIX)/mimalloc && \
@@ -5149,7 +5139,6 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source: $(DEPS_CACHE)/curl-$(CUR
 @BUILD_MIMALLOC_TRUE@		-D MI_BUILD_OBJECT=$(if $(findstring linux,$(host_os)),ON,OFF) && \
 @BUILD_MIMALLOC_TRUE@	$(CMAKE) --build . "$(CMAKEPAROPT)" && \
 @BUILD_MIMALLOC_TRUE@	$(CMAKE) --install .
-@BUILD_MIMALLOC_TRUE@	cp $(DEPS_PREFIX)/mimalloc/bin/mimalloc-redirect*.lib $(DEPS_PREFIX)/bin/
 @BUILD_MIMALLOC_TRUE@	cp $(DEPS_PREFIX)/mimalloc/bin/mimalloc-redirect*.lib $(DEPS_PREFIX)/bin/
 @BUILD_MIMALLOC_TRUE@	touch $@
 @BUILD_MIMALLOC_FALSE@$(DEPS_PREFIX)/mimalloc-$(MIMALLOC_VERSION).built:

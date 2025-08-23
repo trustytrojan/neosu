@@ -316,11 +316,11 @@ endif
 
 if BUILD_MIMALLOC
 if WIN_PLATFORM
-MIMALLOC_DYNAMIC_LIBS := -L$(DEPS_PREFIX)/bin -L$(DEPS_PREFIX)/lib -Wl,--whole-archive -l:mimalloc-redirect$(if $(filter x86_64,$(host_cpu)),,32).lib -Wl,--no-whole-archive -l:libmimalloc.dll.a -lmimalloc -lmimalloc-redirect$(if $(filter x86_64,$(host_cpu)),,32)
+MIMALLOC_DYNAMIC_LIBS := -L$(DEPS_PREFIX)/bin -L$(DEPS_PREFIX)/lib -Wl,--whole-archive -Wl,--undefined=mi_redirect_enable -l:mimalloc-redirect$(if $(filter x86_64,$(host_cpu)),,32).lib -Wl,--no-whole-archive -lmimalloc -lmimalloc-redirect -l:libmimalloc.dll.a
 MIMALLOC_OBJ :=
 MIMALLOC_OVERRIDE_DEP := $(DEPS_PREFIX)/mimalloc/mimalloc_new_delete.cpp
 $(MIMALLOC_OVERRIDE_DEP): $(DEPS_PREFIX)/mimalloc-$(MIMALLOC_VERSION).built
-	@( printf '%s' "#include \"mimalloc-new-delete.h\"" ) > $(MIMALLOC_OVERRIDE_DEP)
+	@( printf '%s\n%s\n%s' "#include \"mimalloc-new-delete.h\"" "extern \"C\" { __declspec(dllimport) bool mi_redirect_enable(void); }" "void __attribute__((used)) *pmi_redirect_enable = (void*)&mi_redirect_enable;" ) > $(MIMALLOC_OVERRIDE_DEP)
 else
 MIMALLOC_DYNAMIC_LIBS :=
 MIMALLOC_OBJ := $(DEPS_PREFIX)/lib/mimalloc$(if $(ENABLE_ASAN),-asan-debug,$(if $(ENABLE_DEBUG),-debug,)).o
@@ -356,7 +356,6 @@ $(DEPS_PREFIX)/mimalloc-$(MIMALLOC_VERSION).built: $(DEPS_CACHE)/mimalloc-$(MIMA
 		-D MI_BUILD_OBJECT=$(if $(findstring linux,$(host_os)),ON,OFF) && \
 	$(CMAKE) --build . "$(CMAKEPAROPT)" && \
 	$(CMAKE) --install .
-	cp $(DEPS_PREFIX)/mimalloc/bin/mimalloc-redirect*.lib $(DEPS_PREFIX)/bin/
 	cp $(DEPS_PREFIX)/mimalloc/bin/mimalloc-redirect*.lib $(DEPS_PREFIX)/bin/
 	touch $@
 else
@@ -837,8 +836,6 @@ neosu_CXXFLAGS := \
 	$(CURL_CFLAGS) \
 	$(SDL3_CFLAGS) \
 	$(AUDIO_CFLAGS) \
-	$(X11_CFLAGS) \
-	$(XI_CFLAGS) \
 	$(XRANDR_CFLAGS) \
 	$(GL_CFLAGS) \
 	$(GLU_CFLAGS) \
@@ -854,7 +851,6 @@ neosu_CXXFLAGS := \
 	$(DXGI_CFLAGS) \
 	$(D3D11_CFLAGS) \
 	$(VKD3D_CFLAGS) \
-	$(BLKID_CFLAGS) \
 	$(LZMA_CFLAGS) \
 	$(DISCORDSDK_CFLAGS) \
 	$(NEOSU_CXXFLAGS) \
@@ -869,12 +865,6 @@ neosu_LDFLAGS := \
 	$(CURL_LIBS) \
 	$(SDL3_LIBS) \
 	$(AUDIO_LIBS) \
-	$(X11_LIBS) \
-	$(XI_LIBS) \
-	$(XRANDR_LIBS) \
-	$(GL_LIBS) \
-	$(GLU_LIBS) \
-	$(EGL_LIBS) \
 	$(FREETYPE2_LIBS) \
 	$(FMT_LIBS) \
 	$(LIBPNG_LIBS) \
@@ -882,10 +872,9 @@ neosu_LDFLAGS := \
 	$(BZIP2_LIBS) \
 	$(LIBJPEG_LIBS) \
 	$(ZLIB_LIBS) \
+	$(LZMA_LIBS) \
 	$(DXGI_LIBS) \
 	$(D3D11_LIBS) \
-	$(BLKID_LIBS) \
-	$(LZMA_LIBS) \
 	$(DISCORDSDK_LIBS) \
 	$(NEOSU_LDFLAGS) \
 	$(EXTRA_WIN_LIBS) \

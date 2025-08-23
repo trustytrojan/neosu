@@ -493,7 +493,7 @@ COMMON_FLAGS="$COMMON_FLAGS -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64 -ffunction-se
 CXXFLAGS="$CXXFLAGS $COMMON_FLAGS -fno-exceptions -fno-unwind-tables" # -fno-rtti
 CFLAGS="$CFLAGS $COMMON_FLAGS"
 
-AS_IF([! { test "x$enable_clang" = "xyes" && test "$host_os" = "linux-gnu" ; } && { test -z "$ubercompat" || test "x$enable_static" = "xyes" ; }], [
+AS_IF([{ test -z "$ubercompat" || test "x$enable_static" = "xyes" ; }], [
     LDFLAGS="$LDFLAGS -static-libstdc++ -static-libgcc"
 ])
 
@@ -566,6 +566,7 @@ AS_IF([test "x$enable_debug" = "xyes"], [
         CPPFLAGS="$CPPFLAGS -DNDEBUG -D_NDEBUG"
         CXXFLAGS="${CXXFLAGS//-g -O2/} -O3 -g0" # where do those -g -O2 flags even come from...
         CFLAGS="${CFLAGS//-g -O2/} -O3 -g0"
+        NEOSU_LDFLAGS="$NEOSU_LDFLAGS -Wl,-O1"
 
         AS_IF([test "x$enable_clang" != "xyes"], [
             CXXFLAGS="$CXXFLAGS -fipa-pta"
@@ -784,7 +785,7 @@ AS_IF([test "$SYSNAME" = "linux"], [
         PKG_CHECK_AUTO([CURL], [libcurl >= $CURL_MIN_VERSION], [have_curl=yes], [have_curl=no])
     ])
 ], [
-    AC_SUBST([EXTRA_WIN_LIBS], [["-lopengl32 -lcomctl32"]])
+    AC_SUBST([EXTRA_WIN_LIBS], [["-lcomctl32"]])
     have_blkid="not required"
     have_curl="no"
 ])

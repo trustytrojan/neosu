@@ -8181,7 +8181,7 @@ COMMON_FLAGS="$COMMON_FLAGS -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64 -ffunction-se
 CXXFLAGS="$CXXFLAGS $COMMON_FLAGS -fno-exceptions -fno-unwind-tables" # -fno-rtti
 CFLAGS="$CFLAGS $COMMON_FLAGS"
 
-if ! { test "x$enable_clang" = "xyes" && test "$host_os" = "linux-gnu" ; } && { test -z "$ubercompat" || test "x$enable_static" = "xyes" ; }
+if { test -z "$ubercompat" || test "x$enable_static" = "xyes" ; }
 then :
 
     LDFLAGS="$LDFLAGS -static-libstdc++ -static-libgcc"
@@ -8809,6 +8809,7 @@ then :
         CPPFLAGS="$CPPFLAGS -DNDEBUG -D_NDEBUG"
         CXXFLAGS="${CXXFLAGS//-g -O2/} -O3 -g0" # where do those -g -O2 flags even come from...
         CFLAGS="${CFLAGS//-g -O2/} -O3 -g0"
+        NEOSU_LDFLAGS="$NEOSU_LDFLAGS -Wl,-O1"
 
         if test "x$enable_clang" != "xyes"
 then :
@@ -11189,7 +11190,7 @@ fi
 
 else case e in #(
   e)
-    EXTRA_WIN_LIBS="-lopengl32 -lcomctl32"
+    EXTRA_WIN_LIBS="-lcomctl32"
 
     have_blkid="not required"
     have_curl="no"

@@ -14,6 +14,7 @@
 #include <blkid/blkid.h>
 #include <linux/limits.h>
 #include <sys/stat.h>
+#include "dynutils.h"
 #endif
 
 #include <algorithm>
@@ -600,16 +601,38 @@ const UString &Bancho::get_disk_uuid() const {
 UString Bancho::get_disk_uuid_blkid() const {
     UString w_uuid{"error getting disk UUID"};
 #ifdef MCENGINE_PLATFORM_LINUX
+    using namespace dynutils;
+
+    // we are only called once, only need libblkid temporarily
+    lib_obj *blkid_lib = load_lib("libblkid.so.1");
+    if(!blkid_lib) {
+        debugLog("error loading blkid for obtaining disk UUID: {}\n", get_error());
+        return w_uuid;
+    }
+
+    auto pblkid_devno_to_devname = load_func<decltype(blkid_devno_to_devname)>(blkid_lib, "blkid_devno_to_devname");
+    auto pblkid_get_cache = load_func<decltype(blkid_get_cache)>(blkid_lib, "blkid_get_cache");
+    auto pblkid_put_cache = load_func<decltype(blkid_put_cache)>(blkid_lib, "blkid_put_cache");
+    auto pblkid_get_tag_value = load_func<decltype(blkid_get_tag_value)>(blkid_lib, "blkid_get_tag_value");
+
+    if(!(pblkid_devno_to_devname && pblkid_get_cache && pblkid_put_cache && pblkid_get_tag_value)) {
+        debugLog("error loading blkid functions for obtaining disk UUID: {}\n", get_error());
+        unload_lib(blkid_lib);
+        return w_uuid;
+    }
+
     const std::string &exe_path = Environment::getPathToSelf();
 
     // get the device number of the device the current exe is running from
     struct stat st{};
     if(stat(exe_path.c_str(), &st) != 0) {
+        unload_lib(blkid_lib);
         return w_uuid;
     }
 
-    char *devname = blkid_devno_to_devname(st.st_dev);
+    char *devname = pblkid_devno_to_devname(st.st_dev);
     if(!devname) {
+        unload_lib(blkid_lib);
         return w_uuid;
     }
 
@@ -617,9 +640,9 @@ UString Bancho::get_disk_uuid_blkid() const {
     blkid_cache cache = nullptr;
     char *uuid = nullptr;
 
-    if(blkid_get_cache(&cache, nullptr) == 0) {
-        uuid = blkid_get_tag_value(cache, "UUID", devname);
-        blkid_put_cache(cache);
+    if(pblkid_get_cache(&cache, nullptr) == 0) {
+        uuid = pblkid_get_tag_value(cache, "UUID", devname);
+        pblkid_put_cache(cache);
     }
 
     if(uuid) {
@@ -628,6 +651,7 @@ UString Bancho::get_disk_uuid_blkid() const {
     }
 
     free(devname);
+    unload_lib(blkid_lib);
 #endif
     return w_uuid;
 }
