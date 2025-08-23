@@ -652,9 +652,13 @@ void MainMenu::drawMainButton() {
 
     // friend
     if(this->fMainMenuAnimFriendPercent > 0.0f) {
-        g->setCulling(false);  // ears get culled when rotating otherwise
+        if(drawing_full_cube) {
+            g->setCulling(false);  // ears get culled when rotating otherwise
+        }
         this->drawFriend(mainButtonRect, pulse, haveTimingpoints);
-        g->setCulling(true);
+        if(drawing_full_cube) {
+            g->setCulling(true);
+        }
     }
 
     // neosu/server logo
