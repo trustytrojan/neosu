@@ -400,7 +400,8 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                         Parsing::parse(csvs[6].c_str(), &slider.repeat);
                         Parsing::parse(csvs[7].c_str(), &slider.pixelLength);
                         if(csvs.size() > 8) sEdgeSounds = csvs[8];
-                        if(csvs.size() > 9) sEdgeSets = csvs[9];
+                        bool edgeSets_present = (csvs.size() > 9);
+                        if(edgeSets_present) sEdgeSets = csvs[9];
                         if(csvs.size() > 10) hitSamples = csvs[10];
 
                         slider.repeat = std::clamp(slider.repeat, 0, sliderMaxRepeatRange);
@@ -445,7 +446,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
 
                         auto edgeSounds = SString::split(sEdgeSounds, "|");
                         auto edgeSets = SString::split(sEdgeSets, "|");
-                        if(edgeSounds.size() != edgeSets.size()) {
+                        if(edgeSets_present && (edgeSounds.size() != edgeSets.size())) {
                             debugLog("Invalid slider edge sounds: {}\n\nIn Beatmap: {}\n", curLineChar, osuFilePath);
                             continue;
                         }
@@ -453,8 +454,12 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                         for(i32 i = 0; i < edgeSounds.size(); i++) {
                             HitSamples samples;
                             Parsing::parse(edgeSounds[i].c_str(), &samples.hitSounds);
-                            Parsing::parse(edgeSets[i].c_str(), &samples.normalSet, ':', &samples.additionSet);
                             samples.hitSounds &= HitSoundType::VALID_HITSOUNDS;
+
+                            if(edgeSets_present) {
+                                Parsing::parse(edgeSets[i].c_str(), &samples.normalSet, ':', &samples.additionSet);
+                            }
+
                             slider.edgeSamples.push_back(samples);
                         }
 
