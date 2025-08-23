@@ -42,27 +42,25 @@ inline std::vector<std::string> split(const std::string& s, const std::string_vi
 
 // in-place whitespace trimming
 inline void trim(std::string* str) {
-    assert(str &&
-           "null string passed to SString::trim()");  // since asserts are disabled in release builds, this is
-                                                      // harmless to add a reason for a null deref crash in debug builds
+    assert(str && "null string passed to SString::trim()");
     if(str->empty()) return;
     str->erase(0, str->find_first_not_of(" \t\r\n"));
     str->erase(str->find_last_not_of(" \t\r\n") + 1);
 }
 
 inline bool contains_ncase(const std::string& haystack, const std::string& needle) {
-    return !haystack.empty() && !std::ranges::search(haystack, needle, [](char ch1, char ch2) {
+    return !haystack.empty() && !std::ranges::search(haystack, needle, [](unsigned char ch1, unsigned char ch2) {
                                      return std::tolower(ch1) == std::tolower(ch2);
                                  }).empty();
 }
 
 inline bool whitespace_only(const std::string& str) {
-    return str.empty() || std::ranges::all_of(str, [](char c) { return std::isspace(c) != 0; });
+    return str.empty() || std::ranges::all_of(str, [](unsigned char c) { return std::isspace(c) != 0; });
 }
 
 inline void to_lower(std::string& str) {
     if(str.empty()) return;
-    std::ranges::transform(str, str.begin(), [](char c) { return std::tolower(c); });
+    std::ranges::transform(str, str.begin(), [](unsigned char c) { return std::tolower(c); });
 }
 
 inline std::string lower(const std::string& str) {
