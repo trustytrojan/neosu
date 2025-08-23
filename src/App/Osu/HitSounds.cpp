@@ -56,7 +56,7 @@ void HitSamples::play(f32 pan, i32 delta, bool is_sliderslide) {
     // and handle updating already playing sounds... when volume is timing point dependent...
 
     auto get_default_sound = [is_sliderslide](i32 set, i32 hitSound) {
-        std::string sound_name = "OSU_SKIN_";
+        std::string sound_name = "SKIN_";
 
         switch(set) {
             case 1:
@@ -146,7 +146,7 @@ void HitSamples::stop() {
     auto types = {"SLIDE", "WHISTLE"};
     for(auto& set : sets) {
         for(auto& type : types) {
-            std::string sound_name = "OSU_SKIN_";
+            std::string sound_name = "SKIN_";
             sound_name.append(set);
             sound_name.append("SLIDER");
             sound_name.append(type);

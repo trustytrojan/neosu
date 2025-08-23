@@ -255,8 +255,6 @@ class Beatmap : public BeatmapInterface {
 
     void playMissSound();
 
-    u32 getMusicPositionMSInterpolated();
-
     bool bIsInSkippableSection;
     bool bShouldFlashWarningArrows;
     f32 fShouldFlashSectionPass;

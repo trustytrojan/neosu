@@ -718,8 +718,6 @@ CONVAR(instafade, "instafade", false, FCVAR_BANCHO_COMPATIBLE, "don't draw hitci
 CONVAR(instafade_sliders, "instafade_sliders", false, FCVAR_BANCHO_COMPATIBLE, "don't draw slider fadeout animations");
 CONVAR(instant_replay_duration, "instant_replay_duration", 15.f, FCVAR_BANCHO_COMPATIBLE,
        "instant replay (F2) duration, in seconds");
-CONVAR(interpolate_music_pos, "interpolate_music_pos", true, FCVAR_BANCHO_COMPATIBLE,
-       "Interpolate song position with engine time if the audio library reports the same position more than once");
 CONVAR(letterboxing, "letterboxing", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(letterboxing_offset_x, "letterboxing_offset_x", 0.0f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(letterboxing_offset_y, "letterboxing_offset_y", 0.0f, FCVAR_BANCHO_COMPATIBLE);

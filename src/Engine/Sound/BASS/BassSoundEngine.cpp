@@ -480,7 +480,9 @@ bool BassSoundEngine::play(Sound *snd, float pan, float pitch) {
 
     if(BASS_Mixer_ChannelGetMixer(channel) != 0) return false;
 
-    auto flags = BASS_MIXER_DOWNMIX | BASS_MIXER_NORAMPIN | BASS_STREAM_AUTOFREE;
+    auto flags = BASS_MIXER_DOWNMIX | BASS_MIXER_NORAMPIN;
+    if(!snd->isStream()) flags |= BASS_STREAM_AUTOFREE;
+
     if(!BASS_Mixer_StreamAddChannel(this->g_bassOutputMixer, channel, flags)) {
         debugLog("BASS_Mixer_StreamAddChannel() failed ({:d})!\n", BASS_ErrorGetCode());
         return false;
@@ -517,26 +519,12 @@ void BassSoundEngine::pause(Sound *snd) {
     if(!bassSound) {
         return;
     }
+    assert(stream);  // can't call pause() on a sample
 
-    if(!stream) {
-        engine->showMessageError("Programmer Error", "Called pause on a sample!");
-        return;
-    }
     if(!bassSound->isPlaying()) return;
 
-    auto pan = bassSound->getPan();
     auto pos = bassSound->getPositionMS();
-    auto loop = bassSound->isLooped();
-    auto speed = bassSound->getSpeed();
-
-    // Calling BASS_Mixer_ChannelRemove automatically frees the stream due
-    // to BASS_STREAM_AUTOFREE. We need to reinitialize it.
-    resourceManager->reloadResource(bassSound);
-
-    bassSound->setPositionMS(pos);
-    bassSound->setSpeed(speed);
-    bassSound->setPan(pan);
-    bassSound->setLoop(loop);
+    BASS_Mixer_ChannelRemove(bassSound->stream);
     bassSound->bPaused = true;
     bassSound->paused_position_ms = pos;
 }
@@ -544,10 +532,15 @@ void BassSoundEngine::pause(Sound *snd) {
 void BassSoundEngine::stop(Sound *snd) {
     if(!this->isReady() || snd == nullptr || !snd->isReady()) return;
 
-    // This will stop all samples, then re-init to be ready for a play()
-    // NOTE: async reload, because... we're doing this for sliderslides...
-    //       really need to fix the BASS_FX desync (or ditch BASS) to stop this madness
-    resourceManager->reloadResource(snd, true);
+    auto [bassSound, stream] = GETHANDLE(BassSound, stream);
+    if(!bassSound) {
+        return;
+    }
+    assert(stream);  // can't call stop() on a sample
+
+    BASS_Mixer_ChannelRemove(bassSound->stream);
+    bassSound->bStarted = false;
+    bassSound->setPositionMS(0);
 }
 
 bool BassSoundEngine::isReady() {

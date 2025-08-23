@@ -2320,7 +2320,7 @@ void Slider::onTickHit(bool successful, int tickIndex) {
         {
             // NOTE: osu! wiki doesn't mention if ticks use the normal set or the addition set.
             //       in fact, it doesn't mention ticks at all.
-            std::string sound_name = "OSU_SKIN_";
+            std::string sound_name = "SKIN_";
             switch(this->samples.getAdditionSet()) {
                 case 1:
                     sound_name.append("NORMAL");

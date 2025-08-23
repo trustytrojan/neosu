@@ -159,86 +159,12 @@ u32 BassSound::setPosition(f64 percent) {
     return ms;
 }
 
-void BassSound::setPositionMS(unsigned long ms) {
-    if(!this->bReady || ms > this->getLengthMS()) return;
-    if(!this->bStream) {
-        engine->showMessageError("Programmer Error", "Called setPositionMS on a sample!");
-        return;
-    }
-
-    i64 target_pos = BASS_ChannelSeconds2Bytes(this->stream, ms / 1000.0);
-    if(target_pos < 0) {
-        debugLog("BASS_ChannelSeconds2Bytes( stream , {} ) error: {}\n", ms / 1000.0, BassManager::getErrorUString());
-        return;
-    }
-
-    // Naively setting position breaks with the current BASS version (& addons).
-    //
-    // BASS_STREAM_PRESCAN no longer seems to work, so our only recourse is to use the BASS_POS_DECODETO
-    // flag which renders the whole audio stream up until the requested seek point.
-    //
-    // The downside of BASS_POS_DECODETO is that it can only seek forward... furthermore, we can't
-    // just seek to 0 before seeking forward again, since BASS_Mixer_ChannelGetPosition breaks
-    // in that case. So, our only recourse is to just reload the whole fucking stream just for seeking.
-
-    bool was_playing = this->isPlaying();
-    auto pos = this->getPositionMS();
-    if(pos <= ms) {
-        // Lucky path, we can just seek forward and be done
-        if(this->isPlaying()) {
-            if(!BASS_Mixer_ChannelSetPosition(this->stream, target_pos,
-                                              BASS_POS_BYTE | BASS_POS_DECODETO | BASS_POS_MIXER_RESET)) {
-                if(cv::debug_snd.getBool()) {
-                    debugLog("setPositionMS( {} ) BASS_ChannelSetPosition() error on file {}: {}\n", ms,
-                             this->sFilePath.c_str(), BassManager::getErrorUString(BASS_ErrorGetCode()));
-                }
-            }
-            this->fLastPlayTime = this->fChannelCreationTime - ((f64)ms / 1000.0);
-        } else {
-            if(!BASS_ChannelSetPosition(this->stream, target_pos, BASS_POS_BYTE | BASS_POS_DECODETO | BASS_POS_FLUSH)) {
-                if(cv::debug_snd.getBool()) {
-                    debugLog("setPositionMS( {} ) BASS_ChannelSetPosition() error on file {}: {}\n", ms,
-                             this->sFilePath.c_str(), BassManager::getErrorUString(BASS_ErrorGetCode()));
-                }
-            }
-        }
-    } else {
-        // Unlucky path, we have to reload the stream
-        auto pan = this->getPan();
-        auto loop = this->isLooped();
-        auto speed = this->getSpeed();
-
-        resourceManager->reloadResource(this);
-
-        this->setSpeed(speed);
-        this->setPan(pan);
-        this->setLoop(loop);
-        this->bPaused = true;
-        this->paused_position_ms = ms;
-
-        if(!BASS_ChannelSetPosition(this->stream, target_pos, BASS_POS_BYTE | BASS_POS_DECODETO | BASS_POS_FLUSH)) {
-            if(cv::debug_snd.getBool()) {
-                debugLog("setPositionMS( {} ) BASS_ChannelSetPosition() error on file {}: {}\n", ms,
-                         this->sFilePath.c_str(), BassManager::getErrorUString());
-            }
-        }
-
-        if(was_playing) {
-            osu->music_unpause_scheduled = true;
-        }
-    }
-
-    // reset interpolation state after seeking
-    this->interpolator.reset(static_cast<f64>(ms), Timing::getTimeReal(), this->getSpeed());
-}
+void BassSound::setPositionMS(unsigned long ms) { return setPositionMS_fast(ms); }
 
 // Inaccurate but fast seeking, to use at song select
 void BassSound::setPositionMS_fast(u32 ms) {
     if(!this->bReady || ms > this->getLengthMS()) return;
-    if(!this->bStream) {
-        engine->showMessageError("Programmer Error", "Called setPositionMS_fast on a sample!");
-        return;
-    }
+    assert(this->bStream);  // can't call setPositionMS() on a sample
 
     i64 target_pos = BASS_ChannelSeconds2Bytes(this->stream, ms / 1000.0);
     if(target_pos < 0) {
@@ -282,10 +208,7 @@ void BassSound::setVolume(float volume) {
 
 void BassSound::setSpeed(float speed) {
     if(!this->bReady) return;
-    if(!this->bStream) {
-        engine->showMessageError("Programmer Error", "Called setSpeed on a sample!");
-        return;
-    }
+    assert(this->bStream);  // can't call setSpeed() on a sample
 
     speed = std::clamp<float>(speed, 0.05f, 50.0f);
 
@@ -326,10 +249,7 @@ void BassSound::setPan(float pan) {
 
 void BassSound::setLoop(bool loop) {
     if(!this->bReady) return;
-    if(!this->bStream) {
-        engine->showMessageError("Programmer Error", "Called setLoop on a sample!");
-        return;
-    }
+    assert(this->bStream);  // can't call setLoop() on a sample
 
     this->bIsLooped = loop;
     BASS_ChannelFlags(this->stream, this->bIsLooped ? BASS_SAMPLE_LOOP : 0, BASS_SAMPLE_LOOP);
@@ -337,17 +257,15 @@ void BassSound::setLoop(bool loop) {
 
 float BassSound::getPosition() {
     if(!this->bReady) return 0.f;
-    if(!this->bStream) {
-        engine->showMessageError("Programmer Error", "Called getPosition on a sample!");
-        return 0.f;
-    }
+    assert(this->bStream);  // can't call getPosition() on a sample
+
     if(this->bPaused) {
         return (f64)this->paused_position_ms / (f64)this->length;
     }
 
     i64 lengthBytes = BASS_ChannelGetLength(this->stream, BASS_POS_BYTE);
     if(lengthBytes < 0) {
-        // The stream ended and got freed by BASS_STREAM_AUTOFREE -> invalid handle!
+        assert(false);  // invalid handle
         return 1.f;
     }
 
@@ -364,10 +282,8 @@ float BassSound::getPosition() {
 
 u32 BassSound::getPositionMS() {
     if(!this->bReady) return 0;
-    if(!this->bStream) {
-        engine->showMessageError("Programmer Error", "Called getPositionMS on a sample!");
-        return 0;
-    }
+    assert(this->bStream);  // can't call getPositionMS() on a sample
+
     if(this->bPaused) {
         this->interpolator.reset(this->paused_position_ms, Timing::getTimeReal(), this->getSpeed());
         return this->paused_position_ms;
@@ -380,7 +296,7 @@ u32 BassSound::getPositionMS() {
         positionBytes = BASS_ChannelGetPosition(this->stream, BASS_POS_BYTE);
     }
     if(positionBytes < 0) {
-        // The stream ended and got freed by BASS_STREAM_AUTOFREE -> invalid handle!
+        assert(false);  // invalid handle
         this->interpolator.reset(this->length, Timing::getTimeReal(), this->getSpeed());
         return this->length;
     }
@@ -406,10 +322,7 @@ float BassSound::getSpeed() { return this->fSpeed; }
 float BassSound::getFrequency() {
     auto default_freq = cv::snd_freq.getFloat();
     if(!this->bReady) return default_freq;
-    if(!this->bStream) {
-        engine->showMessageError("Programmer Error", "Called getFrequency on a sample!");
-        return default_freq;
-    }
+    assert(this->bStream);  // can't call getFrequency() on a sample
 
     float frequency = default_freq;
     BASS_ChannelGetAttribute(this->stream, BASS_ATTRIB_FREQ, &frequency);
@@ -420,7 +333,7 @@ bool BassSound::isPlaying() {
     return this->bReady && this->bStarted && !this->bPaused && !this->getActiveChannels().empty();
 }
 
-bool BassSound::isFinished() { return this->bReady && this->bStarted && !this->isPlaying(); }
+bool BassSound::isFinished() { return this->getPositionMS() >= this->getLengthMS(); }
 
 void BassSound::rebuild(std::string newFilePath) {
     this->sFilePath = std::move(newFilePath);

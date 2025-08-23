@@ -1548,8 +1548,8 @@ void Beatmap::loadMusic(bool stream) {
         // if it's not a stream then we are loading the entire song into memory for playing
         if(!stream) resourceManager->requestNextLoadAsync();
 
-        this->music = resourceManager->loadSoundAbs(this->selectedDifficulty2->getFullSoundFilePath(),
-                                                    "OSU_BEATMAP_MUSIC", stream, false, false);
+        this->music = resourceManager->loadSoundAbs(this->selectedDifficulty2->getFullSoundFilePath(), "BEATMAP_MUSIC",
+                                                    stream, false, false);
         this->music->setVolume(this->getIdealVolume());
         this->fMusicFrequencyBackup = this->music->getFrequency();
         this->music->setSpeed(this->getSpeedMultiplier());
@@ -1627,77 +1627,6 @@ void Beatmap::playMissSound() {
        osu->getScore()->getCombo() > cv::combobreak_sound_combo.getInt()) {
         this->bIsFirstMissSound = false;
         soundEngine->play(this->getSkin()->getCombobreak());
-    }
-}
-
-u32 Beatmap::getMusicPositionMSInterpolated() {
-    if(!cv::interpolate_music_pos.getBool() || this->isLoading()) {
-        return this->music->getPositionMS();
-    } else {
-        const f64 interpolationMultiplier = 1.0;
-
-        // TODO: fix snapping at beginning for maps with instant start
-
-        u32 returnPos = 0;
-        const f64 curPos = (f64)this->music->getPositionMS();
-        const f32 speed = this->music->getSpeed();
-
-        // not reinventing the wheel, the interpolation magic numbers here are (c) peppy
-
-        const f64 realTime = engine->getTimeReal();
-        const f64 interpolationDelta = (realTime - this->fLastRealTimeForInterpolationDelta) * 1000.0 * speed;
-        const f64 interpolationDeltaLimit =
-            ((realTime - this->fLastAudioTimeAccurateSet) * 1000.0 < 1500 || speed < 1.0f ? 11 : 33) *
-            interpolationMultiplier;
-
-        if(this->music->isPlaying() && !this->bWasSeekFrame) {
-            f64 newInterpolatedPos = this->fInterpolatedMusicPos + interpolationDelta;
-            f64 delta = newInterpolatedPos - curPos;
-
-            // debugLog("delta = {:d}\n", (long)delta);
-
-            // approach and recalculate delta
-            newInterpolatedPos -= delta / 8.0 / interpolationMultiplier;
-            delta = newInterpolatedPos - curPos;
-
-            if(std::abs(delta) > interpolationDeltaLimit * 2)  // we're fucked, snap back to curPos
-            {
-                this->fInterpolatedMusicPos = (f64)curPos;
-            } else if(delta < -interpolationDeltaLimit)  // undershot
-            {
-                this->fInterpolatedMusicPos += interpolationDelta * 2;
-                this->fLastAudioTimeAccurateSet = realTime;
-            } else if(delta < interpolationDeltaLimit)  // normal
-            {
-                this->fInterpolatedMusicPos = newInterpolatedPos;
-            } else  // overshot
-            {
-                this->fInterpolatedMusicPos += interpolationDelta / 2;
-                this->fLastAudioTimeAccurateSet = realTime;
-            }
-
-            // calculate final return value
-            returnPos = (u32)std::round(this->fInterpolatedMusicPos);
-
-            if(speed < 1.0f && cv::compensate_music_speed.getBool() && !cv::nightcore_enjoyer.getBool()) {
-                returnPos += (u32)(((1.0f - speed) / 0.75f) * 5);
-            }
-        } else  // no interpolation
-        {
-            returnPos = curPos;
-            this->fInterpolatedMusicPos = (u32)returnPos;
-            this->fLastAudioTimeAccurateSet = realTime;
-        }
-
-        this->fLastRealTimeForInterpolationDelta =
-            realTime;  // this is more accurate than engine->getFrameTime() for the delta calculation, since it
-                       // correctly handles all possible delays inbetween
-
-        // debugLog("returning {:d} \n", returnPos);
-        // debugLog("delta = {:d}\n", (long)returnPos - m_iCurMusicPos);
-        // debugLog("raw delta = {:d}\n", (long)returnPos - (long)curPos);
-
-        return returnPos;
     }
 }
 
@@ -2362,7 +2291,7 @@ void Beatmap::update2() {
     }
 
     // update current music position (this variable does not include any offsets!)
-    this->iCurMusicPos = this->getMusicPositionMSInterpolated();
+    this->iCurMusicPos = this->isActuallyLoading() ? 0 : this->music->getPositionMS();
     this->iContinueMusicPos = this->music->getPositionMS();
     const bool wasSeekFrame = this->bWasSeekFrame;
     this->bWasSeekFrame = false;

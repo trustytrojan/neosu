@@ -18,12 +18,12 @@ UIVolumeSlider::UIVolumeSlider(float xPos, float yPos, float xSize, float ySize,
 
     this->font = resourceManager->getFont("FONT_DEFAULT");
 
-    resourceManager->loadImage("ic_volume_mute_white_48dp.png", "OSU_UI_VOLUME_SLIDER_BLOCK_0");
-    resourceManager->loadImage("ic_volume_up_white_48dp.png", "OSU_UI_VOLUME_SLIDER_BLOCK_1");
-    resourceManager->loadImage("ic_music_off_48dp.png", "OSU_UI_VOLUME_SLIDER_MUSIC_0");
-    resourceManager->loadImage("ic_music_48dp.png", "OSU_UI_VOLUME_SLIDER_MUSIC_1");
-    resourceManager->loadImage("ic_effects_off_48dp.png", "OSU_UI_VOLUME_SLIDER_EFFECTS_0");
-    resourceManager->loadImage("ic_effects_48dp.png", "OSU_UI_VOLUME_SLIDER_EFFECTS_1");
+    resourceManager->loadImage("ic_volume_mute_white_48dp.png", "UI_VOLUME_SLIDER_BLOCK_0");
+    resourceManager->loadImage("ic_volume_up_white_48dp.png", "UI_VOLUME_SLIDER_BLOCK_1");
+    resourceManager->loadImage("ic_music_off_48dp.png", "UI_VOLUME_SLIDER_MUSIC_0");
+    resourceManager->loadImage("ic_music_48dp.png", "UI_VOLUME_SLIDER_MUSIC_1");
+    resourceManager->loadImage("ic_effects_off_48dp.png", "UI_VOLUME_SLIDER_EFFECTS_0");
+    resourceManager->loadImage("ic_effects_48dp.png", "UI_VOLUME_SLIDER_EFFECTS_1");
 
     this->setFrameColor(0xff7f7f7f);
 }
@@ -34,13 +34,13 @@ void UIVolumeSlider::drawBlock() {
     if(this->getFloat() < 0.01f)
         img = resourceManager->getImage(
             this->type == TYPE::MASTER
-                ? "OSU_UI_VOLUME_SLIDER_BLOCK_0"
-                : (this->type == TYPE::MUSIC ? "OSU_UI_VOLUME_SLIDER_MUSIC_0" : "OSU_UI_VOLUME_SLIDER_EFFECTS_0"));
+                ? "UI_VOLUME_SLIDER_BLOCK_0"
+                : (this->type == TYPE::MUSIC ? "UI_VOLUME_SLIDER_MUSIC_0" : "UI_VOLUME_SLIDER_EFFECTS_0"));
     else
         img = resourceManager->getImage(
             this->type == TYPE::MASTER
-                ? "OSU_UI_VOLUME_SLIDER_BLOCK_1"
-                : (this->type == TYPE::MUSIC ? "OSU_UI_VOLUME_SLIDER_MUSIC_1" : "OSU_UI_VOLUME_SLIDER_EFFECTS_1"));
+                ? "UI_VOLUME_SLIDER_BLOCK_1"
+                : (this->type == TYPE::MUSIC ? "UI_VOLUME_SLIDER_MUSIC_1" : "UI_VOLUME_SLIDER_EFFECTS_1"));
 
     g->pushTransform();
     {
