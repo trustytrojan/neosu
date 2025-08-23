@@ -152,13 +152,12 @@ class CBaseUIElement : public KeyboardListener {
         this->bKeepActive = keepActive;
         return this;
     }
-    virtual CBaseUIElement* setEnabled(bool enabled, const char* reason = nullptr) {
+    virtual CBaseUIElement* setEnabled(bool enabled) {
         if(enabled != this->bEnabled) {
             this->bEnabled = enabled;
             if(this->bEnabled) {
                 this->onEnabled();
             } else {
-                this->disabled_reason = reason;
                 this->onDisabled();
             }
         }
@@ -221,8 +220,6 @@ class CBaseUIElement : public KeyboardListener {
     vec2 &vSize;   // reference to rect.vSize
     vec2 &vmPos;   // reference to relRect.vMin
     vec2 &vmSize;  // reference to relRect.vSize
-
-    const char* disabled_reason = nullptr;
 
    private:
     std::bitset<2> mouseInsideCheck{0};

@@ -3,8 +3,6 @@
 
 #include "Engine.h"
 #include "Mouse.h"
-#include "Osu.h"
-#include "TooltipOverlay.h"
 
 bool CBaseUIElement::isVisibleOnScreen(const McRect &rect) { return engine->getScreenRect().intersects(rect); }
 
@@ -16,6 +14,8 @@ void CBaseUIElement::stealFocus() {
 }
 
 void CBaseUIElement::mouse_update(bool *propagate_clicks) {
+    if(!this->bVisible || !this->bEnabled) return;
+
     // check if mouse is inside element
     if(this->getRect().contains(mouse->getPos())) {
         if(!this->bMouseInside) {
@@ -27,17 +27,6 @@ void CBaseUIElement::mouse_update(bool *propagate_clicks) {
             this->bMouseInside = false;
             if(this->bVisible && this->bEnabled) this->onMouseOutside();
         }
-    }
-
-    if(!this->bVisible) return;
-
-    if(!this->bEnabled) {
-        if(this->bMouseInside && this->disabled_reason != nullptr) {
-            osu->getTooltipOverlay()->begin();
-            osu->getTooltipOverlay()->addLine(this->disabled_reason);
-            osu->getTooltipOverlay()->end();
-        }
-        return;
     }
 
     const std::bitset<2> buttonMask{static_cast<size_t>((this->bHandleLeftMouse && mouse->isLeftDown()) |

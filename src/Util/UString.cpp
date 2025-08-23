@@ -333,7 +333,7 @@ void UString::lowerCase() {
     std::ranges::transform(this->sUnicode, this->sUnicode.begin(), [](wchar_t c) { return std::towlower(c); });
 
     if(isAsciiOnly())
-        std::ranges::transform(this->sUtf8, this->sUtf8.begin(), [](char c) { return std::tolower(c); });
+        std::ranges::transform(this->sUtf8, this->sUtf8.begin(), [](unsigned char c) { return std::tolower(c); });
     else
         updateUtf8();
 }
@@ -344,7 +344,7 @@ void UString::upperCase() {
     std::ranges::transform(this->sUnicode, this->sUnicode.begin(), [](wchar_t c) { return std::towupper(c); });
 
     if(isAsciiOnly())
-        std::ranges::transform(this->sUtf8, this->sUtf8.begin(), [](char c) { return std::toupper(c); });
+        std::ranges::transform(this->sUtf8, this->sUtf8.begin(), [](unsigned char c) { return std::toupper(c); });
     else
         updateUtf8();
 }
