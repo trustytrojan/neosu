@@ -53,17 +53,6 @@ class BassSoundEngine final : public SoundEngine {
     SOUNDHANDLE g_bassOutputMixer = 0;
 };
 
-// convenience conversion macro to get the sound handle, extra args are any extra conditions to check for besides general state validity
-// just minor boilerplate reduction
-#define GETHANDLE(T, accessor, ...) \
-	[&]() -> std::pair<T *, SOUNDHANDLE> { \
-		SOUNDHANDLE retHandle = 0; \
-		T *retSound = nullptr; \
-		if (this->isReady() && snd && snd->isReady() __VA_OPT__(&&(__VA_ARGS__)) && (retSound = snd->as<T>())) \
-			retHandle = retSound->accessor; \
-		return {retSound, retHandle}; \
-	}()
-
 #else
 class BassSoundEngine : public SoundEngine {};
 #endif

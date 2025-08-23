@@ -736,8 +736,8 @@ void Skin::load() {
     this->loadSound(this->roomReady, "match-ready", "ROOM_READY_SND", true, true, false);
     this->loadSound(this->matchStart, "match-start", "MATCH_START_SND", true, true, false);
 
-    this->loadSound(this->pauseLoop, "pause-loop", "PAUSE_LOOP_SND", false, false, true, true);
-    this->loadSound(this->pauseHover, "pause-hover", "PAUSE_HOVER_SND", true, true, false, false);
+    this->loadSound(this->pauseLoop, "pause-loop", "PAUSE_LOOP_SND", NOT_OVERLAYABLE, STREAM, LOOPING, true);
+    this->loadSound(this->pauseHover, "pause-hover", "PAUSE_HOVER_SND", OVERLAYABLE, SAMPLE, NOT_LOOPING, false);
     this->loadSound(this->clickPauseBack, "pause-back-click", "CLICK_QUIT_SONG_SND", true, true, false, false);
     this->loadSound(this->hoverPauseBack, "pause-back-hover", "HOVER_QUIT_SONG_SND", true, true, false, false);
     this->loadSound(this->clickPauseContinue, "pause-continue-click", "CLICK_RESUME_SONG_SND", true, true, false,

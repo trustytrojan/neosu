@@ -448,12 +448,10 @@ void BassSoundEngine::shutdown() {
 }
 
 bool BassSoundEngine::play(Sound *snd, float pan, float pitch) {
-    if(!snd || !snd->isReady()) return false;
+    if(!this->isReady() || !snd || !snd->isReady()) return false;
 
-    auto [bassSound, channel] = GETHANDLE(BassSound, getChannel());
-    if(!bassSound) {
-        return false;
-    }
+    auto bassSound = (BassSound *)snd;
+    auto channel = (SOUNDHANDLE)bassSound->getChannel();
 
     if(bassSound->isOverlayable() && cv::snd_restrict_play_frame.getBool()) {
         if(engine->getTime() <= bassSound->fLastPlayTime) {
@@ -515,12 +513,10 @@ bool BassSoundEngine::play(Sound *snd, float pan, float pitch) {
 }
 
 void BassSoundEngine::pause(Sound *snd) {
-    auto [bassSound, stream] = GETHANDLE(BassSound, stream);
-    if(!bassSound) {
-        return;
-    }
-    assert(stream);  // can't call pause() on a sample
+    if(!this->isReady() || !snd || !snd->isReady()) return;
+    assert(snd->isStream());  // can't call pause() on a sample
 
+    auto bassSound = (BassSound *)snd;
     if(!bassSound->isPlaying()) return;
 
     auto pos = bassSound->getPositionMS();
@@ -531,12 +527,10 @@ void BassSoundEngine::pause(Sound *snd) {
 
 void BassSoundEngine::stop(Sound *snd) {
     if(!this->isReady() || snd == nullptr || !snd->isReady()) return;
+    assert(snd->isStream());  // can't call stop() on a sample
 
-    auto [bassSound, stream] = GETHANDLE(BassSound, stream);
-    if(!bassSound) {
-        return;
-    }
-    assert(stream);  // can't call stop() on a sample
+    auto bassSound = (BassSound *)snd;
+    if(!bassSound->isPlaying()) return;
 
     BASS_Mixer_ChannelRemove(bassSound->stream);
     bassSound->bStarted = false;
