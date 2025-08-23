@@ -23,11 +23,8 @@
 
 OpenGLLegacyInterface::OpenGLLegacyInterface()
     : Graphics(),
-      vResolution(engine->getScreenSize()),  // initial viewport size = window size
-      syncobj(std::make_unique<OpenGLSync>()) {
-    //
-    this->syncobj->init();
-
+      vResolution(engine->getScreenSize())  // initial viewport size = window size
+{
     // quality
     glHint(GL_FRAGMENT_SHADER_DERIVATIVE_HINT, GL_NICEST);
     glHint(GL_GENERATE_MIPMAP_HINT, GL_NICEST);
@@ -67,7 +64,6 @@ OpenGLLegacyInterface::OpenGLLegacyInterface()
 
 void OpenGLLegacyInterface::beginScene() {
     this->bInScene = true;
-    this->syncobj->begin();
 
     Matrix4 defaultProjectionMatrix =
         Camera::buildMatrixOrtho2D(0, this->vResolution.x, this->vResolution.y, 0, -1.0f, 1.0f);
@@ -103,7 +99,6 @@ void OpenGLLegacyInterface::endScene() {
 
 #endif
 
-    this->syncobj->end();
     this->bInScene = false;
 }
 

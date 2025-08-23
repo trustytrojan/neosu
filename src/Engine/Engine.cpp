@@ -284,7 +284,7 @@ void Engine::onPaint() {
             if(this->guiContainer != nullptr) this->guiContainer->draw();
 
             // debug input devices
-            for(auto &inputDevice : this->inputDevices) {
+            for(const auto &inputDevice : this->inputDevices) {
                 inputDevice->draw();
             }
         }

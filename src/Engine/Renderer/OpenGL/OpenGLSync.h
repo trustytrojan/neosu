@@ -11,11 +11,10 @@
 typedef struct __GLsync *GLsync;
 
 class OpenGLSync final {
+NOCOPY_NOMOVE(OpenGLSync)
    public:
     OpenGLSync();
     ~OpenGLSync();
-
-    bool init();  // call once after OpenGL is loaded
 
     void begin();  // call at the beginning of beginScene()
     void end();    // call in endScene()
@@ -33,13 +32,12 @@ class OpenGLSync final {
                                   uint64_t timeoutNs);  // wait for a specific sync object to be reached
     void deleteSyncObject(GLsync syncObject);           // delete a sync object
     void setMaxFramesInFlight(int maxFrames);           // set maximum frames in flight (default: 2)
-    [[nodiscard]] int getMaxFramesInFlight() const {
-        return this->iMaxFramesInFlight;
-    }  // get current maximum frames in flight
-    [[nodiscard]] int getCurrentFramesInFlight() const {
-        return this->frameSyncQueue.size();
-    }  // get actual frames in flight
-    void manageFrameSyncQueue(bool forceWait = false);  // Clean up expired sync objects and limit frames in flight
+    // get current maximum frames in flight
+    [[nodiscard]] int getMaxFramesInFlight() const { return this->iMaxFramesInFlight; }
+    // get actual frames in flight
+    [[nodiscard]] int getCurrentFramesInFlight() const { return this->frameSyncQueue.size(); }
+    // clean up expired sync objects and limit frames in flight
+    void manageFrameSyncQueue(bool forceWait = false);
 
     typedef struct {
         GLsync syncObject;
@@ -54,7 +52,7 @@ class OpenGLSync final {
 
     // callbacks
     inline void onSyncBehaviorChanged(const float newValue) {
-        this->bEnabled = (this->init() && !!static_cast<int>(newValue));
+        this->bEnabled = (this->bAvailable && !!static_cast<int>(newValue));
     }
     void onFramecountNumChanged(const float newValue);
 };

@@ -21,6 +21,17 @@ OpenGLSync::OpenGLSync() {
     this->bEnabled = this->bAvailable = false;
     this->iMaxFramesInFlight = cv::r_sync_max_frames.getVal<int>();
 
+#ifdef MCENGINE_PLATFORM_WASM
+    this->bAvailable = false;
+#else
+    if constexpr(Env::cfg(REND::GLES32)) {
+        this->bAvailable = true;
+    } else {
+        this->bAvailable = GLVersion.major > 3 || (GLVersion.major == 3 && GLVersion.minor >= 2);
+    }
+#endif
+    this->bEnabled = cv::r_sync_enabled.getBool() && this->bAvailable;
+
     cv::r_sync_max_frames.setCallback(SA::MakeDelegate<&OpenGLSync::onFramecountNumChanged>(this));
     cv::r_sync_enabled.setCallback(SA::MakeDelegate<&OpenGLSync::onSyncBehaviorChanged>(this));
 }
@@ -32,20 +43,6 @@ OpenGLSync::~OpenGLSync() {
             this->frameSyncQueue.pop_front();
         }
     }
-}
-
-bool OpenGLSync::init() {
-#ifdef MCENGINE_PLATFORM_WASM
-    this->bAvailable = false;
-#else
-    if constexpr(Env::cfg(REND::GLES32)) {
-        this->bAvailable = true;
-    } else {
-        this->bAvailable = GLVersion.major > 3 || (GLVersion.major == 3 && GLVersion.minor >= 2);
-    }
-#endif
-    this->bEnabled = cv::r_sync_enabled.getBool() && this->bAvailable;
-    return this->bEnabled;
 }
 
 void OpenGLSync::begin() {

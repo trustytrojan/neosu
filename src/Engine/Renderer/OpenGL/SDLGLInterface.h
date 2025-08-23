@@ -9,6 +9,8 @@
 
 #include "OpenGLHeaders.h"
 
+class OpenGLSync;
+
 typedef struct SDL_Window SDL_Window;
 class SDLGLInterface final : public BackendGLInterface {
     friend class Environment;
@@ -21,9 +23,10 @@ class SDLGLInterface final : public BackendGLInterface {
     friend class OpenGLShader;
 
    public:
-    SDLGLInterface(SDL_Window *window) : BackendGLInterface(), m_window(window) {}
+    SDLGLInterface(SDL_Window *window);
 
     // scene
+    void beginScene() override;
     void endScene() override;
 
     // device settings
@@ -48,7 +51,10 @@ class SDLGLInterface final : public BackendGLInterface {
 
    private:
     static void load();
-    SDL_Window *m_window;
+    SDL_Window *window;
+
+    // frame queue management
+    std::unique_ptr<OpenGLSync> syncobj;
 };
 
 #else

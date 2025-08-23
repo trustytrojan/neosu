@@ -3,12 +3,13 @@
 
 #if defined(MCENGINE_FEATURE_GLES32) || defined(MCENGINE_FEATURE_OPENGL)
 
-#include <SDL3/SDL.h>
+#include <SDL3/SDL_video.h>
 
 #include "Engine.h"
+#include "OpenGLSync.h"
 
+// resolve GL functions (static, called before construction)
 void SDLGLInterface::load() {
-    // resolve GL functions
 #ifndef MCENGINE_PLATFORM_WASM
     if(!gladLoadGL()) {
         debugLog("gladLoadGL() error\n");
@@ -22,10 +23,23 @@ void SDLGLInterface::load() {
     debugLog("GL_VERSION string: {}\n", reinterpret_cast<const char *>(glGetString(GL_VERSION)));
 }
 
+SDLGLInterface::SDLGLInterface(SDL_Window *window)
+    : BackendGLInterface(), window(window), syncobj(std::make_unique<OpenGLSync>()) {}
+
+void SDLGLInterface::beginScene() {
+    // block on frame queue (if enabled)
+    this->syncobj->begin();
+
+    BackendGLInterface::beginScene();
+}
+
 void SDLGLInterface::endScene() {
     BackendGLInterface::endScene();
 
-    SDL_GL_SwapWindow(m_window);
+    SDL_GL_SwapWindow(this->window);
+
+    // create sync obj for the gl commands this frame (if enabled)
+    this->syncobj->end();
 }
 
 void SDLGLInterface::setVSync(bool vsync) { SDL_GL_SetSwapInterval(vsync ? 1 : 0); }
@@ -170,8 +184,8 @@ void SDLGLInterface::setLog(bool on) {
     }
 }
 
-void APIENTRY SDLGLInterface::glDebugCB(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message,
-                        const void * /*userParam*/) {
+void APIENTRY SDLGLInterface::glDebugCB(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+                                        const GLchar *message, const void * /*userParam*/) {
     Engine::logRaw("[GLDebugCB]\n");
     Engine::logRaw("    message: {}\n", std::string(message, length));
     Engine::logRaw("    time: {:.4f}\n", engine->getTime());
@@ -180,6 +194,5 @@ void APIENTRY SDLGLInterface::glDebugCB(GLenum source, GLenum type, GLuint id, G
     Engine::logRaw("    type: {}\n", glDebugTypeString(type));
     Engine::logRaw("    severity: {}\n", glDebugSeverityString(severity));
 }
-
 
 #endif

@@ -7,8 +7,6 @@
 
 #ifdef MCENGINE_FEATURE_OPENGL
 
-#include "OpenGLSync.h"
-
 class Image;
 
 class OpenGLLegacyInterface : public Graphics {
@@ -18,7 +16,7 @@ NOCOPY_NOMOVE(OpenGLLegacyInterface)
     ~OpenGLLegacyInterface() override = default;
 
     // scene
-    void beginScene() final;
+    void beginScene() override;
     void endScene() override;
 
     // depth buffer
@@ -117,9 +115,6 @@ NOCOPY_NOMOVE(OpenGLLegacyInterface)
     Color color{0xffffffff};
     //float fZ{1};
     //float fClearZ{1};
-
-    // synchronization
-    std::unique_ptr<OpenGLSync> syncobj{nullptr};
 
     // clipping
     std::stack<McRect> clipRectStack;
