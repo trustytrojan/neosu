@@ -2322,13 +2322,13 @@ void Slider::onTickHit(bool successful, int tickIndex) {
             //       in fact, it doesn't mention ticks at all.
             std::string sound_name = "SKIN_";
             switch(this->samples.getAdditionSet()) {
-                case 1:
+                case SampleSetType::NORMAL:
                     sound_name.append("NORMAL");
                     break;
-                case 2:
+                case SampleSetType::SOFT:
                     sound_name.append("SOFT");
                     break;
-                case 3:
+                case SampleSetType::DRUM:
                     sound_name.append("DRUM");
                     break;
             }

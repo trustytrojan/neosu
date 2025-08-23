@@ -12,7 +12,7 @@ i32 HitSamples::getNormalSet() {
     if(this->normalSet != 0) return this->normalSet;
 
     auto beatmap = osu->getSelectedBeatmap();
-    if(!beatmap) return 1;
+    if(!beatmap) return SampleSetType::NORMAL;
 
     // Fallback to timing point sample set
     i32 tp_sampleset = beatmap->getTimingPoint().sampleSet;
@@ -27,7 +27,7 @@ i32 HitSamples::getAdditionSet() {
 
     if(this->additionSet != 0) return this->additionSet;
 
-    // Fallback to normal sample set (I think this is correct? Wiki is a bit confusing...)
+    // Fallback to normal sample set
     return this->getNormalSet();
 }
 
@@ -59,13 +59,14 @@ void HitSamples::play(f32 pan, i32 delta, bool is_sliderslide) {
         std::string sound_name = "SKIN_";
 
         switch(set) {
-            case 1:
+            default:
+            case SampleSetType::NORMAL:
                 sound_name.append("NORMAL");
                 break;
-            case 2:
+            case SampleSetType::SOFT:
                 sound_name.append("SOFT");
                 break;
-            case 3:
+            case SampleSetType::DRUM:
                 sound_name.append("DRUM");
                 break;
         }
@@ -77,6 +78,7 @@ void HitSamples::play(f32 pan, i32 delta, bool is_sliderslide) {
         }
 
         switch(hitSound) {
+            default:
             case HitSoundType::NORMAL:
                 sound_name.append(is_sliderslide ? "SLIDE" : "NORMAL");
                 break;
@@ -104,7 +106,7 @@ void HitSamples::play(f32 pan, i32 delta, bool is_sliderslide) {
 
     std::vector<Sound*> sounds;
 
-    if(this->hitSounds & HitSoundType::NORMAL) {
+    if((this->hitSounds & HitSoundType::NORMAL) || (this->hitSounds == 0)) {
         sounds.push_back(get_map_sound(this->getNormalSet(), HitSoundType::NORMAL));
     }
 
@@ -125,7 +127,6 @@ void HitSamples::play(f32 pan, i32 delta, bool is_sliderslide) {
 
         if(is_sliderslide) {
             if(!sound->isPlaying()) {
-                sound->setLoop(true);
                 soundEngine->play(sound, pan, pitch);
             }
         } else {

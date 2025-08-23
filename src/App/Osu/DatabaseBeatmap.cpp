@@ -222,11 +222,11 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                     if(Parsing::parse(curLineChar, "SampleSet", ':', &sampleSet)) {
                         SString::to_lower(sampleSet);
                         if(sampleSet == "normal") {
-                            c.defaultSampleSet = 1;
+                            c.defaultSampleSet = SampleSetType::NORMAL;
                         } else if(sampleSet == "soft") {
-                            c.defaultSampleSet = 2;
+                            c.defaultSampleSet = SampleSetType::SOFT;
                         } else if(sampleSet == "drum") {
-                            c.defaultSampleSet = 3;
+                            c.defaultSampleSet = SampleSetType::DRUM;
                         }
                     }
 

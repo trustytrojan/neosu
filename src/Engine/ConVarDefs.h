@@ -1173,9 +1173,6 @@ CONVAR(start_first_main_menu_song_at_preview_point, "start_first_main_menu_song_
        FCVAR_BANCHO_COMPATIBLE);
 CONVAR(submit_after_pause, "submit_after_pause", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_GAMEPLAY);
 CONVAR(submit_scores, "submit_scores", false, FCVAR_BANCHO_COMPATIBLE);
-CONVAR(timingpoints_offset, "timingpoints_offset", 5.0f, FCVAR_BANCHO_COMPATIBLE,
-       "Offset in ms which is added before determining the active timingpoint for the sample "
-       "type and sample volume (hitsounds) of the current frame");
 CONVAR(tooltip_anim_duration, "tooltip_anim_duration", 0.4f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(ui_scale, "ui_scale", 1.0f, FCVAR_BANCHO_COMPATIBLE, "multiplier");
 CONVAR(ui_scale_to_dpi, "ui_scale_to_dpi", true, FCVAR_BANCHO_COMPATIBLE,

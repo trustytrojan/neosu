@@ -2453,8 +2453,7 @@ void Beatmap::update2() {
         (this->selectedDifficulty2->getVersion() < 5 ? cv::old_beatmap_offset.getInt() : 0);
 
     if(this->iCurMusicPosWithOffsets >= 0) {
-        this->current_timing_point = this->selectedDifficulty2->getTimingInfoForTime(this->iCurMusicPosWithOffsets +
-                                                                                     cv::timingpoints_offset.getInt());
+        this->current_timing_point = this->selectedDifficulty2->getTimingInfoForTime(this->iCurMusicPosWithOffsets);
     }
 
     // Make sure we're not too far behind the liveplay
