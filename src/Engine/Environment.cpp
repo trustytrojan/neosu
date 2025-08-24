@@ -120,6 +120,11 @@ Environment::Environment(int argc, char *argv[]) {
     m_sdldriver = SDL_GetCurrentVideoDriver();
     m_bIsX11 = (m_sdldriver == "x11");
 
+    if(m_bIsX11) {
+        // workaround alt tab bug (cursor getting stuck confined for 5 seconds)
+        SDL_SetX11EventHook(Environment::sdl_x11eventhook, this);
+    }
+
     // setup callbacks
     cv::debug_env.setCallback(SA::MakeDelegate<&Environment::onLogLevelChange>(this));
     cv::fullscreen_windowed_borderless.setCallback(
@@ -999,7 +1004,7 @@ void Environment::initMonitors(bool force) const {
         if(!SDL_GetDisplayBounds(di, &sdlDisplayRect)) {
             // fallback
             size = vec2{static_cast<float>(SDL_GetDesktopDisplayMode(di)->w),
-                           static_cast<float>(SDL_GetDesktopDisplayMode(di)->h)};
+                        static_cast<float>(SDL_GetDesktopDisplayMode(di)->h)};
             displayRect = McRect{{}, size};
             // expand the display bounds, we just have to assume that the displays are placed left-to-right, with Y
             // coordinates at 0 (in this fallback path)
@@ -1185,3 +1190,18 @@ std::vector<std::string> Environment::enumerateDirectory(const std::string &path
 }
 
 #endif  // MCENGINE_PLATFORM_WINDOWS
+
+// hotfix/workaround cursor confinement issue (maybe just with i3wm?)
+bool Environment::sdl_x11eventhook(void *thisptr, XEvent *xev) {
+    (void)thisptr, (void)xev;
+#ifdef MCENGINE_PLATFORM_LINUX
+    if(thisptr && xev && xev->type == 10 /* FocusOut */) {
+        auto *envptr = static_cast<Environment *>(thisptr);
+        if(envptr->m_window) {
+            // unconfine mouse manually
+            SDL_SetWindowMouseRect(envptr->m_window, nullptr);
+        }
+    }
+#endif
+    return true;
+}
