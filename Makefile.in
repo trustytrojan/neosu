@@ -166,10 +166,10 @@ am__neosu_SOURCES_DIST = libraries/MD5.cpp libraries/base64.cpp \
 	src/App/Osu/DifficultyCalculator.cpp \
 	src/App/Osu/Downloader.cpp src/App/Osu/EnvironmentInterop.cpp \
 	src/App/Osu/HUD.cpp src/App/Osu/HitObjects.cpp \
-	src/App/Osu/Icons.cpp src/App/Osu/LegacyReplay.cpp \
-	src/App/Osu/Lobby.cpp src/App/Osu/MainMenu.cpp \
-	src/App/Osu/ModFPoSu.cpp src/App/Osu/ModSelector.cpp \
-	src/App/Osu/Multiplayer.cpp \
+	src/App/Osu/HitSounds.cpp src/App/Osu/Icons.cpp \
+	src/App/Osu/LegacyReplay.cpp src/App/Osu/Lobby.cpp \
+	src/App/Osu/MainMenu.cpp src/App/Osu/ModFPoSu.cpp \
+	src/App/Osu/ModSelector.cpp src/App/Osu/Multiplayer.cpp \
 	src/App/Osu/NotificationOverlay.cpp \
 	src/App/Osu/OptionsMenu.cpp src/App/Osu/Osu.cpp \
 	src/App/Osu/PauseMenu.cpp src/App/Osu/PeppyImporter.cpp \
@@ -282,6 +282,7 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/App/Osu/neosu-EnvironmentInterop.$(OBJEXT) \
 	src/App/Osu/neosu-HUD.$(OBJEXT) \
 	src/App/Osu/neosu-HitObjects.$(OBJEXT) \
+	src/App/Osu/neosu-HitSounds.$(OBJEXT) \
 	src/App/Osu/neosu-Icons.$(OBJEXT) \
 	src/App/Osu/neosu-LegacyReplay.$(OBJEXT) \
 	src/App/Osu/neosu-Lobby.$(OBJEXT) \
@@ -454,6 +455,7 @@ am__depfiles_remade = $(DEPS_PREFIX)/mimalloc/$(DEPDIR)/neosu-mimalloc_new_delet
 	src/App/Osu/$(DEPDIR)/neosu-EnvironmentInterop.Po \
 	src/App/Osu/$(DEPDIR)/neosu-HUD.Po \
 	src/App/Osu/$(DEPDIR)/neosu-HitObjects.Po \
+	src/App/Osu/$(DEPDIR)/neosu-HitSounds.Po \
 	src/App/Osu/$(DEPDIR)/neosu-Icons.Po \
 	src/App/Osu/$(DEPDIR)/neosu-LegacyReplay.Po \
 	src/App/Osu/$(DEPDIR)/neosu-Lobby.Po \
@@ -924,10 +926,10 @@ neosu_SOURCES = libraries/MD5.cpp libraries/base64.cpp \
 	src/App/Osu/DifficultyCalculator.cpp \
 	src/App/Osu/Downloader.cpp src/App/Osu/EnvironmentInterop.cpp \
 	src/App/Osu/HUD.cpp src/App/Osu/HitObjects.cpp \
-	src/App/Osu/Icons.cpp src/App/Osu/LegacyReplay.cpp \
-	src/App/Osu/Lobby.cpp src/App/Osu/MainMenu.cpp \
-	src/App/Osu/ModFPoSu.cpp src/App/Osu/ModSelector.cpp \
-	src/App/Osu/Multiplayer.cpp \
+	src/App/Osu/HitSounds.cpp src/App/Osu/Icons.cpp \
+	src/App/Osu/LegacyReplay.cpp src/App/Osu/Lobby.cpp \
+	src/App/Osu/MainMenu.cpp src/App/Osu/ModFPoSu.cpp \
+	src/App/Osu/ModSelector.cpp src/App/Osu/Multiplayer.cpp \
 	src/App/Osu/NotificationOverlay.cpp \
 	src/App/Osu/OptionsMenu.cpp src/App/Osu/Osu.cpp \
 	src/App/Osu/PauseMenu.cpp src/App/Osu/PeppyImporter.cpp \
@@ -1353,6 +1355,8 @@ src/App/Osu/neosu-EnvironmentInterop.$(OBJEXT):  \
 src/App/Osu/neosu-HUD.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/neosu-HitObjects.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
+	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
+src/App/Osu/neosu-HitSounds.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/neosu-Icons.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
@@ -1820,6 +1824,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-EnvironmentInterop.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-HUD.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-HitObjects.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-HitSounds.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-Icons.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-LegacyReplay.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-Lobby.Po@am__quote@ # am--include-marker
@@ -2359,6 +2364,20 @@ src/App/Osu/neosu-HitObjects.obj: src/App/Osu/HitObjects.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/HitObjects.cpp' object='src/App/Osu/neosu-HitObjects.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-HitObjects.obj `if test -f 'src/App/Osu/HitObjects.cpp'; then $(CYGPATH_W) 'src/App/Osu/HitObjects.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/HitObjects.cpp'; fi`
+
+src/App/Osu/neosu-HitSounds.o: src/App/Osu/HitSounds.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-HitSounds.o -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-HitSounds.Tpo -c -o src/App/Osu/neosu-HitSounds.o `test -f 'src/App/Osu/HitSounds.cpp' || echo '$(srcdir)/'`src/App/Osu/HitSounds.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/$(DEPDIR)/neosu-HitSounds.Tpo src/App/Osu/$(DEPDIR)/neosu-HitSounds.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/HitSounds.cpp' object='src/App/Osu/neosu-HitSounds.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-HitSounds.o `test -f 'src/App/Osu/HitSounds.cpp' || echo '$(srcdir)/'`src/App/Osu/HitSounds.cpp
+
+src/App/Osu/neosu-HitSounds.obj: src/App/Osu/HitSounds.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-HitSounds.obj -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-HitSounds.Tpo -c -o src/App/Osu/neosu-HitSounds.obj `if test -f 'src/App/Osu/HitSounds.cpp'; then $(CYGPATH_W) 'src/App/Osu/HitSounds.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/HitSounds.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/$(DEPDIR)/neosu-HitSounds.Tpo src/App/Osu/$(DEPDIR)/neosu-HitSounds.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/HitSounds.cpp' object='src/App/Osu/neosu-HitSounds.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-HitSounds.obj `if test -f 'src/App/Osu/HitSounds.cpp'; then $(CYGPATH_W) 'src/App/Osu/HitSounds.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/HitSounds.cpp'; fi`
 
 src/App/Osu/neosu-Icons.o: src/App/Osu/Icons.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-Icons.o -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-Icons.Tpo -c -o src/App/Osu/neosu-Icons.o `test -f 'src/App/Osu/Icons.cpp' || echo '$(srcdir)/'`src/App/Osu/Icons.cpp
@@ -4477,6 +4496,7 @@ distclean: distclean-am
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-EnvironmentInterop.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-HUD.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-HitObjects.Po
+	-rm -f src/App/Osu/$(DEPDIR)/neosu-HitSounds.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Icons.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-LegacyReplay.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Lobby.Po
@@ -4679,6 +4699,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-EnvironmentInterop.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-HUD.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-HitObjects.Po
+	-rm -f src/App/Osu/$(DEPDIR)/neosu-HitSounds.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Icons.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-LegacyReplay.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Lobby.Po

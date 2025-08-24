@@ -341,10 +341,10 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                     if(!Parsing::parse(curLineChar, &x, ',', &y, ',', &time, ',', &type, ',', &hitSounds)) {
                         break;
                     }
-                    if(!std::isfinite(x) || x < std::numeric_limits<i32>::min() || x > std::numeric_limits<i32>::max())
-                        x = 0;
-                    if(!std::isfinite(y) || y < std::numeric_limits<i32>::min() || y > std::numeric_limits<i32>::max())
-                        y = 0;
+                    if(!std::isfinite(x) || std::isnan(x))
+                        x = 0.f;
+                    if(!std::isfinite(y) || std::isnan(y))
+                        y = 0.f;
 
                     if(!(type & PpyHitObjectType::SPINNER)) hitobjectsWithoutSpinnerCounter++;
 
@@ -491,6 +491,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                             .y = (i32)y,
                             .time = time,
                             .endTime = endTime,
+                            .samples = {}
                         };
 
                         // Errors ignored because hitSample is not always present
@@ -1029,7 +1030,6 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
         switch(curBlock) {
             // header (e.g. "osu file format v12")
             case -1: {
-                u8 version;
                 if(Parsing::parse(curLineChar, "osu file format v", &this->iVersion)) {
                     if(this->iVersion > cv::beatmap_version.getInt()) {
                         debugLog("Ignoring unknown/invalid beatmap version {:d}\n", this->iVersion);
