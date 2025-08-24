@@ -74,15 +74,6 @@ class Image : public Resource {
     bool bKeepInSystemMemory;
 
    private:
-    friend void TextureAtlas::resize(int width, int height);
-    inline void resize(int width, int height) {
-        this->iWidth = width;
-        this->iHeight = height;
-        this->rawImage.resize(static_cast<u64>(this->iWidth) * this->iHeight * Image::NUM_CHANNELS);
-        // reset to black
-        std::ranges::fill(this->rawImage, 0);
-    }
-
     [[nodiscard]] bool isCompletelyTransparent() const;
     static bool canHaveTransparency(const u8 *data, u64 size);
 
