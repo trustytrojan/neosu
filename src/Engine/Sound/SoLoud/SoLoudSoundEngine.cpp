@@ -229,7 +229,7 @@ void SoLoudSoundEngine::stop(Sound *snd) {
     auto *soloudSound = snd->as<SoLoudSound>();
     if(!soloudSound || soloudSound->handle == 0) return;
 
-    soloudSound->setPosition(0.0);
+    soloudSound->setPositionMS(0);
     soloudSound->setLastPlayTime(0.0);
     soloudSound->setFrequency(0.0);
     soloud->stop(soloudSound->handle);

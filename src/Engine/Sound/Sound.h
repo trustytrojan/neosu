@@ -30,9 +30,7 @@ class Sound : public Resource {
     // Factory method to create the appropriate sound object
     static Sound *createSound(std::string filepath, bool stream, bool overlayable, bool loop);
 
-    virtual u32 setPosition(f64 percent) = 0;
-    virtual void setPositionMS(unsigned long ms) = 0;
-    virtual void setPositionMS_fast(u32 ms) { this->setPositionMS(ms); }
+    virtual void setPositionMS(u32 ms) = 0;
 
     virtual void setVolume(float volume) = 0;
     virtual void setSpeed(float speed) = 0;

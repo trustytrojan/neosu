@@ -104,7 +104,7 @@ class Beatmap : public BeatmapInterface {
     void deselect();  // stops + unloads the currently loaded music and deletes all hitobjects
 
     bool play();
-    bool watch(FinishedScore score, f64 start_percent);
+    bool watch(FinishedScore score, u32 start_ms);
     bool spectate();
 
     bool start();
@@ -122,8 +122,7 @@ class Beatmap : public BeatmapInterface {
     void unloadMusic();
     f32 getIdealVolume();
     void setSpeed(f32 speed);
-    void seekPercent(f64 percent);
-    void seekPercentPlayable(f64 percent);
+    void seekMS(u32 ms);
     [[nodiscard]] inline DatabaseBeatmap::TIMING_INFO getTimingPoint() const { return this->current_timing_point; }
     [[nodiscard]] inline i32 getDefaultSampleSet() const { return this->default_sample_set; }
 
@@ -241,6 +240,7 @@ class Beatmap : public BeatmapInterface {
     bool bIsWaiting;
     bool bIsRestartScheduled;
     bool bIsRestartScheduledQuick;
+    bool bWasSeekFrame;
 
    protected:
     // internal
@@ -261,7 +261,7 @@ class Beatmap : public BeatmapInterface {
     f32 fShouldFlashSectionFail;
     bool bContinueScheduled;
     u32 iContinueMusicPos;
-    f32 fWaitTime;
+    f32 fWaitTime = 0.f;
 
     // database
     DatabaseBeatmap *selectedDifficulty2;
@@ -270,10 +270,6 @@ class Beatmap : public BeatmapInterface {
     f32 fMusicFrequencyBackup;
     long iCurMusicPos;
     long iCurMusicPosWithOffsets;
-    bool bWasSeekFrame;
-    f64 fInterpolatedMusicPos;
-    f64 fLastAudioTimeAccurateSet;
-    f64 fLastRealTimeForInterpolationDelta;
     int iResourceLoadUpdateDelayHack;
     f32 fAfterMusicIsFinishedVirtualAudioTimeStart;
     bool bIsFirstMissSound;

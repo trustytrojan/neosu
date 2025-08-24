@@ -35,8 +35,7 @@ class HUD : public OsuScreen {
     void draw() override;
     void drawDummy();
 
-    void drawCursor(vec2 pos, float alphaMultiplier = 1.0f, bool secondTrail = false,
-                    bool updateAndDrawTrail = true);
+    void drawCursor(vec2 pos, float alphaMultiplier = 1.0f, bool secondTrail = false, bool updateAndDrawTrail = true);
     void drawCursorTrail(
         vec2 pos, float alphaMultiplier = 1.0f,
         bool secondTrail = false);  // NOTE: only use if drawCursor() with updateAndDrawTrail = false (FPoSu)
@@ -142,9 +141,8 @@ class HUD : public OsuScreen {
                         float ar, float cs, float od, float hp, int nps, int nd, int ur, float pp, float ppfc,
                         float hitWindow300, int hitdeltaMin, int hitdeltaMax);
     void drawTargetHeatmap(float hitcircleDiameter);
-    void drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmapLength,
-                               unsigned long beatmapLengthPlayable, unsigned long beatmapStartTimePlayable,
-                               float beatmapPercentFinishedPlayable, const std::vector<BREAK> &breaks);
+    void drawScrubbingTimeline(u32 beatmapTime, u32 beatmapLengthPlayable, u32 beatmapStartTimePlayable,
+                               f32 beatmapPercentFinishedPlayable, const std::vector<BREAK> &breaks);
     void drawInputOverlay(int numK1, int numK2, int numM1, int numM2);
 
     float getCursorTrailScaleFactor();

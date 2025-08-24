@@ -227,8 +227,15 @@ void HUD::draw() {
             }
         }
 
-        this->drawScrubbingTimeline(beatmap->getTime(), beatmap->getLength(), beatmap->getLengthPlayable(),
-                                    beatmap->getStartTimePlayable(), beatmap->getPercentFinishedPlayable(), breaks);
+        // Fix percent to include time before first hitobject (HACK)
+        f32 true_percent = beatmap->getPercentFinishedPlayable();
+        if(!beatmap->isWaiting()) {
+            f32 true_length = beatmap->getStartTimePlayable() + beatmap->getLengthPlayable();
+            true_percent = std::clamp(beatmap->getTime() / true_length, 0.f, 1.f);
+        }
+
+        this->drawScrubbingTimeline(beatmap->getTime(), beatmap->getLengthPlayable(), beatmap->getStartTimePlayable(),
+                                    true_percent, breaks);
     }
 
     if(!osu->isSkipScheduled() && beatmap->isInSkippableSection() &&
@@ -410,22 +417,22 @@ void HUD::drawCursorTrailInt(Shader *trailShader, std::vector<CURSORTRAIL> &trai
                 const float scaleAnimTrailHeightHalf = (trailHeight / 2) * trail[i].scale;
 
                 const vec3 topLeft = vec3(trail[i].pos.x - scaleAnimTrailWidthHalf,
-                                                trail[i].pos.y - scaleAnimTrailHeightHalf, trail[i].alpha);
+                                          trail[i].pos.y - scaleAnimTrailHeightHalf, trail[i].alpha);
                 this->cursorTrailVAO->addVertex(topLeft);
                 this->cursorTrailVAO->addTexcoord(0, 0);
 
                 const vec3 topRight = vec3(trail[i].pos.x + scaleAnimTrailWidthHalf,
-                                                 trail[i].pos.y - scaleAnimTrailHeightHalf, trail[i].alpha);
+                                           trail[i].pos.y - scaleAnimTrailHeightHalf, trail[i].alpha);
                 this->cursorTrailVAO->addVertex(topRight);
                 this->cursorTrailVAO->addTexcoord(1, 0);
 
                 const vec3 bottomRight = vec3(trail[i].pos.x + scaleAnimTrailWidthHalf,
-                                                    trail[i].pos.y + scaleAnimTrailHeightHalf, trail[i].alpha);
+                                              trail[i].pos.y + scaleAnimTrailHeightHalf, trail[i].alpha);
                 this->cursorTrailVAO->addVertex(bottomRight);
                 this->cursorTrailVAO->addTexcoord(1, 1);
 
                 const vec3 bottomLeft = vec3(trail[i].pos.x - scaleAnimTrailWidthHalf,
-                                                   trail[i].pos.y + scaleAnimTrailHeightHalf, trail[i].alpha);
+                                             trail[i].pos.y + scaleAnimTrailHeightHalf, trail[i].alpha);
                 this->cursorTrailVAO->addVertex(bottomLeft);
                 this->cursorTrailVAO->addTexcoord(0, 1);
             } else  // old style trail
@@ -619,13 +626,12 @@ void HUD::drawPlayfieldBorder(vec2 playfieldCenter, vec2 playfieldSize, float hi
                               cv::hud_playfield_border_size.getInt());
 }
 
-void HUD::drawPlayfieldBorder(vec2 playfieldCenter, vec2 playfieldSize, float hitcircleDiameter,
-                              float borderSize) {
+void HUD::drawPlayfieldBorder(vec2 playfieldCenter, vec2 playfieldSize, float hitcircleDiameter, float borderSize) {
     if(borderSize <= 0.0f) return;
 
     vec2 playfieldBorderTopLeft =
         vec2((int)(playfieldCenter.x - playfieldSize.x / 2 - hitcircleDiameter / 2 - borderSize),
-                (int)(playfieldCenter.y - playfieldSize.y / 2 - hitcircleDiameter / 2 - borderSize));
+             (int)(playfieldCenter.y - playfieldSize.y / 2 - hitcircleDiameter / 2 - borderSize));
     vec2 playfieldBorderSize =
         vec2((int)(playfieldSize.x + hitcircleDiameter), (int)(playfieldSize.y + hitcircleDiameter));
 
@@ -1195,19 +1201,19 @@ void HUD::drawWarningArrows(float /*hitcircleDiameter*/) {
     const float part = GameRules::getPlayfieldSize().y * (1.0f / divider);
 
     g->setColor(0xffffffff);
-    this->drawWarningArrow(vec2(osu->getUIScale(28),
-                                   GameRules::getPlayfieldCenter().y - GameRules::getPlayfieldSize().y / 2 + part * 2),
-                           false);
+    this->drawWarningArrow(
+        vec2(osu->getUIScale(28), GameRules::getPlayfieldCenter().y - GameRules::getPlayfieldSize().y / 2 + part * 2),
+        false);
     this->drawWarningArrow(vec2(osu->getUIScale(28), GameRules::getPlayfieldCenter().y -
-                                                            GameRules::getPlayfieldSize().y / 2 + part * 2 + part * 13),
+                                                         GameRules::getPlayfieldSize().y / 2 + part * 2 + part * 13),
                            false);
 
     this->drawWarningArrow(vec2(osu->getScreenWidth() - osu->getUIScale(28),
-                                   GameRules::getPlayfieldCenter().y - GameRules::getPlayfieldSize().y / 2 + part * 2),
+                                GameRules::getPlayfieldCenter().y - GameRules::getPlayfieldSize().y / 2 + part * 2),
                            true);
     this->drawWarningArrow(
         vec2(osu->getScreenWidth() - osu->getUIScale(28),
-                GameRules::getPlayfieldCenter().y - GameRules::getPlayfieldSize().y / 2 + part * 2 + part * 13),
+             GameRules::getPlayfieldCenter().y - GameRules::getPlayfieldSize().y / 2 + part * 2 + part * 13),
         true);
 }
 
@@ -1453,10 +1459,10 @@ void HUD::drawHitErrorBar(Beatmap *beatmap) {
 
 void HUD::drawHitErrorBar(float hitWindow300, float hitWindow100, float hitWindow50, float hitWindowMiss, int ur) {
     const vec2 center = vec2(osu->getScreenWidth() / 2.0f,
-                                   osu->getScreenHeight() -
-                                       osu->getScreenHeight() * 2.15f * cv::hud_hiterrorbar_height_percent.getFloat() *
-                                           cv::hud_scale.getFloat() * cv::hud_hiterrorbar_scale.getFloat() -
-                                       osu->getScreenHeight() * cv::hud_hiterrorbar_offset_percent.getFloat());
+                             osu->getScreenHeight() -
+                                 osu->getScreenHeight() * 2.15f * cv::hud_hiterrorbar_height_percent.getFloat() *
+                                     cv::hud_scale.getFloat() * cv::hud_hiterrorbar_scale.getFloat() -
+                                 osu->getScreenHeight() * cv::hud_hiterrorbar_offset_percent.getFloat());
 
     if(cv::draw_hiterrorbar_bottom.getBool()) {
         g->pushTransform();
@@ -1476,7 +1482,7 @@ void HUD::drawHitErrorBar(float hitWindow300, float hitWindow100, float hitWindo
         {
             const vec2 localCenter =
                 vec2(center.x, osu->getScreenHeight() - center.y +
-                                      (osu->getScreenHeight() * cv::hud_hiterrorbar_offset_top_percent.getFloat()));
+                                   (osu->getScreenHeight() * cv::hud_hiterrorbar_offset_top_percent.getFloat()));
 
             g->scale(1, -1);
             // drawHitErrorBarInt2(localCenter, ur);
@@ -1491,8 +1497,8 @@ void HUD::drawHitErrorBar(float hitWindow300, float hitWindow100, float hitWindo
         {
             const vec2 localCenter =
                 vec2(osu->getScreenHeight() - center.y +
-                            (osu->getScreenWidth() * cv::hud_hiterrorbar_offset_left_percent.getFloat()),
-                        osu->getScreenHeight() / 2.0f);
+                         (osu->getScreenWidth() * cv::hud_hiterrorbar_offset_left_percent.getFloat()),
+                     osu->getScreenHeight() / 2.0f);
 
             g->rotate(90);
             // drawHitErrorBarInt2(localCenter, ur);
@@ -1507,8 +1513,8 @@ void HUD::drawHitErrorBar(float hitWindow300, float hitWindow100, float hitWindo
         {
             const vec2 localCenter =
                 vec2(osu->getScreenWidth() - (osu->getScreenHeight() - center.y) -
-                            (osu->getScreenWidth() * cv::hud_hiterrorbar_offset_right_percent.getFloat()),
-                        osu->getScreenHeight() / 2.0f);
+                         (osu->getScreenWidth() * cv::hud_hiterrorbar_offset_right_percent.getFloat()),
+                     osu->getScreenHeight() / 2.0f);
 
             g->scale(-1, 1);
             g->rotate(-90);
@@ -1543,11 +1549,11 @@ void HUD::drawHitErrorBarInt(float hitWindow300, float hitWindow100, float hitWi
                                  std::clamp<int>(cv::hud_hiterrorbar_entry_miss_b.getInt(), 0, 255));
 
     vec2 size = vec2(osu->getScreenWidth() * cv::hud_hiterrorbar_width_percent.getFloat(),
-                           osu->getScreenHeight() * cv::hud_hiterrorbar_height_percent.getFloat()) *
-                   cv::hud_scale.getFloat() * cv::hud_hiterrorbar_scale.getFloat();
+                     osu->getScreenHeight() * cv::hud_hiterrorbar_height_percent.getFloat()) *
+                cv::hud_scale.getFloat() * cv::hud_hiterrorbar_scale.getFloat();
     if(cv::hud_hiterrorbar_showmisswindow.getBool())
         size = vec2(osu->getScreenWidth() * cv::hud_hiterrorbar_width_percent_with_misswindow.getFloat(),
-                       osu->getScreenHeight() * cv::hud_hiterrorbar_height_percent.getFloat()) *
+                    osu->getScreenHeight() * cv::hud_hiterrorbar_height_percent.getFloat()) *
                cv::hud_scale.getFloat() * cv::hud_hiterrorbar_scale.getFloat();
 
     const vec2 center = vec2(0, 0);  // NOTE: moved to drawHitErrorBar()
@@ -1616,7 +1622,6 @@ void HUD::drawHitErrorBarInt(float hitWindow300, float hitWindow100, float hitWi
             }
 
             g->setColor(Color(barColor).setA(alphaEntry * fade));
-
 
             float missHeightMultiplier = 1.0f;
             if(this->hiterrors[i].miss) missHeightMultiplier = 1.5f;
@@ -1923,7 +1928,6 @@ void HUD::drawTargetHeatmap(float hitcircleDiameter) {
 
         g->setColor(Color(color).setA(std::clamp<float>((target.time - engine->getTime()) / 3.5f, 0.0f, 1.0f)));
 
-
         const float theta = glm::radians(target.angle);
         const float cs = std::cos(theta);
         const float sn = std::sin(theta);
@@ -1937,8 +1941,7 @@ void HUD::drawTargetHeatmap(float hitcircleDiameter) {
 
         // g->fillRect(center.x-size/2 - offset.x, center.y-size/2 - offset.y, size, size);
 
-        const float imageScale =
-            osu->getImageScaleToFitResolution(osu->getSkin()->getCircleFull(), vec2(size, size));
+        const float imageScale = osu->getImageScaleToFitResolution(osu->getSkin()->getCircleFull(), vec2(size, size));
         g->pushTransform();
         {
             g->scale(imageScale, imageScale);
@@ -1949,67 +1952,61 @@ void HUD::drawTargetHeatmap(float hitcircleDiameter) {
     }
 }
 
-void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmapLength,
-                                unsigned long beatmapLengthPlayable, unsigned long beatmapStartTimePlayable,
-                                float beatmapPercentFinishedPlayable, const std::vector<BREAK> &breaks) {
+void HUD::drawScrubbingTimeline(u32 beatmapTime, u32 beatmapLengthPlayable, u32 beatmapStartTimePlayable,
+                                f32 beatmapPercentFinishedPlayable, const std::vector<BREAK> &breaks) {
     static vec2 last_cursor_pos = mouse->getPos();
-    static double last_cursor_movement = engine->getTime();
+    static f64 last_cursor_movement = engine->getTime();
     vec2 new_cursor_pos = mouse->getPos();
-    double new_cursor_movement = engine->getTime();
+    f64 new_cursor_movement = engine->getTime();
     if(last_cursor_pos.x != new_cursor_pos.x || last_cursor_pos.y != new_cursor_pos.y) {
         last_cursor_pos = new_cursor_pos;
         last_cursor_movement = new_cursor_movement;
     }
 
     // Auto-hide scrubbing timeline when watching a replay
-    double galpha = 1.0f;
+    f64 galpha = 1.0f;
     if(osu->getSelectedBeatmap()->is_watching) {
-        double time_since_last_move = new_cursor_movement - (last_cursor_movement + 1.0f);
+        f64 time_since_last_move = new_cursor_movement - (last_cursor_movement + 1.0f);
         galpha = fmax(0.f, fmin(1.0f - time_since_last_move, 1.0f));
     }
 
-    const float dpiScale = Osu::getUIScale();
-
+    f32 dpiScale = Osu::getUIScale();
     vec2 cursorPos = mouse->getPos();
     cursorPos.y = osu->getScreenHeight() * 0.8;
 
-    const Color grey = 0xffbbbbbb;
-    const Color greyTransparent = 0xbbbbbbbb;
-    const Color greyDark = 0xff777777;
-    const Color green = 0xff00ff00;
+    Color grey = 0xffbbbbbb;
+    Color greyTransparent = 0xbbbbbbbb;
+    Color greyDark = 0xff777777;
+    Color green = 0xff00ff00;
 
     McFont *timeFont = osu->getSubTitleFont();
 
-    const float breakHeight = 15 * dpiScale;
-
-    const float currentTimeTopTextOffset = 7 * dpiScale;
-    const float currentTimeLeftRightTextOffset = 5 * dpiScale;
-    const float startAndEndTimeTextOffset = 5 * dpiScale + breakHeight;
-
-    const unsigned long lengthFullMS = beatmapLength;
-    const unsigned long lengthMS = beatmapLengthPlayable;
-    const unsigned long startTimeMS = beatmapStartTimePlayable;
-    const unsigned long endTimeMS = startTimeMS + lengthMS;
-    const unsigned long currentTimeMS = beatmapTime;
+    f32 breakHeight = 15 * dpiScale;
+    f32 currentTimeTopTextOffset = 7 * dpiScale;
+    f32 currentTimeLeftRightTextOffset = 5 * dpiScale;
+    f32 startAndEndTimeTextOffset = 5 * dpiScale + breakHeight;
+    u32 endTimeMS = beatmapStartTimePlayable + beatmapLengthPlayable;
+    if(endTimeMS == 0) return;
 
     // draw strain graph
     if(cv::draw_scrubbing_timeline_strain_graph.getBool()) {
-        const std::vector<double> &aimStrains = osu->getSelectedBeatmap()->aimStrains;
-        const std::vector<double> &speedStrains = osu->getSelectedBeatmap()->speedStrains;
-        const float speedMultiplier = osu->getSelectedBeatmap()->getSpeedMultiplier();
+        const std::vector<f64> &aimStrains = osu->getSelectedBeatmap()->aimStrains;
+        const std::vector<f64> &speedStrains = osu->getSelectedBeatmap()->speedStrains;
+        const f32 speedMultiplier = osu->getSelectedBeatmap()->getSpeedMultiplier();
 
+        u32 nb_strains = aimStrains.size();
         if(aimStrains.size() > 0 && aimStrains.size() == speedStrains.size()) {
-            const float strainStepMS = 400.0f * speedMultiplier;
+            f32 strainStepMS = 400.0f * speedMultiplier;
 
             // get highest strain values for normalization
-            double highestAimStrain = 0.0;
-            double highestSpeedStrain = 0.0;
-            double highestStrain = 0.0;
-            int highestStrainIndex = -1;
-            for(int i = 0; i < aimStrains.size(); i++) {
-                const double aimStrain = aimStrains[i];
-                const double speedStrain = speedStrains[i];
-                const double strain = aimStrain + speedStrain;
+            f64 highestAimStrain = 0.0;
+            f64 highestSpeedStrain = 0.0;
+            f64 highestStrain = 0.0;
+            i32 highestStrainIndex = -1;
+            for(i32 i = 0; i < aimStrains.size(); i++) {
+                f64 aimStrain = aimStrains[i];
+                f64 speedStrain = speedStrains[i];
+                f64 strain = aimStrain + speedStrain;
 
                 if(strain > highestStrain) {
                     highestStrain = strain;
@@ -2021,34 +2018,28 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
 
             // draw strain bar graph
             if(highestAimStrain > 0.0 && highestSpeedStrain > 0.0 && highestStrain > 0.0) {
-                const float msPerPixel =
-                    (float)lengthMS /
-                    (float)(osu->getScreenWidth() - (((float)startTimeMS / (float)endTimeMS)) * osu->getScreenWidth());
-                const float strainWidth = strainStepMS / msPerPixel;
-                const float strainHeightMultiplier = cv::hud_scrubbing_timeline_strains_height.getFloat() * dpiScale;
+                f32 offsetX = (f32)beatmapStartTimePlayable / (f32)endTimeMS * (f32)osu->getScreenWidth();
+                f32 drawable_area = (f32)osu->getScreenWidth() - offsetX;
+                f32 strainWidth = drawable_area / (f32)nb_strains;
+                f32 strainHeightMultiplier = cv::hud_scrubbing_timeline_strains_height.getFloat() * dpiScale;
 
-                const float offsetX =
-                    ((float)startTimeMS / (float)strainStepMS) * strainWidth;  // compensate for startTimeMS
-
-                const float alpha = cv::hud_scrubbing_timeline_strains_alpha.getFloat() * galpha;
-                const Color aimStrainColor =
-                    argb(alpha, cv::hud_scrubbing_timeline_strains_aim_color_r.getInt() / 255.0f,
-                         cv::hud_scrubbing_timeline_strains_aim_color_g.getInt() / 255.0f,
-                         cv::hud_scrubbing_timeline_strains_aim_color_b.getInt() / 255.0f);
-                const Color speedStrainColor =
-                    argb(alpha, cv::hud_scrubbing_timeline_strains_speed_color_r.getInt() / 255.0f,
-                         cv::hud_scrubbing_timeline_strains_speed_color_g.getInt() / 255.0f,
-                         cv::hud_scrubbing_timeline_strains_speed_color_b.getInt() / 255.0f);
+                f32 alpha = cv::hud_scrubbing_timeline_strains_alpha.getFloat() * galpha;
+                Color aimStrainColor = argb(alpha, cv::hud_scrubbing_timeline_strains_aim_color_r.getInt() / 255.0f,
+                                            cv::hud_scrubbing_timeline_strains_aim_color_g.getInt() / 255.0f,
+                                            cv::hud_scrubbing_timeline_strains_aim_color_b.getInt() / 255.0f);
+                Color speedStrainColor = argb(alpha, cv::hud_scrubbing_timeline_strains_speed_color_r.getInt() / 255.0f,
+                                              cv::hud_scrubbing_timeline_strains_speed_color_g.getInt() / 255.0f,
+                                              cv::hud_scrubbing_timeline_strains_speed_color_b.getInt() / 255.0f);
 
                 g->setDepthBuffer(true);
                 for(int i = 0; i < aimStrains.size(); i++) {
-                    const double aimStrain = (aimStrains[i]) / highestStrain;
-                    const double speedStrain = (speedStrains[i]) / highestStrain;
-                    // const double strain = (aimStrains[i] + speedStrains[i]) / highestStrain;
+                    f64 aimStrain = (aimStrains[i]) / highestStrain;
+                    f64 speedStrain = (speedStrains[i]) / highestStrain;
+                    // f64 strain = (aimStrains[i] + speedStrains[i]) / highestStrain;
 
-                    const double aimStrainHeight = aimStrain * strainHeightMultiplier;
-                    const double speedStrainHeight = speedStrain * strainHeightMultiplier;
-                    // const double strainHeight = strain * strainHeightMultiplier;
+                    f64 aimStrainHeight = aimStrain * strainHeightMultiplier;
+                    f64 speedStrainHeight = speedStrain * strainHeightMultiplier;
+                    // f64 strainHeight = strain * strainHeightMultiplier;
 
                     g->setColor(aimStrainColor);
                     g->fillRect(i * strainWidth + offsetX, cursorPos.y - aimStrainHeight,
@@ -2062,18 +2053,18 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
 
                 // highlight highest total strain value (+- section block)
                 if(highestStrainIndex > -1) {
-                    const double aimStrain = (aimStrains[highestStrainIndex]) / highestStrain;
-                    const double speedStrain = (speedStrains[highestStrainIndex]) / highestStrain;
-                    // const double strain = (aimStrains[i] + speedStrains[i]) / highestStrain;
+                    f64 aimStrain = (aimStrains[highestStrainIndex]) / highestStrain;
+                    f64 speedStrain = (speedStrains[highestStrainIndex]) / highestStrain;
+                    // f64 strain = (aimStrains[i] + speedStrains[i]) / highestStrain;
 
-                    const double aimStrainHeight = aimStrain * strainHeightMultiplier;
-                    const double speedStrainHeight = speedStrain * strainHeightMultiplier;
-                    // const double strainHeight = strain * strainHeightMultiplier;
+                    f64 aimStrainHeight = aimStrain * strainHeightMultiplier;
+                    f64 speedStrainHeight = speedStrain * strainHeightMultiplier;
+                    // f64 strainHeight = strain * strainHeightMultiplier;
 
                     vec2 topLeftCenter = vec2(highestStrainIndex * strainWidth + offsetX + strainWidth / 2.0f,
-                                                    cursorPos.y - aimStrainHeight - speedStrainHeight);
+                                              cursorPos.y - aimStrainHeight - speedStrainHeight);
 
-                    const float margin = 5.0f * dpiScale;
+                    f32 margin = 5.0f * dpiScale;
 
                     g->setColor(Color(0xffffffff).setA(alpha));
 
@@ -2089,8 +2080,8 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
     g->setColor(Color(greyTransparent).setA(galpha));
 
     for(auto i : breaks) {
-        const int width =
-            std::max((int)(osu->getScreenWidth() * std::clamp<float>(i.endPercent - i.startPercent, 0.0f, 1.0f)), 2);
+        i32 width =
+            std::max((i32)(osu->getScreenWidth() * std::clamp<f32>(i.endPercent - i.startPercent, 0.0f, 1.0f)), 2);
         g->fillRect(osu->getScreenWidth() * i.startPercent, cursorPos.y + 1, width, breakHeight);
     }
 
@@ -2118,11 +2109,11 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
     g->popTransform();
 
     // current time text
-    UString currentTimeText = UString::format("%i:%02i", (currentTimeMS / 1000) / 60, (currentTimeMS / 1000) % 60);
+    UString currentTimeText = UString::format("%i:%02i", (beatmapTime / 1000) / 60, (beatmapTime / 1000) % 60);
     g->pushTransform();
     {
         g->translate(
-            std::clamp<float>(
+            std::clamp<f32>(
                 triangleTip.x - timeFont->getStringWidth(currentTimeText) / 2.0f, currentTimeLeftRightTextOffset,
                 osu->getScreenWidth() - timeFont->getStringWidth(currentTimeText) - currentTimeLeftRightTextOffset) +
                 1,
@@ -2138,11 +2129,12 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
     g->popTransform();
 
     // start time text
-    UString startTimeText = UString::format("(%i:%02i)", (startTimeMS / 1000) / 60, (startTimeMS / 1000) % 60);
+    UString startTimeText =
+        UString::format("(%i:%02i)", (beatmapStartTimePlayable / 1000) / 60, (beatmapStartTimePlayable / 1000) % 60);
     g->pushTransform();
     {
-        g->translate((int)(startAndEndTimeTextOffset + 1),
-                     (int)(triangleTip.y + startAndEndTimeTextOffset + timeFont->getHeight() + 1));
+        g->translate((i32)(startAndEndTimeTextOffset + 1),
+                     (i32)(triangleTip.y + startAndEndTimeTextOffset + timeFont->getHeight() + 1));
         g->setColor(Color(0xff000000).setA(galpha));
 
         g->drawString(timeFont, startTimeText);
@@ -2158,8 +2150,8 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
     g->pushTransform();
     {
         g->translate(
-            (int)(osu->getScreenWidth() - timeFont->getStringWidth(endTimeText) - startAndEndTimeTextOffset + 1),
-            (int)(triangleTip.y + startAndEndTimeTextOffset + timeFont->getHeight() + 1));
+            (i32)(osu->getScreenWidth() - timeFont->getStringWidth(endTimeText) - startAndEndTimeTextOffset + 1),
+            (i32)(triangleTip.y + startAndEndTimeTextOffset + timeFont->getHeight() + 1));
         g->setColor(Color(0xff000000).setA(galpha));
 
         g->drawString(timeFont, endTimeText);
@@ -2172,9 +2164,8 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
 
     // quicksave time triangle & text
     if(osu->getQuickSaveTime() != 0.0f) {
-        const float quickSaveTimeToPlayablePercent =
-            std::clamp<float>(((lengthFullMS * osu->getQuickSaveTime())) / (float)endTimeMS, 0.0f, 1.0f);
-        triangleTip = vec2(osu->getScreenWidth() * quickSaveTimeToPlayablePercent, cursorPos.y);
+        f32 quickSavePercent = std::clamp<f32>(osu->getQuickSaveTime() / (f32)endTimeMS, 0.f, 1.f);
+        triangleTip = vec2(osu->getScreenWidth() * quickSavePercent, cursorPos.y);
         g->pushTransform();
         {
             g->rotate(180);
@@ -2190,16 +2181,16 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
         g->popTransform();
 
         // end time text
-        const unsigned long quickSaveTimeMS = lengthFullMS * osu->getQuickSaveTime();
+        u32 quickSaveTimeMS = osu->getQuickSaveTime();
         UString endTimeText = UString::format("%i:%02i", (quickSaveTimeMS / 1000) / 60, (quickSaveTimeMS / 1000) % 60);
         g->pushTransform();
         {
-            g->translate((int)(std::clamp<float>(triangleTip.x - timeFont->getStringWidth(currentTimeText) / 2.0f,
-                                                 currentTimeLeftRightTextOffset,
-                                                 osu->getScreenWidth() - timeFont->getStringWidth(currentTimeText) -
-                                                     currentTimeLeftRightTextOffset) +
+            g->translate((i32)(std::clamp<f32>(triangleTip.x - timeFont->getStringWidth(currentTimeText) / 2.0f,
+                                               currentTimeLeftRightTextOffset,
+                                               osu->getScreenWidth() - timeFont->getStringWidth(currentTimeText) -
+                                                   currentTimeLeftRightTextOffset) +
                                1),
-                         (int)(triangleTip.y + startAndEndTimeTextOffset + timeFont->getHeight() * 2.2f + 1 +
+                         (i32)(triangleTip.y + startAndEndTimeTextOffset + timeFont->getHeight() * 2.2f + 1 +
                                currentTimeTopTextOffset *
                                    std::max(1.0f, this->getCursorScaleFactor() * cv::cursor_scale.getFloat()) *
                                    cv::hud_scrubbing_timeline_hover_tooltip_offset_multiplier.getFloat()));
@@ -2215,18 +2206,17 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
     }
 
     // current time hover text
-    const unsigned long hoverTimeMS =
-        std::clamp<float>((cursorPos.x / (float)osu->getScreenWidth()), 0.0f, 1.0f) * endTimeMS;
+    u32 hoverTimeMS = std::clamp<f32>((cursorPos.x / (f32)osu->getScreenWidth()), 0.0f, 1.0f) * endTimeMS;
     UString hoverTimeText = UString::format("%i:%02i", (hoverTimeMS / 1000) / 60, (hoverTimeMS / 1000) % 60);
     triangleTip = vec2(cursorPos.x, cursorPos.y);
     g->pushTransform();
     {
         g->translate(
-            (int)std::clamp<float>(
+            (i32)std::clamp<f32>(
                 triangleTip.x - timeFont->getStringWidth(currentTimeText) / 2.0f, currentTimeLeftRightTextOffset,
                 osu->getScreenWidth() - timeFont->getStringWidth(currentTimeText) - currentTimeLeftRightTextOffset) +
                 1,
-            (int)(triangleTip.y - osu->getSkin()->getSeekTriangle()->getHeight() - timeFont->getHeight() * 1.2f -
+            (i32)(triangleTip.y - osu->getSkin()->getSeekTriangle()->getHeight() - timeFont->getHeight() * 1.2f -
                   currentTimeTopTextOffset *
                       std::max(1.0f, this->getCursorScaleFactor() * cv::cursor_scale.getFloat()) *
                       cv::hud_scrubbing_timeline_hover_tooltip_offset_multiplier.getFloat() * 2.0f -

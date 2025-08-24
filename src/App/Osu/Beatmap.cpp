@@ -61,7 +61,6 @@ Beatmap::Beatmap() {
     this->fShouldFlashSectionFail = 0.0f;
     this->bContinueScheduled = false;
     this->iContinueMusicPos = 0;
-    this->fWaitTime = 0.0f;
 
     this->selectedDifficulty2 = nullptr;
 
@@ -71,9 +70,6 @@ Beatmap::Beatmap() {
     this->iCurMusicPos = 0;
     this->iCurMusicPosWithOffsets = 0;
     this->bWasSeekFrame = false;
-    this->fInterpolatedMusicPos = 0.0;
-    this->fLastAudioTimeAccurateSet = 0.0;
-    this->fLastRealTimeForInterpolationDelta = 0.0;
     this->iResourceLoadUpdateDelayHack = 0;
     this->bForceStreamPlayback = true;  // if this is set to true here, then the music will always be loaded as a stream
                                         // (meaning slow disk access could cause audio stalling/stuttering)
@@ -472,7 +468,7 @@ bool Beatmap::play() {
     return false;
 }
 
-bool Beatmap::watch(FinishedScore score, f64 start_percent) {
+bool Beatmap::watch(FinishedScore score, u32 start_ms) {
     SAFE_DELETE(sim);
     if(score.replay.size() < 3) {
         // Replay is invalid
@@ -501,9 +497,9 @@ bool Beatmap::watch(FinishedScore score, f64 start_percent) {
 
     osu->songBrowser2->setVisible(false);
 
-    // Don't seek to 0%, since it feels really bad to start immediately
-    if(start_percent > 0.f) {
-        this->seekPercent(start_percent);
+    // Don't seek to beginning, since that would skip waiting time
+    if(start_ms > 0) {
+        this->seekMS(start_ms);
     }
 
     this->sim = new SimulatedBeatmap(this->selectedDifficulty2, score.mods);
@@ -664,8 +660,6 @@ bool Beatmap::start() {
     // for drawing, if multiple hitobjects occupy the exact same time (duration) then they get drawn on top of the
     // active hitobject
     this->hitobjectsSortedByEndTime = this->hitobjects;
-
-    // sort hitobjects by endtime
     std::ranges::sort(this->hitobjectsSortedByEndTime, Beatmap::sortHitObjectByEndTimeComp);
 
     // after the hitobjects have been loaded we can calculate the stacks
@@ -797,8 +791,6 @@ void Beatmap::pause(bool quitIfWaiting) {
         stop_spectating();
         return;
     }
-
-    // TODO: handle sliderslide sound pause/unpause
 
     const bool isFirstPause = !this->bContinueScheduled;
 
@@ -1003,13 +995,13 @@ void Beatmap::setSpeed(f32 speed) {
     if(this->music != nullptr) this->music->setSpeed(speed);
 }
 
-void Beatmap::seekPercent(f64 percent) {
+void Beatmap::seekMS(u32 ms) {
     if(this->selectedDifficulty2 == nullptr || this->music == nullptr || this->bFailed) return;
 
     this->bWasSeekFrame = true;
     this->fWaitTime = 0.0f;
 
-    u32 ms = this->music->setPosition(percent);
+    this->music->setPositionMS(ms);
     this->music->setVolume(this->getIdealVolume());
     this->music->setSpeed(this->getSpeedMultiplier());
 
@@ -1044,27 +1036,11 @@ void Beatmap::seekPercent(f64 percent) {
     }
 
     if(!this->is_watching && !bancho->spectating) {  // score submission already disabled when watching replay
-        debugLog("Disabling score submission due to seeking\n");
-        this->vanilla = false;
+        if(this->vanilla) {
+            debugLog("Disabling score submission due to seeking\n");
+            this->vanilla = false;
+        }
     }
-}
-
-void Beatmap::seekPercentPlayable(f64 percent) {
-    if(this->selectedDifficulty2 == nullptr || (!this->bIsPlaying && !this->bIsPaused) || this->music == nullptr ||
-       this->bFailed)
-        return;
-
-    this->bWasSeekFrame = true;
-    this->fWaitTime = 0.0f;
-
-    f64 actualPlayPercent = percent;
-    if(this->hitobjects.size() > 0)
-        actualPlayPercent = (((f64)this->hitobjects[this->hitobjects.size() - 1]->click_time +
-                              (f64)this->hitobjects[this->hitobjects.size() - 1]->duration) *
-                             percent) /
-                            (f64)this->music->getLengthMS();
-
-    this->seekPercent(actualPlayPercent);
 }
 
 u32 Beatmap::getTime() const {
@@ -1100,21 +1076,28 @@ u32 Beatmap::getLengthPlayable() const {
 }
 
 f32 Beatmap::getPercentFinished() const {
-    if(this->music != nullptr)
-        return (f32)this->iCurMusicPos / (f32)this->music->getLengthMS();
-    else
-        return 0.0f;
+    f32 length = this->getLength();
+    if(length <= 0.f) return 0.f;
+
+    return (f32)this->getTime() / length;
 }
 
 f32 Beatmap::getPercentFinishedPlayable() const {
-    if(this->bIsWaiting)
-        return 1.0f - (this->fWaitTime - engine->getTimeReal()) / (cv::early_note_time.getFloat() / 1000.0f);
+    if(this->bIsWaiting) {
+        // this->fWaitTime is set to the time when the wait time ENDS
+        f32 wait_duration = (cv::early_note_time.getFloat() / 1000.f);
+        if(wait_duration <= 0.f) return 0.f;
 
-    if(this->hitobjects.size() > 0)
-        return (f32)this->iCurMusicPos / ((f32)this->hitobjects[this->hitobjects.size() - 1]->click_time +
-                                          (f32)this->hitobjects[this->hitobjects.size() - 1]->duration);
-    else
-        return (f32)this->iCurMusicPos / (f32)this->music->getLengthMS();
+        f32 wait_start = this->fWaitTime - wait_duration;
+        f32 wait_percent = (engine->getTimeReal() - wait_start) / wait_duration;
+        return std::clamp(wait_percent, 0.f, 1.f);
+    } else {
+        f32 length_playable = this->getLengthPlayable();
+        if(length_playable <= 0.f) return 0.f;
+
+        f32 time_since_first_object = (f32)this->getTime() - (f32)this->getStartTimePlayable();
+        return std::clamp(time_since_first_object / length_playable, 0.f, 1.f);
+    }
 }
 
 int Beatmap::getMostCommonBPM() const {
@@ -1514,15 +1497,15 @@ void Beatmap::handlePreviewPlay() {
             should_start_song_at_preview_point = false;
 
             if(start_at_song_beginning) {
-                this->music->setPositionMS_fast(0);
+                this->music->setPositionMS(0);
                 this->bWasSeekFrame = true;
             } else if(this->iContinueMusicPos != 0) {
-                this->music->setPositionMS_fast(this->iContinueMusicPos);
+                this->music->setPositionMS(this->iContinueMusicPos);
                 this->bWasSeekFrame = true;
             } else {
-                this->music->setPositionMS_fast(this->selectedDifficulty2->getPreviewTime() < 0
-                                                    ? (u32)(this->music->getLengthMS() * 0.40f)
-                                                    : this->selectedDifficulty2->getPreviewTime());
+                this->music->setPositionMS(this->selectedDifficulty2->getPreviewTime() < 0
+                                               ? (u32)(this->music->getLengthMS() * 0.40f)
+                                               : this->selectedDifficulty2->getPreviewTime());
                 this->bWasSeekFrame = true;
             }
 
@@ -1566,11 +1549,11 @@ void Beatmap::unloadObjects() {
     for(auto &hitobject : this->hitobjects) {
         delete hitobject;
     }
-    this->hitobjects = std::vector<HitObject *>();
-    this->hitobjectsSortedByEndTime = std::vector<HitObject *>();
-    this->misaimObjects = std::vector<HitObject *>();
-    this->breaks = std::vector<DatabaseBeatmap::BREAK>();
-    this->clicks = std::vector<Click>();
+    this->hitobjects.clear();
+    this->hitobjectsSortedByEndTime.clear();
+    this->misaimObjects.clear();
+    this->breaks.clear();
+    this->clicks.clear();
 }
 
 void Beatmap::resetHitObjects(long curPos) {
@@ -1926,30 +1909,16 @@ void Beatmap::drawHitObjects() {
     const bool usePVS = cv::pvs.getBool();
 
     if(!cv::mod_mafham.getBool()) {
-        if(!cv::draw_reverse_order.getBool()) {
-            for(auto &obj : this->hitobjectsSortedByEndTime | std::views::reverse) {
-                // PVS optimization (reversed)
-                if(usePVS) {
-                    if(obj->isFinished() && (curPos - pvs > obj->click_time + obj->duration))  // past objects
-                        break;
-                    if(obj->click_time > curPos + pvs)  // future objects
-                        continue;
-                }
-
-                obj->draw();
+        for(auto &obj : this->hitobjectsSortedByEndTime | std::views::reverse) {
+            // PVS optimization (reversed)
+            if(usePVS) {
+                if(obj->isFinished() && (curPos - pvs > obj->click_time + obj->duration))  // past objects
+                    break;
+                if(obj->click_time > curPos + pvs)  // future objects
+                    continue;
             }
-        } else {
-            for(auto &obj : this->hitobjectsSortedByEndTime) {
-                // PVS optimization
-                if(usePVS) {
-                    if(obj->isFinished() && (curPos - pvs > obj->click_time + obj->duration))  // past objects
-                        continue;
-                    if(obj->click_time > curPos + pvs)  // future objects
-                        break;
-                }
 
-                obj->draw();
-            }
+            obj->draw();
         }
         for(auto &obj : this->hitobjectsSortedByEndTime) {
             // NOTE: to fix mayday simultaneous sliders with increasing endtime getting culled here, would have to
@@ -2291,7 +2260,7 @@ void Beatmap::update2() {
     }
 
     // update current music position (this variable does not include any offsets!)
-    this->iCurMusicPos = this->isActuallyLoading() ? 0 : this->music->getPositionMS();
+    this->iCurMusicPos = this->isActuallyLoading() ? -1000 : this->music->getPositionMS();
     this->iContinueMusicPos = this->music->getPositionMS();
     const bool wasSeekFrame = this->bWasSeekFrame;
     this->bWasSeekFrame = false;
@@ -2446,11 +2415,14 @@ void Beatmap::update2() {
     }
 
     // update timing (points)
-    this->iCurMusicPosWithOffsets =
-        this->iCurMusicPos + (long)(cv::universal_offset.getFloat() * this->getSpeedMultiplier()) +
-        cv::universal_offset_hardcoded.getInt() - this->selectedDifficulty2->getLocalOffset() -
-        this->selectedDifficulty2->getOnlineOffset() -
-        (this->selectedDifficulty2->getVersion() < 5 ? cv::old_beatmap_offset.getInt() : 0);
+    this->iCurMusicPosWithOffsets = this->iCurMusicPos;
+    this->iCurMusicPosWithOffsets += (i32)(cv::universal_offset.getFloat() * this->getSpeedMultiplier());
+    this->iCurMusicPosWithOffsets += cv::universal_offset_hardcoded.getInt();
+    this->iCurMusicPosWithOffsets -= this->selectedDifficulty2->getLocalOffset();
+    this->iCurMusicPosWithOffsets -= this->selectedDifficulty2->getOnlineOffset();
+    if(this->selectedDifficulty2->getVersion() < 5) {
+        this->iCurMusicPosWithOffsets -= cv::old_beatmap_offset.getInt();
+    }
 
     if(this->iCurMusicPosWithOffsets >= 0) {
         this->current_timing_point = this->selectedDifficulty2->getTimingInfoForTime(this->iCurMusicPosWithOffsets);
@@ -2460,10 +2432,9 @@ void Beatmap::update2() {
     if(bancho->spectating) {
         if(this->iCurMusicPos + (2 * cv::spec_buffer.getInt()) < this->last_frame_ms) {
             i32 target = this->last_frame_ms - cv::spec_buffer.getInt();
-            f32 percent = (f32)target / (f32)this->getLength();
             debugLog("We're {:d}ms behind, seeking to catch up to player...\n",
                      this->last_frame_ms - this->iCurMusicPos);
-            this->seekPercent(percent);
+            this->seekMS(std::max(0, target));
             return;
         }
     }
@@ -3173,11 +3144,11 @@ void Beatmap::write_frame() {
         .time = (i32)this->iCurMusicPos,  // NOTE: might be incorrect
     });
 
-    this->last_event_time = this->fLastRealTimeForInterpolationDelta;
+    this->last_event_time = engine->getTime();
     this->last_event_ms = this->iCurMusicPosWithOffsets;
     this->last_keys = this->current_keys;
 
-    if(!bancho->spectators.empty() && engine->getTime() > this->last_spectator_broadcast + 1.0) {
+    if(!bancho->spectators.empty() && last_event_time > this->last_spectator_broadcast + 1.0) {
         this->broadcast_spectator_frames();
     }
 }

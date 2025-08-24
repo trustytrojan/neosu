@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "Sound.h"
 #ifdef MCENGINE_FEATURE_BASS
 #include "BassManager.h"
@@ -22,9 +21,7 @@ class BassSound final : public Sound {
     BassSound(const BassSound &) = delete;
     BassSound(BassSound &&) = delete;
 
-    u32 setPosition(f64 percent) override;
-    void setPositionMS(unsigned long ms) override;
-    void setPositionMS_fast(u32 ms) override;
+    void setPositionMS(u32 ms) override;
 
     void setVolume(float volume) override;
     void setSpeed(float speed) override;

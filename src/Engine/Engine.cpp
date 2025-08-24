@@ -51,8 +51,6 @@ Engine::Engine() {
 
     // timing
     this->timer = new Timer();
-    this->dTime = 0;
-    this->dRunTime = 0;
     this->iFrameCount = 0;
     this->iVsyncFrameCount = 0;
     this->fVsyncFrameCounterTime = 0.0f;
@@ -309,8 +307,6 @@ void Engine::onUpdate() {
         // update time
         {
             this->timer->update();
-            this->dRunTime = this->timer->getElapsedTime();
-            this->dTime += this->dFrameTime;
             if(cv::engine_throttle.getBool()) {
                 // it's more like a crude estimate but it gets the job done for use as a throttle
                 if((this->fVsyncFrameCounterTime += static_cast<float>(this->dFrameTime)) >
@@ -574,6 +570,8 @@ void Engine::onEngineThrottleChanged(float newVal) {
         this->iVsyncFrameCount = 0;
     }
 }
+
+double Engine::getTime() { return this->timer->getElapsedTime(); }
 
 double Engine::getTimeReal() {
     this->timer->update();

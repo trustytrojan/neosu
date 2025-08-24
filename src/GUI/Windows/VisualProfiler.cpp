@@ -13,7 +13,7 @@
 #include "ResourceManager.h"
 #include "SoundEngine.h"
 
-VisualProfiler* vprof = nullptr;
+VisualProfiler *vprof = nullptr;
 
 VisualProfiler::VisualProfiler() : CBaseUIElement(0, 0, 0, 0, "") {
     vprof = this;
@@ -95,8 +95,6 @@ void VisualProfiler::draw() {
                     textScale = std::round(env->getDPIScale() + 0.255f);
 
                     const double time = engine->getTime();
-                    const double timeRunning = engine->getTimeRunning();
-                    const double dilation = (timeRunning - time);
                     const vec2 envMousePos = env->getMousePos();
 
                     addTextLine(UString::format("ConVars: %zu", convar->getConVarArray().size()), textFont,
@@ -122,8 +120,6 @@ void VisualProfiler::draw() {
                                 this->textLines);
                     addTextLine(UString::format("Frame: %lu", engine->getFrameCount()), textFont, this->textLines);
                     addTextLine(UString::format("Time: %f", time), textFont, this->textLines);
-                    addTextLine(UString::format("Realtime: %f", timeRunning), textFont, this->textLines);
-                    addTextLine(UString::format("Time Dilation: %f", dilation), textFont, this->textLines);
                 } break;
 
                 case INFO_BLADE_DISPLAY_MODE::INFO_BLADE_DISPLAY_MODE_APP_INFO: {
@@ -561,7 +557,7 @@ void VisualProfiler::mouse_update(bool *propagate_clicks) {
 
 void VisualProfiler::incrementInfoBladeDisplayMode() {
     cv::vprof_display_mode.setValue((cv::vprof_display_mode.getInt() + 1) %
-                                   INFO_BLADE_DISPLAY_MODE::INFO_BLADE_DISPLAY_MODE_COUNT);
+                                    INFO_BLADE_DISPLAY_MODE::INFO_BLADE_DISPLAY_MODE_COUNT);
 }
 
 void VisualProfiler::decrementInfoBladeDisplayMode() {

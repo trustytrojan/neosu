@@ -115,8 +115,7 @@ void SoLoudSound::destroy() {
 
     // stop the sound if it's playing
     if(this->handle != 0) {
-        if (soloud)
-            soloud->stop(this->handle);
+        if(soloud) soloud->stop(this->handle);
         this->handle = 0;
     }
 
@@ -142,29 +141,7 @@ void SoLoudSound::destroy() {
     this->bAsyncReady = false;
 }
 
-u32 SoLoudSound::setPosition(f64 percent) {
-    if(!this->bReady || !this->audioSource || !this->handle) return 0;
-
-    percent = std::clamp<double>(percent, 0.0, 1.0);
-
-    // calculate position based on the ORIGINAL timeline
-    const double streamLengthInSeconds = getSourceLengthInSeconds();
-    double positionInSeconds = streamLengthInSeconds * percent;
-
-    if(cv::debug_snd.getBool())
-        debugLog("seeking to {:.2f} percent (position: {}ms, length: {}ms)\n", percent,
-                 static_cast<unsigned long>(positionInSeconds * 1000),
-                 static_cast<unsigned long>(streamLengthInSeconds * 1000));
-
-    // seek
-    soloud->seek(this->handle, positionInSeconds);
-
-    // reset position interp vars
-    this->interpolator.reset(getStreamPositionInSeconds() / 1000.0, Timing::getTimeReal(), getSpeed());
-    return static_cast<u32>(positionInSeconds * 1000);
-}
-
-void SoLoudSound::setPositionMS(unsigned long ms) {
+void SoLoudSound::setPositionMS(u32 ms) {
     if(!this->bReady || !this->audioSource || !this->handle) return;
 
     auto msD = static_cast<double>(ms);

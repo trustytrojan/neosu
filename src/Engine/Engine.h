@@ -84,9 +84,8 @@ class Engine final : public KeyboardListener {
 
     // vars
     void setFrameTime(double delta);
-    [[nodiscard]] constexpr double getTime() const { return this->dTime; }
-    double getTimeReal();
-    [[nodiscard]] constexpr double getTimeRunning() const { return this->dRunTime; }
+    [[nodiscard]] double getTime();
+    [[nodiscard]] double getTimeReal();
     [[nodiscard]] constexpr double getFrameTime() const { return this->dFrameTime; }
     [[nodiscard]] constexpr unsigned long getFrameCount() const { return this->iFrameCount; }
 
@@ -113,8 +112,6 @@ class Engine final : public KeyboardListener {
 
     // timing
     Timer *timer;
-    double dTime;
-    double dRunTime;
     unsigned long iFrameCount;
     double dFrameTime;
     // this will wrap quickly, and that's fine, it should be used as a dividend in a modular expression anyways

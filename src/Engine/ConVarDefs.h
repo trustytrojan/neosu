@@ -388,7 +388,6 @@ CONVAR(draw_numbers, "draw_numbers", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(draw_playfield_border, "draw_playfield_border", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(draw_progressbar, "draw_progressbar", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(draw_rankingscreen_background_image, "draw_rankingscreen_background_image", true, FCVAR_BANCHO_COMPATIBLE);
-CONVAR(draw_reverse_order, "draw_reverse_order", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(draw_score, "draw_score", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(draw_scorebar, "draw_scorebar", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(draw_scorebarbg, "draw_scorebarbg", true, FCVAR_BANCHO_COMPATIBLE);
@@ -718,6 +717,8 @@ CONVAR(instafade, "instafade", false, FCVAR_BANCHO_COMPATIBLE, "don't draw hitci
 CONVAR(instafade_sliders, "instafade_sliders", false, FCVAR_BANCHO_COMPATIBLE, "don't draw slider fadeout animations");
 CONVAR(instant_replay_duration, "instant_replay_duration", 15.f, FCVAR_BANCHO_COMPATIBLE,
        "instant replay (F2) duration, in seconds");
+CONVAR(interpolate_music_pos, "interpolate_music_pos", true, FCVAR_BANCHO_COMPATIBLE,
+       "interpolate song position with engine time");
 CONVAR(letterboxing, "letterboxing", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(letterboxing_offset_x, "letterboxing_offset_x", 0.0f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(letterboxing_offset_y, "letterboxing_offset_y", 0.0f, FCVAR_BANCHO_COMPATIBLE);

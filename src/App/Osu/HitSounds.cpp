@@ -35,6 +35,9 @@ void HitSamples::play(f32 pan, i32 delta, bool is_sliderslide) {
     auto beatmap = osu->getSelectedBeatmap();
     if(!beatmap) return;
 
+    // Don't play hitsounds when seeking
+    if(beatmap->bWasSeekFrame) return;
+
     if(!cv::sound_panning.getBool() || (cv::mod_fposu.getBool() && !cv::mod_fposu_sound_panning.getBool()) ||
        (cv::mod_fps.getBool() && !cv::mod_fps_sound_panning.getBool())) {
         pan = 0.0f;

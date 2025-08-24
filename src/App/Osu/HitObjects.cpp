@@ -1476,10 +1476,14 @@ void Slider::draw2(bool drawApproachCircle, bool drawOnlyApproachCircle) {
     // draw followcircle
     // HACKHACK: this is not entirely correct (due to m_bHeldTillEnd, if held within 300 range but then released, will
     // flash followcircle at the end)
-    if((this->bVisible && this->bCursorInside &&
-        (this->isClickHeldSlider() || (this->bm->getModsLegacy() & LegacyFlags::Autoplay) ||
-         (this->bm->getModsLegacy() & LegacyFlags::Relax))) ||
-       (this->bFinished && this->fFollowCircleAnimationAlpha > 0.0f && this->bHeldTillEnd)) {
+    bool is_holding_click = this->isClickHeldSlider();
+    is_holding_click |= ModMasks::legacy_eq(this->bm->getModsLegacy(), LegacyFlags::Autoplay);
+    is_holding_click |= ModMasks::legacy_eq(this->bm->getModsLegacy(), LegacyFlags::Relax);
+
+    bool should_draw_followcircle = (this->bVisible && this->bCursorInside && is_holding_click);
+    should_draw_followcircle |= (this->bFinished && this->fFollowCircleAnimationAlpha > 0.0f && this->bHeldTillEnd);
+
+    if(should_draw_followcircle) {
         vec2 point = this->bm->osuCoords2Pixels(this->vCurPointRaw);
 
         // HACKHACK: this is shit
@@ -1944,11 +1948,13 @@ void Slider::update(long curPos, f64 frame_time) {
         }
 
         // handle sliderslide sound
+        // TODO @kiwec: move this to draw()
         if(this->bm != nullptr) {
             bool sliding = this->bStartFinished && !this->bEndFinished && this->bCursorInside && this->iDelta <= 0;
             sliding &= (this->isClickHeldSlider() || (this->bm->getModsLegacy() & LegacyFlags::Autoplay) ||
                         (this->bm->getModsLegacy() & LegacyFlags::Relax));
             sliding &= !this->bm->isPaused() && !this->bm->isWaiting() && this->bm->isPlaying();
+            sliding &= !this->bm->bWasSeekFrame;
 
             if(sliding) {
                 const vec2 osuCoords = this->bm->pixels2OsuCoords(this->bm->osuCoords2Pixels(this->vCurPointRaw));
@@ -2871,7 +2877,7 @@ void Spinner::rotate(float rad) {
     if(std::floor(newRotations / 360.0f) > this->fRotations / 360.0f) {
         if((int)(newRotations / 360.0f) > (int)(this->fRotationsNeeded) + 1) {
             // extra rotations and bonus sound
-            if(this->bm != nullptr) {
+            if(this->bm != nullptr && !this->bm->bWasSeekFrame) {
                 this->bm->getSkin()->playSpinnerBonusSound();
             }
             this->bi->addHitResult(this, LiveScore::HIT::HIT_SPINNERBONUS, 0, false, true, true, true, true,
@@ -2890,7 +2896,7 @@ void Spinner::rotate(float rad) {
     }
 
     // spinner sound
-    if(this->bm != nullptr) {
+    if(this->bm != nullptr && !this->bm->bWasSeekFrame) {
         this->bm->getSkin()->playSpinnerSpinSound();
 
         const float frequency = 20000.0f + (int)(std::clamp<float>(this->fRatio, 0.0f, 2.5f) * 40000.0f);

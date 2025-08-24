@@ -3,8 +3,12 @@
 #include <algorithm>
 #include <cmath>
 
+#include "ConVar.h"
+
 u32 PlaybackInterpolator::update(f64 rawPositionMS, f64 currentTime, f64 playbackSpeed, bool isLooped, u64 lengthMS,
                                  bool isPlaying) {
+    if(!cv::interpolate_music_pos.getBool()) return rawPositionMS;
+
     // reset state if not initialized or not playing
     if(this->dLastPositionTime <= 0.0 || !isPlaying) {
         reset(rawPositionMS, currentTime, playbackSpeed);

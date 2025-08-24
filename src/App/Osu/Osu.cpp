@@ -417,7 +417,7 @@ void Osu::draw() {
 
         if(isFPoSu) this->playfieldBuffer->enable();
 
-        this->getSelectedBeatmap()->draw();
+        beatmap->draw();
 
         auto actual_flashlight_enabled = cv::mod_actual_flashlight.getBool();
         if(cv::mod_flashlight.getBool() || actual_flashlight_enabled) {
@@ -449,7 +449,7 @@ void Osu::draw() {
             if(cv::mod_flashlight.getBool()) {
                 // Dim screen when holding a slider
                 float opacity = 1.f;
-                if(this->getSelectedBeatmap()->holding_slider && !cv::avoid_flashes.getBool()) {
+                if(beatmap->holding_slider && !cv::avoid_flashes.getBool()) {
                     opacity = 0.2f;
                 }
 
@@ -467,7 +467,7 @@ void Osu::draw() {
             if(actual_flashlight_enabled) {
                 // Brighten screen when holding a slider
                 float opacity = 1.f;
-                if(this->getSelectedBeatmap()->holding_slider && !cv::avoid_flashes.getBool()) {
+                if(beatmap->holding_slider && !cv::avoid_flashes.getBool()) {
                     opacity = 0.8f;
                 }
 
@@ -511,8 +511,7 @@ void Osu::draw() {
         fadingCursorAlpha =
             1.0f -
             std::clamp<float>((float)this->score->getCombo() / cv::mod_fadingcursor_combo.getFloat(), 0.0f, 1.0f);
-        if(this->pauseMenu->isVisible() || this->getSelectedBeatmap()->isContinueScheduled() ||
-           !cv::mod_fadingcursor.getBool())
+        if(this->pauseMenu->isVisible() || beatmap->isContinueScheduled() || !cv::mod_fadingcursor.getBool())
             fadingCursorAlpha = 1.0f;
         if(isFPoSu && cv::fposu_draw_cursor_trail.getBool())
             this->hud->drawCursorTrail(beatmap->getCursorPos(), fadingCursorAlpha);
@@ -625,14 +624,15 @@ void Osu::update() {
     // main beatmap update
     this->bSeeking = false;
     if(this->isInPlayMode()) {
-        this->getSelectedBeatmap()->update();
+        auto beatmap = this->getSelectedBeatmap();
+        beatmap->update();
 
         // NOTE: force keep loaded background images while playing
         this->backgroundImageHandler->scheduleFreezeCache();
 
         // skip button clicking
-        bool can_skip = this->getSelectedBeatmap()->isInSkippableSection() && !this->bClickedSkipButton;
-        can_skip &= !this->getSelectedBeatmap()->isPaused() && !this->volumeOverlay->isBusy();
+        bool can_skip = beatmap->isInSkippableSection() && !this->bClickedSkipButton;
+        can_skip &= !beatmap->isPaused() && !this->volumeOverlay->isBusy();
         if(can_skip) {
             const bool isAnyOsuKeyDown =
                 (this->bKeyboardKey1Down || this->bKeyboardKey12Down || this->bKeyboardKey2Down ||
@@ -657,21 +657,18 @@ void Osu::update() {
 
         // skipping
         if(this->bSkipScheduled) {
-            const bool isLoading = this->getSelectedBeatmap()->isLoading();
+            const bool isLoading = beatmap->isLoading();
 
-            if(this->getSelectedBeatmap()->isInSkippableSection() && !this->getSelectedBeatmap()->isPaused() &&
-               !isLoading) {
-                bool can_skip_intro =
-                    (cv::skip_intro_enabled.getBool() && this->getSelectedBeatmap()->iCurrentHitObjectIndex < 1);
-                bool can_skip_break =
-                    (cv::skip_breaks_enabled.getBool() && this->getSelectedBeatmap()->iCurrentHitObjectIndex > 0);
+            if(beatmap->isInSkippableSection() && !beatmap->isPaused() && !isLoading) {
+                bool can_skip_intro = (cv::skip_intro_enabled.getBool() && beatmap->iCurrentHitObjectIndex < 1);
+                bool can_skip_break = (cv::skip_breaks_enabled.getBool() && beatmap->iCurrentHitObjectIndex > 0);
                 if(bancho->is_playing_a_multi_map()) {
                     can_skip_intro = bancho->room.all_players_skipped;
                     can_skip_break = false;
                 }
 
                 if(can_skip_intro || can_skip_break) {
-                    this->getSelectedBeatmap()->skipEmptySection();
+                    beatmap->skipEmptySection();
                 }
             }
 
@@ -680,43 +677,42 @@ void Osu::update() {
 
         // Reset m_bClickedSkipButton on mouse up
         // We only use m_bClickedSkipButton to prevent seeking when clicking the skip button
-        if(this->bClickedSkipButton && !this->getSelectedBeatmap()->isInSkippableSection()) {
+        if(this->bClickedSkipButton && !beatmap->isInSkippableSection()) {
             if(!mouse->isLeftDown()) {
                 this->bClickedSkipButton = false;
             }
         }
 
         // scrubbing/seeking
-        this->bSeeking = (this->bSeekKey || this->getSelectedBeatmap()->is_watching);
-        this->bSeeking &= !this->getSelectedBeatmap()->isPaused() && !this->volumeOverlay->isBusy();
+        this->bSeeking = (this->bSeekKey || beatmap->is_watching);
+        this->bSeeking &= !this->volumeOverlay->isBusy();
         this->bSeeking &= !bancho->is_playing_a_multi_map() && !this->bClickedSkipButton;
         this->bSeeking &= !bancho->spectating;
         if(this->bSeeking) {
-            const float mousePosX = (int)mouse->getPos().x;
-            const float percent = std::clamp<float>(mousePosX / (float)this->getScreenWidth(), 0.0f, 1.0f);
+            f32 mousePosX = std::round(mouse->getPos().x);
+            f32 percent = std::clamp<f32>(mousePosX / (f32)this->getScreenWidth(), 0.0f, 1.0f);
+            f32 seek_to_ms = percent * (beatmap->getStartTimePlayable() + beatmap->getLengthPlayable());
 
             if(mouse->isLeftDown()) {
                 if(mousePosX != this->fPrevSeekMousePosX || !cv::scrubbing_smooth.getBool()) {
                     this->fPrevSeekMousePosX = mousePosX;
 
                     // special case: allow cancelling the failing animation here
-                    if(this->getSelectedBeatmap()->hasFailed()) this->getSelectedBeatmap()->cancelFailing();
+                    if(beatmap->hasFailed()) beatmap->cancelFailing();
 
-                    this->getSelectedBeatmap()->seekPercentPlayable(percent);
-                } else {
-                    // special case: keep player invulnerable even if scrubbing position does not change
-                    this->getSelectedBeatmap()->resetScore();
+                    // when seeking during gameplay, add nofail for convenience
+                    if(!beatmap->is_watching && !cv::mod_nofail.getBool()) {
+                        cv::mod_nofail.setValue(true);
+                    }
+
+                    beatmap->seekMS(seek_to_ms);
                 }
             } else {
                 this->fPrevSeekMousePosX = -1.0f;
             }
 
             if(mouse->isRightDown()) {
-                this->fQuickSaveTime = std::clamp<float>((float)((this->getSelectedBeatmap()->getStartTimePlayable() +
-                                                                  this->getSelectedBeatmap()->getLengthPlayable()) *
-                                                                 percent) /
-                                                             (float)this->getSelectedBeatmap()->getLength(),
-                                                         0.0f, 1.0f);
+                this->fQuickSaveTime = seek_to_ms;
             }
         }
 
@@ -725,8 +721,8 @@ void Osu::update() {
             this->fQuickRetryTime = 0.0f;
 
             if(!bancho->is_playing_a_multi_map()) {
-                this->getSelectedBeatmap()->restart(true);
-                this->getSelectedBeatmap()->update();
+                beatmap->restart(true);
+                beatmap->update();
                 this->pauseMenu->setVisible(false);
             }
         }
@@ -1030,12 +1026,10 @@ void Osu::onKeyDown(KeyboardEvent &key) {
                         score.playerName = cv::name.getString();  // local name
                     }
 
-                    double percentFinished = beatmap->getPercentFinished();
-                    double duration = cv::instant_replay_duration.getFloat() * 1000.f;
-                    double offsetPercent = duration / beatmap->getLength();
-                    double seekPoint = fmax(0.f, percentFinished - offsetPercent);
+                    f64 pos_seconds = beatmap->getTime() - cv::instant_replay_duration.getFloat();
+                    u32 pos_ms = (u32)(std::max(0.0, pos_seconds) * 1000.0);
                     beatmap->cancelFailing();
-                    beatmap->watch(score, seekPoint);
+                    beatmap->watch(score, pos_ms);
                     return;
                 }
             }
@@ -1137,13 +1131,13 @@ void Osu::onKeyDown(KeyboardEvent &key) {
             // quick save/load
             if(!bancho->is_playing_a_multi_map()) {
                 if(key == (KEYCODE)cv::QUICK_SAVE.getInt())
-                    this->fQuickSaveTime = this->getSelectedBeatmap()->getPercentFinished();
+                    this->fQuickSaveTime = this->getSelectedBeatmap()->getTime();
 
                 if(key == (KEYCODE)cv::QUICK_LOAD.getInt()) {
                     // special case: allow cancelling the failing animation here
                     if(this->getSelectedBeatmap()->hasFailed()) this->getSelectedBeatmap()->cancelFailing();
 
-                    this->getSelectedBeatmap()->seekPercent(this->fQuickSaveTime);
+                    this->getSelectedBeatmap()->seekMS(this->fQuickSaveTime);
                 }
             }
 
@@ -1151,24 +1145,15 @@ void Osu::onKeyDown(KeyboardEvent &key) {
             if(!bancho->is_playing_a_multi_map()) {
                 const bool backward = (key == (KEYCODE)cv::SEEK_TIME_BACKWARD.getInt());
                 const bool forward = (key == (KEYCODE)cv::SEEK_TIME_FORWARD.getInt());
-
                 if(backward || forward) {
-                    const unsigned long lengthMS = this->getSelectedBeatmap()->getLength();
-                    const float percentFinished = this->getSelectedBeatmap()->getPercentFinished();
+                    i32 diff = 0;
+                    if(backward) diff -= cv::seek_delta.getInt();
+                    if(forward) diff += cv::seek_delta.getInt();
+                    if(diff != 0) {
+                        // special case: allow cancelling the failing animation here
+                        if(this->getSelectedBeatmap()->hasFailed()) this->getSelectedBeatmap()->cancelFailing();
 
-                    if(lengthMS > 0) {
-                        double seekedPercent = 0.0;
-                        if(backward)
-                            seekedPercent -= (double)cv::seek_delta.getInt() * (1.0 / (double)lengthMS) * 1000.0;
-                        else if(forward)
-                            seekedPercent += (double)cv::seek_delta.getInt() * (1.0 / (double)lengthMS) * 1000.0;
-
-                        if(seekedPercent != 0.0f) {
-                            // special case: allow cancelling the failing animation here
-                            if(this->getSelectedBeatmap()->hasFailed()) this->getSelectedBeatmap()->cancelFailing();
-
-                            this->getSelectedBeatmap()->seekPercent(percentFinished + seekedPercent);
-                        }
+                        this->getSelectedBeatmap()->seekMS(this->getSelectedBeatmap()->getTime() + diff);
                     }
                 }
             }

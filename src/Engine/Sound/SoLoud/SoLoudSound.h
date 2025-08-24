@@ -33,8 +33,7 @@ class SoLoudSound final : public Sound {
     SoLoudSound(SoLoudSound &&) = delete;
 
     // Sound interface implementation
-    u32 setPosition(f64 percent) override;
-    void setPositionMS(unsigned long ms) override;
+    void setPositionMS(u32 ms) override;
     void setVolume(float volume) override;
     void setSpeed(float speed) override;
     void setPitch(float pitch) override;

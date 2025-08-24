@@ -501,8 +501,10 @@ bool BassSoundEngine::play(Sound *snd, float pan, float pitch) {
     if(bassSound->bPaused) {
         bassSound->bPaused = false;
         bassSound->fLastPlayTime = bassSound->fChannelCreationTime - (((f64)bassSound->paused_position_ms) / 1000.0);
+        bassSound->interpolator.reset((f64)bassSound->paused_position_ms, Timing::getTimeReal(), bassSound->getSpeed());
     } else {
         bassSound->fLastPlayTime = bassSound->fChannelCreationTime;
+        bassSound->interpolator.reset(0.0, Timing::getTimeReal(), bassSound->getSpeed());
     }
 
     if(cv::debug_snd.getBool()) {
