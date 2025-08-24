@@ -15,6 +15,8 @@
 
 #include <memory>
 #include <unordered_map>
+#include <unordered_set>
+
 typedef struct FT_Bitmap_ FT_Bitmap;
 typedef struct FT_FaceRec_ *FT_Face;
 typedef struct FT_LibraryRec_ *FT_Library;
@@ -98,18 +100,39 @@ class McFont final : public Resource {
         std::vector<BatchEntry> entryList;
     };
 
+    // texture atlas dynamic slot management
+    struct DynamicSlot {
+        int x, y;           // position in atlas
+        wchar_t character;  // character in this slot (0 if empty)
+        uint64_t lastUsed;  // for LRU eviction
+        bool occupied;
+    };
+
+    // atlas layout constants
+
+    // how much larger to make atlas for dynamic region
+    // we initially pack the ASCII characters + initial characters into a static region,
+    // then dynamically loaded glyphs are placed in the remaining space in fixed-size slots (not packed)
+    // this maximizes the amount of fallback glyphs we can have loaded at once for a fixed amount of memory usage
+    static constexpr float ATLAS_SIZE_MULTIPLIER{4.0f};
+    // size of each dynamic slot
+    static constexpr int DYNAMIC_SLOT_SIZE{64};
+
     forceinline bool hasGlyph(wchar_t ch) const { return m_vGlyphMetrics.find(ch) != m_vGlyphMetrics.end(); };
     bool addGlyph(wchar_t ch);
     bool loadGlyphDynamic(wchar_t ch);
-    bool ensureAtlasSpace(int requiredWidth, int requiredHeight);
-    void rebuildAtlas();
+
+    // atlas management methods
+    int allocateDynamicSlot(wchar_t ch);
+    void markSlotUsed(wchar_t ch);
+    void initializeDynamicRegion(int atlasSize);
 
     // consolidated glyph processing methods
     bool initializeFreeType();
     bool loadGlyphMetrics(wchar_t ch);
     std::unique_ptr<Color[]> createExpandedBitmapData(const FT_Bitmap &bitmap);
     void renderGlyphToAtlas(wchar_t ch, int x, int y, FT_Face face = nullptr);
-    bool createAndPackAtlas(const std::vector<wchar_t> &glyphs, bool isRebuild);
+    bool createAndPackAtlas(const std::vector<wchar_t> &glyphs);
 
     // fallback font management
     FT_Face getFontFaceForGlyph(wchar_t ch, int &fontIndex);
@@ -125,6 +148,8 @@ class McFont final : public Resource {
     static bool s_sharedFtLibraryInitialized;
     static std::vector<FallbackFont> s_sharedFallbackFonts;
     static bool s_sharedFallbacksInitialized;
+    // give up quickly if we know a certain font face isn't found in any fallback font
+    static std::unordered_set<wchar_t> s_sharedFallbackFaceBlacklist;
 
     // shared resource initialization
     static bool initializeSharedFreeType();
@@ -154,10 +179,13 @@ class McFont final : public Resource {
     float m_fHeight;
     GLYPH_METRICS m_errorGlyph;
 
-    // atlas management
-    std::vector<wchar_t> m_vPendingGlyphs;
-
-    mutable bool m_bAtlasNeedsRebuild;
+    // dynamic atlas management
+    int m_staticRegionHeight;  // height of statically packed region
+    int m_dynamicRegionY;      // Y coordinate where dynamic region starts
+    int m_slotsPerRow;         // number of slots per row in dynamic region
+    std::vector<DynamicSlot> m_dynamicSlots;
+    uint64_t m_currentTime;   // for LRU tracking
+    bool m_atlasNeedsReload;  // flag to batch atlas reloads
 
     bool m_batchActive;
     bool m_bFreeTypeInitialized;

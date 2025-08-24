@@ -30,6 +30,7 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG v40_02;
     v40_02.title = "40.02";
     v40_02.changes = {
+        R"(- Added setting to display map titles in their original language)",
         R"(- Fixed pause loop playing after quitting a map)",
         R"(- Fixed Shift+F2 not working in song browser)",
         R"(- Fixed speed mods not always getting applied)",
@@ -91,7 +92,6 @@ Changelog::Changelog() : ScreenBackable() {
         R"(- Fixed keys being counted before first hitobject)",
         R"(- Fixed "RawInputBuffer" option on Windows, should work much more reliably)",
         R"(- Fixed search text being hidden under some skin elements)",
-        // R"(- Added setting to display map titles in their original language)",
     };
     changelogs.push_back(v39_01);
 

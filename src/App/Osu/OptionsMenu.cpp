@@ -535,8 +535,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
                       &cv::mod_touchdevice_always);
 
     this->addSubSection("Songbrowser");
-    // Disabled; too laggy to be usable for now
-    // this->addCheckbox("Prefer metadata in original language", &cv::prefer_cjk);
+    this->addCheckbox("Prefer metadata in original language", &cv::prefer_cjk);
     this->addCheckbox("Draw Strain Graph in Songbrowser",
                       "Hold either SHIFT/CTRL to show only speed/aim strains.\nSpeed strain is red, aim strain is "
                       "green.\n(See osu_hud_scrubbing_timeline_strains_*)",
