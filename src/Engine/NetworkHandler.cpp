@@ -102,8 +102,7 @@ void NetworkHandler::networkThreadFunc(const std::stop_token& stopToken) {
 
             std::stop_callback stopCallback(stopToken, [&]() { this->request_queue_cv.notify_all(); });
 
-            this->request_queue_cv.wait_for(lock, stopToken, std::chrono::milliseconds(100),
-                                            [this] { return !this->pending_requests.empty(); });
+            this->request_queue_cv.wait(lock, stopToken, [this] { return !this->pending_requests.empty(); });
         } else {
             // brief sleep to avoid busy waiting
             Timing::sleepMS(1);
