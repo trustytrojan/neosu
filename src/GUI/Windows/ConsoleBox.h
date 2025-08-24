@@ -91,7 +91,7 @@ class ConsoleBox : public CBaseUIElement {
     std::vector<std::string> commandHistory;
     int iSelectedHistory;
 
-    std::mutex logMutex;
+    std::recursive_mutex logMutex;
 
     // thread-safe log animation state
     std::atomic<bool> bLogAnimationResetPending;
