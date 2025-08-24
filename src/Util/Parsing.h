@@ -139,4 +139,9 @@ const char* parse(const char* str, T arg, Extra... extra) {
     }
 }
 
+template <typename T, typename... Extra>
+const char* parse(const std::string& str, T arg, Extra... extra) {
+    return parse(str.c_str(), arg, extra...);
+}
+
 }  // namespace Parsing

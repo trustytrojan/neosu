@@ -155,6 +155,7 @@ using WASAPIPROC = bass_EXTERN::WASAPIPROC;
 
 #define BASS_MIX_FUNCTIONS(X)        \
     X(BASS_Mixer_GetVersion)         \
+    X(BASS_Mixer_ChannelFlags)       \
     X(BASS_Mixer_ChannelGetMixer)    \
     X(BASS_Mixer_ChannelRemove)      \
     X(BASS_Mixer_ChannelGetPosition) \

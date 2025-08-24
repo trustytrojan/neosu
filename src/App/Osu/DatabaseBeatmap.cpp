@@ -334,17 +334,23 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                     f32 x, y;
                     u32 time;
                     u8 type;
-
                     i32 hitSounds;
-                    std::string hitSamples = "0:0:0:0:";
+                    bool err = false;
 
-                    if(!Parsing::parse(curLineChar, &x, ',', &y, ',', &time, ',', &type, ',', &hitSounds)) {
+                    auto csvs = SString::split(curLine, ",");
+                    if(csvs.size() < 5) break;
+                    err |= !Parsing::parse(csvs[0], &x) || !std::isfinite(x) || std::isnan(x);
+                    err |= !Parsing::parse(csvs[1], &y) || !std::isfinite(y) || std::isnan(y);
+                    err |= !Parsing::parse(csvs[2], &time);
+                    err |= !Parsing::parse(csvs[3], &type);
+                    err |= !Parsing::parse(csvs[4], &hitSounds);
+                    err |= (type & PpyHitObjectType::SLIDER) && (csvs.size() < 8);
+                    err |= (type & PpyHitObjectType::SPINNER) && (csvs.size() < 6);
+                    err |= !(type & (PpyHitObjectType::CIRCLE | PpyHitObjectType::SLIDER | PpyHitObjectType::SPINNER));
+                    if(err) {
+                        debugLog("Invalid hit object: {}\n", curLine);
                         break;
                     }
-                    if(!std::isfinite(x) || std::isnan(x))
-                        x = 0.f;
-                    if(!std::isfinite(y) || std::isnan(y))
-                        y = 0.f;
 
                     if(!(type & PpyHitObjectType::SPINNER)) hitobjectsWithoutSpinnerCounter++;
 
@@ -372,11 +378,12 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                         h.clicked = false;
                         h.samples.hitSounds = (hitSounds & HitSoundType::VALID_HITSOUNDS);
 
-                        // Errors ignored because hitSamples is not always present
-                        if(Parsing::parse(curLineChar, &x, ',', &y, ',', &time, ',', &type, ',', &hitSounds, ',',
-                                          &hitSamples)) {
-                            Parsing::parse(hitSamples.c_str(), &h.samples.normalSet, ':', &h.samples.additionSet, ':',
-                                           &h.samples.index, ':', &h.samples.volume, ':', &h.samples.filename);
+                        if(csvs.size() > 5) {
+                            if(!Parsing::parse(csvs[5], &h.samples.normalSet, ':', &h.samples.additionSet, ':',
+                                               &h.samples.index, ':', &h.samples.volume, ':', &h.samples.filename)) {
+                                debugLog("Invalid circle (hitSamples): {}\n", curLine);
+                                break;
+                            }
                         }
 
                         c.hitcircles.push_back(h);
@@ -384,45 +391,25 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                         SLIDER slider;
                         slider.colorCounter = colorCounter;
                         slider.colorOffset = colorOffset;
-                        slider.x = x;
-                        slider.y = y;
                         slider.time = time;
+                        slider.hoverSamples.hitSounds = (hitSounds & HitSoundType::VALID_SLIDER_HITSOUNDS);
 
-                        auto csvs = SString::split(curLine, ",");
-                        if(csvs.size() < 8) {
-                            debugLog("Invalid slider in beatmap: {:s}\n\ncurLine = {:s}\n", osuFilePath, curLineChar);
-                            break;
-                        }
-
-                        std::string sEdgeSounds = "";
-                        std::string sEdgeSets = "";
-                        std::string curves = csvs[5];
-                        Parsing::parse(csvs[6].c_str(), &slider.repeat);
-                        Parsing::parse(csvs[7].c_str(), &slider.pixelLength);
-                        if(csvs.size() > 8) sEdgeSounds = csvs[8];
-                        bool edgeSets_present = (csvs.size() > 9);
-                        if(edgeSets_present) sEdgeSets = csvs[9];
-                        if(csvs.size() > 10) hitSamples = csvs[10];
-
-                        slider.repeat = std::clamp(slider.repeat, 0, sliderMaxRepeatRange);
-                        slider.pixelLength = std::clamp(slider.pixelLength, -sliderSanityRange, sliderSanityRange);
-
-                        auto sliderTokens = SString::split(curves, "|");
-                        slider.type = sliderTokens[0].c_str()[0];
-                        sliderTokens.erase(sliderTokens.begin());
-
-                        for(auto &curvePoints : sliderTokens) {
+                        auto curves = SString::split(csvs[5], "|");
+                        slider.type = curves[0].c_str()[0];
+                        curves.erase(curves.begin());
+                        for(auto &curvePoints : curves) {
                             f32 cpX, cpY;
-                            if(!Parsing::parse(curvePoints.c_str(), &cpX, ':', &cpY) || !std::isfinite(cpX) ||
-                               !std::isfinite(cpY)) {
-                                debugLog("Invalid slider positions: {:s}\n\nIn Beatmap: {:s}\n", curLineChar,
-                                         osuFilePath);
-                                continue;
-                            }
+                            err |= !Parsing::parse(curvePoints, &cpX, ':', &cpY);
+                            err |= !std::isfinite(cpX) || std::isnan(cpX);
+                            err |= !std::isfinite(cpY) || std::isnan(cpY);
+                            if(err) break;
 
                             slider.points.emplace_back(std::clamp(cpX, -sliderSanityRange, sliderSanityRange),
                                                        std::clamp(cpY, -sliderSanityRange, sliderSanityRange));
                         }
+
+                        err |= !Parsing::parse(csvs[6], &slider.repeat);
+                        err |= !Parsing::parse(csvs[7], &slider.pixelLength);
 
                         // special case: osu! logic for handling the hitobject point vs the controlpoints (since
                         // sliders have both, and older beatmaps store the start point inside the control
@@ -439,65 +426,64 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                         // e.g. https://osu.ppy.sh/beatmapsets/791900#osu/1676490
                         if(slider.points.size() == 1) slider.points.push_back(xy);
 
-                        slider.hoverSamples.hitSounds = (hitSounds & HitSoundType::VALID_SLIDER_HITSOUNDS);
-                        Parsing::parse(hitSamples.c_str(), &slider.hoverSamples.normalSet, ':',
-                                       &slider.hoverSamples.additionSet, ':', &slider.hoverSamples.index, ':',
-                                       &slider.hoverSamples.volume, ':', &slider.hoverSamples.filename);
+                        std::vector<std::string> edgeSounds;
+                        if(csvs.size() > 8) edgeSounds = SString::split(csvs[8], "|");
 
-                        auto edgeSounds = SString::split(sEdgeSounds, "|");
-                        auto edgeSets = SString::split(sEdgeSets, "|");
-                        if(edgeSets_present && (edgeSounds.size() != edgeSets.size())) {
-                            debugLog("Invalid slider edge sounds: {}\n\nIn Beatmap: {}\n", curLineChar, osuFilePath);
-                            continue;
-                        }
+                        std::vector<std::string> edgeSets;
+                        if(csvs.size() > 9) edgeSets = SString::split(csvs[9], "|");
+                        err |= (!edgeSets.empty() && (edgeSounds.size() != edgeSets.size()));
 
-                        for(i32 i = 0; i < edgeSounds.size(); i++) {
+                        for(i32 i = 0; !err && i < edgeSounds.size(); i++) {
                             HitSamples samples;
-                            Parsing::parse(edgeSounds[i].c_str(), &samples.hitSounds);
+                            err |= !Parsing::parse(edgeSounds[i], &samples.hitSounds);
                             samples.hitSounds &= HitSoundType::VALID_HITSOUNDS;
 
-                            if(edgeSets_present) {
-                                Parsing::parse(edgeSets[i].c_str(), &samples.normalSet, ':', &samples.additionSet);
+                            if(!edgeSets.empty()) {
+                                err |= !Parsing::parse(edgeSets[i], &samples.normalSet, ':', &samples.additionSet);
                             }
 
                             slider.edgeSamples.push_back(samples);
                         }
 
-                        if(slider.edgeSamples.empty()) {
-                            // No start sample specified, use default
-                            slider.edgeSamples.emplace_back();
-                        }
-                        if(slider.edgeSamples.size() == 1) {
-                            // No end sample specified, use the same as start
-                            slider.edgeSamples.push_back(slider.edgeSamples.front());
+                        // No start sample specified, use default
+                        if(slider.edgeSamples.empty()) slider.edgeSamples.emplace_back();
+
+                        // No end sample specified, use the same as start
+                        if(slider.edgeSamples.size() == 1) slider.edgeSamples.push_back(slider.edgeSamples.front());
+
+                        if(csvs.size() > 10) {
+                            err |=
+                                !Parsing::parse(csvs[10], &slider.hoverSamples.normalSet, ':',
+                                                &slider.hoverSamples.additionSet, ':', &slider.hoverSamples.index, ':',
+                                                &slider.hoverSamples.volume, ':', &slider.hoverSamples.filename);
                         }
 
+                        if(err) {
+                            debugLog("Invalid slider: {}\n", curLine);
+                            break;
+                        }
+
+                        slider.x = xy.x;
+                        slider.y = xy.y;
+                        slider.repeat = std::clamp(slider.repeat, 0, sliderMaxRepeatRange);
+                        slider.pixelLength = std::clamp(slider.pixelLength, -sliderSanityRange, sliderSanityRange);
                         slider.number = ++comboNumber;
                         c.sliders.push_back(slider);
                     } else if(type & PpyHitObjectType::SPINNER) {
-                        u32 endTime;
-                        if(!Parsing::parse(curLineChar, &x, ',', &y, ',', &time, ',', &type, ',', &hitSounds, ',',
-                                           &endTime, ',', &hitSamples)) {
-                            if(!Parsing::parse(curLineChar, &x, ',', &y, ',', &time, ',', &type, ',', &hitSounds, ',',
-                                               &endTime)) {
-                                debugLog("Invalid spinner in beatmap: {:s}\n\ncurLine = {:s}\n", osuFilePath,
-                                         curLineChar);
-                                continue;
-                            }
+                        SPINNER s{.x = (i32)x, .y = (i32)y, .time = time};
+                        s.samples.hitSounds = (hitSounds & HitSoundType::VALID_HITSOUNDS);
+
+                        err |= !Parsing::parse(csvs[5], &s.endTime);
+
+                        if(csvs.size() > 6) {
+                            err |= !Parsing::parse(csvs[6], &s.samples.normalSet, ':', &s.samples.additionSet, ':',
+                                                   &s.samples.index, ':', &s.samples.volume, ':', &s.samples.filename);
                         }
 
-                        SPINNER s{
-                            .x = (i32)x,
-                            .y = (i32)y,
-                            .time = time,
-                            .endTime = endTime,
-                            .samples = {}
-                        };
-
-                        // Errors ignored because hitSample is not always present
-                        s.samples.hitSounds = (hitSounds & HitSoundType::VALID_HITSOUNDS);
-                        Parsing::parse(hitSamples.c_str(), &s.samples.normalSet, ':', &s.samples.additionSet, ':',
-                                       &s.samples.index, ':', &s.samples.volume, ':', &s.samples.filename);
+                        if(err) {
+                            debugLog("Invalid spinner: {}\n", curLine);
+                            break;
+                        }
 
                         c.spinners.push_back(s);
                     }

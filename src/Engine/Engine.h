@@ -112,6 +112,7 @@ class Engine final : public KeyboardListener {
 
     // timing
     Timer *timer;
+    f64 dTime{0.0};
     unsigned long iFrameCount;
     double dFrameTime;
     // this will wrap quickly, and that's fine, it should be used as a dividend in a modular expression anyways

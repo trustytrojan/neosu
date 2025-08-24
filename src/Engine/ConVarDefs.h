@@ -1092,8 +1092,6 @@ CONVAR(snd_ready_delay, "snd_ready_delay", 0.0f, FCVAR_BANCHO_COMPATIBLE | FCVAR
        "after a sound engine restart, wait this many seconds before marking it as ready");
 CONVAR(snd_restart, "snd_restart");
 CONVAR(debug_snd, "debug_snd", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_NOSAVE);
-CONVAR(snd_restrict_play_frame, "snd_restrict_play_frame", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
-       "only allow one new channel per frame for overlayable sounds (prevents lag and earrape)");
 CONVAR(snd_updateperiod, "snd_updateperiod", 10, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "BASS_CONFIG_UPDATEPERIOD length in milliseconds");
 CONVAR(snd_file_min_size, "snd_file_min_size", 64, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,

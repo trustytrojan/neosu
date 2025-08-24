@@ -452,13 +452,6 @@ bool BassSoundEngine::play(Sound *snd, float pan, float pitch) {
 
     auto bassSound = (BassSound *)snd;
     auto channel = (SOUNDHANDLE)bassSound->getChannel();
-
-    if(bassSound->isOverlayable() && cv::snd_restrict_play_frame.getBool()) {
-        if(engine->getTime() <= bassSound->fLastPlayTime) {
-            return false;
-        }
-    }
-
     if(!channel) {
         debugLog("BassSoundEngine::play() failed to get channel, errorcode {:d}\n", BASS_ErrorGetCode());
         return false;
@@ -476,8 +469,14 @@ bool BassSoundEngine::play(Sound *snd, float pan, float pitch) {
 
     BASS_ChannelFlags(channel, bassSound->isLooped() ? BASS_SAMPLE_LOOP : 0, BASS_SAMPLE_LOOP);
 
-    if(BASS_Mixer_ChannelGetMixer(channel) != 0) return false;
+    if(bassSound->bPaused) {
+        bassSound->bPaused = false;
+        BASS_Mixer_ChannelFlags(bassSound->stream, 0, BASS_MIXER_CHAN_PAUSE);
+        bassSound->interpolator.reset((f64)bassSound->paused_position_ms, Timing::getTimeReal(), bassSound->getSpeed());
+        return true;
+    }
 
+    assert(BASS_Mixer_ChannelGetMixer(channel) == 0);
     auto flags = BASS_MIXER_DOWNMIX | BASS_MIXER_NORAMPIN;
     if(!snd->isStream()) flags |= BASS_STREAM_AUTOFREE;
 
@@ -497,15 +496,7 @@ bool BassSoundEngine::play(Sound *snd, float pan, float pitch) {
     }
 
     bassSound->bStarted = true;
-    bassSound->fChannelCreationTime = engine->getTime();
-    if(bassSound->bPaused) {
-        bassSound->bPaused = false;
-        bassSound->fLastPlayTime = bassSound->fChannelCreationTime - (((f64)bassSound->paused_position_ms) / 1000.0);
-        bassSound->interpolator.reset((f64)bassSound->paused_position_ms, Timing::getTimeReal(), bassSound->getSpeed());
-    } else {
-        bassSound->fLastPlayTime = bassSound->fChannelCreationTime;
-        bassSound->interpolator.reset(0.0, Timing::getTimeReal(), bassSound->getSpeed());
-    }
+    bassSound->interpolator.reset(0.0, Timing::getTimeReal(), bassSound->getSpeed());
 
     if(cv::debug_snd.getBool()) {
         debugLog("Playing {:s}\n", bassSound->getFilePath().c_str());
@@ -522,7 +513,7 @@ void BassSoundEngine::pause(Sound *snd) {
     if(!bassSound->isPlaying()) return;
 
     auto pos = bassSound->getPositionMS();
-    BASS_Mixer_ChannelRemove(bassSound->stream);
+    BASS_Mixer_ChannelFlags(bassSound->stream, BASS_MIXER_CHAN_PAUSE, BASS_MIXER_CHAN_PAUSE);
     bassSound->bPaused = true;
     bassSound->paused_position_ms = pos;
 }
@@ -534,8 +525,8 @@ void BassSoundEngine::stop(Sound *snd) {
     auto bassSound = (BassSound *)snd;
     if(!bassSound->isPlaying()) return;
 
-    BASS_Mixer_ChannelRemove(bassSound->stream);
-    bassSound->bStarted = false;
+    BASS_Mixer_ChannelFlags(bassSound->stream, BASS_MIXER_CHAN_PAUSE, BASS_MIXER_CHAN_PAUSE);
+    bassSound->bPaused = true;
     bassSound->setPositionMS(0);
 }
 

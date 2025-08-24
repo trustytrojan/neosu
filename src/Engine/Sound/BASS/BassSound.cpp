@@ -146,8 +146,6 @@ void BassSound::destroy() {
     this->bStarted = false;
     this->bReady = false;
     this->bAsyncReady = false;
-    this->fLastPlayTime = 0.0;
-    this->fChannelCreationTime = 0.0;
     this->bPaused = false;
     this->paused_position_ms = 0;
     this->bIgnored = false;
@@ -172,7 +170,6 @@ void BassSound::setPositionMS(u32 ms) {
                          this->sFilePath.c_str(), BassManager::getErrorUString());
             }
         }
-        this->fLastPlayTime = this->fChannelCreationTime - ((f64)ms / 1000.0);
     } else {
         if(!BASS_ChannelSetPosition(this->stream, target_pos, BASS_POS_BYTE | BASS_POS_FLUSH)) {
             if(cv::debug_snd.getBool()) {
