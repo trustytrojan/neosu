@@ -156,7 +156,7 @@ void BassSound::setPositionMS(u32 ms) {
     if(!this->bReady || ms > this->getLengthMS()) return;
     assert(this->bStream);  // can't call setPositionMS() on a sample
 
-    i64 target_pos = BASS_ChannelSeconds2Bytes(this->stream, ms / 1000);
+    i64 target_pos = BASS_ChannelSeconds2Bytes(this->stream, ms / 1000.0);
     if(target_pos < 0) {
         debugLog("BASS_ChannelSeconds2Bytes( stream , {} ) error on file {}: {}\n", ms / 1000, this->sFilePath.c_str(),
                  BassManager::getErrorUString());
@@ -179,14 +179,7 @@ void BassSound::setPositionMS(u32 ms) {
         }
     }
 
-    f64 now = Timing::getTimeReal();
-    if(this->bPaused) {
-        this->paused_position_ms = ms;
-        now = 0.0;  // let the interpolator know we are paused
-    }
-
-    // reset interpolation state after seeking
-    this->interpolator.reset(static_cast<f64>(ms), now, this->getSpeed());
+    this->interpolator.reset(static_cast<f64>(ms), Timing::getTimeReal(), this->getSpeed());
 }
 
 void BassSound::setVolume(float volume) {
@@ -266,6 +259,7 @@ u32 BassSound::getPositionMS() {
     assert(this->bStream);  // can't call getPositionMS() on a sample
 
     if(this->bPaused) {
+        this->interpolator.reset(this->paused_position_ms, Timing::getTimeReal(), this->getSpeed());
         return this->paused_position_ms;
     }
 
@@ -277,7 +271,7 @@ u32 BassSound::getPositionMS() {
     }
     if(positionBytes < 0) {
         assert(false);  // invalid handle
-        this->interpolator.reset(0.0, 0.0, this->getSpeed());
+        this->interpolator.reset(this->length, Timing::getTimeReal(), this->getSpeed());
         return this->length;
     }
 
