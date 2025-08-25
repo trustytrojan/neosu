@@ -61,7 +61,7 @@ void SoLoudSoundEngine::restart() {
                              true);
 }
 
-bool SoLoudSoundEngine::play(Sound *snd, f32 pan, f32 pitch, f32 volume) {
+bool SoLoudSoundEngine::play(Sound *snd, f32 pan, f32 pitch, f32 playVolume) {
     if(!this->isReady() || snd == nullptr || !snd->isReady()) return false;
 
     // @spec: adding 1 here because kiwec changed the calling code in some way that i dont understand yet
@@ -73,39 +73,52 @@ bool SoLoudSoundEngine::play(Sound *snd, f32 pan, f32 pitch, f32 volume) {
     auto *soloudSound = snd->as<SoLoudSound>();
     if(!soloudSound) return false;
 
-    auto handle = soloudSound->getHandle();
-    // verify that the sound object's handle isn't stale
-    if(handle != 0 && !soloud->isValidVoiceHandle(handle)) {
-        handle = 0;
+    auto existingHandle = soloudSound->getHandle();
+
+    // check if we have a non-stale voice handle for the most recently played instance
+    if(existingHandle != 0 && !soloud->isValidVoiceHandle(existingHandle)) {
+        existingHandle = 0;
         soloudSound->handle = 0;
     }
-    if(handle != 0 && !soloudSound->isOverlayable()) {
-        if(soloudSound->getPitch() != pitch) {
-            soloudSound->setPitch(pitch);
-        }
 
-        if(soloudSound->getSpeed() != pan) {
-            soloudSound->setPan(pan);
-        }
-
-        const bool wasPaused = soloud->getPause(handle);
-
-        if(wasPaused) {
-            // just unpause if paused
-            soloud->setPause(handle, false);
-        }
-
-        if(cv::debug_snd.getBool()) {
-            debugLog("handle was already valid (and was{} paused), for non-overlayable sound {}\n",
-                     wasPaused ? "" : "n't", soloudSound->getFilePath());
-        }
-        return true;
+    if(existingHandle != 0 && !soloudSound->isOverlayable()) {
+        // if we do and it's not overlayable, update this last instance
+        return this->updateExistingSound(soloudSound, existingHandle, pan, pitch, playVolume);
+    } else {
+        // otherwise try playing a new instance
+        return this->playSound(soloudSound, pan, pitch, playVolume);
     }
-
-    return playSound(soloudSound, pan, pitch, volume);
 }
 
-bool SoLoudSoundEngine::playSound(SoLoudSound *soloudSound, f32 pan, f32 pitch, f32 volume) {
+bool SoLoudSoundEngine::updateExistingSound(SoLoudSound *soloudSound, SOUNDHANDLE handle, f32 pan, f32 pitch,
+                                            f32 playVolume) {
+    assert(soloudSound);
+    if(soloudSound->getPitch() != pitch) {
+        soloudSound->setPitch(pitch);
+    }
+
+    if(soloudSound->getSpeed() != pan) {
+        soloudSound->setPan(pan);
+    }
+
+    soloudSound->setHandleVolume(handle, soloudSound->getBaseVolume() * playVolume);
+
+    // update existing handle in cache with new params
+    PlaybackParams newParams{.pan = pan, .pitch = pitch, .volume = playVolume};
+    soloudSound->activeHandleCache[handle] = newParams;
+
+    // start from the beginning
+    soloudSound->setPositionMS(0);
+    soloudSound->setLastPlayTime(engine->getTime());
+    soloud->setPause(handle, false);  // make sure it's not paused
+
+    if(cv::debug_snd.getBool()) {
+        debugLog("handle was already valid, for non-overlayable sound {}\n", soloudSound->getName());
+    }
+    return true;
+}
+
+bool SoLoudSoundEngine::playSound(SoLoudSound *soloudSound, f32 pan, f32 pitch, f32 playVolume) {
     if(!soloudSound) return false;
 
     // check if we should allow playing this frame
@@ -113,23 +126,14 @@ bool SoLoudSoundEngine::playSound(SoLoudSound *soloudSound, f32 pan, f32 pitch, 
                                 engine->getTime() > soloudSound->getLastPlayTime();
     if(!allowPlayFrame) return false;
 
-    auto restorePos = 0.0;  // position in the track to potentially restore to
-
-    // if the sound is already playing and not overlayable, stop it
-    if(soloudSound->handle != 0 && !soloudSound->isOverlayable()) {
-        restorePos = soloudSound->getStreamPositionInSeconds();
-        soloud->stop(soloudSound->handle);
-        soloudSound->handle = 0;
-    }
-
     if(cv::debug_snd.getBool()) {
-        debugLog("SoLoudSoundEngine: Playing {:s} (stream={:d}) with speed={:f}, pitch={:f}, volume={:f}\n",
-                 soloudSound->sFilePath, soloudSound->bStream ? 1 : 0, soloudSound->fSpeed, pitch,
-                 soloudSound->fVolume * volume);
+        debugLog(
+            "SoLoudSoundEngine: Attempting to play {:s} (stream={:d}) with speed={:f}, pitch={:f}, playVolume={:f}\n",
+            soloudSound->sFilePath, soloudSound->bStream ? 1 : 0, soloudSound->fSpeed, pitch, playVolume);
     }
 
     // play the sound with appropriate method
-    unsigned int handle = 0;
+    SOUNDHANDLE handle = 0;
 
     if(soloudSound->bStream) {
         // reset these, because they're "sticky" properties
@@ -153,8 +157,8 @@ bool SoLoudSoundEngine::playSound(SoLoudSound *soloudSound, f32 pan, f32 pitch, 
             debugLog("SoLoudSoundEngine: Playing streaming audio through SLFXStream with speed={:f}, pitch={:f}\n",
                      soloudSound->fSpeed, soloudSound->fPitch);
     } else {
-        // non-streaming audio (sound effects) - use direct playback with SoLoud's native speed/pitch control
-        handle = this->playDirectSound(soloudSound, pan, pitch, soloudSound->fVolume * volume);
+        // non-streams don't go through the SoLoudFX wrapper
+        handle = this->playDirectSound(soloudSound, pan, pitch, soloudSound->fBaseVolume * playVolume);
     }
 
     // finalize playback
@@ -162,14 +166,15 @@ bool SoLoudSoundEngine::playSound(SoLoudSound *soloudSound, f32 pan, f32 pitch, 
         // store the handle and mark playback time
         soloudSound->handle = handle;
 
-        if(restorePos != 0.0) soloud->seek(handle, restorePos);  // restore the position to where we were pre-pause
+        PlaybackParams newInstance{.pan = pan, .pitch = pitch, .volume = playVolume};
+        soloudSound->addActiveInstance(handle, newInstance);
 
         soloudSound->setLastPlayTime(engine->getTime());
 
         if(soloudSound->bStream)  // unpause and fade it in if it's a stream (since we started it paused with 0 volume)
         {
             soloud->setPause(handle, false);
-            this->setVolumeGradual(handle, soloudSound->fVolume * volume);
+            this->setVolumeGradual(handle, soloudSound->fBaseVolume * playVolume);
         }
 
         return true;
@@ -180,7 +185,7 @@ bool SoLoudSoundEngine::playSound(SoLoudSound *soloudSound, f32 pan, f32 pitch, 
     return false;
 }
 
-unsigned int SoLoudSoundEngine::playDirectSound(SoLoudSound *soloudSound, float pan, float pitch, float volume) {
+SOUNDHANDLE SoLoudSoundEngine::playDirectSound(SoLoudSound *soloudSound, f32 pan, f32 pitch, f32 effectiveVolume) {
     if(!soloudSound || !soloudSound->audioSource) return 0;
 
     // calculate final pitch by combining all pitch modifiers
@@ -193,7 +198,7 @@ unsigned int SoLoudSoundEngine::playDirectSound(SoLoudSound *soloudSound, float 
     if(cv::nightcore_enjoyer.getBool() && soloudSound->fSpeed != 1.0f) finalPitch *= soloudSound->fSpeed;
 
     // play directly
-    unsigned int handle = soloud->play(*soloudSound->audioSource, volume, pan, false /* not paused */);
+    SOUNDHANDLE handle = soloud->play(*soloudSound->audioSource, effectiveVolume, pan, false /* not paused */);
 
     if(handle != 0) {
         // set relative play speed (affects both pitch and speed)
@@ -340,7 +345,7 @@ SoLoudSoundEngine::~SoLoudSoundEngine() {
     soloud.reset();
 }
 
-void SoLoudSoundEngine::setVolume(float volume) {
+void SoLoudSoundEngine::setMasterVolume(float volume) {
     if(!this->isReady()) return;
 
     this->fMasterVolume = std::clamp<float>(volume, 0.0f, 1.0f);
@@ -550,7 +555,7 @@ bool SoLoudSoundEngine::initializeOutputDevice(const OUTPUT_DEVICE &device) {
         this->iMaxActiveVoices);
 
     // init global volume
-    this->setVolume(this->fMasterVolume);
+    this->setMasterVolume(this->fMasterVolume);
 
     // run callbacks pt. 2
     if(this->restartCBs[1] != nullptr) {

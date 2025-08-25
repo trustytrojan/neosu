@@ -56,7 +56,7 @@ class SoundEngine {
 
     // Here, 'volume' means the volume for this play() call, NOT for the sound itself
     // e.g. when calling setVolume(), you're applying a modifier to all currently playing samples of that sound
-    virtual bool play(Sound *snd, f32 pan = 0.f, f32 pitch = 0.f, f32 volume = 1.f) = 0;
+    virtual bool play(Sound *snd, f32 pan = 0.f, f32 pitch = 0.f, f32 playVolume = 1.f) = 0;
 
     virtual void pause(Sound *snd) = 0;
     virtual void stop(Sound *snd) = 0;
@@ -65,7 +65,7 @@ class SoundEngine {
     virtual bool hasExclusiveOutput() { return false; }
 
     virtual void setOutputDevice(const OUTPUT_DEVICE &device) = 0;
-    virtual void setVolume(float volume) = 0;
+    virtual void setMasterVolume(float volume) = 0;
 
     OUTPUT_DEVICE getDefaultDevice();
     OUTPUT_DEVICE getWantedDevice();

@@ -60,7 +60,7 @@ VolumeOverlay::VolumeOverlay() : OsuScreen() {
     this->volumeMusic->setAnimated(false);
     this->volumeSliderOverlayContainer->addBaseUIElement(this->volumeMusic);
 
-    soundEngine->setVolume(cv::volume_master.getFloat());
+    soundEngine->setMasterVolume(cv::volume_master.getFloat());
     this->updateLayout();
 }
 
@@ -157,7 +157,7 @@ void VolumeOverlay::mouse_update(bool *propagate_clicks) {
 
     // volume inactive to active animation
     if(this->bVolumeInactiveToActiveScheduled && this->fVolumeInactiveToActiveAnim > 0.0f) {
-        soundEngine->setVolume(std::lerp(cv::volume_master_inactive.getFloat() * cv::volume_master.getFloat(),
+        soundEngine->setMasterVolume(std::lerp(cv::volume_master_inactive.getFloat() * cv::volume_master.getFloat(),
                                          cv::volume_master.getFloat(), this->fVolumeInactiveToActiveAnim));
 
         // check if we're done
@@ -273,7 +273,7 @@ void VolumeOverlay::loseFocus() {
     this->bVolumeInactiveToActiveScheduled = true;
     anim->deleteExistingAnimation(&this->fVolumeInactiveToActiveAnim);
     this->fVolumeInactiveToActiveAnim = 0.0f;
-    soundEngine->setVolume(cv::volume_master_inactive.getFloat() * cv::volume_master.getFloat());
+    soundEngine->setMasterVolume(cv::volume_master_inactive.getFloat() * cv::volume_master.getFloat());
 }
 
 void VolumeOverlay::onVolumeChange(int multiplier) {
@@ -299,7 +299,7 @@ void VolumeOverlay::onVolumeChange(int multiplier) {
 void VolumeOverlay::onMasterVolumeChange(float newValue) {
     if(this->bVolumeInactiveToActiveScheduled) return;  // not very clean, but w/e
 
-    soundEngine->setVolume(newValue);
+    soundEngine->setMasterVolume(newValue);
 }
 
 void VolumeOverlay::onEffectVolumeChange() {
@@ -312,13 +312,13 @@ void VolumeOverlay::updateEffectVolume(Skin *skin) {
 
     float volume = cv::volume_effects.getFloat();
     for(auto &sound : skin->sounds) {
-        if(sound) sound->setVolume(volume);
+        if(sound) sound->setBaseVolume(volume);
     }
 }
 
 void VolumeOverlay::onMusicVolumeChange() {
     auto music = osu->getSelectedBeatmap()->getMusic();
     if(music != nullptr) {
-        music->setVolume(osu->getSelectedBeatmap()->getIdealVolume());
+        music->setBaseVolume(osu->getSelectedBeatmap()->getIdealVolume());
     }
 }

@@ -1,8 +1,10 @@
 // Copyright (c) 2014, PG, All rights reserved.
-#include "BassSoundEngine.h"
+#include "BaseEnvironment.h"
 
 #ifdef MCENGINE_FEATURE_BASS
 
+#include "BassManager.h"
+#include "BassSoundEngine.h"
 #include "Beatmap.h"
 #include "CBaseUILabel.h"
 #include "ConVar.h"
@@ -440,7 +442,7 @@ void BassSoundEngine::shutdown() {
     BASS_Free();  // free "No sound" device
 }
 
-bool BassSoundEngine::play(Sound *snd, f32 pan, f32 pitch, f32 volume) {
+bool BassSoundEngine::play(Sound *snd, f32 pan, f32 pitch, f32 playVolume) {
     if(!this->isReady() || !snd || !snd->isReady()) return false;
 
     auto bassSound = snd->as<BassSound>();
@@ -451,13 +453,13 @@ bool BassSoundEngine::play(Sound *snd, f32 pan, f32 pitch, f32 volume) {
         return false;
     }
 
-    auto handle = bassSound->getNewHandle(volume);
-    if(!handle.channel) {
+    auto handle = bassSound->getNewHandle();
+    if(!handle) {
         debugLog("BassSoundEngine::play() failed to get channel, errorcode {:d}\n", BASS_ErrorGetCode());
         return false;
     }
 
-    if(bassSound->fLastPlayTime == engine->getTime()) {
+    if(bassSound->getLastPlayTime() == engine->getTime()) {
         if(cv::debug_snd.getBool()) {
             debugLog("Played {} twice in the same update loop!\n", snd->getName());
         }
@@ -465,20 +467,20 @@ bool BassSoundEngine::play(Sound *snd, f32 pan, f32 pitch, f32 volume) {
             return false;
         }
     }
-    bassSound->fLastPlayTime = engine->getTime();
+    bassSound->setLastPlayTime(engine->getTime());
 
     // NOTE: BASS documentation says setting FREQ/PAN/VOL won't work on DECODE streams, but it works just fine...
     pan = std::clamp<float>(pan, -1.0f, 1.0f);
-    BASS_ChannelSetAttribute(handle.channel, BASS_ATTRIB_VOL, handle.base_volume * bassSound->fVolume);
-    BASS_ChannelSetAttribute(handle.channel, BASS_ATTRIB_PAN, pan);
-    BASS_ChannelSetAttribute(handle.channel, BASS_ATTRIB_NORAMP, bassSound->isStream() ? 0 : 1);
+    BASS_ChannelSetAttribute(handle, BASS_ATTRIB_VOL, bassSound->getBaseVolume() * playVolume);
+    BASS_ChannelSetAttribute(handle, BASS_ATTRIB_PAN, pan);
+    BASS_ChannelSetAttribute(handle, BASS_ATTRIB_NORAMP, bassSound->isStream() ? 0 : 1);
     if(pitch != 0.0f) {
         f32 freq = cv::snd_freq.getFloat();
-        BASS_ChannelGetAttribute(handle.channel, BASS_ATTRIB_FREQ, &freq);
-        BASS_ChannelSetAttribute(handle.channel, BASS_ATTRIB_FREQ, std::pow(2.0f, pitch) * freq);
+        BASS_ChannelGetAttribute(handle, BASS_ATTRIB_FREQ, &freq);
+        BASS_ChannelSetAttribute(handle, BASS_ATTRIB_FREQ, std::pow(2.0f, pitch) * freq);
     }
 
-    BASS_ChannelFlags(handle.channel, bassSound->isLooped() ? BASS_SAMPLE_LOOP : 0, BASS_SAMPLE_LOOP);
+    BASS_ChannelFlags(handle, bassSound->isLooped() ? BASS_SAMPLE_LOOP : 0, BASS_SAMPLE_LOOP);
 
     if(bassSound->bPaused) {
         assert(bassSound->bStream);
@@ -488,7 +490,7 @@ bool BassSoundEngine::play(Sound *snd, f32 pan, f32 pitch, f32 volume) {
         return true;
     }
 
-    if(BASS_Mixer_ChannelGetMixer(handle.channel) != 0) {
+    if(BASS_Mixer_ChannelGetMixer(handle) != 0) {
         if(cv::debug_snd.getBool()) {
             debugLog("Attempted to play {}, but channel is already playing!", snd->getName());
         }
@@ -498,14 +500,13 @@ bool BassSoundEngine::play(Sound *snd, f32 pan, f32 pitch, f32 volume) {
     auto flags = BASS_MIXER_DOWNMIX | BASS_MIXER_NORAMPIN;
     if(!snd->isStream()) flags |= BASS_STREAM_AUTOFREE;
 
-    if(!BASS_Mixer_StreamAddChannel(this->g_bassOutputMixer, handle.channel, flags)) {
+    if(!BASS_Mixer_StreamAddChannel(this->g_bassOutputMixer, handle, flags)) {
         debugLog("BASS_Mixer_StreamAddChannel() failed ({:d})!\n", BASS_ErrorGetCode());
 
         // We called getNewHandle(), and it created a new channel. But since it wasn't
         // added to any mixer, it will never get AUTOFREEd - so we need to free it here.
         if(!snd->isStream()) {
-            bassSound->getActiveHandles();  // removes it from bassSound->mixer_handles since it's not active
-            BASS_ChannelFree(handle.channel);
+            BASS_ChannelFree(handle);
         }
 
         return false;
@@ -527,6 +528,9 @@ bool BassSoundEngine::play(Sound *snd, f32 pan, f32 pitch, f32 volume) {
     if(cv::debug_snd.getBool()) {
         debugLog("Playing {:s}\n", bassSound->getFilePath().c_str());
     }
+
+    PlaybackParams newParams{.pan = pan, .pitch = pitch, .volume = playVolume};
+    bassSound->addActiveInstance(handle, newParams);
 
     return true;
 }
@@ -555,8 +559,8 @@ void BassSoundEngine::stop(Sound *snd) {
         bassSound->bPaused = true;
         bassSound->setPositionMS(0);
     } else {
-        for(auto &handle : bassSound->getActiveHandles()) {
-            BASS_Mixer_ChannelRemove(handle.channel);
+        for(auto &[handle, _] : bassSound->getActiveHandles()) {
+            BASS_Mixer_ChannelRemove(handle);
             // sample channels get AUTOFREEd
         }
     }
@@ -620,7 +624,7 @@ void BassSoundEngine::setOutputDevice(const SoundEngine::OUTPUT_DEVICE &device) 
     }
 }
 
-void BassSoundEngine::setVolume(float volume) {
+void BassSoundEngine::setMasterVolume(float volume) {
     if(!this->isReady()) return;
 
     this->fMasterVolume = std::clamp<float>(volume, 0.0f, 1.0f);

@@ -3,54 +3,15 @@
 
 #ifdef MCENGINE_FEATURE_BASS
 
+#include <algorithm>
 #include <utility>
 
+#include "BassManager.h"
 #include "ConVar.h"
 #include "Engine.h"
 #include "File.h"
 #include "Osu.h"
 #include "ResourceManager.h"
-
-std::vector<BassHandle> BassSound::getActiveHandles() {
-    if(this->bStream) {
-        if(BASS_Mixer_ChannelGetMixer(this->stream) != 0) {
-            return {{
-                .channel = this->stream,
-                .base_volume = 1.f,
-            }};
-        } else {
-            return {};
-        }
-    } else {
-        // Only keep handles that are still playing
-        // (sample streams get AUTOFREEd so we don't need to do it here)
-        this->mixer_handles.erase(
-            std::remove_if(this->mixer_handles.begin(), this->mixer_handles.end(),
-                           [](const auto& handle) { return !BASS_Mixer_ChannelGetMixer(handle.channel); }),
-            this->mixer_handles.end());
-        return this->mixer_handles;
-    }
-}
-
-// Kind of bad naming, this gets an existing handle for streams, and creates a new one for samples
-BassHandle BassSound::getNewHandle(f32 volume) {
-    if(this->bStream) {
-        return {
-            .channel = this->stream,
-            .base_volume = 1.f,
-        };
-    } else {
-        // If we want to be able to control samples after playing them, we
-        // have to store them here, since bassmix only accepts DECODE streams.
-        auto chan = BASS_SampleGetChannel(this->sample, BASS_SAMCHAN_STREAM | BASS_STREAM_DECODE);
-        BassHandle handle{
-            .channel = chan,
-            .base_volume = volume,
-        };
-        this->mixer_handles.push_back(handle);
-        return handle;
-    }
-}
 
 void BassSound::init() {
     if(this->bIgnored || this->sFilePath.length() < 2 || !(this->bAsyncReady.load())) return;
@@ -144,12 +105,12 @@ void BassSound::destroy() {
         this->stream = 0;
     }
 
-    for(auto& handle : this->mixer_handles) {
-        BASS_Mixer_ChannelRemove(handle.channel);
-        BASS_ChannelStop(handle.channel);
-        BASS_ChannelFree(handle.channel);
+    for(const auto& [handle, _] : this->activeHandleCache) {
+        BASS_Mixer_ChannelRemove(handle);
+        BASS_ChannelStop(handle);
+        BASS_ChannelFree(handle);
     }
-    this->mixer_handles.clear();
+    this->activeHandleCache.clear();
 
     this->bStarted = false;
     this->bReady = false;
@@ -194,16 +155,6 @@ void BassSound::setPositionMS(u32 ms) {
     this->interpolator.reset(static_cast<f64>(ms), Timing::getTimeReal(), this->getSpeed());
 }
 
-void BassSound::setVolume(float volume) {
-    if(!this->bReady) return;
-
-    this->fVolume = std::clamp<float>(volume, 0.0f, 2.0f);
-
-    for(auto& handle : this->getActiveHandles()) {
-        BASS_ChannelSetAttribute(handle.channel, BASS_ATTRIB_VOL, handle.base_volume * this->fVolume);
-    }
-}
-
 void BassSound::setSpeed(float speed) {
     if(!this->bReady) return;
     assert(this->bStream);  // can't call setSpeed() on a sample
@@ -230,8 +181,8 @@ void BassSound::setFrequency(float frequency) {
 
     frequency = (frequency > 99.0f ? std::clamp<float>(frequency, 100.0f, 100000.0f) : 0.0f);
 
-    for(auto& handle : this->getActiveHandles()) {
-        BASS_ChannelSetAttribute(handle.channel, BASS_ATTRIB_FREQ, frequency);
+    for(const auto& [handle, _] : this->getActiveHandles()) {
+        BASS_ChannelSetAttribute(handle, BASS_ATTRIB_FREQ, frequency);
     }
 }
 
@@ -240,8 +191,8 @@ void BassSound::setPan(float pan) {
 
     this->fPan = std::clamp<float>(pan, -1.0f, 1.0f);
 
-    for(auto& handle : this->getActiveHandles()) {
-        BASS_ChannelSetAttribute(handle.channel, BASS_ATTRIB_PAN, this->fPan);
+    for(const auto& [handle, _] : this->getActiveHandles()) {
+        BASS_ChannelSetAttribute(handle, BASS_ATTRIB_PAN, this->fPan);
     }
 }
 
@@ -318,6 +269,23 @@ bool BassSound::isFinished() { return this->getPositionMS() >= this->getLengthMS
 void BassSound::rebuild(std::string newFilePath) {
     this->sFilePath = std::move(newFilePath);
     resourceManager->reloadResource(this);
+}
+
+bool BassSound::isHandleValid(SOUNDHANDLE queryHandle) const { return BASS_Mixer_ChannelGetMixer(queryHandle); }
+
+void BassSound::setHandleVolume(SOUNDHANDLE handle, float volume) {
+    BASS_ChannelSetAttribute(handle, BASS_ATTRIB_VOL, volume);
+}
+
+// Kind of bad naming, this gets an existing handle for streams, and creates a new one for samples
+// Will be stored in active instances if playback succeeds
+SOUNDHANDLE BassSound::getNewHandle() {
+    if(this->bStream) {
+        return this->stream;
+    } else {
+        auto chan = BASS_SampleGetChannel(this->sample, BASS_SAMCHAN_STREAM | BASS_STREAM_DECODE);
+        return chan;
+    }
 }
 
 #endif

@@ -1,9 +1,10 @@
 #pragma once
 // Copyright (c) 2014, PG, All rights reserved.
 
-#include <memory>
 #include "Resource.h"
 #include "PlaybackInterpolator.h"
+
+#include <map>
 
 #define SOUND_TYPE(ClassName, TypeID, ParentClass)                      \
     static constexpr TypeId TYPE_ID = TypeID;                           \
@@ -15,6 +16,12 @@
 class SoundEngine;
 
 using SOUNDHANDLE = uint32_t;
+
+struct PlaybackParams {
+    float pan{0.f};
+    float pitch{0.f};
+    float volume{1.f};
+};
 
 class Sound : public Resource {
     friend class SoundEngine;
@@ -31,14 +38,15 @@ class Sound : public Resource {
     static Sound *createSound(std::string filepath, bool stream, bool overlayable, bool loop);
 
     virtual void setPositionMS(u32 ms) = 0;
-
-    virtual void setVolume(float volume) = 0;
     virtual void setSpeed(float speed) = 0;
     virtual void setPitch(float pitch) { this->fPitch = pitch; }
     virtual void setFrequency(float frequency) = 0;
     virtual void setPan(float pan) = 0;
     virtual void setLoop(bool loop) = 0;
+    // NOTE: this will also update currently playing handle(s) for this sound
+    void setBaseVolume(float volume);
 
+    inline float getBaseVolume() { return this->fBaseVolume; }
     virtual float getPosition() = 0;
     virtual u32 getPositionMS() = 0;
     virtual u32 getLengthMS() = 0;
@@ -86,6 +94,31 @@ class Sound : public Resource {
     inline void setLastPlayTime(f64 lastPlayTime) { this->fLastPlayTime = lastPlayTime; }
     [[nodiscard]] constexpr f64 getLastPlayTime() const { return this->fLastPlayTime; }
 
+    // backend-specific query
+    virtual bool isHandleValid(SOUNDHANDLE queryHandle) const = 0;
+    // backend-specific setter
+    virtual void setHandleVolume(SOUNDHANDLE handle, float volume) = 0;
+
+    // currently playing sound instances (updates cache)
+    std::map<SOUNDHANDLE, PlaybackParams> getActiveHandles();
+    inline void addActiveInstance(SOUNDHANDLE handle, PlaybackParams instance) { this->activeHandleCache[handle] = instance; }
+
+    PlaybackInterpolator interpolator;
+
+    std::map<SOUNDHANDLE, PlaybackParams> activeHandleCache;
+
+    f64 fLastPlayTime{0.0};
+
+    float fPan{0.0f};
+    float fSpeed{1.0f};
+    float fPitch{1.0f};
+
+    // persistent across all plays for the sound object, only modifiable by setBaseVolume
+    float fBaseVolume{1.0f};
+
+    u32 paused_position_ms{0};
+    u32 length{0};
+
     bool bStream;
     bool bIsLooped;
     bool bIsOverlayable;
@@ -93,16 +126,6 @@ class Sound : public Resource {
     bool bIgnored{false};  // early check for audio file validity
     bool bStarted{false};
     bool bPaused{false};
-
-    float fPan{0.0f};
-    float fSpeed{1.0f};
-    float fPitch{1.0f};
-    float fVolume{1.0f};
-    f64 fLastPlayTime{0.0};
-    u32 paused_position_ms{0};
-    u32 length{0};
-
-    PlaybackInterpolator interpolator;
 
    private:
     static bool isValidAudioFile(const std::string &filePath, const std::string &fileExt);

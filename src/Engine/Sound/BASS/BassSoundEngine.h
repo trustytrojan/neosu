@@ -7,18 +7,17 @@
 
 class Sound;
 
+#ifndef BASSASIO_H
+struct BASS_ASIO_INFO;
+#endif
+
 class BassSoundEngine final : public SoundEngine {
+    NOCOPY_NOMOVE(BassSoundEngine)
     friend class BassSound;
 
    public:
     BassSoundEngine();
     ~BassSoundEngine() override;
-
-    BassSoundEngine &operator=(const BassSoundEngine &) = delete;
-    BassSoundEngine &operator=(BassSoundEngine &&) = delete;
-
-    BassSoundEngine(const BassSoundEngine &) = delete;
-    BassSoundEngine(BassSoundEngine &&) = delete;
 
     void restart() override;
     void shutdown() override;
@@ -31,7 +30,7 @@ class BassSoundEngine final : public SoundEngine {
     bool hasExclusiveOutput() override;
 
     void setOutputDevice(const OUTPUT_DEVICE &device) override;
-    void setVolume(float volume) override;
+    void setMasterVolume(float volume) override;
 
     void updateOutputDevices(bool printInfo) override;
     bool initializeOutputDevice(const OUTPUT_DEVICE &device) override;

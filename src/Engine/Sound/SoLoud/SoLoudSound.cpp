@@ -135,7 +135,7 @@ void SoLoudSound::destroy() {
     this->fPitch = 1.0f;
     this->fSpeed = 1.0f;
     this->fPan = 0.0f;
-    this->fVolume = 1.0f;
+    this->activeHandleCache.clear();
     this->fLastPlayTime = 0.0f;
     this->bIgnored = false;
     this->bAsyncReady = false;
@@ -158,18 +158,6 @@ void SoLoudSound::setPositionMS(u32 ms) {
 
     // reset position interp vars
     this->interpolator.reset(getStreamPositionInSeconds() / 1000.0, Timing::getTimeReal(), getSpeed());
-}
-
-void SoLoudSound::setVolume(float volume) {
-    if(!this->bReady) return;
-
-    if(!this->valid_handle_cached()) return;
-
-    // don't change volume of samples, they're short enough it shouldn't matter anyway
-    if(!this->bStream) return;
-
-    // apply to the voice handle (i.e. most recently played instance of this sound)
-    soloud->setVolume(this->handle, this->fVolume);
 }
 
 void SoLoudSound::setSpeed(float speed) {
@@ -287,11 +275,6 @@ void SoLoudSound::setLoop(bool loop) {
     }
 }
 
-void SoLoudSound::setOverlayable(bool overlayable) {
-    this->bIsOverlayable = overlayable;
-    if(this->audioSource) this->audioSource->setSingleInstance(!overlayable);
-}
-
 float SoLoudSound::getPosition() {
     if(!this->bReady || !this->audioSource || !this->handle) return 0.0f;
 
@@ -349,6 +332,17 @@ bool SoLoudSound::isFinished() {
 void SoLoudSound::rebuild(std::string newFilePath) {
     this->sFilePath = std::move(newFilePath);
     resourceManager->reloadResource(this);
+}
+
+bool SoLoudSound::isHandleValid(SOUNDHANDLE queryHandle) const {
+    return queryHandle != 0 && this->isReady() && soloud && soloud->isValidVoiceHandle(queryHandle);
+}
+
+void SoLoudSound::setHandleVolume(SOUNDHANDLE handle, float volume) {
+    if(handle != 0 && this->isReady() && soloud) {
+        // soloud does not support amplified (>1.0f) volume
+        soloud->setVolume(handle, std::clamp<float>(volume, 0.f, 1.f));
+    }
 }
 
 // soloud-specific accessors

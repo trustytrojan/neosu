@@ -50,6 +50,7 @@
 
 #include "SoundEngine.h"
 #if defined(MCENGINE_PLATFORM_WINDOWS) && defined(MCENGINE_FEATURE_BASS)
+#include "BassManager.h"
 #include "BassSoundEngine.h"  // for ASIO-specific stuff
 #endif
 
@@ -3151,7 +3152,7 @@ void OptionsMenu::onLoudnessNormalizationToggle(CBaseUICheckbox *checkbox) {
 
     auto music = osu->getSelectedBeatmap()->getMusic();
     if(music != nullptr) {
-        music->setVolume(osu->getSelectedBeatmap()->getIdealVolume());
+        music->setBaseVolume(osu->getSelectedBeatmap()->getIdealVolume());
     }
 
     if(cv::normalize_loudness.getBool()) {

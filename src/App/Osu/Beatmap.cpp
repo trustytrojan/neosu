@@ -1002,7 +1002,7 @@ void Beatmap::seekMS(u32 ms) {
     this->fWaitTime = 0.0f;
 
     this->music->setPositionMS(ms);
-    this->music->setVolume(this->getIdealVolume());
+    this->music->setBaseVolume(this->getIdealVolume());
     this->music->setSpeed(this->getSpeedMultiplier());
 
     this->resetHitObjects(ms);
@@ -1509,7 +1509,7 @@ void Beatmap::handlePreviewPlay() {
                 this->bWasSeekFrame = true;
             }
 
-            this->music->setVolume(this->getIdealVolume());
+            this->music->setBaseVolume(this->getIdealVolume());
             this->music->setSpeed(this->getSpeedMultiplier());
         }
     }
@@ -1533,7 +1533,7 @@ void Beatmap::loadMusic(bool stream) {
 
         this->music = resourceManager->loadSoundAbs(this->selectedDifficulty2->getFullSoundFilePath(), "BEATMAP_MUSIC",
                                                     stream, false, false);
-        this->music->setVolume(this->getIdealVolume());
+        this->music->setBaseVolume(this->getIdealVolume());
         this->fMusicFrequencyBackup = this->music->getFrequency();
         this->music->setSpeed(this->getSpeedMultiplier());
     }
@@ -2303,7 +2303,7 @@ void Beatmap::update2() {
                     this->music->setLoop(false);
                     this->music->setPositionMS(0);
                     this->bWasSeekFrame = true;
-                    this->music->setVolume(this->getIdealVolume());
+                    this->music->setBaseVolume(this->getIdealVolume());
                     this->music->setSpeed(this->getSpeedMultiplier());
 
                     // if we are quick restarting, jump just before the first hitobject (even if there is a long waiting

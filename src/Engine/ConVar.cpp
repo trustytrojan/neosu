@@ -469,7 +469,7 @@ void _echo(const UString &args) {
 
 void _volume(const UString & /*oldValue*/, const UString &newValue) {
     if(!soundEngine) return;
-    soundEngine->setVolume(newValue.toFloat());
+    soundEngine->setMasterVolume(newValue.toFloat());
 }
 
 void _vprof(float newValue) {

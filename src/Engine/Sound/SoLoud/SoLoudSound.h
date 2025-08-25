@@ -19,6 +19,7 @@ class SLFXStream;
 extern std::unique_ptr<SoLoud::Soloud> soloud;
 
 class SoLoudSound final : public Sound {
+    NOCOPY_NOMOVE(SoLoudSound)
     friend class SoLoudSoundEngine;
 
    public:
@@ -26,15 +27,8 @@ class SoLoudSound final : public Sound {
         : Sound(std::move(filepath), stream, overlayable, loop) {}
     ~SoLoudSound() override;
 
-    SoLoudSound &operator=(const SoLoudSound &) = delete;
-    SoLoudSound &operator=(SoLoudSound &&) = delete;
-
-    SoLoudSound(const SoLoudSound &) = delete;
-    SoLoudSound(SoLoudSound &&) = delete;
-
     // Sound interface implementation
     void setPositionMS(u32 ms) override;
-    void setVolume(float volume) override;
     void setSpeed(float speed) override;
     void setPitch(float pitch) override;
     void setFrequency(float frequency) override;
@@ -55,12 +49,15 @@ class SoLoudSound final : public Sound {
 
     // inspection
     SOUND_TYPE(SoLoudSound, SOLOUD, Sound)
-   private:
+   protected:
     void init() override;
     void initAsync() override;
     void destroy() override;
 
-    void setOverlayable(bool overlayable);
+    void setHandleVolume(SOUNDHANDLE handle, float volume) override;
+    [[nodiscard]] bool isHandleValid(SOUNDHANDLE queryHandle) const override;
+
+   private:
     SOUNDHANDLE getHandle();
 
     // helpers to access Wav/SLFXStream internals
@@ -73,7 +70,7 @@ class SoLoudSound final : public Sound {
 
     // SoLoud-specific members
     SoLoud::AudioSource *audioSource{nullptr};  // base class pointer, could be either SLFXStream or Wav
-    SOUNDHANDLE handle{0};                      // current voice (i.e. "Sound") handle
+    SOUNDHANDLE handle{0};                      // most recently played instance of this sound
 
     // these are some caching workarounds for limitations of the main soloud instance running on the main thread
     // while its device audio callback being threaded (possibly, not necessarily, pulseaudio + miniaudio creates

@@ -2,19 +2,11 @@
 
 #include "Sound.h"
 #ifdef MCENGINE_FEATURE_BASS
-#include "BassManager.h"
 
-#include <vector>
 class BassSoundEngine;
 
-struct BassHandle {
-    HCHANNEL channel;
-
-    // Volume of the channel *before* applying BassSound->fVolume
-    f32 base_volume;
-};
-
 class BassSound final : public Sound {
+    NOCOPY_NOMOVE(BassSound);
     friend class BassSoundEngine;
 
    public:
@@ -22,15 +14,8 @@ class BassSound final : public Sound {
         : Sound(std::move(filepath), stream, overlayable, loop) {};
     ~BassSound() override { this->destroy(); }
 
-    BassSound &operator=(const BassSound &) = delete;
-    BassSound &operator=(BassSound &&) = delete;
-
-    BassSound(const BassSound &) = delete;
-    BassSound(BassSound &&) = delete;
-
     void setPositionMS(u32 ms) override;
 
-    void setVolume(float volume) override;
     void setSpeed(float speed) override;
     void setFrequency(float frequency) override;
     void setPan(float pan) override;
@@ -50,15 +35,17 @@ class BassSound final : public Sound {
     // inspection
     SOUND_TYPE(BassSound, BASS, Sound)
 
-   private:
+   protected:
     void init() override;
     void initAsync() override;
     void destroy() override;
 
-    std::vector<BassHandle> getActiveHandles();
-    BassHandle getNewHandle(f32 volume);
+    void setHandleVolume(SOUNDHANDLE handle, float volume) override;
+    [[nodiscard]] bool isHandleValid(SOUNDHANDLE queryHandle) const override;
 
-    std::vector<BassHandle> mixer_handles;
+   private:
+    SOUNDHANDLE getNewHandle();
+
     SOUNDHANDLE stream{0};
     SOUNDHANDLE sample{0};
 };

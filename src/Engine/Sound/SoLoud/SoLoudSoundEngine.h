@@ -32,21 +32,23 @@ class SoLoudSoundEngine final : public SoundEngine {
 
     void restart() override;
 
-    bool play(Sound *snd, f32 pan = 0.f, f32 pitch = 0.f, f32 volume = 1.f) override;
+    bool play(Sound *snd, f32 pan = 0.f, f32 pitch = 0.f, f32 playVolume = 1.f) override;
     void pause(Sound *snd) override;
     void stop(Sound *snd) override;
 
     inline bool isReady() override { return this->bReady; }
 
     void setOutputDevice(const OUTPUT_DEVICE &device) override;
-    void setVolume(float volume) override;
+    void setMasterVolume(float volume) override;
 
     void allowInternalCallbacks() override;
 
     SOUND_ENGINE_TYPE(SoLoudSoundEngine, SOLOUD, SoundEngine)
    private:
-    bool playSound(SoLoudSound *soloudSound, f32 pan, f32 pitch, f32 volume);
-    unsigned int playDirectSound(SoLoudSound *soloudSound, float pan, float pitch, float volume);
+    // internal helpers for play()
+    bool playSound(SoLoudSound *soloudSound, f32 pan, f32 pitch, f32 playVolume);
+    SOUNDHANDLE playDirectSound(SoLoudSound *soloudSound, f32 pan, f32 pitch, f32 effectiveVolume);
+    bool updateExistingSound(SoLoudSound *soloudSound, SOUNDHANDLE handle, f32 pan, f32 pitch, f32 playVolume);
 
     void setVolumeGradual(unsigned int handle, float targetVol, float fadeTimeMs = 10.0f);
     void updateOutputDevices(bool printInfo) override;

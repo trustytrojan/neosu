@@ -160,3 +160,20 @@ bool Sound::isValidAudioFile(const std::string& filePath, const std::string& fil
 
     return false;  // don't let unsupported formats be read
 }
+
+std::map<SOUNDHANDLE, PlaybackParams> Sound::getActiveHandles() {
+    // update cache with actual validity from backend
+    std::erase_if(this->activeHandleCache,
+                  [this](const auto &handleInstance ) { return !this->isHandleValid(handleInstance.first); });
+    return this->activeHandleCache;
+}
+
+void Sound::setBaseVolume(float volume) {
+    this->fBaseVolume = std::clamp<float>(volume, 0.0f, 2.0f);
+
+    // propagate the changed volume to the active voice handles
+    for(const auto& [handle, instance] : this->getActiveHandles()) {
+        const auto &vol = instance.volume;
+        this->setHandleVolume(handle, this->fBaseVolume * vol);
+    }
+}
