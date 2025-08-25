@@ -650,43 +650,49 @@ void Skin::load() {
 
     // silder slides
     this->loadSound(this->normalSliderSlide, "normal-sliderslide", "SKIN_NORMALSLIDERSLIDE_SND",  //
-                    NOT_OVERLAYABLE, STREAM, LOOPING);                                            //
+                    NOT_OVERLAYABLE, SAMPLE, LOOPING);                                            //
     this->loadSound(this->softSliderSlide, "soft-sliderslide", "SKIN_SOFTSLIDERSLIDE_SND",        //
-                    NOT_OVERLAYABLE, STREAM, LOOPING);                                            //
+                    NOT_OVERLAYABLE, SAMPLE, LOOPING);                                            //
     this->loadSound(this->drumSliderSlide, "drum-sliderslide", "SKIN_DRUMSLIDERSLIDE_SND",        //
-                    NOT_OVERLAYABLE, STREAM, LOOPING);                                            //
+                    NOT_OVERLAYABLE, SAMPLE, LOOPING);                                            //
 
     // slider whistles
     this->loadSound(this->normalSliderWhistle, "normal-sliderwhistle", "SKIN_NORMALSLIDERWHISTLE_SND",  //
-                    NOT_OVERLAYABLE, STREAM, LOOPING);                                                  //
+                    NOT_OVERLAYABLE, SAMPLE, LOOPING);                                                  //
     this->loadSound(this->softSliderWhistle, "soft-sliderwhistle", "SKIN_SOFTSLIDERWHISTLE_SND",        //
-                    NOT_OVERLAYABLE, STREAM, LOOPING);                                                  //
+                    NOT_OVERLAYABLE, SAMPLE, LOOPING);                                                  //
     this->loadSound(this->drumSliderWhistle, "drum-sliderwhistle", "SKIN_DRUMSLIDERWHISTLE_SND",        //
-                    NOT_OVERLAYABLE, STREAM, LOOPING);                                                  //
+                    NOT_OVERLAYABLE, SAMPLE, LOOPING);                                                  //
 
-    // sounds
-
-    // samples
-    this->loadSound(this->normalHitNormal, "normal-hitnormal", "SKIN_NORMALHITNORMAL_SND", true, true, false, true,
-                    0.8f);
-    this->loadSound(this->normalHitWhistle, "normal-hitwhistle", "SKIN_NORMALHITWHISTLE_SND", true, true, false, true,
-                    0.85f);
-    this->loadSound(this->normalHitFinish, "normal-hitfinish", "SKIN_NORMALHITFINISH_SND", true, true);
-    this->loadSound(this->normalHitClap, "normal-hitclap", "SKIN_NORMALHITCLAP_SND", true, true, false, true, 0.85f);
-
-    this->loadSound(this->softHitNormal, "soft-hitnormal", "SKIN_SOFTHITNORMAL_SND", true, true, false, true, 0.8f);
-    this->loadSound(this->softHitWhistle, "soft-hitwhistle", "SKIN_SOFTHITWHISTLE_SND", true, true, false, true, 0.85f);
-    this->loadSound(this->softHitFinish, "soft-hitfinish", "SKIN_SOFTHITFINISH_SND", true, true);
-    this->loadSound(this->softHitClap, "soft-hitclap", "SKIN_SOFTHITCLAP_SND", true, true, false, true, 0.85f);
-
-    this->loadSound(this->drumHitNormal, "drum-hitnormal", "SKIN_DRUMHITNORMAL_SND", true, true, false, true, 0.8f);
-    this->loadSound(this->drumHitWhistle, "drum-hitwhistle", "SKIN_DRUMHITWHISTLE_SND", true, true, false, true, 0.85f);
-    this->loadSound(this->drumHitFinish, "drum-hitfinish", "SKIN_DRUMHITFINISH_SND", true, true);
-    this->loadSound(this->drumHitClap, "drum-hitclap", "SKIN_DRUMHITCLAP_SND", true, true, false, true, 0.85f);
+    // hitcircle
+    this->loadSound(this->normalHitNormal, "normal-hitnormal", "SKIN_NORMALHITNORMAL_SND",     //
+                    OVERLAYABLE, SAMPLE, NOT_LOOPING, true, 0.8f);                             //
+    this->loadSound(this->softHitNormal, "soft-hitnormal", "SKIN_SOFTHITNORMAL_SND",           //
+                    OVERLAYABLE, SAMPLE, NOT_LOOPING, true, 0.8f);                             //
+    this->loadSound(this->drumHitNormal, "drum-hitnormal", "SKIN_DRUMHITNORMAL_SND",           //
+                    OVERLAYABLE, SAMPLE, NOT_LOOPING, true, 0.8f);                             //
+    this->loadSound(this->normalHitWhistle, "normal-hitwhistle", "SKIN_NORMALHITWHISTLE_SND",  //
+                    OVERLAYABLE, SAMPLE, NOT_LOOPING, true, 0.85f);                            //
+    this->loadSound(this->softHitWhistle, "soft-hitwhistle", "SKIN_SOFTHITWHISTLE_SND",        //
+                    OVERLAYABLE, SAMPLE, NOT_LOOPING, true, 0.85f);                            //
+    this->loadSound(this->drumHitWhistle, "drum-hitwhistle", "SKIN_DRUMHITWHISTLE_SND",        //
+                    OVERLAYABLE, SAMPLE, NOT_LOOPING, true, 0.85f);                            //
+    this->loadSound(this->normalHitFinish, "normal-hitfinish", "SKIN_NORMALHITFINISH_SND",     //
+                    OVERLAYABLE, SAMPLE, NOT_LOOPING, true, 1.f);                              //
+    this->loadSound(this->softHitFinish, "soft-hitfinish", "SKIN_SOFTHITFINISH_SND",           //
+                    OVERLAYABLE, SAMPLE, NOT_LOOPING, true, 1.f);                              //
+    this->loadSound(this->drumHitFinish, "drum-hitfinish", "SKIN_DRUMHITFINISH_SND",           //
+                    OVERLAYABLE, SAMPLE, NOT_LOOPING, true, 1.f);                              //
+    this->loadSound(this->normalHitClap, "normal-hitclap", "SKIN_NORMALHITCLAP_SND",           //
+                    OVERLAYABLE, SAMPLE, NOT_LOOPING, true, 0.85f);                            //
+    this->loadSound(this->softHitClap, "soft-hitclap", "SKIN_SOFTHITCLAP_SND",                 //
+                    OVERLAYABLE, SAMPLE, NOT_LOOPING, true, 0.85f);                            //
+    this->loadSound(this->drumHitClap, "drum-hitclap", "SKIN_DRUMHITCLAP_SND",                 //
+                    OVERLAYABLE, SAMPLE, NOT_LOOPING, true, 0.85f);                            //
 
     // spinner
     this->loadSound(this->spinnerBonus, "spinnerbonus", "SKIN_SPINNERBONUS_SND", OVERLAYABLE, SAMPLE, NOT_LOOPING);
-    this->loadSound(this->spinnerSpinSound, "spinnerspin", "SKIN_SPINNERSPIN_SND", NOT_OVERLAYABLE, STREAM, LOOPING);
+    this->loadSound(this->spinnerSpinSound, "spinnerspin", "SKIN_SPINNERSPIN_SND", NOT_OVERLAYABLE, SAMPLE, LOOPING);
 
     // others
     this->loadSound(this->combobreak, "combobreak", "SKIN_COMBOBREAK_SND", true, true);

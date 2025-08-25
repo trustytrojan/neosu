@@ -451,11 +451,25 @@ bool BassSoundEngine::play(Sound *snd, float pan, float pitch) {
     if(!this->isReady() || !snd || !snd->isReady()) return false;
 
     auto bassSound = (BassSound *)snd;
+    if(!bassSound->isStream() && !bassSound->isOverlayable() && !bassSound->getActiveChannels().empty()) {
+        if(cv::debug_snd.getBool()) {
+            debugLog("Attempted to play non-overlayable {} while it's still playing!\n", snd->getName());
+        }
+        return false;
+    }
+
     auto channel = (SOUNDHANDLE)bassSound->getChannel();
     if(!channel) {
         debugLog("BassSoundEngine::play() failed to get channel, errorcode {:d}\n", BASS_ErrorGetCode());
         return false;
     }
+
+    if(bassSound->fLastPlayTime == engine->getTime()) {
+        if(cv::debug_snd.getBool()) {
+            debugLog("Played {} twice in the same update loop!\n", snd->getName());
+        }
+    }
+    bassSound->fLastPlayTime = engine->getTime();
 
     pan = std::clamp<float>(pan, -1.0f, 1.0f);
     BASS_ChannelSetAttribute(channel, BASS_ATTRIB_VOL, bassSound->fVolume);
@@ -470,6 +484,7 @@ bool BassSoundEngine::play(Sound *snd, float pan, float pitch) {
     BASS_ChannelFlags(channel, bassSound->isLooped() ? BASS_SAMPLE_LOOP : 0, BASS_SAMPLE_LOOP);
 
     if(bassSound->bPaused) {
+        assert(bassSound->bStream);
         bassSound->bPaused = false;
         BASS_Mixer_ChannelFlags(bassSound->stream, 0, BASS_MIXER_CHAN_PAUSE);
         bassSound->interpolator.reset((f64)bassSound->paused_position_ms, Timing::getTimeReal(), bassSound->getSpeed());
@@ -482,6 +497,14 @@ bool BassSoundEngine::play(Sound *snd, float pan, float pitch) {
 
     if(!BASS_Mixer_StreamAddChannel(this->g_bassOutputMixer, channel, flags)) {
         debugLog("BASS_Mixer_StreamAddChannel() failed ({:d})!\n", BASS_ErrorGetCode());
+
+        // Since getChannel() *creates* a new channel for samples, and it won't get AUTOFREEd
+        // without being added to the mixer, we need to free it manually here
+        if(!snd->isStream()) {
+            bassSound->getActiveChannels();  // removes it from bassSound->mixer_channels since it's not playing
+            BASS_ChannelFree(channel);
+        }
+
         return false;
     }
 
@@ -520,14 +543,20 @@ void BassSoundEngine::pause(Sound *snd) {
 
 void BassSoundEngine::stop(Sound *snd) {
     if(!this->isReady() || snd == nullptr || !snd->isReady()) return;
-    assert(snd->isStream());  // can't call stop() on a sample
 
     auto bassSound = (BassSound *)snd;
     if(!bassSound->isPlaying()) return;
 
-    BASS_Mixer_ChannelFlags(bassSound->stream, BASS_MIXER_CHAN_PAUSE, BASS_MIXER_CHAN_PAUSE);
-    bassSound->bPaused = true;
-    bassSound->setPositionMS(0);
+    if(snd->isStream()) {
+        BASS_Mixer_ChannelFlags(bassSound->stream, BASS_MIXER_CHAN_PAUSE, BASS_MIXER_CHAN_PAUSE);
+        bassSound->bPaused = true;
+        bassSound->setPositionMS(0);
+    } else {
+        for(auto chan : bassSound->getActiveChannels()) {
+            BASS_Mixer_ChannelRemove(chan);
+            // sample channels get AUTOFREEd
+        }
+    }
 }
 
 bool BassSoundEngine::isReady() {
