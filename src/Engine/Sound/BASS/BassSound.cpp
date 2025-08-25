@@ -179,6 +179,10 @@ void BassSound::setPositionMS(u32 ms) {
         }
     }
 
+    if(this->bPaused) {
+        this->paused_position_ms = ms;
+    }
+
     this->interpolator.reset(static_cast<f64>(ms), Timing::getTimeReal(), this->getSpeed());
 }
 
