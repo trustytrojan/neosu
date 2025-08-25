@@ -323,7 +323,9 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
 
                 // HitObjects
                 case 6: {
-                    std::pair<bool, size_t> err_line{false, 0};
+                    thread_local std::pair<bool, size_t> err_line;
+                    err_line.first = false;
+                    err_line.second = 0;
 
                     static auto upd_last_error = [&](bool parse_result_bad,
                                                      size_t line = std::source_location::current().line()) -> void {

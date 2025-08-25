@@ -4,7 +4,7 @@
 #include "Resource.h"
 #include "PlaybackInterpolator.h"
 
-#include <map>
+#include <unordered_map>
 
 #define SOUND_TYPE(ClassName, TypeID, ParentClass)                      \
     static constexpr TypeId TYPE_ID = TypeID;                           \
@@ -32,7 +32,9 @@ class Sound : public Resource {
 
    public:
     Sound(std::string filepath, bool stream, bool overlayable, bool loop)
-        : Resource(std::move(filepath)), bStream(stream), bIsLooped(loop), bIsOverlayable(overlayable) {}
+        : Resource(std::move(filepath)), bStream(stream), bIsLooped(loop), bIsOverlayable(overlayable) {
+        this->activeHandleCache.reserve(5);
+    }
 
     // Factory method to create the appropriate sound object
     static Sound *createSound(std::string filepath, bool stream, bool overlayable, bool loop);
@@ -100,12 +102,14 @@ class Sound : public Resource {
     virtual void setHandleVolume(SOUNDHANDLE handle, float volume) = 0;
 
     // currently playing sound instances (updates cache)
-    std::map<SOUNDHANDLE, PlaybackParams> getActiveHandles();
-    inline void addActiveInstance(SOUNDHANDLE handle, PlaybackParams instance) { this->activeHandleCache[handle] = instance; }
+    const std::unordered_map<SOUNDHANDLE, PlaybackParams> &getActiveHandles();
+    inline void addActiveInstance(SOUNDHANDLE handle, PlaybackParams instance) {
+        this->activeHandleCache[handle] = instance;
+    }
 
     PlaybackInterpolator interpolator;
 
-    std::map<SOUNDHANDLE, PlaybackParams> activeHandleCache;
+    std::unordered_map<SOUNDHANDLE, PlaybackParams> activeHandleCache;
 
     f64 fLastPlayTime{0.0};
 
