@@ -163,12 +163,22 @@ void SoLoudSound::setPositionMS(u32 ms) {
 void SoLoudSound::setVolume(float volume) {
     if(!this->bReady) return;
 
-    this->fVolume = std::clamp<float>(volume, 0.0f, 1.0f);
+    if(!this->valid_handle_cached()) return;
 
-    if(!this->handle) return;
+    float new_volume = std::clamp<float>(volume, 0.0f, 1.0f);
+
+    if(this->isOverlayable()) {
+        // apply the volume as a multiplier to the playing volume
+        // for overlayable sounds
+        // FIXME: this is spaghetti
+        float handle_volume = soloud->getVolume(this->handle);
+        float play_volume = handle_volume / this->fVolume;
+        this->fVolume = new_volume * play_volume;
+    } else {
+        this->fVolume = new_volume;
+    }
 
     // apply to the voice handle (i.e. most recently played instance of this sound)
-    // TODO: preserve 'play' volume
     soloud->setVolume(this->handle, this->fVolume);
 }
 
