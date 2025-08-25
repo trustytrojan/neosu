@@ -163,26 +163,13 @@ void SoLoudSound::setPositionMS(u32 ms) {
 void SoLoudSound::setVolume(float volume) {
     if(!this->bReady) return;
 
-    float current_stored_volume = this->fVolume;
-    float new_stored_volume = std::clamp<float>(volume, 0.0f, 1.0f);
-    this->fVolume = new_stored_volume;
-
     if(!this->valid_handle_cached()) return;
 
-    float play_volume = new_stored_volume;
-    if(!this->bStream) {
-        // apply the volume as a multiplier to the playing volume (for non-streams (spaghetti))
-        // FIXME: this means the volume can only be decreased during playback, never increased
-        if(current_stored_volume <= 0.f) { // don't divide by 0
-            play_volume = 0.f;
-        } else {
-            float current_handle_volume = soloud->getVolume(this->handle);
-            play_volume = new_stored_volume * (current_handle_volume / current_stored_volume);
-        }
-    }
+    // don't change volume of samples, they're short enough it shouldn't matter anyway
+    if(!this->bStream) return;
 
     // apply to the voice handle (i.e. most recently played instance of this sound)
-    soloud->setVolume(this->handle, play_volume);
+    soloud->setVolume(this->handle, this->fVolume);
 }
 
 void SoLoudSound::setSpeed(float speed) {
