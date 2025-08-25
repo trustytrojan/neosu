@@ -111,6 +111,11 @@ bool SoLoudSoundEngine::play(Sound *snd, f32 pan, f32 pitch, f32 volume) {
 bool SoLoudSoundEngine::playSound(SoLoudSound *soloudSound, f32 pan, f32 pitch, f32 volume) {
     if(!soloudSound) return false;
 
+    // check if we should allow playing this frame
+    const bool allowPlayFrame =
+        !cv::snd_restrict_play_frame.getBool() || engine->getTime() > soloudSound->getLastPlayTime();
+    if(!allowPlayFrame) return false;
+
     auto restorePos = 0.0;  // position in the track to potentially restore to
 
     // if the sound is already playing and not overlayable, stop it
@@ -161,6 +166,8 @@ bool SoLoudSoundEngine::playSound(SoLoudSound *soloudSound, f32 pan, f32 pitch, 
         soloudSound->handle = handle;
 
         if(restorePos != 0.0) soloud->seek(handle, restorePos);  // restore the position to where we were pre-pause
+
+        soloudSound->setLastPlayTime(engine->getTime());
 
         if(soloudSound->bStream)  // unpause and fade it in if it's a stream (since we started it paused with 0 volume)
         {
@@ -213,6 +220,7 @@ void SoLoudSoundEngine::pause(Sound *snd) {
     if(!soloudSound || soloudSound->handle == 0) return;
 
     soloud->setPause(soloudSound->handle, true);
+    soloudSound->setLastPlayTime(0.0);
 }
 
 void SoLoudSoundEngine::stop(Sound *snd) {
@@ -222,6 +230,7 @@ void SoLoudSoundEngine::stop(Sound *snd) {
     if(!soloudSound || soloudSound->handle == 0) return;
 
     soloudSound->setPositionMS(0);
+    soloudSound->setLastPlayTime(0.0);
     soloudSound->setFrequency(0.0);
     soloud->stop(soloudSound->handle);
     soloudSound->handle = 0;

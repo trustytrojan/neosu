@@ -83,6 +83,9 @@ class Sound : public Resource {
     void initAsync() override;
     void destroy() override = 0;
 
+    inline void setLastPlayTime(f64 lastPlayTime) { this->fLastPlayTime = lastPlayTime; }
+    [[nodiscard]] constexpr f64 getLastPlayTime() const { return this->fLastPlayTime; }
+
     bool bStream;
     bool bIsLooped;
     bool bIsOverlayable;
@@ -95,6 +98,7 @@ class Sound : public Resource {
     float fSpeed{1.0f};
     float fPitch{1.0f};
     float fVolume{1.0f};
+    f64 fLastPlayTime{0.0};
     u32 paused_position_ms{0};
     u32 length{0};
 

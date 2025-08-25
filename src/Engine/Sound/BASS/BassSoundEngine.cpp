@@ -461,6 +461,9 @@ bool BassSoundEngine::play(Sound *snd, f32 pan, f32 pitch, f32 volume) {
         if(cv::debug_snd.getBool()) {
             debugLog("Played {} twice in the same update loop!\n", snd->getName());
         }
+        if(cv::snd_restrict_play_frame.getBool()) {
+            return false;
+        }
     }
     bassSound->fLastPlayTime = engine->getTime();
 
