@@ -7,6 +7,13 @@
 #include <vector>
 class BassSoundEngine;
 
+struct BassHandle {
+    HCHANNEL channel;
+
+    // Volume of the channel *before* applying BassSound->fVolume
+    f32 base_volume;
+};
+
 class BassSound final : public Sound {
     friend class BassSoundEngine;
 
@@ -48,10 +55,10 @@ class BassSound final : public Sound {
     void initAsync() override;
     void destroy() override;
 
-    std::vector<HCHANNEL> getActiveChannels();
-    HCHANNEL getChannel();
+    std::vector<BassHandle> getActiveHandles();
+    BassHandle getNewHandle(f32 volume);
 
-    std::vector<HCHANNEL> mixer_channels;
+    std::vector<BassHandle> mixer_handles;
     SOUNDHANDLE stream{0};
     SOUNDHANDLE sample{0};
 };

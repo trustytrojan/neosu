@@ -478,7 +478,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                                   .y = (i32)y,
                                   .time = time,
                                   .endTime = 0,
-                                  .samples = {.hitSounds = (hitSounds & HitSoundType::VALID_HITSOUNDS)}};
+                                  .samples = {.hitSounds = (u8)(hitSounds & HitSoundType::VALID_HITSOUNDS)}};
 
                         err |= !Parsing::parse(csvs[5], &s.endTime);
 

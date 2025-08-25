@@ -11,36 +11,44 @@
 #include "Osu.h"
 #include "ResourceManager.h"
 
-std::vector<HCHANNEL> BassSound::getActiveChannels() {
-    std::vector<HCHANNEL> channels;
-
+std::vector<BassHandle> BassSound::getActiveHandles() {
     if(this->bStream) {
         if(BASS_Mixer_ChannelGetMixer(this->stream) != 0) {
-            channels.push_back(this->stream);
+            return {{
+                .channel = this->stream,
+                .base_volume = 1.f,
+            }};
+        } else {
+            return {};
         }
     } else {
-        for(auto chan : this->mixer_channels) {
-            if(BASS_Mixer_ChannelGetMixer(chan) != 0) {
-                channels.push_back(chan);
-            }
-        }
-
-        // Only keep channels that are still playing
-        this->mixer_channels = channels;
+        // Only keep handles that are still playing
+        // (sample streams get AUTOFREEd so we don't need to do it here)
+        this->mixer_handles.erase(
+            std::remove_if(this->mixer_handles.begin(), this->mixer_handles.end(),
+                           [](const auto& handle) { return !BASS_Mixer_ChannelGetMixer(handle.channel); }),
+            this->mixer_handles.end());
+        return this->mixer_handles;
     }
-
-    return channels;
 }
 
-HCHANNEL BassSound::getChannel() {
+// Kind of bad naming, this gets an existing handle for streams, and creates a new one for samples
+BassHandle BassSound::getNewHandle(f32 volume) {
     if(this->bStream) {
-        return this->stream;
+        return {
+            .channel = this->stream,
+            .base_volume = 1.f,
+        };
     } else {
         // If we want to be able to control samples after playing them, we
         // have to store them here, since bassmix only accepts DECODE streams.
         auto chan = BASS_SampleGetChannel(this->sample, BASS_SAMCHAN_STREAM | BASS_STREAM_DECODE);
-        this->mixer_channels.push_back(chan);
-        return chan;
+        BassHandle handle{
+            .channel = chan,
+            .base_volume = volume,
+        };
+        this->mixer_handles.push_back(handle);
+        return handle;
     }
 }
 
@@ -136,12 +144,12 @@ void BassSound::destroy() {
         this->stream = 0;
     }
 
-    for(auto chan : this->mixer_channels) {
-        BASS_Mixer_ChannelRemove(chan);
-        BASS_ChannelStop(chan);
-        BASS_ChannelFree(chan);
+    for(auto& handle : this->mixer_handles) {
+        BASS_Mixer_ChannelRemove(handle.channel);
+        BASS_ChannelStop(handle.channel);
+        BASS_ChannelFree(handle.channel);
     }
-    this->mixer_channels.clear();
+    this->mixer_handles.clear();
 
     this->bStarted = false;
     this->bReady = false;
@@ -189,17 +197,11 @@ void BassSound::setPositionMS(u32 ms) {
 void BassSound::setVolume(float volume) {
     if(!this->bReady) return;
 
-    f32 new_volume = std::clamp<float>(volume, 0.0f, 2.0f);
+    this->fVolume = std::clamp<float>(volume, 0.0f, 2.0f);
 
-    for(auto channel : this->getActiveChannels()) {
-        f32 chan_volume = 1.f;
-        BASS_ChannelGetAttribute(channel, BASS_ATTRIB_VOL, &chan_volume);
-
-        f32 play_volume = chan_volume / this->fVolume;
-        BASS_ChannelSetAttribute(channel, BASS_ATTRIB_VOL, new_volume * play_volume);
+    for(auto& handle : this->getActiveHandles()) {
+        BASS_ChannelSetAttribute(handle.channel, BASS_ATTRIB_VOL, handle.base_volume * this->fVolume);
     }
-
-    this->fVolume = new_volume;
 }
 
 void BassSound::setSpeed(float speed) {
@@ -228,8 +230,8 @@ void BassSound::setFrequency(float frequency) {
 
     frequency = (frequency > 99.0f ? std::clamp<float>(frequency, 100.0f, 100000.0f) : 0.0f);
 
-    for(auto channel : this->getActiveChannels()) {
-        BASS_ChannelSetAttribute(channel, BASS_ATTRIB_FREQ, frequency);
+    for(auto& handle : this->getActiveHandles()) {
+        BASS_ChannelSetAttribute(handle.channel, BASS_ATTRIB_FREQ, frequency);
     }
 }
 
@@ -238,8 +240,8 @@ void BassSound::setPan(float pan) {
 
     this->fPan = std::clamp<float>(pan, -1.0f, 1.0f);
 
-    for(auto channel : this->getActiveChannels()) {
-        BASS_ChannelSetAttribute(channel, BASS_ATTRIB_PAN, this->fPan);
+    for(auto& handle : this->getActiveHandles()) {
+        BASS_ChannelSetAttribute(handle.channel, BASS_ATTRIB_PAN, this->fPan);
     }
 }
 
@@ -308,7 +310,7 @@ float BassSound::getFrequency() {
 }
 
 bool BassSound::isPlaying() {
-    return this->bReady && this->bStarted && !this->bPaused && !this->getActiveChannels().empty();
+    return this->bReady && this->bStarted && !this->bPaused && !this->getActiveHandles().empty();
 }
 
 bool BassSound::isFinished() { return this->getPositionMS() >= this->getLengthMS(); }

@@ -385,7 +385,7 @@ bool BassSoundEngine::initializeOutputDevice(const SoundEngine::OUTPUT_DEVICE &d
             flags |= BASS_WASAPI_EXCLUSIVE | BASS_WASAPI_AUTOFORMAT;
         }
         if(!BASS_WASAPI_Init(device.id, 0, 0, flags, bufferSize, updatePeriod, WASAPIPROC_BASS,
-                             reinterpret_cast<void*>(g_bassOutputMixer))) {
+                             reinterpret_cast<void *>(static_cast<uintptr_t>(g_bassOutputMixer)))) {
             ready_since = -1.0;
             debugLog("BASS_WASAPI_Init() failed.\n");
             osu->notificationOverlay->addToast(BassManager::getErrorUString(), ERROR_TOAST);
@@ -444,15 +444,15 @@ bool BassSoundEngine::play(Sound *snd, f32 pan, f32 pitch, f32 volume) {
     if(!this->isReady() || !snd || !snd->isReady()) return false;
 
     auto bassSound = snd->as<BassSound>();
-    if(!bassSound->isStream() && !bassSound->isOverlayable() && !bassSound->getActiveChannels().empty()) {
+    if(!bassSound->isStream() && !bassSound->isOverlayable() && !bassSound->getActiveHandles().empty()) {
         if(cv::debug_snd.getBool()) {
             debugLog("Attempted to play non-overlayable {} while it's still playing!\n", snd->getName());
         }
         return false;
     }
 
-    auto channel = (SOUNDHANDLE)bassSound->getChannel();
-    if(!channel) {
+    auto handle = bassSound->getNewHandle(volume);
+    if(!handle.channel) {
         debugLog("BassSoundEngine::play() failed to get channel, errorcode {:d}\n", BASS_ErrorGetCode());
         return false;
     }
@@ -469,16 +469,16 @@ bool BassSoundEngine::play(Sound *snd, f32 pan, f32 pitch, f32 volume) {
 
     // NOTE: BASS documentation says setting FREQ/PAN/VOL won't work on DECODE streams, but it works just fine...
     pan = std::clamp<float>(pan, -1.0f, 1.0f);
-    BASS_ChannelSetAttribute(channel, BASS_ATTRIB_VOL, volume * bassSound->fVolume);
-    BASS_ChannelSetAttribute(channel, BASS_ATTRIB_PAN, pan);
-    BASS_ChannelSetAttribute(channel, BASS_ATTRIB_NORAMP, bassSound->isStream() ? 0 : 1);
+    BASS_ChannelSetAttribute(handle.channel, BASS_ATTRIB_VOL, handle.base_volume * bassSound->fVolume);
+    BASS_ChannelSetAttribute(handle.channel, BASS_ATTRIB_PAN, pan);
+    BASS_ChannelSetAttribute(handle.channel, BASS_ATTRIB_NORAMP, bassSound->isStream() ? 0 : 1);
     if(pitch != 0.0f) {
         f32 freq = cv::snd_freq.getFloat();
-        BASS_ChannelGetAttribute(channel, BASS_ATTRIB_FREQ, &freq);
-        BASS_ChannelSetAttribute(channel, BASS_ATTRIB_FREQ, std::pow(2.0f, pitch) * freq);
+        BASS_ChannelGetAttribute(handle.channel, BASS_ATTRIB_FREQ, &freq);
+        BASS_ChannelSetAttribute(handle.channel, BASS_ATTRIB_FREQ, std::pow(2.0f, pitch) * freq);
     }
 
-    BASS_ChannelFlags(channel, bassSound->isLooped() ? BASS_SAMPLE_LOOP : 0, BASS_SAMPLE_LOOP);
+    BASS_ChannelFlags(handle.channel, bassSound->isLooped() ? BASS_SAMPLE_LOOP : 0, BASS_SAMPLE_LOOP);
 
     if(bassSound->bPaused) {
         assert(bassSound->bStream);
@@ -488,7 +488,7 @@ bool BassSoundEngine::play(Sound *snd, f32 pan, f32 pitch, f32 volume) {
         return true;
     }
 
-    if(BASS_Mixer_ChannelGetMixer(channel) != 0) {
+    if(BASS_Mixer_ChannelGetMixer(handle.channel) != 0) {
         if(cv::debug_snd.getBool()) {
             debugLog("Attempted to play {}, but channel is already playing!", snd->getName());
         }
@@ -498,14 +498,14 @@ bool BassSoundEngine::play(Sound *snd, f32 pan, f32 pitch, f32 volume) {
     auto flags = BASS_MIXER_DOWNMIX | BASS_MIXER_NORAMPIN;
     if(!snd->isStream()) flags |= BASS_STREAM_AUTOFREE;
 
-    if(!BASS_Mixer_StreamAddChannel(this->g_bassOutputMixer, channel, flags)) {
+    if(!BASS_Mixer_StreamAddChannel(this->g_bassOutputMixer, handle.channel, flags)) {
         debugLog("BASS_Mixer_StreamAddChannel() failed ({:d})!\n", BASS_ErrorGetCode());
 
-        // Since getChannel() *creates* a new channel for samples, and it won't get AUTOFREEd
-        // without being added to the mixer, we need to free it manually here
+        // We called getNewHandle(), and it created a new channel. But since it wasn't
+        // added to any mixer, it will never get AUTOFREEd - so we need to free it here.
         if(!snd->isStream()) {
-            bassSound->getActiveChannels();  // removes it from bassSound->mixer_channels since it's not playing
-            BASS_ChannelFree(channel);
+            bassSound->getActiveHandles();  // removes it from bassSound->mixer_handles since it's not active
+            BASS_ChannelFree(handle.channel);
         }
 
         return false;
@@ -555,8 +555,8 @@ void BassSoundEngine::stop(Sound *snd) {
         bassSound->bPaused = true;
         bassSound->setPositionMS(0);
     } else {
-        for(auto chan : bassSound->getActiveChannels()) {
-            BASS_Mixer_ChannelRemove(chan);
+        for(auto &handle : bassSound->getActiveHandles()) {
+            BASS_Mixer_ChannelRemove(handle.channel);
             // sample channels get AUTOFREEd
         }
     }
