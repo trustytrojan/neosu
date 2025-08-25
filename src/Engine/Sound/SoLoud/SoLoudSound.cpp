@@ -163,23 +163,26 @@ void SoLoudSound::setPositionMS(u32 ms) {
 void SoLoudSound::setVolume(float volume) {
     if(!this->bReady) return;
 
+    float current_stored_volume = this->fVolume;
+    float new_stored_volume = std::clamp<float>(volume, 0.0f, 1.0f);
+    this->fVolume = new_stored_volume;
+
     if(!this->valid_handle_cached()) return;
 
-    float new_volume = std::clamp<float>(volume, 0.0f, 1.0f);
-
-    if(this->isOverlayable()) {
-        // apply the volume as a multiplier to the playing volume
-        // for overlayable sounds
-        // FIXME: this is spaghetti
-        float handle_volume = soloud->getVolume(this->handle);
-        float play_volume = handle_volume / this->fVolume;
-        this->fVolume = new_volume * play_volume;
-    } else {
-        this->fVolume = new_volume;
+    float play_volume = new_stored_volume;
+    if(!this->bStream) {
+        // apply the volume as a multiplier to the playing volume (for non-streams (spaghetti))
+        // FIXME: this means the volume can only be decreased during playback, never increased
+        if(current_stored_volume <= 0.f) { // don't divide by 0
+            play_volume = 0.f;
+        } else {
+            float current_handle_volume = soloud->getVolume(this->handle);
+            play_volume = new_stored_volume * (current_handle_volume / current_stored_volume);
+        }
     }
 
     // apply to the voice handle (i.e. most recently played instance of this sound)
-    soloud->setVolume(this->handle, this->fVolume);
+    soloud->setVolume(this->handle, play_volume);
 }
 
 void SoLoudSound::setSpeed(float speed) {
