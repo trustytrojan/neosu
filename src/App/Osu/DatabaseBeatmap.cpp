@@ -9,6 +9,7 @@
 #include <limits>
 #include <sstream>
 #include <utility>
+#include <source_location>
 
 #include "SString.h"
 #include "Bancho.h"  // md5
@@ -322,12 +323,59 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
 
                 // HitObjects
                 case 6: {
+                    std::pair<bool, size_t> err_line{false, 0};
+
+                    static auto upd_last_error = [&](bool parse_result_bad,
+                                                     size_t line = std::source_location::current().line()) -> void {
+                        if(err_line.first) {  // already got error
+                            return;
+                        } else {
+                            if(parse_result_bad) {
+                                err_line.first = true;
+                                err_line.second = line;
+                            }
+                        }
+                    };
+
                     // circles:
                     // x,y,time,type,hitSounds,hitSamples
                     // sliders:
                     // x,y,time,type,hitSounds,sliderType|curveX:curveY|...,repeat,pixelLength,edgeHitsound,edgeSets,hitSamples
                     // spinners:
                     // x,y,time,type,hitSounds,endTime,hitSamples
+
+                    // hitSamples are colon-separated optional components (up to 5), and not all 5 have to be specified
+                    static auto parse_hitsamples = [&](const std::string &hitSampleStr, HitSamples &samples) -> bool {
+                        samples.normalSet = 0;
+                        samples.additionSet = 0;
+                        samples.index = 0;
+                        samples.volume = 0;
+                        samples.filename = "";
+
+                        if(hitSampleStr.empty()) return true;
+
+                        auto parts = SString::split(hitSampleStr, ":");
+
+                        // Parse available components, using defaults for missing ones
+                        if(parts.size() >= 1 && !parts[0].empty()) {
+                            if(!Parsing::parse(parts[0], &samples.normalSet)) return false;
+                        }
+                        if(parts.size() >= 2 && !parts[1].empty()) {
+                            if(!Parsing::parse(parts[1], &samples.additionSet)) return false;
+                        }
+                        if(parts.size() >= 3 && !parts[2].empty()) {
+                            if(!Parsing::parse(parts[2], &samples.index)) return false;
+                        }
+                        if(parts.size() >= 4 && !parts[3].empty()) {
+                            if(!Parsing::parse(parts[3], &samples.volume)) return false;
+                        }
+                        if(parts.size() >= 5) {
+                            samples.filename = parts[4];  // filename can be empty
+                        }
+
+                        samples.volume = std::clamp<u8>(samples.volume, 0, 100);
+                        return true;
+                    };
 
                     // NOTE: calculating combo numbers and color offsets based on the parsing order is dangerous.
                     // maybe the hitobjects are not sorted by time in the file; these values should be calculated
@@ -337,20 +385,20 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                     u32 time;
                     u8 type;
                     i32 hitSounds;
-                    bool err = false;
 
                     auto csvs = SString::split(curLine, ",");
                     if(csvs.size() < 5) break;
-                    err |= !Parsing::parse(csvs[0], &x) || !std::isfinite(x) || std::isnan(x);
-                    err |= !Parsing::parse(csvs[1], &y) || !std::isfinite(y) || std::isnan(y);
-                    err |= !Parsing::parse(csvs[2], &time);
-                    err |= !Parsing::parse(csvs[3], &type);
-                    err |= !Parsing::parse(csvs[4], &hitSounds);
-                    err |= (type & PpyHitObjectType::SLIDER) && (csvs.size() < 8);
-                    err |= (type & PpyHitObjectType::SPINNER) && (csvs.size() < 6);
-                    err |= !(type & (PpyHitObjectType::CIRCLE | PpyHitObjectType::SLIDER | PpyHitObjectType::SPINNER));
-                    if(err) {
-                        debugLog("Invalid hit object: {}\n", curLine);
+                    upd_last_error(!Parsing::parse(csvs[0], &x) || !std::isfinite(x) || std::isnan(x));
+                    upd_last_error(!Parsing::parse(csvs[1], &y) || !std::isfinite(y) || std::isnan(y));
+                    upd_last_error(!Parsing::parse(csvs[2], &time));
+                    upd_last_error(!Parsing::parse(csvs[3], &type));
+                    upd_last_error(!Parsing::parse(csvs[4], &hitSounds));
+                    upd_last_error((type & PpyHitObjectType::SLIDER) && (csvs.size() < 8));
+                    upd_last_error((type & PpyHitObjectType::SPINNER) && (csvs.size() < 6));
+                    upd_last_error(
+                        !(type & (PpyHitObjectType::CIRCLE | PpyHitObjectType::SLIDER | PpyHitObjectType::SPINNER)));
+                    if(err_line.first) {
+                        debugLog("Invalid hit object (error on line {}): {}\n", err_line.second, curLine);
                         break;
                     }
 
@@ -381,14 +429,12 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                         h.samples.hitSounds = (hitSounds & HitSoundType::VALID_HITSOUNDS);
 
                         if(csvs.size() > 5) {
-                            if(!Parsing::parse(csvs[5], &h.samples.normalSet, ':', &h.samples.additionSet, ':',
-                                               &h.samples.index, ':', &h.samples.volume, ':', &h.samples.filename)) {
-                                debugLog("Invalid circle (hitSamples): {}\n", curLine);
+                            if(!parse_hitsamples(csvs[5], h.samples)) {
+                                debugLog("Invalid circle hitSamples in line: {}\n", curLine);
                                 break;
                             }
                         }
 
-                        h.samples.volume = std::clamp<u8>(h.samples.volume, 0, 100);
                         c.hitcircles.push_back(h);
                     } else if(type & PpyHitObjectType::SLIDER) {
                         SLIDER slider;
@@ -402,17 +448,22 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                         curves.erase(curves.begin());
                         for(auto &curvePoints : curves) {
                             f32 cpX, cpY;
-                            err |= !Parsing::parse(curvePoints, &cpX, ':', &cpY);
-                            err |= !std::isfinite(cpX) || std::isnan(cpX);
-                            err |= !std::isfinite(cpY) || std::isnan(cpY);
-                            if(err) break;
+                            upd_last_error(!Parsing::parse(curvePoints, &cpX, ':', &cpY));
+                            upd_last_error(!std::isfinite(cpX) || std::isnan(cpX));
+                            upd_last_error(!std::isfinite(cpY) || std::isnan(cpY));
+                            if(err_line.second) break;
 
                             slider.points.emplace_back(std::clamp(cpX, -sliderSanityRange, sliderSanityRange),
                                                        std::clamp(cpY, -sliderSanityRange, sliderSanityRange));
                         }
 
-                        err |= !Parsing::parse(csvs[6], &slider.repeat);
-                        err |= !Parsing::parse(csvs[7], &slider.pixelLength);
+                        if(err_line.second) {
+                            debugLog("Invalid slider (error on line {}): {}\n", err_line.second, curLine);
+                            break;
+                        }
+
+                        upd_last_error(!Parsing::parse(csvs[6], &slider.repeat));
+                        upd_last_error(!Parsing::parse(csvs[7], &slider.pixelLength));
 
                         // special case: osu! logic for handling the hitobject point vs the controlpoints (since
                         // sliders have both, and older beatmaps store the start point inside the control
@@ -434,18 +485,24 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
 
                         std::vector<std::string> edgeSets;
                         if(csvs.size() > 9) edgeSets = SString::split(csvs[9], "|");
-                        err |= (!edgeSets.empty() && (edgeSounds.size() != edgeSets.size()));
+                        upd_last_error((!edgeSets.empty() && (edgeSounds.size() != edgeSets.size())));
 
-                        for(i32 i = 0; !err && i < edgeSounds.size(); i++) {
+                        for(i32 i = 0; !err_line.first && i < edgeSounds.size(); i++) {
                             HitSamples samples;
-                            err |= !Parsing::parse(edgeSounds[i], &samples.hitSounds);
+                            upd_last_error(!Parsing::parse(edgeSounds[i], &samples.hitSounds));
                             samples.hitSounds &= HitSoundType::VALID_HITSOUNDS;
 
                             if(!edgeSets.empty()) {
-                                err |= !Parsing::parse(edgeSets[i], &samples.normalSet, ':', &samples.additionSet);
+                                upd_last_error(
+                                    !Parsing::parse(edgeSets[i], &samples.normalSet, ':', &samples.additionSet));
                             }
 
                             slider.edgeSamples.push_back(samples);
+                        }
+
+                        if(err_line.first) {
+                            debugLog("Invalid slider edgeSamples (error on line {}): {}\n", err_line.second, curLine);
+                            break;
                         }
 
                         // No start sample specified, use default
@@ -455,16 +512,10 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                         if(slider.edgeSamples.size() == 1) slider.edgeSamples.push_back(slider.edgeSamples.front());
 
                         if(csvs.size() > 10) {
-                            err |=
-                                !Parsing::parse(csvs[10], &slider.hoverSamples.normalSet, ':',
-                                                &slider.hoverSamples.additionSet, ':', &slider.hoverSamples.index, ':',
-                                                &slider.hoverSamples.volume, ':', &slider.hoverSamples.filename);
-                            slider.hoverSamples.volume = std::clamp<u8>(slider.hoverSamples.volume, 0, 100);
-                        }
-
-                        if(err) {
-                            debugLog("Invalid slider: {}\n", curLine);
-                            break;
+                            if(!parse_hitsamples(csvs[10], slider.hoverSamples)) {
+                                debugLog("Invalid slider hitSamples in line: {}\n", curLine);
+                                break;
+                            }
                         }
 
                         slider.x = xy.x;
@@ -480,17 +531,18 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                                   .endTime = 0,
                                   .samples = {.hitSounds = (u8)(hitSounds & HitSoundType::VALID_HITSOUNDS)}};
 
-                        err |= !Parsing::parse(csvs[5], &s.endTime);
+                        upd_last_error(!Parsing::parse(csvs[5], &s.endTime));
 
-                        if(csvs.size() > 6) {
-                            err |= !Parsing::parse(csvs[6], &s.samples.normalSet, ':', &s.samples.additionSet, ':',
-                                                   &s.samples.index, ':', &s.samples.volume, ':', &s.samples.filename);
-                            s.samples.volume = std::clamp<u8>(s.samples.volume, 0, 100);
+                        if(err_line.first) {
+                            debugLog("Invalid spinner (error on line {}): {}\n", err_line.second, curLine);
+                            break;
                         }
 
-                        if(err) {
-                            debugLog("Invalid spinner: {}\n", curLine);
-                            break;
+                        if(csvs.size() > 6) {
+                            if(!parse_hitsamples(csvs[6], s.samples)) {
+                                debugLog("Invalid spinner hitSamples in line: {}\n", curLine);
+                                break;
+                            }
                         }
 
                         c.spinners.push_back(s);
