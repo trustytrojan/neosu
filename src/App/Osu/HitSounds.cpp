@@ -4,6 +4,7 @@
 #include "ConVar.h"
 #include "Osu.h"
 #include "ResourceManager.h"
+#include "Skin.h"
 #include "SoundEngine.h"
 
 i32 HitSamples::getNormalSet() {
@@ -146,7 +147,9 @@ void HitSamples::play(f32 pan, i32 delta, bool is_sliderslide) {
         soundEngine->play(snd, pan, pitch, volume);
     };
 
-    if((this->hitSounds & HitSoundType::NORMAL) || (this->hitSounds == 0)) {
+    // NOTE: osu->getSkin()->getLayeredHitSounds() seems to be forced even if the map uses custom hitsounds
+    //       according to https://osu.ppy.sh/community/forums/topics/15937
+    if((this->hitSounds & HitSoundType::NORMAL) || (this->hitSounds == 0) || osu->getSkin()->getLayeredHitSounds()) {
         try_play(this->getNormalSet(), HitSoundType::NORMAL);
     }
 

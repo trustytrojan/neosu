@@ -18,9 +18,6 @@ enum {
     FINISH = (1 << 2),
     CLAP = (1 << 3),
 
-    /* non-ppy */
-    TICK = (1 << 4),
-
     VALID_HITSOUNDS = NORMAL | WHISTLE | FINISH | CLAP,
     VALID_SLIDER_HITSOUNDS = NORMAL | WHISTLE,
 };

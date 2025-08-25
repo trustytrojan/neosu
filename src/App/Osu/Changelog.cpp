@@ -31,11 +31,15 @@ Changelog::Changelog() : ScreenBackable() {
     v40_02.title = "40.02";
     v40_02.changes = {
         R"(- Added setting to display map titles in their original language)",
+        R"(- Added support for per-hitobject hitsounds, sample sets and volume)",
         R"(- Fixed pause loop playing after quitting a map)",
         R"(- Fixed Shift+F2 not working in song browser)",
+        R"(- Fixed seeking or restarting sometimes resulting in bugged hitobjects)",
         R"(- Fixed speed mods not always getting applied)",
+        R"(- Fixed strain graphs in seeking overlay)",
         R"(- Improved performance)",
         R"(- Reduced input lag by 1 frame)",
+        R"(- Seeking during gameplay will now enable NoFail)",
     };
     changelogs.push_back(v40_02);
 

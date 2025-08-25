@@ -2342,8 +2342,7 @@ void Slider::onTickHit(bool successful, int tickIndex) {
 
             auto sound = resourceManager->getSound(sound_name);
             if(sound != nullptr) {
-                // TODO @kiwec: volume
-                soundEngine->play(sound, pan, 0.f);
+                soundEngine->play(sound, pan, 0.f, this->samples.getVolume(this->samples.getAdditionSet(), true));
             }
         }
 
