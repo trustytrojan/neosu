@@ -192,13 +192,17 @@ void BassSound::setPositionMS(u32 ms) {
 void BassSound::setVolume(float volume) {
     if(!this->bReady) return;
 
-    this->fVolume = std::clamp<float>(volume, 0.0f, 2.0f);
+    f32 new_volume = std::clamp<float>(volume, 0.0f, 2.0f);
 
-    // TODO @kiwec: add a setting to NOT change the volume of existing sounds
-    //              because hitsounds can have different volume...
     for(auto channel : this->getActiveChannels()) {
-        BASS_ChannelSetAttribute(channel, BASS_ATTRIB_VOL, this->fVolume);
+        f32 chan_volume = 1.f;
+        BASS_ChannelGetAttribute(channel, BASS_ATTRIB_VOL, &chan_volume);
+
+        f32 play_volume = chan_volume / this->fVolume;
+        BASS_ChannelSetAttribute(channel, BASS_ATTRIB_VOL, new_volume * play_volume);
     }
+
+    this->fVolume = new_volume;
 }
 
 void BassSound::setSpeed(float speed) {

@@ -666,29 +666,29 @@ void Skin::load() {
 
     // hitcircle
     this->loadSound(this->normalHitNormal, "normal-hitnormal", "SKIN_NORMALHITNORMAL_SND",     //
-                    OVERLAYABLE, SAMPLE, NOT_LOOPING, true, 0.8f);                             //
+                    OVERLAYABLE, SAMPLE, NOT_LOOPING);                                         //
     this->loadSound(this->softHitNormal, "soft-hitnormal", "SKIN_SOFTHITNORMAL_SND",           //
-                    OVERLAYABLE, SAMPLE, NOT_LOOPING, true, 0.8f);                             //
+                    OVERLAYABLE, SAMPLE, NOT_LOOPING);                                         //
     this->loadSound(this->drumHitNormal, "drum-hitnormal", "SKIN_DRUMHITNORMAL_SND",           //
-                    OVERLAYABLE, SAMPLE, NOT_LOOPING, true, 0.8f);                             //
+                    OVERLAYABLE, SAMPLE, NOT_LOOPING);                                         //
     this->loadSound(this->normalHitWhistle, "normal-hitwhistle", "SKIN_NORMALHITWHISTLE_SND",  //
-                    OVERLAYABLE, SAMPLE, NOT_LOOPING, true, 0.85f);                            //
+                    OVERLAYABLE, SAMPLE, NOT_LOOPING);                                         //
     this->loadSound(this->softHitWhistle, "soft-hitwhistle", "SKIN_SOFTHITWHISTLE_SND",        //
-                    OVERLAYABLE, SAMPLE, NOT_LOOPING, true, 0.85f);                            //
+                    OVERLAYABLE, SAMPLE, NOT_LOOPING);                                         //
     this->loadSound(this->drumHitWhistle, "drum-hitwhistle", "SKIN_DRUMHITWHISTLE_SND",        //
-                    OVERLAYABLE, SAMPLE, NOT_LOOPING, true, 0.85f);                            //
+                    OVERLAYABLE, SAMPLE, NOT_LOOPING);                                         //
     this->loadSound(this->normalHitFinish, "normal-hitfinish", "SKIN_NORMALHITFINISH_SND",     //
-                    OVERLAYABLE, SAMPLE, NOT_LOOPING, true, 1.f);                              //
+                    OVERLAYABLE, SAMPLE, NOT_LOOPING);                                         //
     this->loadSound(this->softHitFinish, "soft-hitfinish", "SKIN_SOFTHITFINISH_SND",           //
-                    OVERLAYABLE, SAMPLE, NOT_LOOPING, true, 1.f);                              //
+                    OVERLAYABLE, SAMPLE, NOT_LOOPING);                                         //
     this->loadSound(this->drumHitFinish, "drum-hitfinish", "SKIN_DRUMHITFINISH_SND",           //
-                    OVERLAYABLE, SAMPLE, NOT_LOOPING, true, 1.f);                              //
+                    OVERLAYABLE, SAMPLE, NOT_LOOPING);                                         //
     this->loadSound(this->normalHitClap, "normal-hitclap", "SKIN_NORMALHITCLAP_SND",           //
-                    OVERLAYABLE, SAMPLE, NOT_LOOPING, true, 0.85f);                            //
+                    OVERLAYABLE, SAMPLE, NOT_LOOPING);                                         //
     this->loadSound(this->softHitClap, "soft-hitclap", "SKIN_SOFTHITCLAP_SND",                 //
-                    OVERLAYABLE, SAMPLE, NOT_LOOPING, true, 0.85f);                            //
+                    OVERLAYABLE, SAMPLE, NOT_LOOPING);                                         //
     this->loadSound(this->drumHitClap, "drum-hitclap", "SKIN_DRUMHITCLAP_SND",                 //
-                    OVERLAYABLE, SAMPLE, NOT_LOOPING, true, 0.85f);                            //
+                    OVERLAYABLE, SAMPLE, NOT_LOOPING);                                         //
 
     // spinner
     this->loadSound(this->spinnerBonus, "spinnerbonus", "SKIN_SPINNERBONUS_SND", OVERLAYABLE, SAMPLE, NOT_LOOPING);
@@ -1255,7 +1255,7 @@ void Skin::checkLoadImage(Image **addressOfPointer, const std::string &skinEleme
 }
 
 void Skin::loadSound(Sound *&sndRef, const std::string &skinElementName, std::string resourceName, bool isOverlayable,
-                     bool isSample, bool loop, bool fallback_to_default, float hardcodedVolumeMultiplier) {
+                     bool isSample, bool loop, bool fallback_to_default) {
     if(sndRef != nullptr) return;  // we are already loaded
 
     // random skin support
@@ -1320,13 +1320,6 @@ void Skin::loadSound(Sound *&sndRef, const std::string &skinElementName, std::st
     // force reload default skin sound anyway if the custom skin does not include it (e.g. audio device change)
     if(!loaded_user_skin && !was_first_load) {
         resourceManager->reloadResource(sndRef, cv::skin_async.getBool());
-    }
-
-    if(isSample) {
-        this->soundSamples.push_back({
-            .sound = sndRef,
-            .hardcodedVolumeMultiplier = (hardcodedVolumeMultiplier >= 0.0f ? hardcodedVolumeMultiplier : 1.0f),
-        });
     }
 
     this->sounds.push_back(sndRef);

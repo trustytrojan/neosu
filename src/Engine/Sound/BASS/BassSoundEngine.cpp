@@ -384,15 +384,8 @@ bool BassSoundEngine::initializeOutputDevice(const SoundEngine::OUTPUT_DEVICE &d
             // mode
             flags |= BASS_WASAPI_EXCLUSIVE | BASS_WASAPI_AUTOFORMAT;
         }
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
-#endif
         if(!BASS_WASAPI_Init(device.id, 0, 0, flags, bufferSize, updatePeriod, WASAPIPROC_BASS,
-                             (void *)g_bassOutputMixer)) {
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
+                             (void *)(uintptr_t)g_bassOutputMixer)) {
             ready_since = -1.0;
             debugLog("BASS_WASAPI_Init() failed.\n");
             osu->notificationOverlay->addToast(BassManager::getErrorUString(), ERROR_TOAST);
@@ -447,7 +440,7 @@ void BassSoundEngine::shutdown() {
     BASS_Free();  // free "No sound" device
 }
 
-bool BassSoundEngine::play(Sound *snd, float pan, float pitch) {
+bool BassSoundEngine::play(Sound *snd, f32 pan, f32 pitch, f32 volume) {
     if(!this->isReady() || !snd || !snd->isReady()) return false;
 
     auto bassSound = (BassSound *)snd;
@@ -471,8 +464,9 @@ bool BassSoundEngine::play(Sound *snd, float pan, float pitch) {
     }
     bassSound->fLastPlayTime = engine->getTime();
 
+    // NOTE: BASS documentation says setting FREQ/PAN/VOL won't work on DECODE streams, but it works just fine...
     pan = std::clamp<float>(pan, -1.0f, 1.0f);
-    BASS_ChannelSetAttribute(channel, BASS_ATTRIB_VOL, bassSound->fVolume);
+    BASS_ChannelSetAttribute(channel, BASS_ATTRIB_VOL, volume * bassSound->fVolume);
     BASS_ChannelSetAttribute(channel, BASS_ATTRIB_PAN, pan);
     BASS_ChannelSetAttribute(channel, BASS_ATTRIB_NORAMP, bassSound->isStream() ? 0 : 1);
     if(pitch != 0.0f) {
@@ -491,7 +485,13 @@ bool BassSoundEngine::play(Sound *snd, float pan, float pitch) {
         return true;
     }
 
-    assert(BASS_Mixer_ChannelGetMixer(channel) == 0);
+    if(BASS_Mixer_ChannelGetMixer(channel) != 0) {
+        if(cv::debug_snd.getBool()) {
+            debugLog("Attempted to play {}, but channel is already playing!", snd->getName());
+        }
+        return false;
+    }
+
     auto flags = BASS_MIXER_DOWNMIX | BASS_MIXER_NORAMPIN;
     if(!snd->isStream()) flags |= BASS_STREAM_AUTOFREE;
 

@@ -23,7 +23,7 @@ class BassSoundEngine final : public SoundEngine {
     void restart() override;
     void shutdown() override;
 
-    bool play(Sound *snd, float pan = 0.0f, float pitch = 0.f) override;
+    bool play(Sound *snd, f32 pan = 0.0f, f32 pitch = 0.f, f32 volume = 1.f) override;
     void pause(Sound *snd) override;
     void stop(Sound *snd) override;
 

@@ -167,6 +167,7 @@ void SoLoudSound::setVolume(float volume) {
     if(!this->handle) return;
 
     // apply to active voice if not overlayable
+    // TODO: preserve 'play' volume
     if(!this->bIsOverlayable) soloud->setVolume(this->handle, this->fVolume);
 }
 

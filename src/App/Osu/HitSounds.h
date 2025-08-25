@@ -39,4 +39,5 @@ struct HitSamples {
 
     i32 getAdditionSet();
     i32 getNormalSet();
+    f32 getVolume(i32 hitSoundType, bool is_sliderslide);
 };

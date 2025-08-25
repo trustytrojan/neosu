@@ -31,6 +31,40 @@ i32 HitSamples::getAdditionSet() {
     return this->getNormalSet();
 }
 
+f32 HitSamples::getVolume(i32 hitSoundType, bool is_sliderslide) {
+    f32 volume = 1.0;
+
+    // Some hardcoded modifiers for hitcircle sounds
+    if(!is_sliderslide) {
+        switch(hitSoundType) {
+            case HitSoundType::NORMAL:
+                volume *= 0.8;
+                break;
+            case HitSoundType::WHISTLE:
+                volume *= 0.85;
+                break;
+            case HitSoundType::FINISH:
+                volume *= 1.0;
+                break;
+            case HitSoundType::CLAP:
+                volume *= 0.85;
+                break;
+            default:
+                assert(false);  // unreachable
+        }
+    }
+
+    if(cv::ignore_beatmap_sample_volume.getBool()) return volume;
+
+    if(this->volume > 0) {
+        volume *= (f32)this->volume / 100.0;
+    } else if(osu->getSelectedBeatmap() != nullptr) {
+        volume *= (f32)osu->getSelectedBeatmap()->getTimingPoint().volume / 100.0;
+    }
+
+    return volume;
+}
+
 void HitSamples::play(f32 pan, i32 delta, bool is_sliderslide) {
     auto beatmap = osu->getSelectedBeatmap();
     if(!beatmap) return;
@@ -50,13 +84,6 @@ void HitSamples::play(f32 pan, i32 delta, bool is_sliderslide) {
         f32 range = beatmap->getHitWindow100();
         pitch = (f32)delta / range * cv::snd_pitch_hitsounds_factor.getFloat();
     }
-
-    // TODO @kiwec: volume. oh god, mcosu never handled this properly either. oh god.
-    // * cv::volume_effects
-    // * cv::ignore_beatmap_sample_volume
-    // * soundSample.hardcodedVolumeMultiplier
-    // * whatever the volume of the hitsound is in current timing point
-    // and handle updating already playing sounds... when volume is timing point dependent...
 
     auto get_default_sound = [is_sliderslide](i32 set, i32 hitSound) {
         std::string sound_name = "SKIN_";
@@ -107,34 +134,32 @@ void HitSamples::play(f32 pan, i32 delta, bool is_sliderslide) {
         return get_default_sound(set, hitSound);
     };
 
-    std::vector<Sound*> sounds;
+    auto try_play = [&](i32 set, i32 hitSound) {
+        auto snd = get_map_sound(set, hitSound);
+        if(!snd) return;
+
+        f32 volume = this->getVolume(hitSound, is_sliderslide);
+        if(volume == 0.0) return;
+
+        if(is_sliderslide && snd->isPlaying()) return;
+
+        soundEngine->play(snd, pan, pitch, volume);
+    };
 
     if((this->hitSounds & HitSoundType::NORMAL) || (this->hitSounds == 0)) {
-        sounds.push_back(get_map_sound(this->getNormalSet(), HitSoundType::NORMAL));
+        try_play(this->getNormalSet(), HitSoundType::NORMAL);
     }
 
     if(this->hitSounds & HitSoundType::WHISTLE) {
-        sounds.push_back(get_map_sound(this->getAdditionSet(), HitSoundType::WHISTLE));
+        try_play(this->getAdditionSet(), HitSoundType::WHISTLE);
     }
 
     if(this->hitSounds & HitSoundType::FINISH) {
-        sounds.push_back(get_map_sound(this->getAdditionSet(), HitSoundType::FINISH));
+        try_play(this->getAdditionSet(), HitSoundType::FINISH);
     }
 
     if(this->hitSounds & HitSoundType::CLAP) {
-        sounds.push_back(get_map_sound(this->getAdditionSet(), HitSoundType::CLAP));
-    }
-
-    for(auto sound : sounds) {
-        if(sound == nullptr) continue;
-
-        if(is_sliderslide) {
-            if(!sound->isPlaying()) {
-                soundEngine->play(sound, pan, pitch);
-            }
-        } else {
-            soundEngine->play(sound, pan, pitch);
-        }
+        try_play(this->getAdditionSet(), HitSoundType::CLAP);
     }
 }
 

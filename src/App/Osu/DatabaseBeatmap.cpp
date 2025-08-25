@@ -137,6 +137,48 @@ DatabaseBeatmap::~DatabaseBeatmap() {
     }
 }
 
+static bool parse_timing_point(const std::string &curLine, DatabaseBeatmap::TIMINGPOINT *out) {
+    // old beatmaps: Offset, Milliseconds per Beat
+    // old new beatmaps: Offset, Milliseconds per Beat, Meter, sampleSet, sampleIndex, Volume,
+    // !Inherited new new beatmaps: Offset, Milliseconds per Beat, Meter, sampleSet, sampleIndex,
+    // Volume, !Inherited, Kiai Mode
+
+    f64 tpOffset;
+    f32 tpMSPerBeat;
+    i32 tpMeter;
+    i32 tpSampleSet, tpSampleIndex;
+    u8 tpVolume;
+    i32 tpTimingChange;
+    i32 tpKiai = 0;  // optional
+
+    if(Parsing::parse(curLine, &tpOffset, ',', &tpMSPerBeat, ',', &tpMeter, ',', &tpSampleSet, ',', &tpSampleIndex, ',',
+                      &tpVolume, ',', &tpTimingChange, ',', &tpKiai) ||
+       Parsing::parse(curLine, &tpOffset, ',', &tpMSPerBeat, ',', &tpMeter, ',', &tpSampleSet, ',', &tpSampleIndex, ',',
+                      &tpVolume, ',', &tpTimingChange)) {
+        out->offset = std::round(tpOffset);
+        out->msPerBeat = tpMSPerBeat;
+        out->sampleSet = tpSampleSet;
+        out->sampleIndex = tpSampleIndex;
+        out->volume = std::clamp<u8>(tpVolume, 0, 100);
+        out->timingChange = tpTimingChange == 1;
+        out->kiai = tpKiai > 0;
+        return true;
+    }
+
+    if(Parsing::parse(curLine, &tpOffset, ',', &tpMSPerBeat)) {
+        out->offset = std::round(tpOffset);
+        out->msPerBeat = tpMSPerBeat;
+        out->sampleSet = 0;
+        out->sampleIndex = 0;
+        out->volume = 100;
+        out->timingChange = true;
+        out->kiai = false;
+        return true;
+    }
+
+    return false;
+}
+
 DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const std::string &osuFilePath) {
     std::atomic<bool> dead;
     dead = false;
@@ -255,50 +297,10 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
 
                 // TimingPoints
                 case 4: {
-                    // old beatmaps: Offset, Milliseconds per Beat
-                    // old new beatmaps: Offset, Milliseconds per Beat, Meter, sampleSet, sampleIndex, Volume,
-                    // !Inherited new new beatmaps: Offset, Milliseconds per Beat, Meter, sampleSet, sampleIndex,
-                    // Volume, !Inherited, Kiai Mode
-
-                    f64 tpOffset;
-                    f32 tpMSPerBeat;
-                    i32 tpMeter;
-                    i32 tpSampleSet, tpSampleIndex;
-                    i32 tpVolume;
-                    i32 tpTimingChange;
-                    i32 tpKiai = 0;  // optional
-
-                    if(Parsing::parse(curLineChar, &tpOffset, ',', &tpMSPerBeat, ',', &tpMeter, ',', &tpSampleSet, ',',
-                                      &tpSampleIndex, ',', &tpVolume, ',', &tpTimingChange, ',', &tpKiai) ||
-                       Parsing::parse(curLineChar, &tpOffset, ',', &tpMSPerBeat, ',', &tpMeter, ',', &tpSampleSet, ',',
-                                      &tpSampleIndex, ',', &tpVolume, ',', &tpTimingChange)) {
-                        DatabaseBeatmap::TIMINGPOINT t{
-                            .offset = std::round(tpOffset),
-                            .msPerBeat = tpMSPerBeat,
-
-                            .sampleSet = tpSampleSet,
-                            .sampleIndex = tpSampleIndex,
-                            .volume = tpVolume,
-
-                            .timingChange = tpTimingChange == 1,
-                            .kiai = tpKiai > 0,
-                        };
-                        c.timingpoints.push_back(t);
-                    } else if(Parsing::parse(curLineChar, &tpOffset, ',', &tpMSPerBeat)) {
-                        DatabaseBeatmap::TIMINGPOINT t{
-                            .offset = std::round(tpOffset),
-                            .msPerBeat = tpMSPerBeat,
-
-                            .sampleSet = 0,
-                            .sampleIndex = 0,
-                            .volume = 100,
-
-                            .timingChange = true,
-                            .kiai = false,
-                        };
+                    DatabaseBeatmap::TIMINGPOINT t{};
+                    if(parse_timing_point(curLine, &t)) {
                         c.timingpoints.push_back(t);
                     }
-
                     break;
                 }
 
@@ -386,6 +388,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                             }
                         }
 
+                        h.samples.volume = std::clamp<u8>(h.samples.volume, 0, 100);
                         c.hitcircles.push_back(h);
                     } else if(type & PpyHitObjectType::SLIDER) {
                         SLIDER slider;
@@ -456,6 +459,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                                 !Parsing::parse(csvs[10], &slider.hoverSamples.normalSet, ':',
                                                 &slider.hoverSamples.additionSet, ':', &slider.hoverSamples.index, ':',
                                                 &slider.hoverSamples.volume, ':', &slider.hoverSamples.filename);
+                            slider.hoverSamples.volume = std::clamp<u8>(slider.hoverSamples.volume, 0, 100);
                         }
 
                         if(err) {
@@ -478,6 +482,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                         if(csvs.size() > 6) {
                             err |= !Parsing::parse(csvs[6], &s.samples.normalSet, ':', &s.samples.additionSet, ':',
                                                    &s.samples.index, ':', &s.samples.volume, ':', &s.samples.filename);
+                            s.samples.volume = std::clamp<u8>(s.samples.volume, 0, 100);
                         }
 
                         if(err) {
@@ -1076,50 +1081,10 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
 
             // TimingPoints
             case 4: {
-                // old beatmaps: Offset, Milliseconds per Beat
-                // old new beatmaps: Offset, Milliseconds per Beat, Meter, Sample Type, Sample Set, Volume,
-                // !Inherited new new beatmaps: Offset, Milliseconds per Beat, Meter, Sample Type, Sample Set,
-                // Volume, !Inherited, Kiai Mode
-
-                f64 tpOffset;
-                f32 tpMSPerBeat;
-                i32 tpMeter;
-                i32 tpSampleSet, tpSampleIndex;
-                i32 tpVolume;
-                i32 tpTimingChange;
-                i32 tpKiai = 0;  // optional
-
-                if(Parsing::parse(curLineChar, &tpOffset, ',', &tpMSPerBeat, ',', &tpMeter, ',', &tpSampleSet, ',',
-                                  &tpSampleIndex, ',', &tpVolume, ',', &tpTimingChange, ',', &tpKiai) ||
-                   Parsing::parse(curLineChar, &tpOffset, ',', &tpMSPerBeat, ',', &tpMeter, ',', &tpSampleSet, ',',
-                                  &tpSampleIndex, ',', &tpVolume, ',', &tpTimingChange)) {
-                    DatabaseBeatmap::TIMINGPOINT t{
-                        .offset = std::round(tpOffset),
-                        .msPerBeat = tpMSPerBeat,
-
-                        .sampleSet = tpSampleSet,
-                        .sampleIndex = tpSampleIndex,
-                        .volume = tpVolume,
-
-                        .timingChange = tpTimingChange == 1,
-                        .kiai = tpKiai > 0,
-                    };
-                    this->timingpoints.push_back(t);
-                } else if(Parsing::parse(curLineChar, &tpOffset, ',', &tpMSPerBeat)) {
-                    DatabaseBeatmap::TIMINGPOINT t{
-                        .offset = std::round(tpOffset),
-                        .msPerBeat = tpMSPerBeat,
-
-                        .sampleSet = 0,
-                        .sampleIndex = 0,
-                        .volume = 100,
-
-                        .timingChange = true,
-                        .kiai = false,
-                    };
+                DatabaseBeatmap::TIMINGPOINT t{};
+                if(parse_timing_point(curLine, &t)) {
                     this->timingpoints.push_back(t);
                 }
-
                 break;
             }
         }

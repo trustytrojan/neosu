@@ -61,7 +61,7 @@ void SoLoudSoundEngine::restart() {
                              true);
 }
 
-bool SoLoudSoundEngine::play(Sound *snd, float pan, float pitch) {
+bool SoLoudSoundEngine::play(Sound *snd, f32 pan, f32 pitch, f32 volume) {
     if(!this->isReady() || snd == nullptr || !snd->isReady()) return false;
 
     // MC_MESSAGE(
@@ -105,10 +105,10 @@ bool SoLoudSoundEngine::play(Sound *snd, float pan, float pitch) {
         return true;
     }
 
-    return playSound(soloudSound, pan, pitch);
+    return playSound(soloudSound, pan, pitch, volume);
 }
 
-bool SoLoudSoundEngine::playSound(SoLoudSound *soloudSound, float pan, float pitch) {
+bool SoLoudSoundEngine::playSound(SoLoudSound *soloudSound, f32 pan, f32 pitch, f32 volume) {
     if(!soloudSound) return false;
 
     auto restorePos = 0.0;  // position in the track to potentially restore to
@@ -123,7 +123,7 @@ bool SoLoudSoundEngine::playSound(SoLoudSound *soloudSound, float pan, float pit
     if(cv::debug_snd.getBool()) {
         debugLog("SoLoudSoundEngine: Playing {:s} (stream={:d}) with speed={:f}, pitch={:f}, volume={:f}\n",
                  soloudSound->sFilePath, soloudSound->bStream ? 1 : 0, soloudSound->fSpeed, pitch,
-                 soloudSound->fVolume);
+                 soloudSound->fVolume * volume);
     }
 
     // play the sound with appropriate method
@@ -152,7 +152,7 @@ bool SoLoudSoundEngine::playSound(SoLoudSound *soloudSound, float pan, float pit
                      soloudSound->fSpeed, soloudSound->fPitch);
     } else {
         // non-streaming audio (sound effects) - use direct playback with SoLoud's native speed/pitch control
-        handle = this->playDirectSound(soloudSound, pan, pitch, soloudSound->fVolume);
+        handle = this->playDirectSound(soloudSound, pan, pitch, soloudSound->fVolume * volume);
     }
 
     // finalize playback
@@ -165,7 +165,7 @@ bool SoLoudSoundEngine::playSound(SoLoudSound *soloudSound, float pan, float pit
         if(soloudSound->bStream)  // unpause and fade it in if it's a stream (since we started it paused with 0 volume)
         {
             soloud->setPause(handle, false);
-            this->setVolumeGradual(handle, soloudSound->fVolume);
+            this->setVolumeGradual(handle, soloudSound->fVolume * volume);
         }
 
         return true;

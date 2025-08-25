@@ -1,8 +1,8 @@
 #pragma once
 // Copyright (c) 2014, PG, All rights reserved.
-
 #include "Delegate.h"
 #include "UString.h"
+#include "types.h"
 
 #define SOUND_ENGINE_TYPE(ClassName, TypeID, ParentClass)               \
     static constexpr TypeId TYPE_ID = TypeID;                           \
@@ -54,7 +54,10 @@ class SoundEngine {
     virtual void shutdown() { ; }
     virtual void update() { ; }
 
-    virtual bool play(Sound *snd, float pan = 0.0f, float pitch = 0.f) = 0;
+    // Here, 'volume' means the volume for this play() call, NOT for the sound itself
+    // e.g. when calling setVolume(), you're applying a modifier to all currently playing samples of that sound
+    virtual bool play(Sound *snd, f32 pan = 0.f, f32 pitch = 0.f, f32 volume = 1.f) = 0;
+
     virtual void pause(Sound *snd) = 0;
     virtual void stop(Sound *snd) = 0;
 

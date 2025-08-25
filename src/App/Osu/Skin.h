@@ -350,12 +350,6 @@ class Skin final {
     [[nodiscard]] inline bool useSmoothCursorTrail() const { return this->cursorMiddle != MISSING_TEXTURE; }
     [[nodiscard]] inline bool isDefaultSkin() const { return this->bIsDefaultSkin; }
 
-    struct SOUND_SAMPLE {
-        Sound *sound;
-        float hardcodedVolumeMultiplier;  // some samples in osu have hardcoded multipliers which can not be modified
-                                          // (i.e. you can NEVER reach 100% volume with them)
-    };
-
     bool parseSkinINI(std::string filepath);
 
     bool compareFilenameWithSkinElementName(const std::string &filename, const std::string &skinElementName);
@@ -368,7 +362,7 @@ class Skin final {
 
     void loadSound(Sound *&sndRef, const std::string &skinElementName, std::string resourceName,
                    bool isOverlayable = false, bool isSample = false, bool loop = false,
-                   bool fallback_to_default = true, float hardcodedVolumeMultiplier = -1.0f);
+                   bool fallback_to_default = true);
 
     bool bReady{false};
     bool bIsDefaultSkin;
@@ -378,7 +372,6 @@ class Skin final {
     std::string sSkinIniFilePath;
     std::vector<Resource *> resources;
     std::vector<Sound *> sounds;
-    std::vector<SOUND_SAMPLE> soundSamples;
     std::vector<SkinImage *> images;
 
     // images
