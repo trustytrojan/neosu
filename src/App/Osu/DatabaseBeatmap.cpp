@@ -474,8 +474,11 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                         slider.number = ++comboNumber;
                         c.sliders.push_back(slider);
                     } else if(type & PpyHitObjectType::SPINNER) {
-                        SPINNER s{.x = (i32)x, .y = (i32)y, .time = time};
-                        s.samples.hitSounds = (hitSounds & HitSoundType::VALID_HITSOUNDS);
+                        SPINNER s{.x = (i32)x,
+                                  .y = (i32)y,
+                                  .time = time,
+                                  .endTime = 0,
+                                  .samples = {.hitSounds = (hitSounds & HitSoundType::VALID_HITSOUNDS)}};
 
                         err |= !Parsing::parse(csvs[5], &s.endTime);
 

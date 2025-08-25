@@ -64,9 +64,6 @@ void SoLoudSoundEngine::restart() {
 bool SoLoudSoundEngine::play(Sound *snd, f32 pan, f32 pitch, f32 volume) {
     if(!this->isReady() || snd == nullptr || !snd->isReady()) return false;
 
-    // MC_MESSAGE(
-    //     "FIXME: audio pitch may be inaccurate! need to convert caller's pitch properly like old McOsu for SoLoud")
-
     // @spec: adding 1 here because kiwec changed the calling code in some way that i dont understand yet
     pitch += 1.0f;
 
@@ -112,8 +109,8 @@ bool SoLoudSoundEngine::playSound(SoLoudSound *soloudSound, f32 pan, f32 pitch, 
     if(!soloudSound) return false;
 
     // check if we should allow playing this frame
-    const bool allowPlayFrame =
-        !cv::snd_restrict_play_frame.getBool() || engine->getTime() > soloudSound->getLastPlayTime();
+    const bool allowPlayFrame = !soloudSound->isOverlayable() || !cv::snd_restrict_play_frame.getBool() ||
+                                engine->getTime() > soloudSound->getLastPlayTime();
     if(!allowPlayFrame) return false;
 
     auto restorePos = 0.0;  // position in the track to potentially restore to

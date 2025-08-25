@@ -385,7 +385,7 @@ bool BassSoundEngine::initializeOutputDevice(const SoundEngine::OUTPUT_DEVICE &d
             flags |= BASS_WASAPI_EXCLUSIVE | BASS_WASAPI_AUTOFORMAT;
         }
         if(!BASS_WASAPI_Init(device.id, 0, 0, flags, bufferSize, updatePeriod, WASAPIPROC_BASS,
-                             (void *)(uintptr_t)g_bassOutputMixer)) {
+                             reinterpret_cast<void*>(g_bassOutputMixer))) {
             ready_since = -1.0;
             debugLog("BASS_WASAPI_Init() failed.\n");
             osu->notificationOverlay->addToast(BassManager::getErrorUString(), ERROR_TOAST);
@@ -443,7 +443,7 @@ void BassSoundEngine::shutdown() {
 bool BassSoundEngine::play(Sound *snd, f32 pan, f32 pitch, f32 volume) {
     if(!this->isReady() || !snd || !snd->isReady()) return false;
 
-    auto bassSound = (BassSound *)snd;
+    auto bassSound = snd->as<BassSound>();
     if(!bassSound->isStream() && !bassSound->isOverlayable() && !bassSound->getActiveChannels().empty()) {
         if(cv::debug_snd.getBool()) {
             debugLog("Attempted to play non-overlayable {} while it's still playing!\n", snd->getName());
@@ -535,7 +535,7 @@ void BassSoundEngine::pause(Sound *snd) {
     if(!this->isReady() || !snd || !snd->isReady()) return;
     assert(snd->isStream());  // can't call pause() on a sample
 
-    auto bassSound = (BassSound *)snd;
+    auto bassSound = snd->as<BassSound>();
     if(!bassSound->isPlaying()) return;
 
     auto pos = bassSound->getPositionMS();
@@ -547,7 +547,7 @@ void BassSoundEngine::pause(Sound *snd) {
 void BassSoundEngine::stop(Sound *snd) {
     if(!this->isReady() || snd == nullptr || !snd->isReady()) return;
 
-    auto bassSound = (BassSound *)snd;
+    auto bassSound = snd->as<BassSound>();
     if(!bassSound->isPlaying()) return;
 
     if(snd->isStream()) {

@@ -1992,14 +1992,9 @@ void HUD::drawScrubbingTimeline(u32 beatmapTime, u32 beatmapLengthPlayable, u32 
     if(cv::draw_scrubbing_timeline_strain_graph.getBool()) {
         const std::vector<f64> &aimStrains = osu->getSelectedBeatmap()->aimStrains;
         const std::vector<f64> &speedStrains = osu->getSelectedBeatmap()->speedStrains;
-        // unused?
-        const f32 speedMultiplier = osu->getSelectedBeatmap()->getSpeedMultiplier();
 
         u32 nb_strains = aimStrains.size();
         if(aimStrains.size() > 0 && aimStrains.size() == speedStrains.size()) {
-            // unused?
-            f32 strainStepMS = 400.0f * speedMultiplier;
-
             // get highest strain values for normalization
             f64 highestAimStrain = 0.0;
             f64 highestSpeedStrain = 0.0;
