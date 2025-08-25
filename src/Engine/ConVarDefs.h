@@ -357,7 +357,7 @@ CONVAR(debug_vprof, "debug_vprof", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(debug_network, "debug_network", false,
        FCVAR_HIDDEN | FCVAR_PRIVATE | FCVAR_GAMEPLAY | FCVAR_NOSAVE | FCVAR_NOLOAD);
 CONVAR(disable_mousebuttons, "disable_mousebuttons", false, FCVAR_BANCHO_COMPATIBLE);
-CONVAR(disable_mousewheel, "disable_mousewheel", true, FCVAR_BANCHO_COMPATIBLE);
+CONVAR(disable_mousewheel, "disable_mousewheel", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(drain_kill, "drain_kill", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_GAMEPLAY,
        "whether to kill the player upon failing");
 CONVAR(drain_kill_notification_duration, "drain_kill_notification_duration", 1.0f, FCVAR_BANCHO_COMPATIBLE,
