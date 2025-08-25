@@ -167,9 +167,9 @@ void SoLoudSound::setVolume(float volume) {
 
     if(!this->handle) return;
 
-    // apply to active voice if not overlayable
+    // apply to the voice handle (i.e. most recently played instance of this sound)
     // TODO: preserve 'play' volume
-    if(!this->bIsOverlayable) soloud->setVolume(this->handle, this->fVolume);
+    soloud->setVolume(this->handle, this->fVolume);
 }
 
 void SoLoudSound::setSpeed(float speed) {
