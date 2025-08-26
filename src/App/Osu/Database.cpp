@@ -1,6 +1,7 @@
 // Copyright (c) 2016, PG, All rights reserved.
 #include "Database.h"
 
+#include "Bancho.h"
 #include "SString.h"
 #include "MD5Hash.h"
 #include "ByteBufferedFile.h"
@@ -484,7 +485,7 @@ std::vector<UString> Database::getPlayerNamesWithPPScores() {
     }
 
     // always add local user, even if there were no scores
-    tempNames.insert(cv::name.getString());
+    tempNames.insert(BanchoState::get_username());
 
     std::vector<UString> names;
     names.reserve(tempNames.size());
@@ -506,7 +507,7 @@ std::vector<UString> Database::getPlayerNamesWithScoresForUserSwitcher() {
     }
 
     // always add local user, even if there were no scores
-    tempNames.insert(cv::name.getString());
+    tempNames.insert(BanchoState::get_username());
 
     std::vector<UString> names;
     names.reserve(tempNames.size());
@@ -1624,7 +1625,7 @@ void Database::loadScores(const UString &dbPath) {
 
             sc.client = db.read_string();
             sc.server = db.read_string();
-            sc.bancho_score_id = db.read<u64>();
+            sc.bancho_score_id = db.read<i64>();
             sc.peppy_replay_tms = db.read<u64>();
 
             sc.num300s = db.read<u16>();
@@ -2017,7 +2018,7 @@ void Database::loadPeppyScores(const UString &dbPath) {
             }
 
             if(score_version >= 20131110) {
-                sc.bancho_score_id = db.read<u64>();
+                sc.bancho_score_id = db.read<i64>();
             } else if(score_version >= 20121008) {
                 sc.bancho_score_id = db.read<i32>();
             } else {
@@ -2128,7 +2129,7 @@ void Database::saveScores() {
 
             db.write_string(score.client);
             db.write_string(score.server);
-            db.write<u64>(score.bancho_score_id);
+            db.write<i64>(score.bancho_score_id);
             db.write<u64>(score.peppy_replay_tms);
 
             db.write<u16>(score.num300s);

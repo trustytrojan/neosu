@@ -371,10 +371,19 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, MD5Hash beatmap_md5, float* pr
             return nullptr;
         }
 
+        UString url{"/web/osu-search-set.php?"};
+        url.append(UString::fmt("b={}", beatmap_id));
+
+        if(BanchoState::is_grass) {
+            // TODO @kiwec: urlencode cho_token?
+            url.append(UString::fmt("&u=$token&h={:s}", BanchoState::cho_token.toUtf8()));
+        } else {
+            url.append(UString::fmt("&u={}&h={:s}", BanchoState::get_username(), BanchoState::pw_md5.hash.data()));
+        }
+
         APIRequest request;
         request.type = GET_BEATMAPSET_INFO;
-        request.path = UString::format("/web/osu-search-set.php?b=%d&u=%s&h=%s", beatmap_id, BanchoState::username.toUtf8(),
-                                       BanchoState::pw_md5.hash.data());
+        request.path = url;
         request.extra_int = beatmap_id;
         BANCHO::Net::send_api_request(request);
 
@@ -446,10 +455,19 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, i32 beatmapset_id, float* prog
             return nullptr;
         }
 
+        UString url{"/web/osu-search-set.php?"};
+        url.append(UString::fmt("b={}", beatmap_id));
+
+        if(BanchoState::is_grass) {
+            // TODO @kiwec: urlencode cho_token?
+            url.append(UString::fmt("&u=$token&h={:s}", BanchoState::cho_token.toUtf8()));
+        } else {
+            url.append(UString::fmt("&u={}&h={:s}", BanchoState::get_username(), BanchoState::pw_md5.hash.data()));
+        }
+
         APIRequest request;
         request.type = GET_BEATMAPSET_INFO;
-        request.path = UString::format("/web/osu-search-set.php?b=%d&u=%s&h=%s", beatmap_id, BanchoState::username.toUtf8(),
-                                       BanchoState::pw_md5.hash.data());
+        request.path = url;
         request.extra_int = beatmap_id;
         BANCHO::Net::send_api_request(request);
 

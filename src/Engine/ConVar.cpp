@@ -421,6 +421,8 @@ static void _listcommands(void) {
 }
 
 static void _dumpcommands(void) {
+    // TODO @kiwec: update so it generates styled html
+
     std::vector<ConVar *> convars = convar->getConVarArray();
     std::ranges::sort(convars, {}, [](const ConVar *v) { return v->getName(); });
 

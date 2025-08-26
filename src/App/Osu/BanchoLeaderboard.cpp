@@ -14,8 +14,6 @@
 #include <cstring>
 #include <vector>
 
-#include <curl/curl.h>
-
 namespace {  // static namespace
 FinishedScore parse_score(char *score_line) {
     FinishedScore score;
@@ -25,7 +23,7 @@ FinishedScore parse_score(char *score_line) {
     auto tokens = SString::split(score_line, "|");
     if(tokens.size() < 15) return score;
 
-    score.bancho_score_id = strtoull(tokens[0].c_str(), nullptr, 10);
+    score.bancho_score_id = strtoll(tokens[0].c_str(), nullptr, 10);
     score.playerName = tokens[1].c_str();
     score.score = strtoull(tokens[2].c_str(), nullptr, 10);
     score.comboMax = static_cast<i32>(strtol(tokens[3].c_str(), nullptr, 10));
@@ -58,36 +56,34 @@ FinishedScore parse_score(char *score_line) {
 
 namespace BANCHO::Leaderboard {
 void fetch_online_scores(DatabaseBeatmap *beatmap) {
-    UString path = "/web/osu-osz2-getscores.php?s=0&vv=4&v=1";
-    path.append(UString::fmt("&c={:s}", beatmap->getMD5Hash().hash.data()));
+    UString url = "/web/osu-osz2-getscores.php?m=0&s=0&vv=4&a=";
 
-    std::string osu_file_path = beatmap->getFilePath();
-    auto path_end = osu_file_path.find_last_of('/');
-    if(path_end != std::string::npos) {
-        osu_file_path.erase(0, path_end + 1);
-    }
+    // TODO: b.py calls this "map_package_hash", could be useful for storyboard-specific LBs
+    //       (assuming it's some hash that includes all relevant map files)
+    url.append("&h=");
 
-    CURL *curl = curl_easy_init();
-    if(!curl) {
-        debugLog("Failed to initialize cURL in fetch_online_scores()!\n");
-        return;
+    // TODO: leaderboard filters
+    url.append("&v=1");
+
+    // Map info
+    std::string map_filename = env->getFileNameFromFilePath(beatmap->getFilePath());
+    url.append(UString::fmt("&f={}", env->encodeStringToURL(map_filename)));
+    url.append(UString::fmt("&c={:s}", beatmap->getMD5Hash().hash.data()));
+    url.append(UString::fmt("&i={}", beatmap->getSetID()));
+
+    // Some servers use mod flags, even without any leaderboard filter active (e.g. for relax)
+    url.append(UString::fmt("&mods={}", osu->modSelector->getModFlags()));
+
+    if(BanchoState::is_grass) {
+        // TODO @kiwec: is cho_token always URL safe?
+        url.append(UString::fmt("&us=$token&ha={:s}", BanchoState::cho_token.toUtf8()));
+    } else {
+        url.append(UString::fmt("&us={}&ha={:s}", BanchoState::get_username(), BanchoState::pw_md5.hash.data()));
     }
-    char *encoded_filename = curl_easy_escape(curl, osu_file_path.c_str(), 0);
-    if(!encoded_filename) {
-        debugLog("Failed to encode map filename!\n");
-        curl_easy_cleanup(curl);
-        return;
-    }
-    path.append(UString::format("&f=%s", encoded_filename));
-    curl_free(encoded_filename);
-    curl_easy_cleanup(curl);
-    path.append(UString::format("&m=0&i=%d&mods=%u&h=&a=0&us=%s&ha=%s", beatmap->getSetID(),
-                                osu->modSelector->getModFlags(), BanchoState::username.toUtf8(), BanchoState::pw_md5.hash.data())
-                    .toUtf8());
 
     APIRequest request;
     request.type = GET_MAP_LEADERBOARD;
-    request.path = path;
+    request.path = url;
     request.mime = nullptr;
     request.extra = (u8 *)strdup(beatmap->getMD5Hash().hash.data());
 

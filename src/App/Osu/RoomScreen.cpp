@@ -707,8 +707,10 @@ void RoomScreen::on_player_failed(i32 slot_id) {
 
 FinishedScore RoomScreen::get_approximate_score() {
     FinishedScore score;
+
     score.player_id = BanchoState::get_uid();
-    score.playerName = BanchoState::username.toUtf8();
+    score.playerName = BanchoState::get_username();
+
     score.diff2 = osu->getSelectedBeatmap()->getSelectedDifficulty2();
 
     for(auto &i : BanchoState::room.slots) {

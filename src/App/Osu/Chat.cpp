@@ -39,8 +39,6 @@
 #include <regex>
 #include <utility>
 
-#include <curl/curl.h>
-
 namespace proto = BANCHO::Proto;
 
 static McFont *chat_font = nullptr;
@@ -592,7 +590,8 @@ void Chat::handle_command(const UString &msg) {
         Packet packet;
 
         packet.id = SEND_PRIVATE_MESSAGE;
-        proto::write_string(&packet, (char *)BanchoState::username.toUtf8());
+
+        proto::write_string(&packet, (char *)BanchoState::get_username().c_str());
         proto::write_string(&packet, (char *)invite_msg.toUtf8());
         proto::write_string(&packet, (char *)username.toUtf8());
         proto::write<i32>(&packet, BanchoState::get_uid());
@@ -794,28 +793,23 @@ void Chat::mark_as_read(ChatChannel *chan) {
     // XXX: Only mark as read after 500ms
     chan->read = true;
 
-    CURL *curl = curl_easy_init();
-    if(!curl) {
-        debugLog("Failed to initialize cURL in Chat::mark_as_read()!\n");
-        return;
-    }
-    char *channel_urlencoded = curl_easy_escape(curl, chan->name.toUtf8(), 0);
-    if(!channel_urlencoded) {
-        debugLog("Failed to encode channel name!\n");
-        curl_easy_cleanup(curl);
-        return;
+    UString url{"web/osu-markasread.php?"};
+    url.append(UString::fmt("channel={}", env->encodeStringToURL(chan->name.toUtf8())));
+
+    if(BanchoState::is_grass) {
+        // TODO @kiwec: urlencode cho_token?
+        url.append(UString::fmt("&u=$token&h={:s}", BanchoState::cho_token.toUtf8()));
+    } else {
+        url.append(UString::fmt("&u={}&h={:s}", BanchoState::get_username(), BanchoState::pw_md5.hash.data()));
     }
 
     APIRequest request;
+
     request.type = MARK_AS_READ;
-    request.path = UString::format("/web/osu-markasread.php?u=%s&h=%s&channel=%s", BanchoState::username.toUtf8(),
-                                   BanchoState::pw_md5.hash.data(), channel_urlencoded);
+    request.path = url;
     request.mime = nullptr;
 
     BANCHO::Net::send_api_request(request);
-
-    curl_free(channel_urlencoded);
-    curl_easy_cleanup(curl);
 }
 
 void Chat::switchToChannel(ChatChannel *chan) {
@@ -900,7 +894,7 @@ void Chat::addMessage(UString channel_name, const ChatMessage &msg, bool mark_un
         // TODO @kiwec: highlight + send toast?
     }
 
-    bool is_pm = msg.author_id > 0 && channel_name[0] != '#' && msg.author_name != BanchoState::username;
+    bool is_pm = msg.author_id > 0 && channel_name[0] != '#' && msg.author_name.toUtf8() != BanchoState::get_username();
     if(is_pm) {
         // If it's a PM, the channel title should be the one who sent the message
         channel_name = msg.author_name;
@@ -917,8 +911,9 @@ void Chat::addMessage(UString channel_name, const ChatMessage &msg, bool mark_un
         }
     }
 
-    bool mentioned = SString::contains_ncase(msg.text.toUtf8(), BanchoState::username.toUtf8());
+    bool mentioned = SString::contains_ncase(msg.text.toUtf8(), BanchoState::get_username());
     mentioned &= msg.author_id != BanchoState::get_uid();
+
     if(mentioned && cv::chat_notify_on_mention.getBool()) {
         auto notif = UString::format("You were mentioned in %s", channel_name.toUtf8());
         osu->notificationOverlay->addToast(
@@ -963,7 +958,8 @@ void Chat::addMessage(UString channel_name, const ChatMessage &msg, bool mark_un
     if(is_pm && this->away_msg.length() > 0) {
         Packet packet;
         packet.id = SEND_PRIVATE_MESSAGE;
-        proto::write_string(&packet, (char *)BanchoState::username.toUtf8());
+
+        proto::write_string(&packet, (char *)BanchoState::get_username().c_str());
         proto::write_string(&packet, (char *)this->away_msg.toUtf8());
         proto::write_string(&packet, (char *)msg.author_name.toUtf8());
         proto::write<i32>(&packet, BanchoState::get_uid());
@@ -973,7 +969,7 @@ void Chat::addMessage(UString channel_name, const ChatMessage &msg, bool mark_un
         this->addMessage(channel_name, ChatMessage{
                                            .tms = time(nullptr),
                                            .author_id = BanchoState::get_uid(),
-                                           .author_name = BanchoState::username,
+                                           .author_name = BanchoState::get_username().c_str(),
                                            .text = this->away_msg,
                                        });
     }
@@ -1203,7 +1199,8 @@ void Chat::leave(const UString &channel_name) {
 void Chat::send_message(const UString &msg) {
     Packet packet;
     packet.id = this->selected_channel->name[0] == '#' ? SEND_PUBLIC_MESSAGE : SEND_PRIVATE_MESSAGE;
-    proto::write_string(&packet, (char *)BanchoState::username.toUtf8());
+
+    proto::write_string(&packet, (char *)BanchoState::get_username().c_str());
     proto::write_string(&packet, (char *)msg.toUtf8());
     proto::write_string(&packet, (char *)this->selected_channel->name.toUtf8());
     proto::write<i32>(&packet, BanchoState::get_uid());
@@ -1213,7 +1210,7 @@ void Chat::send_message(const UString &msg) {
     this->addMessage(this->selected_channel->name, ChatMessage{
                                                        .tms = time(nullptr),
                                                        .author_id = BanchoState::get_uid(),
-                                                       .author_name = BanchoState::username,
+                                                       .author_name = BanchoState::get_username().c_str(),
                                                        .text = msg,
                                                    });
 }

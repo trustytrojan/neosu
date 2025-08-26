@@ -31,7 +31,7 @@ enum Privileges : uint8_t {
     TOURNAMENT_STAFF = 32,
 
     // Made-up flag for convenience
-    MODERATOR = OWNER | DEVELOPER | TOURNAMENT_STAFF,
+    MODERATOR = NOMINATOR | OWNER | DEVELOPER | TOURNAMENT_STAFF,
 };
 
 enum WinCondition : uint8_t {

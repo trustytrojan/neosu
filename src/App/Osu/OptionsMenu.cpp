@@ -1236,7 +1236,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->nameTextbox = this->addTextbox(cv::name.getString().c_str(), &cv::name);
     this->elemContainers.back()->render_condition = RenderCondition::PASSWORD_AUTH;
     const auto &md5pass = cv::mp_password_md5.getString();
-    this->passwordTextbox = this->addTextbox(md5pass.empty() ? "" : md5pass.c_str(), &cv::mp_password_temporary);
+    this->passwordTextbox = this->addTextbox(md5pass.empty() ? "" : md5pass.c_str(), &cv::mp_password);
     this->passwordTextbox->is_password = true;
     this->elemContainers.back()->render_condition = RenderCondition::PASSWORD_AUTH;
     {
@@ -1449,8 +1449,8 @@ void OptionsMenu::update_login_button() {
     } else {
         bool oauth = this->should_use_oauth_login();
         this->logInButton->setText(oauth ? "Log in with osu!" : "Log in");
-        this->logInButton->setColor(oauth ? 0xffff66ff : 0xff00ff00);
-        this->logInButton->is_loading = false;
+        this->logInButton->setColor(oauth ? 0xffff74ff : 0xff00ff00);  // XXX: ugly, due to 85% brightness
+        // intentionally not updating loading state here
     }
 }
 
@@ -1572,9 +1572,17 @@ void OptionsMenu::mouse_update(bool *propagate_clicks) {
     // apply textbox changes on enter key
     if(this->osuFolderTextbox->hitEnter()) cv::osu_folder.setValue(this->osuFolderTextbox->getText());
 
+    // HACKHACK (should just use callback)
+    // XXX: disable serverTextbox while logging in
+    // XXX: jank logic split between update_login_button/setLogingLoadingState
+    if(cv::mp_server.getString() != this->serverTextbox->getText().toUtf8()) {
+        cv::mp_server.setValue(this->serverTextbox->getText());
+        this->update_login_button();
+        this->scheduleLayoutUpdate();  // toggle user/pass fields based on oauthness
+    }
+
     cv::name.setValue(this->nameTextbox->getText());
-    cv::mp_password_temporary.setValue(this->passwordTextbox->getText());
-    cv::mp_server.setValue(this->serverTextbox->getText());
+    cv::mp_password.setValue(this->passwordTextbox->getText());
     if(this->nameTextbox->hitEnter()) {
         this->nameTextbox->stealFocus();
         this->passwordTextbox->focus();
@@ -1769,6 +1777,7 @@ void OptionsMenu::updateLayout() {
     this->updating_layout = true;
 
     bool oauth = this->should_use_oauth_login();
+    this->update_login_button();
 
     // set all elements to the current convar values, and update the reset button states
     for(auto &element : this->elemContainers) {
@@ -1801,10 +1810,9 @@ void OptionsMenu::updateLayout() {
                     if(element->baseElems.size() == 1) {
                         auto *textboxPointer = dynamic_cast<CBaseUITextbox *>(element->baseElems[0]);
                         if(textboxPointer != nullptr) {
-                            // HACKHACK: don't override textbox with the mp_password_temporary (which gets deleted
-                            // on login)
+                            // HACKHACK: don't override textbox with mp_password (which gets deleted on login)
                             UString textToSet{cv->getString().c_str()};
-                            if(cv == &cv::mp_password_temporary && cv::mp_password_temporary.getString().empty()) {
+                            if(cv == &cv::mp_password && cv::mp_password.getString().empty()) {
                                 textToSet = cv::mp_password_md5.getString().c_str();
                             }
                             textboxPointer->setText(textToSet);
@@ -1889,9 +1897,13 @@ void OptionsMenu::updateLayout() {
         if(this->elemContainers[i]->render_condition == RenderCondition::WASAPI_ENABLED &&
            !(soundEngine->getOutputDriverType() == SoundEngine::OutputDriver::BASS_WASAPI))
             continue;
+
+        // XXX: we should hide the checkbox for hardcoded servers that ban it (before connecting)
+        //      ...and disable serverTextbox editing while connected
         if(this->elemContainers[i]->render_condition == RenderCondition::SCORE_SUBMISSION_POLICY &&
-           BanchoState::score_submission_policy != ServerPolicy::NO_PREFERENCE)
+           (BanchoState::score_submission_policy != ServerPolicy::NO_PREFERENCE || oauth))
             continue;
+
         if(this->elemContainers[i]->render_condition == RenderCondition::PASSWORD_AUTH && oauth) continue;
 
         // searching logic happens here:
@@ -2633,28 +2645,29 @@ void OptionsMenu::onLogInClicked(bool left, bool right) {
     }
     soundEngine->play(osu->getSkin()->getMenuHit());
 
+    // Clear mp_oauth_token if the user is connecting to a non-oauth server
+    // This makes it easy to check what we need to do when building the login packet
+    if(!this->should_use_oauth_login()) {
+        cv::mp_oauth_token.setValue("");
+    }
+
     if((right && this->logInButton->is_loading) || BanchoState::is_online()) {
-        BANCHO::Net::disconnect();
+        BanchoState::disconnect();
 
         // Manually clicked disconnect button: clear oauth token
         cv::mp_oauth_token.setValue("");
     } else {
-        // debugLog("DEBUG: manually clicked login, password: {} md5: {}\n", cv::mp_password_temporary.getString(),
-        //           cv::mp_password_md5.getString());
-        if(this->should_use_oauth_login()) {
+        if(this->should_use_oauth_login() && cv::mp_oauth_token.getString().empty()) {
             BanchoState::endpoint = cv::mp_server.getString();
 
-            crypto::rng::get_bytes(&BanchoState::oauth_challenge[0], 32);
-            crypto::hash::sha256(&BanchoState::oauth_challenge[0], 32, &BanchoState::oauth_verifier[0]);
+            crypto::rng::get_bytes(&BanchoState::oauth_verifier[0], 32);
+            crypto::hash::sha256(&BanchoState::oauth_verifier[0], 32, &BanchoState::oauth_challenge[0]);
 
-            auto challenge_b64 = crypto::conv::encode64(&BanchoState::oauth_challenge[0], 32);
-            auto scheme = cv::use_https.getBool() ? "https://" : "http://";
-            auto url = fmt::format("{:s}{:s}/connect?challenge={}", scheme, BanchoState::endpoint,
-                                   (const char *)challenge_b64.data());
-
+            auto challenge_b64 = env->encodeStringToURL(crypto::conv::encode64(&BanchoState::oauth_challenge[0], 32));
+            auto url = fmt::format("https://{}/connect/start?challenge={}", BanchoState::endpoint, challenge_b64);
             env->openURLInDefaultBrowser(url);
         } else {
-            BANCHO::Net::reconnect();
+            BanchoState::reconnect();
         }
     }
 }

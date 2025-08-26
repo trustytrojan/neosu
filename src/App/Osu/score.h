@@ -38,7 +38,7 @@ struct FinishedScore {
 
     std::string client;
     std::string server;
-    u64 bancho_score_id = 0;
+    i64 bancho_score_id = 0;
     u64 peppy_replay_tms = 0;  // online scores don't have peppy_replay_tms
 
     int num300s = 0;

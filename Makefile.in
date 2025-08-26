@@ -170,7 +170,7 @@ am__neosu_SOURCES_DIST = libraries/MD5.cpp libraries/base64.cpp \
 	src/App/Osu/LegacyReplay.cpp src/App/Osu/Lobby.cpp \
 	src/App/Osu/MainMenu.cpp src/App/Osu/ModFPoSu.cpp \
 	src/App/Osu/ModSelector.cpp src/App/Osu/Multiplayer.cpp \
-	src/App/Osu/NotificationOverlay.cpp \
+	src/App/Osu/NeosuUrl.cpp src/App/Osu/NotificationOverlay.cpp \
 	src/App/Osu/OptionsMenu.cpp src/App/Osu/Osu.cpp \
 	src/App/Osu/PauseMenu.cpp src/App/Osu/PeppyImporter.cpp \
 	src/App/Osu/PromptScreen.cpp src/App/Osu/RankingScreen.cpp \
@@ -290,6 +290,7 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/App/Osu/neosu-ModFPoSu.$(OBJEXT) \
 	src/App/Osu/neosu-ModSelector.$(OBJEXT) \
 	src/App/Osu/neosu-Multiplayer.$(OBJEXT) \
+	src/App/Osu/neosu-NeosuUrl.$(OBJEXT) \
 	src/App/Osu/neosu-NotificationOverlay.$(OBJEXT) \
 	src/App/Osu/neosu-OptionsMenu.$(OBJEXT) \
 	src/App/Osu/neosu-Osu.$(OBJEXT) \
@@ -463,6 +464,7 @@ am__depfiles_remade = $(DEPS_PREFIX)/mimalloc/$(DEPDIR)/neosu-mimalloc_new_delet
 	src/App/Osu/$(DEPDIR)/neosu-ModFPoSu.Po \
 	src/App/Osu/$(DEPDIR)/neosu-ModSelector.Po \
 	src/App/Osu/$(DEPDIR)/neosu-Multiplayer.Po \
+	src/App/Osu/$(DEPDIR)/neosu-NeosuUrl.Po \
 	src/App/Osu/$(DEPDIR)/neosu-NotificationOverlay.Po \
 	src/App/Osu/$(DEPDIR)/neosu-OptionsMenu.Po \
 	src/App/Osu/$(DEPDIR)/neosu-Osu.Po \
@@ -929,7 +931,7 @@ neosu_SOURCES = libraries/MD5.cpp libraries/base64.cpp \
 	src/App/Osu/LegacyReplay.cpp src/App/Osu/Lobby.cpp \
 	src/App/Osu/MainMenu.cpp src/App/Osu/ModFPoSu.cpp \
 	src/App/Osu/ModSelector.cpp src/App/Osu/Multiplayer.cpp \
-	src/App/Osu/NotificationOverlay.cpp \
+	src/App/Osu/NeosuUrl.cpp src/App/Osu/NotificationOverlay.cpp \
 	src/App/Osu/OptionsMenu.cpp src/App/Osu/Osu.cpp \
 	src/App/Osu/PauseMenu.cpp src/App/Osu/PeppyImporter.cpp \
 	src/App/Osu/PromptScreen.cpp src/App/Osu/RankingScreen.cpp \
@@ -1369,6 +1371,8 @@ src/App/Osu/neosu-ModFPoSu.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
 src/App/Osu/neosu-ModSelector.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/neosu-Multiplayer.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
+	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
+src/App/Osu/neosu-NeosuUrl.$(OBJEXT): src/App/Osu/$(am__dirstamp) \
 	src/App/Osu/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/neosu-NotificationOverlay.$(OBJEXT):  \
 	src/App/Osu/$(am__dirstamp) \
@@ -1829,6 +1833,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-ModFPoSu.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-ModSelector.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-Multiplayer.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-NeosuUrl.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-NotificationOverlay.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-OptionsMenu.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/$(DEPDIR)/neosu-Osu.Po@am__quote@ # am--include-marker
@@ -2473,6 +2478,20 @@ src/App/Osu/neosu-Multiplayer.obj: src/App/Osu/Multiplayer.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/Multiplayer.cpp' object='src/App/Osu/neosu-Multiplayer.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-Multiplayer.obj `if test -f 'src/App/Osu/Multiplayer.cpp'; then $(CYGPATH_W) 'src/App/Osu/Multiplayer.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/Multiplayer.cpp'; fi`
+
+src/App/Osu/neosu-NeosuUrl.o: src/App/Osu/NeosuUrl.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-NeosuUrl.o -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-NeosuUrl.Tpo -c -o src/App/Osu/neosu-NeosuUrl.o `test -f 'src/App/Osu/NeosuUrl.cpp' || echo '$(srcdir)/'`src/App/Osu/NeosuUrl.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/$(DEPDIR)/neosu-NeosuUrl.Tpo src/App/Osu/$(DEPDIR)/neosu-NeosuUrl.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/NeosuUrl.cpp' object='src/App/Osu/neosu-NeosuUrl.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-NeosuUrl.o `test -f 'src/App/Osu/NeosuUrl.cpp' || echo '$(srcdir)/'`src/App/Osu/NeosuUrl.cpp
+
+src/App/Osu/neosu-NeosuUrl.obj: src/App/Osu/NeosuUrl.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-NeosuUrl.obj -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-NeosuUrl.Tpo -c -o src/App/Osu/neosu-NeosuUrl.obj `if test -f 'src/App/Osu/NeosuUrl.cpp'; then $(CYGPATH_W) 'src/App/Osu/NeosuUrl.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/NeosuUrl.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/App/Osu/$(DEPDIR)/neosu-NeosuUrl.Tpo src/App/Osu/$(DEPDIR)/neosu-NeosuUrl.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/App/Osu/NeosuUrl.cpp' object='src/App/Osu/neosu-NeosuUrl.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/App/Osu/neosu-NeosuUrl.obj `if test -f 'src/App/Osu/NeosuUrl.cpp'; then $(CYGPATH_W) 'src/App/Osu/NeosuUrl.cpp'; else $(CYGPATH_W) '$(srcdir)/src/App/Osu/NeosuUrl.cpp'; fi`
 
 src/App/Osu/neosu-NotificationOverlay.o: src/App/Osu/NotificationOverlay.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-NotificationOverlay.o -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-NotificationOverlay.Tpo -c -o src/App/Osu/neosu-NotificationOverlay.o `test -f 'src/App/Osu/NotificationOverlay.cpp' || echo '$(srcdir)/'`src/App/Osu/NotificationOverlay.cpp
@@ -4501,6 +4520,7 @@ distclean: distclean-am
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-ModFPoSu.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-ModSelector.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Multiplayer.Po
+	-rm -f src/App/Osu/$(DEPDIR)/neosu-NeosuUrl.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-NotificationOverlay.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-OptionsMenu.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Osu.Po
@@ -4704,6 +4724,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-ModFPoSu.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-ModSelector.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Multiplayer.Po
+	-rm -f src/App/Osu/$(DEPDIR)/neosu-NeosuUrl.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-NotificationOverlay.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-OptionsMenu.Po
 	-rm -f src/App/Osu/$(DEPDIR)/neosu-Osu.Po

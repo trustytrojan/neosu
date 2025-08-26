@@ -25,11 +25,14 @@ struct BanchoState final {
     BanchoState(const BanchoState &) = delete;
     BanchoState(BanchoState &&) = delete;
 
+    // TODO @kiwec: update this to:
+    // - release-cv::version
+    // - bleedingedge-cv::build_timestamp
+    // - dev
     static UString neosu_version;
     static UString cho_token;
 
     static std::string endpoint;
-    static UString username;
     static MD5Hash pw_md5;
     static u8 oauth_challenge[32];
     static u8 oauth_verifier[32];
@@ -39,6 +42,8 @@ struct BanchoState final {
     static i32 spectated_player_id;
     static std::vector<u32> spectators;
     static std::vector<u32> fellow_spectators;
+
+    static bool is_grass; // TODO @kiwec: change to is_oauth
 
     static UString server_icon_url;
     static Image *server_icon;
@@ -79,14 +84,22 @@ struct BanchoState final {
     [[nodiscard]] static i32 get_uid() { return user_id.load(std::memory_order_acquire); }
     static inline void set_uid(i32 uid) { user_id.store(uid, std::memory_order_release); }
 
+    [[nodiscard]] static std::string get_username();
+
+    static void disconnect();
+    static void reconnect();
+
    private:
     // internal helpers
-    static void update_channel(const UString &name, const UString &topic, i32 nb_members);
+    static void update_channel(const UString &name, const UString &topic, i32 nb_members, bool join);
 
     [[nodiscard]] static UString get_disk_uuid_win32();
     [[nodiscard]] static UString get_disk_uuid_blkid();
 
     static bool print_new_channels;
+
+    // use get_username() to avoid having to check for online status
+    static std::string username;
 
     // cached on first get
     static UString disk_uuid;

@@ -346,7 +346,7 @@ Osu::Osu() {
 
     // Init online functionality (multiplayer/leaderboards/etc)
     if(cv::mp_autologin.getBool()) {
-        BANCHO::Net::reconnect();
+        BanchoState::reconnect();
     }
 
 #ifndef _DEBUG
@@ -1016,13 +1016,8 @@ void Osu::onKeyDown(KeyboardEvent &key) {
                     score.beatmap_hash = beatmap->getSelectedDifficulty2()->getMD5Hash();
                     score.mods = this->getScore()->mods;
 
-                    if(BanchoState::is_online()) {
-                        score.player_id = BanchoState::get_uid();
-                        score.playerName = BanchoState::username.toUtf8();
-                    } else {
-                        score.player_id = 0;
-                        score.playerName = cv::name.getString();  // local name
-                    }
+                    score.playerName = BanchoState::get_username();
+                    score.player_id = std::max(0, BanchoState::get_uid());
 
                     f64 pos_seconds = beatmap->getTime() - cv::instant_replay_duration.getFloat();
                     u32 pos_ms = (u32)(std::max(0.0, pos_seconds) * 1000.0);
@@ -1795,7 +1790,7 @@ bool Osu::onShutdown() {
     this->optionsMenu->save();
     db->save();
 
-    BANCHO::Net::disconnect();
+    BanchoState::disconnect();
 
     return true;
 }

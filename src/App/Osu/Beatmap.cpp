@@ -1537,11 +1537,17 @@ void Beatmap::loadMusic(bool stream) {
         this->fMusicFrequencyBackup = this->music->getFrequency();
         this->music->setSpeed(this->getSpeedMultiplier());
     }
+
+    // TODO: load custom hitsounds
+    // TODO: load custom skin elements
 }
 
 void Beatmap::unloadMusic() {
     resourceManager->destroyResource(this->music);
     this->music = nullptr;
+
+    // TODO: unload custom hitsounds
+    // TODO: unload custom skin elements
 }
 
 void Beatmap::unloadObjects() {
@@ -3520,14 +3526,11 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
     score.unixTimestamp =
         std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
-    // @neonet: check if we're connected to neonet
     if(BanchoState::is_online()) {
         score.player_id = BanchoState::get_uid();
-        score.playerName = BanchoState::username.toUtf8();
         score.server = BanchoState::endpoint;
-    } else {
-        score.playerName = cv::name.getString();
     }
+    score.playerName = BanchoState::get_username();
     score.passed = isComplete && !isZero && !osu->getScore()->hasDied();
     score.grade = score.passed ? osu->getScore()->getGrade() : FinishedScore::Grade::F;
     score.diff2 = this->selectedDifficulty2;

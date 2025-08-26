@@ -269,7 +269,6 @@ void load_and_watch(FinishedScore score) {
     // Check if replay is loaded
     if(score.replay.empty()) {
         if(!load_from_disk(&score, true)) {
-            // @neonet: try loading replay from neonet
 
             if(score.server.c_str() != BanchoState::endpoint) {
                 auto msg = UString::format("Please connect to %s to view this replay!", score.server.c_str());
@@ -281,10 +280,19 @@ void load_and_watch(FinishedScore score) {
             auto* score_cpy = new(mem) FinishedScore;
             *score_cpy = score;
 
+            UString url{"/web/osu-getreplay.php?m=0"};
+            url.append(UString::fmt("&c={}", score.bancho_score_id));
+
+            if(BanchoState::is_grass) {
+                // TODO @kiwec: urlencode cho_token?
+                url.append(UString::fmt("&u=$token&h={:s}", BanchoState::cho_token.toUtf8()));
+            } else {
+                url.append(UString::fmt("&u={}&h={:s}", BanchoState::get_username(), BanchoState::pw_md5.hash.data()));
+            }
+
             APIRequest request;
             request.type = GET_REPLAY;
-            request.path = UString::format("/web/osu-getreplay.php?u=%s&h=%s&m=0&c=%d", BanchoState::username.toUtf8(),
-                                           BanchoState::pw_md5.hash.data(), score.bancho_score_id);
+            request.path = url;
             request.mime = nullptr;
             request.extra = (u8*)score_cpy;
             BANCHO::Net::send_api_request(request);

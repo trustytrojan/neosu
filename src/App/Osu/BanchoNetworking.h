@@ -36,18 +36,7 @@ struct APIRequest {
     i32 extra_int{0};  // lazy
 };
 
-// unused?
-// struct ReplayExtraInfo {
-//     MD5Hash diff2_md5;
-//     u32 mod_flags;
-//     UString username;
-//     i32 player_id;
-// };
-
 namespace BANCHO::Net {
-
-void disconnect();
-void reconnect();
 
 // Send an API request.
 void send_api_request(const APIRequest& request);
@@ -64,5 +53,8 @@ void update_networking();
 
 // Clean up networking. Should be called once when exiting neosu.
 void cleanup_networking();
+
+// Callback for complete_oauth command
+void complete_oauth(const UString &code);
 
 }  // namespace BANCHO::Net
