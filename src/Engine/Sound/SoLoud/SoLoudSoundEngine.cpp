@@ -107,8 +107,10 @@ bool SoLoudSoundEngine::updateExistingSound(SoLoudSound *soloudSound, SOUNDHANDL
     PlaybackParams newParams{.pan = pan, .pitch = pitch, .volume = playVolume};
     soloudSound->activeHandleCache[handle] = newParams;
 
-    soloud->setPause(handle, false);  // make sure it's not paused
+    // start from the beginning
+    soloudSound->setPositionMS(0);
     soloudSound->setLastPlayTime(engine->getTime());
+    soloud->setPause(handle, false);  // make sure it's not paused
 
     if(cv::debug_snd.getBool()) {
         debugLog("handle was already valid, for non-overlayable sound {}\n", soloudSound->getName());

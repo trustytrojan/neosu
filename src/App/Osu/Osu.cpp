@@ -615,8 +615,8 @@ void Osu::update() {
     }
 
     if(this->music_unpause_scheduled && soundEngine->isReady()) {
-        if(this->getSelectedBeatmap()) {
-            this->getSelectedBeatmap()->playMusic();
+        if(this->getSelectedBeatmap()->getMusic() != nullptr) {
+            soundEngine->play(this->getSelectedBeatmap()->getMusic());
         }
         this->music_unpause_scheduled = false;
     }
@@ -1486,10 +1486,6 @@ Beatmap *Osu::getSelectedBeatmap() {
     if(this->songBrowser2 != nullptr) return this->songBrowser2->getSelectedBeatmap();
 
     return nullptr;
-}
-
-Sound *Osu::getCurrentlyPlayingMusic() {
-    return resourceManager->getSound("BEATMAP_MUSIC");
 }
 
 float Osu::getDifficultyMultiplier() {

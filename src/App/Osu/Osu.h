@@ -9,7 +9,6 @@
 class CWindowManager;
 class AvatarManager;
 
-class Sound;
 class VolumeOverlay;
 class UserCard;
 class Chat;
@@ -95,7 +94,6 @@ class Osu final : public MouseListener, public KeyboardListener {
     [[nodiscard]] inline int getScreenHeight() const { return (int)g_vInternalResolution.y; }
 
     Beatmap *getSelectedBeatmap();
-    Sound *getCurrentlyPlayingMusic();
 
     [[nodiscard]] inline OptionsMenu *getOptionsMenu() const { return this->optionsMenu; }
     [[nodiscard]] inline SongBrowser *getSongBrowser() const { return this->songBrowser2; }

@@ -118,7 +118,6 @@ class Beatmap : public BeatmapInterface {
     void resetScore();
 
     // music/sound
-    bool playMusic(); // with ideal volume
     void loadMusic(bool stream = true);
     void unloadMusic();
     f32 getIdealVolume();
