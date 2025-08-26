@@ -106,8 +106,8 @@ bool load_peppy_collections(const UString& peppy_collections_path) {
     }
 
     u32 version = peppy_collections.read<u32>();
-    if(version > cv::database_version.getVal<u32>()) {
-        debugLog("osu!stable collection.db version is too recent!\n");
+    if(version > cv::database_version.getVal<u32>() && !cv::database_ignore_version.getBool()) {
+        debugLog("osu!stable collection.db (version {}) is newer than latest supported (version {})!\n", version, cv::database_version.getVal<u32>());
         db->bytes_processed += peppy_collections.total_size;
         return false;
     }
