@@ -54,7 +54,7 @@ class ResourceManager final {
     void requestNextLoadAsync();
     void requestNextLoadUnmanaged();
 
-    size_t getSyncLoadMaxBatchSize() const;
+    [[nodiscard]] size_t getSyncLoadMaxBatchSize() const;
     void setSyncLoadMaxBatchSize(size_t resourcesToLoad);
     void resetSyncLoadMaxBatchSize();
 
@@ -62,30 +62,30 @@ class ResourceManager final {
     void setResourceName(Resource *res, std::string name);
 
     // images
-    Image *loadImage(std::string filepath, std::string resourceName, bool mipmapped = false,
+    Image *loadImage(std::string filepath, const std::string &resourceName, bool mipmapped = false,
                      bool keepInSystemMemory = false);
     Image *loadImageUnnamed(std::string filepath, bool mipmapped = false, bool keepInSystemMemory = false);
-    Image *loadImageAbs(std::string absoluteFilepath, std::string resourceName, bool mipmapped = false,
+    Image *loadImageAbs(std::string absoluteFilepath, const std::string &resourceName, bool mipmapped = false,
                         bool keepInSystemMemory = false);
     Image *loadImageAbsUnnamed(std::string absoluteFilepath, bool mipmapped = false, bool keepInSystemMemory = false);
     Image *createImage(i32 width, i32 height, bool mipmapped = false, bool keepInSystemMemory = false);
 
     // fonts
-    McFont *loadFont(std::string filepath, std::string resourceName, int fontSize = 16, bool antialiasing = true,
+    McFont *loadFont(std::string filepath, const std::string &resourceName, int fontSize = 16, bool antialiasing = true,
                      int fontDPI = 96);
-    McFont *loadFont(std::string filepath, std::string resourceName, const std::vector<wchar_t> &characters,
+    McFont *loadFont(std::string filepath, const std::string &resourceName, const std::vector<wchar_t> &characters,
                      int fontSize = 16, bool antialiasing = true, int fontDPI = 96);
 
     // sounds
-    Sound *loadSound(std::string filepath, std::string resourceName, bool stream = false, bool overlayable = false,
+    Sound *loadSound(std::string filepath, const std::string &resourceName, bool stream = false, bool overlayable = false,
                      bool loop = false);
-    Sound *loadSoundAbs(std::string filepath, std::string resourceName, bool stream = false, bool overlayable = false,
+    Sound *loadSoundAbs(std::string filepath, const std::string &resourceName, bool stream = false, bool overlayable = false,
                         bool loop = false);
 
     // shaders
-    Shader *loadShader(std::string vertexShaderFilePath, std::string fragmentShaderFilePath, std::string resourceName);
+    Shader *loadShader(std::string vertexShaderFilePath, std::string fragmentShaderFilePath, const std::string &resourceName);
     Shader *loadShader(std::string vertexShaderFilePath, std::string fragmentShaderFilePath);
-    Shader *createShader(std::string vertexShader, std::string fragmentShader, std::string resourceName);
+    Shader *createShader(std::string vertexShader, std::string fragmentShader, const std::string &resourceName);
     Shader *createShader(std::string vertexShader, std::string fragmentShader);
 
     // rendertargets

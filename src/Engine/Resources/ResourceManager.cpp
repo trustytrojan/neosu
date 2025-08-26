@@ -214,7 +214,7 @@ void ResourceManager::setResourceName(Resource *res, std::string name) {
     return;
 }
 
-Image *ResourceManager::loadImage(std::string filepath, std::string resourceName, bool mipmapped,
+Image *ResourceManager::loadImage(std::string filepath, const std::string &resourceName, bool mipmapped,
                                   bool keepInSystemMemory) {
     auto res = checkIfExistsAndHandle<Image>(resourceName);
     if(res != nullptr) return res;
@@ -238,7 +238,7 @@ Image *ResourceManager::loadImageUnnamed(std::string filepath, bool mipmapped, b
     return img;
 }
 
-Image *ResourceManager::loadImageAbs(std::string absoluteFilepath, std::string resourceName, bool mipmapped,
+Image *ResourceManager::loadImageAbs(std::string absoluteFilepath, const std::string &resourceName, bool mipmapped,
                                      bool keepInSystemMemory) {
     auto res = checkIfExistsAndHandle<Image>(resourceName);
     if(res != nullptr) return res;
@@ -275,7 +275,7 @@ Image *ResourceManager::createImage(i32 width, i32 height, bool mipmapped, bool 
     return img;
 }
 
-McFont *ResourceManager::loadFont(std::string filepath, std::string resourceName, int fontSize, bool antialiasing,
+McFont *ResourceManager::loadFont(std::string filepath, const std::string &resourceName, int fontSize, bool antialiasing,
                                   int fontDPI) {
     auto res = checkIfExistsAndHandle<McFont>(resourceName);
     if(res != nullptr) return res;
@@ -290,7 +290,7 @@ McFont *ResourceManager::loadFont(std::string filepath, std::string resourceName
     return fnt;
 }
 
-McFont *ResourceManager::loadFont(std::string filepath, std::string resourceName,
+McFont *ResourceManager::loadFont(std::string filepath, const std::string &resourceName,
                                   const std::vector<wchar_t> &characters, int fontSize, bool antialiasing,
                                   int fontDPI) {
     auto res = checkIfExistsAndHandle<McFont>(resourceName);
@@ -306,7 +306,7 @@ McFont *ResourceManager::loadFont(std::string filepath, std::string resourceName
     return fnt;
 }
 
-Sound *ResourceManager::loadSound(std::string filepath, std::string resourceName, bool stream, bool overlayable,
+Sound *ResourceManager::loadSound(std::string filepath, const std::string &resourceName, bool stream, bool overlayable,
                                   bool loop) {
     auto res = checkIfExistsAndHandle<Sound>(resourceName);
     if(res != nullptr) return res;
@@ -321,7 +321,7 @@ Sound *ResourceManager::loadSound(std::string filepath, std::string resourceName
     return snd;
 }
 
-Sound *ResourceManager::loadSoundAbs(std::string filepath, std::string resourceName, bool stream, bool overlayable,
+Sound *ResourceManager::loadSoundAbs(std::string filepath, const std::string &resourceName, bool stream, bool overlayable,
                                      bool loop) {
     auto res = checkIfExistsAndHandle<Sound>(resourceName);
     if(res != nullptr) return res;
@@ -336,7 +336,7 @@ Sound *ResourceManager::loadSoundAbs(std::string filepath, std::string resourceN
 }
 
 Shader *ResourceManager::loadShader(std::string vertexShaderFilePath, std::string fragmentShaderFilePath,
-                                    std::string resourceName) {
+                                    const std::string &resourceName) {
     auto res = checkIfExistsAndHandle<Shader>(resourceName);
     if(res != nullptr) return res;
 
@@ -361,7 +361,7 @@ Shader *ResourceManager::loadShader(std::string vertexShaderFilePath, std::strin
     return shader;
 }
 
-Shader *ResourceManager::createShader(std::string vertexShader, std::string fragmentShader, std::string resourceName) {
+Shader *ResourceManager::createShader(std::string vertexShader, std::string fragmentShader, const std::string &resourceName) {
     auto res = checkIfExistsAndHandle<Shader>(resourceName);
     if(res != nullptr) return res;
 
