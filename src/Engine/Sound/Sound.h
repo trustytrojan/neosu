@@ -45,6 +45,9 @@ class Sound : public Resource {
     virtual void setFrequency(float frequency) = 0;
     virtual void setPan(float pan) = 0;
     virtual void setLoop(bool loop) = 0;
+
+    // override currently audible sounds' (if any) volumes to "volume" (* baseVolume)
+    void setPlayingVolume(float volume);
     // NOTE: this will also update currently playing handle(s) for this sound
     void setBaseVolume(float volume);
 

@@ -161,17 +161,24 @@ bool Sound::isValidAudioFile(const std::string& filePath, const std::string& fil
     return false;  // don't let unsupported formats be read
 }
 
-const std::unordered_map<SOUNDHANDLE, PlaybackParams> &Sound::getActiveHandles() {
+const std::unordered_map<SOUNDHANDLE, PlaybackParams>& Sound::getActiveHandles() {
     // update cache with actual validity from backend
     std::erase_if(this->activeHandleCache,
                   [this](const auto& handleInstance) { return !this->isHandleValid(handleInstance.first); });
     return this->activeHandleCache;
 }
 
+void Sound::setPlayingVolume(float volume) {
+    for(const auto& [handle, _] : this->getActiveHandles()) {
+        // override instance volume
+        this->setHandleVolume(handle, this->fBaseVolume * volume);
+    }
+}
+
 void Sound::setBaseVolume(float volume) {
     this->fBaseVolume = std::clamp<float>(volume, 0.0f, 2.0f);
 
-    // propagate the changed volume to the active voice handles
+    // propagate the changed volume to the active voice handles (with existing volume)
     for(const auto& [handle, instance] : this->getActiveHandles()) {
         const auto& vol = instance.volume;
         this->setHandleVolume(handle, this->fBaseVolume * vol);
