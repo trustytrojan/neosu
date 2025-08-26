@@ -487,6 +487,11 @@ bool BassSoundEngine::play(Sound *snd, f32 pan, f32 pitch, f32 playVolume) {
         bassSound->bPaused = false;
         BASS_Mixer_ChannelFlags(bassSound->stream, 0, BASS_MIXER_CHAN_PAUSE);
         bassSound->interpolator.reset((f64)bassSound->paused_position_ms, Timing::getTimeReal(), bassSound->getSpeed());
+
+        // update handle params for existing handle
+        PlaybackParams newParams{.pan = pan, .pitch = pitch, .volume = playVolume};
+        bassSound->activeHandleCache[handle] = newParams;
+
         return true;
     }
 

@@ -158,7 +158,7 @@ void VolumeOverlay::mouse_update(bool *propagate_clicks) {
     // volume inactive to active animation
     if(this->bVolumeInactiveToActiveScheduled && this->fVolumeInactiveToActiveAnim > 0.0f) {
         soundEngine->setMasterVolume(std::lerp(cv::volume_master_inactive.getFloat() * cv::volume_master.getFloat(),
-                                         cv::volume_master.getFloat(), this->fVolumeInactiveToActiveAnim));
+                                               cv::volume_master.getFloat(), this->fVolumeInactiveToActiveAnim));
 
         // check if we're done
         if(this->fVolumeInactiveToActiveAnim == 1.0f) this->bVolumeInactiveToActiveScheduled = false;
@@ -312,13 +312,18 @@ void VolumeOverlay::updateEffectVolume(Skin *skin) {
 
     float volume = cv::volume_effects.getFloat();
     for(auto &sound : skin->sounds) {
-        if(sound) sound->setBaseVolume(volume);
+        if(sound && sound->getBaseVolume() != volume) sound->setBaseVolume(volume);
     }
 }
 
 void VolumeOverlay::onMusicVolumeChange() {
-    auto music = osu->getSelectedBeatmap()->getMusic();
-    if(music != nullptr) {
-        music->setBaseVolume(osu->getSelectedBeatmap()->getIdealVolume());
+    Sound *music = nullptr;
+    if(!osu || !(music = osu->getCurrentlyPlayingMusic())) return;
+
+    float newVolume = cv::volume_music.getFloat();
+    float oldVolume = music->getBaseVolume();
+
+    if(oldVolume != newVolume) {
+        music->setBaseVolume(newVolume);
     }
 }

@@ -1455,13 +1455,11 @@ void MainMenu::onExitButtonPressed() {
 }
 
 void MainMenu::onPausePressed() {
+    if (!osu->getSelectedBeatmap()) return;
     if(osu->getSelectedBeatmap()->isPreviewMusicPlaying()) {
         osu->getSelectedBeatmap()->pausePreviewMusic();
     } else {
-        auto music = osu->getSelectedBeatmap()->getMusic();
-        if(music != nullptr) {
-            soundEngine->play(music);
-        }
+        osu->getSelectedBeatmap()->playMusic();
     }
 }
 
