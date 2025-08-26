@@ -3523,7 +3523,8 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
     score.grade = score.passed ? osu->getScore()->getGrade() : FinishedScore::Grade::F;
     score.diff2 = this->selectedDifficulty2;
     score.ragequit = quit;
-    score.play_time_ms = this->iCurMusicPos / this->getSpeedMultiplier();
+    // iCurMusicPos < 0 means "did not start"
+    score.play_time_ms = (this->iCurMusicPos > 0 ? this->iCurMusicPos / this->getSpeedMultiplier() : 0);
 
     // osu!stable doesn't submit scores of less than 7 seconds
     isZero |= (score.play_time_ms < 7000);
