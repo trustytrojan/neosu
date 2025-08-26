@@ -3150,10 +3150,8 @@ void OptionsMenu::onWASAPIPeriodChange(CBaseUISlider *slider) {
 void OptionsMenu::onLoudnessNormalizationToggle(CBaseUICheckbox *checkbox) {
     this->onCheckboxChange(checkbox);
 
-    Beatmap *beatmap = nullptr;
-    Sound *music = nullptr;
-    if((beatmap = osu->getSelectedBeatmap()) && (music = beatmap->getMusic())) {
-        music->setPlayingVolume(beatmap->getIdealVolume());
+    if(osu->getSelectedBeatmap()) {
+        osu->getSelectedBeatmap()->playMusic();
     }
 
     if(cv::normalize_loudness.getBool()) {

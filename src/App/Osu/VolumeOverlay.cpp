@@ -311,7 +311,7 @@ void VolumeOverlay::updateEffectVolume(Skin *skin) {
     if(!skin || !skin->isReady() || skin->sounds.empty()) return;
 
     float volume = cv::volume_effects.getFloat();
-    for(const auto &sound : skin->sounds) {
+    for(auto &sound : skin->sounds) {
         if(sound && sound->getBaseVolume() != volume) sound->setBaseVolume(volume);
     }
 }

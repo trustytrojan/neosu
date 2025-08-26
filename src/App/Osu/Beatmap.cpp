@@ -1002,7 +1002,6 @@ void Beatmap::seekMS(u32 ms) {
     this->fWaitTime = 0.0f;
 
     this->music->setPositionMS(ms);
-    this->music->setPlayingVolume(this->getIdealVolume());
     this->music->setSpeed(this->getSpeedMultiplier());
 
     this->resetHitObjects(ms);
@@ -1517,7 +1516,9 @@ void Beatmap::handlePreviewPlay() {
     this->music->setLoop(cv::beatmap_preview_music_loop.getBool());
 }
 
-bool Beatmap::playMusic() { return this->music && soundEngine->play(this->music, {}, {}, this->getIdealVolume()); }
+bool Beatmap::playMusic() {
+    return this->music && soundEngine->play(this->music, {}, {}, this->getIdealVolume());
+}
 
 void Beatmap::loadMusic(bool stream) {
     stream = stream || this->bForceStreamPlayback;
