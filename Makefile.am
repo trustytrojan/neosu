@@ -328,7 +328,7 @@ MIMALLOC_OVERRIDE_DEP :=
 endif
 $(DEPS_PREFIX)/mimalloc-$(MIMALLOC_VERSION).built: $(DEPS_CACHE)/mimalloc-$(MIMALLOC_VERSION).source
 	rm -rf $(DEPS_PREFIX)/mimalloc
-	$(MKDIR_P) $(DEPS_PREFIX)/mimalloc $(DEPS_PREFIX)/bin && \
+	$(MKDIR_P) $(DEPS_PREFIX)/mimalloc $(DEPS_PREFIX)/lib && \
 	$(TAR) xf $(DEPS_CACHE)/mimalloc-$(MIMALLOC_VERSION).tar.gz -C $(DEPS_PREFIX)/mimalloc --strip-components=1 && \
 	$(MKDIR_P) $(DEPS_PREFIX)/mimalloc/out/"$(if $(ENABLE_DEBUG),debug,release)" && \
 	cd $(DEPS_PREFIX)/mimalloc/out/"$(if $(ENABLE_DEBUG),debug,release)" && \
@@ -356,7 +356,7 @@ $(DEPS_PREFIX)/mimalloc-$(MIMALLOC_VERSION).built: $(DEPS_CACHE)/mimalloc-$(MIMA
 		-D MI_BUILD_OBJECT=$(if $(findstring linux,$(host_os)),ON,OFF) && \
 	$(CMAKE) --build . "$(CMAKEPAROPT)" && \
 	$(CMAKE) --install .
-	cp $(DEPS_PREFIX)/mimalloc/bin/mimalloc-redirect*.lib $(DEPS_PREFIX)/bin/ || true
+	cp $(DEPS_PREFIX)/mimalloc/bin/mimalloc-redirect*.lib $(DEPS_PREFIX)/lib/ || true
 	touch $@
 else
 MIMALLOC_DYNAMIC_LIBS :=

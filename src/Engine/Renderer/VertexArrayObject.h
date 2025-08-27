@@ -11,9 +11,8 @@ class VertexArrayObject : public Resource {
                       Graphics::USAGE_TYPE usage = Graphics::USAGE_TYPE::USAGE_STATIC, bool keepInSystemMemory = false);
     ~VertexArrayObject() override { ; }
 
-    // TODO: fix the naming schema. clear = empty = just empty the containers, but not necessarily release memory
     void clear();
-    void empty();
+    constexpr void empty() { this->clear(); }
 
     void addVertex(vec2 v);
     void addVertex(vec3 v);
@@ -30,7 +29,13 @@ class VertexArrayObject : public Resource {
     void setVertex(int index, vec2 v);
     void setVertex(int index, vec3 v);
     void setVertex(int index, float x, float y, float z = 0);
-
+    inline void setVertices(const std::vector<vec3> &vertices) {
+        this->vertices = vertices;
+        this->iNumVertices = this->vertices.size();
+    }
+    void setTexcoords(const std::vector<vec2> &texcoords, unsigned int textureUnit = 0);
+    inline void setNormals(const std::vector<vec3> &normals) { this->normals = normals; }
+    inline void setColors(const std::vector<Color> &colors) { this->colors = colors; }
     void setColor(int index, Color color);
 
     void setType(Graphics::PRIMITIVE primitive);

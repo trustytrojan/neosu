@@ -549,6 +549,8 @@ void resetRenderTargetBoundingBox() {
 
 // helper function to update color uniforms
 void updateColorUniforms(const Color &borderColor, const Color &bodyColor) {
+    if(!s_BLEND_SHADER) return;
+
     if(s_uniformCache.lastBorderColor != borderColor) {
         s_BLEND_SHADER->setUniform3f("colBorder", borderColor.Rf(), borderColor.Gf(), borderColor.Bf());
         s_uniformCache.lastBorderColor = borderColor;

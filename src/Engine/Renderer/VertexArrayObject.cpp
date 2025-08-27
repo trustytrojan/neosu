@@ -33,21 +33,6 @@ void VertexArrayObject::destroy() {
 }
 
 void VertexArrayObject::clear() {
-    this->vertices = std::vector<vec3>();
-    for(auto& texcoord : this->texcoords) {
-        texcoord = std::vector<vec2>();
-    }
-    this->texcoords = std::vector<std::vector<vec2>>();
-    this->normals = std::vector<vec3>();
-    this->colors = std::vector<Color>();
-
-    this->partialUpdateVertexIndices = std::vector<int>();
-    this->partialUpdateColorIndices = std::vector<int>();
-
-    // NOTE: do NOT set m_iNumVertices to 0! (also don't change m_bHasTexcoords)
-}
-
-void VertexArrayObject::empty() {
     this->vertices.clear();
     for(auto& texcoord : this->texcoords) {
         texcoord.clear();
@@ -122,6 +107,12 @@ void VertexArrayObject::setVertex(int index, float x, float y, float z) {
     this->vertices[index].z = z;
 
     this->partialUpdateVertexIndices.push_back(index);
+}
+
+void VertexArrayObject::setTexcoords(const std::vector<vec2>& texcoords, unsigned int textureUnit) {
+    this->updateTexcoordArraySize(textureUnit);
+    this->texcoords[textureUnit] = texcoords;
+    this->bHasTexcoords = !texcoords.empty();
 }
 
 void VertexArrayObject::setColor(int index, Color color) {

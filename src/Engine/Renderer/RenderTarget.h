@@ -8,9 +8,8 @@ class ConVar;
 class RenderTarget : public Resource {
    public:
     RenderTarget(int x, int y, int width, int height,
-                 Graphics::MULTISAMPLE_TYPE multiSampleType = Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_0X)
-        : vPos(vec2{x, y}), vSize(width, height), multiSampleType(multiSampleType) {}
-    ~RenderTarget() override { ; }
+                 Graphics::MULTISAMPLE_TYPE multiSampleType = Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_0X);
+    ~RenderTarget() override;
 
     virtual void draw(int x, int y);
     virtual void draw(int x, int y, int width, int height);
@@ -59,6 +58,10 @@ class RenderTarget : public Resource {
     void init() override = 0;
     void initAsync() override = 0;
     void destroy() override = 0;
+
+    std::unique_ptr<VertexArrayObject> vao1;
+    std::unique_ptr<VertexArrayObject> vao2;
+    std::unique_ptr<VertexArrayObject> vao3;
 
     vec2 vPos{0.f};
     vec2 vSize{0.f};
