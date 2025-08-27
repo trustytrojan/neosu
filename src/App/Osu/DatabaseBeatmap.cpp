@@ -422,7 +422,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                         h.x = x;
                         h.y = y;
                         h.time = time;
-                        h.number = ++comboNumber;
+                        h.number = comboNumber++;
                         h.colorCounter = colorCounter;
                         h.colorOffset = colorOffset;
                         h.clicked = false;
@@ -522,7 +522,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                         slider.y = xy.y;
                         slider.repeat = std::clamp(slider.repeat, 0, sliderMaxRepeatRange);
                         slider.pixelLength = std::clamp(slider.pixelLength, -sliderSanityRange, sliderSanityRange);
-                        slider.number = ++comboNumber;
+                        slider.number = comboNumber++;
                         c.sliders.push_back(slider);
                     } else if(type & PpyHitObjectType::SPINNER) {
                         SPINNER s{.x = (i32)x,
