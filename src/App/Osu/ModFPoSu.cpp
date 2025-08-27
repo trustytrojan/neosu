@@ -337,7 +337,7 @@ void ModFPoSu::noclipMove() {
     // normalize
     float wishspeed = 0.0f;
     {
-        const float length = wishdir.length();
+        const float length = vec::length(wishdir);
         if(length > 0.0f) {
             wishdir /= length;  // normalize
             wishspeed = noclipSpeed;
@@ -346,7 +346,7 @@ void ModFPoSu::noclipMove() {
 
     // friction (deccelerate)
     {
-        const float spd = this->vVelocity.length();
+        const float spd = vec::length(this->vVelocity);
         if(spd > 0.00000001f) {
             // only apply friction once we "stop" moving (special case for noclip mode)
             if(wishspeed == 0.0f) {
@@ -377,7 +377,7 @@ void ModFPoSu::noclipMove() {
     }
 
     // clamp to max speed
-    if(this->vVelocity.length() > noclipSpeed) vec::setLength(this->vVelocity, noclipSpeed);
+    if(vec::length(this->vVelocity) > noclipSpeed) vec::setLength(this->vVelocity, noclipSpeed);
 
     // move
     this->camera->setPos(this->camera->getPos() + this->vVelocity * static_cast<float>(engine->getFrameTime()));
@@ -498,8 +498,8 @@ vec2 ModFPoSu::intersectRayMesh(vec3 pos, vec3 dir) {
                 if(v >= 0 && v <= vec::dot(Down - TopLeft, Down - TopLeft)) {
                     if(denominator > 0.0f)  // only allow forwards trace
                     {
-                        const float rightLength = (Right - TopLeft).length();
-                        const float downLength = (Down - TopLeft).length();
+                        const float rightLength = vec::length(Right - TopLeft);
+                        const float downLength = vec::length(Down - TopLeft);
                         const float x = u / (rightLength * rightLength);
                         const float y = v / (downLength * downLength);
                         const float distancePerFace =
@@ -545,11 +545,11 @@ vec3 ModFPoSu::calculateUnProjectedVector(vec2 pos) {
            cursorYPercent <= topTC) {
             const float tcRightPercent = (cursorXPercent - leftTC) / std::abs(leftTC - rightTC);
             vec3 right = (topRight - topLeft);
-            vec::setLength(right, right.length() * tcRightPercent);
+            vec::setLength(right, vec::length(right) * tcRightPercent);
 
             const float tcDownPercent = (cursorYPercent - bottomTC) / std::abs(topTC - bottomTC);
             vec3 down = (bottomLeft - topLeft);
-            vec::setLength(down, down.length() * tcDownPercent);
+            vec::setLength(down, vec::length(down) * tcDownPercent);
 
             const vec3 modelPos = (topLeft + right + down);
 

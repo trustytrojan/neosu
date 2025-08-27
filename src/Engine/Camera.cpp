@@ -228,7 +228,7 @@ void Camera::rotateY(float yawDeg) {
 void Camera::lookAt(vec3 target) { this->lookAt(this->vPos, target); }
 
 void Camera::lookAt(vec3 eye, vec3 target) {
-    if((eye - target).length() < 0.001f) return;
+    if(vec::length(eye - target) < 0.001f) return;
 
     this->vPos = eye;
 
