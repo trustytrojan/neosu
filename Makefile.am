@@ -333,7 +333,7 @@ $(DEPS_PREFIX)/mimalloc-$(MIMALLOC_VERSION).built: $(DEPS_CACHE)/mimalloc-$(MIMA
 	$(MKDIR_P) $(DEPS_PREFIX)/mimalloc/out/"$(if $(ENABLE_DEBUG),debug,release)" && \
 	cd $(DEPS_PREFIX)/mimalloc/out/"$(if $(ENABLE_DEBUG),debug,release)" && \
 	env PKG_CONFIG="$(PKG_CONFIG)" \
-		LDFLAGS="$(LDFLAGS) $(WINPTHREAD_LDFLAGS) -xnone" $(CMAKE) -S ../.. -B . -G "$(CMAKE_GEN)" \
+		LDFLAGS="$(LDFLAGS) -xnone" $(CMAKE) -S ../.. -B . -G "$(CMAKE_GEN)" \
 		-D CMAKE_C_COMPILER="$(CC)" \
 		-D CMAKE_C_FLAGS="$(CFLAGS) -Wno-array-bounds" \
 		-D CMAKE_SYSTEM_NAME="$(CMAKE_SYSTEM_NAME)" \
@@ -878,8 +878,7 @@ neosu_LDFLAGS := \
 	$(DISCORDSDK_LIBS) \
 	$(NEOSU_LDFLAGS) \
 	$(EXTRA_WIN_LIBS) \
-	$(LDFLAGS_EXTRA) \
-	$(WINPTHREAD_LDFLAGS) # must come last, otherwise it overrides exe .rsrc section and the program description becomes "POSIX WinThreads for Windows"
+	$(LDFLAGS_EXTRA)
 
 if WIN_PLATFORM
 # mimalloc new/delete override for windows

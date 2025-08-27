@@ -802,7 +802,6 @@ CMAKEIDOPT
 CMAKERCOPT
 CMAKE_SYSTEM_NAME
 PKG_CONFIG
-WINPTHREAD_LDFLAGS
 WINDRES
 PKG_CONFIG_SYSTEM_INCLUDE_PATH
 PKG_CONFIG_SYSTEM_LIBRARY_PATH
@@ -6833,7 +6832,6 @@ then :
         ubercompat=on
         with_mimalloc="no"
         LDFLAGS="$LDFLAGS -m32 -Wl,--large-address-aware"
-        WINPTHREAD_LDFLAGS="-lwinpthread"
         # xp
         CPPFLAGS="$CPPFLAGS -DWINVER=0x0501 -D_WIN32_WINNT=0x0501 -D_WIN32_WINDOWS=0x0501 -D_WIN32_IE=0x0501"
         CFLAGS="$CFLAGS -m32 -fno-omit-frame-pointer -momit-leaf-frame-pointer -DWINVER=0x0501 -D_WIN32_WINNT=0x0501 -D_WIN32_WINDOWS=0x0501 -D_WIN32_IE=0x0501 -mfpmath=sse"
@@ -6848,8 +6846,6 @@ else case e in #(
         CPPFLAGS="$CPPFLAGS -DWINVER=0x0A00 -D_WIN32_WINNT=0x0A00 -D_WIN32_WINDOWS=0x0A00 -D_WIN32_IE=0x0A00"
         CFLAGS="$CFLAGS -DWINVER=0x0A00 -D_WIN32_WINNT=0x0A00 -D_WIN32_WINDOWS=0x0A00 -D_WIN32_IE=0x0A00"
         CXXFLAGS="$CXXFLAGS -DWINVER=0x0A00 -D_WIN32_WINNT=0x0A00 -D_WIN32_WINDOWS=0x0A00 -D_WIN32_IE=0x0A00"
-        #WINPTHREAD_LDFLAGS="-Wl,-Bstatic,--whole-archive -lwinpthread -Wl,--no-whole-archive,-Bdynamic" # figure out how to make this not overwrite the neosu resources
-        WINPTHREAD_LDFLAGS="-lwinpthread"
         NASMOBJ=win64
 
      ;;
@@ -6862,8 +6858,6 @@ printf "%s\n" "#define MCENGINE_PLATFORM_WINDOWS 1" >>confdefs.h
  ;;
 esac
 fi
-
-
 
 PKG_CONFIG="$PWD/build/pkg-config"
 CMAKEPAROPT="--parallel $CPU_COUNT"
@@ -8177,16 +8171,10 @@ then :
 fi
 
 CPPFLAGS="$CPPFLAGS -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64"
-COMMON_FLAGS="$COMMON_FLAGS -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64 -ffunction-sections -fdata-sections -fwrapv -fno-strict-aliasing -fno-semantic-interposition -ftls-model=initial-exec"
+COMMON_FLAGS="$COMMON_FLAGS -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64 -pipe -ffunction-sections -fdata-sections -fwrapv -fno-strict-aliasing -fno-semantic-interposition -ftls-model=initial-exec -pthread"
 CXXFLAGS="$CXXFLAGS $COMMON_FLAGS -fno-exceptions -fno-unwind-tables" # -fno-rtti
 CFLAGS="$CFLAGS $COMMON_FLAGS"
-
-if { test -z "$ubercompat" || test "x$enable_static" = "xyes" ; }
-then :
-
-    LDFLAGS="$LDFLAGS -static-libstdc++ -static-libgcc"
-
-fi
+LDFLAGS="$LDFLAGS -static-libstdc++ -static-libgcc -pthread"
 
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -9161,8 +9149,8 @@ fi
 fi
 
 NEOSU_CPPFLAGS="$NEOSU_CPPFLAGS -DCJSON_HIDE_SYMBOLS"
-NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -Wall -Wextra -Wno-sign-compare -Wunused-parameter -Wdeprecated-declarations -Wno-error=deprecated-declarations -pthread"
-NEOSU_LDFLAGS="$NEOSU_LDFLAGS -pthread"
+NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -Wall -Wextra -Wno-sign-compare -Wunused-parameter -Wdeprecated-declarations -Wno-error=deprecated-declarations"
+NEOSU_LDFLAGS="$NEOSU_LDFLAGS"
 
 
 
@@ -13071,27 +13059,15 @@ else
 fi
 
 
-# need dynamic winpthread for old windows 32bit compat builds
-# the way im searching for the right .dlls to copy is so disgusting and needs to be fixed somehow
-# also need this for 64bit so that the winpthread resources don't override neosu's...
+# need dynamic winpthread because static linking to it causes problems
 if test "$SYSNAME" = "windows"
 then :
 
-    if test "x$enable_static" = "xyes"
-then :
-   # still need winpthread dynamic, breaks otherwise for reasons i dont understand
-        WINSHARED_DLLS="$($CC -print-prog-name=ld | sed -e 's|/bin/.*||' | tr -d '\n' | find -files0-from - \
-            -iregex ".*$host_cpu"'.*libwinpthread-1.dll' \
-            -printf '%h/%f ')"
-
-else case e in #(
-  e)
-        WINSHARED_DLLS="$($CC -print-prog-name=ld | sed -e 's|/bin/.*||' | tr -d '\n' | find -files0-from - \
-            '(' -iregex ".*$host_cpu"'.*libwinpthread-1.dll' -o -iregex ".*$host_cpu"'.*libgcc_.*.dll' -o -iregex ".*$host_cpu"'.*libstdc.*.dll' ')' \
-            -printf '%h/%f ')"
-     ;;
-esac
-fi
+    WINSHARED_DLLS="$($CC -print-search-dirs | grep '^programs:' | sed 's/programs: =//' | tr ':' '\n' | while read dir; do
+                        if test -n "$dir"; then
+                            find "$dir" -name "libwinpthread-1.dll" 2>/dev/null
+                        fi
+                    done | head -1)"
 
 fi
 

@@ -414,7 +414,6 @@ __EOF__
         ubercompat=on
         with_mimalloc="no"
         LDFLAGS="$LDFLAGS -m32 -Wl,--large-address-aware"
-        WINPTHREAD_LDFLAGS="-lwinpthread"
         # xp
         CPPFLAGS="$CPPFLAGS -DWINVER=0x0501 -D_WIN32_WINNT=0x0501 -D_WIN32_WINDOWS=0x0501 -D_WIN32_IE=0x0501"
         CFLAGS="$CFLAGS -m32 -fno-omit-frame-pointer -momit-leaf-frame-pointer -DWINVER=0x0501 -D_WIN32_WINNT=0x0501 -D_WIN32_WINDOWS=0x0501 -D_WIN32_IE=0x0501 -mfpmath=sse"
@@ -426,15 +425,11 @@ __EOF__
         CPPFLAGS="$CPPFLAGS -DWINVER=0x0A00 -D_WIN32_WINNT=0x0A00 -D_WIN32_WINDOWS=0x0A00 -D_WIN32_IE=0x0A00"
         CFLAGS="$CFLAGS -DWINVER=0x0A00 -D_WIN32_WINNT=0x0A00 -D_WIN32_WINDOWS=0x0A00 -D_WIN32_IE=0x0A00"
         CXXFLAGS="$CXXFLAGS -DWINVER=0x0A00 -D_WIN32_WINNT=0x0A00 -D_WIN32_WINDOWS=0x0A00 -D_WIN32_IE=0x0A00"
-        #WINPTHREAD_LDFLAGS="-Wl,-Bstatic,--whole-archive -lwinpthread -Wl,--no-whole-archive,-Bdynamic" # figure out how to make this not overwrite the neosu resources
-        WINPTHREAD_LDFLAGS="-lwinpthread"
         AC_SUBST([NASMOBJ],[win64])
     ])
 
     AC_DEFINE([MCENGINE_PLATFORM_WINDOWS], [1], [Define if compiling for Windows.])
 ])
-
-AC_SUBST([WINPTHREAD_LDFLAGS])
 
 PKG_CONFIG="$PWD/build/pkg-config"
 CMAKEPAROPT="--parallel $CPU_COUNT"
@@ -489,13 +484,10 @@ AC_SUBST([CXX])
 AS_IF([test "$host_cpu" = "x86_64"], [COMMON_FLAGS="$COMMON_FLAGS -mcmodel=small"])
 
 CPPFLAGS="$CPPFLAGS -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64"
-COMMON_FLAGS="$COMMON_FLAGS -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64 -ffunction-sections -fdata-sections -fwrapv -fno-strict-aliasing -fno-semantic-interposition -ftls-model=initial-exec"
+COMMON_FLAGS="$COMMON_FLAGS -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64 -pipe -ffunction-sections -fdata-sections -fwrapv -fno-strict-aliasing -fno-semantic-interposition -ftls-model=initial-exec -pthread"
 CXXFLAGS="$CXXFLAGS $COMMON_FLAGS -fno-exceptions -fno-unwind-tables" # -fno-rtti
 CFLAGS="$CFLAGS $COMMON_FLAGS"
-
-AS_IF([{ test -z "$ubercompat" || test "x$enable_static" = "xyes" ; }], [
-    LDFLAGS="$LDFLAGS -static-libstdc++ -static-libgcc"
-])
+LDFLAGS="$LDFLAGS -static-libstdc++ -static-libgcc -pthread"
 
 AC_LANG_PUSH([C++])
 AS_IF([test "x$enable_native" != "xno"], [
@@ -633,8 +625,8 @@ AS_IF([test "x$enable_lto" != "xno"], [
 ])
 
 NEOSU_CPPFLAGS="$NEOSU_CPPFLAGS -DCJSON_HIDE_SYMBOLS"
-NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -Wall -Wextra -Wno-sign-compare -Wunused-parameter -Wdeprecated-declarations -Wno-error=deprecated-declarations -pthread"
-NEOSU_LDFLAGS="$NEOSU_LDFLAGS -pthread"
+NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -Wall -Wextra -Wno-sign-compare -Wunused-parameter -Wdeprecated-declarations -Wno-error=deprecated-declarations"
+NEOSU_LDFLAGS="$NEOSU_LDFLAGS"
 AC_SUBST([NEOSU_CPPFLAGS])
 AC_SUBST([NEOSU_CXXFLAGS])
 AC_SUBST([NEOSU_LDFLAGS])
@@ -914,19 +906,13 @@ AM_CONDITIONAL([WIN32_PLATFORM], [test "$SYSNAME" = "windows" && test "$host_cpu
 
 AM_CONDITIONAL([STRIPBINS], [test "x$enable_strip" != "xno" && ! { test "$SYSNAME" = "windows" && test "$host_cpu" = "i686" ; } ])
 
-# need dynamic winpthread for old windows 32bit compat builds
-# the way im searching for the right .dlls to copy is so disgusting and needs to be fixed somehow
-# also need this for 64bit so that the winpthread resources don't override neosu's...
+# need dynamic winpthread because static linking to it causes problems
 AS_IF([test "$SYSNAME" = "windows"], [
-    AS_IF([test "x$enable_static" = "xyes"], [ # still need winpthread dynamic, breaks otherwise for reasons i dont understand
-        WINSHARED_DLLS="$($CC -print-prog-name=ld | sed -e 's|/bin/.*||' | tr -d '\n' | find -files0-from - \
-            -iregex ".*$host_cpu"'.*libwinpthread-1.dll' \
-            -printf '%h/%f ')"
-    ], [
-        WINSHARED_DLLS="$($CC -print-prog-name=ld | sed -e 's|/bin/.*||' | tr -d '\n' | find -files0-from - \
-            '(' -iregex ".*$host_cpu"'.*libwinpthread-1.dll' -o -iregex ".*$host_cpu"'.*libgcc_.*.dll' -o -iregex ".*$host_cpu"'.*libstdc.*.dll' ')' \
-            -printf '%h/%f ')"
-    ])
+    WINSHARED_DLLS="$($CC -print-search-dirs | grep '^programs:' | sed 's/programs: =//' | tr ':' '\n' | while read dir; do
+                        if test -n "$dir"; then
+                            find "$dir" -name "libwinpthread-1.dll" 2>/dev/null
+                        fi
+                    done | head -1)"
 ])
 
 AC_SUBST([WINSHARED_DLLS])
