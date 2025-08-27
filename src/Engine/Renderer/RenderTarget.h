@@ -3,6 +3,8 @@
 #include "Resource.h"
 #include "Graphics.h"
 
+#include <memory>
+
 class ConVar;
 
 class RenderTarget : public Resource {
