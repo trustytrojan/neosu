@@ -27,8 +27,18 @@ Changelog::Changelog() : ScreenBackable() {
 
     std::vector<CHANGELOG> changelogs;
 
+    CHANGELOG v40_03;
+    v40_03.title = "40.03 (2025-08-27)";
+    v40_03.changes = {
+        R"(- Hotfix for some 40.02 regressions:)",
+        R"(  - Fixed certain maps failing to load correctly (hitsound parsing problems))",
+        R"(  - Fixed HP drain and geki/katu hit results (new combo always started at 2))",
+        R"(  - Small audio improvements and fixes (for BASS and SoLoud))",
+    };
+    changelogs.push_back(v40_03);
+
     CHANGELOG v40_02;
-    v40_02.title = "40.02";
+    v40_02.title = "40.02 (2025-08-25)";
     v40_02.changes = {
         R"(- Added setting to display map titles in their original language)",
         R"(- Added support for per-hitobject hitsounds, sample sets and volume)",
