@@ -323,18 +323,16 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
 
                 // HitObjects
                 case 6: {
-                    thread_local std::pair<bool, size_t> err_line;
-                    err_line.first = false;
-                    err_line.second = 0;
+                    thread_local size_t err_line;
+                    err_line = 0;
 
                     static auto upd_last_error = [&](bool parse_result_bad,
                                                      size_t line = std::source_location::current().line()) -> void {
-                        if(err_line.first) {  // already got error
+                        if(err_line) {  // already got error
                             return;
                         } else {
                             if(parse_result_bad) {
-                                err_line.first = true;
-                                err_line.second = line;
+                                err_line = line;
                             }
                         }
                     };
@@ -399,8 +397,8 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                     upd_last_error((type & PpyHitObjectType::SPINNER) && (csvs.size() < 6));
                     upd_last_error(
                         !(type & (PpyHitObjectType::CIRCLE | PpyHitObjectType::SLIDER | PpyHitObjectType::SPINNER)));
-                    if(err_line.first) {
-                        debugLog("Invalid hit object (error on line {}): {}\n", err_line.second, curLine);
+                    if(err_line) {
+                        debugLog("Invalid hit object (error on line {}): {}\n", err_line, curLine);
                         break;
                     }
 
@@ -439,7 +437,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
 
                         c.hitcircles.push_back(h);
                     } else if(type & PpyHitObjectType::SLIDER) {
-                        SLIDER slider;
+                        SLIDER slider{};
                         slider.colorCounter = colorCounter;
                         slider.colorOffset = colorOffset;
                         slider.time = time;
@@ -453,14 +451,14 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                             upd_last_error(!Parsing::parse(curvePoints, &cpX, ':', &cpY));
                             upd_last_error(!std::isfinite(cpX) || std::isnan(cpX));
                             upd_last_error(!std::isfinite(cpY) || std::isnan(cpY));
-                            if(err_line.second) break;
+                            if(err_line) break;
 
                             slider.points.emplace_back(std::clamp(cpX, -sliderSanityRange, sliderSanityRange),
                                                        std::clamp(cpY, -sliderSanityRange, sliderSanityRange));
                         }
 
-                        if(err_line.second) {
-                            debugLog("Invalid slider (error on line {}): {}\n", err_line.second, curLine);
+                        if(err_line) {
+                            debugLog("Invalid slider (error on line {}): {}\n", err_line, curLine);
                             break;
                         }
 
@@ -489,7 +487,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                         if(csvs.size() > 9) edgeSets = SString::split(csvs[9], "|");
                         upd_last_error((!edgeSets.empty() && (edgeSounds.size() != edgeSets.size())));
 
-                        for(i32 i = 0; !err_line.first && i < edgeSounds.size(); i++) {
+                        for(i32 i = 0; !err_line && i < edgeSounds.size(); i++) {
                             HitSamples samples;
                             upd_last_error(!Parsing::parse(edgeSounds[i], &samples.hitSounds));
                             samples.hitSounds &= HitSoundType::VALID_HITSOUNDS;
@@ -502,8 +500,8 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                             slider.edgeSamples.push_back(samples);
                         }
 
-                        if(err_line.first) {
-                            debugLog("Invalid slider edgeSamples (error on line {}): {}\n", err_line.second, curLine);
+                        if(err_line) {
+                            debugLog("Invalid slider edgeSamples (error on line {}): {}\n", err_line, curLine);
                             break;
                         }
 
@@ -535,8 +533,8 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
 
                         upd_last_error(!Parsing::parse(csvs[5], &s.endTime));
 
-                        if(err_line.first) {
-                            debugLog("Invalid spinner (error on line {}): {}\n", err_line.second, curLine);
+                        if(err_line) {
+                            debugLog("Invalid spinner (error on line {}): {}\n", err_line, curLine);
                             break;
                         }
 
