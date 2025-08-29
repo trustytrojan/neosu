@@ -12,7 +12,6 @@
 #include "OpenGLRenderTarget.h"
 #include "OpenGLShader.h"
 #include "OpenGLVertexArrayObject.h"
-#include "Profiler.h"
 
 #include "SDLGLInterface.h"
 #include "OpenGLStateCache.h"
@@ -86,7 +85,6 @@ void OpenGLLegacyInterface::beginScene() {
 }
 
 void OpenGLLegacyInterface::endScene() {
-    VPROF_BUDGET("endScene", VPROF_BUDGETGROUP_DRAW_SWAPBUFFERS);
     popTransform();
 
 #ifdef _DEBUG
