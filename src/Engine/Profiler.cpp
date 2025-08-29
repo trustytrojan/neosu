@@ -100,13 +100,13 @@ void ProfilerNode::constructor(const char *name, const char *group, ProfilerNode
 
 void ProfilerNode::enterScope() {
     if(this->iNumRecursions++ == 0) {
-        this->fTime = engine->getTimeReal();
+        this->fTime = Timing::getTimeReal();
     }
 }
 
 bool ProfilerNode::exitScope() {
     if(--this->iNumRecursions == 0) {
-        this->fTime = engine->getTimeReal() - this->fTime;
+        this->fTime = Timing::getTimeReal() - this->fTime;
         this->fTimeCurrentFrame = this->fTime;
     }
 

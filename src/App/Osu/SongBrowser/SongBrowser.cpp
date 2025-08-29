@@ -2401,9 +2401,9 @@ void SongBrowser::checkHandleKillBackgroundSearchMatcher() {
     if(!this->backgroundSearchMatcher->isDead()) {
         this->backgroundSearchMatcher->kill();
 
-        const double startTime = engine->getTimeReal();
+        const double startTime = Timing::getTimeReal();
         while(!this->backgroundSearchMatcher->isAsyncReady()) {
-            if(engine->getTimeReal() - startTime > 2) {
+            if(Timing::getTimeReal() - startTime > 2) {
                 debugLog("WARNING: Ignoring stuck SearchMatcher thread!\n");
                 break;
             }

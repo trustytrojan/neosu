@@ -142,9 +142,6 @@ Environment::~Environment() {
     env = nullptr;
 }
 
-// called by mainloop when initialization is ready
-Engine *Environment::initEngine() { return new Engine(); }
-
 // well this doesn't do much atm... called at the end of engine->onUpdate
 void Environment::update() {
     m_bIsCursorInsideWindow = m_bHasFocus && m_engine->getScreenRect().contains(getMousePos());

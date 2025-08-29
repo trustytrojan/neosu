@@ -83,9 +83,7 @@ class Engine final : public KeyboardListener {
     [[nodiscard]] constexpr int getScreenHeight() const { return (int)this->vScreenSize.y; }
 
     // vars
-    void setFrameTime(double delta);
-    [[nodiscard]] double getTime();
-    [[nodiscard]] double getTimeReal();
+    [[nodiscard]] constexpr double getTime() const { return this->dTime; }
     [[nodiscard]] constexpr double getFrameTime() const { return this->dFrameTime; }
     [[nodiscard]] constexpr unsigned long getFrameCount() const { return this->iFrameCount; }
 
@@ -111,7 +109,7 @@ class Engine final : public KeyboardListener {
     std::vector<InputDevice *> inputDevices;
 
     // timing
-    Timer *timer;
+    std::unique_ptr<Timer> timer;
     f64 dTime{0.0};
     unsigned long iFrameCount;
     double dFrameTime;

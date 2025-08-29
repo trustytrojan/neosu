@@ -704,7 +704,7 @@ bool Beatmap::start() {
     // we are waiting for an asynchronous start of the beatmap in the next update()
     this->bIsPlaying = true;
     this->bIsWaiting = true;
-    this->fWaitTime = engine->getTimeReal();
+    this->fWaitTime = Timing::getTimeReal<f32>();
 
     cv::snd_change_check_interval.setValue(0.0f);
 
@@ -747,13 +747,13 @@ void Beatmap::actualRestart() {
 
     // we are waiting for an asynchronous start of the beatmap in the next update()
     this->bIsWaiting = true;
-    this->fWaitTime = engine->getTimeReal();
+    this->fWaitTime = Timing::getTimeReal<f32>();
 
     // if the first hitobject starts immediately, add artificial wait time before starting the music
     if(this->hitobjects.size() > 0) {
         if(this->hitobjects[0]->click_time < (long)cv::early_note_time.getInt()) {
             this->bIsWaiting = true;
-            this->fWaitTime = engine->getTimeReal() + cv::early_note_time.getFloat() / 1000.0f;
+            this->fWaitTime = Timing::getTimeReal<f32>() + cv::early_note_time.getFloat() / 1000.0f;
         }
     }
 
@@ -798,7 +798,7 @@ void Beatmap::pause(bool quitIfWaiting) {
     // NOTE: if pure virtual audio time is ever supported (playing without SoundEngine) then this needs to be adapted
     // fix pausing after music ends breaking beatmap state (by just not allowing it to be paused)
     if(this->fAfterMusicIsFinishedVirtualAudioTimeStart >= 0.0f) {
-        const f32 delta = engine->getTimeReal() - this->fAfterMusicIsFinishedVirtualAudioTimeStart;
+        const f32 delta = Timing::getTimeReal<f32>() - this->fAfterMusicIsFinishedVirtualAudioTimeStart;
         if(delta < 5.0f)  // WARNING: sanity limit, always allow escaping after 5 seconds of overflow time
             return;
     }
@@ -1089,7 +1089,7 @@ f32 Beatmap::getPercentFinishedPlayable() const {
         if(wait_duration <= 0.f) return 0.f;
 
         f32 wait_start = this->fWaitTime - wait_duration;
-        f32 wait_percent = (engine->getTimeReal() - wait_start) / wait_duration;
+        f32 wait_percent = (Timing::getTimeReal<f32>() - wait_start) / wait_duration;
         return std::clamp(wait_percent, 0.f, 1.f);
     } else {
         f32 length_playable = this->getLengthPlayable();
@@ -1584,7 +1584,7 @@ void Beatmap::resetScore() {
         .key_flags = 0,
     });
 
-    this->last_event_time = engine->getTimeReal();
+    this->last_event_time = Timing::getTimeReal();
     this->last_event_ms = 0;
     this->current_keys = 0;
     this->last_keys = 0;
@@ -2089,7 +2089,7 @@ void Beatmap::update() {
         if(cv::debug_osu.getBool() && this->iPreLoadingIndex == 0)
             debugLog("Beatmap: Preloading slider vertexbuffers ...\n");
 
-        f64 startTime = engine->getTimeReal();
+        f64 startTime = Timing::getTimeReal();
         f64 delta = 0.0;
 
         // hardcoded deadline of 10 ms, will temporarily bring us down to 45fps on average (better than freezing)
@@ -2104,7 +2104,7 @@ void Beatmap::update() {
             }
 
             this->iPreLoadingIndex++;
-            delta = engine->getTimeReal() - startTime;
+            delta = Timing::getTimeReal() - startTime;
         }
     }
 
@@ -2225,7 +2225,7 @@ void Beatmap::update() {
 
     if(this->last_keys != this->current_keys) {
         this->write_frame();
-    } else if(this->last_event_time + 0.01666666666 <= engine->getTimeReal()) {
+    } else if(this->last_event_time + 0.01666666666 <= Timing::getTimeReal()) {
         this->write_frame();
     }
 }
@@ -2285,16 +2285,16 @@ void Beatmap::update2() {
     // negative start (else everything would just freeze for the waiting period)
     if(this->bIsWaiting) {
         if(this->isLoading()) {
-            this->fWaitTime = engine->getTimeReal();
+            this->fWaitTime = Timing::getTimeReal<f32>();
 
             // if the first hitobject starts immediately, add artificial wait time before starting the music
             if(!this->bIsRestartScheduledQuick && this->hitobjects.size() > 0) {
                 if(this->hitobjects[0]->click_time < (long)cv::early_note_time.getInt()) {
-                    this->fWaitTime = engine->getTimeReal() + cv::early_note_time.getFloat() / 1000.0f;
+                    this->fWaitTime = Timing::getTimeReal<f32>() + cv::early_note_time.getFloat() / 1000.0f;
                 }
             }
         } else {
-            if(engine->getTimeReal() > this->fWaitTime) {
+            if(Timing::getTimeReal<f32>() > this->fWaitTime) {
                 if(!this->bIsPaused) {
                     this->bIsWaiting = false;
                     this->bIsPlaying = true;
@@ -2324,7 +2324,7 @@ void Beatmap::update2() {
                     this->onModUpdate(false, false);
                 }
             } else {
-                this->iCurMusicPos = (engine->getTimeReal() - this->fWaitTime) * 1000.0f * this->getSpeedMultiplier();
+                this->iCurMusicPos = (Timing::getTimeReal<f32>() - this->fWaitTime) * 1000.0f * this->getSpeedMultiplier();
             }
         }
 
@@ -2371,7 +2371,7 @@ void Beatmap::update2() {
 
             // we are waiting for an asynchronous start of the beatmap in the next update()
             this->bIsWaiting = true;
-            this->fWaitTime = engine->getTimeReal();
+            this->fWaitTime = Timing::getTimeReal<f32>();
         } else if(this->iResourceLoadUpdateDelayHack >
                   3)  // second: if that still doesn't work, stop and display an error message
         {
@@ -2388,7 +2388,7 @@ void Beatmap::update2() {
         if(!isMusicFinished)
             this->fAfterMusicIsFinishedVirtualAudioTimeStart = -1.0f;
         else if(this->fAfterMusicIsFinishedVirtualAudioTimeStart < 0.0f)
-            this->fAfterMusicIsFinishedVirtualAudioTimeStart = engine->getTimeReal();
+            this->fAfterMusicIsFinishedVirtualAudioTimeStart = Timing::getTimeReal<f32>();
 
         if(isMusicFinished) {
             // continue with virtual audio time until the last hitobject is done (plus sanity offset given via
@@ -2396,7 +2396,7 @@ void Beatmap::update2() {
             // NOTE: this overwrites m_iCurMusicPos for the rest of the update loop
             this->iCurMusicPos =
                 (long)this->music->getLengthMS() +
-                (long)((engine->getTimeReal() - this->fAfterMusicIsFinishedVirtualAudioTimeStart) * 1000.0f);
+                (long)((Timing::getTimeReal<f32>() - this->fAfterMusicIsFinishedVirtualAudioTimeStart) * 1000.0f);
         }
 
         const bool hasAnyHitObjects = (this->hitobjects.size() > 0);

@@ -35,7 +35,7 @@ Engine *engine = nullptr;
 Console *Engine::console = nullptr;
 ConsoleBox *Engine::consoleBox = nullptr;
 
-Engine::Engine() {
+Engine::Engine() : timer(std::make_unique<Timer>(false)) {
     engine = this;
 
     this->guiContainer = nullptr;
@@ -50,7 +50,6 @@ Engine::Engine() {
     debugLog("cmdline: {:s}\n", UString::join(env->getCommandLine()));
 
     // timing
-    this->timer = new Timer();
     this->iFrameCount = 0;
     this->iVsyncFrameCount = 0;
     this->fVsyncFrameCounterTime = 0.0f;
@@ -181,9 +180,6 @@ Engine::~Engine() {
     mouse.reset();
     keyboard.reset();
 
-    debugLog("Engine: Freeing timer...\n");
-    SAFE_DELETE(this->timer);
-
     debugLog("Engine: Freeing fonts...\n");
     McFont::cleanupSharedResources();
 
@@ -302,11 +298,15 @@ void Engine::onUpdate() {
     VPROF_BUDGET("Engine::onUpdate", VPROF_BUDGETGROUP_UPDATE);
 
     if(this->bBlackout) return;
+
     {
         VPROF_BUDGET("Timer::update", VPROF_BUDGETGROUP_UPDATE);
         // update time
         {
             this->timer->update();
+            // frame time
+            this->dFrameTime = std::max<double>(this->timer->getDelta(), 0.00005);
+            // total engine runtime
             this->dTime = this->timer->getElapsedTime();
             if(cv::engine_throttle.getBool()) {
                 // it's more like a crude estimate but it gets the job done for use as a throttle
@@ -562,21 +562,12 @@ void Engine::requestResolutionChange(vec2 newResolution) {
     this->bResolutionChange = true;
 }
 
-void Engine::setFrameTime(double delta) { this->dFrameTime = std::max<double>(delta, 0.0001); }
-
 void Engine::onEngineThrottleChanged(float newVal) {
     const bool enable = !!static_cast<int>(newVal);
     if(!enable) {
         this->fVsyncFrameCounterTime = 0.0f;
         this->iVsyncFrameCount = 0;
     }
-}
-
-double Engine::getTime() { return this->dTime; }
-
-double Engine::getTimeReal() {
-    this->timer->update();
-    return this->timer->getElapsedTime();
 }
 
 void Engine::logToConsole(std::optional<Color> color, const UString &msg) {

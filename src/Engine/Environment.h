@@ -193,8 +193,7 @@ class Environment {
    protected:
     std::unordered_map<UString, std::optional<UString>> m_mArgMap;
     std::vector<UString> m_vCmdLine;
-    Engine *initEngine();
-    Engine *m_engine;
+    std::unique_ptr<Engine> m_engine;
 
     SDL_Window *m_window;
     std::string m_sdldriver;

@@ -50,11 +50,8 @@ class SDLMain final : public Environment {
     void setFgFPS();
     void setBgFPS();
 
-    // window and context
+    // GL context (must be created early, during window creation)
     SDL_GLContext m_context{nullptr};
-
-    // engine update timer
-    Timing::Timer *m_deltaTimer{nullptr};
 
     int m_iFpsMax{360};
     int m_iFpsMaxBG{30};

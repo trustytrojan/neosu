@@ -12,7 +12,6 @@
 
 #include "MakeDelegateWrapper.h"
 #include "Engine.h"
-#include "Timing.h"
 #include "ConVar.h"
 #include "FPSLimiter.h"
 #include "Keyboard.h"
@@ -51,18 +50,6 @@ void SDLMain::fps_max_background_callback(float newVal) {
 }
 
 SDLMain::~SDLMain() {
-    // clean up timers
-    if(m_deltaTimer) {
-        delete m_deltaTimer;
-        m_deltaTimer = nullptr;
-    }
-
-    // stop the engine
-    if(m_engine) {
-        delete m_engine;
-        m_engine = nullptr;
-    }
-
     // clean up GL context
     if(m_context && (Env::cfg((REND::GL | REND::GLES32), !REND::DX11))) {
         SDL_GL_DestroyContext(m_context);
@@ -89,15 +76,8 @@ SDL_AppResult SDLMain::initialize() {
     // disable (filter) some SDL events we don't care about
     configureEvents();
 
-    // init timing
-    m_deltaTimer = new Timer(false);
-
     // initialize engine, now that all the setup is done
-    m_engine = Environment::initEngine();
-
-    // start engine frame timer
-    m_deltaTimer->start();
-    m_deltaTimer->update();
+    m_engine = std::make_unique<Engine>();
 
     // if we got to this point, all relevant subsystems (input handling, graphics interface, etc.) have been initialized
 
@@ -327,8 +307,6 @@ SDL_AppResult SDLMain::iterate() {
 
     // update
     {
-        m_deltaTimer->update();
-        m_engine->setFrameTime(m_deltaTimer->getDelta());
         m_engine->onUpdate();
     }
 
