@@ -89,18 +89,8 @@ inline INLINE_BODY T getTimeReal() noexcept {
 
 class Timer {
    public:
-    explicit Timer(bool startOnCtor = false) noexcept {
-        if(startOnCtor) start();
-    }
-
-    ~Timer() = default;
-    Timer(const Timer &) = default;
-    Timer &operator=(const Timer &) = default;
-    Timer(Timer &&) = default;
-    Timer &operator=(Timer &&) = default;
-
-    inline void start() noexcept {
-        this->startTimeNS = getTicksNS();
+    inline void start(bool startFromZero = false) noexcept {
+        this->startTimeNS = startFromZero ? 0 : getTicksNS();
         this->lastUpdateNS = this->startTimeNS;
         this->deltaSeconds = 0.0;
     }
@@ -111,8 +101,8 @@ class Timer {
         this->lastUpdateNS = now;
     }
 
-    inline void reset() noexcept {
-        this->startTimeNS = getTicksNS();
+    inline void reset(bool startFromZero = false) noexcept {
+        this->startTimeNS = startFromZero ? 0 : getTicksNS();
         this->lastUpdateNS = this->startTimeNS;
         this->deltaSeconds = 0.0;
     }

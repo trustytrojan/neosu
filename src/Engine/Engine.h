@@ -107,8 +107,7 @@ class Engine final : public KeyboardListener {
     std::vector<InputDevice *> inputDevices;
 
     // timing
-    std::unique_ptr<Timer> timer;
-    f64 dTime{0.0};
+    f64 dTime;
     unsigned long iFrameCount;
     double dFrameTime;
     // this will wrap quickly, and that's fine, it should be used as a dividend in a modular expression anyways

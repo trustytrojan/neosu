@@ -34,7 +34,7 @@ Engine *engine = nullptr;
 
 ConsoleBox *Engine::consoleBox = nullptr;
 
-Engine::Engine() : timer(std::make_unique<Timer>(false)) {
+Engine::Engine() {
     engine = this;
 
     this->guiContainer = nullptr;
@@ -123,7 +123,7 @@ Engine::Engine() : timer(std::make_unique<Timer>(false)) {
         g->setVSync(false);
 
         // engine time starts now
-        this->timer->start();
+        this->dTime = Timing::getTimeReal();
     }
     debugLog("Engine: Initializing subsystems done.\n");
 }
@@ -296,11 +296,10 @@ void Engine::onUpdate() {
         VPROF_BUDGET("Timer::update", VPROF_BUDGETGROUP_UPDATE);
         // update time
         {
-            this->timer->update();
             // frame time
-            this->dFrameTime = std::max<double>(this->timer->getDelta(), 0.00005);
+            this->dFrameTime = std::max<double>(Timing::getTimeReal() - this->dTime, 0.00005);
             // total engine runtime
-            this->dTime = this->timer->getElapsedTime();
+            this->dTime = Timing::getTimeReal();
             if(cv::engine_throttle.getBool()) {
                 // it's more like a crude estimate but it gets the job done for use as a throttle
                 if((this->fVsyncFrameCounterTime += static_cast<float>(this->dFrameTime)) >

@@ -2412,7 +2412,8 @@ void SongBrowser::checkHandleKillBackgroundSearchMatcher() {
 }
 
 void SongBrowser::onDatabaseLoadingFinished() {
-    Timer t(true);
+    Timer t;
+    t.start();
 
     // having a copy of the vector in here is actually completely unnecessary
     this->beatmaps = db->getDatabaseBeatmaps();
