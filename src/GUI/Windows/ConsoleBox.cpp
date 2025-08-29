@@ -152,6 +152,7 @@ ConsoleBox::ConsoleBox() : CBaseUIElement(0, 0, 0, 0, "") {
 
     // convar callbacks
     cv::cmd::showconsolebox.setCallback(SA::MakeDelegate<&ConsoleBox::show>(this));
+    cv::cmd::clear.setCallback(SA::MakeDelegate<&ConsoleBox::clear>(this));
 }
 
 ConsoleBox::~ConsoleBox() {
@@ -336,8 +337,14 @@ void ConsoleBox::mouse_update(bool *propagate_clicks) {
 
         if(this->fLogYPos == this->logFont->getHeight() * (cv::console_overlay_lines.getInt() + 1)) {
             std::scoped_lock logGuard(this->logMutex);
+            this->bClearPending = false;
             this->log_entries.clear();
         }
+    }
+
+    if (this->bClearPending) {
+        this->bClearPending = false;
+        this->log_entries.clear();
     }
 }
 

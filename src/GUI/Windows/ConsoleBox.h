@@ -26,7 +26,7 @@ class ConsoleBox : public CBaseUIElement {
 
     void onResolutionChange(vec2 newResolution);
 
-    void processCommand(const std::string& command);
+    void processCommand(const std::string &command);
     void execConfigFile(std::string filename);
 
     void log(UString text, Color textColor = 0xffffffff);
@@ -50,6 +50,9 @@ class ConsoleBox : public CBaseUIElement {
     };
 
    private:
+    // callback
+    inline void clear() { this->bClearPending = true; }
+
     void onSuggestionClicked(CBaseUIButton *suggestion);
 
     void addSuggestion(const UString &text, const UString &helpText, const UString &command);
@@ -90,6 +93,7 @@ class ConsoleBox : public CBaseUIElement {
 
     std::vector<std::string> commandHistory;
     int iSelectedHistory;
+    bool bClearPending{false};
 
     std::recursive_mutex logMutex;
 

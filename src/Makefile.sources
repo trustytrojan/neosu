@@ -94,6 +94,7 @@ neosu_SOURCES = \
 	src/Engine/ByteBufferedFile.cpp \
 	src/Engine/Camera.cpp \
 	src/Engine/ConVar.cpp \
+	src/Engine/Console.cpp \
 	src/Engine/DiscordInterface.cpp \
 	src/Engine/Engine.cpp \
 	src/Engine/Environment.cpp \
@@ -144,7 +145,6 @@ neosu_SOURCES = \
 	src/GUI/CBaseUITextbox.cpp \
 	src/GUI/CBaseUIWindow.cpp \
 	src/GUI/CWindowManager.cpp \
-	src/GUI/Windows/Console.cpp \
 	src/GUI/Windows/ConsoleBox.cpp \
 	src/GUI/Windows/VisualProfiler.cpp \
 	src/Platform/main.cpp \

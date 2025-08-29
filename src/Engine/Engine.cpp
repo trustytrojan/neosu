@@ -32,7 +32,6 @@ std::unique_ptr<AnimationHandler> animationHandler = nullptr;
 
 Engine *engine = nullptr;
 
-Console *Engine::console = nullptr;
 ConsoleBox *Engine::consoleBox = nullptr;
 
 Engine::Engine() : timer(std::make_unique<Timer>(false)) {
@@ -136,14 +135,8 @@ Engine::~Engine() {
     debugLog("Engine: Freeing app...\n");
     app.reset();
 
-    if(this->console != nullptr)
-        showMessageErrorFatal("Engine Error", "this->console not set to NULL before shutdown!");
-
     debugLog("Engine: Freeing engine GUI...\n");
-    {
-        this->console = nullptr;
-        this->consoleBox = nullptr;
-    }
+    this->consoleBox = nullptr;
     SAFE_DELETE(this->guiContainer);
 
     destroy_discord_sdk();
@@ -576,13 +569,6 @@ void Engine::logToConsole(std::optional<Color> color, const UString &msg) {
             Engine::consoleBox->log(msg, color.value());
         else
             Engine::consoleBox->log(msg);
-    }
-
-    if(Engine::console != nullptr) {
-        if(color.has_value())
-            Engine::console->log(msg, color.value());
-        else
-            Engine::console->log(msg);
     }
 }
 

@@ -210,9 +210,10 @@ am__neosu_SOURCES_DIST = libraries/MD5.cpp libraries/base64.cpp \
 	src/Binary/shaders.cpp src/Engine/AnimationHandler.cpp \
 	src/Engine/Archival.cpp src/Engine/ByteBufferedFile.cpp \
 	src/Engine/Camera.cpp src/Engine/ConVar.cpp \
-	src/Engine/DiscordInterface.cpp src/Engine/Engine.cpp \
-	src/Engine/Environment.cpp src/Engine/FPSLimiter.cpp \
-	src/Engine/File.cpp src/Engine/Font.cpp src/Engine/Image.cpp \
+	src/Engine/Console.cpp src/Engine/DiscordInterface.cpp \
+	src/Engine/Engine.cpp src/Engine/Environment.cpp \
+	src/Engine/FPSLimiter.cpp src/Engine/File.cpp \
+	src/Engine/Font.cpp src/Engine/Image.cpp \
 	src/Engine/Input/KeyBindings.cpp src/Engine/Input/Keyboard.cpp \
 	src/Engine/Input/Mouse.cpp src/Engine/NetworkHandler.cpp \
 	src/Engine/Profiler.cpp src/Engine/Renderer/Graphics.cpp \
@@ -244,8 +245,7 @@ am__neosu_SOURCES_DIST = libraries/MD5.cpp libraries/base64.cpp \
 	src/GUI/CBaseUILabel.cpp src/GUI/CBaseUIScrollView.cpp \
 	src/GUI/CBaseUISlider.cpp src/GUI/CBaseUITextField.cpp \
 	src/GUI/CBaseUITextbox.cpp src/GUI/CBaseUIWindow.cpp \
-	src/GUI/CWindowManager.cpp src/GUI/Windows/Console.cpp \
-	src/GUI/Windows/ConsoleBox.cpp \
+	src/GUI/CWindowManager.cpp src/GUI/Windows/ConsoleBox.cpp \
 	src/GUI/Windows/VisualProfiler.cpp src/Platform/main.cpp \
 	src/Platform/main_impl.cpp src/Util/Quaternion.cpp \
 	src/Util/Rect.cpp src/Util/UString.cpp src/Util/crypto.cpp \
@@ -348,6 +348,7 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/Engine/neosu-ByteBufferedFile.$(OBJEXT) \
 	src/Engine/neosu-Camera.$(OBJEXT) \
 	src/Engine/neosu-ConVar.$(OBJEXT) \
+	src/Engine/neosu-Console.$(OBJEXT) \
 	src/Engine/neosu-DiscordInterface.$(OBJEXT) \
 	src/Engine/neosu-Engine.$(OBJEXT) \
 	src/Engine/neosu-Environment.$(OBJEXT) \
@@ -398,7 +399,6 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/GUI/neosu-CBaseUITextbox.$(OBJEXT) \
 	src/GUI/neosu-CBaseUIWindow.$(OBJEXT) \
 	src/GUI/neosu-CWindowManager.$(OBJEXT) \
-	src/GUI/Windows/neosu-Console.$(OBJEXT) \
 	src/GUI/Windows/neosu-ConsoleBox.$(OBJEXT) \
 	src/GUI/Windows/neosu-VisualProfiler.$(OBJEXT) \
 	src/Platform/neosu-main.$(OBJEXT) \
@@ -521,6 +521,7 @@ am__depfiles_remade = $(DEPS_PREFIX)/mimalloc/$(DEPDIR)/neosu-mimalloc_new_delet
 	src/Engine/$(DEPDIR)/neosu-ByteBufferedFile.Po \
 	src/Engine/$(DEPDIR)/neosu-Camera.Po \
 	src/Engine/$(DEPDIR)/neosu-ConVar.Po \
+	src/Engine/$(DEPDIR)/neosu-Console.Po \
 	src/Engine/$(DEPDIR)/neosu-DiscordInterface.Po \
 	src/Engine/$(DEPDIR)/neosu-Engine.Po \
 	src/Engine/$(DEPDIR)/neosu-Environment.Po \
@@ -571,7 +572,6 @@ am__depfiles_remade = $(DEPS_PREFIX)/mimalloc/$(DEPDIR)/neosu-mimalloc_new_delet
 	src/GUI/$(DEPDIR)/neosu-CBaseUITextbox.Po \
 	src/GUI/$(DEPDIR)/neosu-CBaseUIWindow.Po \
 	src/GUI/$(DEPDIR)/neosu-CWindowManager.Po \
-	src/GUI/Windows/$(DEPDIR)/neosu-Console.Po \
 	src/GUI/Windows/$(DEPDIR)/neosu-ConsoleBox.Po \
 	src/GUI/Windows/$(DEPDIR)/neosu-VisualProfiler.Po \
 	src/Platform/$(DEPDIR)/neosu-main.Po \
@@ -969,9 +969,10 @@ neosu_SOURCES = libraries/MD5.cpp libraries/base64.cpp \
 	src/Binary/shaders.cpp src/Engine/AnimationHandler.cpp \
 	src/Engine/Archival.cpp src/Engine/ByteBufferedFile.cpp \
 	src/Engine/Camera.cpp src/Engine/ConVar.cpp \
-	src/Engine/DiscordInterface.cpp src/Engine/Engine.cpp \
-	src/Engine/Environment.cpp src/Engine/FPSLimiter.cpp \
-	src/Engine/File.cpp src/Engine/Font.cpp src/Engine/Image.cpp \
+	src/Engine/Console.cpp src/Engine/DiscordInterface.cpp \
+	src/Engine/Engine.cpp src/Engine/Environment.cpp \
+	src/Engine/FPSLimiter.cpp src/Engine/File.cpp \
+	src/Engine/Font.cpp src/Engine/Image.cpp \
 	src/Engine/Input/KeyBindings.cpp src/Engine/Input/Keyboard.cpp \
 	src/Engine/Input/Mouse.cpp src/Engine/NetworkHandler.cpp \
 	src/Engine/Profiler.cpp src/Engine/Renderer/Graphics.cpp \
@@ -1003,8 +1004,7 @@ neosu_SOURCES = libraries/MD5.cpp libraries/base64.cpp \
 	src/GUI/CBaseUILabel.cpp src/GUI/CBaseUIScrollView.cpp \
 	src/GUI/CBaseUISlider.cpp src/GUI/CBaseUITextField.cpp \
 	src/GUI/CBaseUITextbox.cpp src/GUI/CBaseUIWindow.cpp \
-	src/GUI/CWindowManager.cpp src/GUI/Windows/Console.cpp \
-	src/GUI/Windows/ConsoleBox.cpp \
+	src/GUI/CWindowManager.cpp src/GUI/Windows/ConsoleBox.cpp \
 	src/GUI/Windows/VisualProfiler.cpp src/Platform/main.cpp \
 	src/Platform/main_impl.cpp src/Util/Quaternion.cpp \
 	src/Util/Rect.cpp src/Util/UString.cpp src/Util/crypto.cpp \
@@ -1539,6 +1539,8 @@ src/Engine/neosu-Camera.$(OBJEXT): src/Engine/$(am__dirstamp) \
 	src/Engine/$(DEPDIR)/$(am__dirstamp)
 src/Engine/neosu-ConVar.$(OBJEXT): src/Engine/$(am__dirstamp) \
 	src/Engine/$(DEPDIR)/$(am__dirstamp)
+src/Engine/neosu-Console.$(OBJEXT): src/Engine/$(am__dirstamp) \
+	src/Engine/$(DEPDIR)/$(am__dirstamp)
 src/Engine/neosu-DiscordInterface.$(OBJEXT):  \
 	src/Engine/$(am__dirstamp) \
 	src/Engine/$(DEPDIR)/$(am__dirstamp)
@@ -1720,9 +1722,6 @@ src/GUI/Windows/$(am__dirstamp):
 src/GUI/Windows/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) src/GUI/Windows/$(DEPDIR)
 	@: >>src/GUI/Windows/$(DEPDIR)/$(am__dirstamp)
-src/GUI/Windows/neosu-Console.$(OBJEXT):  \
-	src/GUI/Windows/$(am__dirstamp) \
-	src/GUI/Windows/$(DEPDIR)/$(am__dirstamp)
 src/GUI/Windows/neosu-ConsoleBox.$(OBJEXT):  \
 	src/GUI/Windows/$(am__dirstamp) \
 	src/GUI/Windows/$(DEPDIR)/$(am__dirstamp)
@@ -1888,6 +1887,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-ByteBufferedFile.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-Camera.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-ConVar.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-Console.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-DiscordInterface.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-Engine.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-Environment.Po@am__quote@ # am--include-marker
@@ -1938,7 +1938,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI/$(DEPDIR)/neosu-CBaseUITextbox.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI/$(DEPDIR)/neosu-CBaseUIWindow.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI/$(DEPDIR)/neosu-CWindowManager.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/GUI/Windows/$(DEPDIR)/neosu-Console.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI/Windows/$(DEPDIR)/neosu-ConsoleBox.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI/Windows/$(DEPDIR)/neosu-VisualProfiler.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Platform/$(DEPDIR)/neosu-main.Po@am__quote@ # am--include-marker
@@ -3287,6 +3286,20 @@ src/Engine/neosu-ConVar.obj: src/Engine/ConVar.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/neosu-ConVar.obj `if test -f 'src/Engine/ConVar.cpp'; then $(CYGPATH_W) 'src/Engine/ConVar.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/ConVar.cpp'; fi`
 
+src/Engine/neosu-Console.o: src/Engine/Console.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/neosu-Console.o -MD -MP -MF src/Engine/$(DEPDIR)/neosu-Console.Tpo -c -o src/Engine/neosu-Console.o `test -f 'src/Engine/Console.cpp' || echo '$(srcdir)/'`src/Engine/Console.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/$(DEPDIR)/neosu-Console.Tpo src/Engine/$(DEPDIR)/neosu-Console.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Console.cpp' object='src/Engine/neosu-Console.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/neosu-Console.o `test -f 'src/Engine/Console.cpp' || echo '$(srcdir)/'`src/Engine/Console.cpp
+
+src/Engine/neosu-Console.obj: src/Engine/Console.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/neosu-Console.obj -MD -MP -MF src/Engine/$(DEPDIR)/neosu-Console.Tpo -c -o src/Engine/neosu-Console.obj `if test -f 'src/Engine/Console.cpp'; then $(CYGPATH_W) 'src/Engine/Console.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Console.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/$(DEPDIR)/neosu-Console.Tpo src/Engine/$(DEPDIR)/neosu-Console.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Console.cpp' object='src/Engine/neosu-Console.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/neosu-Console.obj `if test -f 'src/Engine/Console.cpp'; then $(CYGPATH_W) 'src/Engine/Console.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Console.cpp'; fi`
+
 src/Engine/neosu-DiscordInterface.o: src/Engine/DiscordInterface.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/neosu-DiscordInterface.o -MD -MP -MF src/Engine/$(DEPDIR)/neosu-DiscordInterface.Tpo -c -o src/Engine/neosu-DiscordInterface.o `test -f 'src/Engine/DiscordInterface.cpp' || echo '$(srcdir)/'`src/Engine/DiscordInterface.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/$(DEPDIR)/neosu-DiscordInterface.Tpo src/Engine/$(DEPDIR)/neosu-DiscordInterface.Po
@@ -3987,20 +4000,6 @@ src/GUI/neosu-CWindowManager.obj: src/GUI/CWindowManager.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/GUI/neosu-CWindowManager.obj `if test -f 'src/GUI/CWindowManager.cpp'; then $(CYGPATH_W) 'src/GUI/CWindowManager.cpp'; else $(CYGPATH_W) '$(srcdir)/src/GUI/CWindowManager.cpp'; fi`
 
-src/GUI/Windows/neosu-Console.o: src/GUI/Windows/Console.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/GUI/Windows/neosu-Console.o -MD -MP -MF src/GUI/Windows/$(DEPDIR)/neosu-Console.Tpo -c -o src/GUI/Windows/neosu-Console.o `test -f 'src/GUI/Windows/Console.cpp' || echo '$(srcdir)/'`src/GUI/Windows/Console.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/GUI/Windows/$(DEPDIR)/neosu-Console.Tpo src/GUI/Windows/$(DEPDIR)/neosu-Console.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/GUI/Windows/Console.cpp' object='src/GUI/Windows/neosu-Console.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/GUI/Windows/neosu-Console.o `test -f 'src/GUI/Windows/Console.cpp' || echo '$(srcdir)/'`src/GUI/Windows/Console.cpp
-
-src/GUI/Windows/neosu-Console.obj: src/GUI/Windows/Console.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/GUI/Windows/neosu-Console.obj -MD -MP -MF src/GUI/Windows/$(DEPDIR)/neosu-Console.Tpo -c -o src/GUI/Windows/neosu-Console.obj `if test -f 'src/GUI/Windows/Console.cpp'; then $(CYGPATH_W) 'src/GUI/Windows/Console.cpp'; else $(CYGPATH_W) '$(srcdir)/src/GUI/Windows/Console.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/GUI/Windows/$(DEPDIR)/neosu-Console.Tpo src/GUI/Windows/$(DEPDIR)/neosu-Console.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/GUI/Windows/Console.cpp' object='src/GUI/Windows/neosu-Console.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/GUI/Windows/neosu-Console.obj `if test -f 'src/GUI/Windows/Console.cpp'; then $(CYGPATH_W) 'src/GUI/Windows/Console.cpp'; else $(CYGPATH_W) '$(srcdir)/src/GUI/Windows/Console.cpp'; fi`
-
 src/GUI/Windows/neosu-ConsoleBox.o: src/GUI/Windows/ConsoleBox.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/GUI/Windows/neosu-ConsoleBox.o -MD -MP -MF src/GUI/Windows/$(DEPDIR)/neosu-ConsoleBox.Tpo -c -o src/GUI/Windows/neosu-ConsoleBox.o `test -f 'src/GUI/Windows/ConsoleBox.cpp' || echo '$(srcdir)/'`src/GUI/Windows/ConsoleBox.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/GUI/Windows/$(DEPDIR)/neosu-ConsoleBox.Tpo src/GUI/Windows/$(DEPDIR)/neosu-ConsoleBox.Po
@@ -4560,6 +4559,7 @@ distclean: distclean-am
 	-rm -f src/Engine/$(DEPDIR)/neosu-ByteBufferedFile.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Camera.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-ConVar.Po
+	-rm -f src/Engine/$(DEPDIR)/neosu-Console.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-DiscordInterface.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Engine.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Environment.Po
@@ -4610,7 +4610,6 @@ distclean: distclean-am
 	-rm -f src/GUI/$(DEPDIR)/neosu-CBaseUITextbox.Po
 	-rm -f src/GUI/$(DEPDIR)/neosu-CBaseUIWindow.Po
 	-rm -f src/GUI/$(DEPDIR)/neosu-CWindowManager.Po
-	-rm -f src/GUI/Windows/$(DEPDIR)/neosu-Console.Po
 	-rm -f src/GUI/Windows/$(DEPDIR)/neosu-ConsoleBox.Po
 	-rm -f src/GUI/Windows/$(DEPDIR)/neosu-VisualProfiler.Po
 	-rm -f src/Platform/$(DEPDIR)/neosu-main.Po
@@ -4763,6 +4762,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/Engine/$(DEPDIR)/neosu-ByteBufferedFile.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Camera.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-ConVar.Po
+	-rm -f src/Engine/$(DEPDIR)/neosu-Console.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-DiscordInterface.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Engine.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Environment.Po
@@ -4813,7 +4813,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/GUI/$(DEPDIR)/neosu-CBaseUITextbox.Po
 	-rm -f src/GUI/$(DEPDIR)/neosu-CBaseUIWindow.Po
 	-rm -f src/GUI/$(DEPDIR)/neosu-CWindowManager.Po
-	-rm -f src/GUI/Windows/$(DEPDIR)/neosu-Console.Po
 	-rm -f src/GUI/Windows/$(DEPDIR)/neosu-ConsoleBox.Po
 	-rm -f src/GUI/Windows/$(DEPDIR)/neosu-VisualProfiler.Po
 	-rm -f src/Platform/$(DEPDIR)/neosu-main.Po

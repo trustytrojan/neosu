@@ -342,7 +342,7 @@ static void _help(const UString &args) {
     std::string trimmedArgs{args.trim().utf8View()};
 
     if(trimmedArgs.length() < 1) {
-        Engine::logRaw("Usage:  help <cvarname>\nTo get a list of all available commands, type \"listcommands\".\n");
+        Engine::logRaw("Usage:  help <cvarname>\n To get a list of all available commands, type \"listcommands\".\n");
         return;
     }
 
