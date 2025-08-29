@@ -1166,7 +1166,7 @@ void SongBrowser::onChar(KeyboardEvent &e) {
 void SongBrowser::onResolutionChange(vec2 newResolution) { ScreenBackable::onResolutionChange(newResolution); }
 
 CBaseUIContainer *SongBrowser::setVisible(bool visible) {
-    if(bancho->spectating && visible) return this;  // don't allow song browser to be visible while spectating
+    if(BanchoState::spectating && visible) return this;  // don't allow song browser to be visible while spectating
     if(visible == this->bVisible) return this;
 
     this->bVisible = visible;
@@ -1337,15 +1337,15 @@ void SongBrowser::onDifficultySelected(DatabaseBeatmap *diff2, bool play) {
 
     // start playing
     if(play) {
-        if(bancho->is_in_a_multi_room()) {
-            bancho->room.map_name = UString::format("%s - %s [%s]", diff2->getArtist().c_str(),
+        if(BanchoState::is_in_a_multi_room()) {
+            BanchoState::room.map_name = UString::format("%s - %s [%s]", diff2->getArtist().c_str(),
                                                     diff2->getTitle().c_str(), diff2->getDifficultyName().c_str());
-            bancho->room.map_md5 = diff2->getMD5Hash();
-            bancho->room.map_id = diff2->getID();
+            BanchoState::room.map_md5 = diff2->getMD5Hash();
+            BanchoState::room.map_id = diff2->getID();
 
             Packet packet;
             packet.id = MATCH_CHANGE_SETTINGS;
-            bancho->room.pack(&packet);
+            BanchoState::room.pack(&packet);
             BANCHO::Net::send_packet(packet);
 
             osu->room->on_map_change();

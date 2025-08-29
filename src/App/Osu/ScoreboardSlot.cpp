@@ -29,8 +29,8 @@ ScoreboardSlot::~ScoreboardSlot() {
 
 void ScoreboardSlot::draw() {
     if(this->fAlpha == 0.f) return;
-    if(!cv::draw_scoreboard.getBool() && !bancho->is_playing_a_multi_map()) return;
-    if(!cv::draw_scoreboard_mp.getBool() && bancho->is_playing_a_multi_map()) return;
+    if(!cv::draw_scoreboard.getBool() && !BanchoState::is_playing_a_multi_map()) return;
+    if(!cv::draw_scoreboard_mp.getBool() && BanchoState::is_playing_a_multi_map()) return;
 
     g->pushTransform();
 
@@ -184,7 +184,7 @@ void ScoreboardSlot::draw() {
     g->popTransform();
 
     // draw accuracy
-    if(bancho->is_playing_a_multi_map() && bancho->room.win_condition == ACCURACY) {
+    if(BanchoState::is_playing_a_multi_map() && BanchoState::room.win_condition == ACCURACY) {
         const float accScale = comboScale;
         g->pushTransform();
         {

@@ -1,7 +1,6 @@
 // Copyright (c) 2015, PG, All rights reserved.
 #include "NetworkHandler.h"
 #include "Engine.h"
-#include "Bancho.h"
 #include "Thread.h"
 #include "SString.h"
 #include "ConVar.h"
@@ -9,9 +8,6 @@
 #include "curl_blob.h"
 #include <curl/curl.h>
 #include <utility>
-
-Bancho* NetworkHandler::s_banchoInstance = nullptr;
-mcatomic_ref<Bancho*> bancho{NetworkHandler::s_banchoInstance};
 
 // internal request structure
 struct NetworkRequest {
@@ -40,9 +36,6 @@ NetworkHandler::NetworkHandler() : multi_handle(nullptr) {
         return;
     }
 
-    s_banchoInstance = new Bancho();
-    runtime_assert(s_banchoInstance, "Bancho failed to initialize!");
-
     // start network thread
     this->network_thread = std::make_unique<std::jthread>(
         [this](const std::stop_token& stopToken) { this->networkThreadFunc(stopToken); });
@@ -68,8 +61,6 @@ NetworkHandler::~NetworkHandler() {
         }
         this->active_requests.clear();
     }
-
-    SAFE_DELETE(s_banchoInstance);
 
     if(this->multi_handle) {
         curl_multi_cleanup(this->multi_handle);

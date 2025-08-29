@@ -83,7 +83,7 @@ void UserStatsScreen::rebuildScoreButtons() {
     m_scores->getContainer()->freeElements();
     m_scoreButtons.clear();
 
-    this->m_userCard->setID(bancho->user_id);
+    this->m_userCard->setID(BanchoState::get_uid());
     this->m_userCard->updateUserStats();
 
     i32 i = 0;

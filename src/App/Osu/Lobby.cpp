@@ -253,18 +253,18 @@ void Lobby::removeRoom(u32 room_id) {
 }
 
 void Lobby::on_create_room_clicked() {
-    bancho->room = Room();
-    bancho->room.name = "New room";  // XXX: doesn't work
-    bancho->room.host_id = bancho->user_id;
-    for(auto& slot : bancho->room.slots) {
+    BanchoState::room = Room();
+    BanchoState::room.name = "New room";  // XXX: doesn't work
+    BanchoState::room.host_id = BanchoState::get_uid();
+    for(auto& slot : BanchoState::room.slots) {
         slot.status = 1;  // open slot
     }
-    bancho->room.slots[0].status = 4;  // not ready
-    bancho->room.slots[0].player_id = bancho->user_id;
+    BanchoState::room.slots[0].status = 4;  // not ready
+    BanchoState::room.slots[0].player_id = BanchoState::get_uid();
 
     Packet packet = {0};
     packet.id = CREATE_ROOM;
-    bancho->room.pack(&packet);
+    BanchoState::room.pack(&packet);
     BANCHO::Net::send_packet(packet);
 
     osu->notificationOverlay->addNotification("Creating room...");

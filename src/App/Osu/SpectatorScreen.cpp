@@ -66,8 +66,8 @@ void start_spectating(i32 user_id) {
     auto notif = UString::format("Started spectating %s", user_info->name.toUtf8());
     osu->notificationOverlay->addToast(notif, SUCCESS_TOAST);
 
-    bancho->spectating = true;
-    bancho->spectated_player_id = user_id;
+    BanchoState::spectating = true;
+    BanchoState::spectated_player_id = user_id;
     current_map_id = 0;
 
     osu->prompt->setVisible(false);
@@ -82,18 +82,18 @@ void start_spectating(i32 user_id) {
 }
 
 void stop_spectating() {
-    if(!bancho->spectating) return;
+    if(!BanchoState::spectating) return;
 
     if(osu->isInPlayMode()) {
         osu->getSelectedBeatmap()->stop(true);
     }
 
-    auto user_info = BANCHO::User::get_user_info(bancho->spectated_player_id, true);
+    auto user_info = BANCHO::User::get_user_info(BanchoState::spectated_player_id, true);
     auto notif = UString::format("Stopped spectating %s", user_info->name.toUtf8());
     osu->notificationOverlay->addToast(notif, INFO_TOAST);
 
-    bancho->spectating = false;
-    bancho->spectated_player_id = 0;
+    BanchoState::spectating = false;
+    BanchoState::spectated_player_id = 0;
     current_map_id = 0;
 
     Packet packet;
@@ -142,12 +142,12 @@ SpectatorScreen::SpectatorScreen() {
 
 // NOTE: We use this to control client state, even when the spectator screen isn't visible.
 void SpectatorScreen::mouse_update(bool *propagate_clicks) {
-    if(!bancho->spectating) return;
+    if(!BanchoState::spectating) return;
 
     // Control client state
     // XXX: should use map_md5 instead of map_id
     f32 download_progress = -1.f;
-    auto user_info = BANCHO::User::get_user_info(bancho->spectated_player_id, true);
+    auto user_info = BANCHO::User::get_user_info(BanchoState::spectated_player_id, true);
     if(user_info->map_id == -1 || user_info->map_id == 0) {
         if(osu->isInPlayMode()) {
             osu->getSelectedBeatmap()->stop(true);
@@ -165,9 +165,9 @@ void SpectatorScreen::mouse_update(bool *propagate_clicks) {
 
     // Update spectator screen UI
     static u32 last_player_id = 0;
-    if(bancho->spectated_player_id != last_player_id) {
-        this->userCard->setID(bancho->spectated_player_id);
-        last_player_id = bancho->spectated_player_id;
+    if(BanchoState::spectated_player_id != last_player_id) {
+        this->userCard->setID(BanchoState::spectated_player_id);
+        last_player_id = BanchoState::spectated_player_id;
     }
 
     this->spectating->setText(UString::format("Spectating %s", user_info->name.toUtf8()));
@@ -256,7 +256,7 @@ void SpectatorScreen::draw() {
     OsuScreen::draw();
 }
 
-bool SpectatorScreen::isVisible() { return bancho->spectating && !osu->isInPlayMode(); }
+bool SpectatorScreen::isVisible() { return BanchoState::spectating && !osu->isInPlayMode(); }
 
 CBaseUIElement *SpectatorScreen::setVisible(bool /*visible*/) {
     engine->showMessageError("Programmer Error", "Idiot tried to control spectator screen visibility");

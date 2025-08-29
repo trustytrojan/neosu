@@ -62,11 +62,11 @@ void send_api_request_async(const APIRequest &api_out) {
     options.userAgent = "osu!";
 
     auto scheme = cv::use_https.getBool() ? "https://" : "http://";
-    auto query_url = UString::format("%sosu.%s%s", scheme, bancho->endpoint.c_str(), api_out.path.toUtf8());
+    auto query_url = UString::format("%sosu.%s%s", scheme, BanchoState::endpoint.c_str(), api_out.path.toUtf8());
 
     if(api_out.type == SUBMIT_SCORE) {
-        auto token_header = UString::format("token: %s", cho_token.toUtf8());
-        options.headers["token"] = cho_token.toUtf8();
+        auto token_header = UString::format("token: %s", BanchoState::cho_token.toUtf8());
+        options.headers["token"] = BanchoState::cho_token.toUtf8();
     }
 
     if(api_out.mime != nullptr) {
@@ -106,8 +106,8 @@ void send_bancho_packet_async(Packet outgoing) {
     options.connectTimeout = 5;
     options.userAgent = "osu!";
 
-    auto version_header = UString::format("x-mcosu-ver: %s", bancho->neosu_version.toUtf8());
-    options.headers["x-mcosu-ver"] = bancho->neosu_version.toUtf8();
+    auto version_header = UString::format("x-mcosu-ver: %s", BanchoState::neosu_version.toUtf8());
+    options.headers["x-mcosu-ver"] = BanchoState::neosu_version.toUtf8();
 
     {
         std::scoped_lock<std::mutex> lock{auth_mutex};
@@ -127,7 +127,7 @@ void send_bancho_packet_async(Packet outgoing) {
     options.postData = std::string(reinterpret_cast<char *>(outgoing.memory), outgoing.pos);
 
     auto scheme = cv::use_https.getBool() ? "https://" : "http://";
-    auto query_url = UString::format("%sc.%s/", scheme, bancho->endpoint.c_str());
+    auto query_url = UString::format("%sc.%s/", scheme, BanchoState::endpoint.c_str());
 
     last_packet_tms = time(nullptr);
 
@@ -157,16 +157,16 @@ void send_bancho_packet_async(Packet outgoing) {
             if(cho_token_it != response.headers.end()) {
                 std::scoped_lock<std::mutex> lock{auth_mutex};
                 auth_header = "osu-token: " + cho_token_it->second;
-                cho_token = UString(cho_token_it->second);
+                BanchoState::cho_token = UString(cho_token_it->second);
             }
 
             auto features_it = response.headers.find("x-mcosu-features");
             if(features_it != response.headers.end()) {
                 if(strstr(features_it->second.c_str(), "submit=0") != nullptr) {
-                    bancho->score_submission_policy = ServerPolicy::NO;
+                    BanchoState::score_submission_policy = ServerPolicy::NO;
                     Engine::logRaw("[httpRequestAsync] Server doesn't want score submission. :(\n");
                 } else if(strstr(features_it->second.c_str(), "submit=1") != nullptr) {
-                    bancho->score_submission_policy = ServerPolicy::YES;
+                    BanchoState::score_submission_policy = ServerPolicy::YES;
                     Engine::logRaw("[httpRequestAsync] Server wants score submission! :D\n");
                 }
             }
@@ -290,13 +290,10 @@ void handle_api_response(Packet packet) {
 
 }  // namespace
 
-// this is a global var
-UString cho_token = "";
-
 void disconnect() {
     // Logout
     // This is a blocking call, but we *do* want this to block when quitting the game.
-    if(bancho->is_online()) {
+    if(BanchoState::is_online()) {
         Packet packet;
         proto::write<u16>(&packet, LOGOUT);
         proto::write<u8>(&packet, 0);
@@ -309,8 +306,8 @@ void disconnect() {
         options.userAgent = "osu!";
         options.postData = std::string(reinterpret_cast<char *>(packet.memory), packet.pos);
 
-        auto version_header = UString::format("x-mcosu-ver: %s", bancho->neosu_version.toUtf8());
-        options.headers["x-mcosu-ver"] = bancho->neosu_version.toUtf8();
+        auto version_header = UString::format("x-mcosu-ver: %s", BanchoState::neosu_version.toUtf8());
+        options.headers["x-mcosu-ver"] = BanchoState::neosu_version.toUtf8();
 
         {
             std::scoped_lock<std::mutex> lock{auth_mutex};
@@ -325,7 +322,7 @@ void disconnect() {
         }
 
         auto scheme = cv::use_https.getBool() ? "https://" : "http://";
-        auto query_url = UString::format("%sc.%s/", scheme, bancho->endpoint.c_str());
+        auto query_url = UString::format("%sc.%s/", scheme, BanchoState::endpoint.c_str());
 
         // use sync request for logout to ensure it completes
         NetworkHandler::Response response = networkHandler->performSyncRequest(query_url, options);
@@ -341,21 +338,21 @@ void disconnect() {
     free(outgoing.memory);
     outgoing = Packet();
 
-    bancho->user_id = 0;
+    BanchoState::set_uid(0);
     osu->userButton->setID(0);
 
-    bancho->endpoint = "";
-    bancho->spectating = false;
-    bancho->spectated_player_id = 0;
-    bancho->spectators.clear();
-    bancho->fellow_spectators.clear();
-    bancho->server_icon_url = "";
-    if(bancho->server_icon != nullptr) {
-        resourceManager->destroyResource(bancho->server_icon);
-        bancho->server_icon = nullptr;
+    BanchoState::endpoint = "";
+    BanchoState::spectating = false;
+    BanchoState::spectated_player_id = 0;
+    BanchoState::spectators.clear();
+    BanchoState::fellow_spectators.clear();
+    BanchoState::server_icon_url = "";
+    if(BanchoState::server_icon != nullptr) {
+        resourceManager->destroyResource(BanchoState::server_icon);
+        BanchoState::server_icon = nullptr;
     }
 
-    bancho->score_submission_policy = ServerPolicy::NO_PREFERENCE;
+    BanchoState::score_submission_policy = ServerPolicy::NO_PREFERENCE;
     osu->optionsMenu->update_login_button();
     osu->optionsMenu->scheduleLayoutUpdate();
 
@@ -382,8 +379,8 @@ void reconnect() {
     // Will be reenabled after the login succeeds
     cv::mp_autologin.setValue(false);
 
-    bancho->username = cv::name.getString().c_str();
-    bancho->endpoint = cv::mp_server.getString();
+    BanchoState::username = cv::name.getString().c_str();
+    BanchoState::endpoint = cv::mp_server.getString();
 
     // Admins told me they don't want any clients to connect
     constexpr auto server_blacklist = std::array{
@@ -391,7 +388,7 @@ void reconnect() {
         "gatari.pw",
     };
     for(const char *endpoint : server_blacklist) {
-        if(!strcmp(endpoint, bancho->endpoint.c_str())) {
+        if(!strcmp(endpoint, BanchoState::endpoint.c_str())) {
             osu->notificationOverlay->addToast("This server does not allow neosu clients.", ERROR_TOAST);
             return;
         }
@@ -403,7 +400,7 @@ void reconnect() {
            tempConVar->getString() != cv::mp_password_md5.getString())  // HACK: find a better way to do this...
         {
             const char *tempStr{tempConVar->getString().c_str()};
-            const auto hash{Bancho::md5((u8 *)tempStr, strlen(tempStr))};
+            const auto hash{BanchoState::md5((u8 *)tempStr, strlen(tempStr))};
             cv::mp_password_md5.setValue(hash.hash.data());
             tempConVar->setValue("");
         }
@@ -415,8 +412,8 @@ void reconnect() {
         return;
     }
 
-    bancho->pw_md5 = {cv::mp_password_md5.getString().c_str()};
-    //    bancho->pw_md5 = Bancho::md5((u8 *)pw, strlen(pw));
+    BanchoState::pw_md5 = {cv::mp_password_md5.getString().c_str()};
+    //    BanchoState::pw_md5 = Bancho::md5((u8 *)pw, strlen(pw));
 
     // Admins told me they don't want score submission enabled
     constexpr auto submit_blacklist = std::array{
@@ -424,8 +421,8 @@ void reconnect() {
         "ripple.moe",
     };
     for(const char *endpoint : submit_blacklist) {
-        if(!strcmp(endpoint, bancho->endpoint.c_str())) {
-            bancho->score_submission_policy = ServerPolicy::NO;
+        if(!strcmp(endpoint, BanchoState::endpoint.c_str())) {
+            BanchoState::score_submission_policy = ServerPolicy::NO;
             break;
         }
     }
@@ -462,16 +459,16 @@ void update_networking() {
 
     // Set ping timeout
     if(osu && osu->lobby->isVisible()) seconds_between_pings = 1;
-    if(bancho->spectating) seconds_between_pings = 1;
-    if(bancho->is_in_a_multi_room() && seconds_between_pings > 3) seconds_between_pings = 3;
+    if(BanchoState::spectating) seconds_between_pings = 1;
+    if(BanchoState::is_in_a_multi_room() && seconds_between_pings > 3) seconds_between_pings = 3;
     bool should_ping = difftime(time(nullptr), last_packet_tms) > seconds_between_pings;
-    if(bancho->user_id <= 0) should_ping = false;
+    if(BanchoState::get_uid() <= 0) should_ping = false;
 
     // Handle login and outgoing packet processing
     if(try_logging_in) {
         try_logging_in = false;
-        if(bancho->user_id <= 0) {
-            Packet login = bancho->build_login_packet();
+        if(BanchoState::get_uid() <= 0) {
+            Packet login = BanchoState::build_login_packet();
             send_bancho_packet_async(login);
         }
     } else if(should_ping && outgoing.pos == 0) {
@@ -515,7 +512,7 @@ void receive_bancho_packets() {
     while(!incoming_queue.empty()) {
         Packet incoming = incoming_queue.front();
         incoming_queue.erase(incoming_queue.begin());
-        bancho->handle_packet(&incoming);
+        BanchoState::handle_packet(&incoming);
         free(incoming.memory);
     }
 
@@ -543,7 +540,7 @@ void receive_bancho_packets() {
 }
 
 void send_api_request(const APIRequest &request) {
-    if(bancho->user_id <= 0) {
+    if(BanchoState::get_uid() <= 0) {
         debugLog("Cannot send API request of type {:d} since we are not logged in.\n",
                  static_cast<unsigned int>(request.type));
         return;
@@ -558,7 +555,7 @@ void send_api_request(const APIRequest &request) {
 }
 
 void send_packet(Packet &packet) {
-    if(bancho->user_id <= 0) {
+    if(BanchoState::get_uid() <= 0) {
         // Don't queue any packets until we're logged in
         free(packet.memory);
         packet.memory = nullptr;

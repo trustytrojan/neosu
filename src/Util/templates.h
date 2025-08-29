@@ -4,7 +4,6 @@
 // miscellaneous templates
 #include <cstddef>
 #include <cstdlib>
-#include <atomic>
 #include <cassert>
 
 // zero-initialized dynamic array, similar to std::vector but way faster when you don't need constructors
@@ -80,20 +79,4 @@ struct zarray {
     size_t max = 0;
     size_t nb = 0;
     T *memory = NULL;
-};
-
-template <typename T>
-struct mcatomic_ref : std::atomic_ref<T> {
-    explicit mcatomic_ref(T &__t) noexcept : std::atomic_ref<T>(__t) {}
-
-    mcatomic_ref &operator=(const mcatomic_ref &) = delete;
-
-    mcatomic_ref(const mcatomic_ref &) = default;
-
-    using std::atomic_ref<T>::operator=;
-
-    explicit operator bool() const { return this->load() != nullptr; }
-    bool operator==(void *ptr) const { return this->load() == ptr; }
-    bool operator!=(void *ptr) const { return this->load() != ptr; }
-    auto operator->() const noexcept { return this->load(); }
 };

@@ -119,7 +119,7 @@ void PauseMenu::mouse_update(bool *propagate_clicks) {
     if(!this->bVisible) return;
 
     // hide retry button in multiplayer
-    this->buttons[1]->setVisible(!bancho->is_playing_a_multi_map());
+    this->buttons[1]->setVisible(!BanchoState::is_playing_a_multi_map());
 
     // update and focus handling
     OsuScreen::mouse_update(propagate_clicks);
@@ -143,7 +143,7 @@ void PauseMenu::onContinueClicked() {
 }
 
 void PauseMenu::onRetryClicked() {
-    if(bancho->is_playing_a_multi_map()) return;  // sanity
+    if(BanchoState::is_playing_a_multi_map()) return;  // sanity
     if(anim->isAnimating(&this->fDimAnim)) return;
 
     soundEngine->play(osu->getSkin()->getClickPauseRetrySound());
@@ -333,7 +333,7 @@ void PauseMenu::onResolutionChange(vec2 newResolution) {
 CBaseUIContainer *PauseMenu::setVisible(bool visible) {
     this->bVisible = visible;
 
-    if(!bancho->is_playing_a_multi_map()) {
+    if(!BanchoState::is_playing_a_multi_map()) {
         if(visible) {
             soundEngine->play(osu->getSkin()->getPauseLoopSound());
         } else {
@@ -346,12 +346,12 @@ CBaseUIContainer *PauseMenu::setVisible(bool visible) {
 
     this->setContinueEnabled(!beatmap->hasFailed());
 
-    if(!bancho->is_playing_a_multi_map()) {
+    if(!BanchoState::is_playing_a_multi_map()) {
         if(visible) {
             if(this->bContinueEnabled) {
                 RichPresence::setBanchoStatus("Taking a break", PAUSED);
 
-                if(!bancho->spectators.empty()) {
+                if(!BanchoState::spectators.empty()) {
                     Packet packet;
                     packet.id = OUT_SPECTATE_FRAMES;
                     BANCHO::Proto::write<i32>(&packet, 0);
@@ -367,7 +367,7 @@ CBaseUIContainer *PauseMenu::setVisible(bool visible) {
         } else {
             RichPresence::onPlayStart();
 
-            if(!bancho->spectators.empty()) {
+            if(!BanchoState::spectators.empty()) {
                 Packet packet;
                 packet.id = OUT_SPECTATE_FRAMES;
                 BANCHO::Proto::write<i32>(&packet, 0);

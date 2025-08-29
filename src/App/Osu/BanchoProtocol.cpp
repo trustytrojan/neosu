@@ -231,12 +231,12 @@ void Room::pack(Packet *packet) {
     write<u32>(packet, this->seed);
 }
 
-bool Room::is_host() { return this->host_id == bancho->user_id; }
+bool Room::is_host() { return this->host_id == BanchoState::get_uid(); }
 
 ScoreFrame ScoreFrame::get() {
     u8 slot_id = 0;
     for(u8 i = 0; i < 16; i++) {
-        if(bancho->room.slots[i].player_id == bancho->user_id) {
+        if(BanchoState::room.slots[i].player_id == BanchoState::get_uid()) {
             slot_id = i;
             break;
         }

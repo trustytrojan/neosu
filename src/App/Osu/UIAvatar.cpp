@@ -11,7 +11,7 @@
 UIAvatar::UIAvatar(i32 player_id, float xPos, float yPos, float xSize, float ySize)
     : CBaseUIButton(xPos, yPos, xSize, ySize, "avatar", "") {
     this->player_id_for_endpoint = {player_id,
-                                    fmt::format(MCENGINE_DATA_DIR "avatars/{}/{}", bancho->endpoint, player_id)};
+                                    fmt::format(MCENGINE_DATA_DIR "avatars/{}/{}", BanchoState::endpoint, player_id)};
 
     this->setClickCallback(SA::MakeDelegate<&UIAvatar::onAvatarClicked>(this));
 

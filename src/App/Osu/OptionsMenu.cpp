@@ -1442,7 +1442,7 @@ void OptionsMenu::draw() {
 }
 
 void OptionsMenu::update_login_button() {
-    if(bancho->is_online()) {
+    if(BanchoState::is_online()) {
         this->logInButton->setText("Disconnect");
         this->logInButton->setColor(0xffff0000);
         this->logInButton->is_loading = false;
@@ -1890,7 +1890,7 @@ void OptionsMenu::updateLayout() {
            !(soundEngine->getOutputDriverType() == SoundEngine::OutputDriver::BASS_WASAPI))
             continue;
         if(this->elemContainers[i]->render_condition == RenderCondition::SCORE_SUBMISSION_POLICY &&
-           bancho->score_submission_policy != ServerPolicy::NO_PREFERENCE)
+           BanchoState::score_submission_policy != ServerPolicy::NO_PREFERENCE)
             continue;
         if(this->elemContainers[i]->render_condition == RenderCondition::PASSWORD_AUTH && oauth) continue;
 
@@ -2633,7 +2633,7 @@ void OptionsMenu::onLogInClicked(bool left, bool right) {
     }
     soundEngine->play(osu->getSkin()->getMenuHit());
 
-    if((right && this->logInButton->is_loading) || bancho->is_online()) {
+    if((right && this->logInButton->is_loading) || BanchoState::is_online()) {
         BANCHO::Net::disconnect();
 
         // Manually clicked disconnect button: clear oauth token
@@ -2642,14 +2642,14 @@ void OptionsMenu::onLogInClicked(bool left, bool right) {
         // debugLog("DEBUG: manually clicked login, password: {} md5: {}\n", cv::mp_password_temporary.getString(),
         //           cv::mp_password_md5.getString());
         if(this->should_use_oauth_login()) {
-            bancho->endpoint = cv::mp_server.getString();
+            BanchoState::endpoint = cv::mp_server.getString();
 
-            crypto::rng::get_bytes(&bancho->oauth_challenge[0], 32);
-            crypto::hash::sha256(&bancho->oauth_challenge[0], 32, &bancho->oauth_verifier[0]);
+            crypto::rng::get_bytes(&BanchoState::oauth_challenge[0], 32);
+            crypto::hash::sha256(&BanchoState::oauth_challenge[0], 32, &BanchoState::oauth_verifier[0]);
 
-            auto challenge_b64 = crypto::conv::encode64(&bancho->oauth_challenge[0], 32);
+            auto challenge_b64 = crypto::conv::encode64(&BanchoState::oauth_challenge[0], 32);
             auto scheme = cv::use_https.getBool() ? "https://" : "http://";
-            auto url = fmt::format("{:s}{:s}/connect?challenge={}", scheme, bancho->endpoint,
+            auto url = fmt::format("{:s}{:s}/connect?challenge={}", scheme, BanchoState::endpoint,
                                    (const char *)challenge_b64.data());
 
             env->openURLInDefaultBrowser(url);

@@ -292,7 +292,7 @@ void Beatmap::skipEmptySection() {
 
     soundEngine->play(osu->getSkin()->getMenuHit());
 
-    if(!bancho->spectators.empty()) {
+    if(!BanchoState::spectators.empty()) {
         // TODO @kiwec: how does skip work? does client jump to latest time or just skip beginning?
         //              is signaling skip even necessary?
         this->broadcast_spectator_frames();
@@ -309,7 +309,7 @@ void Beatmap::skipEmptySection() {
 }
 
 void Beatmap::keyPressed1(bool mouse) {
-    if(this->is_watching || bancho->spectating) return;
+    if(this->is_watching || BanchoState::spectating) return;
 
     if(this->bContinueScheduled) this->bClickedContinue = !osu->getModSelector()->isMouseInside();
 
@@ -347,7 +347,7 @@ void Beatmap::keyPressed1(bool mouse) {
 }
 
 void Beatmap::keyPressed2(bool mouse) {
-    if(this->is_watching || bancho->spectating) return;
+    if(this->is_watching || BanchoState::spectating) return;
 
     if(this->bContinueScheduled) this->bClickedContinue = !osu->getModSelector()->isMouseInside();
 
@@ -385,7 +385,7 @@ void Beatmap::keyPressed2(bool mouse) {
 }
 
 void Beatmap::keyReleased1(bool /*mouse*/) {
-    if(this->is_watching || bancho->spectating) return;
+    if(this->is_watching || BanchoState::spectating) return;
 
     // key overlay
     osu->getHUD()->animateInputoverlay(1, false);
@@ -397,7 +397,7 @@ void Beatmap::keyReleased1(bool /*mouse*/) {
 }
 
 void Beatmap::keyReleased2(bool /*mouse*/) {
-    if(this->is_watching || bancho->spectating) return;
+    if(this->is_watching || BanchoState::spectating) return;
 
     // key overlay
     osu->getHUD()->animateInputoverlay(2, false);
@@ -446,7 +446,7 @@ bool Beatmap::play() {
     if(this->start()) {
         this->last_spectator_broadcast = engine->getTime();
         RichPresence::onPlayStart();
-        if(!bancho->spectators.empty()) {
+        if(!BanchoState::spectators.empty()) {
             Packet packet;
             packet.id = OUT_SPECTATE_FRAMES;
             proto::write<i32>(&packet, 0);
@@ -514,15 +514,15 @@ bool Beatmap::spectate() {
     this->bContinueScheduled = false;
     this->unloadObjects();
 
-    auto user_info = BANCHO::User::get_user_info(bancho->spectated_player_id, true);
-    osu->watched_user_id = bancho->spectated_player_id;
+    auto user_info = BANCHO::User::get_user_info(BanchoState::spectated_player_id, true);
+    osu->watched_user_id = BanchoState::spectated_player_id;
     osu->watched_user_name = user_info->name;
 
     osu->previous_mods = Replay::Mods::from_cvars();
 
     FinishedScore score;
     score.client = "peppy-unknown";
-    score.server = bancho->endpoint;
+    score.server = BanchoState::endpoint;
     score.mods = Replay::Mods::from_legacy(user_info->mods);
     osu->useMods(&score);
 
@@ -734,7 +734,7 @@ void Beatmap::restart(bool quick) {
     if(!this->bIsWaiting) {
         this->bIsRestartScheduled = true;
         this->bIsRestartScheduledQuick = quick;
-    } else if(this->bIsPaused && !bancho->spectating) {
+    } else if(this->bIsPaused && !BanchoState::spectating) {
         this->pause(false);
     }
 }
@@ -787,7 +787,7 @@ void Beatmap::actualRestart() {
 
 void Beatmap::pause(bool quitIfWaiting) {
     if(this->selectedDifficulty2 == nullptr) return;
-    if(bancho->spectating) {
+    if(BanchoState::spectating) {
         stop_spectating();
         return;
     }
@@ -901,7 +901,7 @@ void Beatmap::stop(bool quit) {
         osu->bModAutoTemp = false;
     }
 
-    if(this->is_watching || bancho->spectating) {
+    if(this->is_watching || BanchoState::spectating) {
         Replay::Mods::use(osu->previous_mods);
     }
 
@@ -912,7 +912,7 @@ void Beatmap::stop(bool quit) {
 
     this->unloadObjects();
 
-    if(bancho->is_playing_a_multi_map()) {
+    if(BanchoState::is_playing_a_multi_map()) {
         if(quit) {
             osu->onPlayEnd(score, true);
             osu->room->ragequit();
@@ -931,12 +931,12 @@ void Beatmap::stop(bool quit) {
 
 void Beatmap::fail(bool force_death) {
     if(this->bFailed) return;
-    if((this->is_watching || bancho->spectating) && !force_death) return;
+    if((this->is_watching || BanchoState::spectating) && !force_death) return;
 
     // Change behavior of relax mod when online
-    if(bancho->is_online() && osu->getModRelax()) return;
+    if(BanchoState::is_online() && osu->getModRelax()) return;
 
-    if(!bancho->is_playing_a_multi_map() && cv::drain_kill.getBool()) {
+    if(!BanchoState::is_playing_a_multi_map() && cv::drain_kill.getBool()) {
         soundEngine->play(this->getSkin()->getFailsound());
 
         // trigger music slowdown and delayed menu, see update()
@@ -1021,7 +1021,7 @@ void Beatmap::seekMS(u32 ms) {
         this->onModUpdate(false, false);
     }
 
-    if(bancho->spectating) {
+    if(BanchoState::spectating) {
         debugLog("After seeking, we are now {:d}ms behind the player.\n", this->last_frame_ms - (i32)ms);
     }
 
@@ -1035,7 +1035,7 @@ void Beatmap::seekMS(u32 ms) {
         }
     }
 
-    if(!this->is_watching && !bancho->spectating) {  // score submission already disabled when watching replay
+    if(!this->is_watching && !BanchoState::spectating) {  // score submission already disabled when watching replay
         if(this->vanilla) {
             debugLog("Disabling score submission due to seeking\n");
             this->vanilla = false;
@@ -1222,7 +1222,7 @@ f32 Beatmap::getOD_full() const {
 }
 
 bool Beatmap::isKey1Down() const {
-    if(this->is_watching || bancho->spectating) {
+    if(this->is_watching || BanchoState::spectating) {
         return this->current_keys & (LegacyReplay::M1 | LegacyReplay::K1);
     } else {
         return this->bClick1Held;
@@ -1230,7 +1230,7 @@ bool Beatmap::isKey1Down() const {
 }
 
 bool Beatmap::isKey2Down() const {
-    if(this->is_watching || bancho->spectating) {
+    if(this->is_watching || BanchoState::spectating) {
         return this->current_keys & (LegacyReplay::M2 | LegacyReplay::K2);
     } else {
         return this->bClick2Held;
@@ -1628,7 +1628,7 @@ void Beatmap::draw() {
             osu->getHUD()->drawLoadingSmall(loadingMessage);
 
             // draw the rest of the playfield while buffering/paused
-        } else if(bancho->is_playing_a_multi_map() && !bancho->room.all_players_loaded) {
+        } else if(BanchoState::is_playing_a_multi_map() && !BanchoState::room.all_players_loaded) {
             osu->getHUD()->drawLoadingSmall("Waiting for players ...");
 
             // only start drawing the rest of the playfield if everything has loaded
@@ -1677,7 +1677,7 @@ void Beatmap::draw() {
 
     // draw spectator pause message
     if(this->spectate_pause) {
-        auto info = BANCHO::User::get_user_info(bancho->spectated_player_id);
+        auto info = BANCHO::User::get_user_info(BanchoState::spectated_player_id);
         auto pause_msg = UString::format("%s has paused", info->name.toUtf8());
         osu->getHUD()->drawLoadingSmall(pause_msg);
     }
@@ -2109,10 +2109,10 @@ void Beatmap::update() {
     }
 
     // notify all other players (including ourself) once we've finished loading
-    if(bancho->is_playing_a_multi_map()) {
+    if(BanchoState::is_playing_a_multi_map()) {
         if(!this->isActuallyLoading()) {
-            if(!bancho->room.player_loaded) {
-                bancho->room.player_loaded = true;
+            if(!BanchoState::room.player_loaded) {
+                BanchoState::room.player_loaded = true;
 
                 Packet packet;
                 packet.id = MATCH_LOAD_COMPLETE;
@@ -2342,7 +2342,7 @@ void Beatmap::update2() {
         }
     }
 
-    if(bancho->spectating) {
+    if(BanchoState::spectating) {
         if(this->spectate_pause && !this->bFailed && this->music->isPlaying()) {
             soundEngine->pause(this->music);
             this->bIsPlaying = false;
@@ -2429,7 +2429,7 @@ void Beatmap::update2() {
     }
 
     // Make sure we're not too far behind the liveplay
-    if(bancho->spectating) {
+    if(BanchoState::spectating) {
         if(this->iCurMusicPos + (2 * cv::spec_buffer.getInt()) < this->last_frame_ms) {
             i32 target = this->last_frame_ms - cv::spec_buffer.getInt();
             debugLog("We're {:d}ms behind, seeking to catch up to player...\n",
@@ -2440,14 +2440,14 @@ void Beatmap::update2() {
     }
 
     // When CBF is disabled, set click timing and position to the current frame's
-    if(!cv::cbf.getBool() && !this->is_watching && !bancho->spectating) {
+    if(!cv::cbf.getBool() && !this->is_watching && !BanchoState::spectating) {
         for(auto &click : this->clicks) {
             click.click_time = this->iCurMusicPosWithOffsets;
             click.pos = this->getCursorPos();
         }
     }
 
-    if((this->is_watching || bancho->spectating) && this->spectated_replay.size() >= 2) {
+    if((this->is_watching || BanchoState::spectating) && this->spectated_replay.size() >= 2) {
         LegacyReplay::Frame current_frame = this->spectated_replay[this->current_frame_idx];
         LegacyReplay::Frame next_frame = this->spectated_replay[this->current_frame_idx + 1];
 
@@ -2898,7 +2898,7 @@ void Beatmap::update2() {
 
         // While we want to allow the chat to pop up during breaks, we don't
         // want to be able to skip after the start in multiplayer rooms
-        if(bancho->is_playing_a_multi_map() && this->iCurrentHitObjectIndex > 0) {
+        if(BanchoState::is_playing_a_multi_map() && this->iCurrentHitObjectIndex > 0) {
             this->bIsInSkippableSection = false;
         }
     }
@@ -3037,7 +3037,7 @@ void Beatmap::update2() {
                 soundEngine->pause(this->music);
                 this->bIsPaused = true;
 
-                if(bancho->spectating) {
+                if(BanchoState::spectating) {
                     osu->songBrowser2->bHasSelectedAndIsPlaying = false;
                 } else {
                     osu->getPauseMenu()->setVisible(true);
@@ -3052,7 +3052,7 @@ void Beatmap::update2() {
     }
 
     // spectator score correction
-    if(bancho->spectating && this->spectated_replay.size() >= 2) {
+    if(BanchoState::spectating && this->spectated_replay.size() >= 2) {
         auto current_frame = this->spectated_replay[this->current_frame_idx];
 
         i32 score_frame_idx = -1;
@@ -3087,7 +3087,7 @@ void Beatmap::update2() {
 }
 
 void Beatmap::broadcast_spectator_frames() {
-    if(bancho->spectators.empty()) return;
+    if(BanchoState::spectators.empty()) return;
 
     Packet packet;
     packet.id = OUT_SPECTATE_FRAMES;
@@ -3106,7 +3106,7 @@ void Beatmap::broadcast_spectator_frames() {
 }
 
 void Beatmap::write_frame() {
-    if(!this->bIsPlaying || this->bFailed || this->is_watching || bancho->spectating) return;
+    if(!this->bIsPlaying || this->bFailed || this->is_watching || BanchoState::spectating) return;
 
     long delta = this->iCurMusicPosWithOffsets - this->last_event_ms;
     if(delta < 0) return;
@@ -3148,7 +3148,7 @@ void Beatmap::write_frame() {
     this->last_event_ms = this->iCurMusicPosWithOffsets;
     this->last_keys = this->current_keys;
 
-    if(!bancho->spectators.empty() && last_event_time > this->last_spectator_broadcast + 1.0) {
+    if(!BanchoState::spectators.empty() && last_event_time > this->last_spectator_broadcast + 1.0) {
         this->broadcast_spectator_frames();
     }
 }
@@ -3215,7 +3215,7 @@ void Beatmap::resetLiveStarsTasks() {
 
 // HACK: Updates buffering state and pauses/unpauses the music!
 bool Beatmap::isBuffering() {
-    if(!bancho->spectating) return false;
+    if(!BanchoState::spectating) return false;
 
     i32 leeway = this->last_frame_ms - this->iCurMusicPos;
     if(this->is_buffering) {
@@ -3255,7 +3255,7 @@ bool Beatmap::isBuffering() {
 
 bool Beatmap::isLoading() {
     return (this->isActuallyLoading() || this->isBuffering() ||
-            (bancho->is_playing_a_multi_map() && !bancho->room.all_players_loaded));
+            (BanchoState::is_playing_a_multi_map() && !BanchoState::room.all_players_loaded));
 }
 
 bool Beatmap::isActuallyLoading() {
@@ -3405,7 +3405,7 @@ vec2 Beatmap::osuCoords2LegacyPixels(vec2 coords) const {
 }
 
 vec2 Beatmap::getMousePos() const {
-    if((this->is_watching && !this->bIsPaused) || bancho->spectating) {
+    if((this->is_watching && !this->bIsPaused) || BanchoState::spectating) {
         return this->interpolatedMousePos;
     } else {
         return mouse->getPos();
@@ -3501,7 +3501,7 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
     bool isComplete = (num300s + num100s + num50s + numMisses >= numHitObjects);
     bool isZero = (osu->getScore()->getScore() < 1);
     bool isCheated = (osu->getModAuto() || (osu->getModAutopilot() && osu->getModRelax())) ||
-                     osu->getScore()->isUnranked() || this->is_watching || bancho->spectating;
+                     osu->getScore()->isUnranked() || this->is_watching || BanchoState::spectating;
 
     FinishedScore score;
     UString client_ver = "neosu-" OS_NAME "-" NEOSU_STREAM "-";
@@ -3512,10 +3512,10 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
         std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
     // @neonet: check if we're connected to neonet
-    if(bancho->is_online()) {
-        score.player_id = bancho->user_id;
-        score.playerName = bancho->username.toUtf8();
-        score.server = bancho->endpoint;
+    if(BanchoState::is_online()) {
+        score.player_id = BanchoState::get_uid();
+        score.playerName = BanchoState::username.toUtf8();
+        score.server = BanchoState::endpoint;
     } else {
         score.playerName = cv::name.getString();
     }
@@ -3559,8 +3559,8 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
     if(!isCheated) {
         RichPresence::onPlayEnd(quit);
 
-        if(bancho->can_submit_scores() && !isZero && this->vanilla) {
-            score.server = bancho->endpoint;
+        if(BanchoState::can_submit_scores() && !isZero && this->vanilla) {
+            score.server = BanchoState::endpoint;
             BANCHO::Net::submit_score(score);
             // XXX: Save bancho_score_id after getting submission result
         }
@@ -3573,7 +3573,7 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
         }
     }
 
-    if(!bancho->spectators.empty()) {
+    if(!BanchoState::spectators.empty()) {
         this->broadcast_spectator_frames();
 
         Packet packet;

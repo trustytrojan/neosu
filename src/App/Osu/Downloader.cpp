@@ -82,7 +82,7 @@ class DownloadManager {
         NetworkHandler::RequestOptions options;
         options.timeout = 30;
         options.connectTimeout = 5;
-        options.userAgent = bancho->user_agent.toUtf8();
+        options.userAgent = BanchoState::user_agent.toUtf8();
         options.followRedirects = true;
         options.progressCallback = [request](float progress) { request->progress.store(progress); };
 
@@ -336,7 +336,7 @@ void download_beatmapset(u32 set_id, float* progress) {
     std::vector<u8> data;
 
     auto scheme = cv::use_https.getBool() ? "https://" : "http://";
-    auto download_url = fmt::format("{:s}osu.{}/d/", scheme, bancho->endpoint);
+    auto download_url = fmt::format("{:s}osu.{}/d/", scheme, BanchoState::endpoint);
     if(cv::beatmap_mirror_override.getString().length() > 0) {
         download_url = cv::beatmap_mirror_override.getString();
     }
@@ -373,8 +373,8 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, MD5Hash beatmap_md5, float* pr
 
         APIRequest request;
         request.type = GET_BEATMAPSET_INFO;
-        request.path = UString::format("/web/osu-search-set.php?b=%d&u=%s&h=%s", beatmap_id, bancho->username.toUtf8(),
-                                       bancho->pw_md5.hash.data());
+        request.path = UString::format("/web/osu-search-set.php?b=%d&u=%s&h=%s", beatmap_id, BanchoState::username.toUtf8(),
+                                       BanchoState::pw_md5.hash.data());
         request.extra_int = beatmap_id;
         BANCHO::Net::send_api_request(request);
 
@@ -448,8 +448,8 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, i32 beatmapset_id, float* prog
 
         APIRequest request;
         request.type = GET_BEATMAPSET_INFO;
-        request.path = UString::format("/web/osu-search-set.php?b=%d&u=%s&h=%s", beatmap_id, bancho->username.toUtf8(),
-                                       bancho->pw_md5.hash.data());
+        request.path = UString::format("/web/osu-search-set.php?b=%d&u=%s&h=%s", beatmap_id, BanchoState::username.toUtf8(),
+                                       BanchoState::pw_md5.hash.data());
         request.extra_int = beatmap_id;
         BANCHO::Net::send_api_request(request);
 

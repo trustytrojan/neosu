@@ -178,9 +178,9 @@ void set_discord_presence([[maybe_unused]] struct DiscordActivity *activity) {
                                    diff2->getID());
         strncpy(&activity->assets.large_image[0], url.toUtf8(), 127);
 
-        if(bancho->server_icon_url.length() > 0 && cv::main_menu_use_server_logo.getBool()) {
-            strncpy(&activity->assets.small_image[0], bancho->server_icon_url.toUtf8(), 127);
-            strncpy(&activity->assets.small_text[0], bancho->endpoint.c_str(), 127);
+        if(BanchoState::server_icon_url.length() > 0 && cv::main_menu_use_server_logo.getBool()) {
+            strncpy(&activity->assets.small_image[0], BanchoState::server_icon_url.toUtf8(), 127);
+            strncpy(&activity->assets.small_text[0], BanchoState::endpoint.c_str(), 127);
         } else {
             strcpy(&activity->assets.small_image[0], "neosu_icon");
             activity->assets.small_text[0] = '\0';

@@ -239,8 +239,8 @@ void UserCard::mouse_update(bool *propagate_clicks) {
 void UserCard::updateUserStats() {
     Database::PlayerStats stats;
 
-    bool is_self = this->user_id <= 0 || (this->user_id == bancho->user_id);
-    if(is_self && !bancho->can_submit_scores()) {
+    bool is_self = this->user_id <= 0 || (this->user_id == BanchoState::get_uid());
+    if(is_self && !BanchoState::can_submit_scores()) {
         stats = db->calculatePlayerStats(this->sText.toUtf8());
     } else {
         UserInfo *my = BANCHO::User::get_user_info(this->user_id, true);

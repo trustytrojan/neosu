@@ -243,7 +243,7 @@ void HUD::draw() {
         (cv::skip_breaks_enabled.getBool() && beatmap->iCurrentHitObjectIndex > 0)))
         this->drawSkip();
 
-    u32 nb_spectators = bancho->spectating ? bancho->fellow_spectators.size() : bancho->spectators.size();
+    u32 nb_spectators = BanchoState::spectating ? BanchoState::fellow_spectators.size() : BanchoState::spectators.size();
     if(nb_spectators > 0 && cv::draw_spectator_list.getBool()) {
         // XXX: maybe draw player names? avatars?
         const UString str = UString::format("%d spectators", nb_spectators);
@@ -291,8 +291,8 @@ void HUD::drawDummy() {
     scoreEntry.accuracy = 1.0f;
     scoreEntry.dead = false;
     scoreEntry.highlight = true;
-    if((cv::draw_scoreboard.getBool() && !bancho->is_playing_a_multi_map()) ||
-       (cv::draw_scoreboard_mp.getBool() && bancho->is_playing_a_multi_map())) {
+    if((cv::draw_scoreboard.getBool() && !BanchoState::is_playing_a_multi_map()) ||
+       (cv::draw_scoreboard_mp.getBool() && BanchoState::is_playing_a_multi_map())) {
         static std::vector<SCORE_ENTRY> scoreEntries;
         scoreEntries.clear();
         {
@@ -1224,12 +1224,12 @@ std::vector<SCORE_ENTRY> HUD::getCurrentScores() {
     auto beatmap = osu->getSelectedBeatmap();
     if(!beatmap) return scores;
 
-    if(bancho->is_in_a_multi_room()) {
-        for(auto &i : bancho->room.slots) {
+    if(BanchoState::is_in_a_multi_room()) {
+        for(auto &i : BanchoState::room.slots) {
             auto slot = &i;
             if(!slot->is_player_playing() && !slot->has_finished_playing()) continue;
 
-            if(slot->player_id == bancho->user_id) {
+            if(slot->player_id == BanchoState::get_uid()) {
                 // Update local player slot instantly
                 // (not including fields that won't be used for the HUD)
                 slot->num300 = (u16)osu->getScore()->getNum300s();
@@ -1250,7 +1250,7 @@ std::vector<SCORE_ENTRY> HUD::getCurrentScores() {
             scoreEntry.combo = slot->current_combo;
             scoreEntry.score = slot->total_score;
             scoreEntry.dead = (slot->current_hp == 0);
-            scoreEntry.highlight = (slot->player_id == bancho->user_id);
+            scoreEntry.highlight = (slot->player_id == BanchoState::get_uid());
 
             if(slot->has_quit()) {
                 slot->current_hp = 0;
@@ -1300,12 +1300,12 @@ std::vector<SCORE_ENTRY> HUD::getCurrentScores() {
         SCORE_ENTRY playerScoreEntry;
         if(osu->getModAuto() || (osu->getModAutopilot() && osu->getModRelax())) {
             playerScoreEntry.name = "neosu";
-        } else if(beatmap->is_watching || bancho->spectating) {
+        } else if(beatmap->is_watching || BanchoState::spectating) {
             playerScoreEntry.name = osu->watched_user_name;
             playerScoreEntry.player_id = osu->watched_user_id;
         } else {
             playerScoreEntry.name = cv::name.getString().c_str();
-            playerScoreEntry.player_id = bancho->user_id;
+            playerScoreEntry.player_id = BanchoState::get_uid();
         }
         playerScoreEntry.entry_id = 0;
         playerScoreEntry.combo = osu->getScore()->getComboMax();
@@ -1317,7 +1317,7 @@ std::vector<SCORE_ENTRY> HUD::getCurrentScores() {
         nb_slots++;
     }
 
-    WinCondition sorting_type = bancho->is_in_a_multi_room() ? (WinCondition)bancho->room.win_condition : SCOREV1;
+    WinCondition sorting_type = BanchoState::is_in_a_multi_room() ? (WinCondition)BanchoState::room.win_condition : SCOREV1;
     std::ranges::sort(scores, [sorting_type](const SCORE_ENTRY &a, const SCORE_ENTRY &b) {
         if(sorting_type == ACCURACY) {
             return a.accuracy > b.accuracy;
@@ -1346,7 +1346,7 @@ void HUD::resetScoreboard() {
     }
     this->slots.clear();
 
-    int player_entry_id = bancho->is_in_a_multi_room() ? bancho->user_id : 0;
+    int player_entry_id = BanchoState::is_in_a_multi_room() ? BanchoState::get_uid() : 0;
     auto scores = this->getCurrentScores();
     int i = 0;
     for(const auto &score : scores) {

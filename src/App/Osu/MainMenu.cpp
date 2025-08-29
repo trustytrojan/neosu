@@ -185,7 +185,7 @@ MainMenu::MainMenu() : OsuScreen() {
                 if(version < 39.00) {
                     if(!cv::mp_password.getString().empty()) {
                         const char *plaintext_pw{cv::mp_password.getString().c_str()};
-                        const auto hash{Bancho::md5((u8 *)plaintext_pw, strlen(plaintext_pw))};
+                        const auto hash{BanchoState::md5((u8 *)plaintext_pw, strlen(plaintext_pw))};
                         cv::mp_password_md5.setValue(hash.hash.data());
                         cv::mp_password.setValue("");
                         osu->getOptionsMenu()->save();
@@ -505,8 +505,8 @@ void MainMenu::drawFriend(const McRect &mainButtonRect, float pulse, bool haveTi
 
 void MainMenu::drawLogoImage(const McRect &mainButtonRect) {
     auto logo = this->logo_img;
-    if(bancho->server_icon != nullptr && bancho->server_icon->isReady() && cv::main_menu_use_server_logo.getBool()) {
-        logo = bancho->server_icon;
+    if(BanchoState::server_icon != nullptr && BanchoState::server_icon->isReady() && cv::main_menu_use_server_logo.getBool()) {
+        logo = BanchoState::server_icon;
     }
 
     float alpha = (1.0f - this->fMainMenuAnimFriendPercent) * (1.0f - this->fMainMenuAnimFriendPercent) *
@@ -1048,17 +1048,17 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
     }
 
     // load server icon
-    if(!shutting_down && bancho->is_online() && bancho->server_icon_url.length() > 0 &&
-       bancho->server_icon == nullptr) {
-        std::string icon_path = fmt::format(MCENGINE_DATA_DIR "avatars/{}", bancho->endpoint);
+    if(!shutting_down && BanchoState::is_online() && BanchoState::server_icon_url.length() > 0 &&
+       BanchoState::server_icon == nullptr) {
+        std::string icon_path = fmt::format(MCENGINE_DATA_DIR "avatars/{}", BanchoState::endpoint);
         // If we are online, the avatars/<server> directory is already created
         icon_path.append("/server_icon");
 
         float progress = -1.f;
         std::vector<u8> data;
         int response_code;
-        Downloader::download(bancho->server_icon_url.toUtf8(), &progress, data, &response_code);
-        if(progress == -1.f) bancho->server_icon_url = "";
+        Downloader::download(BanchoState::server_icon_url.toUtf8(), &progress, data, &response_code);
+        if(progress == -1.f) BanchoState::server_icon_url = "";
         if(!data.empty()) {
             FILE *file = fopen(icon_path.c_str(), "wb");
             if(file != nullptr) {
@@ -1067,7 +1067,7 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
                 fclose(file);
             }
 
-            bancho->server_icon = resourceManager->loadImageAbs(icon_path, icon_path);
+            BanchoState::server_icon = resourceManager->loadImageAbs(icon_path, icon_path);
         }
     }
 }
@@ -1174,7 +1174,7 @@ CBaseUIContainer *MainMenu::setVisible(bool visible) {
     if(visible) {
         RichPresence::onMainMenu();
 
-        if(!bancho->spectators.empty()) {
+        if(!BanchoState::spectators.empty()) {
             Packet packet;
             packet.id = OUT_SPECTATE_FRAMES;
             BANCHO::Proto::write<i32>(&packet, 0);
@@ -1428,7 +1428,7 @@ void MainMenu::onPlayButtonPressed() {
 }
 
 void MainMenu::onMultiplayerButtonPressed() {
-    if(bancho->user_id <= 0) {
+    if(!BanchoState::is_online()) {
         osu->optionsMenu->askForLoginDetails();
         return;
     }

@@ -37,9 +37,9 @@ void UIUserContextMenuScreen::open(i32 user_id, bool is_song_browser_button) {
     this->user_id = user_id;
 
     int slot_number = -1;
-    if(bancho->is_in_a_multi_room()) {
+    if(BanchoState::is_in_a_multi_room()) {
         for(int i = 0; i < 16; i++) {
-            if(bancho->room.slots[i].player_id == user_id) {
+            if(BanchoState::room.slots[i].player_id == user_id) {
                 slot_number = i;
                 break;
             }
@@ -48,7 +48,7 @@ void UIUserContextMenuScreen::open(i32 user_id, bool is_song_browser_button) {
 
     this->menu->begin(is_song_browser_button ? osu->userButton->getSize().x : 0);
 
-    if(!osu->userStats->isVisible() && (user_id <= 0 || (user_id == bancho->user_id))) {
+    if(!osu->userStats->isVisible() && (user_id <= 0 || (user_id == BanchoState::get_uid()))) {
         this->menu->addButton("View top plays", VIEW_TOP_PLAYS);
     }
 
@@ -56,8 +56,8 @@ void UIUserContextMenuScreen::open(i32 user_id, bool is_song_browser_button) {
         this->menu->addButton("View profile page", VIEW_PROFILE);
     };
 
-    if(user_id != bancho->user_id) {
-        if(bancho->room.is_host() && slot_number != -1) {
+    if(user_id != BanchoState::get_uid()) {
+        if(BanchoState::room.is_host() && slot_number != -1) {
             this->menu->addButton("Set as Host", UA_TRANSFER_HOST);
             this->menu->addButton("Kick", KICK);
         }
@@ -78,7 +78,7 @@ void UIUserContextMenuScreen::open(i32 user_id, bool is_song_browser_button) {
         }
 
         if(cv::enable_spectating.getBool()) {
-            if(bancho->spectated_player_id == user_id) {
+            if(BanchoState::spectated_player_id == user_id) {
                 menu->addButton("Stop spectating", TOGGLE_SPECTATE);
             } else {
                 menu->addButton("Spectate", TOGGLE_SPECTATE);
@@ -104,9 +104,9 @@ void UIUserContextMenuScreen::close() { this->menu->setVisible(false); }
 void UIUserContextMenuScreen::on_action(const UString& /*text*/, int user_action) {
     auto user_info = BANCHO::User::get_user_info(this->user_id);
     int slot_number = -1;
-    if(bancho->is_in_a_multi_room()) {
+    if(BanchoState::is_in_a_multi_room()) {
         for(int i = 0; i < 16; i++) {
-            if(bancho->room.slots[i].player_id == this->user_id) {
+            if(BanchoState::room.slots[i].player_id == this->user_id) {
                 slot_number = i;
                 break;
             }
@@ -128,7 +128,7 @@ void UIUserContextMenuScreen::on_action(const UString& /*text*/, int user_action
         osu->chat->openChannel(user_info->name);
     } else if(user_action == VIEW_PROFILE) {
         // Fallback in case we're offline
-        auto endpoint = bancho->endpoint;
+        auto endpoint = BanchoState::endpoint;
         if(endpoint == "") endpoint = "ppy.sh";
 
         auto url = fmt::format("https://osu.{}/u/{}", endpoint, this->user_id);
@@ -151,7 +151,7 @@ void UIUserContextMenuScreen::on_action(const UString& /*text*/, int user_action
             BANCHO::User::friends.erase(it);
         }
     } else if(user_action == TOGGLE_SPECTATE) {
-        if(bancho->spectated_player_id == this->user_id) {
+        if(BanchoState::spectated_player_id == this->user_id) {
             stop_spectating();
         } else {
             start_spectating(this->user_id);

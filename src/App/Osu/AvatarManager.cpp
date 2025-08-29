@@ -37,7 +37,7 @@ void AvatarManager::update() {
         return;
     }
 
-    if(!bancho->is_online()) {
+    if(!BanchoState::is_online()) {
         // TODO: offline/local avatars?
         // don't clear what we already have in memory, in case we go back online on the same server
         // but also don't update (downloading online avatars while logged out is just not something we need currently)
@@ -142,7 +142,7 @@ bool AvatarManager::download_avatar(const std::pair<i32, std::string>& id_folder
     float progress = -1.f;
     std::vector<u8> img_data;
     auto scheme = cv::use_https.getBool() ? "https://" : "http://";
-    auto img_url = fmt::format("{:s}a.{}/{:d}", scheme, bancho->endpoint, id_folder.first);
+    auto img_url = fmt::format("{:s}a.{}/{:d}", scheme, BanchoState::endpoint, id_folder.first);
     int response_code;
     // TODO: constantly requesting the full download is a bad API, should be a way to just check if it's already downloading
     Downloader::download(img_url.c_str(), &progress, img_data, &response_code);

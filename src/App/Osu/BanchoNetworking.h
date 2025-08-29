@@ -65,6 +65,4 @@ void update_networking();
 // Clean up networking. Should be called once when exiting neosu.
 void cleanup_networking();
 
-extern UString cho_token;
-
 }  // namespace BANCHO::Net

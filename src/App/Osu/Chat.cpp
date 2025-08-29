@@ -469,7 +469,7 @@ void Chat::handle_command(const UString &msg) {
 
         UString song_name = UString::format("%s - %s [%s]", diff->getArtist().c_str(), diff->getTitle().c_str(),
                                             diff->getDifficultyName().c_str());
-        UString song_link = UString::format("[https://osu.%s/beatmaps/%d %s]", bancho->endpoint.c_str(), diff->getID(),
+        UString song_link = UString::format("[https://osu.%s/beatmaps/%d %s]", BanchoState::endpoint.c_str(), diff->getID(),
                                             song_name.toUtf8());
 
         UString np_msg;
@@ -580,21 +580,22 @@ void Chat::handle_command(const UString &msg) {
     }
 
     if(msg.startsWith("/invite ")) {
-        if(!bancho->is_in_a_multi_room()) {
+        if(!BanchoState::is_in_a_multi_room()) {
             this->addSystemMessage("You are not in a multiplayer room!");
             return;
         }
 
         auto username = msg.substr(8);
-        auto invite_msg = UString::format("\001ACTION has invited you to join [osump://%d/%s %s]\001", bancho->room.id,
-                                          bancho->room.password.toUtf8(), bancho->room.name.toUtf8());
+        auto invite_msg = UString::format("\001ACTION has invited you to join [osump://%d/%s %s]\001", BanchoState::room.id,
+                                          BanchoState::room.password.toUtf8(), BanchoState::room.name.toUtf8());
 
         Packet packet;
+
         packet.id = SEND_PRIVATE_MESSAGE;
-        proto::write_string(&packet, (char *)bancho->username.toUtf8());
+        proto::write_string(&packet, (char *)BanchoState::username.toUtf8());
         proto::write_string(&packet, (char *)invite_msg.toUtf8());
         proto::write_string(&packet, (char *)username.toUtf8());
-        proto::write<i32>(&packet, bancho->user_id);
+        proto::write<i32>(&packet, BanchoState::get_uid());
         BANCHO::Net::send_packet(packet);
 
         this->addSystemMessage(UString::format("%s has been invited to the game.", username.toUtf8()));
@@ -807,8 +808,8 @@ void Chat::mark_as_read(ChatChannel *chan) {
 
     APIRequest request;
     request.type = MARK_AS_READ;
-    request.path = UString::format("/web/osu-markasread.php?u=%s&h=%s&channel=%s", bancho->username.toUtf8(),
-                                   bancho->pw_md5.hash.data(), channel_urlencoded);
+    request.path = UString::format("/web/osu-markasread.php?u=%s&h=%s&channel=%s", BanchoState::username.toUtf8(),
+                                   BanchoState::pw_md5.hash.data(), channel_urlencoded);
     request.mime = nullptr;
 
     BANCHO::Net::send_api_request(request);
@@ -899,7 +900,7 @@ void Chat::addMessage(UString channel_name, const ChatMessage &msg, bool mark_un
         // TODO @kiwec: highlight + send toast?
     }
 
-    bool is_pm = msg.author_id > 0 && channel_name[0] != '#' && msg.author_name != bancho->username;
+    bool is_pm = msg.author_id > 0 && channel_name[0] != '#' && msg.author_name != BanchoState::username;
     if(is_pm) {
         // If it's a PM, the channel title should be the one who sent the message
         channel_name = msg.author_name;
@@ -916,8 +917,8 @@ void Chat::addMessage(UString channel_name, const ChatMessage &msg, bool mark_un
         }
     }
 
-    bool mentioned = SString::contains_ncase(msg.text.toUtf8(), bancho->username.toUtf8());
-    mentioned &= msg.author_id != bancho->user_id;
+    bool mentioned = SString::contains_ncase(msg.text.toUtf8(), BanchoState::username.toUtf8());
+    mentioned &= msg.author_id != BanchoState::get_uid();
     if(mentioned && cv::chat_notify_on_mention.getBool()) {
         auto notif = UString::format("You were mentioned in %s", channel_name.toUtf8());
         osu->notificationOverlay->addToast(
@@ -962,17 +963,17 @@ void Chat::addMessage(UString channel_name, const ChatMessage &msg, bool mark_un
     if(is_pm && this->away_msg.length() > 0) {
         Packet packet;
         packet.id = SEND_PRIVATE_MESSAGE;
-        proto::write_string(&packet, (char *)bancho->username.toUtf8());
+        proto::write_string(&packet, (char *)BanchoState::username.toUtf8());
         proto::write_string(&packet, (char *)this->away_msg.toUtf8());
         proto::write_string(&packet, (char *)msg.author_name.toUtf8());
-        proto::write<i32>(&packet, bancho->user_id);
+        proto::write<i32>(&packet, BanchoState::get_uid());
         BANCHO::Net::send_packet(packet);
 
         // Server doesn't echo the message back
         this->addMessage(channel_name, ChatMessage{
                                            .tms = time(nullptr),
-                                           .author_id = bancho->user_id,
-                                           .author_name = bancho->username,
+                                           .author_id = BanchoState::get_uid(),
+                                           .author_name = BanchoState::username,
                                            .text = this->away_msg,
                                        });
     }
@@ -1202,17 +1203,17 @@ void Chat::leave(const UString &channel_name) {
 void Chat::send_message(const UString &msg) {
     Packet packet;
     packet.id = this->selected_channel->name[0] == '#' ? SEND_PUBLIC_MESSAGE : SEND_PRIVATE_MESSAGE;
-    proto::write_string(&packet, (char *)bancho->username.toUtf8());
+    proto::write_string(&packet, (char *)BanchoState::username.toUtf8());
     proto::write_string(&packet, (char *)msg.toUtf8());
     proto::write_string(&packet, (char *)this->selected_channel->name.toUtf8());
-    proto::write<i32>(&packet, bancho->user_id);
+    proto::write<i32>(&packet, BanchoState::get_uid());
     BANCHO::Net::send_packet(packet);
 
     // Server doesn't echo the message back
     this->addMessage(this->selected_channel->name, ChatMessage{
                                                        .tms = time(nullptr),
-                                                       .author_id = bancho->user_id,
-                                                       .author_name = bancho->username,
+                                                       .author_id = BanchoState::get_uid(),
+                                                       .author_name = BanchoState::username,
                                                        .text = msg,
                                                    });
 }
@@ -1223,10 +1224,10 @@ void Chat::onDisconnect() {
     }
     this->channels.clear();
 
-    for(const auto &chan : bancho->chat_channels) {
+    for(const auto &chan : BanchoState::chat_channels) {
         delete chan.second;
     }
-    bancho->chat_channels.clear();
+    BanchoState::chat_channels.clear();
 
     this->selected_channel = nullptr;
     this->updateLayout(osu->getScreenSize());
@@ -1239,7 +1240,7 @@ void Chat::onResolutionChange(vec2 newResolution) { this->updateLayout(newResolu
 bool Chat::isSmallChat() {
     if(osu->room == nullptr || osu->lobby == nullptr || osu->songBrowser2 == nullptr) return false;
     bool sitting_in_room =
-        osu->room->isVisible() && !osu->songBrowser2->isVisible() && !bancho->is_playing_a_multi_map();
+        osu->room->isVisible() && !osu->songBrowser2->isVisible() && !BanchoState::is_playing_a_multi_map();
     bool sitting_in_lobby = osu->lobby->isVisible();
     return sitting_in_room || sitting_in_lobby;
 }
@@ -1258,14 +1259,14 @@ void Chat::updateVisibility() {
     auto selected_beatmap = osu->getSelectedBeatmap();
     bool can_skip = (selected_beatmap != nullptr) && (selected_beatmap->isInSkippableSection());
     bool is_spectating = cv::mod_autoplay.getBool() || (cv::mod_autopilot.getBool() && cv::mod_relax.getBool()) ||
-                         (selected_beatmap != nullptr && selected_beatmap->is_watching) || bancho->spectating;
+                         (selected_beatmap != nullptr && selected_beatmap->is_watching) || BanchoState::spectating;
     bool is_clicking_circles = osu->isInPlayMode() && !can_skip && !is_spectating && !osu->pauseMenu->isVisible();
-    if(bancho->is_playing_a_multi_map() && !bancho->room.all_players_loaded) {
+    if(BanchoState::is_playing_a_multi_map() && !BanchoState::room.all_players_loaded) {
         is_clicking_circles = false;
     }
     is_clicking_circles &= cv::chat_auto_hide.getBool();
     bool force_hide = osu->optionsMenu->isVisible() || osu->modSelector->isVisible() || is_clicking_circles;
-    if(!bancho->is_online()) force_hide = true;
+    if(!BanchoState::is_online()) force_hide = true;
 
     if(force_hide) {
         this->setVisible(false);
@@ -1281,7 +1282,7 @@ CBaseUIContainer *Chat::setVisible(bool visible) {
 
     soundEngine->play(osu->getSkin()->getClickButtonSound());
 
-    if(visible && bancho->user_id <= 0) {
+    if(visible && BanchoState::get_uid() <= 0) {
         osu->optionsMenu->askForLoginDetails();
         return this;
     }

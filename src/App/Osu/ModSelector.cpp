@@ -369,8 +369,8 @@ void ModSelector::updateButtons(bool initial) {
     this->getModButtonOnGrid(4, 0)->setAvailable(true);
     this->getModButtonOnGrid(5, 2)->setAvailable(true);
 
-    if(bancho->is_in_a_multi_room()) {
-        if(bancho->room.freemods && !bancho->room.is_host()) {
+    if(BanchoState::is_in_a_multi_room()) {
+        if(BanchoState::room.freemods && !BanchoState::room.is_host()) {
             this->getModButtonOnGrid(2, 0)->setAvailable(false);  // Disable DC/HT
             this->getModButtonOnGrid(2, 1)->setAvailable(false);  // Disable DT/NC
             this->getModButtonOnGrid(4, 2)->setAvailable(false);  // Disable Target
@@ -423,7 +423,7 @@ void ModSelector::draw() {
     const float experimentalModsAnimationTranslation =
         -(this->experimentalContainer->getSize().x + 2.0f) * (1.0f - this->fExperimentalAnimation);
 
-    if(bancho->is_in_a_multi_room()) {
+    if(BanchoState::is_in_a_multi_room()) {
         // get mod button element bounds
         vec2 modGridButtonsStart = vec2(osu->getScreenWidth(), osu->getScreenHeight());
         vec2 modGridButtonsSize = vec2(0, osu->getScreenHeight());
@@ -545,7 +545,7 @@ void ModSelector::draw() {
     }
 
     // draw experimental mods
-    if(!bancho->is_in_a_multi_room()) {
+    if(!BanchoState::is_in_a_multi_room()) {
         g->pushTransform();
         {
             g->translate(experimentalModsAnimationTranslation, 0);
@@ -583,7 +583,7 @@ void ModSelector::mouse_update(bool *propagate_clicks) {
     // update
     OsuScreen::mouse_update(propagate_clicks);
 
-    if(!bancho->is_in_a_multi_room()) {
+    if(!BanchoState::is_in_a_multi_room()) {
         this->overrideSliderContainer->mouse_update(propagate_clicks);
 
         // override slider tooltips (ALT)
@@ -864,7 +864,7 @@ void ModSelector::updateLayout() {
         const float modGridMaxY = start.y + size.y * this->iGridHeight +
                                   offset.y * (this->iGridHeight - 1);  // exact bottom of the mod buttons
 
-        this->nonVanillaWarning->setVisible(!convar->isVanilla() && bancho->can_submit_scores());
+        this->nonVanillaWarning->setVisible(!convar->isVanilla() && BanchoState::can_submit_scores());
         this->nonVanillaWarning->setSizeToContent();
         this->nonVanillaWarning->setSize(vec2(osu->getScreenWidth(), 20 * uiScale));
         this->nonVanillaWarning->setPos(
@@ -997,7 +997,7 @@ void ModSelector::updateExperimentalLayout() {
     this->experimentalContainer->setPosY(-1);
     this->experimentalContainer->setScrollSizeToContent(1 * dpiScale);
     this->experimentalContainer->getContainer()->update_pos();
-    this->experimentalContainer->setVisible(!bancho->is_in_a_multi_room());
+    this->experimentalContainer->setVisible(!BanchoState::is_in_a_multi_room());
 }
 
 UIModSelectorModButton *ModSelector::setModButtonOnGrid(int x, int y, int state, bool initialState, ConVar *modCvar,
@@ -1118,21 +1118,21 @@ void ModSelector::resetModsUserInitiated() {
     soundEngine->play(osu->getSkin()->getCheckOff());
     this->resetModsButton->animateClickColor();
 
-    if(bancho->is_online()) {
+    if(BanchoState::is_online()) {
         RichPresence::updateBanchoMods();
     }
 
-    if(bancho->is_in_a_multi_room()) {
-        for(auto &slot : bancho->room.slots) {
-            if(slot.player_id != bancho->user_id) continue;
+    if(BanchoState::is_in_a_multi_room()) {
+        for(auto &slot : BanchoState::room.slots) {
+            if(slot.player_id != BanchoState::get_uid()) continue;
 
-            if(bancho->room.is_host()) {
-                bancho->room.mods = this->getModFlags();
+            if(BanchoState::room.is_host()) {
+                BanchoState::room.mods = this->getModFlags();
             } else {
-                this->enableModsFromFlags(bancho->room.mods);
+                this->enableModsFromFlags(BanchoState::room.mods);
             }
 
-            slot.mods = bancho->room.mods;
+            slot.mods = BanchoState::room.mods;
 
             Packet packet;
             packet.id = MATCH_CHANGE_MODS;

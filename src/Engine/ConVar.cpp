@@ -101,7 +101,7 @@ void ConVar::exec() {
 
         auto mod_selector = osu->modSelector;
         if(mod_selector && mod_selector->nonVanillaWarning) {
-            mod_selector->nonVanillaWarning->setVisible(!is_vanilla && bancho->can_submit_scores());
+            mod_selector->nonVanillaWarning->setVisible(!is_vanilla && BanchoState::can_submit_scores());
         }
     }
 
@@ -144,9 +144,9 @@ void ConVar::setDefaultStringInt(const std::string_view &defaultValue) {
 }
 
 bool ConVar::is_unlocked_full() const {
-    if(bancho == nullptr || !bancho->is_online()) return true;
+    if(!BanchoState::is_online()) return true;
 
-    if(bancho->is_in_a_multi_room()) {
+    if(BanchoState::is_in_a_multi_room()) {
         return this->isFlagSet(FCVAR_BANCHO_COMPATIBLE);
     } else {
         return true;
@@ -155,7 +155,7 @@ bool ConVar::is_unlocked_full() const {
 
 bool ConVar::is_gameplay_compatible() const {
     if(osu && this->isFlagSet(FCVAR_GAMEPLAY)) {
-        if(bancho->is_playing_a_multi_map()) {
+        if(BanchoState::is_playing_a_multi_map()) {
             debugLog("Can't edit {:s} while in a multiplayer match.\n", this->sName);
             return false;
         } else {
