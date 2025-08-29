@@ -276,7 +276,7 @@ class ConVar {
    private:
     // lightweight check (offline play)
     [[nodiscard]] forceinline bool is_unlocked() const {
-        if(this->isFlagSet(FCVAR_PRIVATE) || relaxed_checks.load(std::memory_order_acquire)) {
+        if(this->isFlagSet(FCVAR_PRIVATE)) {
             return true;
         }
         return is_unlocked_full();
@@ -437,10 +437,6 @@ class ConVar {
     // callback storage (allow having 1 "change" callback and 1 single value (or void) callback)
     ExecutionCallback callback{std::monostate()};
     ChangeCallback changeCallback{std::monostate()};
-
-    // shared variable for avoiding expensive flag checking while offline
-    friend struct Bancho;
-    static std::atomic<bool> relaxed_checks;
 };
 
 //*******************//

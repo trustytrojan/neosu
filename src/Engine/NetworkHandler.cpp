@@ -8,7 +8,6 @@
 
 #include "curl_blob.h"
 #include <curl/curl.h>
-#include <chrono>
 #include <utility>
 
 Bancho* NetworkHandler::s_banchoInstance = nullptr;

@@ -70,8 +70,6 @@ void Bancho::handle_packet(Packet *packet) {
         this->user_id = new_user_id;
         osu->optionsMenu->update_login_button();
 
-        Bancho::change_login_state(new_user_id > 0);
-
         if(new_user_id > 0) {
             debugLog("Logged in as user #{:d}.\n", new_user_id);
             cv::mp_autologin.setValue(true);
@@ -548,10 +546,6 @@ bool Bancho::can_submit_scores() const {
         return false;
     }
 }
-
-void Bancho::change_login_state(bool logged_in) {
-    ConVar::relaxed_checks.store(!logged_in, std::memory_order_release);
-};
 
 void Bancho::update_channel(const UString &name, const UString &topic, i32 nb_members) {
     Channel *chan{nullptr};

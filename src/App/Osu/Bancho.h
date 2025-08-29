@@ -77,8 +77,6 @@ struct Bancho final {
     [[nodiscard]] inline bool is_online() const { return this->user_id > 0; }
     [[nodiscard]] bool can_submit_scores() const;
 
-    static void change_login_state(bool logged);
-
    private:
     // internal helpers
     void update_channel(const UString &name, const UString &topic, i32 nb_members);

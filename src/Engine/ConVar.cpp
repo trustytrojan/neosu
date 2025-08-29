@@ -20,8 +20,6 @@
 #include <algorithm>
 #include <unordered_set>
 
-std::atomic<bool> ConVar::relaxed_checks{true};
-
 static std::vector<ConVar *> &_getGlobalConVarArray() {
     static std::vector<ConVar *> g_vConVars;  // (singleton)
     return g_vConVars;
@@ -157,7 +155,7 @@ bool ConVar::is_unlocked_full() const {
 
 bool ConVar::is_gameplay_compatible() const {
     if(osu && this->isFlagSet(FCVAR_GAMEPLAY)) {
-        if(!relaxed_checks.load(std::memory_order_acquire) && bancho->is_playing_a_multi_map()) {
+        if(bancho->is_playing_a_multi_map()) {
             debugLog("Can't edit {:s} while in a multiplayer match.\n", this->sName);
             return false;
         } else {
