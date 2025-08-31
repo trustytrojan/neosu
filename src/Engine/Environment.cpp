@@ -33,6 +33,7 @@
 // TODO
 #endif
 
+#include <curl/curl.h>
 #include <SDL3/SDL.h>
 
 Environment *env = nullptr;
@@ -454,13 +455,12 @@ bool Environment::unsetEnvVariable(const std::string &varToUnset) noexcept {
     return false;
 }
 
-// NOTE: This isn't the same as 'real' URL encoding, '/' is not encoded!
-std::string Environment::encodeStringToURL(const std::string &stringToConvert) noexcept {
+std::string Environment::encodeStringToURI(const std::string &unencodedString) noexcept {
     std::ostringstream escaped;
     escaped.fill('0');
     escaped << std::hex;
 
-    for(const char c : stringToConvert) {
+    for(const char c : unencodedString) {
         // keep alphanumerics and other accepted characters intact
         if(std::isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~' || c == '/') {
             escaped << c;
@@ -475,14 +475,32 @@ std::string Environment::encodeStringToURL(const std::string &stringToConvert) n
     return escaped.str();
 }
 
+std::string Environment::urlEncode(const std::string &unencodedString) noexcept {
+    CURL* curl = curl_easy_init();
+    if(!curl) {
+        return "";
+    }
+
+    char* encoded = curl_easy_escape(curl, unencodedString.c_str(), unencodedString.length());
+    if(!encoded) {
+        curl_easy_cleanup(curl);
+        return "";
+    }
+
+    std::string result(encoded);
+    curl_free(encoded);
+    curl_easy_cleanup(curl);
+    return result;
+}
+
 std::string Environment::filesystemPathToURI(const std::filesystem::path &path) noexcept {
     namespace fs = std::filesystem;
     // convert to absolute path and normalize
     auto abs_path = fs::absolute(path);
     // convert to path with forward slashes
     const UString path_str = UString{abs_path.generic_string()};
-    // URL encode the path
-    std::string uri = encodeStringToURL(path_str.toUtf8());
+    // URI encode the path
+    std::string uri = encodeStringToURI(path_str.toUtf8());
 
     // prepend with file:///
     if(uri[0] == '/')

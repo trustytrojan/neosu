@@ -25,8 +25,9 @@ void handle_neosu_url(const char *url) {
         osu->getOptionsMenu()->setLoginLoadingState(true);
 
         auto endpoint = params[3];
-        auto code = env->encodeStringToURL(params[4]);
-        auto proof = env->encodeStringToURL(crypto::conv::encode64(BanchoState::oauth_verifier, 32));
+
+        auto code = env->urlEncode(params[4]);
+        auto proof = env->urlEncode(crypto::conv::encode64(BanchoState::oauth_verifier, 32));
         auto url = UString::fmt("https://{}/connect/finish?code={}&proof={}", endpoint, code, proof);
 
         NetworkHandler::RequestOptions options;

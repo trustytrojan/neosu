@@ -794,11 +794,10 @@ void Chat::mark_as_read(ChatChannel *chan) {
     chan->read = true;
 
     UString url{"web/osu-markasread.php?"};
-    url.append(UString::fmt("channel={}", env->encodeStringToURL(chan->name.toUtf8())));
+    url.append(UString::fmt("channel={}", env->urlEncode(chan->name.toUtf8())));
 
     if(BanchoState::is_grass) {
-        // TODO @kiwec: urlencode cho_token?
-        url.append(UString::fmt("&u=$token&h={:s}", BanchoState::cho_token.toUtf8()));
+        url.append(UString::fmt("&u=$token&h={}", env->urlEncode(BanchoState::cho_token.toUtf8())));
     } else {
         url.append(UString::fmt("&u={}&h={:s}", BanchoState::get_username(), BanchoState::pw_md5.hash.data()));
     }

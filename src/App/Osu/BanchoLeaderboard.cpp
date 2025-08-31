@@ -67,7 +67,7 @@ void fetch_online_scores(DatabaseBeatmap *beatmap) {
 
     // Map info
     std::string map_filename = env->getFileNameFromFilePath(beatmap->getFilePath());
-    url.append(UString::fmt("&f={}", env->encodeStringToURL(map_filename)));
+    url.append(UString::fmt("&f={}", env->urlEncode(map_filename)));
     url.append(UString::fmt("&c={:s}", beatmap->getMD5Hash().hash.data()));
     url.append(UString::fmt("&i={}", beatmap->getSetID()));
 
@@ -75,8 +75,7 @@ void fetch_online_scores(DatabaseBeatmap *beatmap) {
     url.append(UString::fmt("&mods={}", osu->modSelector->getModFlags()));
 
     if(BanchoState::is_grass) {
-        // TODO @kiwec: is cho_token always URL safe?
-        url.append(UString::fmt("&us=$token&ha={:s}", BanchoState::cho_token.toUtf8()));
+        url.append(UString::fmt("&us=$token&ha={}", env->urlEncode(BanchoState::cho_token.toUtf8())));
     } else {
         url.append(UString::fmt("&us={}&ha={:s}", BanchoState::get_username(), BanchoState::pw_md5.hash.data()));
     }

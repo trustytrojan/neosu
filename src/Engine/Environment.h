@@ -110,7 +110,11 @@ class Environment {
     [[nodiscard]] static std::string normalizeDirectory(std::string dirPath) noexcept;
     [[nodiscard]] static bool isAbsolutePath(const std::string &filePath) noexcept;
 
-    [[nodiscard]] static std::string encodeStringToURL(const std::string &unencodedURLString) noexcept;
+    // URL-encodes a string, but keeps slashes intact
+    [[nodiscard]] static std::string encodeStringToURI(const std::string &unencodedString) noexcept;
+
+    // Fully URL-encodes a string, including slashes
+    [[nodiscard]] static std::string urlEncode(const std::string &unencodedString) noexcept;
 
     // clipboard
     [[nodiscard]] const UString &getClipBoardText();
