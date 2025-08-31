@@ -19,7 +19,7 @@ namespace cv
 {
 #ifdef _DEBUG
 namespace {
-ConVar snd_st_debug("snd_st_debug", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_NOSAVE, "Enable detailed SoundTouch filter logging");
+ConVar snd_st_debug("snd_st_debug", false, CLIENT | NOSAVE, "Enable detailed SoundTouch filter logging");
 }
 #define ST_DEBUG_ENABLED cv::snd_st_debug.getBool()
 #else

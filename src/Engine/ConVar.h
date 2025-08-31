@@ -20,39 +20,38 @@
 using ConVarString = std::string;
 using std::string_view_literals::operator""sv;
 
-enum FCVAR_FLAGS : uint8_t {
-    // No flags: cvar is only allowed offline.
-    FCVAR_LOCKED = 0,
+namespace cv {
+    enum CvarFlags {
+        // Modifiable by clients
+        CLIENT = (1 << 0),
 
-    // If the cvar is modified, scores will not submit unless this flag is set.
-    FCVAR_BANCHO_SUBMITTABLE = (1 << 0),
+        // Modifiable by servers, OR by offline clients
+        SERVER = (1 << 1),
 
-    // Legacy servers only support a limited number of cvars.
-    // Unless this flag is set, the cvar will be forced to its default value
-    // when playing in a multiplayer lobby on a legacy server.
-    FCVAR_BANCHO_MULTIPLAYABLE = (1 << 1),  // NOTE: flag shouldn't be set without BANCHO_SUBMITTABLE
-    FCVAR_BANCHO_COMPATIBLE = FCVAR_BANCHO_SUBMITTABLE | FCVAR_BANCHO_MULTIPLAYABLE,
+        // Modifiable by skins
+        // TODO: assert() CLIENT is set
+        SKINS = (1 << 2),
 
-    // hide cvar from console suggestions
-    FCVAR_HIDDEN = (1 << 2),
+        // Scores won't submit if modified
+        PROTECTED = (1 << 3),
 
-    // prevent servers from touching this cvar
-    FCVAR_PRIVATE = (1 << 3),
+        // Scores won't submit if modified during gameplay
+        GAMEPLAY = (1 << 4),
 
-    // this cvar affects gameplay
-    FCVAR_GAMEPLAY = (1 << 4),
+        // Hidden from console suggestions (e.g. for passwords or deprecated cvars)
+        HIDDEN = (1 << 5),
 
-    // don't save this cvar to configs
-    FCVAR_NOSAVE = (1 << 5),
-    // don't load this cvar from configs
-    FCVAR_NOLOAD = (1 << 6),
-    // don't allow this convar to be manually set from console
-    FCVAR_NOEXEC = (1 << 7),
+        // Don't save this cvar to configs
+        NOSAVE = (1 << 6),
 
-    // don't save, load, or allow this convar to be modified (basically, make it completely invisible outside of engine
-    // code)
-    FCVAR_INTERNAL = FCVAR_HIDDEN | FCVAR_PRIVATE | FCVAR_NOEXEC | FCVAR_NOSAVE | FCVAR_NOLOAD
-};
+        // Don't load this cvar from configs
+        NOLOAD = (1 << 7),
+
+        // Mark the variable as intended for use only inside engine code
+        // NOTE: This is intended to be used without any other flags
+        CONSTANT = HIDDEN | NOLOAD | NOSAVE,
+    };
+}
 
 class ConVar {
    public:
@@ -101,7 +100,7 @@ class ConVar {
     explicit ConVar(const std::string_view &name) {
         this->sName = this->sDefaultValue = this->sDefaultDefaultValue = name;
         this->type = CONVAR_TYPE::CONVAR_TYPE_STRING;
-        this->iDefaultFlags = this->iFlags = FCVAR_NOSAVE;
+        this->iDefaultFlags = this->iFlags = cv::NOSAVE;
         this->addConVar(this);
     };
 
@@ -111,7 +110,7 @@ class ConVar {
         requires std::is_invocable_v<Callback> || std::is_invocable_v<Callback, const UString &> ||
                  std::is_invocable_v<Callback, float>
     {
-        flags |= FCVAR_NOSAVE;
+        flags |= cv::NOSAVE;
         this->initCallback(name, flags, ""sv, callback);
         this->addConVar(this);
     }
@@ -274,14 +273,7 @@ class ConVar {
     [[nodiscard]] inline bool isFlagSet(uint8_t flag) const { return (bool)((this->iFlags & flag) == flag); }
 
    private:
-    // lightweight check (offline play)
-    [[nodiscard]] forceinline bool is_unlocked() const {
-        if(this->isFlagSet(FCVAR_PRIVATE)) {
-            return true;
-        }
-        return is_unlocked_full();
-    }
-    [[nodiscard]] bool is_unlocked_full() const;
+    [[nodiscard]] bool is_unlocked() const;
     [[nodiscard]] bool is_gameplay_compatible() const;
 
     // unified init for callback-only convars
@@ -419,8 +411,8 @@ class ConVar {
    private:
     bool bHasValue{false};
     CONVAR_TYPE type{CONVAR_TYPE::CONVAR_TYPE_FLOAT};
-    uint8_t iDefaultFlags{FCVAR_BANCHO_COMPATIBLE};
-    uint8_t iFlags{FCVAR_BANCHO_COMPATIBLE};
+    uint8_t iDefaultFlags{0};
+    uint8_t iFlags{0};
 
     // store doubles internally to allow converting to larger integers accurately
     std::atomic<double> dValue{0.0f};
@@ -457,9 +449,9 @@ class ConVarHandler {
     [[nodiscard]] ConVar *getConVarByName(const ConVarString &name, bool warnIfNotFound = true) const;
     [[nodiscard]] std::vector<ConVar *> getConVarByLetter(const ConVarString &letters) const;
 
-    bool isVanilla();
+    bool areAllCvarsSubmittable();
 };
 
-extern ConVarHandler *convar;
+extern ConVarHandler *cvars;
 
 #endif

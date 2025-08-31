@@ -97,7 +97,7 @@ void VisualProfiler::draw() {
                     const double time = engine->getTime();
                     const vec2 envMousePos = env->getMousePos();
 
-                    addTextLine(UString::format("ConVars: %zu", convar->getConVarArray().size()), textFont,
+                    addTextLine(UString::format("ConVars: %zu", cvars->getConVarArray().size()), textFont,
                                 this->textLines);
                     addTextLine(UString::format("Monitor: [%i] of %zu", env->getMonitor(), env->getMonitors().size()),
                                 textFont, this->textLines);

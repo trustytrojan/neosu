@@ -143,8 +143,8 @@ class Beatmap : public BeatmapInterface {
     std::vector<f64> aimStrains;
     std::vector<f64> speedStrains;
 
-    // set to false when using non-vanilla mods (disables score submission)
-    bool vanilla = true;
+    // set to false when using protected cvars
+    bool is_submittable = true;
 
     // replay recording
     void write_frame();

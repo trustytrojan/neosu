@@ -171,7 +171,7 @@ std::string glDebugSeverityString(GLenum severity) {
 }  // namespace
 
 namespace cv {
-static ConVar debug_opengl_v("debug_opengl_v", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_HIDDEN,
+static ConVar debug_opengl_v("debug_opengl_v", false, CLIENT | HIDDEN,
                              [](float val) -> void { SDLGLInterface::setLog(!!static_cast<int>(val)); });
 }  // namespace cv
 

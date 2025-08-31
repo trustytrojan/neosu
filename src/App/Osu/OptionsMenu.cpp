@@ -3714,8 +3714,8 @@ void OptionsMenu::save() {
 
             bool cvar_found = false;
             auto parts = line.split(" ");
-            for(auto convar : convar->getConVarArray()) {
-                if(convar->isFlagSet(FCVAR_INTERNAL) || convar->isFlagSet(FCVAR_NOSAVE)) continue;
+            for(auto convar : cvars->getConVarArray()) {
+                if(convar->isFlagSet(cv::NOSAVE)) continue;
                 if(UString{convar->getName()} == parts[0]) {
                     cvar_found = true;
                     break;
@@ -3741,8 +3741,8 @@ void OptionsMenu::save() {
         }
         out << "\n";
 
-        for(auto convar : convar->getConVarArray()) {
-            if(!convar->hasValue() || convar->isFlagSet(FCVAR_INTERNAL) || convar->isFlagSet(FCVAR_NOSAVE)) continue;
+        for(auto convar : cvars->getConVarArray()) {
+            if(!convar->hasValue() || convar->isFlagSet(cv::NOSAVE)) continue;
             if(convar->getString() == convar->getDefaultString()) continue;
             out << convar->getName() << " " << convar->getString() << "\n";
         }

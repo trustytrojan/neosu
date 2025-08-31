@@ -56,7 +56,7 @@ class ModSelector : public OsuScreen {
     void updateLayout();
     void updateExperimentalLayout();
 
-    CBaseUILabel *nonVanillaWarning;
+    CBaseUILabel *nonSubmittableWarning;
     UIModSelectorModButton *modButtonHalftime;
     UIModSelectorModButton *modButtonDoubletime;
     UIModSelectorModButton *modButtonAuto;

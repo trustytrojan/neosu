@@ -251,14 +251,14 @@ ModSelector::ModSelector() : OsuScreen() {
     this->addExperimentalCheckbox("Flip Left/Right", "Playfield is flipped left/right (mirrored at vertical axis).",
                                   &cv::playfield_mirror_vertical);
 
-    this->nonVanillaWarning = new CBaseUILabel();
-    this->nonVanillaWarning->setDrawFrame(false);
-    this->nonVanillaWarning->setDrawBackground(false);
-    this->nonVanillaWarning->setText("WARNING: Score submission will be disabled due to non-vanilla mod selection.");
-    this->nonVanillaWarning->setTextColor(0xffff0000);
-    this->nonVanillaWarning->setCenterText(true);
-    this->nonVanillaWarning->setVisible(false);
-    this->addBaseUIElement(this->nonVanillaWarning);
+    this->nonSubmittableWarning = new CBaseUILabel();
+    this->nonSubmittableWarning->setDrawFrame(false);
+    this->nonSubmittableWarning->setDrawBackground(false);
+    this->nonSubmittableWarning->setText("WARNING: Score submission will be disabled due to non-vanilla mod selection.");
+    this->nonSubmittableWarning->setTextColor(0xffff0000);
+    this->nonSubmittableWarning->setCenterText(true);
+    this->nonSubmittableWarning->setVisible(false);
+    this->addBaseUIElement(this->nonSubmittableWarning);
 
     // build score multiplier label
     this->scoreMultiplierLabel = new CBaseUILabel();
@@ -864,16 +864,16 @@ void ModSelector::updateLayout() {
         const float modGridMaxY = start.y + size.y * this->iGridHeight +
                                   offset.y * (this->iGridHeight - 1);  // exact bottom of the mod buttons
 
-        this->nonVanillaWarning->setVisible(!convar->isVanilla() && BanchoState::can_submit_scores());
-        this->nonVanillaWarning->setSizeToContent();
-        this->nonVanillaWarning->setSize(vec2(osu->getScreenWidth(), 20 * uiScale));
-        this->nonVanillaWarning->setPos(
-            0, modGridMaxY + std::abs(actionStart.y - modGridMaxY) / 2 - this->nonVanillaWarning->getSize().y);
+        this->nonSubmittableWarning->setVisible(!cvars->areAllCvarsSubmittable() && BanchoState::can_submit_scores());
+        this->nonSubmittableWarning->setSizeToContent();
+        this->nonSubmittableWarning->setSize(vec2(osu->getScreenWidth(), 20 * uiScale));
+        this->nonSubmittableWarning->setPos(
+            0, modGridMaxY + std::abs(actionStart.y - modGridMaxY) / 2 - this->nonSubmittableWarning->getSize().y);
 
         this->scoreMultiplierLabel->setVisible(true);
         this->scoreMultiplierLabel->setSizeToContent();
         this->scoreMultiplierLabel->setSize(vec2(osu->getScreenWidth(), 30 * uiScale));
-        this->scoreMultiplierLabel->setPos(0, this->nonVanillaWarning->getPos().y + 20 * uiScale);
+        this->scoreMultiplierLabel->setPos(0, this->nonSubmittableWarning->getPos().y + 20 * uiScale);
     } else  // compact in-beatmap mode
     {
         // mod grid buttons

@@ -92,16 +92,16 @@ void ConVar::exec() {
     if(!this->is_unlocked()) return;
 
     if(osu != nullptr) {
-        auto is_vanilla = convar->isVanilla();
+        auto is_submittable = cvars->areAllCvarsSubmittable();
 
         auto beatmap = osu->getSelectedBeatmap();
         if(beatmap != nullptr) {
-            beatmap->vanilla &= is_vanilla;
+            beatmap->is_submittable &= is_submittable;
         }
 
         auto mod_selector = osu->modSelector;
-        if(mod_selector && mod_selector->nonVanillaWarning) {
-            mod_selector->nonVanillaWarning->setVisible(!is_vanilla && BanchoState::can_submit_scores());
+        if(mod_selector && mod_selector->nonSubmittableWarning) {
+            mod_selector->nonSubmittableWarning->setVisible(!is_submittable && BanchoState::can_submit_scores());
         }
     }
 
@@ -143,18 +143,23 @@ void ConVar::setDefaultStringInt(const std::string_view &defaultValue) {
     }
 }
 
-bool ConVar::is_unlocked_full() const {
-    if(!BanchoState::is_online()) return true;
+bool ConVar::is_unlocked() const {
+    if(!BanchoState::is_online()) {
+        return this->isFlagSet(cv::CLIENT) || this->isFlagSet(cv::SERVER);
+    }
+
+    if(!this->isFlagSet(cv::CLIENT)) return false;
 
     if(BanchoState::is_in_a_multi_room()) {
-        return this->isFlagSet(FCVAR_BANCHO_COMPATIBLE);
+        return !this->isFlagSet(cv::PROTECTED);
     } else {
         return true;
     }
 }
 
+// HACK ALERT: getter shouldn't affect state!
 bool ConVar::is_gameplay_compatible() const {
-    if(osu && this->isFlagSet(FCVAR_GAMEPLAY)) {
+    if(osu && this->isFlagSet(cv::GAMEPLAY)) {
         if(BanchoState::is_playing_a_multi_map()) {
             debugLog("Can't edit {:s} while in a multiplayer match.\n", this->sName);
             return false;
@@ -175,14 +180,14 @@ bool ConVar::is_gameplay_compatible() const {
 //********************************//
 
 ConVar _emptyDummyConVar(
-    "emptyDummyConVar", 42.0f, FCVAR_BANCHO_COMPATIBLE,
-    "this placeholder convar is returned by convar->getConVarByName() if no matching convar is found");
+    "emptyDummyConVar", 42.0f, cv::CLIENT,
+    "this placeholder convar is returned by cvars->getConVarByName() if no matching convar is found");
 
-ConVarHandler *convar = new ConVarHandler();
+ConVarHandler *cvars = new ConVarHandler();
 
-ConVarHandler::ConVarHandler() { convar = this; }
+ConVarHandler::ConVarHandler() { cvars = this; }
 
-ConVarHandler::~ConVarHandler() { convar = nullptr; }
+ConVarHandler::~ConVarHandler() { cvars = nullptr; }
 
 const std::vector<ConVar *> &ConVarHandler::getConVarArray() const { return _getGlobalConVarArray(); }
 
@@ -190,7 +195,7 @@ int ConVarHandler::getNumConVars() const { return _getGlobalConVarArray().size()
 
 ConVar *ConVarHandler::getConVarByName(const ConVarString &name, bool warnIfNotFound) const {
     ConVar *found = _getConVar(name);
-    if(found != nullptr && !found->isFlagSet(FCVAR_INTERNAL)) return found;
+    if(found) return found;
 
     if(warnIfNotFound) {
         ConVarString errormsg = ConVarString("ENGINE: ConVar \"");
@@ -216,7 +221,7 @@ std::vector<ConVar *> ConVarHandler::getConVarByLetter(const ConVarString &lette
 
         // first try matching exactly
         for(auto convar : convars) {
-            if(convar->isFlagSet(FCVAR_HIDDEN)) continue;
+            if(convar->isFlagSet(cv::HIDDEN)) continue;
 
             if(convar->getName().find(letters) != std::string::npos) {
                 if(letters.length() > 1) matchingConVarNames.insert(convar->getName());
@@ -228,7 +233,7 @@ std::vector<ConVar *> ConVarHandler::getConVarByLetter(const ConVarString &lette
         // then try matching substrings
         if(letters.length() > 1) {
             for(auto convar : convars) {
-                if(convar->isFlagSet(FCVAR_HIDDEN)) continue;
+                if(convar->isFlagSet(cv::HIDDEN)) continue;
 
                 if(convar->getName().find(letters) != std::string::npos) {
                     const ConVarString &stdName = convar->getName();
@@ -246,34 +251,30 @@ std::vector<ConVar *> ConVarHandler::getConVarByLetter(const ConVarString &lette
 }
 
 ConVarString ConVarHandler::flagsToString(uint8_t flags) {
-    ConVarString string;
-    {
-        if(flags == 0) {
-            string.append("no flags");
-        } else {
-            if((flags & FCVAR_HIDDEN) == FCVAR_HIDDEN) string.append(string.length() > 0 ? " hidden" : "hidden");
-            if((flags & FCVAR_BANCHO_SUBMITTABLE) == FCVAR_BANCHO_SUBMITTABLE)
-                string.append(string.length() > 0 ? " bancho_submittable" : "bancho_submittable");
-            if((flags & FCVAR_BANCHO_COMPATIBLE) == FCVAR_BANCHO_COMPATIBLE)
-                string.append(string.length() > 0 ? " bancho_compatible" : "bancho_compatible");
-#ifdef _DEBUG
-            bool internal = (flags & FCVAR_INTERNAL) == FCVAR_INTERNAL;
-            if(internal) {
-                string.append(string.length() > 0 ? " internal" : "internal");
-            } else {
-                if((flags & FCVAR_NOEXEC) == FCVAR_NOEXEC) string.append(string.length() > 0 ? " noexec" : "noexec");
-                if((flags & FCVAR_NOSAVE) == FCVAR_NOSAVE) string.append(string.length() > 0 ? " nosave" : "nosave");
-                if((flags & FCVAR_NOLOAD) == FCVAR_NOLOAD) string.append(string.length() > 0 ? " noload" : "noload");
-            }
-#endif
-        }
+    if(flags == 0) {
+        return "no flags";
     }
+
+    ConVarString string;
+
+    if(flags & cv::CLIENT) string.append(" client");
+    if(flags & cv::SERVER) string.append(" server");
+    if(flags & cv::SKINS) string.append(" skins");
+    if(flags & cv::PROTECTED) string.append(" protected");
+    if(flags & cv::GAMEPLAY) string.append(" gameplay");
+    if(flags & cv::HIDDEN) string.append(" hidden");
+    if(flags & cv::NOSAVE) string.append(" nosave");
+    if(flags & cv::NOLOAD) string.append(" noload");
+
+    string.pop_back(); // remove leading space
+
     return string;
 }
 
-bool ConVarHandler::isVanilla() {
+bool ConVarHandler::areAllCvarsSubmittable() {
     for(const auto &cv : _getGlobalConVarArray()) {
-        if(cv->isFlagSet(FCVAR_BANCHO_SUBMITTABLE)) continue;
+        if(!cv->isFlagSet(cv::PROTECTED)) continue;
+
         if(cv->getString() != cv->getDefaultString()) {
             return false;
         }
@@ -284,10 +285,12 @@ bool ConVarHandler::isVanilla() {
         // We don't want to submit target scores, even though it's allowed in multiplayer
         if(osu->getModTarget()) return false;
 
-        if(osu->getModNightmare()) return false;
         if(osu->getModEZ() && osu->getModHR()) return false;
-        f32 speed = cv::speed_override.getFloat();
-        if(speed != -1.f && speed != 0.75 && speed != 1.0 && speed != 1.5) return false;
+
+        if(!cv::sv_allow_speed_override.getBool()) {
+            f32 speed = cv::speed_override.getFloat();
+            if(speed != -1.f && speed != 0.75 && speed != 1.0 && speed != 1.5) return false;
+        }
     }
 
     return true;
@@ -303,11 +306,11 @@ static void _find(const UString &args) {
         return;
     }
 
-    const std::vector<ConVar *> &convars = convar->getConVarArray();
+    const std::vector<ConVar *> &convars = cvars->getConVarArray();
 
     std::vector<ConVar *> matchingConVars;
     for(auto convar : convars) {
-        if(convar->isFlagSet(FCVAR_HIDDEN)) continue;
+        if(convar->isFlagSet(cv::HIDDEN)) continue;
 
         const ConVarString &name = convar->getName();
         if(name.find(args.toUtf8()) != std::string::npos) matchingConVars.push_back(convar);
@@ -344,7 +347,7 @@ static void _help(const UString &args) {
         return;
     }
 
-    const std::vector<ConVar *> matches = convar->getConVarByLetter(trimmedArgs);
+    const std::vector<ConVar *> matches = cvars->getConVarByLetter(trimmedArgs);
 
     if(matches.size() < 1) {
         Engine::logRaw("ConVar {:s} does not exist.\n", trimmedArgs);
@@ -387,11 +390,11 @@ static void _help(const UString &args) {
 static void _listcommands(void) {
     Engine::logRaw("----------------------------------------------\n");
     {
-        std::vector<ConVar *> convars = convar->getConVarArray();
+        std::vector<ConVar *> convars = cvars->getConVarArray();
         std::ranges::sort(convars, {}, [](const ConVar *v) { return v->getName(); });
 
         for(auto &convar : convars) {
-            if(convar->isFlagSet(FCVAR_HIDDEN)) continue;
+            if(convar->isFlagSet(cv::HIDDEN)) continue;
 
             ConVar *var = convar;
 
@@ -423,7 +426,7 @@ static void _listcommands(void) {
 static void _dumpcommands(void) {
     // TODO @kiwec: update so it generates styled html
 
-    std::vector<ConVar *> convars = convar->getConVarArray();
+    std::vector<ConVar *> convars = cvars->getConVarArray();
     std::ranges::sort(convars, {}, [](const ConVar *v) { return v->getName(); });
 
     FILE *file = fopen("commands.htm", "w");
@@ -434,8 +437,6 @@ static void _dumpcommands(void) {
 
     for(auto var : convars) {
         if(!var->hasValue()) continue;
-        if(var->isFlagSet(FCVAR_HIDDEN)) continue;
-        if(var->isFlagSet(FCVAR_PRIVATE)) continue;
 
         std::string cmd = "<h4>";
         cmd.append(var->getName());
@@ -444,11 +445,9 @@ static void _dumpcommands(void) {
         cmd.append("<pre>{");
         cmd.append("\n    \"default\": ");
         cmd.append(var->getFancyDefaultValue());
-        cmd.append("\n    \"bancho_submittable\": ");
-        cmd.append(var->isFlagSet(FCVAR_BANCHO_SUBMITTABLE) ? "true" : "false");
-        cmd.append("\n    \"bancho_compatible\": ");
-        cmd.append(var->isFlagSet(FCVAR_BANCHO_COMPATIBLE) ? "true" : "false");
         cmd.append("\n}</pre>\n");
+
+        // TODO @kiwec: flags
 
         fwrite(cmd.c_str(), cmd.size(), 1, file);
     }

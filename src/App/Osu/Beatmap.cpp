@@ -852,7 +852,7 @@ void Beatmap::pause(bool quitIfWaiting) {
     if(this->bIsPaused && isFirstPause) {
         if(!cv::submit_after_pause.getBool()) {
             debugLog("Disabling score submission due to pausing\n");
-            this->vanilla = false;
+            this->is_submittable = false;
         }
 
         this->vContinueCursorPoint = this->getMousePos();
@@ -945,7 +945,7 @@ void Beatmap::fail(bool force_death) {
         anim->moveLinear(&this->fFailAnim, 0.0f, cv::fail_time.getFloat(), true);
     } else if(!osu->getScore()->isDead()) {
         debugLog("Disabling score submission due to death\n");
-        this->vanilla = false;
+        this->is_submittable = false;
 
         anim->deleteExistingAnimation(&this->fHealth2);
         this->fHealth = 0.0;
@@ -1036,9 +1036,9 @@ void Beatmap::seekMS(u32 ms) {
     }
 
     if(!this->is_watching && !BanchoState::spectating) {  // score submission already disabled when watching replay
-        if(this->vanilla) {
+        if(this->is_submittable) {
             debugLog("Disabling score submission due to seeking\n");
-            this->vanilla = false;
+            this->is_submittable = false;
         }
     }
 }
@@ -1572,7 +1572,7 @@ void Beatmap::resetHitObjects(long curPos) {
 }
 
 void Beatmap::resetScore() {
-    this->vanilla = convar->isVanilla();
+    this->is_submittable = cvars->areAllCvarsSubmittable();
 
     this->live_replay.clear();
     this->live_replay.push_back(LegacyReplay::Frame{
@@ -3569,7 +3569,7 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
     if(!isCheated) {
         RichPresence::onPlayEnd(quit);
 
-        if(BanchoState::can_submit_scores() && !isZero && this->vanilla) {
+        if(BanchoState::can_submit_scores() && !isZero && this->is_submittable) {
             score.server = BanchoState::endpoint;
             BANCHO::Net::submit_score(score);
             // XXX: Save bancho_score_id after getting submission result

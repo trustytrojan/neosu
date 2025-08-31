@@ -43,14 +43,13 @@ void Console::processCommand(std::string command, bool fromFile) {
     }
 
     // get convar
-    ConVar *var = convar->getConVarByName(commandName, false);
-    if(var == nullptr || var->isFlagSet(FCVAR_NOEXEC) || (fromFile && var->isFlagSet(FCVAR_NOLOAD))) {
-#ifdef _DEBUG
-        if(var) {
-            debugLog("not executing {}, flags: {}\n", var->getName(), ConVarHandler::flagsToString(var->getFlags()));
-        }
-#endif
+    ConVar *var = cvars->getConVarByName(commandName, false);
+    if(!var) {
         debugLog("Unknown command: {:s}\n", commandName);
+        return;
+    }
+
+    if(fromFile && var->isFlagSet(cv::NOLOAD)) {
         return;
     }
 
@@ -69,7 +68,7 @@ void Console::processCommand(std::string command, bool fromFile) {
     }
 
     // log
-    if(cv::console_logging.getBool() && !var->isFlagSet(FCVAR_HIDDEN)) {
+    if(cv::console_logging.getBool() && !var->isFlagSet(cv::HIDDEN)) {
         std::string logMessage;
 
         bool doLog = false;

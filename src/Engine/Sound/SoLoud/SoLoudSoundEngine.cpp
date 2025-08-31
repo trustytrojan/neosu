@@ -279,7 +279,7 @@ bool SoLoudSoundEngine::setOutputDeviceInt(const SoundEngine::OUTPUT_DEVICE &des
 void SoLoudSoundEngine::allowInternalCallbacks() {
     // convar callbacks
     cv::snd_freq.setCallback(SA::MakeDelegate<&SoLoudSoundEngine::restart>(this));
-    cv::snd_restart.setCallback(SA::MakeDelegate<&SoLoudSoundEngine::restart>(this));
+    cv::cmd::snd_restart.setCallback(SA::MakeDelegate<&SoLoudSoundEngine::restart>(this));
 
     static auto backendSwitchCB = [&](const UString &arg) -> void {
         const bool nowSDL = arg.findIgnoreCase("sdl") != -1;
@@ -300,7 +300,7 @@ void SoLoudSoundEngine::allowInternalCallbacks() {
 
     bool doRestart = !this->bWasBackendEverReady ||  //
                      (cv::snd_freq.getDefaultFloat() != cv::snd_freq.getFloat()) ||
-                     (cv::snd_restart.getDefaultFloat() != cv::snd_restart.getFloat()) ||
+                     (cv::cmd::snd_restart.getDefaultFloat() != cv::cmd::snd_restart.getFloat()) ||
                      (cv::snd_soloud_backend.getDefaultString() != cv::snd_soloud_backend.getString());
 
     if(doRestart) {
