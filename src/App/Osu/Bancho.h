@@ -25,10 +25,6 @@ struct BanchoState final {
     BanchoState(const BanchoState &) = delete;
     BanchoState(BanchoState &&) = delete;
 
-    // TODO @kiwec: update this to:
-    // - release-cv::version
-    // - bleedingedge-cv::build_timestamp
-    // - dev
     static UString neosu_version;
     static UString cho_token;
 

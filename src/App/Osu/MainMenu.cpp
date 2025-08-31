@@ -876,7 +876,7 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
     if(!this->bVisible) return;
 
     UString versionString;
-    if(cv::bleedingedge.getBool()) {
+    if(cv::is_bleedingedge.getBool()) {
         versionString = UString::fmt("Version {:.2f} ({:s})", cv::version.getFloat(), cv::build_timestamp.getString());
         this->versionButton->setTextColor(rgb(255, 220, 220));
     } else {

@@ -3,14 +3,6 @@
 
 #include "BanchoProtocol.h"
 
-#if defined(CI_DEVBUILD)
-#define NEOSU_STREAM "edge"
-#elif defined(_DEBUG)
-#define NEOSU_STREAM "dev"
-#else
-#define NEOSU_STREAM "release"
-#endif
-
 #define NEOSU_DOMAIN "neosu.net"
 
 // NOTE: Full version can be something like "b20200201.2cuttingedge"

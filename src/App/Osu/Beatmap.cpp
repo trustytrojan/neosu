@@ -3519,9 +3519,7 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
                      osu->getScore()->isUnranked() || this->is_watching || BanchoState::spectating;
 
     FinishedScore score;
-    UString client_ver = "neosu-" OS_NAME "-" NEOSU_STREAM "-";
-    client_ver.append(UString::fmt("{:.2f}", cv::version.getFloat()));
-    score.client = client_ver.toUtf8();
+    score.client = fmt::format("neosu-" OS_NAME "-{:s}", BanchoState::neosu_version.toUtf8());
 
     score.unixTimestamp =
         std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();

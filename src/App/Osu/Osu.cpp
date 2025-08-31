@@ -84,9 +84,17 @@ Osu::Osu() {
     crypto::rng::get_bytes(reinterpret_cast<u8 *>(&seed), 4);
     srand(seed);
 
-    BanchoState::neosu_version = UString::fmt("{:.2f}-" NEOSU_STREAM, cv::version.getFloat());
-    BanchoState::user_agent = UString::format("Mozilla/5.0 (compatible; neosu/%s; +https://" NEOSU_DOMAIN "/)",
-                                         BanchoState::neosu_version.toUtf8());
+    if(env->isDebugBuild()) {
+        BanchoState::neosu_version = UString::fmt("dev-{}", cv::build_timestamp.getVal<u64>());
+    } else if(cv::is_bleedingedge.getBool()) {
+        BanchoState::neosu_version = UString::fmt("bleedingedge-{}", cv::build_timestamp.getVal<u64>());
+    } else {
+        BanchoState::neosu_version = UString::fmt("release-{:.2f}", cv::version.getFloat());
+    }
+
+    BanchoState::user_agent = "Mozilla/5.0 (compatible; neosu/";
+    BanchoState::user_agent.append(BanchoState::neosu_version);
+    BanchoState::user_agent.append("; " OS_NAME "; +https://" NEOSU_DOMAIN "/)");
 
     // experimental mods list
     this->experimentalMods.push_back(&cv::fposu_mod_strafing);
