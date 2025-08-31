@@ -46,31 +46,30 @@
 
 // defs
 // some of these are atomic due to multithreaded access
-UString BanchoState::neosu_version;
-UString BanchoState::cho_token{""};
-
 std::string BanchoState::endpoint;
 std::string BanchoState::username;
 MD5Hash BanchoState::pw_md5;
+
+bool BanchoState::is_oauth{false};
 u8 BanchoState::oauth_challenge[32]{};
 u8 BanchoState::oauth_verifier[32]{};
-Room BanchoState::room;
 
 bool BanchoState::spectating{false};
 i32 BanchoState::spectated_player_id{0};
 std::vector<u32> BanchoState::spectators;
 std::vector<u32> BanchoState::fellow_spectators;
 
-bool BanchoState::is_grass{false};
-
 UString BanchoState::server_icon_url;
 Image *BanchoState::server_icon{nullptr};
 
 ServerPolicy BanchoState::score_submission_policy{ServerPolicy::NO_PREFERENCE};
 
+UString BanchoState::neosu_version;
+UString BanchoState::cho_token{""};
 UString BanchoState::user_agent;
 UString BanchoState::client_hashes;
 
+Room BanchoState::room;
 bool BanchoState::match_started{false};
 Slot BanchoState::last_scores[16];
 
@@ -108,9 +107,7 @@ void BanchoState::handle_packet(Packet *packet) {
         BanchoState::set_uid(new_user_id);
         osu->optionsMenu->update_login_button();
         osu->optionsMenu->setLoginLoadingState(false);
-
-        // Assume any OAuth server to have full neosu support
-        BanchoState::is_grass = !cv::mp_oauth_token.getString().empty();
+        BanchoState::is_oauth = !cv::mp_oauth_token.getString().empty();
 
         if(new_user_id > 0) {
             debugLog("Logged in as user #{:d}.\n", new_user_id);
@@ -148,7 +145,7 @@ void BanchoState::handle_packet(Packet *packet) {
             } else if(new_user_id == -7) {
                 errmsg = "You need to reset your password to connect to this server.";
             } else if(new_user_id == -8) {
-                if(BanchoState::is_grass) {
+                if(BanchoState::is_oauth) {
                     errmsg = "osu! session expired, please log in again.";
                 } else {
                     errmsg = "Open the verification link sent to your email, then log in again.";
@@ -625,7 +622,7 @@ void BanchoState::update_channel(const UString &name, const UString &topic, i32 
                 .author_name = UString(""),
                 .text = UString::format("%s: %s", name.toUtf8(), topic.toUtf8()),
             };
-            osu->chat->addMessage(BanchoState::is_grass ? "#neosu" : "#osu", msg, false);
+            osu->chat->addMessage(BanchoState::is_oauth ? "#neosu" : "#osu", msg, false);
         }
     } else {
         chan = it->second;

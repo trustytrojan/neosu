@@ -505,7 +505,7 @@ void BanchoState::disconnect() {
     BanchoState::set_uid(0);
     osu->userButton->setID(0);
 
-    BanchoState::is_grass = false;
+    BanchoState::is_oauth = false;
     BanchoState::endpoint = "";
     BanchoState::spectating = false;
     BanchoState::spectated_player_id = 0;

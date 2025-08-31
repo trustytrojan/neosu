@@ -74,7 +74,7 @@ void fetch_online_scores(DatabaseBeatmap *beatmap) {
     // Some servers use mod flags, even without any leaderboard filter active (e.g. for relax)
     url.append(UString::fmt("&mods={}", osu->modSelector->getModFlags()));
 
-    if(BanchoState::is_grass) {
+    if(BanchoState::is_oauth) {
         url.append(UString::fmt("&us=$token&ha={}", env->urlEncode(BanchoState::cho_token.toUtf8())));
     } else {
         url.append(UString::fmt("&us={}&ha={:s}", BanchoState::get_username(), BanchoState::pw_md5.hash.data()));

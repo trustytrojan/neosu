@@ -25,30 +25,28 @@ struct BanchoState final {
     BanchoState(const BanchoState &) = delete;
     BanchoState(BanchoState &&) = delete;
 
-    static UString neosu_version;
-    static UString cho_token;
-
     static std::string endpoint;
     static MD5Hash pw_md5;
     static u8 oauth_challenge[32];
     static u8 oauth_verifier[32];
-    static Room room;
+    static bool is_oauth;
 
     static bool spectating;
     static i32 spectated_player_id;
     static std::vector<u32> spectators;
     static std::vector<u32> fellow_spectators;
 
-    static bool is_grass; // TODO @kiwec: change to is_oauth
-
     static UString server_icon_url;
     static Image *server_icon;
 
     static ServerPolicy score_submission_policy;
 
+    static UString neosu_version;
+    static UString cho_token;
     static UString user_agent;
     static UString client_hashes;
 
+    static Room room;
     static bool match_started;
     static Slot last_scores[16];
 

@@ -796,7 +796,7 @@ void Chat::mark_as_read(ChatChannel *chan) {
     UString url{"web/osu-markasread.php?"};
     url.append(UString::fmt("channel={}", env->urlEncode(chan->name.toUtf8())));
 
-    if(BanchoState::is_grass) {
+    if(BanchoState::is_oauth) {
         url.append(UString::fmt("&u=$token&h={}", env->urlEncode(BanchoState::cho_token.toUtf8())));
     } else {
         url.append(UString::fmt("&u={}&h={:s}", BanchoState::get_username(), BanchoState::pw_md5.hash.data()));

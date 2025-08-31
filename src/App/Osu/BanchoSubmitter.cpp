@@ -82,7 +82,7 @@ void submit_score(FinishedScore score) {
         curl_mime_data(part, unique_ids.toUtf8(), unique_ids.lengthUtf8());
     }
 
-    if(BanchoState::is_grass) {
+    if(BanchoState::is_oauth) {
         part = curl_mime_addpart(request.mime);
         curl_mime_name(part, "pass");
         curl_mime_data(part, BanchoState::cho_token.toUtf8(), BanchoState::cho_token.lengthUtf8());
@@ -117,7 +117,7 @@ void submit_score(FinishedScore score) {
         UString score_data;
         score_data.append(score.diff2->getMD5Hash().hash.data());
 
-        if(BanchoState::is_grass) {
+        if(BanchoState::is_oauth) {
             score_data.append(":$token");
         } else {
             score_data.append(UString::fmt(":{}", BanchoState::get_username()));
@@ -130,7 +130,7 @@ void submit_score(FinishedScore score) {
             idiot_check.append(UString::format("uu%s", score.diff2->getMD5Hash().hash.data()));
             idiot_check.append(UString::format("%d%s", score.comboMax, score.perfect ? "True" : "False"));
 
-            if(BanchoState::is_grass) {
+            if(BanchoState::is_oauth) {
                 idiot_check.append("$token");
             } else {
                 idiot_check.append(BanchoState::get_username().c_str());
