@@ -1,5 +1,4 @@
 #pragma once
-
 #include "types.h"
 
 /**
@@ -55,4 +54,40 @@ class PlaybackInterpolator {
     f64 dLastPositionTime{0.0};        // engine time when last position was obtained
     f64 iEstimatedRate{1000.0};        // estimated playback rate (ms per second)
     u32 dLastInterpolatedPosition{0};  // last calculated interpolated position
+};
+
+// Playback interpolator used by McOsu
+class McOsuInterpolator {
+   public:
+    McOsuInterpolator() = default;
+
+    u32 update(f64 rawPositionMS, f64 currentTime, f64 playbackSpeed, bool isLooped = false, u64 lengthMS = 0,
+               bool isPlaying = true);
+
+   private:
+    f64 fInterpolatedMusicPos{0.0};
+    f64 fLastAudioTimeAccurateSet{0.0};
+    f64 fLastRealTimeForInterpolationDelta{0.0};
+};
+
+// Playback interpolator used by osu-framework (LLM'd to C++)
+// NOTE(kiwec): i tried this and it is... stuttery? as if it does the reverse of interpolating. lol
+class TachyonInterpolator {
+   public:
+    TachyonInterpolator() = default;
+
+    f64 Lerp(f64 start, f64 final, f64 amount);
+    f64 Damp(f64 start, f64 final, f64 base, f64 exponent);
+    f64 DampContinuously(f64 current, f64 target, f64 halfTime, f64 elapsedTime);
+
+    u32 update(f64 rawPositionMS, f64 currentTime, f64 playbackSpeed, bool isLooped = false, u64 lengthMS = 0,
+               bool isPlaying = true);
+
+   private:
+    f64 fAllowableErrorMilliseconds{1000.0 / 60 * 2};
+    f64 fDriftRecoveryHalfLife{50.0};
+    bool fIsInterpolating{false};
+    f64 fInterpolatedMusicPos{0.0};
+    f64 fLastAudioTimeAccurateSet{0.0};
+    f64 fLastRealTimeForInterpolationDelta{0.0};
 };

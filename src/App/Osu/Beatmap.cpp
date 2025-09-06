@@ -2260,7 +2260,15 @@ void Beatmap::update2() {
     }
 
     // update current music position (this variable does not include any offsets!)
-    this->iCurMusicPos = this->isActuallyLoading() ? -1000 : this->music->getPositionMS();
+    if(this->isActuallyLoading()) {
+        this->iCurMusicPos = -1000;
+        this->musicInterp.update(0.0, Timing::getTimeReal<f64>(), 0.0, false, 0.0, false);
+    } else {
+        this->iCurMusicPos = this->musicInterp.update((f64)this->music->getPositionMS(), Timing::getTimeReal<f64>(),
+                                                      this->music->getSpeed(), false, this->music->getLengthMS(),
+                                                      this->music->isPlaying() && !this->bWasSeekFrame);
+    }
+
     this->iContinueMusicPos = this->music->getPositionMS();
     const bool wasSeekFrame = this->bWasSeekFrame;
     this->bWasSeekFrame = false;
@@ -2324,7 +2332,8 @@ void Beatmap::update2() {
                     this->onModUpdate(false, false);
                 }
             } else {
-                this->iCurMusicPos = (Timing::getTimeReal<f32>() - this->fWaitTime) * 1000.0f * this->getSpeedMultiplier();
+                this->iCurMusicPos =
+                    (Timing::getTimeReal<f32>() - this->fWaitTime) * 1000.0f * this->getSpeedMultiplier();
             }
         }
 

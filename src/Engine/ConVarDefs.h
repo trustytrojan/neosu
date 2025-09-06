@@ -279,8 +279,6 @@ CONVAR(combo_anim2_duration, "combo_anim2_duration", 0.4f, FCVAR_BANCHO_COMPATIB
 CONVAR(combo_anim2_size, "combo_anim2_size", 0.5f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(combobreak_sound_combo, "combobreak_sound_combo", 20, FCVAR_BANCHO_COMPATIBLE,
        "Only play the combobreak sound if the combo is higher than this");
-CONVAR(compensate_music_speed, "compensate_music_speed", true, FCVAR_BANCHO_COMPATIBLE,
-       "compensates speeds slower than 1x a little bit, by adding an offset depending on the slowness");
 CONVAR(confine_cursor_fullscreen, "confine_cursor_fullscreen", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(confine_cursor_windowed, "confine_cursor_windowed", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(confine_cursor_never, "confine_cursor_never", false, FCVAR_BANCHO_COMPATIBLE);

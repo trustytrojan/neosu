@@ -6,6 +6,7 @@
 #include "DifficultyCalculator.h"
 #include "HUD.h"
 #include "LegacyReplay.h"
+#include "PlaybackInterpolator.h"
 #include "score.h"
 #include "uwu.h"
 
@@ -270,6 +271,7 @@ class Beatmap : public BeatmapInterface {
     f32 fMusicFrequencyBackup;
     long iCurMusicPos;
     long iCurMusicPosWithOffsets;
+    McOsuInterpolator musicInterp;
     int iResourceLoadUpdateDelayHack;
     f32 fAfterMusicIsFinishedVirtualAudioTimeStart;
     bool bIsFirstMissSound;
