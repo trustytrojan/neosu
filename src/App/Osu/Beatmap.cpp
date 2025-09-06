@@ -2307,25 +2307,25 @@ void Beatmap::update2() {
                     this->bIsWaiting = false;
                     this->bIsPlaying = true;
 
-                    soundEngine->play(this->music);
-                    this->music->setLoop(false);
-                    this->music->setPositionMS(0);
-                    this->bWasSeekFrame = true;
-                    this->music->setBaseVolume(this->getIdealVolume());
-                    this->music->setSpeed(this->getSpeedMultiplier());
+                    i64 start_ms = 0;
 
                     // if we are quick restarting, jump just before the first hitobject (even if there is a long waiting
                     // period at the beginning with nothing etc.)
-                    bool quick_restarting = this->bIsRestartScheduledQuick;
-                    quick_restarting &=
-                        this->hitobjects.size() > 0 && this->hitobjects[0]->click_time > cv::quick_retry_time.getInt();
-                    if(quick_restarting) {
-                        this->music->setPositionMS(
-                            std::max((i64)0, this->hitobjects[0]->click_time - cv::quick_retry_time.getInt()));
+                    if(this->bIsRestartScheduledQuick) {
+                        if(this->hitobjects.size() > 0) {
+                            i64 retry_time = std::max(0, cv::quick_retry_time.getInt());
+                            start_ms = this->hitobjects[0]->click_time - retry_time;
+                            if(start_ms < 0) start_ms = 0;
+                        }
+                        this->bIsRestartScheduledQuick = false;
                     }
-                    this->bWasSeekFrame = true;
 
-                    this->bIsRestartScheduledQuick = false;
+                    soundEngine->play(this->music);
+                    this->music->setLoop(false);
+                    this->music->setPositionMS(start_ms);
+                    this->bWasSeekFrame = true;
+                    this->music->setBaseVolume(this->getIdealVolume());
+                    this->music->setSpeed(this->getSpeedMultiplier());
 
                     // if there are calculations in there that need the hitobjects to be loaded, also applies
                     // speed/pitch

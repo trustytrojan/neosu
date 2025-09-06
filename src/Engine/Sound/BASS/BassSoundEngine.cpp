@@ -551,6 +551,7 @@ void BassSoundEngine::pause(Sound *snd) {
     BASS_Mixer_ChannelFlags(bassSound->stream, BASS_MIXER_CHAN_PAUSE, BASS_MIXER_CHAN_PAUSE);
     bassSound->bPaused = true;
     bassSound->paused_position_ms = pos;
+    bassSound->interpolator.reset(pos, Timing::getTimeReal(), bassSound->getSpeed());
 }
 
 void BassSoundEngine::stop(Sound *snd) {

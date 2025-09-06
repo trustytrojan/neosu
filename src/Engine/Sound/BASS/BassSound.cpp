@@ -120,31 +120,22 @@ void BassSound::destroy() {
     this->bIgnored = false;
 }
 
-// Inaccurate but fast seeking, to use at song select
 void BassSound::setPositionMS(u32 ms) {
     if(!this->bReady || ms > this->getLengthMS()) return;
     assert(this->bStream);  // can't call setPositionMS() on a sample
 
-    i64 target_pos = BASS_ChannelSeconds2Bytes(this->stream, ms / 1000.0);
+    f64 seconds = (f64)ms / 1000.0;
+    i64 target_pos = BASS_ChannelSeconds2Bytes(this->stream, seconds);
     if(target_pos < 0) {
-        debugLog("BASS_ChannelSeconds2Bytes( stream , {} ) error on file {}: {}\n", ms / 1000, this->sFilePath.c_str(),
+        debugLog("BASS_ChannelSeconds2Bytes( stream , {} ) error on file {}: {}\n", seconds, this->sFilePath.c_str(),
                  BassManager::getErrorUString());
         return;
     }
 
-    if(this->isPlaying()) {
-        if(!BASS_Mixer_ChannelSetPosition(this->stream, target_pos, BASS_POS_BYTE | BASS_POS_MIXER_RESET)) {
-            if(cv::debug_snd.getBool()) {
-                debugLog("BASS_Mixer_ChannelSetPosition( stream , {} ) error on file {}: {}\n", ms,
-                         this->sFilePath.c_str(), BassManager::getErrorUString());
-            }
-        }
-    } else {
-        if(!BASS_ChannelSetPosition(this->stream, target_pos, BASS_POS_BYTE | BASS_POS_FLUSH)) {
-            if(cv::debug_snd.getBool()) {
-                debugLog("BASS_ChannelSetPosition( stream , {} ) error on file {}: {}\n", ms, this->sFilePath.c_str(),
-                         BassManager::getErrorUString());
-            }
+    if(!BASS_Mixer_ChannelSetPosition(this->stream, target_pos, BASS_POS_BYTE | BASS_POS_MIXER_RESET)) {
+        if(cv::debug_snd.getBool()) {
+            debugLog("BASS_Mixer_ChannelSetPosition( stream , {} ) error on file {}: {}\n", ms, this->sFilePath.c_str(),
+                     BassManager::getErrorUString());
         }
     }
 
@@ -216,31 +207,24 @@ u32 BassSound::getPositionMS() {
     assert(this->bStream);  // can't call getPositionMS() on a sample
 
     if(this->bPaused) {
-        this->interpolator.reset(this->paused_position_ms, Timing::getTimeReal(), this->getSpeed());
         return this->paused_position_ms;
     }
 
-    i64 positionBytes = 0;
-    if(this->isPlaying()) {
-        positionBytes = BASS_Mixer_ChannelGetPosition(this->stream, BASS_POS_BYTE);
-    } else {
-        positionBytes = BASS_ChannelGetPosition(this->stream, BASS_POS_BYTE);
+    if(!this->isPlaying()) {
+        // We 'pause' even when stopping the sound, so it is safe to assume the sound hasn't started yet.
+        return 0;
     }
+
+    i64 positionBytes = BASS_Mixer_ChannelGetPosition(this->stream, BASS_POS_BYTE);
     if(positionBytes < 0) {
         assert(false);  // invalid handle
-        this->interpolator.reset(this->length, Timing::getTimeReal(), this->getSpeed());
-        return this->length;
+        return 0;
     }
 
     f64 positionInSeconds = BASS_ChannelBytes2Seconds(this->stream, positionBytes);
     f64 rawPositionMS = positionInSeconds * 1000.0;
-
-    // get interpolated position
-    u32 interpolatedPositionMS =
-        this->interpolator.update(rawPositionMS, Timing::getTimeReal(), this->getSpeed(), this->isLooped(),
-                                  static_cast<u64>(this->length), this->isPlaying());
-
-    return interpolatedPositionMS;
+    return this->interpolator.update(rawPositionMS, Timing::getTimeReal(), this->getSpeed(), this->isLooped(),
+                                     static_cast<u64>(this->length), this->isPlaying());
 }
 
 u32 BassSound::getLengthMS() {
