@@ -12,7 +12,7 @@ class VertexArrayObject : public Resource {
     ~VertexArrayObject() override { ; }
 
     void clear();
-    constexpr void empty() { this->clear(); }
+    void empty() { this->clear(); }
 
     void addVertex(vec2 v);
     void addVertex(vec3 v);
