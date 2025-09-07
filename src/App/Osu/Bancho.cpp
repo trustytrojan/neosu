@@ -97,427 +97,642 @@ MD5Hash BanchoState::md5(u8 *msg, size_t msg_len) {
     return out;
 }
 
+namespace proto = BANCHO::Proto;
+
 void BanchoState::handle_packet(Packet *packet) {
-    // XXX: This is a bit of a mess, should at least group packets by type for readability
-    if(cv::debug_network.getBool() && packet) {
+    if(cv::debug_network.getBool()) {
         debugLog("packet id: {}\n", packet->id);
     }
-    if(packet->id == USER_ID) {
-        i32 new_user_id = proto::read<i32>(packet);
-        BanchoState::set_uid(new_user_id);
-        osu->optionsMenu->update_login_button();
-        osu->optionsMenu->setLoginLoadingState(false);
-        BanchoState::is_oauth = !cv::mp_oauth_token.getString().empty();
 
-        if(new_user_id > 0) {
-            debugLog("Logged in as user #{:d}.\n", new_user_id);
-            cv::mp_autologin.setValue(true);
-            BanchoState::print_new_channels = true;
+    switch(packet->id) {
+        case USER_ID: {
+            i32 new_user_id = proto::read<i32>(packet);
+            BanchoState::set_uid(new_user_id);
+            osu->optionsMenu->update_login_button();
+            osu->optionsMenu->setLoginLoadingState(false);
+            BanchoState::is_oauth = !cv::mp_oauth_token.getString().empty();
 
-            std::string avatar_dir = fmt::format(MCENGINE_DATA_DIR "avatars/{}", BanchoState::endpoint);
-            env->createDirectory(avatar_dir);
+            if(new_user_id > 0) {
+                debugLog("Logged in as user #{:d}.\n", new_user_id);
+                cv::mp_autologin.setValue(true);
+                BanchoState::print_new_channels = true;
 
-            std::string replays_dir = fmt::format(MCENGINE_DATA_DIR "replays/{}", BanchoState::endpoint);
-            env->createDirectory(replays_dir);
+                std::string avatar_dir = fmt::format(MCENGINE_DATA_DIR "avatars/{}", BanchoState::endpoint);
+                env->createDirectory(avatar_dir);
 
-            osu->onUserCardChange(BanchoState::username.c_str());
+                std::string replays_dir = fmt::format(MCENGINE_DATA_DIR "replays/{}", BanchoState::endpoint);
+                env->createDirectory(replays_dir);
 
-            // XXX: We should toggle between "offline" sorting options and "online" ones
-            //      Online ones would be "Local scores", "Global", "Country", "Selected mods" etc
-            //      While offline ones would be "By score", "By pp", etc
-            osu->songBrowser2->onSortScoresChange(UString("Online Leaderboard"), 0);
+                osu->onUserCardChange(BanchoState::username.c_str());
 
-            // If server sent a score submission policy, update options menu to hide the checkbox
-            osu->optionsMenu->scheduleLayoutUpdate();
-        } else {
-            cv::mp_autologin.setValue(false);
-            cv::mp_oauth_token.setValue("");
+                // XXX: We should toggle between "offline" sorting options and "online" ones
+                //      Online ones would be "Local scores", "Global", "Country", "Selected mods" etc
+                //      While offline ones would be "By score", "By pp", etc
+                osu->songBrowser2->onSortScoresChange(UString("Online Leaderboard"), 0);
 
-            debugLog("Failed to log in, server returned code {:d}.\n", BanchoState::get_uid());
-            UString errmsg =
-                UString::fmt("Failed to log in: {} (code {})\n", BanchoState::cho_token.toUtf8(), BanchoState::get_uid());
-            if(new_user_id == -2) {
-                errmsg = "Client version is too old to connect to this server.";
-            } else if(new_user_id == -3 || new_user_id == -4) {
-                errmsg = "You are banned from this server.";
-            } else if(new_user_id == -6) {
-                errmsg = "You need to buy supporter to connect to this server.";
-            } else if(new_user_id == -7) {
-                errmsg = "You need to reset your password to connect to this server.";
-            } else if(new_user_id == -8) {
-                if(BanchoState::is_oauth) {
-                    errmsg = "osu! session expired, please log in again.";
-                } else {
-                    errmsg = "Open the verification link sent to your email, then log in again.";
-                }
+                // If server sent a score submission policy, update options menu to hide the checkbox
+                osu->optionsMenu->scheduleLayoutUpdate();
             } else {
-                if(BanchoState::cho_token == UString("user-already-logged-in")) {
-                    errmsg = "Already logged in on another client.";
-                } else if(BanchoState::cho_token == UString("unknown-username")) {
-                    errmsg = UString::fmt("No account by the username '{}' exists.", BanchoState::username);
-                } else if(BanchoState::cho_token == UString("incorrect-credentials")) {
-                    errmsg = "This username is not registered.";
-                } else if(BanchoState::cho_token == UString("incorrect-password")) {
-                    errmsg = "Incorrect password.";
-                } else if(BanchoState::cho_token == UString("contact-staff")) {
-                    errmsg = "Please contact an administrator of the server.";
+                cv::mp_autologin.setValue(false);
+                cv::mp_oauth_token.setValue("");
+
+                debugLog("Failed to log in, server returned code {:d}.\n", BanchoState::get_uid());
+                UString errmsg =
+                    UString::fmt("Failed to log in: {} (code {})\n", BanchoState::cho_token.toUtf8(), BanchoState::get_uid());
+                if(new_user_id == -2) {
+                    errmsg = "Client version is too old to connect to this server.";
+                } else if(new_user_id == -3 || new_user_id == -4) {
+                    errmsg = "You are banned from this server.";
+                } else if(new_user_id == -6) {
+                    errmsg = "You need to buy supporter to connect to this server.";
+                } else if(new_user_id == -7) {
+                    errmsg = "You need to reset your password to connect to this server.";
+                } else if(new_user_id == -8) {
+                    if(BanchoState::is_oauth) {
+                        errmsg = "osu! session expired, please log in again.";
+                    } else {
+                        errmsg = "Open the verification link sent to your email, then log in again.";
+                    }
+                } else {
+                    if(BanchoState::cho_token == UString("user-already-logged-in")) {
+                        errmsg = "Already logged in on another client.";
+                    } else if(BanchoState::cho_token == UString("unknown-username")) {
+                        errmsg = UString::fmt("No account by the username '{}' exists.", BanchoState::username);
+                    } else if(BanchoState::cho_token == UString("incorrect-credentials")) {
+                        errmsg = "This username is not registered.";
+                    } else if(BanchoState::cho_token == UString("incorrect-password")) {
+                        errmsg = "Incorrect password.";
+                    } else if(BanchoState::cho_token == UString("contact-staff")) {
+                        errmsg = "Please contact an administrator of the server.";
+                    }
+                }
+                osu->notificationOverlay->addToast(errmsg, ERROR_TOAST);
+            }
+            break;
+        }
+
+        case RECV_MESSAGE: {
+            UString sender = proto::read_string(packet);
+            UString text = proto::read_string(packet);
+            UString recipient = proto::read_string(packet);
+            i32 sender_id = proto::read<i32>(packet);
+
+            auto msg = ChatMessage{
+                .tms = time(nullptr),
+                .author_id = sender_id,
+                .author_name = sender,
+                .text = text,
+            };
+            osu->chat->addMessage(recipient, msg);
+
+            break;
+        }
+
+        case PONG: {
+            // (nothing to do)
+            break;
+        }
+
+        case USER_STATS: {
+            i32 raw_id = proto::read<i32>(packet);
+            i32 stats_user_id = abs(raw_id);  // IRC clients are sent with negative IDs, hence the abs()
+            auto action = (Action)proto::read<u8>(packet);
+
+            UserInfo *user = BANCHO::User::get_user_info(stats_user_id);
+            if(action != user->action) {
+                // TODO @kiwec: i think client is supposed to regularly poll for friend stats
+                if(user->is_friend() && cv::notify_friend_status_change.getBool() && action < NB_ACTIONS) {
+                    static constexpr auto actions = std::array{
+                        "idle",   "afk",     "playing",    "editing", "modding", "in a multiplayer lobby", "spectating",
+                        "vibing", "testing", "submitting", "pausing", "testing", "multiplaying",           "browsing maps",
+                    };
+                    auto text = UString::format("%s is now %s", user->name.toUtf8(), actions[action]);
+                    auto open_dms = [uid = stats_user_id]() -> void {
+                        UserInfo *user = BANCHO::User::get_user_info(uid);
+                        osu->chat->openChannel(user->name);
+                    };
+                    osu->notificationOverlay->addToast(text, STATUS_TOAST, open_dms, ToastElement::TYPE::CHAT);
                 }
             }
-            osu->notificationOverlay->addToast(errmsg, ERROR_TOAST);
-        }
-    } else if(packet->id == RECV_MESSAGE) {
-        UString sender = proto::read_string(packet);
-        UString text = proto::read_string(packet);
-        UString recipient = proto::read_string(packet);
-        i32 sender_id = proto::read<i32>(packet);
 
-        auto msg = ChatMessage{
-            .tms = time(nullptr),
-            .author_id = sender_id,
-            .author_name = sender,
-            .text = text,
-        };
-        osu->chat->addMessage(recipient, msg);
-    } else if(packet->id == PONG) {
-        // (nothing to do)
-    } else if(packet->id == USER_STATS) {
-        i32 raw_id = proto::read<i32>(packet);
-        i32 stats_user_id = abs(raw_id);  // IRC clients are sent with negative IDs, hence the abs()
-        auto action = (Action)proto::read<u8>(packet);
+            user->irc_user = raw_id < 0;
+            user->stats_tms = Timing::getTicksMS();
+            user->action = action;
+            user->info_text = proto::read_string(packet);
+            user->map_md5 = proto::read_hash(packet);
+            user->mods = proto::read<u32>(packet);
+            user->mode = (GameMode)proto::read<u8>(packet);
+            user->map_id = proto::read<i32>(packet);
+            user->ranked_score = proto::read<i64>(packet);
+            user->accuracy = proto::read<f32>(packet);
+            user->plays = proto::read<i32>(packet);
+            user->total_score = proto::read<i64>(packet);
+            user->global_rank = proto::read<i32>(packet);
+            user->pp = proto::read<u16>(packet);
 
-        UserInfo *user = BANCHO::User::get_user_info(stats_user_id);
-        if(action != user->action) {
-            // TODO @kiwec: i think client is supposed to regularly poll for friend stats
-            if(user->is_friend() && cv::notify_friend_status_change.getBool() && action < NB_ACTIONS) {
-                static constexpr auto actions = std::array{
-                    "idle",   "afk",     "playing",    "editing", "modding", "in a multiplayer lobby", "spectating",
-                    "vibing", "testing", "submitting", "pausing", "testing", "multiplaying",           "browsing maps",
-                };
-                auto text = UString::format("%s is now %s", user->name.toUtf8(), actions[action]);
-                auto open_dms = [uid = stats_user_id]() -> void {
-                    UserInfo *user = BANCHO::User::get_user_info(uid);
-                    osu->chat->openChannel(user->name);
-                };
-                osu->notificationOverlay->addToast(text, STATUS_TOAST, open_dms, ToastElement::TYPE::CHAT);
+            if(stats_user_id == BanchoState::get_uid()) {
+                osu->userButton->updateUserStats();
             }
+            if(stats_user_id == BanchoState::spectated_player_id) {
+                osu->spectatorScreen->userCard->updateUserStats();
+            }
+
+            osu->chat->updateUserList();
+
+            break;
         }
 
-        user->irc_user = raw_id < 0;
-        user->stats_tms = Timing::getTicksMS();
-        user->action = action;
-        user->info_text = proto::read_string(packet);
-        user->map_md5 = proto::read_hash(packet);
-        user->mods = proto::read<u32>(packet);
-        user->mode = (GameMode)proto::read<u8>(packet);
-        user->map_id = proto::read<i32>(packet);
-        user->ranked_score = proto::read<i64>(packet);
-        user->accuracy = proto::read<f32>(packet);
-        user->plays = proto::read<i32>(packet);
-        user->total_score = proto::read<i64>(packet);
-        user->global_rank = proto::read<i32>(packet);
-        user->pp = proto::read<u16>(packet);
-
-        if(stats_user_id == BanchoState::get_uid()) {
-            osu->userButton->updateUserStats();
-        }
-        if(stats_user_id == BanchoState::spectated_player_id) {
-            osu->spectatorScreen->userCard->updateUserStats();
+        case USER_LOGOUT: {
+            i32 logged_out_id = proto::read<i32>(packet);
+            proto::read<u8>(packet);
+            if(logged_out_id == BanchoState::get_uid()) {
+                debugLog("Logged out.\n");
+                BanchoState::disconnect();
+            } else {
+                BANCHO::User::logout_user(logged_out_id);
+            }
+            break;
         }
 
-        osu->chat->updateUserList();
-    } else if(packet->id == USER_LOGOUT) {
-        i32 logged_out_id = proto::read<i32>(packet);
-        proto::read<u8>(packet);
-        if(logged_out_id == BanchoState::get_uid()) {
-            debugLog("Logged out.\n");
-            BanchoState::disconnect();
-        } else {
-            BANCHO::User::logout_user(logged_out_id);
+        case SPECTATOR_JOINED: {
+            i32 spectator_id = proto::read<i32>(packet);
+            if(std::ranges::find(BanchoState::spectators, spectator_id) == BanchoState::spectators.end()) {
+                debugLog("Spectator joined: user id {:d}\n", spectator_id);
+                BanchoState::spectators.push_back(spectator_id);
+            }
+
+            break;
         }
-    } else if(packet->id == IN_SPECTATE_FRAMES) {
-        i32 extra = proto::read<i32>(packet);
-        (void)extra;  // this is mania seed or something we can't use
 
-        if(BanchoState::spectating) {
-            UserInfo *info = BANCHO::User::get_user_info(BanchoState::spectated_player_id, true);
-            auto beatmap = osu->getSelectedBeatmap();
+        case SPECTATOR_LEFT: {
+            i32 spectator_id = proto::read<i32>(packet);
+            auto it = std::ranges::find(BanchoState::spectators, spectator_id);
+            if(it != BanchoState::spectators.end()) {
+                debugLog("Spectator left: user id {:d}\n", spectator_id);
+                BanchoState::spectators.erase(it);
+            }
 
-            u16 nb_frames = proto::read<u16>(packet);
-            for(u16 i = 0; i < nb_frames; i++) {
-                auto frame = proto::read<LiveReplayFrame>(packet);
+            break;
+        }
 
-                if(frame.mouse_x < 0 || frame.mouse_x > 512 || frame.mouse_y < 0 || frame.mouse_y > 384) {
-                    debugLog("WEIRD FRAME: time {:d}, x {:f}, y {:f}\n", frame.time, frame.mouse_x, frame.mouse_y);
+        case IN_SPECTATE_FRAMES: {
+            i32 extra = proto::read<i32>(packet);
+            (void)extra;  // this is mania seed or something we can't use
+
+            if(BanchoState::spectating) {
+                UserInfo *info = BANCHO::User::get_user_info(BanchoState::spectated_player_id, true);
+                auto beatmap = osu->getSelectedBeatmap();
+
+                u16 nb_frames = proto::read<u16>(packet);
+                for(u16 i = 0; i < nb_frames; i++) {
+                    auto frame = proto::read<LiveReplayFrame>(packet);
+
+                    if(frame.mouse_x < 0 || frame.mouse_x > 512 || frame.mouse_y < 0 || frame.mouse_y > 384) {
+                        debugLog("WEIRD FRAME: time {:d}, x {:f}, y {:f}\n", frame.time, frame.mouse_x, frame.mouse_y);
+                    }
+
+                    beatmap->spectated_replay.push_back(LegacyReplay::Frame{
+                        .cur_music_pos = frame.time,
+                        .milliseconds_since_last_frame = 0,  // fixed below
+                        .x = frame.mouse_x,
+                        .y = frame.mouse_y,
+                        .key_flags = frame.key_flags,
+                    });
                 }
 
-                beatmap->spectated_replay.push_back(LegacyReplay::Frame{
-                    .cur_music_pos = frame.time,
-                    .milliseconds_since_last_frame = 0,  // fixed below
-                    .x = frame.mouse_x,
-                    .y = frame.mouse_y,
-                    .key_flags = frame.key_flags,
+                // NOTE: Server can send frames in the wrong order. So we're correcting it here.
+                std::ranges::sort(beatmap->spectated_replay, [](LegacyReplay::Frame a, LegacyReplay::Frame b) {
+                    return a.cur_music_pos < b.cur_music_pos;
                 });
+                beatmap->last_frame_ms = 0;
+                for(auto &frame : beatmap->spectated_replay) {
+                    frame.milliseconds_since_last_frame = frame.cur_music_pos - beatmap->last_frame_ms;
+                    beatmap->last_frame_ms = frame.cur_music_pos;
+                }
+
+                auto action = (LiveReplayBundle::Action)proto::read<u8>(packet);
+                info->spec_action = action;
+
+                if(osu->isInPlayMode()) {
+                    if(action == LiveReplayBundle::Action::SONG_SELECT) {
+                        info->map_id = 0;
+                        info->map_md5 = MD5Hash();
+                        beatmap->stop(true);
+                    }
+                    if(action == LiveReplayBundle::Action::UNPAUSE) {
+                        beatmap->spectate_pause = false;
+                    }
+                    if(action == LiveReplayBundle::Action::PAUSE) {
+                        beatmap->spectate_pause = true;
+                    }
+                    if(action == LiveReplayBundle::Action::SKIP) {
+                        beatmap->skipEmptySection();
+                    }
+                    if(action == LiveReplayBundle::Action::FAIL) {
+                        beatmap->fail(true);
+                    }
+                    if(action == LiveReplayBundle::Action::NEW_SONG) {
+                        osu->rankingScreen->setVisible(false);
+                        beatmap->restart(true);
+                        beatmap->update();
+                    }
+                }
+
+                auto score_frame = proto::read<ScoreFrame>(packet);
+                beatmap->score_frames.push_back(score_frame);
+
+                auto sequence = proto::read<u16>(packet);
+                (void)sequence;  // don't know how to use this
             }
 
-            // NOTE: Server can send frames in the wrong order. So we're correcting it here.
-            std::ranges::sort(beatmap->spectated_replay, [](LegacyReplay::Frame a, LegacyReplay::Frame b) {
-                return a.cur_music_pos < b.cur_music_pos;
-            });
-            beatmap->last_frame_ms = 0;
-            for(auto &frame : beatmap->spectated_replay) {
-                frame.milliseconds_since_last_frame = frame.cur_music_pos - beatmap->last_frame_ms;
-                beatmap->last_frame_ms = frame.cur_music_pos;
+            break;
+        }
+
+        case VERSION_UPDATE: {
+            // (nothing to do)
+            break;
+        }
+
+        case SPECTATOR_CANT_SPECTATE: {
+            i32 spectator_id = proto::read<i32>(packet);
+            debugLog("Spectator can't spectate: user id {:d}\n", spectator_id);
+            break;
+        }
+
+        case GET_ATTENTION: {
+            // (nothing to do)
+            break;
+        }
+
+        case NOTIFICATION: {
+            UString notification = proto::read_string(packet);
+            osu->notificationOverlay->addToast(notification, INFO_TOAST);
+            break;
+        }
+
+        case ROOM_UPDATED: {
+            auto room = Room(packet);
+            if(osu->lobby->isVisible()) {
+                osu->lobby->updateRoom(room);
+            } else if(room.id == BanchoState::room.id) {
+                osu->room->on_room_updated(room);
             }
 
-            auto action = (LiveReplayBundle::Action)proto::read<u8>(packet);
-            info->spec_action = action;
+            break;
+        }
 
+        case ROOM_CREATED: {
+            auto room = new Room(packet);
+            osu->lobby->addRoom(room);
+            break;
+        }
+
+        case ROOM_CLOSED: {
+            i32 room_id = proto::read<i32>(packet);
+            osu->lobby->removeRoom(room_id);
+            break;
+        }
+
+        case ROOM_JOIN_SUCCESS: {
+            // Sanity, in case some trolley admins do funny business
+            if(BanchoState::spectating) {
+                stop_spectating();
+            }
             if(osu->isInPlayMode()) {
-                if(action == LiveReplayBundle::Action::SONG_SELECT) {
-                    info->map_id = 0;
-                    info->map_md5 = MD5Hash();
-                    beatmap->stop(true);
-                }
-                if(action == LiveReplayBundle::Action::UNPAUSE) {
-                    beatmap->spectate_pause = false;
-                }
-                if(action == LiveReplayBundle::Action::PAUSE) {
-                    beatmap->spectate_pause = true;
-                }
-                if(action == LiveReplayBundle::Action::SKIP) {
-                    beatmap->skipEmptySection();
-                }
-                if(action == LiveReplayBundle::Action::FAIL) {
-                    beatmap->fail(true);
-                }
-                if(action == LiveReplayBundle::Action::NEW_SONG) {
-                    osu->rankingScreen->setVisible(false);
-                    beatmap->restart(true);
-                    beatmap->update();
+                osu->getSelectedBeatmap()->stop(true);
+            }
+
+            auto room = Room(packet);
+            osu->room->on_room_joined(room);
+
+            break;
+        }
+
+        case ROOM_JOIN_FAIL: {
+            osu->notificationOverlay->addToast("Failed to join room.", ERROR_TOAST);
+            osu->lobby->on_room_join_failed();
+            break;
+        }
+
+        case FELLOW_SPECTATOR_JOINED: {
+            i32 spectator_id = proto::read<i32>(packet);
+            if(std::ranges::find(BanchoState::fellow_spectators, spectator_id) == BanchoState::fellow_spectators.end()) {
+                debugLog("Fellow spectator joined: user id {:d}\n", spectator_id);
+                BanchoState::fellow_spectators.push_back(spectator_id);
+            }
+
+            break;
+        }
+
+        case FELLOW_SPECTATOR_LEFT: {
+            i32 spectator_id = proto::read<i32>(packet);
+            auto it = std::ranges::find(BanchoState::fellow_spectators, spectator_id);
+            if(it != BanchoState::fellow_spectators.end()) {
+                debugLog("Fellow spectator left: user id {:d}\n", spectator_id);
+                BanchoState::fellow_spectators.erase(it);
+            }
+
+            break;
+        }
+
+        case MATCH_STARTED: {
+            auto room = Room(packet);
+            osu->room->on_match_started(room);
+            break;
+        }
+
+        case MATCH_SCORE_UPDATED: {
+            osu->room->on_match_score_updated(packet);
+            break;
+        }
+
+        case HOST_CHANGED: {
+            // (nothing to do)
+            break;
+        }
+
+        case MATCH_ALL_PLAYERS_LOADED: {
+            osu->room->on_all_players_loaded();
+            break;
+        }
+
+        case MATCH_PLAYER_FAILED: {
+            i32 slot_id = proto::read<i32>(packet);
+            osu->room->on_player_failed(slot_id);
+            break;
+        }
+
+        case MATCH_FINISHED: {
+            osu->room->on_match_finished();
+            break;
+        }
+
+        case MATCH_SKIP: {
+            osu->room->on_all_players_skipped();
+            break;
+        }
+
+        case CHANNEL_JOIN_SUCCESS: {
+            UString name = proto::read_string(packet);
+            auto msg = ChatMessage{
+                .tms = time(nullptr),
+                .author_id = 0,
+                .author_name = UString(""),
+                .text = UString("Joined channel."),
+            };
+            osu->chat->addChannel(name);
+            osu->chat->addMessage(name, msg, false);
+            break;
+        }
+
+        case CHANNEL_INFO: {
+            UString channel_name = proto::read_string(packet);
+            UString channel_topic = proto::read_string(packet);
+            i32 nb_members = proto::read<i32>(packet);
+            BanchoState::update_channel(channel_name, channel_topic, nb_members, false);
+            break;
+        }
+
+        case LEFT_CHANNEL: {
+            UString name = proto::read_string(packet);
+            osu->chat->removeChannel(name);
+            break;
+        }
+
+        case CHANNEL_AUTO_JOIN: {
+            UString channel_name = proto::read_string(packet);
+            UString channel_topic = proto::read_string(packet);
+            i32 nb_members = proto::read<i32>(packet);
+            BanchoState::update_channel(channel_name, channel_topic, nb_members, true);
+            break;
+        }
+
+        case PRIVILEGES: {
+            proto::read<u32>(packet);  // not using it for anything
+            break;
+        }
+
+        case FRIENDS_LIST: {
+            BANCHO::User::friends.clear();
+
+            u16 nb_friends = proto::read<u16>(packet);
+            for(u16 i = 0; i < nb_friends; i++) {
+                i32 friend_id = proto::read<i32>(packet);
+                BANCHO::User::friends.push_back(friend_id);
+            }
+            break;
+        }
+
+        case PROTOCOL_VERSION: {
+            int protocol_version = proto::read<i32>(packet);
+            if(protocol_version != 19) {
+                osu->notificationOverlay->addToast("This server may use an unsupported protocol version.", ERROR_TOAST);
+            }
+            break;
+        }
+
+        case MAIN_MENU_ICON: {
+            UString icon = proto::read_string(packet);
+            auto urls = icon.split("|");
+            if(urls.size() == 2 && ((urls[0].startsWith("http://")) || urls[0].startsWith("https://"))) {
+                BanchoState::server_icon_url = urls[0];
+            }
+            break;
+        }
+
+        case MATCH_PLAYER_SKIPPED: {
+            i32 user_id = proto::read<i32>(packet);
+            osu->room->on_player_skip(user_id);
+            break;
+        }
+
+        case USER_PRESENCE: {
+            i32 raw_id = proto::read<i32>(packet);
+            i32 presence_user_id = abs(raw_id);  // IRC clients are sent with negative IDs, hence the abs()
+            auto presence_username = proto::read_string(packet);
+
+            UserInfo *user = BANCHO::User::get_user_info(presence_user_id);
+            user->irc_user = raw_id < 0;
+            user->has_presence = true;
+            user->name = presence_username;
+            user->utc_offset = proto::read<u8>(packet);
+            user->country = proto::read<u8>(packet);
+            user->privileges = proto::read<u8>(packet);
+            user->longitude = proto::read<f32>(packet);
+            user->latitude = proto::read<f32>(packet);
+            user->global_rank = proto::read<i32>(packet);
+
+            // Server can decide what username we use
+            if(presence_user_id == BanchoState::get_uid()) { 
+                BanchoState::username = presence_username.toUtf8();
+                osu->onUserCardChange(presence_username);
+            }
+
+            osu->chat->updateUserList();
+            break;
+        }
+
+        case RESTART: {
+            // XXX: wait 'ms' milliseconds before reconnecting
+            i32 ms = proto::read<i32>(packet);
+            (void)ms;
+
+            // Some servers send "restart" packets when password is incorrect
+            // So, don't retry unless actually logged in
+            if(BanchoState::is_online()) {
+                BanchoState::reconnect();
+            }
+            break;
+        }
+
+        case ROOM_INVITE: {
+            break;
+        }
+
+        case CHANNEL_INFO_END: {
+            BanchoState::print_new_channels = false;
+            break;
+        }
+
+        case ROOM_PASSWORD_CHANGED: {
+            UString new_password = proto::read_string(packet);
+            debugLog("Room changed password to {:s}\n", new_password.toUtf8());
+            BanchoState::room.password = new_password;
+            break;
+        }
+
+        case SILENCE_END: {
+            i32 delta = proto::read<i32>(packet);
+            debugLog("Silence ends in {:d} seconds.\n", delta);
+            // XXX: Prevent user from sending messages while silenced
+            break;
+        }
+
+        case USER_SILENCED: {
+            i32 user_id = proto::read<i32>(packet);
+            debugLog("User #{:d} silenced.\n", user_id);
+            break;
+        }
+
+        case USER_PRESENCE_SINGLE: {
+            BANCHO::User::get_user_info(proto::read<i32>(packet));  // add to online_users list
+            break;
+        }
+
+        case USER_PRESENCE_BUNDLE: {
+            u16 nb_users = proto::read<u16>(packet);
+            for(u16 i = 0; i < nb_users; i++) {
+                BANCHO::User::get_user_info(proto::read<i32>(packet));  // add to online_users list
+            }
+            break;
+        }
+
+        case USER_DM_BLOCKED: {
+            proto::read_string(packet);
+            proto::read_string(packet);
+            UString blocked = proto::read_string(packet);
+            proto::read<u32>(packet);
+            debugLog("Blocked {:s}.\n", blocked.toUtf8());
+            break;
+        }
+
+        case TARGET_IS_SILENCED: {
+            proto::read_string(packet);
+            proto::read_string(packet);
+            UString blocked = proto::read_string(packet);
+            proto::read<u32>(packet);
+            debugLog("Silenced {:s}.\n", blocked.toUtf8());
+            break;
+        }
+
+        case VERSION_UPDATE_FORCED: {
+            BanchoState::disconnect();
+            osu->notificationOverlay->addToast("This server requires a newer client version.", ERROR_TOAST);
+            break;
+        }
+
+        case SWITCH_SERVER: {
+            break;
+        }
+
+        case ACCOUNT_RESTRICTED: {
+            osu->notificationOverlay->addToast("Account restricted.", ERROR_TOAST);
+            BanchoState::disconnect();
+            break;
+        }
+
+        case MATCH_ABORT: {
+            osu->room->on_match_aborted();
+            break;
+        }
+
+        // neosu-specific below
+
+        case PROTECT_VARIABLES: {
+            u16 nb_variables = proto::read<u16>(packet);
+            for(u16 i = 0; i < nb_variables; i++) {
+                auto name = proto::read_stdstring(packet);
+                auto cvar = cvars->getConVarByName(name, false);
+                if(cvar) {
+                    cvar->setServerProtected(ConVar::ProtectionPolicy::PROTECTED);
+                } else {
+                    debugLog("Server wanted to protect cvar '{}', but it doesn't exist!", name);
                 }
             }
 
-            auto score_frame = proto::read<ScoreFrame>(packet);
-            beatmap->score_frames.push_back(score_frame);
-
-            auto sequence = proto::read<u16>(packet);
-            (void)sequence;  // don't know how to use this
-        }
-    } else if(packet->id == SPECTATOR_JOINED) {
-        i32 spectator_id = proto::read<i32>(packet);
-        if(std::ranges::find(BanchoState::spectators, spectator_id) == BanchoState::spectators.end()) {
-            debugLog("Spectator joined: user id {:d}\n", spectator_id);
-            BanchoState::spectators.push_back(spectator_id);
-        }
-    } else if(packet->id == SPECTATOR_LEFT) {
-        i32 spectator_id = proto::read<i32>(packet);
-        auto it = std::ranges::find(BanchoState::spectators, spectator_id);
-        if(it != BanchoState::spectators.end()) {
-            debugLog("Spectator left: user id {:d}\n", spectator_id);
-            BanchoState::spectators.erase(it);
-        }
-    } else if(packet->id == SPECTATOR_CANT_SPECTATE) {
-        i32 spectator_id = proto::read<i32>(packet);
-        debugLog("Spectator can't spectate: user id {:d}\n", spectator_id);
-    } else if(packet->id == FELLOW_SPECTATOR_JOINED) {
-        i32 spectator_id = proto::read<i32>(packet);
-        if(std::ranges::find(BanchoState::fellow_spectators, spectator_id) == BanchoState::fellow_spectators.end()) {
-            debugLog("Fellow spectator joined: user id {:d}\n", spectator_id);
-            BanchoState::fellow_spectators.push_back(spectator_id);
-        }
-    } else if(packet->id == FELLOW_SPECTATOR_LEFT) {
-        i32 spectator_id = proto::read<i32>(packet);
-        auto it = std::ranges::find(BanchoState::fellow_spectators, spectator_id);
-        if(it != BanchoState::fellow_spectators.end()) {
-            debugLog("Fellow spectator left: user id {:d}\n", spectator_id);
-            BanchoState::fellow_spectators.erase(it);
-        }
-    } else if(packet->id == GET_ATTENTION) {
-        // (nothing to do)
-    } else if(packet->id == NOTIFICATION) {
-        UString notification = proto::read_string(packet);
-        osu->notificationOverlay->addToast(notification, INFO_TOAST);
-    } else if(packet->id == ROOM_UPDATED) {
-        auto room = Room(packet);
-        if(osu->lobby->isVisible()) {
-            osu->lobby->updateRoom(room);
-        } else if(room.id == BanchoState::room.id) {
-            osu->room->on_room_updated(room);
-        }
-    } else if(packet->id == ROOM_CREATED) {
-        auto room = new Room(packet);
-        osu->lobby->addRoom(room);
-    } else if(packet->id == ROOM_CLOSED) {
-        i32 room_id = proto::read<i32>(packet);
-        osu->lobby->removeRoom(room_id);
-    } else if(packet->id == ROOM_JOIN_SUCCESS) {
-        // Sanity, in case some trolley admins do funny business
-        if(BanchoState::spectating) {
-            stop_spectating();
-        }
-        if(osu->isInPlayMode()) {
-            osu->getSelectedBeatmap()->stop(true);
+            break;
         }
 
-        auto room = Room(packet);
-        osu->room->on_room_joined(room);
-    } else if(packet->id == ROOM_JOIN_FAIL) {
-        osu->notificationOverlay->addToast("Failed to join room.", ERROR_TOAST);
-        osu->lobby->on_room_join_failed();
-    } else if(packet->id == MATCH_STARTED) {
-        auto room = Room(packet);
-        osu->room->on_match_started(room);
-    } else if(packet->id == UPDATE_MATCH_SCORE || packet->id == MATCH_SCORE_UPDATED) {
-        osu->room->on_match_score_updated(packet);
-    } else if(packet->id == HOST_CHANGED) {
-        // (nothing to do)
-    } else if(packet->id == MATCH_ALL_PLAYERS_LOADED) {
-        osu->room->on_all_players_loaded();
-    } else if(packet->id == MATCH_PLAYER_FAILED) {
-        i32 slot_id = proto::read<i32>(packet);
-        osu->room->on_player_failed(slot_id);
-    } else if(packet->id == MATCH_FINISHED) {
-        osu->room->on_match_finished();
-    } else if(packet->id == MATCH_SKIP) {
-        osu->room->on_all_players_skipped();
-    } else if(packet->id == CHANNEL_JOIN_SUCCESS) {
-        UString name = proto::read_string(packet);
-        auto msg = ChatMessage{
-            .tms = time(nullptr),
-            .author_id = 0,
-            .author_name = UString(""),
-            .text = UString("Joined channel."),
-        };
-        osu->chat->addChannel(name);
-        osu->chat->addMessage(name, msg, false);
-    } else if(packet->id == CHANNEL_INFO) {
-        UString channel_name = proto::read_string(packet);
-        UString channel_topic = proto::read_string(packet);
-        i32 nb_members = proto::read<i32>(packet);
-        BanchoState::update_channel(channel_name, channel_topic, nb_members, false);
-    } else if(packet->id == LEFT_CHANNEL) {
-        UString name = proto::read_string(packet);
-        osu->chat->removeChannel(name);
-    } else if(packet->id == CHANNEL_AUTO_JOIN) {
-        UString channel_name = proto::read_string(packet);
-        UString channel_topic = proto::read_string(packet);
-        i32 nb_members = proto::read<i32>(packet);
-        BanchoState::update_channel(channel_name, channel_topic, nb_members, true);
-    } else if(packet->id == PRIVILEGES) {
-        proto::read<u32>(packet);
-        // (nothing to do)
-    } else if(packet->id == FRIENDS_LIST) {
-        BANCHO::User::friends.clear();
+        case UNPROTECT_VARIABLES: {
+            u16 nb_variables = proto::read<u16>(packet);
+            for(u16 i = 0; i < nb_variables; i++) {
+                auto name = proto::read_stdstring(packet);
+                auto cvar = cvars->getConVarByName(name, false);
+                if(cvar) {
+                    cvar->setServerProtected(ConVar::ProtectionPolicy::UNPROTECTED);
+                } else {
+                    debugLog("Server wanted to unprotect cvar '{}', but it doesn't exist!", name);
+                }
+            }
 
-        u16 nb_friends = proto::read<u16>(packet);
-        for(u16 i = 0; i < nb_friends; i++) {
-            i32 friend_id = proto::read<i32>(packet);
-            BANCHO::User::friends.push_back(friend_id);
-        }
-    } else if(packet->id == PROTOCOL_VERSION) {
-        int protocol_version = proto::read<i32>(packet);
-        if(protocol_version != 19) {
-            osu->notificationOverlay->addToast("This server may use an unsupported protocol version.", ERROR_TOAST);
-        }
-    } else if(packet->id == MAIN_MENU_ICON) {
-        UString icon = proto::read_string(packet);
-        auto urls = icon.split("|");
-        if(urls.size() == 2 && ((urls[0].startsWith("http://")) || urls[0].startsWith("https://"))) {
-            BanchoState::server_icon_url = urls[0];
-        }
-    } else if(packet->id == MATCH_PLAYER_SKIPPED) {
-        i32 user_id = proto::read<i32>(packet);
-        osu->room->on_player_skip(user_id);
-    } else if(packet->id == USER_PRESENCE) {
-        i32 raw_id = proto::read<i32>(packet);
-        i32 presence_user_id = abs(raw_id);  // IRC clients are sent with negative IDs, hence the abs()
-        auto presence_username = proto::read_string(packet);
-
-        UserInfo *user = BANCHO::User::get_user_info(presence_user_id);
-        user->irc_user = raw_id < 0;
-        user->has_presence = true;
-        user->name = presence_username;
-        user->utc_offset = proto::read<u8>(packet);
-        user->country = proto::read<u8>(packet);
-        user->privileges = proto::read<u8>(packet);
-        user->longitude = proto::read<f32>(packet);
-        user->latitude = proto::read<f32>(packet);
-        user->global_rank = proto::read<i32>(packet);
-
-        // Server can decide what username we use
-        if(presence_user_id == BanchoState::get_uid()) { 
-            BanchoState::username = presence_username.toUtf8();
-            osu->onUserCardChange(presence_username);
+            break;
         }
 
-        osu->chat->updateUserList();
-    } else if(packet->id == USER_PRESENCE_SINGLE) {
-        BANCHO::User::get_user_info(proto::read<i32>(packet));  // add to online_users list
-    } else if(packet->id == USER_PRESENCE_BUNDLE) {
-        u16 nb_users = proto::read<u16>(packet);
-        for(u16 i = 0; i < nb_users; i++) {
-            BANCHO::User::get_user_info(proto::read<i32>(packet));  // add to online_users list
-        }
-    } else if(packet->id == RESTART) {
-        // XXX: wait 'ms' milliseconds before reconnecting
-        i32 ms = proto::read<i32>(packet);
-        (void)ms;
+        case FORCE_VALUES: {
+            u16 nb_variables = proto::read<u16>(packet);
+            for(u16 i = 0; i < nb_variables; i++) {
+                auto name = proto::read_stdstring(packet);
+                auto val = proto::read_stdstring(packet);
+                auto cvar = cvars->getConVarByName(name, false);
+                if(cvar) {
+                    cvar->setValue(val, true, ConVar::CvarEditor::SERVER);
+                } else {
+                    debugLog("Server wanted to set cvar '{}' to '{}', but it doesn't exist!", name, val);
+                }
+            }
 
-        // Some servers send "restart" packets when password is incorrect
-        // So, don't retry unless actually logged in
-        if(BanchoState::is_online()) {
-            BanchoState::reconnect();
+            break;
         }
-    } else if(packet->id == MATCH_INVITE) {
-        UString sender = proto::read_string(packet);
-        UString text = proto::read_string(packet);
-        UString recipient = proto::read_string(packet);
-        (void)recipient;
-        i32 sender_id = proto::read<i32>(packet);
-        auto msg = ChatMessage{
-            .tms = time(nullptr),
-            .author_id = sender_id,
-            .author_name = sender,
-            .text = text,
-        };
-        osu->chat->addMessage(recipient, msg);
-    } else if(packet->id == CHANNEL_INFO_END) {
-        BanchoState::print_new_channels = false;
-    } else if(packet->id == ROOM_PASSWORD_CHANGED) {
-        UString new_password = proto::read_string(packet);
-        debugLog("Room changed password to {:s}\n", new_password.toUtf8());
-        BanchoState::room.password = new_password;
-    } else if(packet->id == SILENCE_END) {
-        i32 delta = proto::read<i32>(packet);
-        debugLog("Silence ends in {:d} seconds.\n", delta);
-        // XXX: Prevent user from sending messages while silenced
-    } else if(packet->id == USER_SILENCED) {
-        i32 user_id = proto::read<i32>(packet);
-        debugLog("User #{:d} silenced.\n", user_id);
-    } else if(packet->id == USER_DM_BLOCKED) {
-        proto::read_string(packet);
-        proto::read_string(packet);
-        UString blocked = proto::read_string(packet);
-        proto::read<u32>(packet);
-        debugLog("Blocked {:s}.\n", blocked.toUtf8());
-    } else if(packet->id == TARGET_IS_SILENCED) {
-        proto::read_string(packet);
-        proto::read_string(packet);
-        UString blocked = proto::read_string(packet);
-        proto::read<u32>(packet);
-        debugLog("Silenced {:s}.\n", blocked.toUtf8());
-    } else if(packet->id == VERSION_UPDATE) {
-        // (nothing to do)
-    } else if(packet->id == VERSION_UPDATE_FORCED) {
-        BanchoState::disconnect();
-        osu->notificationOverlay->addToast("This server requires a newer client version.", ERROR_TOAST);
-    } else if(packet->id == ACCOUNT_RESTRICTED) {
-        osu->notificationOverlay->addToast("Account restricted.", ERROR_TOAST);
-        BanchoState::disconnect();
-    } else if(packet->id == MATCH_ABORT) {
-        osu->room->on_match_aborted();
-    } else {
-        debugLog("Unknown packet ID {:d} ({:d} bytes)!\n", packet->id, packet->size);
+
+        case RESET_VALUES: {
+            u16 nb_variables = proto::read<u16>(packet);
+            for(u16 i = 0; i < nb_variables; i++) {
+                auto name = proto::read_stdstring(packet);
+                auto cvar = cvars->getConVarByName(name, false);
+                if(cvar) {
+                    cvar->hasServerValue = false;
+                } else {
+                    debugLog("Server wanted to reset cvar '{}', but it doesn't exist!", name);
+                }
+            }
+
+            break;
+        }
+
+        default: {
+            debugLog("Unknown packet ID {:d} ({:d} bytes)!\n", packet->id, packet->size);
+            break;
+        }
     }
 }
 

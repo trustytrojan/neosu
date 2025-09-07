@@ -57,14 +57,14 @@ static ConVar *_getConVar(const ConVarString &name) {
 ConVarString ConVar::getFancyDefaultValue() {
     switch(this->getType()) {
         case ConVar::CONVAR_TYPE::CONVAR_TYPE_BOOL:
-            return this->dDefaultDefaultValue == 0 ? "false" : "true";
+            return this->dDefaultValue == 0 ? "false" : "true";
         case ConVar::CONVAR_TYPE::CONVAR_TYPE_INT:
-            return std::to_string((int)this->dDefaultDefaultValue);
+            return std::to_string((int)this->dDefaultValue);
         case ConVar::CONVAR_TYPE::CONVAR_TYPE_FLOAT:
-            return std::to_string(this->dDefaultDefaultValue);
+            return std::to_string(this->dDefaultValue);
         case ConVar::CONVAR_TYPE::CONVAR_TYPE_STRING: {
             ConVarString out = "\"";
-            out.append(this->sDefaultDefaultValue);
+            out.append(this->sDefaultValue);
             out.append("\"");
             return out;
         }
@@ -89,90 +89,96 @@ ConVarString ConVar::typeToString(CONVAR_TYPE type) {
 }
 
 void ConVar::exec() {
-    if(!this->is_unlocked()) return;
-
-    if(osu != nullptr) {
-        auto is_submittable = cvars->areAllCvarsSubmittable();
-
-        auto beatmap = osu->getSelectedBeatmap();
-        if(beatmap != nullptr) {
-            beatmap->is_submittable &= is_submittable;
-        }
-
-        auto mod_selector = osu->modSelector;
-        if(mod_selector && mod_selector->nonSubmittableWarning) {
-            mod_selector->nonSubmittableWarning->setVisible(!is_submittable && BanchoState::can_submit_scores());
-        }
-    }
-
     if(auto *cb = std::get_if<NativeConVarCallback>(&this->callback)) (*cb)();
 }
 
 void ConVar::execArgs(const UString &args) {
-    if(!this->is_unlocked()) return;
-
     if(auto *cb = std::get_if<NativeConVarCallbackArgs>(&this->callback)) (*cb)(args);
 }
 
 void ConVar::execFloat(float args) {
-    if(!this->is_unlocked()) return;
-
     if(auto *cb = std::get_if<NativeConVarCallbackFloat>(&this->callback)) (*cb)(args);
 }
 
-void ConVar::setFlags(uint8_t new_flags) {
-    std::atomic_thread_fence(std::memory_order_seq_cst);
-    this->iFlags = new_flags;
+double ConVar::getDouble() const {
+    if(this->isFlagSet(cv::SERVER) && this->hasServerValue.load()) {
+        return this->dServerValue.load(std::memory_order_acquire);
+    }
+
+    if(this->isFlagSet(cv::SKINS) && this->hasSkinValue.load()) {
+        return this->dSkinValue.load(std::memory_order_acquire);
+    }
+
+    if(this->isProtected() && BanchoState::is_in_a_multi_room()) {
+        return this->dDefaultValue;
+    }
+
+    return this->dClientValue.load(std::memory_order_acquire);
 }
 
-void ConVar::setDefaultString(const UString &defaultValue) { this->setDefaultStringInt(defaultValue.utf8View()); }
+const ConVarString &ConVar::getString() const {
+    if(this->isFlagSet(cv::SERVER) && this->hasServerValue.load()) {
+        return this->sServerValue;
+    }
 
-void ConVar::setDefaultFloat(float defaultValue) { this->setDefaultFloatInt(defaultValue); }
+    if(this->isFlagSet(cv::SKINS) && this->hasSkinValue.load()) {
+        return this->sSkinValue;
+    }
 
-void ConVar::setDefaultFloatInt(double defaultValue) {
-    this->dDefaultValue.store(defaultValue, std::memory_order_release);
+    if(this->isProtected() && BanchoState::is_in_a_multi_room()) {
+        return this->sDefaultValue;
+    }
+
+    return this->sClientValue;
+}
+
+
+void ConVar::setDefaultDouble(double defaultValue) {
+    this->dDefaultValue = defaultValue;
     this->sDefaultValue = fmt::format("{:g}", defaultValue);
 }
 
-void ConVar::setDefaultStringInt(const std::string_view &defaultValue) {
+void ConVar::setDefaultString(const std::string_view &defaultValue) {
     this->sDefaultValue = defaultValue;
+
     // also try to parse default float from the default string
     const double f = std::strtod(this->sDefaultValue.c_str(), nullptr);
     if(f != 0.0) {
-        this->dDefaultValue.store(f, std::memory_order_release);
+        this->dDefaultValue = f;
     }
 }
 
-bool ConVar::is_unlocked() const {
-    if(!BanchoState::is_online()) {
-        return this->isFlagSet(cv::CLIENT) || this->isFlagSet(cv::SERVER);
+bool ConVar::onSetValueGameplay(CvarEditor editor) {
+    // Only SERVER can edit GAMEPLAY cvars during multiplayer matches
+    if(BanchoState::is_playing_a_multi_map() && editor != CvarEditor::SERVER) {
+        debugLog("Can't edit {} while in a multiplayer match.\n", this->sName);
+        return false;
     }
 
-    if(!this->isFlagSet(cv::CLIENT)) return false;
-
-    if(BanchoState::is_in_a_multi_room()) {
-        return !this->isFlagSet(cv::PROTECTED);
-    } else {
-        return true;
+    // Regardless of the editor, changing GAMEPLAY cvars in the middle of a map
+    // will result in an invalid replay. Set it as cheated so the score isn't saved.
+    if(osu->isInPlayMode()) {
+        debugLog("{} affects gameplay: won't submit score.\n", this->sName);
     }
-}
-
-// HACK ALERT: getter shouldn't affect state!
-bool ConVar::is_gameplay_compatible() const {
-    if(osu && this->isFlagSet(cv::GAMEPLAY)) {
-        if(BanchoState::is_playing_a_multi_map()) {
-            debugLog("Can't edit {:s} while in a multiplayer match.\n", this->sName);
-            return false;
-        } else {
-            if(osu->isInPlayMode()) {
-                debugLog("{:s} affects gameplay: won't submit score.\n", this->sName);
-            }
-            osu->getScore()->setCheated();
-        }
-        osu->getScore()->mods = Replay::Mods::from_cvars();
-    }
+    osu->getScore()->setCheated();
 
     return true;
+}
+
+void ConVar::onSetValueProtected(const std::string &oldValue) {
+    if(!osu) return;
+
+    (void)oldValue;  // we just assume it was changed to something else than default
+
+    auto beatmap = osu->getSelectedBeatmap();
+    if(beatmap != nullptr) {
+        beatmap->is_submittable = false;
+    }
+
+    auto mod_selector = osu->modSelector;
+    if(mod_selector && mod_selector->nonSubmittableWarning) {
+        mod_selector->nonSubmittableWarning->setVisible(BanchoState::can_submit_scores());
+    }
 }
 
 //********************************//
@@ -273,7 +279,7 @@ ConVarString ConVarHandler::flagsToString(uint8_t flags) {
 
 bool ConVarHandler::areAllCvarsSubmittable() {
     for(const auto &cv : _getGlobalConVarArray()) {
-        if(!cv->isFlagSet(cv::PROTECTED)) continue;
+        if(!cv->isProtected()) continue;
 
         if(cv->getString() != cv->getDefaultString()) {
             return false;
@@ -295,6 +301,20 @@ bool ConVarHandler::areAllCvarsSubmittable() {
 
     return true;
 }
+
+void ConVarHandler::resetServerCvars() {
+    for(const auto &cv : _getGlobalConVarArray()) {
+        cv->hasServerValue = false;
+        cv->serverProtectionPolicy = ConVar::ProtectionPolicy::DEFAULT;
+    }
+}
+
+void ConVarHandler::resetSkinCvars() {
+    for(const auto &cv : _getGlobalConVarArray()) {
+        cv->hasSkinValue = false;
+    }
+}
+
 
 //*****************************//
 //	ConVarHandler ConCommands  //

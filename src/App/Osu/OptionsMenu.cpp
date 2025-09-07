@@ -3087,7 +3087,7 @@ void OptionsMenu::onASIOBufferChange([[maybe_unused]] CBaseUISlider *slider) {
 
     BASS_ASIO_INFO info{};
     BASS_ASIO_GetInfo(&info);
-    cv::asio_buffer_size.setDefaultFloat(info.bufpref);
+    cv::asio_buffer_size.setDefaultDouble(info.bufpref);
     slider->setBounds(info.bufmin, info.bufmax);
     slider->setKeyDelta(info.bufgran == -1 ? info.bufmin : info.bufgran);
 

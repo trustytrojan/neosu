@@ -48,6 +48,7 @@ enum GameMode : uint8_t {
     MANIA = 3,
 };
 
+// NOTE: u8 in case packet headers get shortened, even though packet IDs are currently u16
 enum IncomingPackets : uint8_t {
     USER_ID = 5,
     RECV_MESSAGE = 7,
@@ -99,8 +100,15 @@ enum IncomingPackets : uint8_t {
     SWITCH_SERVER = 103,
     ACCOUNT_RESTRICTED = 104,
     MATCH_ABORT = 106,
+
+    // neosu-specific packets (128 is arbitrary number to start at)
+    PROTECT_VARIABLES = 128,
+    UNPROTECT_VARIABLES = 129,
+    FORCE_VALUES = 130,
+    RESET_VALUES = 131,
 };
 
+// NOTE: u8 in case packet headers get shortened, even though packet IDs are currently u16
 enum OutgoingPackets : uint8_t {
     CHANGE_ACTION = 0,
     SEND_PUBLIC_MESSAGE = 1,

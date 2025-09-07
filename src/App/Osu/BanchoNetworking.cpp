@@ -454,9 +454,9 @@ void cleanup_networking() {
 
 }  // namespace BANCHO::Net
 
-
-
 void BanchoState::disconnect() {
+    cvars->resetServerCvars();
+
     // Logout
     // This is a blocking call, but we *do* want this to block when quitting the game.
     if(BanchoState::is_online()) {

@@ -40,7 +40,7 @@ SoLoudSoundEngine::SoLoudSoundEngine() : SoundEngine() {
 
     cv::snd_freq.setValue(SoLoud::Soloud::AUTO);  // let it be auto-negotiated (the snd_freq callback will adjust if
                                                   // needed, if this is manually set in a config)
-    cv::snd_freq.setDefaultFloat(SoLoud::Soloud::AUTO);
+    cv::snd_freq.setDefaultDouble(SoLoud::Soloud::AUTO);
 
     this->iMaxActiveVoices =
         std::clamp<int>(cv::snd_sanity_simultaneous_limit.getInt(), 64,
@@ -510,7 +510,7 @@ bool SoLoudSoundEngine::initializeOutputDevice(const OUTPUT_DEVICE &device) {
 
         if(this->currentOutputDevice.isDefault && this->currentOutputDevice.id == -1) {
             // update "fake" default convar string (avoid saving to configs)
-            cv::snd_output_device.setDefaultString(this->currentOutputDevice.name);
+            cv::snd_output_device.setDefaultString(this->currentOutputDevice.name.toUtf8());
         }
 
         cv::snd_output_device.setValue(this->currentOutputDevice.name, false);

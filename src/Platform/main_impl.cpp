@@ -445,9 +445,9 @@ bool SDLMain::createWindow() {
         const auto fourxhz = std::round(std::clamp<float>(hz * 4.0f, hz, 1000.0f));
 
         // also set fps_max to 4x the refresh rate
-        cv::fps_max.setDefaultFloat(fourxhz);
+        cv::fps_max.setDefaultDouble(fourxhz);
         cv::fps_max.setValue(fourxhz);
-        cv::fps_max_menu.setDefaultFloat(hz);
+        cv::fps_max_menu.setDefaultDouble(hz);
         cv::fps_max_menu.setValue(hz);
     }
 
