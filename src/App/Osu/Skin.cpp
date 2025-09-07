@@ -237,9 +237,11 @@ void Skin::load() {
 
     bool parseSkinIni1Status = true;
     bool parseSkinIni2Status = true;
+    cvars->resetSkinCvars();
     if(!this->parseSkinINI(this->sSkinIniFilePath)) {
         parseSkinIni1Status = false;
         this->sSkinIniFilePath = MCENGINE_DATA_DIR "materials/default/skin.ini";
+        cvars->resetSkinCvars();
         parseSkinIni2Status = this->parseSkinINI(this->sSkinIniFilePath);
     }
 
@@ -946,8 +948,16 @@ bool Skin::parseSkinINI(std::string filepath) {
 
     // process content line by line, handling different line endings
     int nonEmptyLineCounter = 0;
-    int curBlock = 0;  // NOTE: was -1, but osu incorrectly defaults to [General] and loads properties even before the
-                       // actual section start (just for this first section though)
+
+    enum class SkinSection {
+        GENERAL,
+        COLOURS,
+        FONTS,
+        NEOSU,
+    };
+
+    // osu! defaults to [General] and loads properties even before the actual section start
+    SkinSection curBlock = SkinSection::GENERAL;
 
     UString currentLine;
     for(int i = 0; i < fileContent.length(); i++) {
@@ -973,17 +983,18 @@ bool Skin::parseSkinINI(std::string filepath) {
 
         // section detection
         if(curLine.find("[General]") != std::string::npos)
-            curBlock = 0;
+            curBlock = SkinSection::GENERAL;
         else if(curLine.find("[Colours]") != std::string::npos || curLine.find("[Colors]") != std::string::npos)
-            curBlock = 1;
+            curBlock = SkinSection::COLOURS;
         else if(curLine.find("[Fonts]") != std::string::npos)
-            curBlock = 2;
+            curBlock = SkinSection::FONTS;
+        else if(curLine.find("[neosu]") != std::string::npos)
+            curBlock = SkinSection::NEOSU;
 
         auto curLineChar = curLine.c_str();
 
         switch(curBlock) {
-            // General
-            case 0: {
+            case SkinSection::GENERAL: {
                 std::string version;
                 if(Parsing::parse(curLineChar, "Version", ':', &version)) {
                     if((version.find("latest") != std::string::npos) || (version.find("User") != std::string::npos)) {
@@ -1015,8 +1026,7 @@ bool Skin::parseSkinINI(std::string filepath) {
                 break;
             }
 
-            // Colors
-            case 1: {
+            case SkinSection::COLOURS: {
                 u8 comboNum;
                 u8 r, g, b;
 
@@ -1044,8 +1054,7 @@ bool Skin::parseSkinINI(std::string filepath) {
                 break;
             }
 
-            // Fonts
-            case 2: {
+            case SkinSection::FONTS: {
                 Parsing::parse(curLineChar, "ComboOverlap", ':', &this->iComboOverlap);
                 Parsing::parse(curLineChar, "ScoreOverlap", ':', &this->iScoreOverlap);
                 Parsing::parse(curLineChar, "HitCircleOverlap", ':', &this->iHitCircleOverlap);
@@ -1078,6 +1087,25 @@ bool Skin::parseSkinINI(std::string filepath) {
                             this->sHitCirclePrefix.insert(i, "/");
                         }
                     }
+                }
+
+                break;
+            }
+
+            case SkinSection::NEOSU: {
+                size_t pos = curLine.find(':');
+                if(pos == std::string::npos) break;
+
+                std::string name, value;
+                Parsing::parse(curLine.substr(0, pos), &name);
+                Parsing::parse(curLine.substr(pos + 1), &value);
+
+                // XXX: shouldn't be setting cvars directly in parsing method
+                auto cvar = cvars->getConVarByName(name, false);
+                if(cvar) {
+                    cvar->setValue(value, true, ConVar::CvarEditor::SKIN);
+                } else {
+                    debugLog("Skin wanted to set cvar '{}' to '{}', but it doesn't exist!", name, value);
                 }
 
                 break;
