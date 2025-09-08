@@ -46,7 +46,10 @@ extern std::unordered_map<i32, UserInfo*> online_users;
 extern std::vector<i32> friends;
 extern std::vector<i32> stats_requests;
 
+void login_user(i32 user_id);
 void logout_user(i32 user_id);
+void logout_all_users();
+
 UserInfo* find_user(const UString& username);
 UserInfo* find_user_starting_with(UString prefix, const UString& last_match);
 UserInfo* try_get_user_info(i32 user_id, bool wants_presence = false);

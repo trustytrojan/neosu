@@ -615,14 +615,16 @@ void BanchoState::handle_packet(Packet *packet) {
         }
 
         case USER_PRESENCE_SINGLE: {
-            BANCHO::User::get_user_info(proto::read<i32>(packet));  // add to online_users list
+            i32 user_id = proto::read<i32>(packet);
+            BANCHO::User::login_user(user_id);
             break;
         }
 
         case USER_PRESENCE_BUNDLE: {
             u16 nb_users = proto::read<u16>(packet);
             for(u16 i = 0; i < nb_users; i++) {
-                BANCHO::User::get_user_info(proto::read<i32>(packet));  // add to online_users list
+                i32 user_id = proto::read<i32>(packet);
+                BANCHO::User::login_user(user_id);
             }
             break;
         }

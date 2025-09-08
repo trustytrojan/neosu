@@ -522,12 +522,7 @@ void BanchoState::disconnect() {
     osu->optionsMenu->setLoginLoadingState(false);
     osu->optionsMenu->scheduleLayoutUpdate();
 
-    for(auto &pair : BANCHO::User::online_users) {
-        delete pair.second;
-    }
-    BANCHO::User::online_users.clear();
-    BANCHO::User::friends.clear();
-
+    BANCHO::User::logout_all_users();
     osu->chat->onDisconnect();
 
     // XXX: We should toggle between "offline" sorting options and "online" ones

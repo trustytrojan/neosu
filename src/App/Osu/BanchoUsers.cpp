@@ -26,6 +26,7 @@ void request_presence(UserInfo* info) {
 }
 }  // namespace
 
+std::unordered_map<i32, UserInfo*> all_users;
 std::unordered_map<i32, UserInfo*> online_users;
 std::vector<i32> friends;
 std::vector<i32> stats_requests;
@@ -48,6 +49,13 @@ void request_presence_batch() {
         BANCHO::Proto::write<i32>(&packet, user_id);
     }
     BANCHO::Net::send_packet(packet);
+}
+
+void login_user(i32 user_id) {
+    UserInfo* user = get_user_info(user_id, true);
+    if(online_users.find(user_id) == online_users.end()) {
+        online_users[user_id] = user;
+    }
 }
 
 void logout_user(i32 user_id) {
@@ -73,8 +81,17 @@ void logout_user(i32 user_id) {
     }
 }
 
+void logout_all_users() {
+    for(auto &pair : all_users) {
+        delete pair.second;
+    }
+    all_users.clear();
+    online_users.clear();
+    friends.clear();
+}
+
 UserInfo* find_user(const UString& username) {
-    for(auto pair : online_users) {
+    for(auto pair : all_users) {
         if(pair.second->name == username) {
             return pair.second;
         }
@@ -85,7 +102,7 @@ UserInfo* find_user(const UString& username) {
 
 UserInfo* find_user_starting_with(UString prefix, const UString& last_match) {
     bool matched = last_match.length() == 0;
-    for(auto pair : online_users) {
+    for(auto pair : all_users) {
         auto user = pair.second;
         if(!matched) {
             if(user->name == last_match) {
@@ -109,8 +126,8 @@ UserInfo* find_user_starting_with(UString prefix, const UString& last_match) {
 }
 
 UserInfo* try_get_user_info(i32 user_id, bool wants_presence) {
-    auto it = online_users.find(user_id);
-    if(it != online_users.end()) {
+    auto it = all_users.find(user_id);
+    if(it != all_users.end()) {
         if(wants_presence) {
             request_presence(it->second);
         }
@@ -127,7 +144,7 @@ UserInfo* get_user_info(i32 user_id, bool wants_presence) {
         info = new UserInfo();
         info->user_id = user_id;
         info->name = UString::format("User #%d", user_id);
-        online_users[user_id] = info;
+        all_users[user_id] = info;
         osu->chat->updateUserList();
 
         if(wants_presence) {
