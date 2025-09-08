@@ -44,7 +44,6 @@ namespace BANCHO::User {
 
 extern std::unordered_map<i32, UserInfo*> online_users;
 extern std::vector<i32> friends;
-extern std::vector<i32> stats_requests;
 
 void login_user(i32 user_id);
 void logout_user(i32 user_id);
@@ -55,5 +54,9 @@ UserInfo* find_user_starting_with(UString prefix, const UString& last_match);
 UserInfo* try_get_user_info(i32 user_id, bool wants_presence = false);
 UserInfo* get_user_info(i32 user_id, bool wants_presence = false);
 
+void enqueue_presence_request(UserInfo* info);
+void enqueue_stats_request(UserInfo* info);
 void request_presence_batch();
+void request_stats_batch();
+
 }  // namespace BANCHO::User

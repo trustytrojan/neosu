@@ -394,19 +394,14 @@ void Chat::drawTicker() {
 void Chat::mouse_update(bool *propagate_clicks) {
     if(!this->bVisible) return;
 
-    // Request stats for on-screen user cards
+    // Request presence & stats for on-screen user cards
     for(auto elm : this->user_list->getContainer()->getElements()) {
         auto *card = (UserCard2 *)elm;
-        if(card->info->irc_user) continue;
-
-        bool is_outdated = card->info->stats_tms + 5000 < Timing::getTicksMS();
         bool is_above_bottom = card->getPos().y <= this->user_list->getPos().y + this->user_list->getSize().y;
         bool is_below_top = card->getPos().y + card->getSize().y >= this->user_list->getPos().y;
-        if(is_outdated && is_above_bottom && is_below_top) {
-            if(std::ranges::find(BANCHO::User::stats_requests, card->info->user_id) ==
-               BANCHO::User::stats_requests.end()) {
-                BANCHO::User::stats_requests.push_back(card->info->user_id);
-            }
+        if(is_above_bottom && is_below_top) {
+            BANCHO::User::enqueue_presence_request(card->info);
+            BANCHO::User::enqueue_stats_request(card->info);
         }
     }
 

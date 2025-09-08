@@ -387,18 +387,7 @@ void receive_bancho_packets() {
         last_presence_request = engine->getTime();
 
         BANCHO::User::request_presence_batch();
-
-        if(!BANCHO::User::stats_requests.empty()) {
-            Packet packet;
-            packet.id = USER_STATS_REQUEST;
-            proto::write<u16>(&packet, BANCHO::User::stats_requests.size());
-            for(auto user_id : BANCHO::User::stats_requests) {
-                proto::write<i32>(&packet, user_id);
-            }
-            send_packet(packet);
-
-            BANCHO::User::stats_requests.clear();
-        }
+        BANCHO::User::request_stats_batch();
     }
 }
 

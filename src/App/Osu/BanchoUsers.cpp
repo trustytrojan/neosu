@@ -5,6 +5,7 @@
 
 #include "Bancho.h"
 #include "BanchoNetworking.h"
+#include "BanchoProtocol.h"
 #include "Chat.h"
 #include "Engine.h"
 #include "NotificationOverlay.h"
@@ -12,31 +13,32 @@
 #include "SpectatorScreen.h"
 
 namespace BANCHO::User {
-namespace {  // static namespace
-std::vector<UserInfo*> presence_requests;
-
-void request_presence(UserInfo* info) {
-    if(info->has_presence) return;
-
-    for(auto req : presence_requests) {
-        if(req->user_id == info->user_id) return;
-    }
-
-    presence_requests.push_back(info);
-}
-}  // namespace
 
 std::unordered_map<i32, UserInfo*> all_users;
 std::unordered_map<i32, UserInfo*> online_users;
 std::vector<i32> friends;
-std::vector<i32> stats_requests;
+std::vector<UserInfo*> presence_requests;
+std::vector<UserInfo*> stats_requests;
+
+
+void enqueue_presence_request(UserInfo* info) {
+    if(info->has_presence) return;
+    if(std::find(presence_requests.begin(), presence_requests.end(), info) != presence_requests.end()) return;
+    presence_requests.push_back(info);
+}
+
+void enqueue_stats_request(UserInfo* info) {
+    if(info->irc_user) return;
+    if(info->stats_tms + 5000 > Timing::getTicksMS()) return;
+    if(std::find(stats_requests.begin(), stats_requests.end(), info) != stats_requests.end()) return;
+    stats_requests.push_back(info);
+}
 
 void request_presence_batch() {
     std::vector<i32> actual_requests;
     for(auto req : presence_requests) {
-        if(!req->has_presence) {
-            actual_requests.push_back(req->user_id);
-        }
+        if(req->has_presence) continue;
+        actual_requests.push_back(req->user_id);
     }
 
     presence_requests.clear();
@@ -51,11 +53,30 @@ void request_presence_batch() {
     BANCHO::Net::send_packet(packet);
 }
 
-void login_user(i32 user_id) {
-    UserInfo* user = get_user_info(user_id, true);
-    if(online_users.find(user_id) == online_users.end()) {
-        online_users[user_id] = user;
+void request_stats_batch() {
+    std::vector<i32> actual_requests;
+    for(auto req : stats_requests) {
+        if(req->irc_user) continue;
+        if(req->stats_tms + 5000 > Timing::getTicksMS()) continue;
+        actual_requests.push_back(req->user_id);
     }
+
+    stats_requests.clear();
+    if(actual_requests.empty()) return;
+
+    Packet packet;
+    packet.id = USER_STATS_REQUEST;
+    BANCHO::Proto::write<u16>(&packet, actual_requests.size());
+    for(auto user_id : actual_requests) {
+        BANCHO::Proto::write<i32>(&packet, user_id);
+    }
+    BANCHO::Net::send_packet(packet);
+}
+
+void login_user(i32 user_id) {
+    // We mark the user as online, but don't request presence data
+    // Presence & stats are only requested when the user shows up in UI
+    online_users[user_id] = get_user_info(user_id, false);
 }
 
 void logout_user(i32 user_id) {
@@ -88,6 +109,8 @@ void logout_all_users() {
     all_users.clear();
     online_users.clear();
     friends.clear();
+    presence_requests.clear();
+    stats_requests.clear();
 }
 
 UserInfo* find_user(const UString& username) {
@@ -129,7 +152,7 @@ UserInfo* try_get_user_info(i32 user_id, bool wants_presence) {
     auto it = all_users.find(user_id);
     if(it != all_users.end()) {
         if(wants_presence) {
-            request_presence(it->second);
+            enqueue_presence_request(it->second);
         }
 
         return it->second;
@@ -148,7 +171,7 @@ UserInfo* get_user_info(i32 user_id, bool wants_presence) {
         osu->chat->updateUserList();
 
         if(wants_presence) {
-            request_presence(info);
+            enqueue_presence_request(info);
         }
     }
 

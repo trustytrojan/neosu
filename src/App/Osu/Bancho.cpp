@@ -562,6 +562,8 @@ void BanchoState::handle_packet(Packet *packet) {
             user->latitude = proto::read<f32>(packet);
             user->global_rank = proto::read<i32>(packet);
 
+            BANCHO::User::login_user(presence_user_id);
+
             // Server can decide what username we use
             if(presence_user_id == BanchoState::get_uid()) { 
                 BanchoState::username = presence_username.toUtf8();
