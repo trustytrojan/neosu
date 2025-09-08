@@ -376,7 +376,6 @@ $(DEPS_PREFIX)/SDL3-$(SDL3_VERSION).built: $(DEPS_CACHE)/SDL3-$(SDL3_VERSION).so
 	$(MKDIR_P) $(DEPS_PREFIX)/SDL3/build
 	cd $(DEPS_PREFIX)/SDL3 && \
 	$(if $(SDL3_STATIC),$(SED) -i -e 's|#ifdef SDL_DYNAMIC_API.*|#if 1|' -e 's|#error.*Nope.*|#define SDL_DYNAMIC_API 0|' src/dynapi/SDL_dynapi.h,true) && \
-	patch -Np1<$(BUILD_MISCDIR)/sdl3-xp.patch && \
 	PKG_CONFIG="$(PKG_CONFIG)" \
 	CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" LDFLAGS="$(LDFLAGS)" $(CMAKE) -S . -B build -G "$(CMAKE_GEN)" \
 		-D CMAKE_BUILD_TYPE="$(if $(ENABLE_DEBUG),Debug,Release)" \

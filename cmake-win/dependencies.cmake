@@ -1,9 +1,9 @@
 # Dependencies configuration for neosu
 # This file contains version information, URLs, and hashes for all external dependencies
 
-set(SDL3_VERSION "edfbfa27b44d7f8963ddffe536773227329755c1")
+set(SDL3_VERSION "9d6fb509fe855a18f2c5291dd4e17f2b7e6d4d73")
 set(SDL3_URL "https://github.com/libsdl-org/SDL/archive/${SDL3_VERSION}.tar.gz")
-set(SDL3_HASH "SHA512=df2aca1a53ff35c0ddb2c360a8f3c7d846c8592e8154abd6e25ce27779af4c9ce88caa54795a2c09fa90702f79d5c6864da18973e40d8f73bede4dee577cac4b")
+set(SDL3_HASH "SHA512=a2d182036891ab78faf63e8d5eaeac08f00746ffe2ac4ff950e1d15cf485adf61427d0ad8e95e4bcd97ce9de64068af5136280c8f31964a7a2ad8052479cbc66")
 
 set(FREETYPE2_VERSION "2.13.3")
 string(REPLACE "." "-" _freetype_ver_temp "${FREETYPE2_VERSION}")
