@@ -18,6 +18,7 @@
 #include "UpdateHandler.h"
 
 #include <algorithm>
+#include <fmt/chrono.h>
 #include <unordered_set>
 
 static std::vector<ConVar *> &_getGlobalConVarArray() {
@@ -444,38 +445,225 @@ static void _listcommands(void) {
 }
 
 static void _dumpcommands(void) {
-    // TODO @kiwec: update so it generates styled html
+    // XXX: move this into assets/
+    std::string html_template = R"(<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>neosu | variables</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+            line-height: 1.5em;
+            background-color: #000;
+            color: #eee;
+        }
+
+        body {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 auto;
+            justify-content: center;
+        }
+
+        main {
+            margin: auto;
+            max-width: 768px;
+        }
+
+        h3 {
+            margin: 0;
+        }
+
+        section.variables {
+            display: block;
+            margin-bottom: 2em;
+        }
+
+        section.variables > div {
+            border: 1px solid #333;
+            border-radius: 5px;
+            margin-bottom: 1em;
+            padding: 1em;
+            background-color: #111;
+        }
+
+        cv-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 0.5em;
+        }
+
+        cv-name {
+            font-family: monospace;
+            font-weight: bold;
+            color: #88b0ff;
+            font-size: 1.1em;
+        }
+
+        cv-default {
+            font-family: monospace;
+            color: #aaa;
+            font-size: 0.9em;
+        }
+
+        cv-description {
+            display: block;
+            color: #ccc;
+            margin-bottom: 0.5em;
+            font-size: 0.95em;
+        }
+
+        cv-flags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5em;
+        }
+
+        .flag {
+            padding: 0.2em 0.5em;
+            border-radius: 3px;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .flag.gameplay {
+            background-color: #8b2635;
+            color: #fff;
+        }
+
+        .flag.protected {
+            background-color: #b8860b;
+            color: #fff;
+        }
+
+        .flag.client {
+            background-color: #2d4a88;
+            color: #fff;
+        }
+
+        .flag.skins {
+            background-color: #2d4a22;
+            color: #fff;
+        }
+
+        .flag.server {
+            background-color: #5c1765;
+            color: #fff;
+        }
+
+        a { color: #88b0ff; }
+        a:hover { color: #b4cdff; }
+
+        section.legend {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5em;
+
+            margin-bottom: 2em;
+            padding: 1em;
+            background-color: #111;
+            border-radius: 5px;
+            border: 1px solid #333;
+        }
+
+        .legend > div {
+            display: flex;
+            gap: 0.5em;
+        }
+        .legend > div > div {
+            text-align: right;
+            min-width: 6em;
+        }
+        .legend div span {
+            flex-grow: 1;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>neosu variables</h1>
+        <section class="legend">
+            <h3>Availability</h3>
+            <div>
+                <div><span class="flag client">CLIENT</span></div>
+                <span>Modifiable by clients</span>
+            </div>
+            <div>
+                <div><span class="flag skins">SKINS</span></div>
+                <span>Modifiable by skins</span>
+            </div>
+            <div>
+                <div><span class="flag server">SERVER</span></div>
+                <span>Modifiable by servers (+ saved in replays)</span>
+            </div>
+            <h3 style="margin-top:0.5em">Behavior</h3>
+            <div>
+                <div><span class="flag protected">PROTECTED</span></div>
+                <span>Scores won't submit if modified, and will be forced to default in multiplayer</span>
+            </div>
+            <div>
+                <div><span class="flag gameplay">GAMEPLAY</span></div>
+                <span>Scores won't submit if modified during gameplay</span>
+            </div>
+        </section>
+
+        {{CONVARS_HERE}}
+    </main>
+</body>
+</html>)";
 
     std::vector<ConVar *> convars = cvars->getConVarArray();
     std::ranges::sort(convars, {}, [](const ConVar *v) { return v->getName(); });
 
-    FILE *file = fopen("commands.htm", "w");
+    std::string html = R"(<section class="variables">)";
+    for(auto var : convars) {
+        std::string flags;
+        if(var->isFlagSet(cv::CLIENT)) flags.append("<span class=\"flag client\">CLIENT</span>");
+        if(var->isFlagSet(cv::SKINS)) flags.append("<span class=\"flag skins\">SKINS</span>");
+        if(var->isFlagSet(cv::SERVER)) flags.append("<span class=\"flag server\">SERVER</span>");
+        if(var->isFlagSet(cv::PROTECTED)) flags.append("<span class=\"flag protected\">PROTECTED</span>");
+        if(var->isFlagSet(cv::GAMEPLAY)) flags.append("<span class=\"flag gameplay\">GAMEPLAY</span>");
+
+        html.append(fmt::format(R"(<div>
+    <cv-header>
+        <cv-name>{}</cv-name>
+        <cv-default>{}</cv-default>
+    </cv-header>
+    <cv-description>{}</cv-description>
+    <cv-flags>{}</cv-flags>
+</div>)", var->getName(), var->getFancyDefaultValue(), var->getHelpstring(), flags));
+    }
+    html.append(R"(</section>)");
+
+    html.append(fmt::format(R"(<p style="text-align:center">
+        This page was generated on {:%Y-%m-%d} for neosu v{:.2f}.<br>
+        Use the <code>dumpcommands</code> command to regenerate it yourself.
+    </p>)", fmt::gmtime(std::time(nullptr)), cv::version.getDouble()));
+
+
+    std::string marker = "{{CONVARS_HERE}}";
+    size_t pos = html_template.find(marker);
+    html_template.replace(pos, marker.length(), html);
+
+
+    FILE *file = fopen("variables.htm", "w");
     if(file == nullptr) {
-        Engine::logRaw("Failed to open commands.htm for writing\n");
+        Engine::logRaw("Failed to open variables.htm for writing\n");
         return;
     }
 
-    for(auto var : convars) {
-        if(!var->hasValue()) continue;
-
-        std::string cmd = "<h4>";
-        cmd.append(var->getName());
-        cmd.append("</h4>\n");
-        cmd.append(var->getHelpstring());
-        cmd.append("<pre>{");
-        cmd.append("\n    \"default\": ");
-        cmd.append(var->getFancyDefaultValue());
-        cmd.append("\n}</pre>\n");
-
-        // TODO @kiwec: flags
-
-        fwrite(cmd.c_str(), cmd.size(), 1, file);
-    }
-
+    fwrite(html_template.c_str(), html_template.size(), 1, file);
     fflush(file);
     fclose(file);
 
-    Engine::logRaw("Commands dumped to commands.htm\n");
+    Engine::logRaw("ConVars dumped to variables.htm\n");
 }
 
 void _exec(const UString &args) { Console::execConfigFile(args.toUtf8()); }
