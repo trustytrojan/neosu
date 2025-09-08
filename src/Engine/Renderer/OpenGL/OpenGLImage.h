@@ -7,28 +7,28 @@
 
 #if defined(MCENGINE_FEATURE_OPENGL) || defined(MCENGINE_FEATURE_GLES32)
 
-class OpenGLImage final : public Image
-{
-public:
-	OpenGLImage(std::string filepath, bool mipmapped = false, bool keepInSystemMemory = false);
-	OpenGLImage(i32 width, i32 height, bool mipmapped = false, bool keepInSystemMemory = false);
-	~OpenGLImage() override;
+class OpenGLImage final : public Image {
+   public:
+    OpenGLImage(std::string filepath, bool mipmapped = false, bool keepInSystemMemory = false);
+    OpenGLImage(i32 width, i32 height, bool mipmapped = false, bool keepInSystemMemory = false);
+    ~OpenGLImage() override;
 
-	void bind(unsigned int textureUnit = 0) override;
-	void unbind() override;
+    void bind(unsigned int textureUnit = 0) override;
+    void unbind() override;
 
-	void setFilterMode(Graphics::FILTER_MODE filterMode) override;
-	void setWrapMode(Graphics::WRAP_MODE wrapMode) override;
+    void setFilterMode(Graphics::FILTER_MODE filterMode) override;
+    void setWrapMode(Graphics::WRAP_MODE wrapMode) override;
 
-private:
-	void init() override;
-	void initAsync() override;
-	void destroy() override;
+   private:
+    void init() override;
+    void initAsync() override;
+    void destroy() override;
 
-	void handleGLErrors();
+    void handleGLErrors();
+    void deleteGL();
 
-	unsigned int GLTexture;
-	unsigned int iTextureUnitBackup;
+    unsigned int GLTexture;
+    unsigned int iTextureUnitBackup;
 };
 
 #endif

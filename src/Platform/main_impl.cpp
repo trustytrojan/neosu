@@ -50,6 +50,8 @@ void SDLMain::fps_max_background_callback(float newVal) {
 }
 
 SDLMain::~SDLMain() {
+    m_engine.reset();
+
     // clean up GL context
     if(m_context && (Env::cfg((REND::GL | REND::GLES32), !REND::DX11))) {
         SDL_GL_DestroyContext(m_context);

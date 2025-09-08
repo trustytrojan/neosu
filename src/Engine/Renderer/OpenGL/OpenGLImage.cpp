@@ -4,9 +4,7 @@
 #if defined(MCENGINE_FEATURE_OPENGL) || defined(MCENGINE_FEATURE_GLES32)
 
 #include <utility>
-#include <algorithm>
 
-#include "ResourceManager.h"
 #include "Environment.h"
 #include "Engine.h"
 #include "ConVar.h"
@@ -28,10 +26,8 @@ OpenGLImage::OpenGLImage(i32 width, i32 height, bool mipmapped, bool keepInSyste
 
 OpenGLImage::~OpenGLImage() {
     this->destroy();
-    if(this->GLTexture != 0) {
-        glDeleteTextures(1, &this->GLTexture);
-        this->GLTexture = 0;
-    }
+    this->deleteGL();
+    this->rawImage.clear();
 }
 
 void OpenGLImage::init() {
@@ -123,13 +119,21 @@ void OpenGLImage::initAsync() {
 void OpenGLImage::destroy() {
     // don't delete the texture if we're keeping it in memory, for reloads
     if(!this->bKeepInSystemMemory) {
-        if(this->GLTexture != 0) {
-            glDeleteTextures(1, &this->GLTexture);
-            this->GLTexture = 0;
-        }
-
+        this->deleteGL();
         this->rawImage.clear();
     }
+}
+
+void OpenGLImage::deleteGL() {
+    if(this->GLTexture != 0 && glDeleteTextures != nullptr && glIsTexture != nullptr) {
+        if(!glIsTexture(this->GLTexture)) {
+            debugLog("WARNING: tried to glDeleteTexture on {} ({:p}), which is not a valid GL texture!\n", this->sName,
+                     static_cast<const void*>(&this->GLTexture));
+        } else {
+            glDeleteTextures(1, &this->GLTexture);
+        }
+    }
+    this->GLTexture = 0;
 }
 
 void OpenGLImage::bind(unsigned int textureUnit) {
