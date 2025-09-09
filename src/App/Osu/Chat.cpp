@@ -394,14 +394,16 @@ void Chat::drawTicker() {
 void Chat::mouse_update(bool *propagate_clicks) {
     if(!this->bVisible) return;
 
-    // Request presence & stats for on-screen user cards
-    for(auto elm : this->user_list->getContainer()->getElements()) {
-        auto *card = (UserCard2 *)elm;
-        bool is_above_bottom = card->getPos().y <= this->user_list->getPos().y + this->user_list->getSize().y;
-        bool is_below_top = card->getPos().y + card->getSize().y >= this->user_list->getPos().y;
-        if(is_above_bottom && is_below_top) {
-            BANCHO::User::enqueue_presence_request(card->info);
-            BANCHO::User::enqueue_stats_request(card->info);
+    if(this->user_list->isVisible()) {
+        // Request presence & stats for on-screen user cards
+        for(auto elm : this->user_list->getContainer()->getElements()) {
+            auto *card = (UserCard2 *)elm;
+            bool is_above_bottom = card->getPos().y <= this->user_list->getPos().y + this->user_list->getSize().y;
+            bool is_below_top = card->getPos().y + card->getSize().y >= this->user_list->getPos().y;
+            if(is_above_bottom && is_below_top) {
+                BANCHO::User::enqueue_presence_request(card->info);
+                BANCHO::User::enqueue_stats_request(card->info);
+            }
         }
     }
 
