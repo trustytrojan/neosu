@@ -17,6 +17,7 @@ struct NetworkRequest {
     NetworkHandler::Response response;
     CURL* easy_handle{nullptr};
     struct curl_slist* headers_list{nullptr};
+    curl_mime* mime{nullptr};
 
     // for sync requests
     bool is_sync{false};
@@ -158,6 +159,11 @@ void NetworkHandler::processCompletedRequests() {
                     }
                     curl_easy_cleanup(easy_handle);
 
+                    if(request->mime) {
+                        curl_mime_free(request->mime);
+                        request->mime = nullptr;
+                    }
+
                     if(request->is_sync) {
                         // handle sync request immediately
                         std::scoped_lock<std::mutex> sync_lock{this->sync_requests_mutex};
@@ -231,8 +237,19 @@ void NetworkHandler::setupCurlHandle(CURL* handle, NetworkRequest* request) {
     }
 
     // setup MIME data
-    if(request->options.mimeData) {
-        curl_easy_setopt(handle, CURLOPT_MIMEPOST, request->options.mimeData);
+    if(!request->options.mimeParts.empty()) {
+        request->mime = curl_mime_init(handle);
+
+        for(const auto& it : request->options.mimeParts) {
+            auto part = curl_mime_addpart(request->mime);
+            if(!it.filename.empty()) {
+                curl_mime_filename(part, it.filename.c_str());
+            }
+            curl_mime_name(part, it.name.c_str());
+            curl_mime_data(part, (const char*)it.data.data(), it.data.size());
+        }
+
+        curl_easy_setopt(handle, CURLOPT_MIMEPOST, request->mime);
     }
 
     // setup progress callback if provided

@@ -113,16 +113,14 @@ end:
     return replay_frames;
 }
 
-void compress_frames(const std::vector<Frame>& frames, u8** compressed, size_t* s_compressed) {
+std::vector<u8> compress_frames(const std::vector<Frame>& frames) {
     lzma_stream stream = LZMA_STREAM_INIT;
     lzma_options_lzma options;
     lzma_lzma_preset(&options, LZMA_PRESET_DEFAULT);
     lzma_ret ret = lzma_alone_encoder(&stream, &options);
     if(ret != LZMA_OK) {
         debugLog("Failed to initialize lzma encoder: error {:d}\n", static_cast<unsigned int>(ret));
-        *compressed = nullptr;
-        *s_compressed = 0;
-        return;
+        return {};
     }
 
     std::string replay_string;
@@ -135,31 +133,29 @@ void compress_frames(const std::vector<Frame>& frames, u8** compressed, size_t* 
     // osu!stable doesn't consider a replay valid unless it ends with this
     replay_string.append("-12345|0.0000|0.0000|0,");
 
-    *s_compressed = replay_string.length();
-    *compressed = (u8*)malloc(*s_compressed);
+    std::vector<u8> compressed;
+    compressed.resize(replay_string.length());
 
     stream.avail_in = replay_string.length();
     stream.next_in = (const u8*)replay_string.c_str();
-    stream.avail_out = *s_compressed;
-    stream.next_out = *compressed;
+    stream.avail_out = compressed.size();
+    stream.next_out = compressed.data();
     do {
         ret = lzma_code(&stream, LZMA_FINISH);
         if(ret == LZMA_OK) {
-            *s_compressed *= 2;
-            *compressed = (u8*)realloc(*compressed, *s_compressed);
-            stream.avail_out = *s_compressed - stream.total_out;
-            stream.next_out = *compressed + stream.total_out;
+            compressed.resize(compressed.size() * 2);
+            stream.avail_out = compressed.size() - stream.total_out;
+            stream.next_out = compressed.data() + stream.total_out;
         } else if(ret != LZMA_STREAM_END) {
             debugLog("Error while compressing replay: error {:d}\n", static_cast<unsigned int>(ret));
-            *compressed = nullptr;
-            *s_compressed = 0;
-            lzma_end(&stream);
-            return;
+            stream.total_out = 0;
+            break;
         }
     } while(ret != LZMA_STREAM_END);
 
-    *s_compressed = stream.total_out;
+    compressed.resize(stream.total_out);
     lzma_end(&stream);
+    return compressed;
 }
 
 Info from_bytes(u8* data, int s_data) {
@@ -292,7 +288,6 @@ void load_and_watch(FinishedScore score) {
             APIRequest request;
             request.type = GET_REPLAY;
             request.path = url;
-            request.mime = nullptr;
             request.extra = (u8*)score_cpy;
             BANCHO::Net::send_api_request(request);
 

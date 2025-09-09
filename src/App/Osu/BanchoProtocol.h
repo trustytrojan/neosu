@@ -106,6 +106,7 @@ enum IncomingPackets : uint8_t {
     UNPROTECT_VARIABLES = 129,
     FORCE_VALUES = 130,
     RESET_VALUES = 131,
+    REQUEST_MAP = 132,
 };
 
 // NOTE: u8 in case packet headers get shortened, even though packet IDs are currently u16

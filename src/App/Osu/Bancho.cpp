@@ -32,6 +32,7 @@
 #include "Engine.h"
 #include "Lobby.h"
 #include "crypto.h"
+#include "NetworkHandler.h"
 #include "NotificationOverlay.h"
 #include "OptionsMenu.h"
 #include "Osu.h"
@@ -729,6 +730,43 @@ void BanchoState::handle_packet(Packet *packet) {
                     debugLog("Server wanted to reset cvar '{}', but it doesn't exist!", name);
                 }
             }
+
+            break;
+        }
+
+        case REQUEST_MAP: {
+            auto md5 = proto::read_hash(packet);
+
+            // Load map (XXX: blocking)
+            auto diff = db->getBeatmapDifficulty(md5);
+            auto osu_file = diff->getMapFile();
+            auto md5_check = BanchoState::md5((u8*)osu_file.c_str(), osu_file.length());
+            if(md5 != md5_check) {
+                debugLog("After loading map {}, we got different md5 {}!\n", md5.hash.data(), md5_check.hash.data());
+                break;
+            }
+
+            // Submit map
+            auto scheme = cv::use_https.getBool() ? "https://" : "http://";
+            auto url = UString::fmt("{}osu.{}/web/neosu-submit-map.php", scheme, BanchoState::endpoint);
+            url.append(UString::fmt("?hash={}", md5.hash.data()));
+
+            if(BanchoState::is_oauth) {
+                url.append(UString::fmt("&u=$token&h={}", env->urlEncode(BanchoState::cho_token.toUtf8())));
+            } else {
+                url.append(UString::fmt("&u={}&h={:s}", BanchoState::get_username(), BanchoState::pw_md5.hash.data()));
+            }
+
+            NetworkHandler::RequestOptions options;
+            options.timeout = 60;
+            options.connectTimeout = 5;
+            options.userAgent = "osu!";
+            options.mimeParts.push_back({
+                .filename = fmt::format("{}.osu", md5.hash.data()),
+                .name = "osu_file",
+                .data = {osu_file.begin(), osu_file.end()},
+            });
+            networkHandler->httpRequestAsync(url, [](NetworkHandler::Response /*response*/) {}, options);
 
             break;
         }

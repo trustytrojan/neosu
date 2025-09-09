@@ -245,6 +245,7 @@ class DatabaseBeatmap final {
         return this->timingpoints;
     }
 
+    std::string getMapFile();
     std::string getFullSoundFilePath();
 
     // redundant data

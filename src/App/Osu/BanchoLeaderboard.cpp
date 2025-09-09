@@ -83,7 +83,6 @@ void fetch_online_scores(DatabaseBeatmap *beatmap) {
     APIRequest request;
     request.type = GET_MAP_LEADERBOARD;
     request.path = url;
-    request.mime = nullptr;
     request.extra = (u8 *)strdup(beatmap->getMD5Hash().hash.data());
 
     BANCHO::Net::send_api_request(request);

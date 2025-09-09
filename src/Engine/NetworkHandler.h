@@ -2,26 +2,31 @@
 // Copyright (c) 2015, PG, All rights reserved.
 #include "UString.h"
 #include "templates.h"
+#include "types.h"
 
-#include <memory>
-#include <mutex>
 #include <condition_variable>
-#include <queue>
 #include <functional>
 #include <map>
+#include <memory>
+#include <mutex>
+#include <queue>
 #include <thread>
-
-struct BanchoState;
+#include <unordered_map>
 
 // forward declare for async requests
 struct NetworkRequest;
 
 // forward defs
-typedef struct curl_mime curl_mime;
 typedef void CURLM;
 typedef void CURL;
 
 typedef int64_t curl_off_t;
+
+struct MimePart {
+    std::string filename{};
+    std::string name{};
+    std::vector<u8> data{};
+};
 
 class NetworkHandler {
     NOCOPY_NOMOVE(NetworkHandler)
@@ -33,7 +38,7 @@ class NetworkHandler {
         std::map<std::string, std::string> headers;
         std::string postData;
         std::string userAgent;
-        curl_mime* mimeData{nullptr};
+        std::vector<MimePart> mimeParts;
         long timeout{5};
         long connectTimeout{5};
         bool followRedirects{false};

@@ -801,7 +801,6 @@ void Chat::mark_as_read(ChatChannel *chan) {
 
     request.type = MARK_AS_READ;
     request.path = url;
-    request.mime = nullptr;
 
     BANCHO::Net::send_api_request(request);
 }

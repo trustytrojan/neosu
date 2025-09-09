@@ -1009,6 +1009,17 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(P
     return result;
 }
 
+// XXX: make it nonblocking, with callback
+std::string DatabaseBeatmap::getMapFile() {
+    File file(this->sFilePath);
+    if(file.canRead()) {
+        // Intentionally returning std::string because .osu files are always text
+        return file.readString();
+    } else {
+        return "";
+    }
+}
+
 // XXX: code duplication (see loadPrimitiveObjects)
 bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
     if(this->difficulties != nullptr) return false;  // we are a beatmapset, not a difficulty

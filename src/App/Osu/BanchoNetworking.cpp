@@ -64,15 +64,6 @@ void send_api_request_async(const APIRequest &api_out) {
     auto scheme = cv::use_https.getBool() ? "https://" : "http://";
     auto query_url = UString::format("%sosu.%s%s", scheme, BanchoState::endpoint.c_str(), api_out.path.toUtf8());
 
-    if(api_out.type == SUBMIT_SCORE) {
-        auto token_header = UString::format("token: %s", BanchoState::cho_token.toUtf8());
-        options.headers["token"] = BanchoState::cho_token.toUtf8();
-    }
-
-    if(api_out.mime != nullptr) {
-        options.mimeData = api_out.mime;
-    }
-
     networkHandler->httpRequestAsync(
         query_url,
         [api_out](NetworkHandler::Response response) {
@@ -90,11 +81,6 @@ void send_api_request_async(const APIRequest &api_out) {
                 api_responses_mutex.lock();
                 api_response_queue.push_back(api_response);
                 api_responses_mutex.unlock();
-            }
-
-            // cleanup mime data if it was provided
-            if(api_out.mime) {
-                curl_mime_free(api_out.mime);
             }
         },
         options);
@@ -265,16 +251,6 @@ void handle_api_response(Packet packet) {
 
         case MARK_AS_READ: {
             // (nothing to do)
-            break;
-        }
-
-        case SUBMIT_SCORE: {
-            // TODO @kiwec: handle response
-            debugLog("Score submit result: {:s}\n", reinterpret_cast<const char *>(packet.memory));
-
-            // Reset leaderboards so new score will appear
-            db->online_scores.clear();
-            osu->getSongBrowser()->rebuildScoreButtons();
             break;
         }
 

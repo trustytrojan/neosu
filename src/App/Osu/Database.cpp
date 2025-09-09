@@ -356,14 +356,12 @@ int Database::addScore(const FinishedScore &score) {
     // @PPV3: use new replay format
 
     // XXX: this is blocking main thread
-    u8 *compressed_replay = nullptr;
-    size_t s_compressed_replay = 0;
-    LegacyReplay::compress_frames(score.replay, &compressed_replay, &s_compressed_replay);
-    if(s_compressed_replay > 0) {
+    auto compressed_replay = LegacyReplay::compress_frames(score.replay);
+    if(!compressed_replay.empty()) {
         auto replay_path = UString::format(MCENGINE_DATA_DIR "replays/%d.replay.lzma", score.unixTimestamp);
         FILE *replay_file = fopen(replay_path.toUtf8(), "wb");
         if(replay_file != nullptr) {
-            fwrite(compressed_replay, s_compressed_replay, 1, replay_file);
+            fwrite(compressed_replay.data(), compressed_replay.size(), 1, replay_file);
             fclose(replay_file);
         }
     }

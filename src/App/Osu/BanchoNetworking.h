@@ -9,21 +9,16 @@
 #define OSU_VERSION "b20250815"
 #define OSU_VERSION_DATEONLY 20250815
 
-// forward def
-typedef struct curl_mime curl_mime;
-
 enum APIRequestType : uint8_t {
     GET_BEATMAPSET_INFO,
     GET_MAP_LEADERBOARD,
     GET_REPLAY,
     MARK_AS_READ,
-    SUBMIT_SCORE,
 };
 
 struct APIRequest {
     APIRequestType type;
     UString path{""};
-    curl_mime* mime{nullptr};
     u8* extra{nullptr};
     i32 extra_int{0};  // lazy
 };
