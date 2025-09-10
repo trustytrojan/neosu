@@ -1250,11 +1250,11 @@ CONVAR(win_snd_wasapi_exclusive, "win_snd_wasapi_exclusive", true, FCVAR_BANCHO_
 CONVAR(win_snd_wasapi_period_size, "win_snd_wasapi_period_size", 0.0f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "interval between OutputWasapiProc calls in seconds (e.g. 0.016 = 16 ms) (0 = use default)");
 
-CONVAR(snd_soloud_buffer, "snd_soloud_buffer", 0, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
+CONVAR(snd_soloud_buffer, "snd_soloud_buffer", 0, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_NOSAVE,
        "SoLoud audio device buffer size (recommended to leave this on 0/auto)");
 CONVAR(snd_soloud_backend, "snd_soloud_backend", "MiniAudio", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        R"(SoLoud backend, "MiniAudio" or "SDL3" (MiniAudio is default))");
-CONVAR(snd_sanity_simultaneous_limit, "snd_sanity_simultaneous_limit", 128, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
+CONVAR(snd_sanity_simultaneous_limit, "snd_sanity_simultaneous_limit", 128, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE | FCVAR_NOSAVE,
        "The maximum number of overlayable sounds that are allowed to be active at once");
 CONVAR(snd_soloud_prefer_ffmpeg, "snd_soloud_prefer_ffmpeg", 0, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
        "(0=no, 1=streams, 2=streams+samples) prioritize using ffmpeg as a decoder (if available) over other decoder "
