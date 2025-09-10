@@ -802,7 +802,6 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 PATCHELF = @PATCHELF@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKGCONF = @PKGCONF@
-PKGTYPE = @PKGTYPE@
 PKG_CONFIG = @PKG_CONFIG@
 PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
 PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
@@ -5230,7 +5229,7 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source: $(DEPS_CACHE)/curl-$(CUR
 @USE_SOLOUD_TRUE@		-D BUILD_SHARED_LIBS="$(if $(STATICBUILD),OFF,ON)" && \
 @USE_SOLOUD_TRUE@	$(CMAKE) --build build "$(CMAKEPAROPT)" && \
 @USE_SOLOUD_TRUE@	$(CMAKE) --install build
-@USE_SOLOUD_TRUE@	$(PKG_CONFIG) --env-only --exists --print-errors soloud
+@USE_SOLOUD_TRUE@	$(PKG_CONFIG) --env-only --modversion --print-errors soloud # since we never accept system SoLoud, use --modversion instead of --exists to find sdl3/mpg123 from the system
 @USE_SOLOUD_TRUE@	touch $@
 
 @USE_SOLOUD_TRUE@$(DEPS_PREFIX)/SoundTouch-$(SOUNDTOUCH_VERSION).built: $(DEPS_CACHE)/SoundTouch-$(SOUNDTOUCH_VERSION).source
@@ -5257,7 +5256,7 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-linux-binary.source: $(DEPS_CACHE)/curl-$(CUR
 @USE_SOLOUD_TRUE@	$(CMAKE) --build build "$(CMAKEPAROPT)" && \
 @USE_SOLOUD_TRUE@	$(CMAKE) --install build
 @USE_SOLOUD_TRUE@	rm -rf $(DEPS_PREFIX)/lib/*SoundTouch$(if $(STATICBUILD),$(DLLEXT),.a)*
-@USE_SOLOUD_TRUE@	$(PKG_CONFIG) --env-only --exists --print-errors soundtouch
+@USE_SOLOUD_TRUE@	$(PKG_CONFIG) --env-only --modversion --print-errors soundtouch
 @USE_SOLOUD_TRUE@	touch $@
 @USE_SOLOUD_FALSE@$(DEPS_PREFIX)/SoLoud-$(SOLOUD_VERSION).built:
 @USE_SOLOUD_FALSE@	$(MKDIR_P) $(DEPS_PREFIX) && touch $@

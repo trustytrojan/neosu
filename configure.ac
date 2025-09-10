@@ -165,7 +165,7 @@ AS_IF([test "x$enable_static" != "xno"], [
     enable_shared=no
     disable_shared=yes
 
-    PKGTYPE="--static"
+    pc_addflags="--static"
     STATICBUILD=yes
 ], [
     enable_static=no
@@ -186,7 +186,6 @@ AS_IF([test "x$enable_native" != "xyes"], [
 ])
 
 AC_SUBST([DISABLE_NATIVE])
-AC_SUBST([PKGTYPE])
 AC_SUBST([STATICBUILD])
 
 AS_IF([test "x$enable_system_deps" != "xyes"], [
@@ -296,14 +295,6 @@ AS_IF([test "x$enable_asan" = "xyes" || test "x$enable_tsan" = "xyes"], [
     AC_SUBST([ENABLE_ASAN])
 ])
 
-ac_cv_env_PKG_CONFIG_value="$PKG_CONFIG"
-ac_cv_env_PKG_CONFIG_set="set"
-
-PKG_CONFIG_PATH="$PWD/build/deps/lib/pkgconfig:$PWD/build/deps/lib64/pkgconfig"
-PKG_CONFIG_PATH_CUSTOM="$PKG_CONFIG_PATH"
-AC_SUBST([PKG_CONFIG_PATH])
-AC_SUBST([PKG_CONFIG_PATH_CUSTOM])
-
 AS_IF([test "x$enable_clang" = "xyes"], [
     CC=clang
     CXX=clang++
@@ -330,6 +321,14 @@ AS_IF([test "$host_cpu" = "x86_64" && test -z "$LLVMMINGW"], [
 AS_IF([[case "$host_cpu" in
   i[[3456789]]86*) host_cpu=i686 ;;
 esac]])
+
+ac_cv_env_PKG_CONFIG_value="$PKG_CONFIG"
+ac_cv_env_PKG_CONFIG_set="set"
+
+PKG_CONFIG_PATH="$PWD/build/deps/lib/pkgconfig:$PWD/build/deps/lib64/pkgconfig"
+PKG_CONFIG_PATH_CUSTOM="$PKG_CONFIG_PATH"
+AC_SUBST([PKG_CONFIG_PATH])
+AC_SUBST([PKG_CONFIG_PATH_CUSTOM])
 
 AS_IF([test "$host_os" = "linux-gnu"], [
     AS_IF([test "$host_cpu" = "i686"], [
@@ -363,7 +362,7 @@ EOF
 
     install -Dm755 /dev/stdin $PWD/build/pkg-config <<__EOF__
 #!/bin/bash
-PKG_CONFIG_PATH="$PWD/build/deps/lib/pkgconfig:$PWD/build/deps/lib64/pkgconfig" $PKGCONF --personality=$host_cpu-pc-linux-gnu "$PKGTYPE" "\$@"
+PKG_CONFIG_PATH="$PKG_CONFIG_PATH" $PKGCONF --personality=$host_cpu-pc-linux-gnu $pc_addflags "\$@"
 __EOF__
 
     CC="$PWD/build/$target-$CC"
@@ -377,30 +376,6 @@ __EOF__
 
     AC_DEFINE([MCENGINE_PLATFORM_LINUX], [1], [Define if compiling for Linux.])
 ],[
-    # TODO: don't hardcode mingw paths here
-    AS_IF([test "$build_os" = "linux-gnu"], [
-        AC_SUBST([PKG_CONFIG_SYSTEM_LIBRARY_PATH],["/usr/$host_cpu-w64-mingw32/lib"])
-        AC_SUBST([PKG_CONFIG_SYSTEM_INCLUDE_PATH],["/usr/$host_cpu-w64-mingw32/include"])
-        install -Dm755 /dev/stdin $PWD/build/pkg-config <<__EOF__
-#!/bin/bash
-PKG_CONFIG_LIBDIR="/usr/$host_cpu-w64-mingw32/lib/pkgconfig" PKG_CONFIG_SYSTEM_INCLUDE_PATH="/usr/$host_cpu-w64-mingw32/include" \
-PKG_CONFIG_SYSTEM_LIBRARY_PATH="/usr/$host_cpu-w64-mingw32/lib" PKG_CONFIG_PATH="$PWD/build/deps/lib/pkgconfig:$PWD/build/deps/lib64/pkgconfig" \
-$PKGCONF --personality=$host_cpu-w64-mingw32 $PKGTYPE "\$@"
-__EOF__
-        CMAKE_GEN="Ninja"
-    ], [
-        # WIP: building in msys2
-        install -Dm755 /dev/stdin $PWD/build/pkg-config <<__EOF__
-#!/bin/bash
-PKG_CONFIG_PATH="$PWD/build/deps/lib/pkgconfig:$PWD/build/deps/lib64/pkgconfig" \
-$PKGCONF --personality=$host_cpu-w64-mingw32 $PKGTYPE "\$@"
-__EOF__
-        CMAKE_GEN="MSYS Makefiles"
-        CMAKEIDOPT="-DCMAKE_CXX_COMPILER_ID=$_cid -DCMAKE_C_COMPILER_ID=$_cid"
-        CFLAGS="$CFLAGS -UHAVE_SYMLINK" # for some reason libarchive's configure thinks we have it then fails to compile...
-        MSYS2_BUILD=1
-    ])
-
     AC_CHECK_TOOL([WINDRES], [windres], [windres])
 
     CMAKE_SYSTEM_NAME="Windows"
@@ -430,18 +405,6 @@ __EOF__
 
     AC_DEFINE([MCENGINE_PLATFORM_WINDOWS], [1], [Define if compiling for Windows.])
 ])
-
-PKG_CONFIG="$PWD/build/pkg-config"
-CMAKEPAROPT="--parallel $CPU_COUNT"
-AC_SUBST([PKG_CONFIG])
-AC_SUBST([CMAKE_SYSTEM_NAME])
-AC_SUBST([CMAKERCOPT])
-AC_SUBST([CMAKEIDOPT])
-AC_SUBST([CMAKEPAROPT])
-AC_SUBST([CMAKE_GEN])
-AC_SUBST([SYSNAME])
-AC_SUBST([DLLEXT])
-AC_SUBST([LIBPREFIX])
 
 AC_PROG_CC([$CC])
 AS_IF([[case "$CC" in
@@ -480,6 +443,72 @@ export CXX="$PWD/build/cxx"
 
 AC_SUBST([CC])
 AC_SUBST([CXX])
+
+# putting this part here so that $CC is defined to the final value
+AS_IF([test "$host_os" = "mingw32"], [
+    # building on linux
+    AS_IF([test "$build_os" = "linux-gnu"], [
+        AC_SUBST([PKG_CONFIG_SYSTEM_LIBRARY_PATH])
+        AC_SUBST([PKG_CONFIG_SYSTEM_INCLUDE_PATH])
+        AC_SUBST([PKG_CONFIG_LIBDIR])
+
+        # set library search paths if not already provided
+        AS_VAR_SET_IF([PKG_CONFIG_SYSTEM_LIBRARY_PATH],
+            [pc_syslibpath="$PKG_CONFIG_SYSTEM_LIBRARY_PATH"], [
+            pc_syslibpath="$($CC -print-search-dirs | grep '^libraries:' | sed 's/libraries: =//')"
+        ])
+
+        # set include search paths if not already provided
+        AS_VAR_SET_IF([PKG_CONFIG_SYSTEM_INCLUDE_PATH],
+            [pc_sysincpath="$PKG_CONFIG_SYSTEM_INCLUDE_PATH"], [
+            pc_sysincpath="$($CC -E -v -x c /dev/null 2>&1 >/dev/null | \
+                sed -n '/#include <...> search starts here:/,/End of search list./p' | \
+                sed '1d;$d' | sed 's/^ //' | tr '\n' ':' | sed 's/:$//')"
+        ])
+
+        # set pkg-config library directory if not already provided
+        AS_VAR_SET_IF([PKG_CONFIG_LIBDIR],
+            [pc_syslibdir="$PKG_CONFIG_LIBDIR"], [
+            AS_IF([test "x$enable_system_deps" = "xyes" && test -d "/usr/$host_cpu-w64-mingw32/lib/pkgconfig"],
+                [pc_syslibdir="/usr/$host_cpu-w64-mingw32/lib/pkgconfig"],
+                [pc_syslibdir=""])
+        ])
+
+        install -Dm755 /dev/stdin $PWD/build/pkg-config <<__EOF__
+#!/bin/bash
+PKG_CONFIG_LIBDIR="$pc_syslibdir" \\
+PKG_CONFIG_SYSTEM_INCLUDE_PATH="$pc_sysincpath" \\
+PKG_CONFIG_SYSTEM_LIBRARY_PATH="$pc_syslibpath" \\
+PKG_CONFIG_PATH="$PKG_CONFIG_PATH" \\
+$PKGCONF --personality=$host_cpu-w64-mingw32 $pc_addflags "\$@"
+__EOF__
+
+        CMAKE_GEN="Ninja"
+    ], [
+        # WIP: building in msys2
+        install -Dm755 /dev/stdin $PWD/build/pkg-config <<__EOF__
+#!/bin/bash
+PKG_CONFIG_PATH="$PKG_CONFIG_PATH" \
+$PKGCONF --personality=$host_cpu-w64-mingw32 $pc_addflags "\$@"
+__EOF__
+        CMAKE_GEN="MSYS Makefiles"
+        CMAKEIDOPT="-DCMAKE_CXX_COMPILER_ID=$_cid -DCMAKE_C_COMPILER_ID=$_cid"
+        CFLAGS="$CFLAGS -UHAVE_SYMLINK" # for some reason libarchive's configure thinks we have it then fails to compile...
+        MSYS2_BUILD=1
+    ])
+])
+
+PKG_CONFIG="$PWD/build/pkg-config"
+AC_SUBST([PKG_CONFIG])
+AC_SUBST([CMAKE_SYSTEM_NAME])
+AC_SUBST([CMAKERCOPT])
+AC_SUBST([CMAKEIDOPT])
+CMAKEPAROPT="--parallel $CPU_COUNT"
+AC_SUBST([CMAKEPAROPT])
+AC_SUBST([CMAKE_GEN])
+AC_SUBST([SYSNAME])
+AC_SUBST([DLLEXT])
+AC_SUBST([LIBPREFIX])
 
 AS_IF([test "$host_cpu" = "x86_64"], [COMMON_FLAGS="$COMMON_FLAGS -mcmodel=small"])
 
@@ -605,7 +634,7 @@ AS_IF([test "x$enable_lto" != "xno"], [
             CFLAGS="$CFLAGS -flto=auto -ffat-lto-objects -fuse-linker-plugin -fdevirtualize-at-ltrans"
             LDFLAGS="$LDFLAGS -flto=auto -ffat-lto-objects -fuse-linker-plugin -fdevirtualize-at-ltrans"
             mkdir -p $PWD/.ltocache-gcc
-            AS_IF([test -z "$MSYS2_BUILD"], [ 
+            AS_IF([test -z "$MSYS2_BUILD"], [
                 mkdir -p $PWD/.ltocache-gcc
                 AX_CHECK_LINK_FLAG([-flto-incremental=$PWD/.ltocache-gcc], [
                     CXXFLAGS="$CXXFLAGS -flto-incremental=$PWD/.ltocache-gcc"

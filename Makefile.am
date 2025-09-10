@@ -453,7 +453,7 @@ $(DEPS_PREFIX)/SoLoud-$(SOLOUD_VERSION).built: $(DEPS_CACHE)/SoLoud-$(SOLOUD_VER
 		-D BUILD_SHARED_LIBS="$(if $(STATICBUILD),OFF,ON)" && \
 	$(CMAKE) --build build "$(CMAKEPAROPT)" && \
 	$(CMAKE) --install build
-	$(PKG_CONFIG) --env-only --exists --print-errors soloud
+	$(PKG_CONFIG) --env-only --modversion --print-errors soloud # since we never accept system SoLoud, use --modversion instead of --exists to find sdl3/mpg123 from the system
 	touch $@
 
 $(DEPS_PREFIX)/SoundTouch-$(SOUNDTOUCH_VERSION).built: $(DEPS_CACHE)/SoundTouch-$(SOUNDTOUCH_VERSION).source
@@ -480,7 +480,7 @@ $(DEPS_PREFIX)/SoundTouch-$(SOUNDTOUCH_VERSION).built: $(DEPS_CACHE)/SoundTouch-
 	$(CMAKE) --build build "$(CMAKEPAROPT)" && \
 	$(CMAKE) --install build
 	rm -rf $(DEPS_PREFIX)/lib/*SoundTouch$(if $(STATICBUILD),$(DLLEXT),.a)*
-	$(PKG_CONFIG) --env-only --exists --print-errors soundtouch
+	$(PKG_CONFIG) --env-only --modversion --print-errors soundtouch
 	touch $@
 else
 $(DEPS_PREFIX)/SoLoud-$(SOLOUD_VERSION).built:
