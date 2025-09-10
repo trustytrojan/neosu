@@ -77,8 +77,8 @@ class Database {
 
     std::vector<UString> getPlayerNamesWithPPScores();
     std::vector<UString> getPlayerNamesWithScoresForUserSwitcher();
-    PlayerPPScores getPlayerPPScores(std::string playerName);
-    PlayerStats calculatePlayerStats(std::string playerName);
+    PlayerPPScores getPlayerPPScores(const std::string &playerName);
+    PlayerStats calculatePlayerStats(const std::string &playerName);
     static float getWeightForIndex(int i);
     static float getBonusPPForNumScores(size_t numScores);
     static unsigned long long getRequiredScoreForLevel(int level);
@@ -114,7 +114,6 @@ class Database {
     std::unordered_map<MD5Hash, MapOverrides> peppy_overrides;
     std::vector<BeatmapDifficulty *> maps_to_recalc;
     std::vector<BeatmapDifficulty *> loudness_to_calc;
-    std::vector<FinishedScore> scores_to_convert;
 
     std::mutex scores_mtx;
     std::atomic<bool> bDidScoresChangeForStats = true;
@@ -158,7 +157,7 @@ class Database {
 
     void saveMaps();
 
-    void openDatabases();
+    void findDatabases();
     bool importDatabase(const std::string &db_path);
     void loadMaps();
     void loadScores(const UString &dbPath);
@@ -166,7 +165,8 @@ class Database {
     void loadPeppyScores(const UString &dbPath);
     void saveScores();
     bool addScoreRaw(const FinishedScore &score);
-    bool isScoreAlreadyInDB(u64 unix_timestamp, const MD5Hash &map_hash);
+    // returns position of existing score in the scores[hash] array if found, -1 otherwise
+    int isScoreAlreadyInDB(u64 unix_timestamp, const MD5Hash &map_hash);
 
     AsyncDBLoader *loader{nullptr};
     Timing::Timer *importTimer;

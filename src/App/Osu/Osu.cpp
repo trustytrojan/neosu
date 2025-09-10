@@ -839,8 +839,6 @@ bool Osu::isInPlayModeAndNotPaused() {
     return isInPlayMode() && !(getSelectedBeatmap() != nullptr && getSelectedBeatmap()->isPaused());
 }
 
-void Osu::useMods(FinishedScore *score) { Replay::Mods::use(score->mods); }
-
 void Osu::updateMods() {
     using namespace ModMasks;
     if(BanchoState::is_in_a_multi_room()) {

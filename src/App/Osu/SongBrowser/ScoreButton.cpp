@@ -38,22 +38,8 @@
 UString ScoreButton::recentScoreIconString;
 
 ScoreButton::ScoreButton(UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize, STYLE style)
-    : CBaseUIButton(xPos, yPos, xSize, ySize, "", "") {
-    this->contextMenu = contextMenu;
-    this->style = style;
-
+    : CBaseUIButton(xPos, yPos, xSize, ySize, "", ""), contextMenu(contextMenu), style(style) {
     if(recentScoreIconString.length() < 1) recentScoreIconString.insert(0, Icons::ARROW_CIRCLE_UP);
-
-    this->fIndexNumberAnim = 0.0f;
-    this->bIsPulseAnim = false;
-
-    this->bRightClick = false;
-    this->bRightClickCheck = false;
-
-    this->iScoreIndexNumber = 1;
-    this->iScoreUnixTimestamp = 0;
-
-    this->scoreGrade = FinishedScore::Grade::D;
 }
 
 ScoreButton::~ScoreButton() {
@@ -580,6 +566,7 @@ void ScoreButton::onRightMouseUpInside() {
                 replayButton->setEnabled(false);
                 replayButton->setTextColor(0xff888888);
                 replayButton->setTextDarkColor(0xff000000);
+                // debugLog("disallowing replay button, client: {}\n", this->score.client);
             }
 
             CBaseUIButton *spacer = this->contextMenu->addButton("---");
@@ -835,23 +822,30 @@ void ScoreButton::setScore(const FinishedScore &score, DatabaseBeatmap *diff2, i
 bool ScoreButton::isContextMenuVisible() { return (this->contextMenu != nullptr && this->contextMenu->isVisible()); }
 
 SkinImage *ScoreButton::getGradeImage(FinishedScore::Grade grade) {
+    const auto &skin{osu->getSkin()};
+    if(!skin) {
+        debugLog("no skin to return a grade image for\n");
+        return nullptr;
+    }
+
+    using enum FinishedScore::Grade;
     switch(grade) {
-        case FinishedScore::Grade::XH:
-            return osu->getSkin()->getRankingXHsmall();
-        case FinishedScore::Grade::SH:
-            return osu->getSkin()->getRankingSHsmall();
-        case FinishedScore::Grade::X:
-            return osu->getSkin()->getRankingXsmall();
-        case FinishedScore::Grade::S:
-            return osu->getSkin()->getRankingSsmall();
-        case FinishedScore::Grade::A:
-            return osu->getSkin()->getRankingAsmall();
-        case FinishedScore::Grade::B:
-            return osu->getSkin()->getRankingBsmall();
-        case FinishedScore::Grade::C:
-            return osu->getSkin()->getRankingCsmall();
+        case XH:
+            return skin->getRankingXHsmall();
+        case SH:
+            return skin->getRankingSHsmall();
+        case X:
+            return skin->getRankingXsmall();
+        case S:
+            return skin->getRankingSsmall();
+        case A:
+            return skin->getRankingAsmall();
+        case B:
+            return skin->getRankingBsmall();
+        case C:
+            return skin->getRankingCsmall();
         default:
-            return osu->getSkin()->getRankingDsmall();
+            return skin->getRankingDsmall();
     }
 }
 

@@ -1,11 +1,15 @@
 #pragma once
-#include "Replay.h"
 #include "MD5Hash.h"
+#include "Replay.h"
 
 class ConVar;
 class DatabaseBeatmap;
 class BeatmapInterface;
 class HitObject;
+
+namespace LegacyReplay {
+    struct Frame;
+}
 
 struct FinishedScore {
     u64 score = 0;

@@ -8,12 +8,14 @@
 #include "SimulatedBeatmap.h"
 #include "score.h"
 
+// TODO
+static constexpr bool USE_PPV3{false};
+
 std::atomic<u32> sct_computed = 0;
 std::atomic<u32> sct_total = 0;
 
 static std::thread thr;
 static std::atomic<bool> dead = true;
-static std::vector<FinishedScore> scores;
 
 static std::vector<f64> aimStrains;
 static std::vector<f64> speedStrains;
@@ -91,11 +93,41 @@ static void update_ppv2(const FinishedScore& score) {
     db->scores_mtx.unlock();
 }
 
-static void run_sct() {
+static forceinline bool score_needs_recalc(const FinishedScore& score) {
+    if((USE_PPV3 && score.hitdeltas.empty())
+       // should this be < or != ... ?
+       || (score.ppv2_version < DifficultyCalculator::PP_ALGORITHM_VERSION)
+       // is this correct? e.g. if we can never successfully calculate for a score, what to do? we just keep trying and failing
+       || (score.ppv2_score <= 0.f)) {
+        return true;
+    }
+    return false;
+}
+
+static void run_sct(const std::unordered_map<MD5Hash, std::vector<FinishedScore>> &all_set_scores) {
     debugLog("Started score converter thread\n");
 
-    i32 idx = 0;
-    for(auto& score : scores) {
+    // defer the actual needs-recalc check to run on the thread, to avoid unnecessarily blocking (O(n^2) loop)
+    std::vector<FinishedScore> scores_to_calc;
+    // lazy reserve, assume 3 scores per score vector
+    scores_to_calc.reserve(all_set_scores.size() * 3);
+
+    for(const auto& [_, beatmap] : all_set_scores) {
+        for(const auto& score : beatmap) {
+            if(score_needs_recalc(score)) {
+                scores_to_calc.push_back(score);
+            }
+        }
+    }
+
+    sct_total = scores_to_calc.size();
+
+    debugLog("Found {} scores which need pp recalculation\n", sct_total.load());
+
+    // nothing to do...
+    if(sct_total == 0) return;
+
+    for(i32 idx = 0; auto& score : scores_to_calc) {
         while(osu->should_pause_background_threads.load() && !dead.load()) {
             Timing::sleepMS(100);
         }
@@ -106,12 +138,14 @@ static void run_sct() {
         // This is "placeholder" until we get accurate replay simulation
         {
             update_ppv2(score);
-            sct_computed++;
-            idx++;
         }
 
         // @PPV3: below
-        continue;
+        if(!USE_PPV3) {
+            sct_computed++;
+            idx++;
+            continue;
+        }
 
         if(score.replay.empty()) {
             if(!LegacyReplay::load_from_disk(&score, false)) {
@@ -142,10 +176,10 @@ static void run_sct() {
                      smap.live_score.getNumMisses());
 
         db->scores_mtx.lock();
-        for(auto& other : (*db->getScores())[score.beatmap_hash]) {
-            if(other.unixTimestamp == score.unixTimestamp) {
+        for(auto& dbScore : (*db->getScores())[score.beatmap_hash]) {
+            if(dbScore.unixTimestamp == score.unixTimestamp) {
                 // @PPV3: currently hitdeltas is always empty
-                other.hitdeltas = score.hitdeltas;
+                dbScore.hitdeltas = score.hitdeltas;
                 break;
             }
         }
@@ -160,15 +194,18 @@ static void run_sct() {
     sct_computed++;
 }
 
-void sct_calc(std::vector<FinishedScore> scores_to_calc) {
+void sct_calc(std::unordered_map<MD5Hash, std::vector<FinishedScore>> scores_to_maybe_calc) {
     sct_abort();
-    if(scores_to_calc.empty()) return;
 
     dead = false;
-    scores = std::move(scores_to_calc);
+
+    // to be set in run_sct (find scores which actually need recalc)
+    sct_total = 0;
     sct_computed = 0;
-    sct_total = scores.size() + 1;
-    thr = std::thread(run_sct);
+
+    if (!scores_to_maybe_calc.empty()) {
+        thr = std::thread(run_sct, std::move(scores_to_maybe_calc));
+    }
 }
 
 void sct_abort() {

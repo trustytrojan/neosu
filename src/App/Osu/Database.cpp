@@ -97,7 +97,7 @@ void Database::AsyncDBLoader::init() {
     } else {
         MapCalcThread::start_calc(db->maps_to_recalc);
         VolNormalization::start_calc(db->loudness_to_calc);
-        sct_calc(db->scores_to_convert);
+        sct_calc(db->scores);
     }
 
     // signal that we are done
@@ -119,7 +119,6 @@ void Database::AsyncDBLoader::initAsync() {
     MapCalcThread::abort();
     VolNormalization::abort();
 
-    db->scores_to_convert.clear();
     db->loudness_to_calc.clear();
     db->maps_to_recalc.clear();
 
@@ -133,7 +132,7 @@ void Database::AsyncDBLoader::initAsync() {
     }
     db->neosu_sets.clear();
 
-    db->openDatabases();
+    db->findDatabases();
     db->loadScores(db->database_files["neosu_scores.db"]);
     db->loadOldMcNeosuScores(db->database_files["scores.db"]);
 
@@ -286,7 +285,7 @@ void Database::update() {
 
                 MapCalcThread::start_calc(this->maps_to_recalc);
                 VolNormalization::start_calc(this->loudness_to_calc);
-                sct_calc(this->scores_to_convert);
+                sct_calc(this->scores);
 
                 break;
             }
@@ -377,28 +376,56 @@ int Database::addScore(const FinishedScore &score) {
     return -1;
 }
 
-bool Database::isScoreAlreadyInDB(u64 unix_timestamp, const MD5Hash &map_hash) {
+int Database::isScoreAlreadyInDB(u64 unix_timestamp, const MD5Hash &map_hash) {
     std::scoped_lock lock(this->scores_mtx);
-    for(const auto &other : this->scores[map_hash]) {
-        if(other.unixTimestamp == unix_timestamp) {
+
+    for(int existing_pos = -1; const auto &existing : this->scores[map_hash]) {
+        existing_pos++;
+        if(existing.unixTimestamp == unix_timestamp) {
             // Score has already been added
-            return true;
+            return existing_pos;
         }
     }
 
-    return false;
+    return -1;
 }
 
 bool Database::addScoreRaw(const FinishedScore &score) {
-    if(this->isScoreAlreadyInDB(score.unixTimestamp, score.beatmap_hash)) {
-        return false;
+    const bool new_might_have_replay{score.has_possible_replay()};
+
+    int existing_pos{-1};
+    bool overwrite{false};
+
+    if((existing_pos = this->isScoreAlreadyInDB(score.unixTimestamp, score.beatmap_hash)) >= 0) {
+        // a bit hacky, but allow overwriting mcosu scores with peppy/neosu scores
+        // otherwise scores imported to mcosu from stable will be marked as "from mcosu"
+        // which we consider to never have a replay available
+
+        // we don't want to overwrite in any case if the new score has no possible replay
+        if(!new_might_have_replay) {
+            return false;
+        }
+
+        {
+            std::scoped_lock lock(this->scores_mtx);
+            // otherwise check if the old one doesn't have a replay
+            // if it has one, don't overwrite it
+            overwrite = !this->scores[score.beatmap_hash][existing_pos].has_possible_replay();
+        }
+
+        if(!overwrite) {
+            return false;
+        }
+        // otherwise overwrite it
     }
 
     std::scoped_lock lock(this->scores_mtx);
 
-    this->scores[score.beatmap_hash].push_back(score);
-    if(score.hitdeltas.empty()) {
-        this->scores_to_convert.push_back(score);
+    if(overwrite) {
+        this->scores[score.beatmap_hash][existing_pos] = score;
+    } else {
+        // new score
+        this->scores[score.beatmap_hash].push_back(score);
     }
 
     return true;
@@ -490,7 +517,7 @@ std::vector<UString> Database::getPlayerNamesWithScoresForUserSwitcher() {
     return names;
 }
 
-Database::PlayerPPScores Database::getPlayerPPScores(std::string playerName) {
+Database::PlayerPPScores Database::getPlayerPPScores(const std::string &playerName) {
     std::scoped_lock lock(this->scores_mtx);
     PlayerPPScores ppScores;
     ppScores.totalScore = 0;
@@ -544,7 +571,7 @@ Database::PlayerPPScores Database::getPlayerPPScores(std::string playerName) {
     return ppScores;
 }
 
-Database::PlayerStats Database::calculatePlayerStats(std::string playerName) {
+Database::PlayerStats Database::calculatePlayerStats(const std::string &playerName) {
     if(!this->bDidScoresChangeForStats.load() && playerName == this->prevPlayerStats.name.toUtf8())
         return this->prevPlayerStats;
 
@@ -599,7 +626,7 @@ Database::PlayerStats Database::calculatePlayerStats(std::string playerName) {
     return this->prevPlayerStats;
 }
 
-float Database::getWeightForIndex(int i) { return pow(0.95, (double)i); }
+float Database::getWeightForIndex(int i) { return std::pow(0.95f, (f32)i); }
 
 float Database::getBonusPPForNumScores(size_t numScores) {
     return (417.0 - 1.0 / 3.0) * (1.0 - pow(0.995, std::min(1000.0, (f64)numScores)));
@@ -857,10 +884,10 @@ void Database::loadMaps() {
                         diff->sArtistUnicode = diff->sArtist;
                     }
 
-                    if (SString::whitespace_only(diff->sTitleUnicode)) {
+                    if(SString::whitespace_only(diff->sTitleUnicode)) {
                         diff->bEmptyTitleUnicode = true;
                     }
-                    if (SString::whitespace_only(diff->sArtistUnicode)) {
+                    if(SString::whitespace_only(diff->sArtistUnicode)) {
                         diff->bEmptyArtistUnicode = true;
                     }
 
@@ -1069,7 +1096,7 @@ void Database::loadMaps() {
                     bpm.min = overrides->second.min_bpm;
                     bpm.max = overrides->second.max_bpm;
                     bpm.most_common = overrides->second.avg_bpm;
-                } else if (nb_timing_points > 0) {
+                } else if(nb_timing_points > 0) {
                     timing_points_buffer.resize(nb_timing_points);
                     if(db.read_bytes((u8 *)timing_points_buffer.data(),
                                      sizeof(Database::TIMINGPOINT) * nb_timing_points) !=
@@ -1158,7 +1185,7 @@ void Database::loadMaps() {
                 {
                     diff2->sTitle = songTitle;
                     diff2->sTitleUnicode = songTitleUnicode;
-                    if (SString::whitespace_only(diff2->sTitleUnicode)) {
+                    if(SString::whitespace_only(diff2->sTitleUnicode)) {
                         diff2->bEmptyTitleUnicode = true;
                     }
                     diff2->sAudioFileName = audioFileName;
@@ -1168,7 +1195,7 @@ void Database::loadMaps() {
 
                     diff2->sArtist = artistName;
                     diff2->sArtistUnicode = artistNameUnicode;
-                    if (SString::whitespace_only(diff2->sArtistUnicode)) {
+                    if(SString::whitespace_only(diff2->sArtistUnicode)) {
                         diff2->bEmptyArtistUnicode = true;
                     }
                     diff2->sCreator = creatorName;
@@ -1409,7 +1436,7 @@ void Database::saveMaps() {
     debugLog("Saved {:d} maps (+ {:d} overrides) in {:f} seconds.\n", nb_diffs_saved, nb_overrides, t.getElapsedTime());
 }
 
-void Database::openDatabases() {
+void Database::findDatabases() {
     this->bytes_processed = 0;
     this->total_bytes = 0;
     this->database_files.clear();
@@ -1774,7 +1801,7 @@ void Database::loadOldMcNeosuScores(const UString &dbPath) {
                     /* isImportedLegacyScore = */ db.skip<uint8_t>();  // too lazy to handle this logic
                 }
                 const auto unixTimestamp = db.read<uint64_t>();
-                if(this->isScoreAlreadyInDB(unixTimestamp, md5hash)) {
+                if(this->isScoreAlreadyInDB(unixTimestamp, md5hash) >= 0) {
                     db.skip_string();  // playerName
                     u32 bytesToSkipUntilNextScore = 0;
                     bytesToSkipUntilNextScore +=

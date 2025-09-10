@@ -161,7 +161,8 @@ class Osu final : public MouseListener, public KeyboardListener {
     bool shouldFallBackToLegacySliderRenderer();  // certain mods or actions require Sliders to render dynamically
                                                   // (e.g. wobble or the CS override slider)
 
-    void useMods(FinishedScore *score);
+    inline void useMods(FinishedScore *score) {Replay::Mods::use(score->mods);}
+
     void updateMods();
     void updateCursorVisibility();
     void updateConfineCursor();
