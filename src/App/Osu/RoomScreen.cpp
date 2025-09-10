@@ -126,20 +126,20 @@ RoomScreen::RoomScreen() : OsuScreen() {
     this->room_name_ipt->setText("Multiplayer room");
 
     this->change_password_btn = new UIButton(0, 0, 190, 40, "change_password_btn", "Change password");
-    this->change_password_btn->setColor(0xff0e94b5);
+    this->change_password_btn->setColor(0xff0c7c99);
     this->change_password_btn->setUseDefaultSkin();
     this->change_password_btn->setClickCallback(SA::MakeDelegate<&RoomScreen::onChangePasswordClicked>(this));
 
     INIT_LABEL(this->win_condition, "Win condition: Score", false);
     this->change_win_condition_btn = new UIButton(0, 0, 240, 40, "change_win_condition_btn", "Win condition: Score");
-    this->change_win_condition_btn->setColor(0xff00ff00);
+    this->change_win_condition_btn->setColor(0xff00d900);
     this->change_win_condition_btn->setUseDefaultSkin();
     this->change_win_condition_btn->setClickCallback(
         SA::MakeDelegate<&RoomScreen::onChangeWinConditionClicked>(this));
 
     INIT_LABEL(map_label, "Beatmap", true);
     this->select_map_btn = new UIButton(0, 0, 130, 40, "select_map_btn", "Select map");
-    this->select_map_btn->setColor(0xff0e94b5);
+    this->select_map_btn->setColor(0xff0c7c99);
     this->select_map_btn->setUseDefaultSkin();
     this->select_map_btn->setClickCallback(SA::MakeDelegate<&RoomScreen::onSelectMapClicked>(this));
 
@@ -150,7 +150,7 @@ RoomScreen::RoomScreen() : OsuScreen() {
 
     INIT_LABEL(mods_label, "Mods", true);
     this->select_mods_btn = new UIButton(0, 0, 180, 40, "select_mods_btn", "Select mods [F1]");
-    this->select_mods_btn->setColor(0xff0e94b5);
+    this->select_mods_btn->setColor(0xff0c7c99);
     this->select_mods_btn->setUseDefaultSkin();
     this->select_mods_btn->setClickCallback(SA::MakeDelegate<&RoomScreen::onSelectModsClicked>(this));
     this->freemod = new UICheckbox(0, 0, 200, 50, "allow_freemod", "Freemod");
@@ -161,7 +161,7 @@ RoomScreen::RoomScreen() : OsuScreen() {
     INIT_LABEL(this->no_mods_selected, "No mods selected.", false);
 
     this->ready_btn = new UIButton(0, 0, 300, 50, "start_game_btn", "Start game");
-    this->ready_btn->setColor(0xff00ff00);
+    this->ready_btn->setColor(0xff00d900);
     this->ready_btn->setUseDefaultSkin();
     this->ready_btn->setClickCallback(SA::MakeDelegate<&RoomScreen::onReadyButtonClick>(this));
     this->ready_btn->is_loading = true;
@@ -421,10 +421,10 @@ void RoomScreen::updateSettingsLayout(vec2 newResolution) {
             force_start_str = UString("Start game");
         }
         this->ready_btn->setText(force_start_str);
-        this->ready_btn->setColor(0xff00ff00);
+        this->ready_btn->setColor(0xff00d900);
     } else {
         this->ready_btn->setText(is_ready ? "Not ready" : "Ready!");
-        this->ready_btn->setColor(is_ready ? 0xffff0000 : 0xff00ff00);
+        this->ready_btn->setColor(is_ready ? 0xffd90000 : 0xff00d900);
     }
     ADD_ELEMENT(this->ready_btn);
 

@@ -162,6 +162,16 @@ constexpr Color rgb(R r, G g, B b)
 
 namespace Colors
 {
+constexpr Color brighten(Color color, float factor)
+{
+	return Color(
+		color.A(),
+		(Channel)std::clamp((float)color.R() * factor, 0.f, 255.f),
+		(Channel)std::clamp((float)color.G() * factor, 0.f, 255.f),
+		(Channel)std::clamp((float)color.B() * factor, 0.f, 255.f)
+	);
+}
+
 constexpr Color invert(Color color)
 {
 	return {static_cast<Channel>((color.v >> 24) & 0xFF), static_cast<Channel>(255 - ((color.v >> 16) & 0xFF)), 

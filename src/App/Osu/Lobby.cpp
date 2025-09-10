@@ -50,7 +50,7 @@ RoomUIElement::RoomUIElement(Lobby* multi, Room* room, float x, float y, float w
 
     this->join_btn = new UIButton(10, 65, 120, 30, "", "Join room");
     this->join_btn->setUseDefaultSkin();
-    this->join_btn->setColor(0xff00ff00);
+    this->join_btn->setColor(0xff00d900);
     this->join_btn->setClickCallback(SA::MakeDelegate<&RoomUIElement::onRoomJoinButtonClick>(this));
     this->getContainer()->addBaseUIElement(this->join_btn);
 
@@ -83,7 +83,7 @@ Lobby::Lobby() : OsuScreen() {
 
     this->create_room_btn = new UIButton(0, 0, 200, 50, "", "Create new room");
     this->create_room_btn->setUseDefaultSkin();
-    this->create_room_btn->setColor(0xff00ff00);
+    this->create_room_btn->setColor(0xff00d900);
     this->create_room_btn->setClickCallback(SA::MakeDelegate<&Lobby::on_create_room_clicked>(this));
     this->addBaseUIElement(this->create_room_btn);
 

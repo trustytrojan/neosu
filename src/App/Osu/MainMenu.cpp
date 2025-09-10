@@ -232,7 +232,7 @@ MainMenu::MainMenu() : OsuScreen() {
     this->updateAvailableButton = new UIButton(0, 0, 0, 0, "", "Checking for updates ...");
     this->updateAvailableButton->setUseDefaultSkin();
     this->updateAvailableButton->setClickCallback(SA::MakeDelegate<&MainMenu::onUpdatePressed>(this));
-    this->updateAvailableButton->setColor(0x2200ff00);
+    this->updateAvailableButton->setColor(0x2200d900);
     this->updateAvailableButton->setTextColor(0x22ffffff);
 
     this->versionButton = new CBaseUIButton(0, 0, 0, 0, "", "");
@@ -984,12 +984,12 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
                 break;
             case UpdateHandler::STATUS::STATUS_CHECKING_FOR_UPDATE:
                 this->updateAvailableButton->setText("Checking for updates ...");
-                this->updateAvailableButton->setColor(0x2200ff00);
+                this->updateAvailableButton->setColor(0x2200d900);
                 this->updateAvailableButton->setVisible(true);
                 break;
             case UpdateHandler::STATUS::STATUS_DOWNLOADING_UPDATE:
                 this->updateAvailableButton->setText("Downloading ...");
-                this->updateAvailableButton->setColor(0x2200ff00);
+                this->updateAvailableButton->setColor(0x2200d900);
                 this->updateAvailableButton->setVisible(true);
                 break;
             case UpdateHandler::STATUS::STATUS_DOWNLOAD_COMPLETE:
@@ -997,7 +997,7 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
                    this->fUpdateButtonAnim > 0.175f) {
                     this->fUpdateButtonTextTime = this->fUpdateButtonAnimTime;
 
-                    this->updateAvailableButton->setColor(rgb(0, 150, 230));
+                    this->updateAvailableButton->setColor(rgb(0, 130, 200));
                     this->updateAvailableButton->setTextColor(0xffffffff);
                     this->updateAvailableButton->setVisible(true);
 
@@ -1014,7 +1014,7 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
                 break;
             case UpdateHandler::STATUS::STATUS_ERROR:
                 this->updateAvailableButton->setText("Update Error! Click to retry ...");
-                this->updateAvailableButton->setColor(rgb(255, 0, 0));
+                this->updateAvailableButton->setColor(rgb(220, 0, 0));
                 this->updateAvailableButton->setTextColor(0xffffffff);
                 this->updateAvailableButton->setVisible(true);
                 break;

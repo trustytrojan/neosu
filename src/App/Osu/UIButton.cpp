@@ -15,18 +15,6 @@
 
 static float button_sound_cooldown = 0.f;
 
-UIButton::UIButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
-    : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), std::move(text)) {
-    this->bDefaultSkin = false;
-    this->color = 0xffffffff;
-    this->backupColor = this->color;
-    this->fBrightness = 0.85f;
-    this->fAnim = 0.0f;
-    this->fAlphaAddOnHover = 0.0f;
-
-    this->bFocusStolenDelay = false;
-}
-
 void UIButton::draw() {
     if(!this->bVisible || !this->bVisible2) return;
 
@@ -44,16 +32,14 @@ void UIButton::draw() {
 
     float middleWidth = this->vSize.x - leftWidth - rightWidth;
 
-    auto color = this->is_loading ? rgba(0x33, 0x33, 0x33, 0xff) : this->color;
-    const auto red =
-        static_cast<Channel>(std::max(static_cast<float>(color.R()) * this->fBrightness, this->fAnim * 255.0f));
-    const auto green =
-        static_cast<Channel>(std::max(static_cast<float>(color.G()) * this->fBrightness, this->fAnim * 255.0f));
-    const auto blue =
-        static_cast<Channel>(std::max(static_cast<float>(color.B()) * this->fBrightness, this->fAnim * 255.0f));
-    g->setColor(
-        argb(std::clamp<int>(color.A() + (isMouseInside() ? (int)(this->fAlphaAddOnHover * 255.0f) : 0), 0, 255), red,
-             green, blue));
+    {
+        auto color = this->is_loading ? rgba(0x33, 0x33, 0x33, 0xff) : this->color;
+
+        float brightness = 1.f + (this->fHoverAnim * 0.2f);
+        color = Colors::brighten(color, brightness);
+
+        g->setColor(color);
+    }
 
     buttonLeft->bind();
     {
@@ -106,7 +92,8 @@ void UIButton::mouse_update(bool *propagate_clicks) {
 }
 
 void UIButton::onMouseInside() {
-    this->fBrightness = 1.0f;
+    // There's actually no animation, it just goes to 1 instantly
+    this->fHoverAnim = 1.f;
 
     if(button_sound_cooldown + 0.05f < engine->getTime()) {
         soundEngine->play(osu->getSkin()->getHoverButtonSound());
@@ -114,7 +101,7 @@ void UIButton::onMouseInside() {
     }
 }
 
-void UIButton::onMouseOutside() { this->fBrightness = 0.85f; }
+void UIButton::onMouseOutside() { this->fHoverAnim = 0.f; }
 
 void UIButton::onClicked(bool left, bool right) {
     CBaseUIButton::onClicked(left, right);
@@ -134,8 +121,8 @@ void UIButton::onFocusStolen() {
 }
 
 void UIButton::animateClickColor() {
-    this->fAnim = 1.0f;
-    anim->moveLinear(&this->fAnim, 0.0f, 0.5f, true);
+    this->fClickAnim = 1.0f;
+    anim->moveLinear(&this->fClickAnim, 0.0f, 0.5f, true);
 }
 
 void UIButton::setTooltipText(const UString& text) { this->tooltipTextLines = text.split("\n"); }

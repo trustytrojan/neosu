@@ -270,10 +270,10 @@ ModSelector::ModSelector() : OsuScreen() {
     // build action buttons
     this->resetModsButton = this->addActionButton("1. Reset All Mods");
     this->resetModsButton->setClickCallback(SA::MakeDelegate<&ModSelector::resetModsUserInitiated>(this));
-    this->resetModsButton->setColor(0xffff3800);
+    this->resetModsButton->setColor(0xffc62b00);
     this->closeButton = this->addActionButton("2. Close");
     this->closeButton->setClickCallback(SA::MakeDelegate<&ModSelector::close>(this));
-    this->closeButton->setColor(0xff8f8f8f);
+    this->closeButton->setColor(0xff636363);
 
     this->updateButtons(true);
     this->updateLayout();

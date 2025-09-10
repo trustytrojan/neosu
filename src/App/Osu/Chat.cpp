@@ -286,7 +286,7 @@ Chat::Chat() : OsuScreen() {
 
     this->join_channel_btn = new UIButton(0, 0, 0, 0, "button", "+");
     this->join_channel_btn->setUseDefaultSkin();
-    this->join_channel_btn->setColor(0xffffff55);
+    this->join_channel_btn->setColor(0xffd9d948);
     this->join_channel_btn->setSize(this->button_height + 2, this->button_height + 2);
     this->join_channel_btn->setClickCallback(SA::MakeDelegate<&Chat::askWhatChannelToJoin>(this));
     this->button_container->addBaseUIElement(this->join_channel_btn);
@@ -1074,12 +1074,12 @@ void Chat::updateButtonLayout(vec2 screen) {
         btn->setSize(button_width + 2, this->button_height + 2);
 
         if(this->selected_channel->name == btn->getText()) {
-            btn->setColor(0xfffefffd);
+            btn->setColor(0xffc9c9c9);
         } else {
             if(chan->read) {
-                btn->setColor(0xff38439f);
+                btn->setColor(0xff20265e);
             } else {
-                btn->setColor(0xff88a0f7);
+                btn->setColor(0xff677abc);
             }
         }
 

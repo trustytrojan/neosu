@@ -689,8 +689,8 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
                 const std::string &current = cv::snd_soloud_backend.getString();
                 const bool MAactive = !SString::contains_ncase(current, "sdl");
 
-                constexpr const auto inactiveGrey = rgba(173, 172, 172, 255);
-                constexpr const auto activeGreen = rgba(61, 182, 61, 255);
+                constexpr const auto inactiveGrey = rgba(150, 150, 150, 255);
+                constexpr const auto activeGreen = rgba(50, 155, 50, 255);
 
                 MAButton->setColor(MAactive ? activeGreen : inactiveGrey);
                 SDLButton->setColor(MAactive ? inactiveGrey : activeGreen);
@@ -736,7 +736,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
             this->wasapiPeriodSizeSlider->setAnimated(false);
             UIButton *restartSoundEngine = this->addButton("Restart SoundEngine");
             restartSoundEngine->setClickCallback(SA::MakeDelegate<&OptionsMenu::onOutputDeviceRestart>(this));
-            restartSoundEngine->setColor(0xff00566b);
+            restartSoundEngine->setColor(0xff003947);
             this->addLabel("");
         }
         auto wasapi_end_idx = this->elemContainers.size();
@@ -756,10 +756,10 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
             this->addLabel("");
             UIButton *asio_settings_btn = this->addButton("Open ASIO settings");
             asio_settings_btn->setClickCallback(SA::MakeDelegate<&OptionsMenu::OpenASIOSettings>(this));
-            asio_settings_btn->setColor(0xff00566b);
+            asio_settings_btn->setColor(0xff003947);
             UIButton *restartSoundEngine = this->addButton("Restart SoundEngine");
             restartSoundEngine->setClickCallback(SA::MakeDelegate<&OptionsMenu::onOutputDeviceRestart>(this));
-            restartSoundEngine->setColor(0xff00566b);
+            restartSoundEngine->setColor(0xff003947);
         }
         auto asio_end_idx = this->elemContainers.size();
         for(auto i = asio_idx; i < asio_end_idx; i++) {
@@ -830,7 +830,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
                 "Temporary, does not change your configured skin (reload to reset).\nUse \"osu_skin_random 1\" to "
                 "randomize on every skin reload.\nUse \"osu_skin_random_elements 1\" to mix multiple skins.\nUse "
                 "\"osu_skin_export\" to export the currently active skin.");
-        ((UIButton *)skinReload.baseElems[1])->setColor(0xff00566b);
+        ((UIButton *)skinReload.baseElems[1])->setColor(0xff003947);
     }
     this->addSpacer();
     this->addCheckbox("Sort Skins Alphabetically",
@@ -925,7 +925,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     const UString keyboardSectionTags = "keyboard keys key bindings binds keybinds keybindings";
     CBaseUIElement *subSectionKeyboard = this->addSubSection("Keyboard", keyboardSectionTags);
     UIButton *resetAllKeyBindingsButton = this->addButton("Reset all key bindings");
-    resetAllKeyBindingsButton->setColor(0xffff0000);
+    resetAllKeyBindingsButton->setColor(0xffd90000);
     resetAllKeyBindingsButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onKeyBindingsResetAllPressed>(this));
     this->addSubSection("Keys - In-Game", keyboardSectionTags);
     this->addKeyBindButton("Left Click", &cv::LEFT_CLICK);
@@ -1204,7 +1204,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addSubSection("FPoSu - Mouse");
     UIButton *cm360CalculatorLinkButton = this->addButton("https://www.mouse-sensitivity.com/");
     cm360CalculatorLinkButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onCM360CalculatorLinkClicked>(this));
-    cm360CalculatorLinkButton->setColor(0xff10667b);
+    cm360CalculatorLinkButton->setColor(0xff0e4a59);
     this->addLabel("");
     this->dpiTextbox = this->addTextbox(cv::fposu_mouse_dpi.getString().c_str(), "DPI:", &cv::fposu_mouse_dpi);
     this->cm360Textbox =
@@ -1247,7 +1247,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
 
         this->logInButton->setHandleRightMouse(true);  // for canceling logins
         this->logInButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onLogInClicked>(this));
-        this->logInButton->setColor(0xff00ff00);
+        this->logInButton->setColor(0xff00d900);
         this->logInButton->setTextColor(0xffffffff);
 
         auto *keepCbx = static_cast<UICheckbox *>(loginElement->baseElems[KEEPSIGNEDCBX]);
@@ -1303,10 +1303,10 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addSubSection("Restore");
     UIButton *resetAllSettingsButton = this->addButton("Reset all settings");
     resetAllSettingsButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onResetEverythingClicked>(this));
-    resetAllSettingsButton->setColor(0xffff0000);
+    resetAllSettingsButton->setColor(0xffd90000);
     UIButton *importSettingsButton = this->addButton("Import settings from osu!stable");
     importSettingsButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onImportSettingsFromStable>(this));
-    importSettingsButton->setColor(0xffff0000);
+    importSettingsButton->setColor(0xffd90000);
     this->addSubSection("Testing");
     this->addCheckbox("Use bleeding edge release stream", &cv::bleedingedge);
     this->addSpacer();
@@ -1444,12 +1444,12 @@ void OptionsMenu::draw() {
 void OptionsMenu::update_login_button() {
     if(BanchoState::is_online()) {
         this->logInButton->setText("Disconnect");
-        this->logInButton->setColor(0xffff0000);
+        this->logInButton->setColor(0xffd90000);
         this->logInButton->is_loading = false;
     } else {
         bool oauth = this->should_use_oauth_login();
         this->logInButton->setText(oauth ? "Log in with osu!" : "Log in");
-        this->logInButton->setColor(oauth ? 0xffff74ff : 0xff00ff00);  // XXX: ugly, due to 85% brightness
+        this->logInButton->setColor(oauth ? 0xffdd30c1 : 0xff00d900);
         // intentionally not updating loading state here
     }
 }
@@ -3393,7 +3393,7 @@ CBaseUILabel *OptionsMenu::addLabel(const UString &text) {
 
 UIButton *OptionsMenu::addButton(const UString &text) {
     auto *button = new UIButton(0, 0, this->options->getSize().x, 50, text, text);
-    button->setColor(0xff0e94b5);
+    button->setColor(0xff0c7c99);
     button->setUseDefaultSkin();
     this->options->getContainer()->addBaseUIElement(button);
 
@@ -3408,7 +3408,7 @@ UIButton *OptionsMenu::addButton(const UString &text) {
 OptionsMenu::OPTIONS_ELEMENT *OptionsMenu::addButton(const UString &text, const UString &labelText,
                                                      bool withResetButton) {
     auto *button = new UIButton(0, 0, this->options->getSize().x, 50, text, text);
-    button->setColor(0xff0e94b5);
+    button->setColor(0xff0c7c99);
     button->setUseDefaultSkin();
     this->options->getContainer()->addBaseUIElement(button);
 
@@ -3431,12 +3431,12 @@ OptionsMenu::OPTIONS_ELEMENT *OptionsMenu::addButton(const UString &text, const 
 
 OptionsMenu::OPTIONS_ELEMENT *OptionsMenu::addButtonButton(const UString &text1, const UString &text2) {
     auto *button = new UIButton(0, 0, this->options->getSize().x, 50, text1, text1);
-    button->setColor(0xff0e94b5);
+    button->setColor(0xff0c7c99);
     button->setUseDefaultSkin();
     this->options->getContainer()->addBaseUIElement(button);
 
     auto *button2 = new UIButton(0, 0, this->options->getSize().x, 50, text2, text2);
-    button2->setColor(0xff0e94b5);
+    button2->setColor(0xff0c7c99);
     button2->setUseDefaultSkin();
     this->options->getContainer()->addBaseUIElement(button2);
 
@@ -3452,12 +3452,12 @@ OptionsMenu::OPTIONS_ELEMENT *OptionsMenu::addButtonButton(const UString &text1,
 OptionsMenu::OPTIONS_ELEMENT *OptionsMenu::addButtonButtonLabel(const UString &text1, const UString &text2,
                                                                 const UString &labelText, bool withResetButton) {
     auto *button = new UIButton(0, 0, this->options->getSize().x, 50, text1, text1);
-    button->setColor(0xff0e94b5);
+    button->setColor(0xff0c7c99);
     button->setUseDefaultSkin();
     this->options->getContainer()->addBaseUIElement(button);
 
     auto *button2 = new UIButton(0, 0, this->options->getSize().x, 50, text2, text2);
-    button2->setColor(0xff0e94b5);
+    button2->setColor(0xff0c7c99);
     button2->setUseDefaultSkin();
     this->options->getContainer()->addBaseUIElement(button2);
 
@@ -3483,14 +3483,14 @@ OptionsMenuKeyBindButton *OptionsMenu::addKeyBindButton(const UString &text, Con
     /// UString unbindIconString; unbindIconString.insert(0, Icons::UNDO);
     auto *unbindButton = new UIButton(0, 0, this->options->getSize().x, 50, text, "");
     unbindButton->setTooltipText("Unbind");
-    unbindButton->setColor(0x77ff0000);
+    unbindButton->setColor(0x77d90000);
     unbindButton->setUseDefaultSkin();
     unbindButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onKeyUnbindButtonPressed>(this));
     /// unbindButton->setFont(osu->getFontIcons());
     this->options->getContainer()->addBaseUIElement(unbindButton);
 
     auto *bindButton = new OptionsMenuKeyBindButton(0, 0, this->options->getSize().x, 50, text, text);
-    bindButton->setColor(0xff0e94b5);
+    bindButton->setColor(0xff0c7c99);
     bindButton->setUseDefaultSkin();
     bindButton->setClickCallback(SA::MakeDelegate<&OptionsMenu::onKeyBindingButtonPressed>(this));
     this->options->getContainer()->addBaseUIElement(bindButton);
@@ -3546,7 +3546,7 @@ CBaseUICheckbox *OptionsMenu::addCheckbox(const UString &text, const UString &to
 
 OptionsMenu::OPTIONS_ELEMENT *OptionsMenu::addButtonCheckbox(const UString &buttontext, const UString &cbxtooltip) {
     auto *button = new UIButton(0, 0, this->options->getSize().x, 50, buttontext, buttontext);
-    button->setColor(0xff0e94b5);
+    button->setColor(0xff0c7c99);
     button->setUseDefaultSkin();
     this->options->getContainer()->addBaseUIElement(button);
 

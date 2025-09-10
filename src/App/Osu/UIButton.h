@@ -4,17 +4,14 @@
 
 class UIButton : public CBaseUIButton {
    public:
-    UIButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text);
+    UIButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
+      : CBaseUIButton(xPos, yPos, xSize, ySize, std::move(name), std::move(text)) {}
 
     void draw() override;
     void mouse_update(bool *propagate_clicks) override;
 
-    void setColor(Color color) {
-        this->color = color;
-        this->backupColor = color;
-    }
+    void setColor(Color color) { this->color = color; }
     void setUseDefaultSkin() { this->bDefaultSkin = true; }
-    void setAlphaAddOnHover(float alphaAddOnHover) { this->fAlphaAddOnHover = alphaAddOnHover; }
 
     void setTooltipText(const UString& text);
 
@@ -31,13 +28,11 @@ class UIButton : public CBaseUIButton {
     void onClicked(bool left = true, bool right = false) override;
     void onFocusStolen() override;
 
-    bool bDefaultSkin;
-    Color color;
-    Color backupColor;
-    float fBrightness;
-    float fAnim;
-    float fAlphaAddOnHover;
+    bool bDefaultSkin{false};
+    Color color{0xffffffff};
+    float fClickAnim{0.f};
+    float fHoverAnim{0.f};
 
     std::vector<UString> tooltipTextLines;
-    bool bFocusStolenDelay;
+    bool bFocusStolenDelay{false};
 };
