@@ -401,12 +401,18 @@ void ScoreButton::mouse_update(bool *propagate_clicks) {
             this->score.ppv2_aim_stars = info.aim_stars;
             this->score.ppv2_speed_stars = info.speed_stars;
 
-            std::scoped_lock lock(db->scores_mtx);
-            for(auto &other : db->scores[this->score.beatmap_hash]) {
-                if(other.unixTimestamp == this->score.unixTimestamp) {
-                    other = this->score;
-                    osu->getSongBrowser()->score_resort_scheduled = true;
-                    break;
+            // We do NOT want to "copy" an online score to a local score!
+            // Local score data will always be more accurate than online score data.
+            // Plus, we're not even checking for player ID here, could get unlucky
+            // and have one of our local scores nuked by someone else...
+            if(!this->score.is_online_score) {
+                std::scoped_lock lock(db->scores_mtx);
+                for(auto &other : db->scores[this->score.beatmap_hash]) {
+                    if(other.unixTimestamp == this->score.unixTimestamp) {
+                        other = this->score;
+                        osu->getSongBrowser()->score_resort_scheduled = true;
+                        break;
+                    }
                 }
             }
 
