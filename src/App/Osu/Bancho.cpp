@@ -750,12 +750,7 @@ void BanchoState::handle_packet(Packet *packet) {
             auto scheme = cv::use_https.getBool() ? "https://" : "http://";
             auto url = UString::fmt("{}osu.{}/web/neosu-submit-map.php", scheme, BanchoState::endpoint);
             url.append(UString::fmt("?hash={}", md5.hash.data()));
-
-            if(BanchoState::is_oauth) {
-                url.append(UString::fmt("&u=$token&h={}", env->urlEncode(BanchoState::cho_token.toUtf8())));
-            } else {
-                url.append(UString::fmt("&u={}&h={:s}", BanchoState::get_username(), BanchoState::pw_md5.hash.data()));
-            }
+            BANCHO::Net::append_auth_params(url);
 
             NetworkHandler::RequestOptions options;
             options.timeout = 60;

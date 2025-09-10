@@ -264,14 +264,14 @@ ConVarString ConVarHandler::flagsToString(uint8_t flags) {
 
     ConVarString string;
 
-    if(flags & cv::CLIENT) string.append(" client");
-    if(flags & cv::SERVER) string.append(" server");
-    if(flags & cv::SKINS) string.append(" skins");
-    if(flags & cv::PROTECTED) string.append(" protected");
-    if(flags & cv::GAMEPLAY) string.append(" gameplay");
-    if(flags & cv::HIDDEN) string.append(" hidden");
-    if(flags & cv::NOSAVE) string.append(" nosave");
-    if(flags & cv::NOLOAD) string.append(" noload");
+    if((flags & cv::CLIENT) == cv::CLIENT) string.append(" client");
+    if((flags & cv::SERVER) == cv::SERVER) string.append(" server");
+    if((flags & cv::SKINS) == cv::SKINS) string.append(" skins");
+    if((flags & cv::PROTECTED) == cv::PROTECTED) string.append(" protected");
+    if((flags & cv::GAMEPLAY) == cv::GAMEPLAY) string.append(" gameplay");
+    if((flags & cv::HIDDEN) == cv::HIDDEN) string.append(" hidden");
+    if((flags & cv::NOSAVE) == cv::NOSAVE) string.append(" nosave");
+    if((flags & cv::NOLOAD) == cv::NOLOAD) string.append(" noload");
 
     string.pop_back(); // remove leading space
 

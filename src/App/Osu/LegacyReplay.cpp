@@ -278,12 +278,7 @@ void load_and_watch(FinishedScore score) {
 
             UString url{"/web/osu-getreplay.php?m=0"};
             url.append(UString::fmt("&c={}", score.bancho_score_id));
-
-            if(BanchoState::is_oauth) {
-                url.append(UString::fmt("&u=$token&h={}", env->urlEncode(BanchoState::cho_token.toUtf8())));
-            } else {
-                url.append(UString::fmt("&u={}&h={:s}", BanchoState::get_username(), BanchoState::pw_md5.hash.data()));
-            }
+            BANCHO::Net::append_auth_params(url);
 
             APIRequest request;
             request.type = GET_REPLAY;

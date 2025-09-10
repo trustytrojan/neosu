@@ -373,12 +373,7 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, MD5Hash beatmap_md5, float* pr
 
         UString url{"/web/osu-search-set.php?"};
         url.append(UString::fmt("b={}", beatmap_id));
-
-        if(BanchoState::is_oauth) {
-            url.append(UString::fmt("&u=$token&h={}", env->urlEncode(BanchoState::cho_token.toUtf8())));
-        } else {
-            url.append(UString::fmt("&u={}&h={:s}", BanchoState::get_username(), BanchoState::pw_md5.hash.data()));
-        }
+        BANCHO::Net::append_auth_params(url);
 
         APIRequest request;
         request.type = GET_BEATMAPSET_INFO;
@@ -456,12 +451,7 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, i32 beatmapset_id, float* prog
 
         UString url{"/web/osu-search-set.php?"};
         url.append(UString::fmt("b={}", beatmap_id));
-
-        if(BanchoState::is_oauth) {
-            url.append(UString::fmt("&u=$token&h={}", env->urlEncode(BanchoState::cho_token.toUtf8())));
-        } else {
-            url.append(UString::fmt("&u={}&h={:s}", BanchoState::get_username(), BanchoState::pw_md5.hash.data()));
-        }
+        BANCHO::Net::append_auth_params(url);
 
         APIRequest request;
         request.type = GET_BEATMAPSET_INFO;

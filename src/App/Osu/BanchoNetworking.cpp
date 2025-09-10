@@ -417,6 +417,19 @@ void cleanup_networking() {
     outgoing = Packet();
 }
 
+void append_auth_params(UString& url, std::string user_param, std::string pw_param) {
+    std::string user, pw;
+    if(BanchoState::is_oauth) {
+        user = "$token";
+        pw = BanchoState::cho_token.toUtf8();
+    } else {
+        user = BanchoState::get_username();
+        pw = BanchoState::pw_md5.hash.data();
+    }
+
+    url.append(UString::fmt("&{}={}&{}={}", user_param, user, pw_param, pw));
+}
+
 }  // namespace BANCHO::Net
 
 void BanchoState::disconnect() {
