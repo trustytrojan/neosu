@@ -39,7 +39,10 @@ struct FinishedScore {
     std::string client;
     std::string server;
     i64 bancho_score_id = 0;
-    u64 peppy_replay_tms = 0;  // online scores don't have peppy_replay_tms
+
+    // Only present in scores parsed from osu!.db, aka "peppy" replays
+    // So it will always be 0 in mcosu/neosu scores, or in online scores
+    u64 peppy_replay_tms = 0;
 
     int num300s = 0;
     int num100s = 0;
@@ -77,10 +80,22 @@ struct FinishedScore {
     MD5Hash beatmap_hash;
     std::vector<LegacyReplay::Frame> replay;  // not always loaded
 
-    [[nodiscard]] bool is_peppy_imported() const { return this->bancho_score_id != 0 || this->peppy_replay_tms != 0; }
-    [[nodiscard]] bool has_possible_replay() const { return !this->client.contains("mcosu"); }
+    // Online scores are not saved to db
+    bool is_online_score = false;
+    bool is_online_replay_available = false;
+
+    [[nodiscard]] bool is_peppy_imported() const { return this->server == "ppy.sh"; }
     [[nodiscard]] f64 get_pp() const;
     [[nodiscard]] Grade calculate_grade() const;
+
+    [[nodiscard]] bool has_possible_replay() const {
+        if(this->is_online_score) {
+            return this->is_online_replay_available;
+        } else {
+            // Assume we always have a replay, as long as it's not a McOsu-imported score
+            return !this->client.contains("mcosu");
+        }
+    }
 };
 
 class LiveScore {

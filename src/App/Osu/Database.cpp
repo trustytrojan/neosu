@@ -2079,6 +2079,8 @@ void Database::saveScores() {
         db.write<u32>(it.second.size());
 
         for(auto &score : it.second) {
+            assert(!score.is_online_score);
+
             db.write<u64>(score.mods.flags);
             db.write<f32>(score.mods.speed);
             db.write<i32>(score.mods.notelock_type);

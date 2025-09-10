@@ -560,7 +560,7 @@ void ScoreButton::onRightMouseUpInside() {
         this->contextMenu->begin(0, true);
         {
             this->contextMenu->addButton("Use Mods", 1);  // for scores without mods this will just nomod
-            auto *replayButton = this->contextMenu->addButton("View replay", 2);
+            auto *replayButton = this->contextMenu->addButton("Watch replay", 2);
             if(!this->score.has_possible_replay())  // e.g. mcosu scores will never have replays
             {
                 replayButton->setEnabled(false);

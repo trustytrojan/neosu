@@ -19,9 +19,10 @@ FinishedScore parse_score(char *score_line) {
     FinishedScore score;
     score.client = "peppy-unknown";
     score.server = BanchoState::endpoint;
+    score.is_online_score = true;
 
     auto tokens = SString::split(score_line, "|");
-    if(tokens.size() < 15) return score;
+    if(tokens.size() < 16) return score;
 
     score.bancho_score_id = strtoll(tokens[0].c_str(), nullptr, 10);
     score.playerName = tokens[1].c_str();
@@ -37,6 +38,7 @@ FinishedScore parse_score(char *score_line) {
     score.mods = Replay::Mods::from_legacy(static_cast<u32>(strtoul(tokens[11].c_str(), nullptr, 10)));
     score.player_id = static_cast<i32>(strtol(tokens[12].c_str(), nullptr, 10));
     score.unixTimestamp = strtoull(tokens[14].c_str(), nullptr, 10);
+    score.is_online_replay_available = strtoul(tokens[15].c_str(), nullptr, 10) == 1;
 
     // @PPV3: score can only be ppv2, AND we need to recompute ppv2 on it
     // might also be missing some important fields here, double check
