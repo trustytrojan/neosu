@@ -559,6 +559,10 @@ void ScoreButton::onRightMouseUpInside() {
         this->contextMenu->setRelPos(pos);
         this->contextMenu->begin(0, true);
         {
+            if(!this->score.server.empty() && this->score.player_id != 0) {
+                this->contextMenu->addButton("View Profile", 4);
+            }
+
             this->contextMenu->addButton("Use Mods", 1);  // for scores without mods this will just nomod
             auto *replayButton = this->contextMenu->addButton("Watch replay", 2);
             if(!this->score.has_possible_replay())  // e.g. mcosu scores will never have replays
@@ -614,6 +618,12 @@ void ScoreButton::onContextMenu(const UString &text, int id) {
         else
             this->onDeleteScoreClicked();
 
+        return;
+    }
+
+    if(id == 4) {
+        auto user_url = fmt::format("https://osu.{}/u/{}", this->score.server, this->score.player_id);
+        env->openURLInDefaultBrowser(user_url);
         return;
     }
 }
