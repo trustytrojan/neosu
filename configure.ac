@@ -518,6 +518,11 @@ CXXFLAGS="$CXXFLAGS $COMMON_FLAGS -fno-exceptions -fno-unwind-tables" # -fno-rtt
 CFLAGS="$CFLAGS $COMMON_FLAGS"
 LDFLAGS="$LDFLAGS -static-libstdc++ -static-libgcc -pthread"
 
+AC_SUBST([CXXFLAGS])
+AC_SUBST([CFLAGS])
+AC_SUBST([LDFLAGS])
+AC_SUBST([CXXFLAGS_EXTRA]) # appended to neosu build flags only
+
 AC_LANG_PUSH([C++])
 AS_IF([test "x$enable_native" != "xno"], [
     CXXFLAGS="$CXXFLAGS -march=native -mtune=native"

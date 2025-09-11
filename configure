@@ -783,6 +783,7 @@ ENABLE_DEBUG
 RANLIB
 AR
 LD
+CXXFLAGS_EXTRA
 LIBPREFIX
 DLLEXT
 SYSNAME
@@ -8223,6 +8224,11 @@ COMMON_FLAGS="$COMMON_FLAGS -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64 -pipe -ffunct
 CXXFLAGS="$CXXFLAGS $COMMON_FLAGS -fno-exceptions -fno-unwind-tables" # -fno-rtti
 CFLAGS="$CFLAGS $COMMON_FLAGS"
 LDFLAGS="$LDFLAGS -static-libstdc++ -static-libgcc -pthread"
+
+
+
+
+ # appended to neosu build flags only
 
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
