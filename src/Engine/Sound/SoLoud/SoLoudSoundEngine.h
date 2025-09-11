@@ -47,10 +47,9 @@ class SoLoudSoundEngine final : public SoundEngine {
    private:
     // internal helpers for play()
     bool playSound(SoLoudSound *soloudSound, f32 pan, f32 pitch, f32 playVolume);
-    SOUNDHANDLE playDirectSound(SoLoudSound *soloudSound, f32 pan, f32 pitch, f32 effectiveVolume);
     bool updateExistingSound(SoLoudSound *soloudSound, SOUNDHANDLE handle, f32 pan, f32 pitch, f32 playVolume);
 
-    void setVolumeGradual(unsigned int handle, float targetVol, float fadeTimeMs = 10.0f);
+    void setVolumeGradual(SOUNDHANDLE handle, float targetVol, float fadeTimeMs = 10.0f);
     void updateOutputDevices(bool printInfo) override;
 
     bool initializeOutputDevice(const OUTPUT_DEVICE &device) override;

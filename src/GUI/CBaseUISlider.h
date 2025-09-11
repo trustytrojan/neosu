@@ -84,6 +84,9 @@ class CBaseUISlider : public CBaseUIElement {
     vec2 vBlockSize, vBlockPos{0.f};
     vec2 vGrabBackup{0.f};
 
+    // to avoid "fighting" between externally set values and mouse-based slider values, if the mouse position hasn't moved
+    vec2 vLastMousePos{0.f};
+
     float fMinValue, fMaxValue, fCurValue, fCurPercent;
     float fPrevValue;
     float fKeyDelta;
@@ -95,6 +98,7 @@ class CBaseUISlider : public CBaseUIElement {
     unsigned bDrawBackground : 1;
     unsigned bHorizontal : 1;
     unsigned bHasChanged : 1;
+    unsigned bWasChangeCallback : 1;
     unsigned bAnimated : 1;
     unsigned bLiveUpdate : 1;
     unsigned bAllowMouseWheel : 1;

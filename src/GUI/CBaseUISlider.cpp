@@ -21,6 +21,7 @@ CBaseUISlider::CBaseUISlider(float xPos, float yPos, float xSize, float ySize, U
     this->bDrawBackground = true;
     this->bHorizontal = false;
     this->bHasChanged = false;
+    this->bWasChangeCallback = false;
     this->bAnimated = true;
     this->bLiveUpdate = false;
     this->bAllowMouseWheel = true;
@@ -29,6 +30,7 @@ CBaseUISlider::CBaseUISlider(float xPos, float yPos, float xSize, float ySize, U
     this->frameColor = argb(255, 255, 255, 255);
 
     this->fCurValue = 0.0f;
+    this->fPrevValue = 0.0f;
     this->fCurPercent = 0.0f;
     this->fMinValue = 0.0f;
     this->fMaxValue = 1.0f;
@@ -86,13 +88,16 @@ void CBaseUISlider::drawBlock() {
 }
 
 void CBaseUISlider::mouse_update(bool *propagate_clicks) {
-    if(!this->bVisible) return;
     CBaseUIElement::mouse_update(propagate_clicks);
+    if(!this->bVisible) return;
 
-    vec2 mousepos = mouse->getPos();
+    vec2 mousepos{mouse->getPos()};
+    // ignore unmoving mouse
+    const bool activeMouseMotion{this->bActive && (mousepos != this->vLastMousePos)};
+    this->vLastMousePos = mousepos;
 
     // handle moving
-    if(this->bActive) {
+    if(activeMouseMotion) {
         // calculate new values
         if(!this->bHorizontal) {
             if(this->bAnimated) {
@@ -151,7 +156,7 @@ void CBaseUISlider::mouse_update(bool *propagate_clicks) {
     }
 
     // handle animation value settings after mouse release
-    if(!this->bActive) {
+    if(!activeMouseMotion) {
         if(anim->isAnimating(&this->vBlockPos.x)) {
             this->fCurPercent =
                 std::clamp<float>(std::round(this->vBlockPos.x) / (this->vSize.x - this->vBlockSize.x), 0.0f, 1.0f);
@@ -189,7 +194,10 @@ void CBaseUISlider::onKeyDown(KeyboardEvent &e) {
 }
 
 void CBaseUISlider::fireChangeCallback() {
-    if(this->sliderChangeCallback != nullptr) this->sliderChangeCallback(this);
+    if(this->sliderChangeCallback != nullptr) {
+        this->bWasChangeCallback = true;
+        this->sliderChangeCallback(this);
+    }
 }
 
 void CBaseUISlider::updateBlockPos() {
@@ -210,12 +218,20 @@ CBaseUISlider *CBaseUISlider::setBounds(float minValue, float maxValue) {
 
 CBaseUISlider *CBaseUISlider::setValue(float value, bool animate, bool call_callback) {
     bool changeCallbackCheck = false;
-    if(value != this->fCurValue) {
-        changeCallbackCheck = true;
+    float valueClamped = std::clamp<float>(value, this->fMinValue, this->fMaxValue);
+    if(valueClamped != this->fCurValue) {
+        this->fCurValue = valueClamped;
+
+        if (this->bWasChangeCallback) {
+            // avoid recursive callback calls
+            this->bWasChangeCallback = false;
+        } else {
+            changeCallbackCheck = true;
+        }
+
         this->bHasChanged = true;
     }
 
-    this->fCurValue = std::clamp<float>(value, this->fMinValue, this->fMaxValue);
     float percent = this->getPercent();
 
     if(!this->bHorizontal) {
@@ -232,11 +248,11 @@ CBaseUISlider *CBaseUISlider::setValue(float value, bool animate, bool call_call
     }
 
     if(call_callback && changeCallbackCheck && this->sliderChangeCallback != nullptr) {
-        this->sliderChangeCallback(this);
+        this->fireChangeCallback();
 
         if(this->bHasChanged) {
             if(this->fLastSoundPlayTime + 0.05f < engine->getTime()) {
-                soundEngine->play(osu->getSkin()->getSliderbarSound(), 0.f, 1.f + 0.05f * percent);
+                soundEngine->play(osu->getSkin()->getSliderbarSound(), 0.f, 0.75f + (.075f * percent));
                 this->fLastSoundPlayTime = engine->getTime();
             }
         }
@@ -284,13 +300,13 @@ void CBaseUISlider::onFocusStolen() { this->bBusy = false; }
 void CBaseUISlider::onMouseUpInside(bool  /*left*/, bool  /*right*/) {
     this->bBusy = false;
 
-    if(this->fCurValue != this->fPrevValue && this->sliderChangeCallback != nullptr) this->sliderChangeCallback(this);
+    if(this->fCurValue != this->fPrevValue && this->sliderChangeCallback != nullptr) this->fireChangeCallback();
 }
 
 void CBaseUISlider::onMouseUpOutside(bool  /*left*/, bool  /*right*/) {
     this->bBusy = false;
 
-    if(this->fCurValue != this->fPrevValue && this->sliderChangeCallback != nullptr) this->sliderChangeCallback(this);
+    if(this->fCurValue != this->fPrevValue && this->sliderChangeCallback != nullptr) this->fireChangeCallback();
 }
 
 void CBaseUISlider::onMouseDownInside(bool  /*left*/, bool  /*right*/) {

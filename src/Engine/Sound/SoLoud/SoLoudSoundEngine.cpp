@@ -68,7 +68,7 @@ bool SoLoudSoundEngine::play(Sound *snd, f32 pan, f32 pitch, f32 playVolume) {
     pitch += 1.0f;
 
     pan = std::clamp<float>(pan, -1.0f, 1.0f);
-    pitch = std::clamp<float>(pitch, 0.0f, 2.0f);
+    pitch = std::clamp<float>(pitch, 0.01f, 2.0f);
 
     auto *soloudSound = snd->as<SoLoudSound>();
     if(!soloudSound) return false;
@@ -151,13 +151,9 @@ bool SoLoudSoundEngine::playSound(SoLoudSound *soloudSound, f32 pan, f32 pitch, 
                         // buzzsliders can cause glitches in music playback
                         // TODO: a better workaround would be to manually prevent samples from playing if
                         // it would lead to getMaxActiveVoiceCount() <= getActiveVoiceCount()
-
-        if(cv::debug_snd.getBool() && handle)
-            debugLog("SoLoudSoundEngine: Playing streaming audio through SLFXStream with speed={:f}, pitch={:f}\n",
-                     soloudSound->fSpeed, soloudSound->fPitch);
     } else {
         // non-streams don't go through the SoLoudFX wrapper
-        handle = this->playDirectSound(soloudSound, pan, pitch, soloudSound->fBaseVolume * playVolume);
+        handle = soloud->play(*soloudSound->audioSource, soloudSound->fBaseVolume * playVolume, pan, true /* paused */);
     }
 
     // finalize playback
@@ -168,13 +164,30 @@ bool SoLoudSoundEngine::playSound(SoLoudSound *soloudSound, f32 pan, f32 pitch, 
         PlaybackParams newInstance{.pan = pan, .pitch = pitch, .volume = playVolume};
         soloudSound->addActiveInstance(handle, newInstance);
 
-        soloudSound->setLastPlayTime(engine->getTime());
-
-        if(soloudSound->bStream)  // unpause and fade it in if it's a stream (since we started it paused with 0 volume)
-        {
-            soloud->setPause(handle, false);
+        if(soloudSound->bStream) {  // fade it in if it's a stream (since we started it paused with 0 volume)
             this->setVolumeGradual(handle, soloudSound->fBaseVolume * playVolume);
+
+            if(cv::debug_snd.getBool())
+                debugLog("SoLoudSoundEngine: Playing streaming audio through SLFXStream with speed={:f}, pitch={:f}\n",
+                         soloudSound->getSpeed(), soloudSound->getPitch());
+        } else {  // set playback pitch
+            // calculate final pitch by combining all pitch modifiers
+            float playbackPitch = pitch * soloudSound->getPitch() * soloudSound->getSpeed();
+
+            // set relative play speed (affects both pitch and speed)
+            soloud->setRelativePlaySpeed(handle, playbackPitch);
+
+            if(cv::debug_snd.getBool())
+                debugLog(
+                    "SoLoudSoundEngine: Playing non-streaming audio with playbackPitch={:f} (pitch={:f} * "
+                    "soundPitch={:f}, soundSpeed={:f})\n",
+                    playbackPitch, pitch, soloudSound->getPitch(), soloudSound->getSpeed());
         }
+
+        // we started it paused, so unpause it now
+        soloud->setPause(handle, false);
+
+        soloudSound->setLastPlayTime(engine->getTime());
 
         return true;
     }
@@ -182,36 +195,6 @@ bool SoLoudSoundEngine::playSound(SoLoudSound *soloudSound, f32 pan, f32 pitch, 
     if(cv::debug_snd.getBool()) debugLog("SoLoudSoundEngine: Failed to play sound {:s}\n", soloudSound->sFilePath);
 
     return false;
-}
-
-SOUNDHANDLE SoLoudSoundEngine::playDirectSound(SoLoudSound *soloudSound, f32 pan, f32 pitch, f32 effectiveVolume) {
-    if(!soloudSound || !soloudSound->audioSource) return 0;
-
-    // calculate final pitch by combining all pitch modifiers
-    float finalPitch = pitch;
-
-    // combine with sound's pitch setting
-    if(soloudSound->fPitch != 1.0f) finalPitch *= soloudSound->fPitch;
-
-    // if speed compensation is disabled, apply speed as pitch
-    if(cv::nightcore_enjoyer.getBool() && soloudSound->fSpeed != 1.0f) finalPitch *= soloudSound->fSpeed;
-
-    // play directly
-    SOUNDHANDLE handle = soloud->play(*soloudSound->audioSource, effectiveVolume, pan, false /* not paused */);
-
-    if(handle != 0) {
-        // set relative play speed (affects both pitch and speed)
-        if(finalPitch != 1.0f) soloud->setRelativePlaySpeed(handle, finalPitch);
-
-        if(cv::debug_snd.getBool())
-            debugLog(
-                "SoLoudSoundEngine: Playing non-streaming audio with finalPitch={:f} (pitch={:f} * soundPitch={:f} * "
-                "speedAsPitch={:f})\n",
-                finalPitch, pitch, soloudSound->fPitch,
-                (cv::nightcore_enjoyer.getBool() && soloudSound->fSpeed != 1.0f) ? soloudSound->fSpeed : 1.0f);
-    }
-
-    return handle;
 }
 
 void SoLoudSoundEngine::pause(Sound *snd) {
@@ -354,7 +337,7 @@ void SoLoudSoundEngine::setMasterVolume(float volume) {
     soloud->setGlobalVolume(this->fMasterVolume);
 }
 
-void SoLoudSoundEngine::setVolumeGradual(unsigned int handle, float targetVol, float fadeTimeMs) {
+void SoLoudSoundEngine::setVolumeGradual(SOUNDHANDLE handle, float targetVol, float fadeTimeMs) {
     if(!this->isReady() || handle == 0 || !soloud->isValidVoiceHandle(handle)) return;
 
     soloud->setVolume(handle, 0.0f);
