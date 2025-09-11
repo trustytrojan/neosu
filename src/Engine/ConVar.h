@@ -21,36 +21,36 @@ using ConVarString = std::string;
 using std::string_view_literals::operator""sv;
 
 namespace cv {
-    enum CvarFlags {
-        // Modifiable by clients
-        CLIENT = (1 << 0),
+enum CvarFlags {
+    // Modifiable by clients
+    CLIENT = (1 << 0),
 
-        // Modifiable by servers, OR by offline clients
-        SERVER = (1 << 1),
+    // Modifiable by servers, OR by offline clients
+    SERVER = (1 << 1),
 
-        // Modifiable by skins
-        // TODO: assert() CLIENT is set
-        SKINS = (1 << 2),
+    // Modifiable by skins
+    // TODO: assert() CLIENT is set
+    SKINS = (1 << 2),
 
-        // Scores won't submit if modified
-        PROTECTED = (1 << 3),
+    // Scores won't submit if modified
+    PROTECTED = (1 << 3),
 
-        // Scores won't submit if modified during gameplay
-        GAMEPLAY = (1 << 4),
+    // Scores won't submit if modified during gameplay
+    GAMEPLAY = (1 << 4),
 
-        // Hidden from console suggestions (e.g. for passwords or deprecated cvars)
-        HIDDEN = (1 << 5),
+    // Hidden from console suggestions (e.g. for passwords or deprecated cvars)
+    HIDDEN = (1 << 5),
 
-        // Don't save this cvar to configs
-        NOSAVE = (1 << 6),
+    // Don't save this cvar to configs
+    NOSAVE = (1 << 6),
 
-        // Don't load this cvar from configs
-        NOLOAD = (1 << 7),
+    // Don't load this cvar from configs
+    NOLOAD = (1 << 7),
 
-        // Mark the variable as intended for use only inside engine code
-        // NOTE: This is intended to be used without any other flags
-        CONSTANT = HIDDEN | NOLOAD | NOSAVE,
-    };
+    // Mark the variable as intended for use only inside engine code
+    // NOTE: This is intended to be used without any other flags
+    CONSTANT = HIDDEN | NOLOAD | NOSAVE,
+};
 }
 
 class ConVarHandler;
@@ -240,9 +240,7 @@ class ConVar {
     }
 
     // get
-    [[nodiscard]] inline float getDefaultFloat() const {
-        return static_cast<float>(this->dDefaultValue);
-    }
+    [[nodiscard]] inline float getDefaultFloat() const { return static_cast<float>(this->dDefaultValue); }
     [[nodiscard]] inline double getDefaultDouble() const { return this->dDefaultValue; }
     [[nodiscard]] inline const ConVarString &getDefaultString() const { return this->sDefaultValue; }
 
@@ -254,13 +252,15 @@ class ConVar {
     [[nodiscard]] double getDouble() const;
     [[nodiscard]] const ConVarString &getString() const;
 
-    template<typename T>
-    [[nodiscard]] constexpr T getVal() { return (T)this->getDouble(); }
+    template <typename T>
+    [[nodiscard]] constexpr T getVal() {
+        return (T)this->getDouble();
+    }
 
-    [[nodiscard]] constexpr int getInt() const { return (int)this->getDouble(); }
-    [[nodiscard]] constexpr bool getBool() const { return (bool)this->getDouble(); }
-    [[nodiscard]] constexpr bool get() const { return this->getBool(); }
-    [[nodiscard]] constexpr float getFloat() const { return (float)this->getDouble(); }
+    [[nodiscard]] const int getInt() const { return (int)this->getDouble(); }
+    [[nodiscard]] const bool getBool() const { return (bool)this->getDouble(); }
+    [[nodiscard]] const bool get() const { return this->getBool(); }
+    [[nodiscard]] const float getFloat() const { return (float)this->getDouble(); }
 
     [[nodiscard]] inline const ConVarString &getHelpstring() const { return this->sHelpString; }
     [[nodiscard]] inline const ConVarString &getName() const { return this->sName; }
@@ -280,10 +280,16 @@ class ConVar {
 
     [[nodiscard]] inline bool isProtected() const {
         switch(this->serverProtectionPolicy) {
-            case ProtectionPolicy::DEFAULT: return this->isFlagSet(cv::PROTECTED);
-            case ProtectionPolicy::PROTECTED: return true;
-            case ProtectionPolicy::UNPROTECTED: return false;
+            case ProtectionPolicy::DEFAULT:
+                return this->isFlagSet(cv::PROTECTED);
+            case ProtectionPolicy::PROTECTED:
+                return true;
+            case ProtectionPolicy::UNPROTECTED:
+                return false;
         }
+
+        // unreachable, but MSVC is bitching
+        return true;
     }
 
    private:
@@ -480,7 +486,8 @@ class ConVar {
     // callback storage (allow having 1 "change" callback and 1 single value (or void) callback)
     ExecutionCallback callback{std::monostate()};
     ChangeCallback changeCallback{std::monostate()};
-public:
+
+   public:
     std::atomic<bool> hasServerValue{false};
 };
 
