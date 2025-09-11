@@ -27,13 +27,22 @@ Changelog::Changelog() : ScreenBackable() {
 
     std::vector<CHANGELOG> changelogs;
 
+    CHANGELOG v40_04;
+    v40_04.title = "40.04";
+    v40_04.changes = {
+        R"(- Added support for OAuth login servers)",
+        R"(- Added ability for servers to override game settings)",
+        R"(- Added ability for skins to override game settings)",
+        R"(- Fixed user presence/stats getting requested too often)",
+    };
+    changelogs.push_back(v40_04);
+
     CHANGELOG v40_03;
     v40_03.title = "40.03 (2025-08-27)";
     v40_03.changes = {
-        R"(- Hotfix for some 40.02 regressions:)",
-        R"(  - Fixed certain maps failing to load correctly (hitsound parsing problems))",
-        R"(  - Fixed HP drain and geki/katu hit results (new combo always started at 2))",
-        R"(  - Small audio improvements and fixes (for BASS and SoLoud))",
+        R"(- Fixed certain maps failing to load correctly (hitsound parsing problems))",
+        R"(- Fixed HP drain and geki/katu hit results (new combo always started at 2))",
+        R"(- Small audio improvements and fixes (for BASS and SoLoud))",
     };
     changelogs.push_back(v40_03);
 
