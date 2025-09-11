@@ -61,6 +61,7 @@ void CBaseUILabel::drawText() {
         g->setColor(this->textColor);
         g->pushTransform();
         {
+            g->scale(this->fScale, this->fScale); // XXX: not sure if scaling respects text justification
             g->translate(
                 (int)(this->vPos.x + (this->bCenterText ? +this->vSize.x / 2.0f - this->fStringWidth / 2.0f : xPosAdd)),
                 (int)(this->vPos.y + this->vSize.y / 2.0f + this->fStringHeight / 2.0f));

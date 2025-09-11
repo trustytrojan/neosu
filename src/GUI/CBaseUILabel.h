@@ -67,6 +67,10 @@ class CBaseUILabel : public CBaseUIElement {
         this->textJustification = textJustification;
         return this;
     }
+    CBaseUILabel *setScale(float newScale) {
+        this->fScale = newScale;
+        return this;
+    }
 
     // DEPRECATED! use setTextJustification() instead
     void setCenterText(bool centerText) { this->bCenterText = centerText; }
@@ -96,6 +100,7 @@ class CBaseUILabel : public CBaseUIElement {
     Color textColor;
 
     TEXT_JUSTIFICATION textJustification : 2;
+    float fScale{1.f};
 
     unsigned bDrawFrame : 1;
     unsigned bDrawBackground : 1;

@@ -1222,23 +1222,37 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->sectionOnline = this->addSection("Online");
 
     this->addSubSection("Online server");
-    this->addLabel("If the server admins don't explicitly allow neosu,")->setTextColor(0xff666666);
-    this->elemContainers.back()->render_condition = RenderCondition::SCORE_SUBMISSION_POLICY;
-    this->addLabel("you might get banned!")->setTextColor(0xff666666);
-    this->elemContainers.back()->render_condition = RenderCondition::SCORE_SUBMISSION_POLICY;
-    this->addLabel("");
-    this->serverTextbox = this->addTextbox(cv::mp_server.getString().c_str(), &cv::mp_server);
-    this->submitScoresCheckbox = this->addCheckbox("Submit scores", &cv::submit_scores);
-    this->elemContainers.back()->render_condition = RenderCondition::SCORE_SUBMISSION_POLICY;
 
-    this->addSubSection("Login details (username/password)");
-    this->elemContainers.back()->render_condition = RenderCondition::PASSWORD_AUTH;
-    this->nameTextbox = this->addTextbox(cv::name.getString().c_str(), &cv::name);
-    this->elemContainers.back()->render_condition = RenderCondition::PASSWORD_AUTH;
-    const auto &md5pass = cv::mp_password_md5.getString();
-    this->passwordTextbox = this->addTextbox(md5pass.empty() ? "" : md5pass.c_str(), &cv::mp_password);
-    this->passwordTextbox->is_password = true;
-    this->elemContainers.back()->render_condition = RenderCondition::PASSWORD_AUTH;
+    // Only renders if server submission policy is unknown
+    {
+        this->addLabel("If the server admins don't explicitly allow neosu,")->setTextColor(0xff666666);
+        this->elemContainers.back()->render_condition = RenderCondition::SCORE_SUBMISSION_POLICY;
+        this->addLabel("you might get banned!")->setTextColor(0xff666666);
+        this->elemContainers.back()->render_condition = RenderCondition::SCORE_SUBMISSION_POLICY;
+        this->addLabel("");
+        this->elemContainers.back()->render_condition = RenderCondition::SCORE_SUBMISSION_POLICY;
+    }
+
+    this->serverTextbox = this->addTextbox(cv::mp_server.getString().c_str(), "Server address:", &cv::mp_server);
+
+    // Only renders if server submission policy is unknown
+    {
+        this->submitScoresCheckbox = this->addCheckbox("Submit scores", &cv::submit_scores);
+        this->elemContainers.back()->render_condition = RenderCondition::SCORE_SUBMISSION_POLICY;
+    }
+
+    // Only renders if server isn't OAuth
+    {
+        this->addSubSection("Login details (username/password)");
+        this->elemContainers.back()->render_condition = RenderCondition::PASSWORD_AUTH;
+        this->nameTextbox = this->addTextbox(cv::name.getString().c_str(), &cv::name);
+        this->elemContainers.back()->render_condition = RenderCondition::PASSWORD_AUTH;
+        const auto &md5pass = cv::mp_password_md5.getString();
+        this->passwordTextbox = this->addTextbox(md5pass.empty() ? "" : md5pass.c_str(), &cv::mp_password);
+        this->passwordTextbox->is_password = true;
+        this->elemContainers.back()->render_condition = RenderCondition::PASSWORD_AUTH;
+    }
+
     {
         enum ELEMS : uint8_t { LOGINBTN = 0, KEEPSIGNEDCBX = 1 };
         OPTIONS_ELEMENT *loginElement = this->addButtonCheckbox("Log in", "Keep me logged in");
@@ -1267,15 +1281,8 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addSubSection("In-game chat");
     this->addCheckbox("Chat ticker", &cv::chat_ticker);
     this->addCheckbox("Automatically hide chat during gameplay", &cv::chat_auto_hide);
-
-    this->addSpacer();
-    this->addLabel("Chat word ignore list (space-separated)");
-    this->addLabel("");
-    this->addTextbox(cv::chat_ignore_list.getString().c_str(), &cv::chat_ignore_list);
-    // this->addSpacer();
-    // this->addLabel("Chat word highlight list (space-separated)");
-    // this->addLabel("");
-    // this->addTextbox(cv::chat_highlight_words.getString().c_str(), &cv::chat_highlight_words);
+    this->addTextbox(cv::chat_ignore_list.getString().c_str(), "Chat word ignore list (space-separated):", &cv::chat_ignore_list);
+    // this->addTextbox(cv::chat_highlight_words.getString().c_str(), "Chat word highlight list (space-separated):", &cv::chat_highlight_words);
 
     this->addSubSection("Privacy");
     this->addCheckbox("Automatically update neosu to the latest version", &cv::auto_update);
@@ -2105,6 +2112,8 @@ void OptionsMenu::updateLayout() {
 
                 e3->setRelPos(sideMargin + e1->getSize().x + e2->getSize().x + 1.5f * spacing, yCounter);
                 e3->setSizeX(elementWidth * dividerEnd - spacing);
+
+                yCounter += e1->getSize().y;
             } else if(isButtonCheckbox) {
                 // make checkbox square (why the hell does this always need to be done here?)
                 e2->setSizeX(e2->getSize().y);
@@ -2115,6 +2124,16 @@ void OptionsMenu::updateLayout() {
 
                 //  checkbox
                 e2->setRelPos(sideMargin + e1->getSize().x + spacing, yCounter);
+
+                yCounter += e1->getSize().y;
+            } else if(labelPointer != nullptr) {
+                // Labeled textbox
+                e1->setRelPos(sideMargin, yCounter);
+                e1->setSizeX(elementWidth);
+                yCounter += e1->getSize().y;
+                e2->setRelPos(sideMargin , yCounter);
+                e2->setSizeX(elementWidth);
+                yCounter += e2->getSize().y;
             } else {
                 float dividerEnd = 1.0f / 2.0f;
                 float dividerBegin = 1.0f - dividerEnd;
@@ -2124,9 +2143,9 @@ void OptionsMenu::updateLayout() {
 
                 e2->setRelPos(sideMargin + e1->getSize().x + 2 * spacing, yCounter);
                 e2->setSizeX(elementWidth * dividerEnd - spacing);
-            }
 
-            yCounter += e1->getSize().y;
+                yCounter += e1->getSize().y;
+            }
         } else if(this->elemContainers[i]->baseElems.size() == 3) {
             CBaseUIElement *e1 = this->elemContainers[i]->baseElems[0];
             CBaseUIElement *e2 = this->elemContainers[i]->baseElems[1];
@@ -3633,10 +3652,12 @@ CBaseUITextbox *OptionsMenu::addTextbox(UString text, const UString &labelText, 
     textbox->setText(std::move(text));
     this->options->getContainer()->addBaseUIElement(textbox);
 
-    auto *label = new CBaseUILabel(0, 0, this->options->getSize().x, 40, labelText, labelText);
+    auto *label = new CBaseUILabel(0, 0, this->options->getSize().x, 35, labelText, labelText);
     label->setDrawFrame(false);
     label->setDrawBackground(false);
+    label->setTextColor(rgb(200, 200, 200));
     label->setWidthToContent();
+    label->setScale(0.9f);
     this->options->getContainer()->addBaseUIElement(label);
 
     auto *e = new OPTIONS_ELEMENT;
