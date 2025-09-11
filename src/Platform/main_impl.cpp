@@ -353,7 +353,6 @@ bool SDLMain::createWindow() {
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
         }
-        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
         // setup antialiasing from -aa command line argument
         if(m_mArgMap["-aa"].has_value()) {
             auto aaSamples = m_mArgMap["-aa"].value().to<unsigned int>();
