@@ -11,8 +11,6 @@
 #include "Skin.h"
 #include "SoundEngine.h"
 
-
-
 CBaseUISlider::CBaseUISlider(float xPos, float yPos, float xSize, float ySize, UString name)
     : CBaseUIElement(xPos, yPos, xSize, ySize, std::move(name)) {
     this->grabs_clicks = true;
@@ -21,7 +19,6 @@ CBaseUISlider::CBaseUISlider(float xPos, float yPos, float xSize, float ySize, U
     this->bDrawBackground = true;
     this->bHorizontal = false;
     this->bHasChanged = false;
-    this->bWasChangeCallback = false;
     this->bAnimated = true;
     this->bLiveUpdate = false;
     this->bAllowMouseWheel = true;
@@ -70,9 +67,8 @@ void CBaseUISlider::draw() {
 
 void CBaseUISlider::drawBlock() {
     // draw block
-    vec2 center =
-        this->vPos +
-        vec2(this->vBlockSize.x / 2 + (this->vSize.x - this->vBlockSize.x) * this->getPercent(), this->vSize.y / 2);
+    vec2 center = this->vPos + vec2(this->vBlockSize.x / 2 + (this->vSize.x - this->vBlockSize.x) * this->getPercent(),
+                                    this->vSize.y / 2);
     vec2 topLeft = center - this->vBlockSize / 2.f;
     vec2 topRight = center + vec2(this->vBlockSize.x / 2 + 1, -this->vBlockSize.y / 2);
     vec2 halfLeft = center + vec2(-this->vBlockSize.x / 2, 1);
@@ -103,21 +99,21 @@ void CBaseUISlider::mouse_update(bool *propagate_clicks) {
             if(this->bAnimated) {
                 anim->moveQuadOut(
                     &this->vBlockPos.y,
-                    std::clamp<float>(mousepos.y - this->vGrabBackup.y, 0.0f, this->vSize.y - this->vBlockSize.y), 0.10f, 0,
-                    true);
+                    std::clamp<float>(mousepos.y - this->vGrabBackup.y, 0.0f, this->vSize.y - this->vBlockSize.y),
+                    0.10f, 0, true);
             } else {
                 this->vBlockPos.y =
                     std::clamp<float>(mousepos.y - this->vGrabBackup.y, 0.0f, this->vSize.y - this->vBlockSize.y);
             }
 
-            this->fCurPercent =
-                std::clamp<float>(1.0f - (std::round(this->vBlockPos.y) / (this->vSize.y - this->vBlockSize.y)), 0.0f, 1.0f);
+            this->fCurPercent = std::clamp<float>(
+                1.0f - (std::round(this->vBlockPos.y) / (this->vSize.y - this->vBlockSize.y)), 0.0f, 1.0f);
         } else {
             if(this->bAnimated) {
                 anim->moveQuadOut(
                     &this->vBlockPos.x,
-                    std::clamp<float>(mousepos.x - this->vGrabBackup.x, 0.0f, this->vSize.x - this->vBlockSize.x), 0.10f, 0,
-                    true);
+                    std::clamp<float>(mousepos.x - this->vGrabBackup.x, 0.0f, this->vSize.x - this->vBlockSize.x),
+                    0.10f, 0, true);
             } else {
                 this->vBlockPos.x =
                     std::clamp<float>(mousepos.x - this->vGrabBackup.x, 0.0f, this->vSize.x - this->vBlockSize.x);
@@ -168,8 +164,8 @@ void CBaseUISlider::mouse_update(bool *propagate_clicks) {
         }
 
         if(anim->isAnimating(&this->vBlockPos.y)) {
-            this->fCurPercent =
-                std::clamp<float>(1.0f - (std::round(this->vBlockPos.y) / (this->vSize.y - this->vBlockSize.y)), 0.0f, 1.0f);
+            this->fCurPercent = std::clamp<float>(
+                1.0f - (std::round(this->vBlockPos.y) / (this->vSize.y - this->vBlockSize.y)), 0.0f, 1.0f);
 
             if(this->bLiveUpdate)
                 this->setValue(std::lerp(this->fMinValue, this->fMaxValue, this->fCurPercent), false);
@@ -195,7 +191,6 @@ void CBaseUISlider::onKeyDown(KeyboardEvent &e) {
 
 void CBaseUISlider::fireChangeCallback() {
     if(this->sliderChangeCallback != nullptr) {
-        this->bWasChangeCallback = true;
         this->sliderChangeCallback(this);
     }
 }
@@ -217,19 +212,16 @@ CBaseUISlider *CBaseUISlider::setBounds(float minValue, float maxValue) {
 }
 
 CBaseUISlider *CBaseUISlider::setValue(float value, bool animate, bool call_callback) {
-    bool changeCallbackCheck = false;
-    float valueClamped = std::clamp<float>(value, this->fMinValue, this->fMaxValue);
+    bool changeCallbackCheck{false};
+    bool playAudio{false};
+
+    float valueClamped{std::clamp<float>(value, this->fMinValue, this->fMaxValue)};
     if(valueClamped != this->fCurValue) {
+        this->bHasChanged = true;
         this->fCurValue = valueClamped;
 
-        if (this->bWasChangeCallback) {
-            // avoid recursive callback calls
-            this->bWasChangeCallback = false;
-        } else {
-            changeCallbackCheck = true;
-        }
-
-        this->bHasChanged = true;
+        playAudio = this->fLastSoundPlayTime + 0.05f < engine->getTime();
+        changeCallbackCheck = true;
     }
 
     float percent = this->getPercent();
@@ -248,17 +240,24 @@ CBaseUISlider *CBaseUISlider::setValue(float value, bool animate, bool call_call
     }
 
     if(call_callback && changeCallbackCheck && this->sliderChangeCallback != nullptr) {
+        const float audioPlayTimeBefore{this->fLastSoundPlayTime};
+
         this->fireChangeCallback();
 
-        if(this->bHasChanged) {
-            if(this->fLastSoundPlayTime + 0.05f < engine->getTime()) {
-                soundEngine->play(osu->getSkin()->getSliderbarSound(), 0.f, 0.75f + (.075f * percent));
-                this->fLastSoundPlayTime = engine->getTime();
-            }
+        const float audioPlayTimeAfter{this->fLastSoundPlayTime};
+
+        if (audioPlayTimeBefore != audioPlayTimeAfter) {
+            // avoid duplicated audio playback (callback might setValue)
+            playAudio = false;
         }
     }
 
     this->updateBlockPos();
+
+    if(playAudio) {
+        soundEngine->play(osu->getSkin()->getSliderbarSound(), 0.f, 0.75f + (.075f * percent));
+        this->fLastSoundPlayTime = engine->getTime();
+    }
 
     return this;
 }
@@ -283,7 +282,7 @@ void CBaseUISlider::setBlockSize(float xSize, float ySize) { this->vBlockSize = 
 
 float CBaseUISlider::getPercent() {
     return std::clamp<float>((this->fCurValue - this->fMinValue) / (std::abs(this->fMaxValue - this->fMinValue)), 0.0f,
-                        1.0f);
+                             1.0f);
 }
 
 bool CBaseUISlider::hasChanged() {
@@ -297,19 +296,19 @@ bool CBaseUISlider::hasChanged() {
 
 void CBaseUISlider::onFocusStolen() { this->bBusy = false; }
 
-void CBaseUISlider::onMouseUpInside(bool  /*left*/, bool  /*right*/) {
+void CBaseUISlider::onMouseUpInside(bool /*left*/, bool /*right*/) {
     this->bBusy = false;
 
     if(this->fCurValue != this->fPrevValue && this->sliderChangeCallback != nullptr) this->fireChangeCallback();
 }
 
-void CBaseUISlider::onMouseUpOutside(bool  /*left*/, bool  /*right*/) {
+void CBaseUISlider::onMouseUpOutside(bool /*left*/, bool /*right*/) {
     this->bBusy = false;
 
     if(this->fCurValue != this->fPrevValue && this->sliderChangeCallback != nullptr) this->fireChangeCallback();
 }
 
-void CBaseUISlider::onMouseDownInside(bool  /*left*/, bool  /*right*/) {
+void CBaseUISlider::onMouseDownInside(bool /*left*/, bool /*right*/) {
     this->fPrevValue = this->fCurValue;
 
     if(McRect(this->vPos.x + this->vBlockPos.x, this->vPos.y + this->vBlockPos.y, this->vBlockSize.x,

@@ -98,7 +98,6 @@ class CBaseUISlider : public CBaseUIElement {
     unsigned bDrawBackground : 1;
     unsigned bHorizontal : 1;
     unsigned bHasChanged : 1;
-    unsigned bWasChangeCallback : 1;
     unsigned bAnimated : 1;
     unsigned bLiveUpdate : 1;
     unsigned bAllowMouseWheel : 1;
