@@ -981,6 +981,8 @@ f32 Beatmap::getIdealVolume() {
     f32 modifier = 1.f;
 
     if(cv::normalize_loudness.getBool()) {
+        if(this->selectedDifficulty2 == nullptr) return volume;
+
         if(this->selectedDifficulty2->loudness == 0.f) {
             modifier = std::pow(10, (cv::loudness_target.getFloat() - cv::loudness_fallback.getFloat()) / 20);
         } else {
