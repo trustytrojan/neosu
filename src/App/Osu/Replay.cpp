@@ -181,7 +181,7 @@ Mods Mods::from_legacy(u32 legacy_flags) {
     return mods;
 }
 
-void Mods::use(Mods mods) {
+void Mods::use(const Mods &mods) {
     using namespace ModFlags;
     using namespace ModMasks;
     // Reset mod selector buttons and sliders

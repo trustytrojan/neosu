@@ -99,7 +99,7 @@ struct Mods {
 
     static Mods from_cvars();
     static Mods from_legacy(u32 legacy_flags);
-    static void use(Mods mods);
+    static void use(const Mods &mods);
 };
 
 }  // namespace Replay
