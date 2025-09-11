@@ -340,13 +340,12 @@ EOF
 #!/bin/bash
 $CXX -m32 "\$@"
 EOF
-        AS_IF([ "x$enable_clang" = "xyes" ], [
+        AS_IF([test "x$enable_clang" = "xyes"], [
             NEOSU_LDFLAGS="$NEOSU_LDFLAGS -latomic"
-        ],[
-            # ld complains about libcrypto.a(libcrypto-lib-cast-586.o): warning: relocation against `CAST_S_table1' in read-only section `.text'
-            NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -fno-PIE -no-pie"
-            NEOSU_LDFLAGS="$NEOSU_LDFLAGS -no-pie"
         ])
+        # ld complains about libcrypto.a(libcrypto-lib-cast-586.o): warning: relocation against `CAST_S_table1' in read-only section `.text'
+        NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -fno-PIE -no-pie"
+        NEOSU_LDFLAGS="$NEOSU_LDFLAGS -no-pie"
         AC_SUBST([NASMOBJ],[elf32])
     ],[
         install -Dm755 /dev/stdin $PWD/build/$target-$CC <<EOF
