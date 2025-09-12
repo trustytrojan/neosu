@@ -153,7 +153,7 @@ AC_ARG_WITH([renderer],
     AS_HELP_STRING([--with-renderer={opengl,opengles,dx11}], [The (single) renderer backend to build with (default: opengl)]))
 
 AC_ARG_WITH([audio],
-    AS_HELP_STRING([--with-audio={bass,soloud,sdl}], [The (comma separated list of) audio backend(s) to build with (default: bass)]))
+    AS_HELP_STRING([--with-audio={bass,soloud}], [The (comma separated list of) audio backend(s) to build with (default: soloud)]))
 
 AC_ARG_WITH([mimalloc],
     AS_HELP_STRING([--with-mimalloc], [Use mimalloc instead of the default memory allocator (faster) (default: on if not debug and not winx86)]))
@@ -245,6 +245,7 @@ AS_IF([test "$renderer" = "opengl"], [
 AUDBACKENDLIST=""
 
 with_bass=unset
+with_soloud=unset
 AS_VAR_SET_IF([with_audio],
     [ac_save_IFS=$IFS
         IFS=' ,'
@@ -259,19 +260,22 @@ AS_VAR_SET_IF([with_audio],
             esac
         done])
 
-AS_IF([test "$with_bass" = "yes" || { test "$with_bass" = "unset" && ! { test "$with_soloud" = "yes"; } ; } ], [
+AS_IF([test "$with_soloud" = "yes" || { test "$with_soloud" = "unset" && test "$with_bass" != "yes"; } ], [
+    AUDBACKENDLIST="${AUDBACKENDLIST} SoLoud"
+    with_soloud=yes
+    AC_DEFINE([MCENGINE_FEATURE_SOLOUD], [1], [Define if the SoLoud audio backend is desired.])
+], [
+    with_soloud=no
+])
+
+AS_IF([test "$with_bass" = "yes"], [
+    AS_IF([test "$with_soloud" = "yes"], [
+        make_audio_shortcuts=yes
+    ])
     AUDBACKENDLIST="${AUDBACKENDLIST} BASS"
-    with_bass=yes
     AC_DEFINE([MCENGINE_FEATURE_BASS], [1], [Define if the BASS audio backend is desired.])
 ], [
     with_bass=no
-])
-AS_IF([test "$with_soloud" = "yes"], [
-    AS_IF([test "$with_bass" = "yes"], [
-        make_audio_shortcuts=yes
-    ])
-    AUDBACKENDLIST="${AUDBACKENDLIST} SoLoud"
-    AC_DEFINE([MCENGINE_FEATURE_SOLOUD], [1], [Define if the SoLoud audio backend is desired.])
 ])
 
 AC_SUBST([AUDBACKENDLIST])

@@ -1671,9 +1671,9 @@ Optional Packages:
   --with-renderer={opengl,opengles,dx11}
                           The (single) renderer backend to build with
                           (default: opengl)
-  --with-audio={bass,soloud,sdl}
+  --with-audio={bass,soloud}
                           The (comma separated list of) audio backend(s) to
-                          build with (default: bass)
+                          build with (default: soloud)
   --with-mimalloc         Use mimalloc instead of the default memory allocator
                           (faster) (default: on if not debug and not winx86)
 
@@ -6488,6 +6488,7 @@ fi
 AUDBACKENDLIST=""
 
 with_bass=unset
+with_soloud=unset
 if test ${with_audio+y}
 then :
   ac_save_IFS=$IFS
@@ -6504,11 +6505,32 @@ then :
         done
 fi
 
-if test "$with_bass" = "yes" || { test "$with_bass" = "unset" && ! { test "$with_soloud" = "yes"; } ; }
+if test "$with_soloud" = "yes" || { test "$with_soloud" = "unset" && test "$with_bass" != "yes"; }
 then :
 
+    AUDBACKENDLIST="${AUDBACKENDLIST} SoLoud"
+    with_soloud=yes
+
+printf "%s\n" "#define MCENGINE_FEATURE_SOLOUD 1" >>confdefs.h
+
+
+else case e in #(
+  e)
+    with_soloud=no
+ ;;
+esac
+fi
+
+if test "$with_bass" = "yes"
+then :
+
+    if test "$with_soloud" = "yes"
+then :
+
+        make_audio_shortcuts=yes
+
+fi
     AUDBACKENDLIST="${AUDBACKENDLIST} BASS"
-    with_bass=yes
 
 printf "%s\n" "#define MCENGINE_FEATURE_BASS 1" >>confdefs.h
 
@@ -6518,21 +6540,6 @@ else case e in #(
     with_bass=no
  ;;
 esac
-fi
-if test "$with_soloud" = "yes"
-then :
-
-    if test "$with_bass" = "yes"
-then :
-
-        make_audio_shortcuts=yes
-
-fi
-    AUDBACKENDLIST="${AUDBACKENDLIST} SoLoud"
-
-printf "%s\n" "#define MCENGINE_FEATURE_SOLOUD 1" >>confdefs.h
-
-
 fi
 
 
