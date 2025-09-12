@@ -771,8 +771,7 @@ CONVAR(fullscreen, "fullscreen", false, CLIENT,
 CONVAR(monitor, "monitor", 0, CLIENT, "monitor/display device to switch to, 0 = primary monitor");
 CONVAR(r_sync_max_frames, "r_sync_max_frames", 1, CLIENT,
        "maximum pre-rendered frames allowed in rendering pipeline");  // (a la "Max Prerendered Frames")
-// disabled for now, need to work out some potential hanging issue
-CONVAR(alt_sleep, "alt_sleep", 0, CLIENT, "use an alternative sleep implementation (on Windows) for potentially more accurate frame limiting");
+CONVAR(alt_sleep, "alt_sleep", 1, CLIENT, "use an alternative sleep implementation (on Windows) for potentially more accurate frame limiting");
 
 // Constants (TODO: remove these)
 CONVAR(
