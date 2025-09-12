@@ -505,7 +505,8 @@ void MainMenu::drawFriend(const McRect &mainButtonRect, float pulse, bool haveTi
 
 void MainMenu::drawLogoImage(const McRect &mainButtonRect) {
     auto logo = this->logo_img;
-    if(BanchoState::server_icon != nullptr && BanchoState::server_icon->isReady() && cv::main_menu_use_server_logo.getBool()) {
+    if(BanchoState::server_icon != nullptr && BanchoState::server_icon->isReady() &&
+       cv::main_menu_use_server_logo.getBool()) {
         logo = BanchoState::server_icon;
     }
 
@@ -1028,7 +1029,7 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
         auto *music = osu->getSelectedBeatmap()->getMusic();
 
         // try getting existing playing music track, even if osu->getSelectedBeatmap()->getMusic() did not have one
-        if (!music) {
+        if(!music) {
             music = resourceManager->getSound("BEATMAP_MUSIC");
         }
 
@@ -1099,7 +1100,8 @@ void MainMenu::selectRandomBeatmap() {
         sb->getSelectedBeatmap()->deselect();
         SAFE_DELETE(this->preloaded_beatmapset);
 
-        for(int i = 0; i < 10; i++) {
+        constexpr int RETRY_SETS{10};
+        for(int i = 0; i < RETRY_SETS; i++) {
             const auto &mapset_folder = mapset_folders[rand() % mapset_folders.size()];
             BeatmapSet *set = db->loadRawBeatmap(mapset_folder);
             if(set == nullptr) {
@@ -1108,8 +1110,19 @@ void MainMenu::selectRandomBeatmap() {
             }
 
             auto beatmap_diffs = set->getDifficulties();
-            if(beatmap_diffs.size() == 0) {
-                debugLog("Beatmap '{:s}' has no difficulties!\n", mapset_folder.c_str());
+            if(beatmap_diffs.empty()) {
+                debugLog("Mapset '{:s}' has no difficulties!\n", set->getFolder());
+                delete set;
+                continue;
+            }
+
+            const auto &candidate_diff{beatmap_diffs[rand() % beatmap_diffs.size()]};
+
+            assert(candidate_diff);
+
+            const bool skip = (i < RETRY_SETS - 1) && !env->fileExists(candidate_diff->getFullBackgroundImageFilePath());
+            if(skip) {
+                debugLog("Beatmap '{:s}' has no background image, skipping.\n", candidate_diff->getFilePath());
                 delete set;
                 continue;
             }
@@ -1118,7 +1131,7 @@ void MainMenu::selectRandomBeatmap() {
 
             // We're picking a random diff and not the first one, because diffs of the same set
             // can have their own separate sound file.
-            this->preloaded_beatmap = beatmap_diffs[rand() % beatmap_diffs.size()];
+            this->preloaded_beatmap = candidate_diff;
             this->preloaded_beatmap->do_not_store = true;
 
             osu->getSongBrowser()->onDifficultySelected(this->preloaded_beatmap, false);
