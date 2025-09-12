@@ -2,8 +2,9 @@
 #include "FPSLimiter.h"
 #include "Timing.h"
 #include "ConVar.h"
-
 #include "types.h"
+
+#include <cassert>
 
 namespace FPSLimiter {
 namespace  // static
@@ -18,7 +19,8 @@ void limit_frames(int target_fps) {
 
         // if we're ahead of schedule, sleep until next frame
         if(next_frame_time > now) {
-            const u64 sleep_time = next_frame_time - now;
+            // never sleep more than the current target fps frame time
+            const u64 sleep_time = std::min(next_frame_time - now, frame_time_ns);
             Timing::sleepNSPrecise(sleep_time);
         } else if(cv::fps_max_yield.getBool()) {
             Timing::sleep(0);
