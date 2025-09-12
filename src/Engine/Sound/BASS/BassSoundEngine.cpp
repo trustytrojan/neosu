@@ -612,7 +612,7 @@ void BassSoundEngine::setOutputDevice(const SoundEngine::OUTPUT_DEVICE &device) 
     if(osu->getSelectedBeatmap()->getMusic() != nullptr) {
         if(osu->isInPlayMode()) {
             osu->getSelectedBeatmap()->unloadMusic();
-            osu->getSelectedBeatmap()->loadMusic(false);
+            osu->getSelectedBeatmap()->loadMusic();
             osu->getSelectedBeatmap()->getMusic()->setLoop(false);
             osu->getSelectedBeatmap()->getMusic()->setPositionMS(prevMusicPositionMS);
         } else {

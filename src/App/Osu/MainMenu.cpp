@@ -1025,12 +1025,17 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
     this->pauseButton->setPaused(true);
 
     if(soundEngine->isReady()) {
-        auto diff2 = osu->getSelectedBeatmap()->getSelectedDifficulty2();
-        auto music = osu->getSelectedBeatmap()->getMusic();
-        if(music == nullptr) {
+        auto *music = osu->getSelectedBeatmap()->getMusic();
+
+        // try getting existing playing music track, even if osu->getSelectedBeatmap()->getMusic() did not have one
+        if (!music) {
+            music = resourceManager->getSound("BEATMAP_MUSIC");
+        }
+
+        if(!music) {
             this->selectRandomBeatmap();
         } else {
-            if(music->isFinished()) {
+            if(!music->isReady() || music->isFinished()) {
                 this->selectRandomBeatmap();
             } else if(music->isPlaying()) {
                 this->pauseButton->setPaused(false);
@@ -1040,6 +1045,7 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
 
                 // load timing points if needed
                 // XXX: file io, don't block main thread
+                auto *diff2 = osu->getSelectedBeatmap()->getSelectedDifficulty2();
                 if(diff2 && diff2->getTimingpoints().empty()) {
                     diff2->loadMetadata(false);
                 }

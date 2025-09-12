@@ -2188,7 +2188,7 @@ void Osu::setupSoloud() {
             if(osu->getSelectedBeatmap() && osu->getSelectedBeatmap()->getMusic()) {
                 if(osu->isInPlayMode()) {
                     osu->getSelectedBeatmap()->unloadMusic();
-                    osu->getSelectedBeatmap()->loadMusic(false);
+                    osu->getSelectedBeatmap()->loadMusic();
                     osu->getSelectedBeatmap()->getMusic()->setLoop(false);
                     osu->getSelectedBeatmap()->getMusic()->setPositionMS(prev_position_ms);
                 } else {
