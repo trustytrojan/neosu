@@ -133,6 +133,7 @@ neosu_SOURCES = \
 	src/Engine/Sound/SoundEngine.cpp \
 	src/Engine/TextureAtlas.cpp \
 	src/Engine/Thread.cpp \
+	src/Engine/Timing.cpp \
 	src/GUI/CBaseUIButton.cpp \
 	src/GUI/CBaseUICheckbox.cpp \
 	src/GUI/CBaseUIContainer.cpp \

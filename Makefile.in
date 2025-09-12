@@ -239,13 +239,14 @@ am__neosu_SOURCES_DIST = libraries/MD5.cpp libraries/base64.cpp \
 	src/Engine/Sound/SoLoud/SoLoudSoundEngine.cpp \
 	src/Engine/Sound/Sound.cpp src/Engine/Sound/SoundEngine.cpp \
 	src/Engine/TextureAtlas.cpp src/Engine/Thread.cpp \
-	src/GUI/CBaseUIButton.cpp src/GUI/CBaseUICheckbox.cpp \
-	src/GUI/CBaseUIContainer.cpp src/GUI/CBaseUIElement.cpp \
-	src/GUI/CBaseUIImage.cpp src/GUI/CBaseUIImageButton.cpp \
-	src/GUI/CBaseUILabel.cpp src/GUI/CBaseUIScrollView.cpp \
-	src/GUI/CBaseUISlider.cpp src/GUI/CBaseUITextField.cpp \
-	src/GUI/CBaseUITextbox.cpp src/GUI/CBaseUIWindow.cpp \
-	src/GUI/CWindowManager.cpp src/GUI/Windows/ConsoleBox.cpp \
+	src/Engine/Timing.cpp src/GUI/CBaseUIButton.cpp \
+	src/GUI/CBaseUICheckbox.cpp src/GUI/CBaseUIContainer.cpp \
+	src/GUI/CBaseUIElement.cpp src/GUI/CBaseUIImage.cpp \
+	src/GUI/CBaseUIImageButton.cpp src/GUI/CBaseUILabel.cpp \
+	src/GUI/CBaseUIScrollView.cpp src/GUI/CBaseUISlider.cpp \
+	src/GUI/CBaseUITextField.cpp src/GUI/CBaseUITextbox.cpp \
+	src/GUI/CBaseUIWindow.cpp src/GUI/CWindowManager.cpp \
+	src/GUI/Windows/ConsoleBox.cpp \
 	src/GUI/Windows/VisualProfiler.cpp src/Platform/main.cpp \
 	src/Platform/main_impl.cpp src/Util/Quaternion.cpp \
 	src/Util/Rect.cpp src/Util/UString.cpp src/Util/crypto.cpp \
@@ -387,6 +388,7 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/Engine/Sound/neosu-SoundEngine.$(OBJEXT) \
 	src/Engine/neosu-TextureAtlas.$(OBJEXT) \
 	src/Engine/neosu-Thread.$(OBJEXT) \
+	src/Engine/neosu-Timing.$(OBJEXT) \
 	src/GUI/neosu-CBaseUIButton.$(OBJEXT) \
 	src/GUI/neosu-CBaseUICheckbox.$(OBJEXT) \
 	src/GUI/neosu-CBaseUIContainer.$(OBJEXT) \
@@ -535,6 +537,7 @@ am__depfiles_remade = $(DEPS_PREFIX)/mimalloc/$(DEPDIR)/neosu-mimalloc_new_delet
 	src/Engine/$(DEPDIR)/neosu-Profiler.Po \
 	src/Engine/$(DEPDIR)/neosu-TextureAtlas.Po \
 	src/Engine/$(DEPDIR)/neosu-Thread.Po \
+	src/Engine/$(DEPDIR)/neosu-Timing.Po \
 	src/Engine/Input/$(DEPDIR)/neosu-KeyBindings.Po \
 	src/Engine/Input/$(DEPDIR)/neosu-Keyboard.Po \
 	src/Engine/Input/$(DEPDIR)/neosu-Mouse.Po \
@@ -1000,13 +1003,14 @@ neosu_SOURCES = libraries/MD5.cpp libraries/base64.cpp \
 	src/Engine/Sound/SoLoud/SoLoudSoundEngine.cpp \
 	src/Engine/Sound/Sound.cpp src/Engine/Sound/SoundEngine.cpp \
 	src/Engine/TextureAtlas.cpp src/Engine/Thread.cpp \
-	src/GUI/CBaseUIButton.cpp src/GUI/CBaseUICheckbox.cpp \
-	src/GUI/CBaseUIContainer.cpp src/GUI/CBaseUIElement.cpp \
-	src/GUI/CBaseUIImage.cpp src/GUI/CBaseUIImageButton.cpp \
-	src/GUI/CBaseUILabel.cpp src/GUI/CBaseUIScrollView.cpp \
-	src/GUI/CBaseUISlider.cpp src/GUI/CBaseUITextField.cpp \
-	src/GUI/CBaseUITextbox.cpp src/GUI/CBaseUIWindow.cpp \
-	src/GUI/CWindowManager.cpp src/GUI/Windows/ConsoleBox.cpp \
+	src/Engine/Timing.cpp src/GUI/CBaseUIButton.cpp \
+	src/GUI/CBaseUICheckbox.cpp src/GUI/CBaseUIContainer.cpp \
+	src/GUI/CBaseUIElement.cpp src/GUI/CBaseUIImage.cpp \
+	src/GUI/CBaseUIImageButton.cpp src/GUI/CBaseUILabel.cpp \
+	src/GUI/CBaseUIScrollView.cpp src/GUI/CBaseUISlider.cpp \
+	src/GUI/CBaseUITextField.cpp src/GUI/CBaseUITextbox.cpp \
+	src/GUI/CBaseUIWindow.cpp src/GUI/CWindowManager.cpp \
+	src/GUI/Windows/ConsoleBox.cpp \
 	src/GUI/Windows/VisualProfiler.cpp src/Platform/main.cpp \
 	src/Platform/main_impl.cpp src/Util/Quaternion.cpp \
 	src/Util/Rect.cpp src/Util/UString.cpp src/Util/crypto.cpp \
@@ -1688,6 +1692,8 @@ src/Engine/neosu-TextureAtlas.$(OBJEXT): src/Engine/$(am__dirstamp) \
 	src/Engine/$(DEPDIR)/$(am__dirstamp)
 src/Engine/neosu-Thread.$(OBJEXT): src/Engine/$(am__dirstamp) \
 	src/Engine/$(DEPDIR)/$(am__dirstamp)
+src/Engine/neosu-Timing.$(OBJEXT): src/Engine/$(am__dirstamp) \
+	src/Engine/$(DEPDIR)/$(am__dirstamp)
 src/GUI/$(am__dirstamp):
 	@$(MKDIR_P) src/GUI
 	@: >>src/GUI/$(am__dirstamp)
@@ -1904,6 +1910,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-Profiler.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-TextureAtlas.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-Thread.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-Timing.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Input/$(DEPDIR)/neosu-KeyBindings.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Input/$(DEPDIR)/neosu-Keyboard.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Input/$(DEPDIR)/neosu-Mouse.Po@am__quote@ # am--include-marker
@@ -3837,6 +3844,20 @@ src/Engine/neosu-Thread.obj: src/Engine/Thread.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/neosu-Thread.obj `if test -f 'src/Engine/Thread.cpp'; then $(CYGPATH_W) 'src/Engine/Thread.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Thread.cpp'; fi`
 
+src/Engine/neosu-Timing.o: src/Engine/Timing.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/neosu-Timing.o -MD -MP -MF src/Engine/$(DEPDIR)/neosu-Timing.Tpo -c -o src/Engine/neosu-Timing.o `test -f 'src/Engine/Timing.cpp' || echo '$(srcdir)/'`src/Engine/Timing.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/$(DEPDIR)/neosu-Timing.Tpo src/Engine/$(DEPDIR)/neosu-Timing.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Timing.cpp' object='src/Engine/neosu-Timing.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/neosu-Timing.o `test -f 'src/Engine/Timing.cpp' || echo '$(srcdir)/'`src/Engine/Timing.cpp
+
+src/Engine/neosu-Timing.obj: src/Engine/Timing.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/neosu-Timing.obj -MD -MP -MF src/Engine/$(DEPDIR)/neosu-Timing.Tpo -c -o src/Engine/neosu-Timing.obj `if test -f 'src/Engine/Timing.cpp'; then $(CYGPATH_W) 'src/Engine/Timing.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Timing.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/$(DEPDIR)/neosu-Timing.Tpo src/Engine/$(DEPDIR)/neosu-Timing.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Timing.cpp' object='src/Engine/neosu-Timing.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/neosu-Timing.obj `if test -f 'src/Engine/Timing.cpp'; then $(CYGPATH_W) 'src/Engine/Timing.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Timing.cpp'; fi`
+
 src/GUI/neosu-CBaseUIButton.o: src/GUI/CBaseUIButton.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/GUI/neosu-CBaseUIButton.o -MD -MP -MF src/GUI/$(DEPDIR)/neosu-CBaseUIButton.Tpo -c -o src/GUI/neosu-CBaseUIButton.o `test -f 'src/GUI/CBaseUIButton.cpp' || echo '$(srcdir)/'`src/GUI/CBaseUIButton.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/GUI/$(DEPDIR)/neosu-CBaseUIButton.Tpo src/GUI/$(DEPDIR)/neosu-CBaseUIButton.Po
@@ -4591,6 +4612,7 @@ distclean: distclean-am
 	-rm -f src/Engine/$(DEPDIR)/neosu-Profiler.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-TextureAtlas.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Thread.Po
+	-rm -f src/Engine/$(DEPDIR)/neosu-Timing.Po
 	-rm -f src/Engine/Input/$(DEPDIR)/neosu-KeyBindings.Po
 	-rm -f src/Engine/Input/$(DEPDIR)/neosu-Keyboard.Po
 	-rm -f src/Engine/Input/$(DEPDIR)/neosu-Mouse.Po
@@ -4795,6 +4817,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/Engine/$(DEPDIR)/neosu-Profiler.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-TextureAtlas.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Thread.Po
+	-rm -f src/Engine/$(DEPDIR)/neosu-Timing.Po
 	-rm -f src/Engine/Input/$(DEPDIR)/neosu-KeyBindings.Po
 	-rm -f src/Engine/Input/$(DEPDIR)/neosu-Keyboard.Po
 	-rm -f src/Engine/Input/$(DEPDIR)/neosu-Mouse.Po
