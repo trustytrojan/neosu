@@ -147,7 +147,7 @@ void Database::AsyncDBLoader::initAsync() {
     db->loadMaps();
 
     // .db files that were dropped on the main window
-    for(auto &db_path : db->dbPathsToImport) {
+    for(const auto &db_path : db->dbPathsToImport) {
         db->importDatabase(db_path);
     }
     db->dbPathsToImport.clear();
@@ -273,14 +273,16 @@ void Database::update() {
 
                 load_collections();
 
-                for(auto &set : this->beatmapsets) {
-                    for(auto &diff : *set->difficulties) {
-                        if(diff->fStarsNomod <= 0.f) {
-                            diff->fStarsNomod *= -1.f;
-                            this->maps_to_recalc.push_back(diff);
-                        }
-                    }
+                // clang-format off
+                for(auto &diff : this->beatmapsets
+                                // for all diffs within the set with fStarsNomod <= 0.f
+                                | std::views::transform([](const auto &set) -> auto & { return *set->difficulties; })
+                                | std::views::join
+                                | std::views::filter([](const auto &diff) { return diff->fStarsNomod <= 0.f; })) {
+                    diff->fStarsNomod *= -1.f;
+                    this->maps_to_recalc.push_back(diff);
                 }
+                // clang-format on
 
                 this->fLoadingProgress = 1.0f;
 
@@ -332,7 +334,7 @@ BeatmapSet *Database::addBeatmapSet(const std::string &beatmapFolderPath, i32 se
     this->neosu_sets.push_back(beatmap);
 
     this->beatmap_difficulties_mtx.lock();
-    for(auto diff : beatmap->getDifficulties()) {
+    for(const auto &diff : beatmap->getDifficulties()) {
         this->beatmap_difficulties[diff->getMD5Hash()] = diff;
     }
     this->beatmap_difficulties_mtx.unlock();
@@ -444,20 +446,22 @@ void Database::deleteScore(MD5Hash beatmapMD5Hash, u64 scoreUnixTimestamp) {
 void Database::sortScoresInPlace(std::vector<FinishedScore> &scores) {
     if(scores.size() < 2) return;
 
-    if(cv::songbrowser_scores_sortingtype.getString() == "Online Leaderboard") {
+    const auto &sortTypeString{cv::songbrowser_scores_sortingtype.getString()};
+
+    if(sortTypeString == "Online Leaderboard") {
         // Online scores are already sorted
         return;
     }
 
-    for(auto &scoreSortingMethod : this->scoreSortingMethods) {
-        if(cv::songbrowser_scores_sortingtype.getString() == scoreSortingMethod.name) {
-            std::ranges::sort(scores, scoreSortingMethod.comparator);
+    for(const auto &sortMethod : this->scoreSortingMethods) {
+        if(sortTypeString == sortMethod.name) {
+            std::ranges::sort(scores, sortMethod.comparator);
             return;
         }
     }
 
     if(cv::debug_db.getBool()) {
-        debugLog("ERROR: Invalid score sortingtype \"{:s}\"\n", cv::songbrowser_scores_sortingtype.getString());
+        debugLog("ERROR: Invalid score sortingtype \"{:s}\"\n", sortTypeString);
     }
 }
 
@@ -471,14 +475,15 @@ std::vector<UString> Database::getPlayerNamesWithPPScores() {
     std::vector<MD5Hash> keys;
     keys.reserve(this->scores.size());
 
-    for(const auto &kv : this->scores) {
-        keys.push_back(kv.first);
+    for(const auto &[hash, _] : this->scores) {
+        keys.push_back(hash);
     }
 
     std::unordered_set<std::string> tempNames;
-    for(auto &key : keys) {
-        for(auto &score : this->scores[key]) {
-            tempNames.insert(score.playerName);
+    for(const auto &key : keys) {
+        for(const auto &name :
+            this->scores[key] | std::views::transform([](const auto &score) -> auto & { return score.playerName; })) {
+            tempNames.insert(name);
         }
     }
 
@@ -487,8 +492,8 @@ std::vector<UString> Database::getPlayerNamesWithPPScores() {
 
     std::vector<UString> names;
     names.reserve(tempNames.size());
-    for(const auto &k : tempNames) {
-        if(k.length() > 0) names.emplace_back(k.c_str());
+    for(const auto &name : tempNames) {
+        if(name.length() > 0) names.emplace_back(name);
     }
 
     return names;
@@ -497,10 +502,10 @@ std::vector<UString> Database::getPlayerNamesWithPPScores() {
 std::vector<UString> Database::getPlayerNamesWithScoresForUserSwitcher() {
     std::scoped_lock lock(this->scores_mtx);
     std::unordered_set<std::string> tempNames;
-    for(const auto &kv : this->scores) {
-        const MD5Hash &key = kv.first;
-        for(auto &score : this->scores[key]) {
-            tempNames.insert(score.playerName);
+    for(const auto &[hash, _] : this->scores) {
+        for(const auto &name :
+            this->scores[hash] | std::views::transform([](const auto &score) -> auto & { return score.playerName; })) {
+            tempNames.insert(name);
         }
     }
 
@@ -509,8 +514,8 @@ std::vector<UString> Database::getPlayerNamesWithScoresForUserSwitcher() {
 
     std::vector<UString> names;
     names.reserve(tempNames.size());
-    for(const auto &k : tempNames) {
-        if(k.length() > 0) names.emplace_back(k.c_str());
+    for(const auto &name : tempNames) {
+        if(name.length() > 0) names.emplace_back(name);
     }
 
     return names;
@@ -533,7 +538,7 @@ Database::PlayerPPScores Database::getPlayerPPScores(const std::string &playerNa
     }
 
     unsigned long long totalScore = 0;
-    for(auto &key : keys) {
+    for(const auto &key : keys) {
         if(this->scores[key].size() == 0) continue;
 
         FinishedScore *tempScore = &this->scores[key][0];
@@ -674,9 +679,9 @@ DatabaseBeatmap *Database::getBeatmapDifficulty(i32 map_id) {
     if(this->isLoading()) return nullptr;
 
     std::scoped_lock lock(this->beatmap_difficulties_mtx);
-    for(auto pair : this->beatmap_difficulties) {
-        if(pair.second->getID() == map_id) {
-            return pair.second;
+    for(const auto &[_, diff] : this->beatmap_difficulties) {
+        if(diff->getID() == map_id) {
+            return diff;
         }
     }
 
@@ -686,7 +691,7 @@ DatabaseBeatmap *Database::getBeatmapDifficulty(i32 map_id) {
 DatabaseBeatmap *Database::getBeatmapSet(i32 set_id) {
     if(this->isLoading()) return nullptr;
 
-    for(auto beatmap : this->beatmapsets) {
+    for(const auto &beatmap : this->beatmapsets) {
         if(beatmap->getSetID() == set_id) {
             return beatmap;
         }
@@ -1250,7 +1255,7 @@ void Database::loadMaps() {
                 const bool beatmapSetExists = (result != setIDToIndex.end());
                 bool diff_already_added = false;
                 if(beatmapSetExists) {
-                    for(auto existing_diff : *beatmapSets[result->second].diffs2) {
+                    for(const auto &existing_diff : *beatmapSets[result->second].diffs2) {
                         if(existing_diff->getMD5Hash() == diff2->getMD5Hash()) {
                             diff_already_added = true;
                             break;
@@ -1305,7 +1310,7 @@ void Database::loadMaps() {
             }
 
             // build beatmap sets
-            for(auto &beatmapSet : beatmapSets) {
+            for(const auto &beatmapSet : beatmapSets) {
                 if(this->bInterruptLoad.load()) break;    // cancellation point
                 if(beatmapSet.diffs2->empty()) continue;  // sanity check
 
@@ -1315,7 +1320,7 @@ void Database::loadMaps() {
                 } else {
                     // set with invalid ID: treat all its diffs separately. we'll group the diffs by title+artist.
                     std::unordered_map<std::string, std::vector<DatabaseBeatmap *> *> titleArtistToBeatmap;
-                    for(auto diff : (*beatmapSet.diffs2)) {
+                    for(const auto &diff : (*beatmapSet.diffs2)) {
                         std::string titleArtist = diff->getTitle();
                         titleArtist.append("|");
                         titleArtist.append(diff->getArtist());
@@ -1408,7 +1413,7 @@ void Database::saveMaps() {
     this->peppy_overrides_mtx.lock();
 
     // When calculating loudness we don't call update_overrides() for performance reasons
-    for(auto diff2 : this->loudness_to_calc) {
+    for(const auto &diff2 : this->loudness_to_calc) {
         if(diff2->type != DatabaseBeatmap::BeatmapType::PEPPY_DIFFICULTY) continue;
         if(diff2->loudness.load() == 0.f) continue;
         this->peppy_overrides[diff2->getMD5Hash()] = diff2->get_overrides();
@@ -1416,16 +1421,16 @@ void Database::saveMaps() {
 
     u32 nb_overrides = 0;
     maps.write<u32>(this->peppy_overrides.size());
-    for(auto &pair : this->peppy_overrides) {
-        maps.write_hash(pair.first);
-        maps.write<i16>(pair.second.local_offset);
-        maps.write<i16>(pair.second.online_offset);
-        maps.write<f32>(pair.second.star_rating);
-        maps.write<f32>(pair.second.loudness);
-        maps.write<i32>(pair.second.min_bpm);
-        maps.write<i32>(pair.second.max_bpm);
-        maps.write<i32>(pair.second.avg_bpm);
-        maps.write<u8>(pair.second.draw_background);
+    for(const auto &[hash, override] : this->peppy_overrides) {
+        maps.write_hash(hash);
+        maps.write<i16>(override.local_offset);
+        maps.write<i16>(override.online_offset);
+        maps.write<f32>(override.star_rating);
+        maps.write<f32>(override.loudness);
+        maps.write<i32>(override.min_bpm);
+        maps.write<i32>(override.max_bpm);
+        maps.write<i32>(override.avg_bpm);
+        maps.write<u8>(override.draw_background);
 
         nb_overrides++;
     }
@@ -2062,8 +2067,8 @@ void Database::saveScores() {
 
     u32 nb_beatmaps = 0;
     u32 nb_scores = 0;
-    for(auto &it : this->scores) {
-        u32 beatmap_scores = it.second.size();
+    for(const auto &[_, scorevec] : this->scores) {
+        u32 beatmap_scores = scorevec.size();
         if(beatmap_scores > 0) {
             nb_beatmaps++;
             nb_scores += beatmap_scores;
@@ -2072,13 +2077,13 @@ void Database::saveScores() {
     db.write<u32>(nb_beatmaps);
     db.write<u32>(nb_scores);
 
-    for(auto &it : this->scores) {
-        if(it.second.empty()) continue;
+    for(const auto &[hash, scorevec] : this->scores) {
+        if(scorevec.empty()) continue;
 
-        db.write_hash(it.first);
-        db.write<u32>(it.second.size());
+        db.write_hash(hash);
+        db.write<u32>(scorevec.size());
 
-        for(auto &score : it.second) {
+        for(const auto &score : scorevec) {
             assert(!score.is_online_score);
 
             db.write<u64>(score.mods.flags);
