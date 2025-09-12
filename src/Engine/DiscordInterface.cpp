@@ -40,7 +40,7 @@ struct IDiscordActivityEvents activities_events{};
 struct IDiscordRelationshipEvents relationships_events{};
 struct IDiscordUserEvents users_events{};
 
-#if defined(_WIN32) && !defined(_WIN64)  // doesn't work
+#if !(defined(_WIN32) && !defined(_WIN64))  // doesn't work on winx32
 void on_discord_log(void * /*cdata*/, enum EDiscordLogLevel level, const char *message) {
     //(void)cdata;
     if(level == DiscordLogLevel_Error) {
