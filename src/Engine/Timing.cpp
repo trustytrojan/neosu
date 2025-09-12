@@ -7,6 +7,7 @@
 #include <winnt.h>
 #include <profileapi.h>
 #include "dynutils.h"
+#include "ConVar.h"
 #endif
 
 namespace Timing::detail {
@@ -51,7 +52,7 @@ class SleepHandler final {
     }
 
     forceinline void imprecise(uint64_t ns) {
-        if(!m_bUseNTDelayExec) {
+        if(!m_bUseNTDelayExec || !cv::alt_sleep.getBool()) {
             SDL_DelayNS(ns);
             return;
         }
@@ -60,7 +61,7 @@ class SleepHandler final {
     }
 
     forceinline void precise(uint64_t ns) {
-        if(!m_bUseNTDelayExec) {
+        if(!m_bUseNTDelayExec || !cv::alt_sleep.getBool()) {
             SDL_DelayPrecise(ns);
             return;
         }
