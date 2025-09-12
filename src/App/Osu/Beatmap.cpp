@@ -4179,16 +4179,14 @@ void Beatmap::computeDrainRate() {
 }
 
 long Beatmap::getInternalAudioOffset() {
-    using Backend = enum SoundEngine::SndEngineType;
-
-    static_assert(Backend::MAX == 2, "make sure audio offset is correct for new sound engine");
+    static_assert(SoundEngine::SndEngineType::MAX == 2, "make sure audio offset is correct for new sound engine");
 
     switch(soundEngine->getTypeId()) {
-        case Backend::SOLOUD:
+        case SoundEngine::SndEngineType::SOLOUD:
             // +18 universal matches BASS better, at least on windows
             // on linux BASS always needs ~-35ms offset, so people probably need to adjust that manually anyways
             return 18;
-        case Backend::BASS:
+        case SoundEngine::SndEngineType::BASS:
             // We compensate for latency via BASS_ATTRIB_MIXER_LATENCY
         default:
             return 0;

@@ -1,9 +1,9 @@
 # Dependencies configuration for neosu
 # This file contains version information, URLs, and hashes for all external dependencies
 
-set(SDL3_VERSION "9d6fb509fe855a18f2c5291dd4e17f2b7e6d4d73")
+set(SDL3_VERSION "3c627390bb885fe1e97802d4d16da31333d145c7")
 set(SDL3_URL "https://github.com/libsdl-org/SDL/archive/${SDL3_VERSION}.tar.gz")
-set(SDL3_HASH "SHA512=a2d182036891ab78faf63e8d5eaeac08f00746ffe2ac4ff950e1d15cf485adf61427d0ad8e95e4bcd97ce9de64068af5136280c8f31964a7a2ad8052479cbc66")
+set(SDL3_HASH "SHA512=5e6e0c30d2ef6cc0d404b2e4355720302da03077734cfce70488ce3d4c12211ca70161cc6300b96254a6f53c2dbfd5da47e1cb53beadb4e30d7841291762074b")
 
 set(FREETYPE2_VERSION "2.13.3")
 string(REPLACE "." "-" _freetype_ver_temp "${FREETYPE2_VERSION}")
@@ -11,9 +11,9 @@ set(FREETYPE2_URL "https://github.com/freetype/freetype/archive/refs/tags/VER-${
 set(FREETYPE2_HASH "SHA512=fccfaa15eb79a105981bf634df34ac9ddf1c53550ec0b334903a1b21f9f8bf5eb2b3f9476e554afa112a0fca58ec85ab212d674dfd853670efec876bacbe8a53")
 unset(_freetype_ver_temp)
 
-set(LIBJPEG_VERSION "3.1.1")
+set(LIBJPEG_VERSION "3.1.2")
 set(LIBJPEG_URL "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/${LIBJPEG_VERSION}/libjpeg-turbo-${LIBJPEG_VERSION}.tar.gz")
-set(LIBJPEG_HASH "SHA512=d08c8eb77281c1eee2c93ef9f2eefaf79a4b9adff5172ebcb20c845ccad8896a28fc3d622002cc8b28964ff860dca0a491d6b1b921aaa7aedccd21b909aad4cb")
+set(LIBJPEG_HASH "SHA512=79271ae4ddc12e3753cc7323dc15617f1d82b2d554ef27b555712f6ab5de603323dd33747620815e3b55663a20e07b292a55172aee9f401f9fd3557145967abe")
 
 set(LIBPNG_VERSION "1.6.50")
 set(LIBPNG_URL "https://github.com/pnggroup/libpng/archive/refs/tags/v${LIBPNG_VERSION}.tar.gz")
@@ -27,9 +27,9 @@ set(BZIP2_VERSION "1ea1ac188ad4b9cb662e3f8314673c63df95a589")
 set(BZIP2_URL "https://github.com/libarchive/bzip2/archive/${BZIP2_VERSION}.tar.gz")
 set(BZIP2_HASH "SHA512=a1aae1e884f85a225e2a1ddf610f11dda672bc242d4e8d0cda3534efb438b3a0306ec1d130eec378d46abb48f6875687d6b20dcc18a6037a4455f531c22d50f6")
 
-set(FMT_VERSION "93f03953af6b0268e1a29bb5b23d50f72b87a151")
+set(FMT_VERSION "36390db094afc48c47809ad9a6c9ced89b38551d")
 set(FMT_URL "https://github.com/fmtlib/fmt/archive/${FMT_VERSION}.tar.gz")
-set(FMT_HASH "SHA512=fd72b657e3ccf8a570ae8bf5bafd4908d779dee89c971cfda9c7fb016e32f17cf6ce8083391d8624d1fed064ead5941cc2052a8643215729b922489273638599")
+set(FMT_HASH "SHA512=f93d90bfc922dbe169dcdb080eddc8df14f6715a7def400aed3fc36eed053cc6e94bb289621d493bd20b182b406ecbb8e09bb435a3880f383d6c28bec12be559")
 
 set(GLM_VERSION "1.0.1")
 set(GLM_URL "https://github.com/g-truc/glm/archive/refs/tags/${GLM_VERSION}.tar.gz")

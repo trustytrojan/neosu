@@ -90,7 +90,7 @@ void init_discord_sdk() {
         return;
     }
 
-#ifdef _WIN64
+#if !(defined(_WIN32) && !defined(_WIN64))
     dapp.core->set_log_hook(dapp.core, DiscordLogLevel_Warn, nullptr, on_discord_log);
 #endif
     dapp.activities = dapp.core->get_activity_manager(dapp.core);
