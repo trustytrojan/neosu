@@ -33,7 +33,7 @@ extern Environment *env;
 class Environment {
    public:
     struct Interop {
-        void handle_cmdline_args(const std::vector<UString> &args);
+        void handle_cmdline_args(const std::vector<std::string> &args);
         void handle_cmdline_args() { env ? handle_cmdline_args(env->getCommandLine()) : (void)0; }
         void register_file_associations();
         static void handle_existing_window([[maybe_unused]] int argc,
@@ -76,10 +76,10 @@ class Environment {
 
     static void openURLInDefaultBrowser(const std::string &url) noexcept;
 
-    [[nodiscard]] inline const std::unordered_map<UString, std::optional<UString>> &getLaunchArgs() const {
+    [[nodiscard]] inline const std::unordered_map<std::string, std::optional<std::string>> &getLaunchArgs() const {
         return m_mArgMap;
     }
-    [[nodiscard]] inline const std::vector<UString> &getCommandLine() const { return m_vCmdLine; }
+    [[nodiscard]] inline const std::vector<std::string> &getCommandLine() const { return m_vCmdLine; }
 
     // returns at least 1
     static int getLogicalCPUCount();
@@ -201,8 +201,8 @@ class Environment {
 #endif
 
    protected:
-    std::unordered_map<UString, std::optional<UString>> m_mArgMap;
-    std::vector<UString> m_vCmdLine;
+    std::unordered_map<std::string, std::optional<std::string>> m_mArgMap;
+    std::vector<std::string> m_vCmdLine;
     std::unique_ptr<Engine> m_engine;
 
     SDL_Window *m_window;

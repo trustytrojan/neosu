@@ -18,6 +18,7 @@
 #include "SoundEngine.h"
 #include "Timing.h"
 #include "VisualProfiler.h"
+#include "SString.h"
 
 Image *MISSING_TEXTURE = nullptr;
 
@@ -46,7 +47,7 @@ Engine::Engine() {
 
     // print debug information
     debugLog("-= Engine Startup =-\n");
-    debugLog("cmdline: {:s}\n", UString::join(env->getCommandLine()));
+    debugLog("cmdline: {:s}\n", SString::join(env->getCommandLine()));
 
     // timing
     this->iFrameCount = 0;
@@ -104,8 +105,9 @@ Engine::Engine() {
                                                                   : SoundEngine::BASS;
         {
             auto args = env->getLaunchArgs();
-            auto soundString = args["-sound"].value_or("bass").trim();
-            soundString.lowerCase();
+            auto soundString = args["-sound"].value_or("bass");
+            SString::trim(&soundString);
+            SString::to_lower(soundString);
             if(Env::cfg(AUD::BASS) && soundString == "bass")
                 type = SoundEngine::BASS;
             else if(Env::cfg(AUD::SOLOUD) && soundString == "soloud")

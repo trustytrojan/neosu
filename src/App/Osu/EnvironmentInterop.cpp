@@ -63,24 +63,24 @@ void handle_osz(const char *osz_path) {
 }
 }  // namespace
 
-void Environment::Interop::handle_cmdline_args(const std::vector<UString> &args) {
+void Environment::Interop::handle_cmdline_args(const std::vector<std::string> &args) {
     bool need_to_reload_database = false;
 
-    for(auto &arg : args) {
+    for(const auto &arg : args) {
         if(arg[0] == '-') return;
         if(arg.length() < 4) return;
 
-        if(strstr(arg.toUtf8(), "neosu://") == arg.toUtf8()) {
-            handle_neosu_url(arg.toUtf8());
+        if(arg.starts_with("neosu://")) {
+            handle_neosu_url(arg.c_str());
         } else {
-            auto extension = env->getFileExtensionFromFilePath(arg.toUtf8());
+            auto extension = env->getFileExtensionFromFilePath(arg);
             if(!extension.compare("osz")) {
                 // NOTE: we're assuming db is loaded here?
-                handle_osz(arg.toUtf8());
+                handle_osz(arg.c_str());
             } else if(!extension.compare("osk") || !extension.compare("zip")) {
-                handle_osk(arg.toUtf8());
+                handle_osk(arg.c_str());
             } else if(!extension.compare("db") && !db->isLoading()) {
-                db->dbPathsToImport.emplace_back(arg.toUtf8());
+                db->dbPathsToImport.emplace_back(arg.c_str());
                 need_to_reload_database = true;
             }
         }

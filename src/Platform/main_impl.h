@@ -32,7 +32,7 @@ class SDLMain final : public Environment {
     SDL_AppResult handleEvent(SDL_Event *event);
     void shutdown(SDL_AppResult result);
 
-    static void restart(const std::vector<UString> &restartArgs);
+    static void restart(const std::vector<std::string> &restartArgs);
 
    private:
     // init methods
@@ -56,5 +56,5 @@ class SDLMain final : public Environment {
     int m_iFpsMax{360};
     int m_iFpsMaxBG{30};
 
-    std::vector<UString> m_vDroppedData;  // queued data dropped onto window
+    std::vector<std::string> m_vDroppedData;  // queued data dropped onto window
 };

@@ -86,7 +86,7 @@ void SDL_AppQuit(void *appstate, SDL_AppResult result) {
     fmain->grabKeyboard(false);
 
     const bool restart = fmain->isRestartScheduled();
-    std::vector<UString> restartArgs{};
+    std::vector<std::string> restartArgs{};
     if(restart) {
         restartArgs = fmain->getCommandLine();
     }
