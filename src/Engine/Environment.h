@@ -31,17 +31,21 @@ class Environment;
 extern Environment *env;
 
 class Environment {
+    NOCOPY_NOMOVE(Environment)
    public:
     struct Interop {
+        Interop(Environment *env_ptr) : m_env(env_ptr) {}
         void handle_cmdline_args(const std::vector<std::string> &args);
-        void handle_cmdline_args() { env ? handle_cmdline_args(env->getCommandLine()) : (void)0; }
+        void handle_cmdline_args() { handle_cmdline_args(m_env->getCommandLine()); }
         void register_file_associations();
         static void handle_existing_window([[maybe_unused]] int argc,
                                            [[maybe_unused]] char *argv[]);  // this is likely broken ATM
+       private:
+        Environment *m_env;
     };
 
    private:
-    Interop m_interop{};
+    Interop m_interop;
 
    public:
     Environment(int argc, char *argv[]);

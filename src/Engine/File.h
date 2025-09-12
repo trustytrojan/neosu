@@ -9,7 +9,7 @@
 #ifndef FILE_H
 #define FILE_H
 
-#include "BaseEnvironment.h"
+#include "noinclude.h"
 #include "types.h"
 
 #include <filesystem>
@@ -21,6 +21,7 @@ class ConVar;
 class DirectoryCache;
 
 class File {
+    NOCOPY_NOMOVE(File)
    public:
     enum class TYPE : uint8_t { READ, WRITE };
 
@@ -29,11 +30,6 @@ class File {
    public:
     File(std::string filePath, TYPE type = TYPE::READ);
     ~File() = default;
-
-    File &operator=(const File &) = delete;
-    File &operator=(File &&) = delete;
-    File(const File &) = delete;
-    File(File &&) = delete;
 
     [[nodiscard]] constexpr bool canRead() const {
         return this->bReady && this->ifstream && this->ifstream->good() && this->fileType == TYPE::READ;

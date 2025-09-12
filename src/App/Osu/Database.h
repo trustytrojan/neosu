@@ -130,14 +130,10 @@ class Database {
 
    private:
     class AsyncDBLoader : public Resource {
+        NOCOPY_NOMOVE(AsyncDBLoader)
        public:
         ~AsyncDBLoader() override = default;
         AsyncDBLoader() : Resource() {}
-
-        AsyncDBLoader &operator=(const AsyncDBLoader &) = delete;
-        AsyncDBLoader &operator=(AsyncDBLoader &&) = delete;
-        AsyncDBLoader(const AsyncDBLoader &) = delete;
-        AsyncDBLoader(AsyncDBLoader &&) = delete;
 
         [[nodiscard]] Type getResType() const override { return APPDEFINED; }
 

@@ -42,7 +42,7 @@ bool Environment::s_bIsWine = false;
 SDL_Environment *Environment::s_sdlenv = SDL_GetEnvironment();
 bool Environment::s_bIsATTY = (isatty(fileno(stdout)) != 0);
 
-Environment::Environment(int argc, char *argv[]) {
+Environment::Environment(int argc, char *argv[]) : m_interop(this) {
     env = this;
 
     // parse args

@@ -148,16 +148,13 @@ class MainMenu : public OsuScreen, public MouseListener {
     Shader *background_shader = nullptr;
 
     struct SongsFolderEnumerator : public Resource {
+        NOCOPY_NOMOVE(SongsFolderEnumerator)
+       public:
         ~SongsFolderEnumerator() override = default;
         SongsFolderEnumerator() : Resource() {
             resourceManager->requestNextLoadAsync();
             resourceManager->loadResource(this);
         }
-
-        SongsFolderEnumerator &operator=(const SongsFolderEnumerator &) = delete;
-        SongsFolderEnumerator &operator=(SongsFolderEnumerator &&) = delete;
-        SongsFolderEnumerator(const SongsFolderEnumerator &) = delete;
-        SongsFolderEnumerator(SongsFolderEnumerator &&) = delete;
 
         [[nodiscard]] inline const std::vector<std::string> &getEntries() const { return this->entries; }
         [[nodiscard]] inline std::string getFolderPath() const { return this->folderPath; }

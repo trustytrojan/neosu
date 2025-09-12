@@ -1,25 +1,21 @@
 #pragma once
 // Copyright (c) 2024, kiwec, All rights reserved.
+#include "noinclude.h"
+#include "types.h"
 
 #include <memory>
 #include <vector>
 #include <mutex>
-#include "types.h"
 
 class DatabaseBeatmap;
 class VolNormalization {
+    NOCOPY_NOMOVE(VolNormalization)
    public:
     VolNormalization() = default;
     ~VolNormalization() {
         // only clean up this instance's resources
         abort_instance();
     }
-
-    // non-copyable, non-movable
-    VolNormalization(const VolNormalization&) = delete;
-    VolNormalization& operator=(const VolNormalization&) = delete;
-    VolNormalization(VolNormalization&&) = delete;
-    VolNormalization& operator=(VolNormalization&&) = delete;
 
     static inline void start_calc(const std::vector<DatabaseBeatmap*>& maps_to_calc) {
         get_instance().start_calc_instance(maps_to_calc);

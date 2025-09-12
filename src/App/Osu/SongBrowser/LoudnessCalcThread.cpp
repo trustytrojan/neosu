@@ -19,6 +19,8 @@ std::once_flag VolNormalization::instance_flag;
 std::once_flag VolNormalization::shutdown_flag;
 
 struct VolNormalization::LoudnessCalcThread {
+    NOCOPY_NOMOVE(LoudnessCalcThread)
+   public:
     std::thread thr;
     std::atomic<bool> dead{true};
     std::vector<DatabaseBeatmap *> maps;
@@ -42,11 +44,6 @@ struct VolNormalization::LoudnessCalcThread {
             this->thr.join();
         }
     }
-
-    LoudnessCalcThread &operator=(const LoudnessCalcThread &) = delete;
-    LoudnessCalcThread &operator=(LoudnessCalcThread &&) = delete;
-    LoudnessCalcThread(const LoudnessCalcThread &) = delete;
-    LoudnessCalcThread(LoudnessCalcThread &&) = delete;
 
    private:
     void run() {

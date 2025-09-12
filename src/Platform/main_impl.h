@@ -18,14 +18,10 @@ extern void SDL_AppQuit(void *appstate, SDL_AppResult result);
 #endif
 
 class SDLMain final : public Environment {
+    NOCOPY_NOMOVE(SDLMain)
    public:
     SDLMain(int argc, char *argv[]);
     ~SDLMain() override;
-
-    SDLMain &operator=(const SDLMain &) = delete;
-    SDLMain &operator=(SDLMain &&) = delete;
-    SDLMain(const SDLMain &) = delete;
-    SDLMain(SDLMain &&) = delete;
 
     SDL_AppResult initialize();
     SDL_AppResult iterate();
