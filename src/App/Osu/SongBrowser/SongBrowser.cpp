@@ -321,9 +321,7 @@ bool sort_by_title(SongButton const *a, SongButton const *b) {
 SongBrowser::SongBrowser()  // NOLINT(cert-msc51-cpp, cert-msc32-c)
     : ScreenBackable() {
     // random selection algorithm init
-    u64 seed{};
-    crypto::rng::get_bytes(reinterpret_cast<u8 *>(&seed), 8);
-    this->rngalg.seed(seed);
+    this->rngalg.seed(crypto::rng::get_rand<u64>());
 
     // sorting/grouping + methods
     this->group = GROUP::GROUP_NO_GROUPING;

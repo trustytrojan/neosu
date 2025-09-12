@@ -79,10 +79,7 @@ Shader *flashlight_shader = nullptr;
 
 Osu::Osu() {
     osu = this;
-
-    u32 seed{};
-    crypto::rng::get_bytes(reinterpret_cast<u8 *>(&seed), 4);
-    srand(seed);
+    srand(crypto::rng::get_rand<u32>());
 
     if(env->isDebugBuild()) {
         BanchoState::neosu_version = UString::fmt("dev-{}", cv::build_timestamp.getVal<u64>());
