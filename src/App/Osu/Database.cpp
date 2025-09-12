@@ -340,9 +340,7 @@ BeatmapSet *Database::addBeatmapSet(const std::string &beatmapFolderPath, i32 se
         }
     }
 
-    // Not sure why this was adding to both vectors. This causes duplication.
-    // Prefer the neosu db since we can write to it.
-    // this->beatmapsets.push_back(beatmap);
+    this->beatmapsets.push_back(beatmap);
     this->neosu_sets.push_back(beatmap);
 
     this->beatmap_difficulties_mtx.lock();
