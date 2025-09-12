@@ -322,6 +322,7 @@ class ConVar {
     template <typename T, typename Callback>
     void initValue(const std::string_view &name, const T &defaultValue, uint8_t flags,
                    const std::string_view &helpString, Callback callback) {
+        this->bHasValue = true;
         this->iFlags = flags;
         this->sName = name;
         this->sHelpString = helpString;
