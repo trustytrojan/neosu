@@ -385,7 +385,7 @@ class ConVar {
         }();
 
         // backup old values, for passing into callbacks
-        double oldDouble;
+        double oldDouble{0.0};
         std::string oldString;
         if(doCallback) {
             oldDouble = this->getDouble();

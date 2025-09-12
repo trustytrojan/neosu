@@ -530,39 +530,44 @@ void MainMenu::drawLogoImage(const McRect &mainButtonRect) {
 std::pair<bool, float> MainMenu::getTimingpointPulseAmount() {
     constexpr const float div = 1.25f;
 
-    float pulse = 0.0f;
-    bool haveTimingpoints = false;
+    float pulse = (div - fmod(engine->getTime(), div)) / div;
 
-    if(osu->getSelectedBeatmap()->getSelectedDifficulty2() != nullptr &&
-       osu->getSelectedBeatmap()->getMusic() != nullptr && osu->getSelectedBeatmap()->getMusic()->isPlaying()) {
-        haveTimingpoints = true;
+    const auto &selectedMap = osu->getSelectedBeatmap();
+    if(!selectedMap) {
+        return {false, pulse};
+    }
 
-        const long curMusicPos =
-            (long)osu->getSelectedBeatmap()->getMusic()->getPositionMS() +
-            (long)(cv::universal_offset.getFloat() * osu->getSelectedBeatmap()->getSpeedMultiplier()) +
-            (long)cv::universal_offset_hardcoded.getInt() -
-            osu->getSelectedBeatmap()->getSelectedDifficulty2()->getLocalOffset() -
-            osu->getSelectedBeatmap()->getSelectedDifficulty2()->getOnlineOffset() -
-            (osu->getSelectedBeatmap()->getSelectedDifficulty2()->getVersion() < 5 ? cv::old_beatmap_offset.getInt()
-                                                                                   : 0);
+    const auto &music = selectedMap->getMusic();
+    if(!music || !music->isPlaying()) {
+        return {false, pulse};
+    }
 
-        DatabaseBeatmap::TIMING_INFO t =
-            osu->getSelectedBeatmap()->getSelectedDifficulty2()->getTimingInfoForTime(curMusicPos);
+    const auto &diff2 = selectedMap->getSelectedDifficulty2();
+    if(!diff2) {
+        return {false, pulse};
+    }
 
-        if(t.beatLengthBase == 0.0f)  // bah
-            t.beatLengthBase = 1.0f;
+    // playing music, get dynamic pulse amount
+    const long curMusicPos = (long)music->getPositionMS() +
+                             (long)(cv::universal_offset.getFloat() * selectedMap->getSpeedMultiplier()) +
+                             Beatmap::getInternalAudioOffset() - diff2->getLocalOffset() - diff2->getOnlineOffset() -
+                             (diff2->getVersion() < 5 ? cv::old_beatmap_offset.getInt() : 0);
 
-        this->iMainMenuAnimBeatCounter =
-            (curMusicPos - t.offset - (long)(std::max((long)t.beatLengthBase, (long)1) * 0.5f)) /
-            std::max((long)t.beatLengthBase, (long)1);
-        pulse = (float)((curMusicPos - t.offset) % std::max((long)t.beatLengthBase, (long)1)) /
-                t.beatLengthBase;  // modulo must be >= 1
-        pulse = std::clamp<float>(pulse, -1.0f, 1.0f);
-        if(pulse < 0.0f) pulse = 1.0f - std::abs(pulse);
-    } else
-        pulse = (div - fmod(engine->getTime(), div)) / div;
+    DatabaseBeatmap::TIMING_INFO t = diff2->getTimingInfoForTime(curMusicPos);
 
-    return {haveTimingpoints, pulse};
+    if(t.beatLengthBase == 0.0f)  // bah
+        t.beatLengthBase = 1.0f;
+
+    this->iMainMenuAnimBeatCounter =
+        (curMusicPos - t.offset - (long)(std::max((long)t.beatLengthBase, (long)1) * 0.5f)) /
+        std::max((long)t.beatLengthBase, (long)1);
+
+    pulse = (float)((curMusicPos - t.offset) % std::max((long)t.beatLengthBase, (long)1)) /
+            t.beatLengthBase;  // modulo must be >= 1
+    pulse = std::clamp<float>(pulse, -1.0f, 1.0f);
+    if(pulse < 0.0f) pulse = 1.0f - std::abs(pulse);
+
+    return {true, pulse};
 }
 
 // the cube
@@ -1120,7 +1125,8 @@ void MainMenu::selectRandomBeatmap() {
 
             assert(candidate_diff);
 
-            const bool skip = (i < RETRY_SETS - 1) && !env->fileExists(candidate_diff->getFullBackgroundImageFilePath());
+            const bool skip =
+                (i < RETRY_SETS - 1) && !env->fileExists(candidate_diff->getFullBackgroundImageFilePath());
             if(skip) {
                 debugLog("Beatmap '{:s}' has no background image, skipping.\n", candidate_diff->getFilePath());
                 delete set;

@@ -1509,7 +1509,7 @@ void Beatmap::handlePreviewPlay() {
 
 void Beatmap::loadMusic() {
     if(!this->selectedDifficulty2 || this->selectedDifficulty2->getFullSoundFilePath().empty()) {
-        if (this->selectedDifficulty2) {
+        if(this->selectedDifficulty2) {
             debugLog("no music file for {}!\n", this->selectedDifficulty2->getFilePath());
         }
         unloadMusic();
@@ -1549,7 +1549,7 @@ void Beatmap::loadMusic() {
 }
 
 void Beatmap::unloadMusic() {
-    if (this->music) {
+    if(this->music) {
         resourceManager->destroyResource(this->music);
         this->music = nullptr;
     }
@@ -2353,7 +2353,7 @@ void Beatmap::update2() {
 
         // ugh. force update all hitobjects while waiting (necessary because of pvs optimization)
         long curPos = this->iCurMusicPos + (long)(cv::universal_offset.getFloat() * this->getSpeedMultiplier()) +
-                      cv::universal_offset_hardcoded.getInt() - this->selectedDifficulty2->getLocalOffset() -
+                      this->getInternalAudioOffset() - this->selectedDifficulty2->getLocalOffset() -
                       this->selectedDifficulty2->getOnlineOffset() -
                       (this->selectedDifficulty2->getVersion() < 5 ? cv::old_beatmap_offset.getInt() : 0);
         if(curPos > -1)  // otherwise auto would already click elements that start at exactly 0 (while the map has not
@@ -2425,7 +2425,7 @@ void Beatmap::update2() {
     // update timing (points)
     this->iCurMusicPosWithOffsets = this->iCurMusicPos;
     this->iCurMusicPosWithOffsets += (i32)(cv::universal_offset.getFloat() * this->getSpeedMultiplier());
-    this->iCurMusicPosWithOffsets += cv::universal_offset_hardcoded.getInt();
+    this->iCurMusicPosWithOffsets += this->getInternalAudioOffset();
     this->iCurMusicPosWithOffsets -= this->selectedDifficulty2->getLocalOffset();
     this->iCurMusicPosWithOffsets -= this->selectedDifficulty2->getOnlineOffset();
     if(this->selectedDifficulty2->getVersion() < 5) {
@@ -4175,6 +4175,23 @@ void Beatmap::computeDrainRate() {
             (testDrop / testPlayer.hpBarMaximum) * 1000.0;  // from [0, 200] to [0, 1], and from ms to seconds
         this->fHpMultiplierComboEnd = testPlayer.hpMultiplierComboEnd;
         this->fHpMultiplierNormal = testPlayer.hpMultiplierNormal;
+    }
+}
+
+long Beatmap::getInternalAudioOffset() {
+    using Backend = enum SoundEngine::SndEngineType;
+
+    static_assert(Backend::MAX == 2, "make sure audio offset is correct for new sound engine");
+
+    switch(soundEngine->getTypeId()) {
+        case Backend::SOLOUD:
+            // +18 universal matches BASS better, at least on windows
+            // on linux BASS always needs ~-35ms offset, so people probably need to adjust that manually anyways
+            return 18;
+        case Backend::BASS:
+            // We compensate for latency via BASS_ATTRIB_MIXER_LATENCY
+        default:
+            return 0;
     }
 }
 

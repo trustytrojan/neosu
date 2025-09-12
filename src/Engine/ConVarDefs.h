@@ -1229,7 +1229,6 @@ CONVAR(ui_top_ranks_max, "ui_top_ranks_max", 200, CLIENT | SKINS | SERVER,
 CONVAR(ui_window_animspeed, "ui_window_animspeed", 0.29f, CLIENT | SKINS | SERVER);
 CONVAR(ui_window_shadow_radius, "ui_window_shadow_radius", 13.0f, CLIENT | SKINS | SERVER);
 CONVAR(universal_offset, "universal_offset", 0.0f, CLIENT);
-CONVAR(universal_offset_hardcoded, "universal_offset_hardcoded", 0.0f, CLIENT);
 CONVAR(use_https, "use_https", true, CLIENT);
 CONVAR(use_ppv3, "use_ppv3", false, CLIENT | SKINS | SERVER, "use ppv3 instead of ppv2 (experimental)");
 CONVAR(user_draw_accuracy, "user_draw_accuracy", true, CLIENT | SKINS | SERVER);

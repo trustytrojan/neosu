@@ -2156,10 +2156,6 @@ float Osu::getUIScale() {
 }
 
 void Osu::setupSoloud() {
-    // set +18ms universal offset here to match BASS better, at least on windows
-    // on linux BASS always needs ~-35ms offset, so people probably need to adjust that anyways
-    cv::universal_offset_hardcoded.setValue(18.0f);
-
     // need to save this state somewhere to share data between callback stages
     static bool was_playing = false;
     static unsigned long prev_position_ms = 0;

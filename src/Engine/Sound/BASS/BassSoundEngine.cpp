@@ -255,9 +255,6 @@ bool BassSoundEngine::initializeOutputDevice(const SoundEngine::OUTPUT_DEVICE &d
 
     this->shutdown();
 
-    // We compensate for latency via BASS_ATTRIB_MIXER_LATENCY
-    cv::universal_offset_hardcoded.setValue(0.f);
-
     if(device.driver == OutputDriver::NONE || (device.driver == OutputDriver::BASS && device.id == 0)) {
         this->ready_since = -1.0;
         this->currentOutputDevice = device;

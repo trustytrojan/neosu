@@ -126,6 +126,8 @@ class Beatmap : public BeatmapInterface {
     void seekMS(u32 ms);
     [[nodiscard]] inline DatabaseBeatmap::TIMING_INFO getTimingPoint() const { return this->current_timing_point; }
     [[nodiscard]] inline i32 getDefaultSampleSet() const { return this->default_sample_set; }
+    // backend-dependent
+    [[nodiscard]] static long getInternalAudioOffset();
 
     [[nodiscard]] inline Sound *getMusic() const { return this->music; }
     [[nodiscard]] u32 getTime() const;
