@@ -938,6 +938,8 @@ AM_CONDITIONAL([BUILD_MIMALLOC], [{ test "x$enable_debug" != "xyes" || test "x$w
 
 AM_CONDITIONAL([USE_BASS], [test "$with_bass" = "yes"])
 AM_CONDITIONAL([USE_SOLOUD], [test "$with_soloud" = "yes"])
+# this just copies some libraries on installation
+AM_CONDITIONAL([USE_DISCORDSDK], [test "$SYSNAME" = "windows" || { test "$SYSNAME" = "linux" && test "$host_cpu" = "x86_64" ; } ])
 AM_CONDITIONAL([WIN_PLATFORM], [test "$SYSNAME" = "windows"])
 AM_CONDITIONAL([WIN32_PLATFORM], [test "$SYSNAME" = "windows" && test "$host_cpu" = "i686"])
 

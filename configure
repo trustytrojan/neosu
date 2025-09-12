@@ -656,6 +656,8 @@ WIN32_PLATFORM_FALSE
 WIN32_PLATFORM_TRUE
 WIN_PLATFORM_FALSE
 WIN_PLATFORM_TRUE
+USE_DISCORDSDK_FALSE
+USE_DISCORDSDK_TRUE
 USE_SOLOUD_FALSE
 USE_SOLOUD_TRUE
 USE_BASS_FALSE
@@ -13090,6 +13092,15 @@ else
   USE_SOLOUD_FALSE=
 fi
 
+# this just copies some libraries on installation
+ if test "$SYSNAME" = "windows" || { test "$SYSNAME" = "linux" && test "$host_cpu" = "x86_64" ; } ; then
+  USE_DISCORDSDK_TRUE=
+  USE_DISCORDSDK_FALSE='#'
+else
+  USE_DISCORDSDK_TRUE='#'
+  USE_DISCORDSDK_FALSE=
+fi
+
  if test "$SYSNAME" = "windows"; then
   WIN_PLATFORM_TRUE=
   WIN_PLATFORM_FALSE='#'
@@ -13359,6 +13370,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${USE_SOLOUD_TRUE}" && test -z "${USE_SOLOUD_FALSE}"; then
   as_fn_error $? "conditional \"USE_SOLOUD\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${USE_DISCORDSDK_TRUE}" && test -z "${USE_DISCORDSDK_FALSE}"; then
+  as_fn_error $? "conditional \"USE_DISCORDSDK\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${WIN_PLATFORM_TRUE}" && test -z "${WIN_PLATFORM_FALSE}"; then

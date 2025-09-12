@@ -491,13 +491,18 @@ $(DEPS_PREFIX)/SoundTouch-$(SOUNDTOUCH_VERSION).built:
 	$(MKDIR_P) $(DEPS_PREFIX) && touch $@
 endif # USE_SOLOUD
 
+if USE_DISCORDSDK
 DISCORDSDK_CFLAGS := -I$(DEPS_CACHE)/discordsdk-$(DISCORDSDK_VERSION)/include
-DISCORDSDK_LIBS := -L$(DEPS_CACHE)/discordsdk-$(DISCORDSDK_VERSION)/lib/$(SYSNAME)/$(host_cpu)
 DISCORDSDK_INSTALL_LIBS := $(DEPS_CACHE)/discordsdk-$(DISCORDSDK_VERSION)/lib/$(SYSNAME)/$(host_cpu)/$(LIBPREFIX)discord_game_sdk$(DLLEXT)
 
 $(DEPS_PREFIX)/discordsdk-$(DISCORDSDK_VERSION).built: $(DEPS_CACHE)/discordsdk-$(DISCORDSDK_VERSION).source
 	$(MKDIR_P) $(DEPS_PREFIX)
 	touch $@
+else
+$(DEPS_PREFIX)/discordsdk-$(DISCORDSDK_VERSION).built:
+	$(MKDIR_P) $(DEPS_PREFIX)
+	touch $@
+endif # USE_DISCORDSDK
 
 if USE_BASS
 AUDIO_CFLAGS += -I$(DEPS_CACHE)/bass-$(BASS_VERSION)/bass/include -I$(DEPS_CACHE)/bass-$(BASS_VERSION)/bassfx/include -I$(DEPS_CACHE)/bass-$(BASS_VERSION)/bassmix/include \
@@ -871,7 +876,6 @@ neosu_LDFLAGS := \
 	$(LZMA_LIBS) \
 	$(DXGI_LIBS) \
 	$(D3D11_LIBS) \
-	$(DISCORDSDK_LIBS) \
 	$(NEOSU_LDFLAGS) \
 	$(EXTRA_WIN_LIBS) \
 	$(LDFLAGS_EXTRA)
@@ -941,7 +945,9 @@ install-libs:
 	find $(srcdir)/$(ASSETS_DIR)/fonts -type f -exec $(INSTALL) -Dm 644 '{''}' "$(DESTDIR)$(bindir)/fonts" ';'
 	find $(srcdir)/$(ASSETS_DIR)/materials -mindepth 1 -maxdepth 1 -type f -exec $(INSTALL) -Dm 644 '{''}' "$(DESTDIR)$(bindir)/materials" ';'
 	find $(srcdir)/$(ASSETS_DIR)/materials/default -mindepth 1 -maxdepth 1 -type f -exec $(INSTALL) -Dm 644 '{''}' "$(DESTDIR)$(bindir)/materials/default" ';'
-	@$(if $(and $(filter i686,$(host_cpu)),$(findstring linux,$(host_os))),true,cp -P $(DISCORDSDK_INSTALL_LIBS) "$(DESTDIR)$(bindir)/$(LIBDEST)")
+if USE_DISCORDSDK
+	@cp -P $(DISCORDSDK_INSTALL_LIBS) "$(DESTDIR)$(bindir)/$(LIBDEST)"
+endif
 if WIN_PLATFORM
 if BUILD_MIMALLOC
 	@cp -P "$(DEPS_PREFIX)/bin/mimalloc"{,-redirect$(if $(filter x86_64,$(host_cpu)),,32)}".dll" "$(DESTDIR)$(bindir)/$(LIBDEST)"
