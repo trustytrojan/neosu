@@ -1,6 +1,16 @@
 // Copyright (c) 2018, PG, All rights reserved.
 #include "DiscordInterface.h"
 
+#ifndef USE_DISCORD_SDK
+
+void init_discord_sdk() {}
+void tick_discord_sdk() {}
+void destroy_discord_sdk() {}
+void clear_discord_presence() {}
+void set_discord_presence(struct DiscordActivity * /*activity*/) {}
+
+#else
+
 static bool initialized = false;
 
 #include "Bancho.h"
@@ -30,6 +40,7 @@ struct IDiscordActivityEvents activities_events{};
 struct IDiscordRelationshipEvents relationships_events{};
 struct IDiscordUserEvents users_events{};
 
+#if defined(_WIN32) && !defined(_WIN64)  // doesn't work
 void on_discord_log(void * /*cdata*/, enum EDiscordLogLevel level, const char *message) {
     //(void)cdata;
     if(level == DiscordLogLevel_Error) {
@@ -38,6 +49,7 @@ void on_discord_log(void * /*cdata*/, enum EDiscordLogLevel level, const char *m
         Engine::logRaw("[Discord] {:s}\n", message);
     }
 }
+#endif
 
 dynutils::lib_obj *discord_handle{nullptr};
 
@@ -178,3 +190,5 @@ void set_discord_presence([[maybe_unused]] struct DiscordActivity *activity) {
 
 // void (DISCORD_API *accept_invite)(struct IDiscordActivityManager* manager, DiscordUserId user_id, void*
 //     callback_data, void (DISCORD_API *callback)(void* callback_data, enum EDiscordResult result));
+
+#endif

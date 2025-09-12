@@ -133,9 +133,9 @@ $(DEPS_CACHE)/ffmpeg-$(FFMPEG_VERSION).source: $(DEPS_CACHE)/ffmpeg-$(FFMPEG_VER
 	$(MKDIR_P) linuxx86_64 && $(TAR) xf ffmpeg-linuxx86_64.tar.xz -C linuxx86_64 --strip-components=1 --wildcards --no-anchored include/'*'.h lib/'*'.so'*' && \
 	$(MKDIR_P) linuxi686 && cp -r linuxx86_64/include linuxi686/ && \
 	$(MKDIR_P) windowsi686/lib && $(UNZIP) -qjo ffmpeg-windowsi686.zip "*/bin/*.dll" -d windowsi686/lib && \
-	$(MKDIR_P) windowsi686/include && $(UNZIP) -qo ffmpeg-windowsi686.zip "*/include/*" -d windowsi686/include && mv windowsi686/include/*/*/* windowsi686/include/ && \
+	$(MKDIR_P) windowsi686/include && $(UNZIP) -qo ffmpeg-windowsi686.zip "*/include/**" -d windowsi686/include && mv windowsi686/include/*/*/* windowsi686/include/ && \
 	$(MKDIR_P) windowsx86_64/lib && $(UNZIP) -qjo ffmpeg-windowsx86_64.zip "*/bin/*.dll" -d windowsx86_64/lib && \
-	$(MKDIR_P) windowsx86_64/include && $(UNZIP) -qo ffmpeg-windowsx86_64.zip "*/include/*" -d windowsx86_64/include && mv windowsx86_64/include/*/*/* windowsx86_64/include/
+	$(MKDIR_P) windowsx86_64/include && $(UNZIP) -qo ffmpeg-windowsx86_64.zip "*/include/**" -d windowsx86_64/include && mv windowsx86_64/include/*/*/* windowsx86_64/include/
 	touch $@
 
 # --with-audio=bass
@@ -255,7 +255,7 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-windows-binary.source: $(DEPS_CACHE)/curl-$(C
 	rm -rf windowsx86_64 && \
 	$(MKDIR_P) windowsx86_64/bin && $(UNZIP) -qjo curl-windowsx86_64.zip "*/bin/*.dll" -d windowsx86_64/bin && \
 	$(MKDIR_P) windowsx86_64/lib && $(UNZIP) -qjo curl-windowsx86_64.zip "*/lib/*.a" -d windowsx86_64/lib && \
-	$(MKDIR_P) windowsx86_64/include && $(UNZIP) -qo curl-windowsx86_64.zip "*/include/*" -d windowsx86_64/include && mv windowsx86_64/include/*/*/* windowsx86_64/include/ && \
+	$(MKDIR_P) windowsx86_64/include && $(UNZIP) -qo curl-windowsx86_64.zip "*/include/**" -d windowsx86_64/include && mv windowsx86_64/include/*/*/* windowsx86_64/include/ && \
 	rm -rf windows*/lib/libz.a windows*/lib/zlib*.a && \
 	touch $@
 
@@ -941,7 +941,7 @@ install-libs:
 	find $(srcdir)/$(ASSETS_DIR)/fonts -type f -exec $(INSTALL) -Dm 644 '{''}' "$(DESTDIR)$(bindir)/fonts" ';'
 	find $(srcdir)/$(ASSETS_DIR)/materials -mindepth 1 -maxdepth 1 -type f -exec $(INSTALL) -Dm 644 '{''}' "$(DESTDIR)$(bindir)/materials" ';'
 	find $(srcdir)/$(ASSETS_DIR)/materials/default -mindepth 1 -maxdepth 1 -type f -exec $(INSTALL) -Dm 644 '{''}' "$(DESTDIR)$(bindir)/materials/default" ';'
-	@cp -P $(DISCORDSDK_INSTALL_LIBS) "$(DESTDIR)$(bindir)/$(LIBDEST)"
+	@$(if $(and $(filter i686,$(host_cpu)),$(findstring linux,$(host_os))),true,cp -P $(DISCORDSDK_INSTALL_LIBS) "$(DESTDIR)$(bindir)/$(LIBDEST)")
 if WIN_PLATFORM
 if BUILD_MIMALLOC
 	@cp -P "$(DEPS_PREFIX)/bin/mimalloc"{,-redirect$(if $(filter x86_64,$(host_cpu)),,32)}".dll" "$(DESTDIR)$(bindir)/$(LIBDEST)"
