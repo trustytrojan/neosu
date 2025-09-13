@@ -11,6 +11,7 @@ set(CMAKE_CXX_EXTENSIONS ON)
 set(CMAKE_C_EXTENSIONS ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(BUILD_SHARED_LIBS OFF)
+set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 
 include(deps.cmake)
 
@@ -31,13 +32,6 @@ target_compile_definitions(neosu PRIVATE
 )
 
 find_package(OpenGL REQUIRED)
-find_package(ZLIB REQUIRED)
-find_package(PNG REQUIRED)
-find_package(Freetype REQUIRED)
-find_package(LibLZMA REQUIRED)
-find_package(CURL REQUIRED)
-find_package(fmt REQUIRED)
-find_package(SDL3 REQUIRED)
 
 target_include_directories(neosu PRIVATE
     src
@@ -74,12 +68,12 @@ target_link_libraries(neosu PRIVATE
     OpenGL::GL
     OpenGL::GLU
     SDL3::SDL3-static
-    ZLIB::ZLIB
+    zlibstatic
     turbojpeg
-    PNG::PNG
-    Freetype::Freetype
+    png_static
+    freetype
     fmt::fmt
-    LibLZMA::LibLZMA
+    liblzma
     CURL::libcurl
     glm::glm
     SoundTouch
