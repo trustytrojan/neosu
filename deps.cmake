@@ -39,38 +39,39 @@ FetchContent_Declare(ft2
 	URL https://github.com/freetype/freetype/archive/refs/tags/VER-2-13-3.zip)
 	# URL_HASH SHA512=fccfaa15eb79a105981bf634df34ac9ddf1c53550ec0b334903a1b21f9f8bf5eb2b3f9476e554afa112a0fca58ec85ab212d674dfd853670efec876bacbe8a53)
 
-# setcb(ENABLE_STATIC ON)
-# setcb(ENABLE_SHARED OFF)
-# setcb(WITH_JPEG8 ON)
-# setcb(WITH_SIMD ON)
-# setcb(REQUIRE_SIMD OFF)
-# FetchContent_Declare(jpeg
-# 	URL https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/${LIBJPEG_VERSION}/libjpeg-turbo-${LIBJPEG_VERSION}.tar.gz
-# 	URL_HASH SHA512=d08c8eb77281c1eee2c93ef9f2eefaf79a4b9adff5172ebcb20c845ccad8896a28fc3d622002cc8b28964ff860dca0a491d6b1b921aaa7aedccd21b909aad4cb)
+setcb(ENABLE_STATIC ON)
+setcb(ENABLE_SHARED OFF)
+setcb(WITH_JPEG8 ON)
+setcb(WITH_SIMD ON)
+setcb(REQUIRE_SIMD OFF)
+setcb(WITH_TURBOJPEG OFF)
+FetchContent_Declare(jpeg
+	URL https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/${LIBJPEG_VERSION}/libjpeg-turbo-${LIBJPEG_VERSION}.tar.gz
+	URL_HASH SHA512=d08c8eb77281c1eee2c93ef9f2eefaf79a4b9adff5172ebcb20c845ccad8896a28fc3d622002cc8b28964ff860dca0a491d6b1b921aaa7aedccd21b909aad4cb)
 
-include(ProcessorCount)
-ProcessorCount(CPU_COUNT)
-if(CPU_COUNT EQUAL 0)
-    set(CPU_COUNT 4)
-endif()
+# include(ProcessorCount)
+# ProcessorCount(CPU_COUNT)
+# if(CPU_COUNT EQUAL 0)
+#     set(CPU_COUNT 4)
+# endif()
 
-# unfortunately we can't have nice things because some devs are lazy
-include(ExternalProject)
-ExternalProject_Add(libjpeg_external
-    URL https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/${LIBJPEG_VERSION}/libjpeg-turbo-${LIBJPEG_VERSION}.tar.gz
-    URL_HASH SHA512=d08c8eb77281c1eee2c93ef9f2eefaf79a4b9adff5172ebcb20c845ccad8896a28fc3d622002cc8b28964ff860dca0a491d6b1b921aaa7aedccd21b909aad4cb
-    CMAKE_ARGS
-        ${EXTERNAL_PROJECT_CMAKE_ARGS}
-        -DENABLE_STATIC=ON
-        -DENABLE_SHARED=OFF
-        -DWITH_JPEG8=ON
-        -DWITH_SIMD=ON
-        -DREQUIRE_SIMD=OFF
-        -DCMAKE_ASM_NASM_FLAGS="-DPIC"
-		-DWITH_TURBOJPEG=OFF
-        # -DCMAKE_ASM_NASM_OBJECT_FORMAT=win64
-    BUILD_COMMAND cmake --build <BINARY_DIR> --config ${CMAKE_BUILD_TYPE} --parallel ${CPU_COUNT}
-)
+# # unfortunately we can't have nice things because some devs are lazy
+# include(ExternalProject)
+# ExternalProject_Add(libjpeg_external
+#     URL https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/${LIBJPEG_VERSION}/libjpeg-turbo-${LIBJPEG_VERSION}.tar.gz
+#     URL_HASH SHA512=d08c8eb77281c1eee2c93ef9f2eefaf79a4b9adff5172ebcb20c845ccad8896a28fc3d622002cc8b28964ff860dca0a491d6b1b921aaa7aedccd21b909aad4cb
+#     CMAKE_ARGS
+#         ${EXTERNAL_PROJECT_CMAKE_ARGS}
+#         -DENABLE_STATIC=ON
+#         -DENABLE_SHARED=OFF
+#         -DWITH_JPEG8=ON
+#         -DWITH_SIMD=ON
+#         -DREQUIRE_SIMD=OFF
+#         -DCMAKE_ASM_NASM_FLAGS="-DPIC"
+# 		-DWITH_TURBOJPEG=OFF
+#         # -DCMAKE_ASM_NASM_OBJECT_FORMAT=win64
+#     BUILD_COMMAND cmake --build <BINARY_DIR> --config ${CMAKE_BUILD_TYPE} --parallel ${CPU_COUNT}
+# )
 
 setcb(PNG_SHARED OFF)
 setcb(PNG_STATIC ON)
@@ -166,7 +167,9 @@ setcb(BUILD_STATIC_LIBS ON)
 setcb(BUILD_CURL_EXE OFF)
 setcb(BUILD_STATIC_CURL OFF)
 setcb(CURL_USE_LIBPSL OFF)
-setcb(CURL_USE_SCHANNEL ON)
+if(WIN32)
+	setcb(CURL_USE_SCHANNEL ON)
+endif()
 string(REPLACE "." "_" _curl_ver_temp "${CURL_VERSION}")
 FetchContent_Declare(curl
     URL https://github.com/curl/curl/releases/download/curl-${_curl_ver_temp}/curl-${CURL_VERSION}.tar.gz
@@ -196,7 +199,7 @@ FetchContent_Declare(soloud
     URL https://github.com/whrvt/neoloud/archive/${SOLOUD_VERSION}.tar.gz
     URL_HASH SHA512=48c67f893a5e7d6eec5c9cffe15d98bb7358899e831b8f35ec75bf8fc38b0a54d3286cc13f5c4bd8a59d4033b9040e8ff7a63af03f8c338d5dad231541b13599)
 
-FetchContent_MakeAvailable(sdl3 ft2 png zlib bz2 fmt glm lzma libarchive curl mpg123 soundtouch soloud)
+FetchContent_MakeAvailable(sdl3 ft2 png jpeg zlib bz2 fmt glm lzma libarchive curl mpg123 soundtouch soloud)
 
 ## Binary dependencies
 FetchContent_Declare(discord_game_sdk
