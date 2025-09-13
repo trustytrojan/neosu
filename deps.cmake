@@ -19,26 +19,31 @@ setcb(FT_REQUIRE_PNG ON)
 setcb(FT_REQUIRE_BZIP2 ON)
 FetchContent_Declare(ft2 URL ${FREETYPE2_URL} URL_HASH ${FREETYPE2_HASH})
 
-setcb(ENABLE_STATIC ON)
-setcb(ENABLE_SHARED OFF)
-setcb(WITH_JPEG8 ON)
-setcb(WITH_SIMD ON)
-setcb(REQUIRE_SIMD OFF)
-FetchContent_Declare(jpeg
-	URL ${LIBJPEG_URL}
-	URL_HASH ${LIBJPEG_HASH})
+include(ProcessorCount)
+ProcessorCount(CPU_COUNT)
+if(CPU_COUNT EQUAL 0)
+    set(CPU_COUNT 4)
+endif()
 
-# prevent jpeg from erroring because we use FetchContent
-execute_process(
-	COMMAND sed -i "/The libjpeg-turbo build system cannot be integrated into another build system/d" /home/t/neosu/build/_deps/jpeg-src/CMakeLists.txt ${CMAKE_BINARY_DIR}/_deps/jpeg-src/CMakeLists.txt
-	COMMAND_ERROR_IS_FATAL ANY
+include(ExternalProject)
+ExternalProject_Add(jpeg
+    URL ${LIBJPEG_URL}
+    URL_HASH ${LIBJPEG_HASH}	
+    CMAKE_ARGS
+        -DENABLE_STATIC=ON
+        -DENABLE_SHARED=OFF
+        -DWITH_JPEG8=ON
+        -DWITH_SIMD=ON
+        -DREQUIRE_SIMD=OFF
+        -DCMAKE_ASM_NASM_FLAGS="-DPIC"
+        # -DCMAKE_ASM_NASM_OBJECT_FORMAT=win64
+	INSTALL_COMMAND ""
 )
 
 setcb(PNG_SHARED OFF)
 setcb(PNG_STATIC ON)
 setcb(PNG_TESTS OFF)
 setcb(PNG_TOOLS OFF)
-setcb(WITH_TURBOJPEG OFF)
 if(WIN32)
 	setcb(MINGW ON)
 endif()
@@ -142,10 +147,6 @@ FetchContent_Declare(soloud URL ${SOLOUD_URL} URL_HASH ${SOLOUD_HASH})
 
 FetchContent_MakeAvailable(sdl3 ft2 png zlib bz2 fmt glm lzma libarchive curl mpg123 soundtouch soloud)
 
-macro(install)
-endmacro()
-FetchContent_MakeAvailable(jpeg)
-
 ## Binary dependencies
 FetchContent_Declare(discord_game_sdk URL ${DISCORDSDK_URL} URL_HASH ${DISCORDSDK_HASH})
 FetchContent_Declare(bass URL ${BASS_URL} URL_HASH ${BASS_HASH})
@@ -154,6 +155,15 @@ FetchContent_Declare(bassmix URL ${BASSMIX_URL} URL_HASH ${BASSMIX_HASH})
 FetchContent_Declare(bassloud URL ${BASSLOUD_URL} URL_HASH ${BASSLOUD_HASH})
 FetchContent_Declare(bassflac URL ${BASSFLAC_URL} URL_HASH ${BASSFLAC_HASH})
 FetchContent_MakeAvailable(discord_game_sdk bass bassfx bassmix bassloud bassflac)
+
+if(LINUX)
+	FetchContent_Declare(bass-linux URL ${BASS_LINUX_URL})
+	FetchContent_Declare(bassfx-linux URL ${BASSFX_LINUX_URL})
+	FetchContent_Declare(bassmix-linux URL ${BASSMIX_LINUX_URL})
+	FetchContent_Declare(bassloud-linux URL ${BASSLOUD_LINUX_URL})
+	FetchContent_Declare(bassflac-linux URL ${BASSFLAC_LINUX_URL})
+	FetchContent_MakeAvailable(bass-linux bassfx-linux bassmix-linux bassloud-linux bassflac-linux)
+endif()
 
 if(WIN32 OR MSVC)
 	FetchContent_Declare(basswasapi URL ${BASSWASAPI_URL} URL_HASH ${BASSWASAPI_HASH})
