@@ -203,12 +203,12 @@ Database::Database() {
     this->prevPlayerStats.percentToNextLevel = 0.0f;
     this->prevPlayerStats.totalScore = 0;
 
-    this->scoreSortingMethods = {{{.name = "Sort by accuracy", .comparator = sortScoreByAccuracy},
-                                  {.name = "Sort by combo", .comparator = sortScoreByCombo},
-                                  {.name = "Sort by date", .comparator = sortScoreByDate},
-                                  {.name = "Sort by misses", .comparator = sortScoreByMisses},
-                                  {.name = "Sort by score", .comparator = sortScoreByScore},
-                                  {.name = "Sort by pp", .comparator = sortScoreByPP}}};
+    this->scoreSortingMethods = {{{.name = "By accuracy", .comparator = sortScoreByAccuracy},
+                                  {.name = "By combo", .comparator = sortScoreByCombo},
+                                  {.name = "By date", .comparator = sortScoreByDate},
+                                  {.name = "By misses", .comparator = sortScoreByMisses},
+                                  {.name = "By score", .comparator = sortScoreByScore},
+                                  {.name = "By pp", .comparator = sortScoreByPP}}};
 }
 
 Database::~Database() {
@@ -447,12 +447,6 @@ void Database::sortScoresInPlace(std::vector<FinishedScore> &scores) {
     if(scores.size() < 2) return;
 
     const auto &sortTypeString{cv::songbrowser_scores_sortingtype.getString()};
-
-    if(sortTypeString == "Online Leaderboard") {
-        // Online scores are already sorted
-        return;
-    }
-
     for(const auto &sortMethod : this->scoreSortingMethods) {
         if(sortTypeString == sortMethod.name) {
             std::ranges::sort(scores, sortMethod.comparator);
@@ -460,9 +454,9 @@ void Database::sortScoresInPlace(std::vector<FinishedScore> &scores) {
         }
     }
 
-    if(cv::debug_db.getBool()) {
-        debugLog("ERROR: Invalid score sortingtype \"{:s}\"\n", sortTypeString);
-    }
+    // Fallback
+    cv::songbrowser_scores_sortingtype.setValue("By pp");
+    std::ranges::sort(scores, sortScoreByPP);
 }
 
 void Database::sortScores(MD5Hash beatmapMD5Hash) {

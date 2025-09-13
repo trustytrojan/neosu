@@ -375,10 +375,15 @@ SongBrowser::SongBrowser()  // NOLINT(cert-msc51-cpp, cert-msc32-c)
     this->songInfo = new InfoLabel(0, 0, 0, 0, "");
     this->topbarLeft->addBaseUIElement(this->songInfo);
 
-    this->scoreSortButton = new CBaseUIButton(0, 0, 0, 0, "", "Sort by score");
-    this->scoreSortButton->setDrawBackground(false);
-    this->scoreSortButton->setClickCallback(SA::MakeDelegate<&SongBrowser::onSortScoresClicked>(this));
-    this->topbarLeft->addBaseUIElement(this->scoreSortButton);
+    this->filterScoresDropdown = new CBaseUIButton(0, 0, 0, 0, "", "Local");
+    this->filterScoresDropdown->setDrawBackground(false);
+    this->filterScoresDropdown->setClickCallback(SA::MakeDelegate<&SongBrowser::onFilterScoresClicked>(this));
+    this->topbarLeft->addBaseUIElement(this->filterScoresDropdown);
+
+    this->sortScoresDropdown = new CBaseUIButton(0, 0, 0, 0, "", "By score");
+    this->sortScoresDropdown->setDrawBackground(false);
+    this->sortScoresDropdown->setClickCallback(SA::MakeDelegate<&SongBrowser::onSortScoresClicked>(this));
+    this->topbarLeft->addBaseUIElement(this->sortScoresDropdown);
 
     this->webButton = new CBaseUIButton(0, 0, 0, 0, "", "Web");
     this->webButton->setDrawBackground(false);
@@ -2129,12 +2134,16 @@ void SongBrowser::updateLayout() {
     this->webButton->setRelPos(this->topbarLeft->getSize().x - (topbarLeftButtonMargin + topbarLeftButtonWidth),
                                this->topbarLeft->getSize().y - this->webButton->getSize().y);
 
-    this->scoreSortButton->onResized();  // HACKHACK: framework bug (should update string metrics on setSize())
-    this->scoreSortButton->setSize(
-        this->topbarLeft->getSize().x - 3 * topbarLeftButtonMargin - (topbarLeftButtonWidth + topbarLeftButtonMargin),
-        topbarLeftButtonHeight);
-    this->scoreSortButton->setRelPos(topbarLeftButtonMargin,
-                                     this->topbarLeft->getSize().y - this->scoreSortButton->getSize().y);
+    const int dropdowns_width = this->topbarLeft->getSize().x - 3 * topbarLeftButtonMargin - (topbarLeftButtonWidth + topbarLeftButtonMargin);
+    const int dropdowns_y = this->topbarLeft->getSize().y - this->sortScoresDropdown->getSize().y;
+
+    this->filterScoresDropdown->onResized();  // HACKHACK: framework bug (should update string metrics on setSize())
+    this->filterScoresDropdown->setSize(dropdowns_width / 2, topbarLeftButtonHeight);
+    this->filterScoresDropdown->setRelPos(topbarLeftButtonMargin, dropdowns_y);
+
+    this->sortScoresDropdown->onResized();  // HACKHACK: framework bug (should update string metrics on setSize())
+    this->sortScoresDropdown->setSize(dropdowns_width / 2, topbarLeftButtonHeight);
+    this->sortScoresDropdown->setRelPos(topbarLeftButtonMargin + (dropdowns_width / 2), dropdowns_y);
 
     this->topbarLeft->update_pos();
 
@@ -2275,7 +2284,7 @@ void SongBrowser::rebuildScoreButtons() {
     this->localBestContainer->setVisible(false);
 
     const bool validBeatmap = (this->beatmap != nullptr && this->beatmap->getSelectedDifficulty2() != nullptr);
-    bool is_online = cv::songbrowser_scores_sortingtype.getString() == "Online Leaderboard";
+    bool is_online = cv::songbrowser_scores_filteringtype.getString() != "Local";
 
     std::vector<FinishedScore> scores;
     if(validBeatmap) {
@@ -2737,15 +2746,34 @@ void SongBrowser::rebuildSongButtonsAndVisibleSongButtonsWithSearchMatchSupport(
     }
 }
 
+void SongBrowser::onFilterScoresClicked(CBaseUIButton *button) {
+    const std::vector<std::string> filters{"Local", "Global", "Selected mods", "Country", "Friends"};
+
+    this->contextMenu->setPos(button->getPos());
+    this->contextMenu->setRelPos(button->getRelPos());
+    this->contextMenu->begin(button->getSize().x);
+    {
+        if(BanchoState::is_online()) {
+            for(const auto& filter : filters) {
+                CBaseUIButton *button = this->contextMenu->addButton(filter.c_str());
+                if(filter == cv::songbrowser_scores_filteringtype.getString()) {
+                    button->setTextBrightColor(0xff00ff00);
+                }
+            }
+        } else {
+            CBaseUIButton *button = this->contextMenu->addButton("Local");
+            button->setTextBrightColor(0xff00ff00);
+        }
+    }
+    this->contextMenu->end(false, false);
+    this->contextMenu->setClickCallback(SA::MakeDelegate<&SongBrowser::onFilterScoresChange>(this));
+}
+
 void SongBrowser::onSortScoresClicked(CBaseUIButton *button) {
     this->contextMenu->setPos(button->getPos());
     this->contextMenu->setRelPos(button->getRelPos());
     this->contextMenu->begin(button->getSize().x);
     {
-        CBaseUIButton *button = this->contextMenu->addButton("Online Leaderboard");
-        if(cv::songbrowser_scores_sortingtype.getString() == "Online Leaderboard")
-            button->setTextBrightColor(0xff00ff00);
-
         for(const auto &scoreSortingMethod : db->getScoreSortingMethods()) {
             CBaseUIButton *button = this->contextMenu->addButton(UString{scoreSortingMethod.name});
             if(scoreSortingMethod.name == cv::songbrowser_scores_sortingtype.getString())
@@ -2756,9 +2784,17 @@ void SongBrowser::onSortScoresClicked(CBaseUIButton *button) {
     this->contextMenu->setClickCallback(SA::MakeDelegate<&SongBrowser::onSortScoresChange>(this));
 }
 
+void SongBrowser::onFilterScoresChange(const UString &text, int /*id*/) {
+    cv::songbrowser_scores_filteringtype.setValue(text);  // NOTE: remember
+    this->filterScoresDropdown->setText(text);
+    db->online_scores.clear();
+    this->rebuildScoreButtons();
+    this->scoreBrowser->scrollToTop();
+}
+
 void SongBrowser::onSortScoresChange(const UString &text, int /*id*/) {
     cv::songbrowser_scores_sortingtype.setValue(text);  // NOTE: remember
-    this->scoreSortButton->setText(text);
+    this->sortScoresDropdown->setText(text);
     this->rebuildScoreButtons();
     this->scoreBrowser->scrollToTop();
 

@@ -64,8 +64,18 @@ void fetch_online_scores(DatabaseBeatmap *beatmap) {
     //       (assuming it's some hash that includes all relevant map files)
     url.append("&h=");
 
-    // TODO: leaderboard filters
-    url.append("&v=1");
+    auto filter = cv::songbrowser_scores_filteringtype.getString();
+    if(filter == "Global") {
+        url.append("&v=1");
+    } else if(filter == "Selected mods") {
+        url.append("&v=2");
+    } else if(filter == "Friends") {
+        url.append("&v=3");
+    } else if(filter == "Country") {
+        url.append("&v=4");
+    } else {
+        url.append("&v=1");
+    }
 
     // Map info
     std::string map_filename = env->getFileNameFromFilePath(beatmap->getFilePath());

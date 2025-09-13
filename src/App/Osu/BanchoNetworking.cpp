@@ -502,11 +502,7 @@ void BanchoState::disconnect() {
 
     BANCHO::User::logout_all_users();
     osu->chat->onDisconnect();
-
-    // XXX: We should toggle between "offline" sorting options and "online" ones
-    //      Online ones would be "Local scores", "Global", "Country", "Selected mods" etc
-    //      While offline ones would be "By score", "By pp", etc
-    osu->songBrowser2->onSortScoresChange(UString("Sort by pp"), 0);
+    osu->songBrowser2->onFilterScoresChange("Local", 0);
 
     Downloader::abort_downloads();
 }
