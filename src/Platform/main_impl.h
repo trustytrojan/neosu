@@ -18,21 +18,17 @@ extern void SDL_AppQuit(void *appstate, SDL_AppResult result);
 #endif
 
 class SDLMain final : public Environment {
+    NOCOPY_NOMOVE(SDLMain)
    public:
     SDLMain(int argc, char *argv[]);
     ~SDLMain() override;
-
-    SDLMain &operator=(const SDLMain &) = delete;
-    SDLMain &operator=(SDLMain &&) = delete;
-    SDLMain(const SDLMain &) = delete;
-    SDLMain(SDLMain &&) = delete;
 
     SDL_AppResult initialize();
     SDL_AppResult iterate();
     SDL_AppResult handleEvent(SDL_Event *event);
     void shutdown(SDL_AppResult result);
 
-    static void restart(const std::vector<UString> &restartArgs);
+    static void restart(const std::vector<std::string> &restartArgs);
 
    private:
     // init methods
@@ -56,5 +52,5 @@ class SDLMain final : public Environment {
     int m_iFpsMax{360};
     int m_iFpsMaxBG{30};
 
-    std::vector<UString> m_vDroppedData;  // queued data dropped onto window
+    std::vector<std::string> m_vDroppedData;  // queued data dropped onto window
 };

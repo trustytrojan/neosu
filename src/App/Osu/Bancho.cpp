@@ -125,11 +125,7 @@ void BanchoState::handle_packet(Packet *packet) {
                 env->createDirectory(replays_dir);
 
                 osu->onUserCardChange(BanchoState::username.c_str());
-
-                // XXX: We should toggle between "offline" sorting options and "online" ones
-                //      Online ones would be "Local scores", "Global", "Country", "Selected mods" etc
-                //      While offline ones would be "By score", "By pp", etc
-                osu->songBrowser2->onSortScoresChange(UString("Online Leaderboard"), 0);
+                osu->songBrowser2->onFilterScoresChange(UString("Global"), 0);
 
                 // If server sent a score submission policy, update options menu to hide the checkbox
                 osu->optionsMenu->scheduleLayoutUpdate();

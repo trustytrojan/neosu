@@ -79,10 +79,7 @@ Shader *flashlight_shader = nullptr;
 
 Osu::Osu() {
     osu = this;
-
-    u32 seed{};
-    crypto::rng::get_bytes(reinterpret_cast<u8 *>(&seed), 4);
-    srand(seed);
+    srand(crypto::rng::get_rand<u32>());
 
     if(env->isDebugBuild()) {
         BanchoState::neosu_version = UString::fmt("dev-{}", cv::build_timestamp.getVal<u64>());
@@ -2159,10 +2156,6 @@ float Osu::getUIScale() {
 }
 
 void Osu::setupSoloud() {
-    // set +18ms universal offset here to match BASS better, at least on windows
-    // on linux BASS always needs ~-35ms offset, so people probably need to adjust that anyways
-    cv::universal_offset_hardcoded.setValue(18.0f);
-
     // need to save this state somewhere to share data between callback stages
     static bool was_playing = false;
     static unsigned long prev_position_ms = 0;
@@ -2188,7 +2181,7 @@ void Osu::setupSoloud() {
             if(osu->getSelectedBeatmap() && osu->getSelectedBeatmap()->getMusic()) {
                 if(osu->isInPlayMode()) {
                     osu->getSelectedBeatmap()->unloadMusic();
-                    osu->getSelectedBeatmap()->loadMusic(false);
+                    osu->getSelectedBeatmap()->loadMusic();
                     osu->getSelectedBeatmap()->getMusic()->setLoop(false);
                     osu->getSelectedBeatmap()->getMusic()->setPositionMS(prev_position_ms);
                 } else {

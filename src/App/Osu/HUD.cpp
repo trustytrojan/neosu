@@ -1272,7 +1272,7 @@ std::vector<SCORE_ENTRY> HUD::getCurrentScores() {
     } else {
         std::scoped_lock lock(db->scores_mtx);
         std::vector<FinishedScore> *singleplayer_scores = &((*db->getScores())[this->beatmap_md5]);
-        bool is_online = cv::songbrowser_scores_sortingtype.getString() == "Online Leaderboard";
+        bool is_online = cv::songbrowser_scores_filteringtype.getString() != "Local";
         if(is_online) {
             auto search = db->online_scores.find(this->beatmap_md5);
             if(search != db->online_scores.end()) {

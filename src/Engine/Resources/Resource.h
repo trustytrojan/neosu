@@ -18,6 +18,7 @@ class RenderTarget;
 
 class Resource
 {
+	NOCOPY_NOMOVE(Resource)
 friend class ResourceManager;
 public:
 	enum Type : uint8_t
@@ -37,11 +38,6 @@ public:
 	Resource(std::string filepath);
 
 	virtual ~Resource() = default;
-
-	Resource &operator=(const Resource &) = delete;
-	Resource &operator=(Resource &&) = delete;
-	Resource(const Resource &) = delete;
-	Resource(Resource &&) = delete;
 
 	void load();
 	void loadAsync();

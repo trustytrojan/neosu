@@ -1,4 +1,6 @@
 // Copyright (c) 2025, kiwec, All rights reserved.
+#include "NeosuUrl.h"
+
 #include "crypto.h"
 #include "Bancho.h"
 #include "ConVar.h"
@@ -8,7 +10,6 @@
 #include "OptionsMenu.h"
 #include "Osu.h"
 #include "SString.h"
-
 
 void handle_neosu_url(const char *url) {
     if(strstr(url, "neosu://login/") == url) {

@@ -102,11 +102,11 @@ void ConVar::execFloat(float args) {
 }
 
 double ConVar::getDouble() const {
-    if(this->isFlagSet(cv::SERVER) && this->hasServerValue.load()) {
+    if(this->isFlagSet(cv::SERVER) && this->hasServerValue.load(std::memory_order_acquire)) {
         return this->dServerValue.load(std::memory_order_acquire);
     }
 
-    if(this->isFlagSet(cv::SKINS) && this->hasSkinValue.load()) {
+    if(this->isFlagSet(cv::SKINS) && this->hasSkinValue.load(std::memory_order_acquire)) {
         return this->dSkinValue.load(std::memory_order_acquire);
     }
 
@@ -118,11 +118,11 @@ double ConVar::getDouble() const {
 }
 
 const ConVarString &ConVar::getString() const {
-    if(this->isFlagSet(cv::SERVER) && this->hasServerValue.load()) {
+    if(this->isFlagSet(cv::SERVER) && this->hasServerValue.load(std::memory_order_acquire)) {
         return this->sServerValue;
     }
 
-    if(this->isFlagSet(cv::SKINS) && this->hasSkinValue.load()) {
+    if(this->isFlagSet(cv::SKINS) && this->hasSkinValue.load(std::memory_order_acquire)) {
         return this->sSkinValue;
     }
 
@@ -276,6 +276,20 @@ ConVarString ConVarHandler::flagsToString(uint8_t flags) {
     string.pop_back(); // remove leading space
 
     return string;
+}
+
+std::vector<ConVar*> ConVarHandler::getNonSubmittableCvars() const {
+    std::vector<ConVar*> list;
+
+    for(const auto &cv : _getGlobalConVarArray()) {
+        if(!cv->isProtected()) continue;
+
+        if(cv->getString() != cv->getDefaultString()) {
+            list.push_back(cv);
+        }
+    }
+
+    return list;
 }
 
 bool ConVarHandler::areAllCvarsSubmittable() {

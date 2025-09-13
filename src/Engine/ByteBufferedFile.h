@@ -27,15 +27,11 @@ class ByteBufferedFile {
 
    public:
     class Reader {
+        NOCOPY_NOMOVE(Reader)
        public:
         Reader() = default;  // MSVC complains if no default constructor
         Reader(const UString &uPath);
         ~Reader() = default;
-
-        Reader &operator=(const Reader &) = delete;
-        Reader &operator=(Reader &&) = delete;
-        Reader(const Reader &) = delete;
-        Reader(Reader &&) = delete;
 
         // always_inline is a 2x speedup here
         [[nodiscard]] always_inline_attr size_t read_bytes(u8 *out, size_t len) {
@@ -196,14 +192,10 @@ class ByteBufferedFile {
     };
 
     class Writer {
+        NOCOPY_NOMOVE(Writer)
        public:
         Writer(const UString &uPath);
         ~Writer();
-
-        Writer &operator=(const Writer &) = delete;
-        Writer &operator=(Writer &&) = delete;
-        Writer(const Writer &) = delete;
-        Writer(Writer &&) = delete;
 
         [[nodiscard]] bool good() const { return !this->error_flag; }
         [[nodiscard]] std::string_view error() const { return this->last_error; }

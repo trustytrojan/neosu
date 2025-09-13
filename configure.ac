@@ -153,7 +153,7 @@ AC_ARG_WITH([renderer],
     AS_HELP_STRING([--with-renderer={opengl,opengles,dx11}], [The (single) renderer backend to build with (default: opengl)]))
 
 AC_ARG_WITH([audio],
-    AS_HELP_STRING([--with-audio={bass,soloud,sdl}], [The (comma separated list of) audio backend(s) to build with (default: bass)]))
+    AS_HELP_STRING([--with-audio={bass,soloud}], [The (comma separated list of) audio backend(s) to build with (default: soloud)]))
 
 AC_ARG_WITH([mimalloc],
     AS_HELP_STRING([--with-mimalloc], [Use mimalloc instead of the default memory allocator (faster) (default: on if not debug and not winx86)]))
@@ -245,6 +245,7 @@ AS_IF([test "$renderer" = "opengl"], [
 AUDBACKENDLIST=""
 
 with_bass=unset
+with_soloud=unset
 AS_VAR_SET_IF([with_audio],
     [ac_save_IFS=$IFS
         IFS=' ,'
@@ -259,19 +260,22 @@ AS_VAR_SET_IF([with_audio],
             esac
         done])
 
-AS_IF([test "$with_bass" = "yes" || { test "$with_bass" = "unset" && ! { test "$with_soloud" = "yes"; } ; } ], [
+AS_IF([test "$with_soloud" = "yes" || { test "$with_soloud" = "unset" && test "$with_bass" != "yes"; } ], [
+    AUDBACKENDLIST="${AUDBACKENDLIST} SoLoud"
+    with_soloud=yes
+    AC_DEFINE([MCENGINE_FEATURE_SOLOUD], [1], [Define if the SoLoud audio backend is desired.])
+], [
+    with_soloud=no
+])
+
+AS_IF([test "$with_bass" = "yes"], [
+    AS_IF([test "$with_soloud" = "yes"], [
+        make_audio_shortcuts=yes
+    ])
     AUDBACKENDLIST="${AUDBACKENDLIST} BASS"
-    with_bass=yes
     AC_DEFINE([MCENGINE_FEATURE_BASS], [1], [Define if the BASS audio backend is desired.])
 ], [
     with_bass=no
-])
-AS_IF([test "$with_soloud" = "yes"], [
-    AS_IF([test "$with_bass" = "yes"], [
-        make_audio_shortcuts=yes
-    ])
-    AUDBACKENDLIST="${AUDBACKENDLIST} SoLoud"
-    AC_DEFINE([MCENGINE_FEATURE_SOLOUD], [1], [Define if the SoLoud audio backend is desired.])
 ])
 
 AC_SUBST([AUDBACKENDLIST])
@@ -765,11 +769,11 @@ AS_IF([test "$renderer" != "dx11"], [
 ])
 
 SDL3_MIN_VERSION=3.2.20
-SDL3_BUILD_VERSION=9d6fb509fe855a18f2c5291dd4e17f2b7e6d4d73 # git
+SDL3_BUILD_VERSION=3c627390bb885fe1e97802d4d16da31333d145c7 # git
 FREETYPE2_MIN_VERSION=2.10.0
-FREETYPE2_BUILD_VERSION=2.13.3
+FREETYPE2_BUILD_VERSION=2.14.1
 LIBJPEG_MIN_VERSION=3.0.0
-LIBJPEG_BUILD_VERSION=3.1.1
+LIBJPEG_BUILD_VERSION=3.1.2
 LIBPNG_MIN_VERSION=1.6.38
 LIBPNG_BUILD_VERSION=1.6.50
 ZLIB_MIN_VERSION=1.3
@@ -777,7 +781,7 @@ ZLIB_BUILD_VERSION=2.2.5 # zlib-ng
 BZIP2_MIN_VERSION=1.0.8
 BZIP2_BUILD_VERSION=1.0.8
 FMT_MIN_VERSION=11.0.0
-FMT_BUILD_VERSION=93f03953af6b0268e1a29bb5b23d50f72b87a151
+FMT_BUILD_VERSION=36390db094afc48c47809ad9a6c9ced89b38551d
 LZMA_MIN_VERSION=5.4.7
 LZMA_BUILD_VERSION=5.8.1
 LIBARCHIVE_MIN_VERSION=3.6.2
@@ -934,6 +938,8 @@ AM_CONDITIONAL([BUILD_MIMALLOC], [{ test "x$enable_debug" != "xyes" || test "x$w
 
 AM_CONDITIONAL([USE_BASS], [test "$with_bass" = "yes"])
 AM_CONDITIONAL([USE_SOLOUD], [test "$with_soloud" = "yes"])
+# this just copies some libraries on installation
+AM_CONDITIONAL([USE_DISCORDSDK], [test "$SYSNAME" = "windows" || { test "$SYSNAME" = "linux" && test "$host_cpu" = "x86_64" ; } ])
 AM_CONDITIONAL([WIN_PLATFORM], [test "$SYSNAME" = "windows"])
 AM_CONDITIONAL([WIN32_PLATFORM], [test "$SYSNAME" = "windows" && test "$host_cpu" = "i686"])
 

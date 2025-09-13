@@ -1,31 +1,27 @@
 #pragma once
 // Copyright (c) 2024, kiwec, All rights reserved.
 
+#include "noinclude.h"
+#include "types.h"
+#include "templates.h"
+
 #include <atomic>
 #include <memory>
 #include <mutex>
 #include <thread>
 #include <vector>
 
-#include "types.h"
-#include "templates.h"
-
 class DatabaseBeatmap;
 struct BPMTuple;
 
 class MapCalcThread {
+    NOCOPY_NOMOVE(MapCalcThread)
    public:
     MapCalcThread() = default;
     ~MapCalcThread() {
         // only clean up this instance's resources
         abort_instance();
     }
-
-    // non-copyable, non-movable
-    MapCalcThread(const MapCalcThread&) = delete;
-    MapCalcThread& operator=(const MapCalcThread&) = delete;
-    MapCalcThread(MapCalcThread&&) = delete;
-    MapCalcThread& operator=(MapCalcThread&&) = delete;
 
     struct mct_result {
         DatabaseBeatmap* diff2{};
@@ -38,7 +34,7 @@ class MapCalcThread {
         u32 avg_bpm{};
     };
 
-    static inline void start_calc(const std::vector<DatabaseBeatmap*> &maps_to_calc) {
+    static inline void start_calc(const std::vector<DatabaseBeatmap*>& maps_to_calc) {
         get_instance().start_calc_instance(maps_to_calc);
     }
 
@@ -84,7 +80,7 @@ class MapCalcThread {
    private:
     void run();
 
-    void start_calc_instance(const std::vector<DatabaseBeatmap*> &maps_to_calc);
+    void start_calc_instance(const std::vector<DatabaseBeatmap*>& maps_to_calc);
     void abort_instance();
 
     // singleton access
@@ -98,7 +94,7 @@ class MapCalcThread {
     std::vector<mct_result> results{};
     zarray<BPMTuple> bpm_calc_buf;
 
-    const std::vector<DatabaseBeatmap*> *maps_to_process{nullptr};
+    const std::vector<DatabaseBeatmap*>* maps_to_process{nullptr};
 
     static std::unique_ptr<MapCalcThread> instance;
     static std::once_flag instance_flag;

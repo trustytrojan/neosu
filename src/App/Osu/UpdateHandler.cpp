@@ -18,8 +18,6 @@
 #endif
 
 #include <fstream>
-#include <iomanip>
-#include <sstream>
 
 using enum UpdateHandler::STATUS;
 

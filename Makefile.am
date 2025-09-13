@@ -133,9 +133,9 @@ $(DEPS_CACHE)/ffmpeg-$(FFMPEG_VERSION).source: $(DEPS_CACHE)/ffmpeg-$(FFMPEG_VER
 	$(MKDIR_P) linuxx86_64 && $(TAR) xf ffmpeg-linuxx86_64.tar.xz -C linuxx86_64 --strip-components=1 --wildcards --no-anchored include/'*'.h lib/'*'.so'*' && \
 	$(MKDIR_P) linuxi686 && cp -r linuxx86_64/include linuxi686/ && \
 	$(MKDIR_P) windowsi686/lib && $(UNZIP) -qjo ffmpeg-windowsi686.zip "*/bin/*.dll" -d windowsi686/lib && \
-	$(MKDIR_P) windowsi686/include && $(UNZIP) -qo ffmpeg-windowsi686.zip "*/include/*" -d windowsi686/include && mv windowsi686/include/*/*/* windowsi686/include/ && \
+	$(MKDIR_P) windowsi686/include && $(UNZIP) -qo ffmpeg-windowsi686.zip "*/include/**" -d windowsi686/include && mv windowsi686/include/*/*/* windowsi686/include/ && \
 	$(MKDIR_P) windowsx86_64/lib && $(UNZIP) -qjo ffmpeg-windowsx86_64.zip "*/bin/*.dll" -d windowsx86_64/lib && \
-	$(MKDIR_P) windowsx86_64/include && $(UNZIP) -qo ffmpeg-windowsx86_64.zip "*/include/*" -d windowsx86_64/include && mv windowsx86_64/include/*/*/* windowsx86_64/include/
+	$(MKDIR_P) windowsx86_64/include && $(UNZIP) -qo ffmpeg-windowsx86_64.zip "*/include/**" -d windowsx86_64/include && mv windowsx86_64/include/*/*/* windowsx86_64/include/
 	touch $@
 
 # --with-audio=bass
@@ -231,6 +231,8 @@ $(DEPS_CACHE)/discordsdk-$(DISCORDSDK_VERSION).source: $(DEPS_CACHE)/discordsdk-
 	$(MKDIR_P) lib/windows/i686 && $(UNZIP) -qjo discordsdk.zip lib/x86/discord_game_sdk.dll.lib -d lib/windows/i686/ && \
 	$(MKDIR_P) lib/windows/x86_64 && $(UNZIP) -qjo discordsdk.zip lib/x86_64/discord_game_sdk.dll -d lib/windows/x86_64/ && \
 	$(MKDIR_P) lib/windows/x86_64 && $(UNZIP) -qjo discordsdk.zip lib/x86_64/discord_game_sdk.dll.lib -d lib/windows/x86_64/ && \
+	$(MKDIR_P) lib/linux/x86_64 && $(UNZIP) -qjo discordsdk.zip lib/x86_64/discord_game_sdk.so -d lib/linux/x86_64/ && \
+	mv lib/linux/x86_64/discord_game_sdk.so lib/linux/x86_64/libdiscord_game_sdk.so && \
 	touch $@
 
 $(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle/cacert.pem:
@@ -253,7 +255,7 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION)-windows-binary.source: $(DEPS_CACHE)/curl-$(C
 	rm -rf windowsx86_64 && \
 	$(MKDIR_P) windowsx86_64/bin && $(UNZIP) -qjo curl-windowsx86_64.zip "*/bin/*.dll" -d windowsx86_64/bin && \
 	$(MKDIR_P) windowsx86_64/lib && $(UNZIP) -qjo curl-windowsx86_64.zip "*/lib/*.a" -d windowsx86_64/lib && \
-	$(MKDIR_P) windowsx86_64/include && $(UNZIP) -qo curl-windowsx86_64.zip "*/include/*" -d windowsx86_64/include && mv windowsx86_64/include/*/*/* windowsx86_64/include/ && \
+	$(MKDIR_P) windowsx86_64/include && $(UNZIP) -qo curl-windowsx86_64.zip "*/include/**" -d windowsx86_64/include && mv windowsx86_64/include/*/*/* windowsx86_64/include/ && \
 	rm -rf windows*/lib/libz.a windows*/lib/zlib*.a && \
 	touch $@
 
@@ -489,10 +491,9 @@ $(DEPS_PREFIX)/SoundTouch-$(SOUNDTOUCH_VERSION).built:
 	$(MKDIR_P) $(DEPS_PREFIX) && touch $@
 endif # USE_SOLOUD
 
-if WIN_PLATFORM
+if USE_DISCORDSDK
 DISCORDSDK_CFLAGS := -I$(DEPS_CACHE)/discordsdk-$(DISCORDSDK_VERSION)/include
-DISCORDSDK_LIBS := -L$(DEPS_CACHE)/discordsdk-$(DISCORDSDK_VERSION)/lib/$(SYSNAME)/$(host_cpu)
-DISCORDSDK_INSTALL_LIBS := $(DEPS_CACHE)/discordsdk-$(DISCORDSDK_VERSION)/lib/$(SYSNAME)/$(host_cpu)/discord_game_sdk$(DLLEXT)
+DISCORDSDK_INSTALL_LIBS := $(DEPS_CACHE)/discordsdk-$(DISCORDSDK_VERSION)/lib/$(SYSNAME)/$(host_cpu)/$(LIBPREFIX)discord_game_sdk$(DLLEXT)
 
 $(DEPS_PREFIX)/discordsdk-$(DISCORDSDK_VERSION).built: $(DEPS_CACHE)/discordsdk-$(DISCORDSDK_VERSION).source
 	$(MKDIR_P) $(DEPS_PREFIX)
@@ -501,7 +502,7 @@ else
 $(DEPS_PREFIX)/discordsdk-$(DISCORDSDK_VERSION).built:
 	$(MKDIR_P) $(DEPS_PREFIX)
 	touch $@
-endif
+endif # USE_DISCORDSDK
 
 if USE_BASS
 AUDIO_CFLAGS += -I$(DEPS_CACHE)/bass-$(BASS_VERSION)/bass/include -I$(DEPS_CACHE)/bass-$(BASS_VERSION)/bassfx/include -I$(DEPS_CACHE)/bass-$(BASS_VERSION)/bassmix/include \
@@ -875,7 +876,6 @@ neosu_LDFLAGS := \
 	$(LZMA_LIBS) \
 	$(DXGI_LIBS) \
 	$(D3D11_LIBS) \
-	$(DISCORDSDK_LIBS) \
 	$(NEOSU_LDFLAGS) \
 	$(EXTRA_WIN_LIBS) \
 	$(LDFLAGS_EXTRA)
@@ -945,8 +945,10 @@ install-libs:
 	find $(srcdir)/$(ASSETS_DIR)/fonts -type f -exec $(INSTALL) -Dm 644 '{''}' "$(DESTDIR)$(bindir)/fonts" ';'
 	find $(srcdir)/$(ASSETS_DIR)/materials -mindepth 1 -maxdepth 1 -type f -exec $(INSTALL) -Dm 644 '{''}' "$(DESTDIR)$(bindir)/materials" ';'
 	find $(srcdir)/$(ASSETS_DIR)/materials/default -mindepth 1 -maxdepth 1 -type f -exec $(INSTALL) -Dm 644 '{''}' "$(DESTDIR)$(bindir)/materials/default" ';'
-if WIN_PLATFORM
+if USE_DISCORDSDK
 	@cp -P $(DISCORDSDK_INSTALL_LIBS) "$(DESTDIR)$(bindir)/$(LIBDEST)"
+endif
+if WIN_PLATFORM
 if BUILD_MIMALLOC
 	@cp -P "$(DEPS_PREFIX)/bin/mimalloc"{,-redirect$(if $(filter x86_64,$(host_cpu)),,32)}".dll" "$(DESTDIR)$(bindir)/$(LIBDEST)"
 endif

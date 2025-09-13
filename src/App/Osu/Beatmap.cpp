@@ -70,9 +70,6 @@ Beatmap::Beatmap() {
     this->iCurMusicPos = 0;
     this->iCurMusicPosWithOffsets = 0;
     this->bWasSeekFrame = false;
-    this->iResourceLoadUpdateDelayHack = 0;
-    this->bForceStreamPlayback = true;  // if this is set to true here, then the music will always be loaded as a stream
-                                        // (meaning slow disk access could cause audio stalling/stuttering)
     this->fAfterMusicIsFinishedVirtualAudioTimeStart = -1.0f;
     this->bIsFirstMissSound = true;
 
@@ -236,13 +233,6 @@ void Beatmap::drawBackground() {
 
         if(this->bIsPlaying) {
             g->setColor(0xff0000ff);
-            g->fillRect(50, y, 50, 50);
-        }
-
-        y += 100;
-
-        if(this->bForceStreamPlayback) {
-            g->setColor(0xffff0000);
             g->fillRect(50, y, 50, 50);
         }
 
@@ -413,9 +403,6 @@ void Beatmap::select() {
     if(this->music != nullptr && (this->music->isPlaying())) this->iContinueMusicPos = this->music->getPositionMS();
 
     this->selectDifficulty2(this->selectedDifficulty2);
-
-    this->loadMusic();
-    this->handlePreviewPlay();
 }
 
 void Beatmap::selectDifficulty2(DatabaseBeatmap *difficulty2) {
@@ -683,7 +670,7 @@ bool Beatmap::start() {
         // Restarting sound engine already reloads the music
     } else {
         this->unloadMusic();  // need to reload in case of speed/pitch changes (just to be sure)
-        this->loadMusic(false);
+        this->loadMusic();
     }
 
     this->music->setLoop(false);
@@ -1520,21 +1507,38 @@ void Beatmap::handlePreviewPlay() {
     this->music->setLoop(cv::beatmap_preview_music_loop.getBool());
 }
 
-void Beatmap::loadMusic(bool stream) {
-    stream = stream || this->bForceStreamPlayback;
-    this->iResourceLoadUpdateDelayHack = 0;
+void Beatmap::loadMusic() {
+    if(!this->selectedDifficulty2 || this->selectedDifficulty2->getFullSoundFilePath().empty()) {
+        if(this->selectedDifficulty2) {
+            debugLog("no music file for {}!\n", this->selectedDifficulty2->getFilePath());
+        }
+        unloadMusic();
+        return;
+    }
+
+    // try getting existing sound resource first and rebuilding with a new path
+    if(!this->music) {
+        this->music = resourceManager->getSound("BEATMAP_MUSIC");
+    }
+
+    std::string oldPath{};
+    if(this->music) {
+        oldPath = this->music->getFilePath();
+    }
+
+    std::string newPath{this->selectedDifficulty2->getFullSoundFilePath()};
 
     // load the song (again)
-    if(this->selectedDifficulty2 != nullptr &&
-       (this->music == nullptr || this->selectedDifficulty2->getFullSoundFilePath() != this->music->getFilePath() ||
-        !this->music->isReady())) {
-        this->unloadMusic();
+    if(!this->music || newPath != oldPath || !this->music->isReady()) {
+        if(this->music) {
+            // rebuild with new path
+            this->music->rebuild(newPath);
+        } else {
+            // fresh load
+            this->music = resourceManager->loadSoundAbs(newPath, "BEATMAP_MUSIC", true /* stream */, false, false);
+        }
+        assert(this->music);
 
-        // if it's not a stream then we are loading the entire song into memory for playing
-        if(!stream) resourceManager->requestNextLoadAsync();
-
-        this->music = resourceManager->loadSoundAbs(this->selectedDifficulty2->getFullSoundFilePath(), "BEATMAP_MUSIC",
-                                                    stream, false, false);
         this->music->setBaseVolume(this->getIdealVolume());
         this->fMusicFrequencyBackup = this->music->getFrequency();
         this->music->setSpeed(this->getSpeedMultiplier());
@@ -1545,8 +1549,10 @@ void Beatmap::loadMusic(bool stream) {
 }
 
 void Beatmap::unloadMusic() {
-    resourceManager->destroyResource(this->music);
-    this->music = nullptr;
+    if(this->music) {
+        resourceManager->destroyResource(this->music);
+        this->music = nullptr;
+    }
 
     // TODO: unload custom hitsounds
     // TODO: unload custom skin elements
@@ -2347,7 +2353,7 @@ void Beatmap::update2() {
 
         // ugh. force update all hitobjects while waiting (necessary because of pvs optimization)
         long curPos = this->iCurMusicPos + (long)(cv::universal_offset.getFloat() * this->getSpeedMultiplier()) +
-                      cv::universal_offset_hardcoded.getInt() - this->selectedDifficulty2->getLocalOffset() -
+                      this->getInternalAudioOffset() - this->selectedDifficulty2->getLocalOffset() -
                       this->selectedDifficulty2->getOnlineOffset() -
                       (this->selectedDifficulty2->getVersion() < 5 ? cv::old_beatmap_offset.getInt() : 0);
         if(curPos > -1)  // otherwise auto would already click elements that start at exactly 0 (while the map has not
@@ -2377,24 +2383,9 @@ void Beatmap::update2() {
 
     // handle music loading fail
     if(!this->music->isReady()) {
-        this->iResourceLoadUpdateDelayHack++;  // HACKHACK: async loading takes 1 additional engine update() until both
-                                               // isAsyncReady() and isReady() return true
-        if(this->iResourceLoadUpdateDelayHack > 1 &&
-           !this->bForceStreamPlayback)  // first: try loading a stream version of the music file
-        {
-            this->bForceStreamPlayback = true;
-            this->unloadMusic();
-            this->loadMusic(true);
-
-            // we are waiting for an asynchronous start of the beatmap in the next update()
-            this->bIsWaiting = true;
-            this->fWaitTime = Timing::getTimeReal<f32>();
-        } else if(this->iResourceLoadUpdateDelayHack >
-                  3)  // second: if that still doesn't work, stop and display an error message
-        {
-            osu->notificationOverlay->addToast("Couldn't load music file :(", ERROR_TOAST);
-            this->stop(true);
-        }
+        osu->notificationOverlay->addToast("Couldn't load music file :(", ERROR_TOAST);
+        this->stop(true);
+        return;
     }
 
     // detect and handle music end
@@ -2434,7 +2425,7 @@ void Beatmap::update2() {
     // update timing (points)
     this->iCurMusicPosWithOffsets = this->iCurMusicPos;
     this->iCurMusicPosWithOffsets += (i32)(cv::universal_offset.getFloat() * this->getSpeedMultiplier());
-    this->iCurMusicPosWithOffsets += cv::universal_offset_hardcoded.getInt();
+    this->iCurMusicPosWithOffsets += this->getInternalAudioOffset();
     this->iCurMusicPosWithOffsets -= this->selectedDifficulty2->getLocalOffset();
     this->iCurMusicPosWithOffsets -= this->selectedDifficulty2->getOnlineOffset();
     if(this->selectedDifficulty2->getVersion() < 5) {
@@ -4184,6 +4175,21 @@ void Beatmap::computeDrainRate() {
             (testDrop / testPlayer.hpBarMaximum) * 1000.0;  // from [0, 200] to [0, 1], and from ms to seconds
         this->fHpMultiplierComboEnd = testPlayer.hpMultiplierComboEnd;
         this->fHpMultiplierNormal = testPlayer.hpMultiplierNormal;
+    }
+}
+
+long Beatmap::getInternalAudioOffset() {
+    static_assert(SoundEngine::SndEngineType::MAX == 2, "make sure audio offset is correct for new sound engine");
+
+    switch(soundEngine->getTypeId()) {
+        case SoundEngine::SndEngineType::SOLOUD:
+            // +18 universal matches BASS better, at least on windows
+            // on linux BASS always needs ~-35ms offset, so people probably need to adjust that manually anyways
+            return 18;
+        case SoundEngine::SndEngineType::BASS:
+            // We compensate for latency via BASS_ATTRIB_MIXER_LATENCY
+        default:
+            return 0;
     }
 }
 

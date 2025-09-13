@@ -158,6 +158,8 @@ class SongBrowser final : public ScreenBackable {
     void rebuildSongButtonsAndVisibleSongButtonsWithSearchMatchSupport(bool scrollToTop,
                                                                        bool doRebuildSongButtons = true);
 
+    void onFilterScoresClicked(CBaseUIButton *button);
+    void onFilterScoresChange(const UString &text, int id = -1);
     void onSortScoresClicked(CBaseUIButton *button);
     void onSortScoresChange(const UString &text, int id = -1);
     void onWebClicked(CBaseUIButton *button);
@@ -195,7 +197,8 @@ class SongBrowser final : public ScreenBackable {
     // top bar left
     CBaseUIContainer *topbarLeft;
     InfoLabel *songInfo;
-    CBaseUIButton *scoreSortButton;
+    CBaseUIButton *filterScoresDropdown;
+    CBaseUIButton *sortScoresDropdown;
     CBaseUIButton *webButton;
 
     // top bar right

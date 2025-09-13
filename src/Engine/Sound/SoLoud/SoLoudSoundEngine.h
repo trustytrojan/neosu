@@ -20,15 +20,10 @@ struct DeviceInfo;
 class SoLoudSound;
 
 class SoLoudSoundEngine final : public SoundEngine {
+    NOCOPY_NOMOVE(SoLoudSoundEngine)
    public:
     SoLoudSoundEngine();
     ~SoLoudSoundEngine() override;
-
-    SoLoudSoundEngine &operator=(const SoLoudSoundEngine &) = delete;
-    SoLoudSoundEngine &operator=(SoLoudSoundEngine &&) = delete;
-
-    SoLoudSoundEngine(const SoLoudSoundEngine &) = delete;
-    SoLoudSoundEngine(SoLoudSoundEngine &&) = delete;
 
     void restart() override;
 

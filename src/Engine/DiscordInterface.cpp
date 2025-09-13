@@ -1,9 +1,17 @@
 // Copyright (c) 2018, PG, All rights reserved.
 #include "DiscordInterface.h"
 
-static bool initialized = false;
+#ifndef USE_DISCORD_SDK
 
-#ifdef MCENGINE_PLATFORM_WINDOWS
+void init_discord_sdk() {}
+void tick_discord_sdk() {}
+void destroy_discord_sdk() {}
+void clear_discord_presence() {}
+void set_discord_presence(struct DiscordActivity * /*activity*/) {}
+
+#else
+
+static bool initialized = false;
 
 #include "Bancho.h"
 #include "Beatmap.h"
@@ -32,7 +40,7 @@ struct IDiscordActivityEvents activities_events{};
 struct IDiscordRelationshipEvents relationships_events{};
 struct IDiscordUserEvents users_events{};
 
-#ifdef _WIN64
+#if !(defined(_WIN32) && !defined(_WIN64))  // doesn't work on winx32
 void on_discord_log(void * /*cdata*/, enum EDiscordLogLevel level, const char *message) {
     //(void)cdata;
     if(level == DiscordLogLevel_Error) {
@@ -41,16 +49,13 @@ void on_discord_log(void * /*cdata*/, enum EDiscordLogLevel level, const char *m
         Engine::logRaw("[Discord] {:s}\n", message);
     }
 }
-
 #endif
 
 dynutils::lib_obj *discord_handle{nullptr};
 
 }  // namespace
-#endif
 
 void init_discord_sdk() {
-#ifdef _WIN32
     discord_handle = dynutils::load_lib("discord_game_sdk");
     if(!discord_handle) {
         debugLog("Failed to load Discord SDK! (error {:s})\n", dynutils::get_error());
@@ -85,7 +90,7 @@ void init_discord_sdk() {
         return;
     }
 
-#ifdef _WIN64
+#if !(defined(_WIN32) && !defined(_WIN64))
     dapp.core->set_log_hook(dapp.core, DiscordLogLevel_Warn, nullptr, on_discord_log);
 #endif
     dapp.activities = dapp.core->get_activity_manager(dapp.core);
@@ -101,47 +106,32 @@ void init_discord_sdk() {
     // dapp.relationships = dapp.core->get_relationship_manager(dapp.core);
 
     initialized = true;
-#else
-    // not enabled on linux cuz the sdk is broken there
-#endif
 }
 
 void tick_discord_sdk() {
     if(!initialized) return;
-
-#ifdef _WIN32
     dapp.core->run_callbacks(dapp.core);
-#else
-    // not enabled on linux cuz the sdk is broken there
-#endif
 }
 
 void destroy_discord_sdk() {
     // not doing anything because it will fucking CRASH if you close discord first
-#ifdef _WIN32
     if(discord_handle) {
         dynutils::unload_lib(discord_handle);
     }
-#endif
 }
 
 void clear_discord_presence() {
     if(!initialized) return;
 
-#ifdef _WIN32
     // TODO @kiwec: test if this works
     struct DiscordActivity activity{};
     memset(&activity, 0, sizeof(activity));
     dapp.activities->update_activity(dapp.activities, &activity, nullptr, nullptr);
-#else
-    // not enabled on linux cuz the sdk is broken there
-#endif
 }
 
 void set_discord_presence([[maybe_unused]] struct DiscordActivity *activity) {
     if(!initialized) return;
 
-#ifdef _WIN32
     if(!cv::rich_presence.getBool()) return;
 
     // activity->type: int
@@ -188,9 +178,6 @@ void set_discord_presence([[maybe_unused]] struct DiscordActivity *activity) {
     }
 
     dapp.activities->update_activity(dapp.activities, activity, nullptr, nullptr);
-#else
-    // not enabled on linux cuz the sdk is broken there
-#endif
 }
 
 // void (DISCORD_API *send_request_reply)(struct IDiscordActivityManager* manager, DiscordUserId user_id, enum
@@ -203,3 +190,5 @@ void set_discord_presence([[maybe_unused]] struct DiscordActivity *activity) {
 
 // void (DISCORD_API *accept_invite)(struct IDiscordActivityManager* manager, DiscordUserId user_id, void*
 //     callback_data, void (DISCORD_API *callback)(void* callback_data, enum EDiscordResult result));
+
+#endif

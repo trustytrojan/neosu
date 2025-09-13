@@ -30,6 +30,7 @@ class DownloadManager;
 std::shared_ptr<DownloadManager> s_download_manager;
 
 class DownloadManager {
+NOCOPY_NOMOVE(DownloadManager)
    private:
     struct DownloadRequest {
         std::string url;
@@ -137,11 +138,6 @@ class DownloadManager {
     DownloadManager() { this->last_download_start = std::chrono::steady_clock::now() - std::chrono::milliseconds(100); }
 
     ~DownloadManager() { this->shutdown(); }
-
-    DownloadManager& operator=(const DownloadManager&) = delete;
-    DownloadManager& operator=(DownloadManager&&) = delete;
-    DownloadManager(const DownloadManager&) = delete;
-    DownloadManager(DownloadManager&&) = delete;
 
     void shutdown() {
         if(!this->shutting_down.exchange(true)) {
