@@ -1,21 +1,5 @@
 include(FetchContent)
-
-## Dependency versions
-set(SDL3_VERSION "9d6fb509fe855a18f2c5291dd4e17f2b7e6d4d73")
-set(LIBJPEG_VERSION "3.1.1")
-set(LIBPNG_VERSION "1.6.50")
-set(ZLIB_VERSION "2.2.5")
-set(BZIP2_VERSION "1ea1ac188ad4b9cb662e3f8314673c63df95a589")
-set(FMT_VERSION "93f03953af6b0268e1a29bb5b23d50f72b87a151")
-set(GLM_VERSION "1.0.1")
-set(LZMA_VERSION "5.8.1")
-set(LIBARCHIVE_VERSION "3.8.1")
-set(MPG123_VERSION "ec6ead5fc1102d64efbb6a04865f59454198c3fc")
-set(SOUNDTOUCH_VERSION "2.4.0")
-set(SOLOUD_VERSION "1.1.7")
-set(CURL_VERSION "8.15.0")
-set(DISCORDSDK_VERSION "2.5.6")
-set(BASS_VERSION "20250813")
+include(cmake-win/dependencies.cmake)
 
 # You want options in cache otherwise everything might rebuild
 macro(setcb var val)
@@ -26,77 +10,49 @@ endmacro()
 setcb(SDL_SHARED OFF)
 setcb(SDL_STATIC ON)
 setcb(SDL_HIDAPI_LIBUSB OFF)
-FetchContent_Declare(sdl3
-	URL https://github.com/libsdl-org/SDL/archive/${SDL3_VERSION}.tar.gz
-	URL_HASH SHA512=a2d182036891ab78faf63e8d5eaeac08f00746ffe2ac4ff950e1d15cf485adf61427d0ad8e95e4bcd97ce9de64068af5136280c8f31964a7a2ad8052479cbc66)
+FetchContent_Declare(sdl3 URL ${SDL3_URL} URL_HASH ${SDL3_HASH})
 
 setcb(FT_DISABLE_HARFBUZZ ON)
 setcb(FT_DISABLE_BROTLI ON)
 setcb(FT_REQUIRE_ZLIB ON)
 setcb(FT_REQUIRE_PNG ON)
 setcb(FT_REQUIRE_BZIP2 ON)
-FetchContent_Declare(ft2
-	URL https://github.com/freetype/freetype/archive/refs/tags/VER-2-13-3.zip)
-	# URL_HASH SHA512=fccfaa15eb79a105981bf634df34ac9ddf1c53550ec0b334903a1b21f9f8bf5eb2b3f9476e554afa112a0fca58ec85ab212d674dfd853670efec876bacbe8a53)
+FetchContent_Declare(ft2 URL ${FREETYPE2_URL} URL_HASH ${FREETYPE2_HASH})
 
 setcb(ENABLE_STATIC ON)
 setcb(ENABLE_SHARED OFF)
 setcb(WITH_JPEG8 ON)
 setcb(WITH_SIMD ON)
 setcb(REQUIRE_SIMD OFF)
-setcb(WITH_TURBOJPEG OFF)
 FetchContent_Declare(jpeg
-	URL https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/${LIBJPEG_VERSION}/libjpeg-turbo-${LIBJPEG_VERSION}.tar.gz
-	URL_HASH SHA512=d08c8eb77281c1eee2c93ef9f2eefaf79a4b9adff5172ebcb20c845ccad8896a28fc3d622002cc8b28964ff860dca0a491d6b1b921aaa7aedccd21b909aad4cb)
+	URL ${LIBJPEG_URL}
+	URL_HASH ${LIBJPEG_HASH})
 
-# include(ProcessorCount)
-# ProcessorCount(CPU_COUNT)
-# if(CPU_COUNT EQUAL 0)
-#     set(CPU_COUNT 4)
-# endif()
-
-# # unfortunately we can't have nice things because some devs are lazy
-# include(ExternalProject)
-# ExternalProject_Add(libjpeg_external
-#     URL https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/${LIBJPEG_VERSION}/libjpeg-turbo-${LIBJPEG_VERSION}.tar.gz
-#     URL_HASH SHA512=d08c8eb77281c1eee2c93ef9f2eefaf79a4b9adff5172ebcb20c845ccad8896a28fc3d622002cc8b28964ff860dca0a491d6b1b921aaa7aedccd21b909aad4cb
-#     CMAKE_ARGS
-#         ${EXTERNAL_PROJECT_CMAKE_ARGS}
-#         -DENABLE_STATIC=ON
-#         -DENABLE_SHARED=OFF
-#         -DWITH_JPEG8=ON
-#         -DWITH_SIMD=ON
-#         -DREQUIRE_SIMD=OFF
-#         -DCMAKE_ASM_NASM_FLAGS="-DPIC"
-# 		-DWITH_TURBOJPEG=OFF
-#         # -DCMAKE_ASM_NASM_OBJECT_FORMAT=win64
-#     BUILD_COMMAND cmake --build <BINARY_DIR> --config ${CMAKE_BUILD_TYPE} --parallel ${CPU_COUNT}
-# )
+# prevent jpeg from erroring because we use FetchContent
+execute_process(
+	COMMAND sed -i "/The libjpeg-turbo build system cannot be integrated into another build system/d" /home/t/neosu/build/_deps/jpeg-src/CMakeLists.txt ${CMAKE_BINARY_DIR}/_deps/jpeg-src/CMakeLists.txt
+	COMMAND_ERROR_IS_FATAL ANY
+)
 
 setcb(PNG_SHARED OFF)
 setcb(PNG_STATIC ON)
 setcb(PNG_TESTS OFF)
 setcb(PNG_TOOLS OFF)
+setcb(WITH_TURBOJPEG OFF)
 if(WIN32)
 	setcb(MINGW ON)
 endif()
-FetchContent_Declare(png
-	URL https://github.com/pnggroup/libpng/archive/refs/tags/v${LIBPNG_VERSION}.tar.gz
-	URL_HASH SHA512=34c806e0dda960b480ce2f5ea13e2e55a9540f07c51948be25d312b901c431bc814f730f9322a2e3b6f88d4104a0c49bde9e616762b342d07db44e2c7fd5f2dc)
+FetchContent_Declare(png URL ${LIBPNG_URL} URL_HASH ${LIBPNG_HASH})
 
 setcb(ZLIB_COMPAT ON)
 setcb(ZLIB_ENABLE_TESTS OFF)
-FetchContent_Declare(zlib
-	URL https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.2.5.tar.gz)
-	# URL_HASH SHA512=a2d182036891ab78faf63e8d5eaeac08f00746ffe2ac4ff950e1d15cf485adf61427d0ad8e95e4bcd97ce9de64068af5136280c8f31964a7a2ad8052479cbc66)
+FetchContent_Declare(zlib URL ${ZLIB_URL} URL_HASH ${ZLIB_HASH})
 
 setcb(ENABLE_STATIC_RUNTIME ON)
 setcb(ENABLE_STATIC_LIB ON)
 setcb(ENABLE_SHARED_LIB OFF)
 setcb(ENABLE_LIB_ONLY ON)
-FetchContent_Declare(bz2
-	URL https://github.com/libarchive/bzip2/archive/${BZIP2_VERSION}.tar.gz
-	URL_HASH SHA512=a1aae1e884f85a225e2a1ddf610f11dda672bc242d4e8d0cda3534efb438b3a0306ec1d130eec378d46abb48f6875687d6b20dcc18a6037a4455f531c22d50f6)
+FetchContent_Declare(bz2 URL ${BZIP2_URL} URL_HASH ${BZIP2_HASH})
 
 setcb(FMT_CUDA_TEST OFF)
 setcb(FMT_DOC OFF)
@@ -109,17 +65,13 @@ setcb(FMT_SYSTEM_HEADERS OFF)
 setcb(FMT_TEST OFF)
 setcb(FMT_UNICODE ON)
 setcb(FMT_WERROR OFF)
-FetchContent_Declare(fmt
-	URL https://github.com/fmtlib/fmt/archive/${FMT_VERSION}.tar.gz
-	URL_HASH SHA512=fd72b657e3ccf8a570ae8bf5bafd4908d779dee89c971cfda9c7fb016e32f17cf6ce8083391d8624d1fed064ead5941cc2052a8643215729b922489273638599)
+FetchContent_Declare(fmt URL ${FMT_URL} URL_HASH ${FMT_HASH})
 
 setcb(GLM_BUILD_TESTS OFF)
 setcb(GLM_BUILD_LIBRARY OFF)
 setcb(GLM_ENABLE_CXX_20 ON)
 setcb(GLM_ENABLE_LANG_EXTENSIONS ON)
-FetchContent_Declare(glm
-	URL https://github.com/g-truc/glm/archive/refs/tags/${GLM_VERSION}.tar.gz
-	URL_HASH SHA512=c6c6fa1ea7a7e97820e36ee042a78be248ae828c99c1b1111080d9bf334a5160c9993a70312351c92a867cd49907c95f9f357c8dfe2bc29946da6e83e27ba20c)
+FetchContent_Declare(glm URL ${GLM_URL} URL_HASH ${GLM_HASH})
 
 setcb(BUILD_TESTING OFF)
 setcb(XZ_TOOL_LZMADEC OFF)
@@ -131,9 +83,7 @@ setcb(XZ_TOOL_XZ OFF)
 setcb(XZ_TOOL_XZDEC OFF)
 setcb(XZ_SANDBOX no)
 setcb(XZ_THREADS yes)
-FetchContent_Declare(lzma
-    URL https://github.com/tukaani-project/xz/releases/download/v${LZMA_VERSION}/xz-${LZMA_VERSION}.tar.gz
-	URL_HASH SHA512=151b2a47fdf00274c4fd71ceada8fb6c892bdac44070847ebf3259e602b97c95ee5ee88974e03d7aa821ab4f16d5c38e50dfb2baf660cf39c199878a666e19ad)
+FetchContent_Declare(lzma URL ${LZMA_URL} URL_HASH ${LZMA_HASH})
 
 setcb(ENABLE_BZ2LIB ON)
 setcb(ENABLE_ZLIB ON)
@@ -159,9 +109,7 @@ setcb(ENABLE_UNZIP OFF)
 setcb(ENABLE_WIN32_XMLLITE OFF)
 setcb(ENABLE_XML2 OFF)
 setcb(ENABLE_ZSTD OFF)
-FetchContent_Declare(libarchive
-    URL https://github.com/libarchive/libarchive/releases/download/v${LIBARCHIVE_VERSION}/libarchive-${LIBARCHIVE_VERSION}.tar.gz
-    URL_HASH SHA512=0eed931378e998590ec97b191322e5c48019cce447d9dbbbcbadd3008e26fdf000a11c45cbeefa0567bd101422afc0da10248220afa280dea1a9b4f91d8ee653)
+FetchContent_Declare(libarchive URL ${LIBARCHIVE_URL} URL_HASH ${LIBARCHIVE_HASH})
 
 setcb(BUILD_STATIC_LIBS ON)
 setcb(BUILD_CURL_EXE OFF)
@@ -170,24 +118,19 @@ setcb(CURL_USE_LIBPSL OFF)
 if(WIN32)
 	setcb(CURL_USE_SCHANNEL ON)
 endif()
-string(REPLACE "." "_" _curl_ver_temp "${CURL_VERSION}")
-FetchContent_Declare(curl
-    URL https://github.com/curl/curl/releases/download/curl-${_curl_ver_temp}/curl-${CURL_VERSION}.tar.gz
-    URL_HASH SHA512=382b8480e3cc89170370334c03f8b72a64e29630f8ee8d4390b01f99f63c5519fda53dc4103eb774051c8c5a673c177c6afa3c179d60de7a6a76ff1de37706ac)
-unset(_curl_ver_temp)
+FetchContent_Declare(curl URL ${CURL_URL} URL_HASH ${CURL_HASH})
 
 setcb(BUILD_LIBOUT123 OFF)
 FetchContent_Declare(mpg123
-    URL https://github.com/madebr/mpg123/archive/${MPG123_VERSION}.tar.gz
-	URL_HASH SHA512=1ab5f881aa3653b01deb4f2a0f993d70bd8239a8e74c4caca7cc0ed72420816ce6b13f5b88a0ae5a35edf69ae4402f8583623daa6bffe271577e12bf7ea66197)
+	URL ${MPG123_URL}
+	URL_HASH ${MPG123_HASH}
+	SOURCE_SUBDIR ports/cmake)
 
 setcb(ST_NO_EXCEPTION_HANDLING ON)
 setcb(SOUNDSTRETCH OFF)
 setcb(SOUNDTOUCH_DLL OFF)
 setcb(OPENMP OFF)
-FetchContent_Declare(soundtouch
-    URL https://codeberg.org/soundtouch/soundtouch/archive/${SOUNDTOUCH_VERSION}.tar.gz
-    URL_HASH SHA512=8bd199c6363104ba6c9af1abbd3c4da3567ccda5fe3a68298917817fc9312ecb0914609afba1abd864307b0a596becf450bc7073eeec17b1de5a7c5086fbc45e)
+FetchContent_Declare(soundtouch URL ${SOUNDTOUCH_URL} URL_HASH ${SOUNDTOUCH_HASH})
 
 setcb(SOLOUD_WITH_SDL3 ON)
 setcb(SOLOUD_WITH_MPG123 ON)
@@ -195,42 +138,26 @@ setcb(SOLOUD_WITH_FFMPEG OFF)
 if(MSVC)
 	set(PKG_CONFIG_ARGN "--msvc-syntax")
 endif()
-FetchContent_Declare(soloud
-    URL https://github.com/whrvt/neoloud/archive/${SOLOUD_VERSION}.tar.gz
-    URL_HASH SHA512=48c67f893a5e7d6eec5c9cffe15d98bb7358899e831b8f35ec75bf8fc38b0a54d3286cc13f5c4bd8a59d4033b9040e8ff7a63af03f8c338d5dad231541b13599)
+FetchContent_Declare(soloud URL ${SOLOUD_URL} URL_HASH ${SOLOUD_HASH})
 
-FetchContent_MakeAvailable(sdl3 ft2 png jpeg zlib bz2 fmt glm lzma libarchive curl mpg123 soundtouch soloud)
+FetchContent_MakeAvailable(sdl3 ft2 png zlib bz2 fmt glm lzma libarchive curl mpg123 soundtouch soloud)
+
+macro(install)
+endmacro()
+FetchContent_MakeAvailable(jpeg)
 
 ## Binary dependencies
-FetchContent_Declare(discord_game_sdk
-	URL https://web.archive.org/web/20250505113314/https://dl-game-sdk.discordapp.net/${DISCORDSDK_VERSION}/discord_game_sdk.zip
-	URL_HASH SHA512=4c8f72c7bdf92bc969fb86b96ea0d835e01b9bab1a2cc27ae00bdac1b9733a1303ceadfe138c24a7609b76d61d49999a335dd596cf3f335d894702e2aa23406f)
-FetchContent_Declare(bass
-	URL https://archive.org/download/BASS-libs-${BASS_VERSION}/bass.zip
-	URL_HASH SHA512=6066f2a9097389c433b68f28d325793fcc4a3b1adf7916eb58d11cd48a8d5da16ea91de75d6f3e353bdc1cbe2cdee3eb6b1c4a035ca9ba15941ee2fb357185f3)
-FetchContent_Declare(bassfx
-	URL https://archive.org/download/BASS-libs-${BASS_VERSION}/bass_fx.zip
-	URL_HASH SHA512=561572d0f6d5f108dfa11d786c664923bdb9aebc4d49a78a66f5826bcdfe102254c0308000a00cb79b6eb007938845f8625ea0ed3c4f9ff72806a48562ddd800)
-FetchContent_Declare(bassmix
-	URL https://archive.org/download/BASS-libs-${BASS_VERSION}/bassmix.zip
-	URL_HASH SHA512=e7139b71f53b30bd27f2991006781f69a5e0e415996fcd41a7122908b0245cc6e1efb82b66409b80dc4d7cb4eb0d6d445cf3eaff52fe6f7c43bbd9872ea7949b)
-FetchContent_Declare(bassloud
-	URL https://archive.org/download/BASS-libs-${BASS_VERSION}/bassloud.zip
-	URL_HASH SHA512=8607d5d9fd07f6886ab4984cf68f6e9463b027a5766ae572e6d99f9298fafd08cc8ac4ece0c4ca4e47a532a76448d75443c9fa7ea7f1d7b84579487022cec493)
-FetchContent_Declare(bassflac
-	URL https://archive.org/download/BASS-libs-${BASS_VERSION}/bassflac24.zip
-	URL_HASH SHA512=1d912dcd342cf0ef873e743a305b5fc5f06a60c7446ff6f6e7e5f313124475526bb01c69718c401158b9803fb9935d2dd4d7f7ac1b2646f7ba4e769ef0455b29)
+FetchContent_Declare(discord_game_sdk URL ${DISCORDSDK_URL} URL_HASH ${DISCORDSDK_HASH})
+FetchContent_Declare(bass URL ${BASS_URL} URL_HASH ${BASS_HASH})
+FetchContent_Declare(bassfx URL ${BASSFX_URL} URL_HASH ${BASSFX_HASH})
+FetchContent_Declare(bassmix URL ${BASSMIX_URL} URL_HASH ${BASSMIX_HASH})
+FetchContent_Declare(bassloud URL ${BASSLOUD_URL} URL_HASH ${BASSLOUD_HASH})
+FetchContent_Declare(bassflac URL ${BASSFLAC_URL} URL_HASH ${BASSFLAC_HASH})
 FetchContent_MakeAvailable(discord_game_sdk bass bassfx bassmix bassloud bassflac)
 
 if(WIN32 OR MSVC)
-	FetchContent_Declare(basswasapi
-		URL https://archive.org/download/BASS-libs-${BASS_VERSION}/basswasapi.zip
-		URL_HASH SHA512=f5c68062936ccf60383c5dbea3dc4b9bcf52884fb745d0564bd6592e88a7336e16e5d9a63ea28177385641790d53eaa5d9edfe112e768dcfb68b82af65affddc)
-	FetchContent_Declare(basswasapi_header
-		URL https://archive.org/download/BASS-libs-${BASS_VERSION}/basswasapi24-header.zip
-		URL_HASH SHA512=de54b3961491ea832a0069af75dc1d57209b7805699d955b384bf9671a4da3615ba3ea217c596fa41616d2df4a8b2ea0f8f9d9c4e2453221541aacb0cc30dc6c)
-	FetchContent_Declare(bassasio
-		URL https://archive.org/download/BASS-libs-${BASS_VERSION}/bassasio.zip
-		URL_HASH SHA512=9542469b352d6a6bfd3a3292a09642639c0583963b714a780699ab0e5fa7cbf36e3c9ae8081195d6fef7daad88133cf10d0a568724edca5e8374473128da738a)
+	FetchContent_Declare(basswasapi URL ${BASSWASAPI_URL} URL_HASH ${BASSWASAPI_HASH})
+	FetchContent_Declare(basswasapi_header URL ${BASSWASAPI_HEADER_URL} URL_HASH ${BASSWASAPI_HEADER_HASH})
+	FetchContent_Declare(bassasio URL ${BASSASIO_URL} URL_HASH ${BASSASIO_HASH})
 	FetchContent_MakeAvailable(basswasapi basswasapi_header bassasio)
 endif()
