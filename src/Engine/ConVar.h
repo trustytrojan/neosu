@@ -496,6 +496,7 @@ class ConVarHandler {
     [[nodiscard]] ConVar *getConVarByName(const ConVarString &name, bool warnIfNotFound = true) const;
     [[nodiscard]] std::vector<ConVar *> getConVarByLetter(const ConVarString &letters) const;
 
+    [[nodiscard]] std::vector<ConVar *> getNonSubmittableCvars() const;
     bool areAllCvarsSubmittable();
 
     void resetServerCvars();

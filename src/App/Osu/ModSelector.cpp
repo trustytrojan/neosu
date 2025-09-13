@@ -583,6 +583,14 @@ void ModSelector::mouse_update(bool *propagate_clicks) {
     // update
     OsuScreen::mouse_update(propagate_clicks);
 
+    if(this->nonSubmittableWarning->isVisible() && this->nonSubmittableWarning->isMouseInside()) {
+        osu->getTooltipOverlay()->begin();
+        for(const auto& cvar : cvars->getNonSubmittableCvars()) {
+            osu->getTooltipOverlay()->addLine(cvar->getName().c_str());
+        }
+        osu->getTooltipOverlay()->end();
+    }
+
     if(!BanchoState::is_in_a_multi_room()) {
         this->overrideSliderContainer->mouse_update(propagate_clicks);
 

@@ -278,6 +278,20 @@ ConVarString ConVarHandler::flagsToString(uint8_t flags) {
     return string;
 }
 
+std::vector<ConVar*> ConVarHandler::getNonSubmittableCvars() const {
+    std::vector<ConVar*> list;
+
+    for(const auto &cv : _getGlobalConVarArray()) {
+        if(!cv->isProtected()) continue;
+
+        if(cv->getString() != cv->getDefaultString()) {
+            list.push_back(cv);
+        }
+    }
+
+    return list;
+}
+
 bool ConVarHandler::areAllCvarsSubmittable() {
     for(const auto &cv : _getGlobalConVarArray()) {
         if(!cv->isProtected()) continue;
