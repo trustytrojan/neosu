@@ -62,13 +62,16 @@ class SleepHandler final {
         }
 
         // use NtDelayExecution for bulk delay, busy-wait for remainder
-        uint64_t targetTime = getTicksNS() + ns;
+        const uint64_t targetTime = getTicksNS() + ns;
         if(ns > m_actualDelayAmount) {
-            uint64_t bulkDelay = ns - m_actualDelayAmount;
+            // get "remainder", time which the sleep resolution might not handle
+            // e.g. 0.51ms with 0.5ms minimum: NtDelayExecution for exactly 1 x 0.5ms = 0.5ms, busy wait for 0.01ms remainder
+            //      1.25ms with 0.5ms minimum: NtDelayExecution for exactly 2 x 0.5ms = 1ms, busy wait for 0.25ms remainder
+            const uint64_t bulkDelay = (ns / m_actualDelayAmount) * m_actualDelayAmount;
             m_pNtDelayExec(0, nsToDelayInterval(bulkDelay));
         }
 
-        // busy-wait for remaining time
+        // busy-wait remainder
         while(getTicksNS() < targetTime) {
             YieldProcessor();
         }
@@ -124,9 +127,7 @@ class SleepHandler final {
     }
 
     // callback
-    void forceDisable(float newVal) {
-        m_bForceDisable = !static_cast<int>(newVal);
-    }
+    void forceDisable(float newVal) { m_bForceDisable = !static_cast<int>(newVal); }
 
     using NtDelayExecution_t = LONG NTAPI(BOOLEAN Alertable, PLARGE_INTEGER DelayInterval);
     using NtQueryTimerResolution_t = LONG NTAPI(PULONG MaximumTime, PULONG MinimumTime, PULONG CurrentTime);
