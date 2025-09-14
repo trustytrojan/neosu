@@ -172,7 +172,6 @@ class Database {
     int iNumBeatmapsToLoad;
     std::atomic<bool> bInterruptLoad;
     std::vector<BeatmapSet *> beatmapsets;
-    std::vector<BeatmapSet *> neosu_sets;
 
     std::mutex beatmap_difficulties_mtx;
     std::unordered_map<MD5Hash, BeatmapDifficulty *> beatmap_difficulties;

@@ -128,11 +128,6 @@ void Database::AsyncDBLoader::initAsync() {
     }
     db->beatmapsets.clear();
 
-    for(auto &neosu_set : db->neosu_sets) {
-        SAFE_DELETE(neosu_set);
-    }
-    db->neosu_sets.clear();
-
     db->findDatabases();
     db->loadScores(db->database_files["neosu_scores.db"]);
     db->loadOldMcNeosuScores(db->database_files["scores.db"]);
@@ -228,11 +223,6 @@ Database::~Database() {
         SAFE_DELETE(beatmapset);
     }
     this->beatmapsets.clear();
-
-    for(auto &neosu_set : this->neosu_sets) {
-        SAFE_DELETE(neosu_set);
-    }
-    this->neosu_sets.clear();
 
     unload_collections();
 }
@@ -331,7 +321,6 @@ BeatmapSet *Database::addBeatmapSet(const std::string &beatmapFolderPath, i32 se
     }
 
     this->beatmapsets.push_back(beatmap);
-    this->neosu_sets.push_back(beatmap);
 
     this->beatmap_difficulties_mtx.lock();
     for(const auto &diff : beatmap->getDifficulties()) {
@@ -900,7 +889,7 @@ void Database::loadMaps() {
                     delete diffs;
                 } else {
                     auto set = new BeatmapSet(diffs, DatabaseBeatmap::BeatmapType::NEOSU_BEATMAPSET);
-                    this->neosu_sets.push_back(set);
+                    this->beatmapsets.push_back(set);
 
                     setIDToIndex[set_id] = beatmapSets.size();
                     Beatmap_Set s;
@@ -1355,13 +1344,21 @@ void Database::saveMaps() {
     Timer t;
     t.start();
 
+    // collect neosu-only sets here
+    std::vector<BeatmapSet *> temp_neosu_sets;
+    for(const auto &beatmap : this->beatmapsets) {
+        if(beatmap->type == DatabaseBeatmap::BeatmapType::NEOSU_BEATMAPSET) {
+            temp_neosu_sets.push_back(beatmap);
+        }
+    }
+
     ByteBufferedFile::Writer maps("neosu_maps.db");
     maps.write<u32>(NEOSU_MAPS_DB_VERSION);
 
     // Save neosu-downloaded maps
     u32 nb_diffs_saved = 0;
-    maps.write<u32>(this->neosu_sets.size());
-    for(BeatmapSet *beatmap : this->neosu_sets) {
+    maps.write<u32>(temp_neosu_sets.size());
+    for(BeatmapSet *beatmap : temp_neosu_sets) {
         maps.write<i32>(beatmap->getSetID());
         maps.write<u16>(beatmap->getDifficulties().size());
 
