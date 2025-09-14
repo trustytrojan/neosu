@@ -402,9 +402,13 @@ void send_packet(Packet &packet) {
     proto::write<u16>(&outgoing, packet.id);
     proto::write<u8>(&outgoing, 0);
     proto::write<u32>(&outgoing, packet.pos);
-    proto::write_bytes(&outgoing, packet.memory, packet.pos);
 
-    free(packet.memory);
+    // Some packets have an empty payload
+    if(packet.memory != nullptr) {
+        proto::write_bytes(&outgoing, packet.memory, packet.pos);
+        free(packet.memory);
+    }
+
     packet.memory = nullptr;
     packet.size = 0;
 }

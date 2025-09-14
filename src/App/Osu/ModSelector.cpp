@@ -370,7 +370,7 @@ void ModSelector::updateButtons(bool initial) {
     this->getModButtonOnGrid(5, 2)->setAvailable(true);
 
     if(BanchoState::is_in_a_multi_room()) {
-        if(BanchoState::room.freemods && !BanchoState::room.is_host()) {
+        if(!BanchoState::room.is_host()) {
             this->getModButtonOnGrid(2, 0)->setAvailable(false);  // Disable DC/HT
             this->getModButtonOnGrid(2, 1)->setAvailable(false);  // Disable DT/NC
             this->getModButtonOnGrid(4, 2)->setAvailable(false);  // Disable Target
@@ -1126,30 +1126,24 @@ void ModSelector::resetModsUserInitiated() {
     soundEngine->play(osu->getSkin()->getCheckOff());
     this->resetModsButton->animateClickColor();
 
-    if(BanchoState::is_online()) {
-        RichPresence::updateBanchoMods();
+    if(BanchoState::is_in_a_multi_room()) {
+        u32 minimum_mods = 0;
+        if(!BanchoState::room.is_host()) {
+            minimum_mods = BanchoState::room.mods;
+            minimum_mods &= (LegacyFlags::DoubleTime | LegacyFlags::HalfTime | LegacyFlags::Target);
+        }
+
+        Packet packet;
+        packet.id = MATCH_CHANGE_MODS;
+        BANCHO::Proto::write<u32>(&packet, minimum_mods);
+        BANCHO::Net::send_packet(packet);
+
+        // Don't wait on server response to update UI
+        this->enableModsFromFlags(minimum_mods);
     }
 
-    if(BanchoState::is_in_a_multi_room()) {
-        for(auto &slot : BanchoState::room.slots) {
-            if(slot.player_id != BanchoState::get_uid()) continue;
-
-            if(BanchoState::room.is_host()) {
-                BanchoState::room.mods = this->getModFlags();
-            } else {
-                this->enableModsFromFlags(BanchoState::room.mods);
-            }
-
-            slot.mods = BanchoState::room.mods;
-
-            Packet packet;
-            packet.id = MATCH_CHANGE_MODS;
-            BANCHO::Proto::write<u32>(&packet, slot.mods);
-            BANCHO::Net::send_packet(packet);
-
-            osu->room->updateLayout(osu->getScreenSize());
-            break;
-        }
+    if(BanchoState::is_online()) {
+        RichPresence::updateBanchoMods();
     }
 }
 
@@ -1184,7 +1178,11 @@ void ModSelector::resetMods() {
     }
 }
 
-u32 ModSelector::getModFlags() { return osu->getScore()->getModsLegacy(); }
+u32 ModSelector::getModFlags() {
+    // We need the mod flags to always be up to date
+    auto mods = Replay::Mods::from_cvars();
+    return mods.to_legacy();
+}
 
 void ModSelector::enableModsFromFlags(u32 flags) {
     using namespace ModMasks;
