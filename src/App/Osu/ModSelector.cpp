@@ -583,6 +583,7 @@ void ModSelector::mouse_update(bool *propagate_clicks) {
     // update
     OsuScreen::mouse_update(propagate_clicks);
 
+    this->nonSubmittableWarning->setVisible(BanchoState::can_submit_scores() && !cvars->areAllCvarsSubmittable());
     if(this->nonSubmittableWarning->isVisible() && this->nonSubmittableWarning->isMouseInside()) {
         osu->getTooltipOverlay()->begin();
         for(const auto& cvar : cvars->getNonSubmittableCvars()) {
@@ -872,7 +873,6 @@ void ModSelector::updateLayout() {
         const float modGridMaxY = start.y + size.y * this->iGridHeight +
                                   offset.y * (this->iGridHeight - 1);  // exact bottom of the mod buttons
 
-        this->nonSubmittableWarning->setVisible(!cvars->areAllCvarsSubmittable() && BanchoState::can_submit_scores());
         this->nonSubmittableWarning->setSizeToContent();
         this->nonSubmittableWarning->setSize(vec2(osu->getScreenWidth(), 20 * uiScale));
         this->nonSubmittableWarning->setPos(

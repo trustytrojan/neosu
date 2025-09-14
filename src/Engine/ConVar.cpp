@@ -166,19 +166,13 @@ bool ConVar::onSetValueGameplay(CvarEditor editor) {
     return true;
 }
 
-void ConVar::onSetValueProtected(const std::string &oldValue) {
+void ConVar::onSetValueProtected(const std::string &oldValue, const std::string &newValue) {
     if(!osu) return;
-
-    (void)oldValue;  // we just assume it was changed to something else than default
+    if(oldValue == newValue) return;
 
     auto beatmap = osu->getSelectedBeatmap();
     if(beatmap != nullptr) {
         beatmap->is_submittable = false;
-    }
-
-    auto mod_selector = osu->modSelector;
-    if(mod_selector && mod_selector->nonSubmittableWarning) {
-        mod_selector->nonSubmittableWarning->setVisible(BanchoState::can_submit_scores());
     }
 }
 
