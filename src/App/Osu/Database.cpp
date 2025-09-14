@@ -164,6 +164,7 @@ void Database::startLoader() {
         SAFE_DELETE(beatmapset);
     }
     db->beatmapsets.clear();
+    db->neosu_sets.clear();
 
     this->loader = new AsyncDBLoader();
     this->bIsFirstLoad = true;
@@ -232,6 +233,7 @@ Database::~Database() {
         SAFE_DELETE(beatmapset);
     }
     this->beatmapsets.clear();
+    this->neosu_sets.clear();
 
     unload_collections();
 }
@@ -317,9 +319,8 @@ void Database::save() {
     this->saveScores();
 }
 
-// Only use for neosu sets!
 BeatmapSet *Database::addBeatmapSet(const std::string &beatmapFolderPath, i32 set_id_override) {
-    BeatmapSet *beatmap = this->loadRawBeatmap(beatmapFolderPath, true);
+    BeatmapSet *beatmap = this->loadRawBeatmap(beatmapFolderPath);
     if(beatmap == nullptr) return nullptr;
 
     // Some beatmaps don't provide beatmap/beatmapset IDs in the .osu files
@@ -332,6 +333,7 @@ BeatmapSet *Database::addBeatmapSet(const std::string &beatmapFolderPath, i32 se
     }
 
     this->beatmapsets.push_back(beatmap);
+    this->neosu_sets.push_back(beatmap);
 
     this->beatmap_difficulties_mtx.lock();
     for(const auto &diff : beatmap->getDifficulties()) {
@@ -822,7 +824,7 @@ void Database::loadMaps() {
                     map_path.append(osu_filename);
 
                     auto diff =
-                        new BeatmapDifficulty(map_path, mapset_path, BeatmapType::NEOSU_DIFFICULTY);
+                        new BeatmapDifficulty(map_path, mapset_path, DatabaseBeatmap::BeatmapType::NEOSU_DIFFICULTY);
                     diff->iID = neosu_maps.read<i32>();
                     diff->iSetID = set_id;
                     diff->sTitle = neosu_maps.read_string();
@@ -899,6 +901,9 @@ void Database::loadMaps() {
                 if(diffs->empty() || set_id == -1) {
                     delete diffs;
                 } else {
+                    auto set = new BeatmapSet(diffs, DatabaseBeatmap::BeatmapType::NEOSU_BEATMAPSET);
+                    this->neosu_sets.push_back(set);
+
                     setIDToIndex[set_id] = beatmapSets.size();
                     Beatmap_Set s;
                     s.setID = set_id;
@@ -1176,7 +1181,7 @@ void Database::loadMaps() {
                 if(mode != 0) continue;
 
                 auto *diff2 =
-                    new DatabaseBeatmap(fullFilePath, beatmapPath, BeatmapType::PEPPY_DIFFICULTY);
+                    new DatabaseBeatmap(fullFilePath, beatmapPath, DatabaseBeatmap::BeatmapType::PEPPY_DIFFICULTY);
                 {
                     diff2->sTitle = songTitle;
                     diff2->sTitleUnicode = songTitleUnicode;
@@ -1306,7 +1311,7 @@ void Database::loadMaps() {
                 if(beatmapSet.diffs2->empty()) continue;  // sanity check
 
                 if(beatmapSet.setID > 0) {
-                    auto *set = new BeatmapSet(beatmapSet.diffs2, BeatmapType::PEPPY_BEATMAPSET);
+                    auto *set = new BeatmapSet(beatmapSet.diffs2, DatabaseBeatmap::BeatmapType::PEPPY_BEATMAPSET);
                     this->beatmapsets.push_back(set);
                 } else {
                     // set with invalid ID: treat all its diffs separately. we'll group the diffs by title+artist.
@@ -1325,7 +1330,7 @@ void Database::loadMaps() {
                     }
 
                     for(const auto &scuffed_set : titleArtistToBeatmap) {
-                        auto *set = new BeatmapSet(scuffed_set.second, BeatmapType::PEPPY_BEATMAPSET);
+                        auto *set = new BeatmapSet(scuffed_set.second, DatabaseBeatmap::BeatmapType::PEPPY_BEATMAPSET);
                         this->beatmapsets.push_back(set);
                     }
                 }
@@ -1356,21 +1361,13 @@ void Database::saveMaps() {
     maps.write<u32>(NEOSU_MAPS_DB_VERSION);
 
     // Save neosu-downloaded maps
-    u32 nb_sets = 0;
-    for(BeatmapSet *set : this->beatmapsets) {
-        if(set->type != BeatmapType::NEOSU_BEATMAPSET) continue;
-        nb_sets++;
-    }
-
     u32 nb_diffs_saved = 0;
-    maps.write<u32>(nb_sets);
-    for(BeatmapSet *set : this->beatmapsets) {
-        if(set->type != BeatmapType::NEOSU_BEATMAPSET) continue;
+    maps.write<u32>(this->neosu_sets.size());
+    for(BeatmapSet *beatmap : this->neosu_sets) {
+        maps.write<i32>(beatmap->getSetID());
+        maps.write<u16>(beatmap->getDifficulties().size());
 
-        maps.write<i32>(set->getSetID());
-        maps.write<u16>(set->getDifficulties().size());
-
-        for(BeatmapDifficulty *diff : set->getDifficulties()) {
+        for(BeatmapDifficulty *diff : beatmap->getDifficulties()) {
             maps.write_string(env->getFileNameFromFilePath(diff->sFilePath).c_str());
             maps.write<i32>(diff->iID);
             maps.write_string(diff->sTitle.c_str());
@@ -1413,7 +1410,7 @@ void Database::saveMaps() {
 
     // When calculating loudness we don't call update_overrides() for performance reasons
     for(const auto &diff2 : this->loudness_to_calc) {
-        if(diff2->type != BeatmapType::PEPPY_DIFFICULTY) continue;
+        if(diff2->type != DatabaseBeatmap::BeatmapType::PEPPY_DIFFICULTY) continue;
         if(diff2->loudness.load() == 0.f) continue;
         this->peppy_overrides[diff2->getMD5Hash()] = diff2->get_overrides();
     }
@@ -2163,7 +2160,7 @@ void Database::saveScores() {
     debugLog("Saved {:d} scores in {:f} seconds.\n", nb_scores, (Timing::getTimeReal() - startTime));
 }
 
-BeatmapSet *Database::loadRawBeatmap(const std::string &beatmapPath, bool is_neosu_folder) {
+BeatmapSet *Database::loadRawBeatmap(const std::string &beatmapPath) {
     if(cv::debug_db.getBool()) debugLog("BeatmapDatabase::loadRawBeatmap() : {:s}\n", beatmapPath.c_str());
 
     // try loading all diffs
@@ -2176,7 +2173,7 @@ BeatmapSet *Database::loadRawBeatmap(const std::string &beatmapPath, bool is_neo
         std::string fullFilePath = beatmapPath;
         fullFilePath.append(beatmapFile);
 
-        auto *diff2 = new BeatmapDifficulty(fullFilePath, beatmapPath, is_neosu_folder ? BeatmapType::NEOSU_DIFFICULTY : BeatmapType::UNKNOWN_DIFFICULTY);
+        auto *diff2 = new BeatmapDifficulty(fullFilePath, beatmapPath, DatabaseBeatmap::BeatmapType::NEOSU_DIFFICULTY);
         if(diff2->loadMetadata()) {
             diffs2->push_back(diff2);
         } else {
@@ -2191,7 +2188,7 @@ BeatmapSet *Database::loadRawBeatmap(const std::string &beatmapPath, bool is_neo
     if(diffs2->empty()) {
         delete diffs2;
     } else {
-        set = new BeatmapSet(diffs2, is_neosu_folder ? BeatmapType::NEOSU_BEATMAPSET : BeatmapType::UNKNOWN_DIFFICULTY);
+        set = new BeatmapSet(diffs2, DatabaseBeatmap::BeatmapType::NEOSU_BEATMAPSET);
     }
 
     return set;
