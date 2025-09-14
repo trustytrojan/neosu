@@ -5,6 +5,8 @@
 #include <thread>
 #include <vector>
 
+#include "Thread.h"
+
 // Unified Wait Utilities (◕‿◕✿)
 namespace uwu {
 
@@ -57,6 +59,8 @@ struct lazy_promise {
 
    private:
     void run() {
+        McThread::set_current_thread_name("lazy_func_thr");
+        McThread::set_current_thread_prio(false); // reset priority
         for(;;) {
             std::unique_lock<std::mutex> lock(this->funcs_mtx);
             this->cv.wait(lock, [this]() { return !this->funcs.empty() || !this->keep_running; });

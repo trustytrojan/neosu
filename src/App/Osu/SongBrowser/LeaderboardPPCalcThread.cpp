@@ -7,6 +7,7 @@
 #include "ConVar.h"
 #include "DatabaseBeatmap.h"
 #include "Timing.h"
+#include "Thread.h"
 
 struct hitobject_cache {
     // Selectors
@@ -50,6 +51,9 @@ static std::vector<hitobject_cache*> ho_cache;
 static std::vector<info_cache*> inf_cache;
 
 static void run_thread() {
+    McThread::set_current_thread_name("lb_pp_calc");
+    McThread::set_current_thread_prio(false); // reset priority
+
     std::vector<f64> aimStrains;
     std::vector<f64> speedStrains;
 

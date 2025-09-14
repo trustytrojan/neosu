@@ -105,6 +105,9 @@ static forceinline bool score_needs_recalc(const FinishedScore& score) {
 }
 
 static void run_sct(const std::unordered_map<MD5Hash, std::vector<FinishedScore>> &all_set_scores) {
+    McThread::set_current_thread_name("score_cvt");
+    McThread::set_current_thread_prio(false); // reset priority
+
     debugLog("Started score converter thread\n");
 
     // defer the actual needs-recalc check to run on the thread, to avoid unnecessarily blocking (O(n^2) loop)
