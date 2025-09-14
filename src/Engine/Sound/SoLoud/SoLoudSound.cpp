@@ -348,12 +348,8 @@ void SoLoudSound::setHandleVolume(SOUNDHANDLE handle, float volume) {
 // soloud-specific accessors
 
 double SoLoudSound::getStreamPositionInSeconds() const {
-    if(!this->audioSource) return this->interpolator.getLastInterpolatedPositionMS() / 1000.0;
-    if(this->bStream)
-        return static_cast<SoLoud::SLFXStream *>(this->audioSource)->getRealStreamPosition();
-    else
-        return this->handle ? soloud->getStreamPosition(this->handle)
-                            : this->interpolator.getLastInterpolatedPositionMS() / 1000.0;
+    if(!this->audioSource || !this->handle) return this->interpolator.getLastInterpolatedPositionMS() / 1000.0;
+    return soloud->getStreamPosition(this->handle);
 }
 
 double SoLoudSound::getSourceLengthInSeconds() const {
