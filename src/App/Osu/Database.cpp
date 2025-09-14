@@ -167,6 +167,8 @@ void Database::startLoader() {
     this->destroyLoader();
 
     this->loader = new AsyncDBLoader();
+    this->bIsFirstLoad = true;
+    this->bRawBeatmapLoadScheduled = false;
     resourceManager->requestNextLoadAsync();
     resourceManager->loadResource(this->loader);
 
