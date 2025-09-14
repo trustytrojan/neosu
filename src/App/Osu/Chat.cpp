@@ -870,6 +870,11 @@ void Chat::addMessage(UString channel_name, const ChatMessage &msg, bool mark_un
     bool should_highlight = false;
     auto highlight_list = SString::split(cv::chat_highlight_words.getString(), " ");
     for(auto &word : msg_words) {
+        if(chatter_is_moderator && word == "@everyone") {
+            should_highlight = true;
+            break;
+        }
+
         for(auto &highlight : highlight_list) {
             if(highlight == "") continue;
 
@@ -881,7 +886,10 @@ void Chat::addMessage(UString channel_name, const ChatMessage &msg, bool mark_un
         }
     }
     if(should_highlight) {
-        // TODO @kiwec: highlight + send toast?
+        // TODO: highlight message
+        auto notif = UString::fmt("{} mentioned you in {}", msg.author_name.toUtf8(), channel_name);
+        osu->notificationOverlay->addToast(
+            notif, CHAT_TOAST, [channel_name] { osu->chat->openChannel(channel_name); }, ToastElement::TYPE::CHAT);
     }
 
     bool is_pm = msg.author_id > 0 && channel_name[0] != '#' && msg.author_name.toUtf8() != BanchoState::get_username();
