@@ -2,6 +2,7 @@
 // Copyright (c) 2020, PG, All rights reserved.
 #include <atomic>
 #include <future>
+#include <memory>
 
 #include "DifficultyCalculator.h"
 #include "HitSounds.h"
@@ -152,8 +153,8 @@ class DatabaseBeatmap final {
     };
 
     DatabaseBeatmap(std::string filePath, std::string folder, BeatmapType type);
-    DatabaseBeatmap(std::vector<DatabaseBeatmap *> *difficulties, BeatmapType type);
-    ~DatabaseBeatmap();
+    DatabaseBeatmap(std::vector<std::shared_ptr<DatabaseBeatmap>> &difficulties, BeatmapType type);
+    ~DatabaseBeatmap() = default;
 
     static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string &osuFilePath, float AR, float CS,
                                                         float speedMultiplier, bool calculateStarsInaccurately = false);
@@ -164,7 +165,7 @@ class DatabaseBeatmap final {
                                                         float speedMultiplier, bool calculateStarsInaccurately,
                                                         const std::atomic<bool> &dead);
     bool loadMetadata(bool compute_md5 = true);
-    static LOAD_GAMEPLAY_RESULT loadGameplay(DatabaseBeatmap *databaseBeatmap, BeatmapInterface *beatmap);
+    static LOAD_GAMEPLAY_RESULT loadGameplay(std::shared_ptr<DatabaseBeatmap> databaseBeatmap, BeatmapInterface *beatmap);
     MapOverrides get_overrides();
     void update_overrides();
 
@@ -182,11 +183,10 @@ class DatabaseBeatmap final {
     [[nodiscard]] inline std::string getFilePath() const { return this->sFilePath; }
 
     template <typename T = DatabaseBeatmap>
-    [[nodiscard]] inline const std::vector<T *> &getDifficulties() const
+    [[nodiscard]] inline const std::vector<std::shared_ptr<T>> &getDifficulties() const
         requires(std::is_same_v<std::remove_cv_t<T>, DatabaseBeatmap>)
     {
-        static std::vector<T *> empty;
-        return this->difficulties == nullptr ? empty : reinterpret_cast<const std::vector<T *> &>(*this->difficulties);
+        return reinterpret_cast<const std::vector<std::shared_ptr<T>> &>(this->difficulties);
     }
 
     [[nodiscard]] inline const MD5Hash &getMD5Hash() const { return this->sMD5Hash; }
@@ -358,7 +358,7 @@ class DatabaseBeatmap final {
         int beatmapVersion, std::vector<SLIDER> &sliders, zarray<DatabaseBeatmap::TIMINGPOINT> &timingpoints,
         float sliderMultiplier, float sliderTickRate, const std::atomic<bool> &dead);
 
-    std::vector<DatabaseBeatmap *> *difficulties = nullptr;
+    std::vector<std::shared_ptr<DatabaseBeatmap>> difficulties;
     BeatmapType type;
 
     MD5Hash sMD5Hash;

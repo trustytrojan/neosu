@@ -23,13 +23,13 @@ struct VolNormalization::LoudnessCalcThread {
    public:
     std::thread thr;
     std::atomic<bool> dead{true};
-    std::vector<DatabaseBeatmap *> maps;
+    std::vector<std::shared_ptr<DatabaseBeatmap>> maps;
 
     std::atomic<u32> nb_computed{0};
     std::atomic<u32> nb_total{0};
 #ifdef MCENGINE_FEATURE_BASS
    public:
-    LoudnessCalcThread(std::vector<DatabaseBeatmap *> maps_to_calc) {
+    LoudnessCalcThread(std::vector<std::shared_ptr<DatabaseBeatmap>> maps_to_calc) {
         this->dead = false;
         this->maps = std::move(maps_to_calc);
         this->nb_total = this->maps.size() + 1;
@@ -121,7 +121,7 @@ struct VolNormalization::LoudnessCalcThread {
         this->nb_computed++;
     }
 #else  // TODO:
-    LoudnessCalcThread(std::vector<DatabaseBeatmap *> maps_to_calc) { (void)maps_to_calc; }
+    LoudnessCalcThread(std::vector<std::shared_ptr<DatabaseBeatmap>> maps_to_calc) { (void)maps_to_calc; }
 #endif
 };
 
@@ -143,7 +143,7 @@ u32 VolNormalization::get_total_instance() {
     return x;
 }
 
-void VolNormalization::start_calc_instance(const std::vector<DatabaseBeatmap *> &maps_to_calc) {
+void VolNormalization::start_calc_instance(const std::vector<std::shared_ptr<DatabaseBeatmap>> &maps_to_calc) {
     if(!Env::cfg(AUD::BASS) || soundEngine->getTypeId() != SoundEngine::BASS) return;  // TODO
     this->abort_instance();
     if(maps_to_calc.empty()) return;
@@ -162,7 +162,7 @@ void VolNormalization::start_calc_instance(const std::vector<DatabaseBeatmap *> 
     for(int i = 0; i < nb_threads; i++) {
         int cur_chunk_size = chunk_size + (i < remainder ? 1 : 0);
 
-        auto chunk = std::vector<DatabaseBeatmap *>(it, it + cur_chunk_size);
+        auto chunk = std::vector<std::shared_ptr<DatabaseBeatmap>>(it, it + cur_chunk_size);
         it += cur_chunk_size;
 
         auto lct = new LoudnessCalcThread(chunk);

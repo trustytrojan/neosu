@@ -16,7 +16,7 @@ class InfoLabel : public CBaseUIButton {
     void draw() override;
     void mouse_update(bool *propagate_clicks) override;
 
-    void setFromBeatmap(Beatmap *beatmap, DatabaseBeatmap *diff2);
+    void setFromBeatmap(Beatmap *beatmap, std::shared_ptr<DatabaseBeatmap> diff2);
 
     void setArtist(std::string artist) { this->sArtist = std::move(artist); }
     void setTitle(std::string title) { this->sTitle = std::move(title); }

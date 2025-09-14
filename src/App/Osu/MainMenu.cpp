@@ -243,7 +243,6 @@ MainMenu::MainMenu() : OsuScreen() {
 }
 
 MainMenu::~MainMenu() {
-    SAFE_DELETE(this->preloaded_beatmapset);
     SAFE_DELETE(this->updateAvailableButton);
 
     anim->deleteExistingAnimation(&this->fUpdateButtonAnim);
@@ -1051,7 +1050,7 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
 
                 // load timing points if needed
                 // XXX: file io, don't block main thread
-                auto *diff2 = osu->getSelectedBeatmap()->getSelectedDifficulty2();
+                auto diff2 = osu->getSelectedBeatmap()->getSelectedDifficulty2();
                 if(diff2 && diff2->getTimingpoints().empty()) {
                     diff2->loadMetadata(false);
                 }
@@ -1103,12 +1102,12 @@ void MainMenu::selectRandomBeatmap() {
         }
 
         sb->getSelectedBeatmap()->deselect();
-        SAFE_DELETE(this->preloaded_beatmapset);
+        this->preloaded_beatmapset = nullptr;
 
         constexpr int RETRY_SETS{10};
         for(int i = 0; i < RETRY_SETS; i++) {
             const auto &mapset_folder = mapset_folders[rand() % mapset_folders.size()];
-            BeatmapSet *set = db->loadRawBeatmap(mapset_folder, false);
+            std::shared_ptr<BeatmapSet> set = db->loadRawBeatmap(mapset_folder, false);
             if(set == nullptr) {
                 debugLog("Failed to load beatmap set '{:s}'\n", mapset_folder.c_str());
                 continue;
@@ -1117,7 +1116,6 @@ void MainMenu::selectRandomBeatmap() {
             auto beatmap_diffs = set->getDifficulties();
             if(beatmap_diffs.empty()) {
                 debugLog("Mapset '{:s}' has no difficulties!\n", set->getFolder());
-                delete set;
                 continue;
             }
 
@@ -1129,7 +1127,6 @@ void MainMenu::selectRandomBeatmap() {
                 (i < RETRY_SETS - 1) && !env->fileExists(candidate_diff->getFullBackgroundImageFilePath());
             if(skip) {
                 debugLog("Beatmap '{:s}' has no background image, skipping.\n", candidate_diff->getFilePath());
-                delete set;
                 continue;
             }
 

@@ -33,7 +33,7 @@ struct info_cache {
     pp_info info{};
 };
 
-static BeatmapDifficulty* diff = nullptr;
+static std::shared_ptr<BeatmapDifficulty> diff = nullptr;
 
 static std::condition_variable cond;
 static std::thread thr;
@@ -216,7 +216,7 @@ static void run_thread() {
     }
 }
 
-void lct_set_map(DatabaseBeatmap* new_diff) {
+void lct_set_map(std::shared_ptr<DatabaseBeatmap> new_diff) {
     if(diff == new_diff) return;
 
     if(diff != nullptr) {

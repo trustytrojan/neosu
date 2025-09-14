@@ -35,7 +35,7 @@ class RankingScreen : public ScreenBackable {
     void onWatchClicked();
 
     void setScore(FinishedScore score);
-    void setBeatmapInfo(Beatmap *beatmap, DatabaseBeatmap *diff2);
+    void setBeatmapInfo(Beatmap *beatmap, std::shared_ptr<DatabaseBeatmap> diff2);
 
    private:
     void updateLayout() override;

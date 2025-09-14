@@ -23,7 +23,7 @@
 
 SongDifficultyButton::SongDifficultyButton(SongBrowser* songBrowser, UIContextMenu* contextMenu,
                                            float xPos, float yPos, float xSize, float ySize, UString name,
-                                           DatabaseBeatmap* diff2, SongButton* parentSongButton)
+                                           std::shared_ptr<DatabaseBeatmap> diff2, SongButton* parentSongButton)
     : SongButton(songBrowser, contextMenu, xPos, yPos, xSize, ySize, std::move(name), nullptr) {
     this->databaseBeatmap = diff2;  // NOTE: can't use parent constructor for passing this argument, as it would
                                     // otherwise try to build a full button (and not just a diff button)

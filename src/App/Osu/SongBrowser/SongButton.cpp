@@ -24,7 +24,7 @@
 #include "UIContextMenu.h"
 
 SongButton::SongButton(SongBrowser *songBrowser, UIContextMenu *contextMenu, float xPos, float yPos, float xSize,
-                       float ySize, UString name, DatabaseBeatmap *databaseBeatmap)
+                       float ySize, UString name, std::shared_ptr<DatabaseBeatmap> databaseBeatmap)
     : CarouselButton(songBrowser, contextMenu, xPos, yPos, xSize, ySize, std::move(name)) {
     this->databaseBeatmap = databaseBeatmap;
 
@@ -43,7 +43,7 @@ SongButton::SongButton(SongBrowser *songBrowser, UIContextMenu *contextMenu, flo
 
     // build children
     if(this->databaseBeatmap != nullptr) {
-        const std::vector<DatabaseBeatmap *> &difficulties = this->databaseBeatmap->getDifficulties();
+        const std::vector<std::shared_ptr<DatabaseBeatmap>> &difficulties = this->databaseBeatmap->getDifficulties();
 
         // and add them
         for(auto difficultie : difficulties) {

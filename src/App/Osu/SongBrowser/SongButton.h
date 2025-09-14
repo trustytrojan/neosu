@@ -10,7 +10,7 @@ class BeatmapCarousel;
 class SongButton : public CarouselButton {
    public:
     SongButton(SongBrowser *songBrowser, UIContextMenu *contextMenu, float xPos, float yPos,
-               float xSize, float ySize, UString name, DatabaseBeatmap *databaseBeatmap);
+               float xSize, float ySize, UString name, std::shared_ptr<DatabaseBeatmap> databaseBeatmap);
     ~SongButton() override;
 
     void draw() override;
@@ -22,7 +22,7 @@ class SongButton : public CarouselButton {
     void updateLayoutEx() override;
     virtual void updateGrade() { ; }
 
-    [[nodiscard]] DatabaseBeatmap *getDatabaseBeatmap() const override { return this->databaseBeatmap; }
+    [[nodiscard]] std::shared_ptr<DatabaseBeatmap> getDatabaseBeatmap() const override { return this->databaseBeatmap; }
     FinishedScore::Grade grade = FinishedScore::Grade::N;
 
    protected:
@@ -41,7 +41,7 @@ class SongButton : public CarouselButton {
     float calculateGradeScale();
     float calculateGradeWidth();
 
-    DatabaseBeatmap *databaseBeatmap;
+    std::shared_ptr<DatabaseBeatmap> databaseBeatmap;
 
     std::string sTitle;
     std::string sArtist;

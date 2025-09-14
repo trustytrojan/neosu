@@ -270,7 +270,7 @@ void InfoLabel::mouse_update(bool *propagate_clicks) {
     }
 }
 
-void InfoLabel::setFromBeatmap(Beatmap * /*beatmap*/, DatabaseBeatmap *diff2) {
+void InfoLabel::setFromBeatmap(Beatmap * /*beatmap*/, std::shared_ptr<DatabaseBeatmap> diff2) {
     this->iBeatmapId = diff2->getID();
 
     this->setArtist(diff2->getArtist());

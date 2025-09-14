@@ -530,7 +530,7 @@ void RankingScreen::setScore(FinishedScore score) {
         this->enabledExperimentalMods.push_back(&cv::mod_approach_different);
 }
 
-void RankingScreen::setBeatmapInfo(Beatmap *beatmap, DatabaseBeatmap *diff2) {
+void RankingScreen::setBeatmapInfo(Beatmap *beatmap, std::shared_ptr<DatabaseBeatmap> diff2) {
     this->score.diff2 = diff2;
     this->songInfo->setFromBeatmap(beatmap, diff2);
 

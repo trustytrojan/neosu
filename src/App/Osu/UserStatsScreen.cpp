@@ -92,7 +92,7 @@ void UserStatsScreen::rebuildScoreButtons() {
         if(i >= cv::ui_top_ranks_max.getInt()) break;
         const float weight = Database::getWeightForIndex(i);
 
-        DatabaseBeatmap *diff = db->getBeatmapDifficulty(score->beatmap_hash);
+        std::shared_ptr<DatabaseBeatmap> diff = db->getBeatmapDifficulty(score->beatmap_hash);
         if(!diff) continue;
 
         UString title = "...";

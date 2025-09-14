@@ -17,7 +17,7 @@ class VolNormalization {
         abort_instance();
     }
 
-    static inline void start_calc(const std::vector<DatabaseBeatmap*>& maps_to_calc) {
+    static inline void start_calc(const std::vector<std::shared_ptr<DatabaseBeatmap>>& maps_to_calc) {
         get_instance().start_calc_instance(maps_to_calc);
     }
 
@@ -52,7 +52,7 @@ class VolNormalization {
     static VolNormalization& get_instance();
     static VolNormalization* get_instance_ptr();
 
-    void start_calc_instance(const std::vector<DatabaseBeatmap*>& maps_to_calc);
+    void start_calc_instance(const std::vector<std::shared_ptr<DatabaseBeatmap>>& maps_to_calc);
 
     u32 get_total_instance();
     u32 get_computed_instance();

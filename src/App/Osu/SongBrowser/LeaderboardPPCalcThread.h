@@ -1,6 +1,6 @@
 #pragma once
 // Copyright (c) 2024, kiwec, All rights reserved.
-
+#include <memory>
 #include "DifficultyCalculator.h"  // for pp_info
 
 class DatabaseBeatmap;
@@ -21,7 +21,7 @@ struct pp_calc_request {
 };
 
 // Set currently selected map. Clears pp cache. Pass NULL to init/reset.
-void lct_set_map(DatabaseBeatmap* diff2);
+void lct_set_map(std::shared_ptr<DatabaseBeatmap> diff2);
 
 // Get pp for given parameters. Returns -1 pp values if not computed yet.
 pp_info lct_get_pp(pp_calc_request rqt);

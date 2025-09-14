@@ -225,7 +225,7 @@ class NoRecordsSetElement : public CBaseUILabel {
 };
 
 bool sort_by_difficulty(SongButton const *a, SongButton const *b) {
-    const auto *aPtr = a->getDatabaseBeatmap(), *bPtr = b->getDatabaseBeatmap();
+    const auto aPtr = a->getDatabaseBeatmap(), bPtr = b->getDatabaseBeatmap();
     if((aPtr == nullptr) || (bPtr == nullptr)) return (aPtr == nullptr) < (bPtr == nullptr);
 
     float stars1 = aPtr->getStarsNomod();
@@ -246,7 +246,7 @@ namespace {  // static namespace
 // not used anywhere else
 
 bool sort_by_artist(SongButton const *a, SongButton const *b) {
-    const auto *aPtr = a->getDatabaseBeatmap(), *bPtr = b->getDatabaseBeatmap();
+    const auto aPtr = a->getDatabaseBeatmap(), bPtr = b->getDatabaseBeatmap();
     if((aPtr == nullptr) || (bPtr == nullptr)) return (aPtr == nullptr) < (bPtr == nullptr);
 
     const auto &artistA{aPtr->getArtist()};
@@ -258,7 +258,7 @@ bool sort_by_artist(SongButton const *a, SongButton const *b) {
 }
 
 bool sort_by_bpm(SongButton const *a, SongButton const *b) {
-    const auto *aPtr = a->getDatabaseBeatmap(), *bPtr = b->getDatabaseBeatmap();
+    const auto aPtr = a->getDatabaseBeatmap(), bPtr = b->getDatabaseBeatmap();
     if((aPtr == nullptr) || (bPtr == nullptr)) return (aPtr == nullptr) < (bPtr == nullptr);
 
     int bpm1 = aPtr->getMostCommonBPM();
@@ -268,7 +268,7 @@ bool sort_by_bpm(SongButton const *a, SongButton const *b) {
 }
 
 bool sort_by_creator(SongButton const *a, SongButton const *b) {
-    const auto *aPtr = a->getDatabaseBeatmap(), *bPtr = b->getDatabaseBeatmap();
+    const auto aPtr = a->getDatabaseBeatmap(), bPtr = b->getDatabaseBeatmap();
     if((aPtr == nullptr) || (bPtr == nullptr)) return (aPtr == nullptr) < (bPtr == nullptr);
 
     const auto &creatorA{aPtr->getCreator()};
@@ -280,7 +280,7 @@ bool sort_by_creator(SongButton const *a, SongButton const *b) {
 }
 
 bool sort_by_date_added(SongButton const *a, SongButton const *b) {
-    const auto *aPtr = a->getDatabaseBeatmap(), *bPtr = b->getDatabaseBeatmap();
+    const auto aPtr = a->getDatabaseBeatmap(), bPtr = b->getDatabaseBeatmap();
     if((aPtr == nullptr) || (bPtr == nullptr)) return (aPtr == nullptr) < (bPtr == nullptr);
 
     long long time1 = aPtr->last_modification_time;
@@ -295,7 +295,7 @@ bool sort_by_grade(SongButton const *a, SongButton const *b) {
 }
 
 bool sort_by_length(SongButton const *a, SongButton const *b) {
-    const auto *aPtr = a->getDatabaseBeatmap(), *bPtr = b->getDatabaseBeatmap();
+    const auto aPtr = a->getDatabaseBeatmap(), bPtr = b->getDatabaseBeatmap();
     if((aPtr == nullptr) || (bPtr == nullptr)) return (aPtr == nullptr) < (bPtr == nullptr);
 
     unsigned long length1 = aPtr->getLengthMS();
@@ -305,7 +305,7 @@ bool sort_by_length(SongButton const *a, SongButton const *b) {
 }
 
 bool sort_by_title(SongButton const *a, SongButton const *b) {
-    const auto *aPtr = a->getDatabaseBeatmap(), *bPtr = b->getDatabaseBeatmap();
+    const auto aPtr = a->getDatabaseBeatmap(), bPtr = b->getDatabaseBeatmap();
     if((aPtr == nullptr) || (bPtr == nullptr)) return (aPtr == nullptr) < (bPtr == nullptr);
 
     const auto &titleA{aPtr->getTitle()};
@@ -877,8 +877,8 @@ bool SongBrowser::selectBeatmapset(i32 set_id) {
     }
 
     // Just picking the hardest diff for now
-    DatabaseBeatmap *best_diff = nullptr;
-    const std::vector<DatabaseBeatmap *> &diffs = beatmapset->getDifficulties();
+    std::shared_ptr<DatabaseBeatmap> best_diff = nullptr;
+    const std::vector<std::shared_ptr<DatabaseBeatmap>> &diffs = beatmapset->getDifficulties();
     for(auto diff : diffs) {
         if(!best_diff || diff->getStarsNomod() > best_diff->getStarsNomod()) {
             best_diff = diff;
@@ -1328,7 +1328,7 @@ void SongBrowser::onSelectionChange(CarouselButton *button, bool rebuild) {
     if(rebuild) this->rebuildSongButtons();
 }
 
-void SongBrowser::onDifficultySelected(DatabaseBeatmap *diff2, bool play) {
+void SongBrowser::onDifficultySelected(std::shared_ptr<DatabaseBeatmap> diff2, bool play) {
     // deselect = unload
     this->beatmap->deselect();
 
@@ -1478,7 +1478,7 @@ void SongBrowser::refreshBeatmaps() {
     db->load();
 }
 
-void SongBrowser::addBeatmapSet(BeatmapSet *mapset) {
+void SongBrowser::addBeatmapSet(std::shared_ptr<BeatmapSet> mapset) {
     if(mapset->getDifficulties().size() < 1) return;
 
     SongButton *songButton;
@@ -1805,13 +1805,13 @@ void SongBrowser::updateSongButtonLayout() {
     this->carousel->setScrollSizeToContent(this->carousel->getSize().y / 2);
 }
 
-bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
+bool SongBrowser::searchMatcher(std::shared_ptr<DatabaseBeatmap> databaseBeatmap,
                                 const std::vector<std::string> &searchStringTokens) {
     if(databaseBeatmap == nullptr) return false;
 
-    const std::vector<const DatabaseBeatmap *> tmpContainer{databaseBeatmap};
+    const std::vector<std::shared_ptr<DatabaseBeatmap>> tmpContainer{databaseBeatmap};
     const auto &diffs = databaseBeatmap->getDifficulties().size() > 0
-                            ? databaseBeatmap->getDifficulties<const DatabaseBeatmap>()
+                            ? databaseBeatmap->getDifficulties<DatabaseBeatmap>()
                             : tmpContainer;
 
     auto speed = osu->getSelectedBeatmap()->getSpeedMultiplier();
@@ -1874,7 +1874,7 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
     // parse over all difficulties
     bool expressionMatches = false;  // if any diff matched all expressions
     std::vector<std::string> literalSearchStrings;
-    for(const auto *diff : diffs) {
+    for(const auto& diff : diffs) {
         bool expressionsMatch = true;  // if the current search string (meaning only the expressions in this case)
                                        // matches the current difficulty
 
@@ -2062,7 +2062,7 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
 
     // early return here for literal match/contains
     if(hasAnyValidLiteralSearchString) {
-        static constexpr auto findSubstringInDiff = [](const DatabaseBeatmap *diff,
+        static constexpr auto findSubstringInDiff = [](const std::shared_ptr<DatabaseBeatmap> diff,
                                                        const std::string &searchString) -> bool {
             if(!diff->getTitle().empty() && SString::contains_ncase(diff->getTitle(), searchString)) return true;
             if(!diff->getArtist().empty() && SString::contains_ncase(diff->getArtist(), searchString)) return true;
@@ -2079,7 +2079,7 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
             return false;
         };
 
-        for(const auto *diff : diffs) {
+        for(const auto& diff : diffs) {
             bool atLeastOneFullMatch = true;
 
             for(const auto &literalSearchString : literalSearchStrings) {
@@ -2613,7 +2613,7 @@ void SongBrowser::onDatabaseLoadingFinished() {
             this->selectSelectedBeatmapSongButton();
         }
 
-        SAFE_DELETE(osu->mainMenu->preloaded_beatmapset);
+        osu->mainMenu->preloaded_beatmapset = nullptr;
     }
 
     // ok, if we still haven't selected a song, do so now
@@ -3086,10 +3086,10 @@ void SongBrowser::onSongButtonContextMenu(SongButton *songButton, const UString 
                         beatmapSetHashes.push_back(i->getDatabaseBeatmap()->getMD5Hash());
                     }
                 } else {
-                    const DatabaseBeatmap *beatmap =
+                    const std::shared_ptr<DatabaseBeatmap> beatmap =
                         db->getBeatmapDifficulty(songButton->getDatabaseBeatmap()->getMD5Hash());
                     if(beatmap != nullptr) {
-                        const std::vector<DatabaseBeatmap *> &diffs = beatmap->getDifficulties();
+                        const std::vector<std::shared_ptr<DatabaseBeatmap>> &diffs = beatmap->getDifficulties();
                         for(auto diff : diffs) {
                             beatmapSetHashes.push_back(diff->getMD5Hash());
                         }
@@ -3284,7 +3284,7 @@ void SongBrowser::selectRandomBeatmap() {
 
 void SongBrowser::selectPreviousRandomBeatmap() {
     if(this->previousRandomBeatmaps.size() > 0) {
-        DatabaseBeatmap *currentRandomBeatmap = this->previousRandomBeatmaps.back();
+        std::shared_ptr<DatabaseBeatmap> currentRandomBeatmap = this->previousRandomBeatmaps.back();
         if(this->previousRandomBeatmaps.size() > 1 && this->beatmap != nullptr &&
            this->previousRandomBeatmaps[this->previousRandomBeatmaps.size() - 1] ==
                this->beatmap->getSelectedDifficulty2())
@@ -3303,7 +3303,7 @@ void SongBrowser::selectPreviousRandomBeatmap() {
 
         // select it, if we can find it (and remove it from memory)
         bool foundIt = false;
-        const DatabaseBeatmap *previousRandomBeatmap = this->previousRandomBeatmaps.back();
+        const std::shared_ptr<DatabaseBeatmap> previousRandomBeatmap = this->previousRandomBeatmaps.back();
         for(auto &songButton : songButtons) {
             if(songButton->getDatabaseBeatmap() != nullptr &&
                songButton->getDatabaseBeatmap() == previousRandomBeatmap) {

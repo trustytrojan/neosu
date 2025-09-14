@@ -1,5 +1,6 @@
 #pragma once
 // Copyright (c) 2016, PG, All rights reserved.
+#include <memory>
 #include "types.h"
 
 class DatabaseBeatmap;
@@ -94,8 +95,8 @@ struct Mods {
 
     // Get AR/OD, ignoring mods which change it over time
     // Used for ppv2 calculations.
-    f32 get_naive_ar(DatabaseBeatmap *diff2) const;
-    f32 get_naive_od(DatabaseBeatmap *diff2) const;
+    f32 get_naive_ar(std::shared_ptr<DatabaseBeatmap> diff2) const;
+    f32 get_naive_od(std::shared_ptr<DatabaseBeatmap> diff2) const;
 
     static Mods from_cvars();
     static Mods from_legacy(u32 legacy_flags);

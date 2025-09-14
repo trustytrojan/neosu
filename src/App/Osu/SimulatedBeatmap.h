@@ -5,7 +5,7 @@
 
 class SimulatedBeatmap : public BeatmapInterface {
    public:
-    SimulatedBeatmap(DatabaseBeatmap *diff2, Replay::Mods mods_);
+    SimulatedBeatmap(std::shared_ptr<DatabaseBeatmap> diff2, Replay::Mods mods_);
     ~SimulatedBeatmap() override;
 
     Replay::Mods mods;
@@ -86,7 +86,7 @@ class SimulatedBeatmap : public BeatmapInterface {
 
    protected:
     // database
-    DatabaseBeatmap *selectedDifficulty2;
+    std::shared_ptr<DatabaseBeatmap> selectedDifficulty2;
 
     // sound
     i32 iCurMusicPos = 0;

@@ -19,8 +19,8 @@ void download_beatmapset(u32 set_id, float *progress);
 
 // Downloads given beatmap (unless it already exists)
 // When download/extraction fails, `progress` is -1
-DatabaseBeatmap *download_beatmap(i32 beatmap_id, MD5Hash beatmap_md5, float *progress);
-DatabaseBeatmap *download_beatmap(i32 beatmap_id, i32 beatmapset_id, float *progress);
+std::shared_ptr<DatabaseBeatmap> download_beatmap(i32 beatmap_id, MD5Hash beatmap_md5, float *progress);
+std::shared_ptr<DatabaseBeatmap> download_beatmap(i32 beatmap_id, i32 beatmapset_id, float *progress);
 void process_beatmapset_info_response(Packet packet);
 
 i32 extract_beatmapset_id(const u8 *data, size_t data_s);

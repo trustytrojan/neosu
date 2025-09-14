@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include "MD5Hash.h"
 #include "Replay.h"
 
@@ -19,7 +20,7 @@ struct FinishedScore {
     u64 unixTimestamp = 0;
     i32 player_id = 0;
     std::string playerName;
-    DatabaseBeatmap *diff2 = nullptr;  // NOTE: do NOT assume this is set
+    std::shared_ptr<DatabaseBeatmap> diff2 = nullptr;  // NOTE: do NOT assume this is set
     u64 play_time_ms = 0;
 
     enum class Grade : uint8_t {
