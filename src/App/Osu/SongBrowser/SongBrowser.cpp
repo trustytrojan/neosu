@@ -2398,6 +2398,22 @@ void SongBrowser::rebuildScoreButtons() {
 
     // layout
     this->updateScoreBrowserLayout();
+
+    // update grades of songbuttons for current map
+    // (weird place for this to be, i think the intent is to update them after you set a score)
+    if(validBeatmap) {
+        for(auto &visibleSongButton : this->visibleSongButtons) {
+            if(visibleSongButton->getDatabaseBeatmap() == this->beatmap->getSelectedDifficulty2()) {
+                auto *songButtonPointer = dynamic_cast<SongButton *>(visibleSongButton);
+                if(songButtonPointer != nullptr) {
+                    for(CarouselButton *diffButton : songButtonPointer->getChildren()) {
+                        auto *diffButtonPointer = dynamic_cast<SongButton *>(diffButton);
+                        if(diffButtonPointer != nullptr) diffButtonPointer->updateGrade();
+                    }
+                }
+            }
+        }
+    }
 }
 
 void SongBrowser::scheduleSearchUpdate(bool immediately) {
@@ -2797,22 +2813,6 @@ void SongBrowser::onSortScoresChange(const UString &text, int /*id*/) {
     this->sortScoresDropdown->setText(text);
     this->rebuildScoreButtons();
     this->scoreBrowser->scrollToTop();
-
-    // update grades of all visible songdiffbuttons
-    // NOTE(kiwec): why here???? wtf lol
-    if(this->beatmap != nullptr) {
-        for(auto &visibleSongButton : this->visibleSongButtons) {
-            if(visibleSongButton->getDatabaseBeatmap() == this->beatmap->getSelectedDifficulty2()) {
-                auto *songButtonPointer = dynamic_cast<SongButton *>(visibleSongButton);
-                if(songButtonPointer != nullptr) {
-                    for(CarouselButton *diffButton : songButtonPointer->getChildren()) {
-                        auto *diffButtonPointer = dynamic_cast<SongButton *>(diffButton);
-                        if(diffButtonPointer != nullptr) diffButtonPointer->updateGrade();
-                    }
-                }
-            }
-        }
-    }
 }
 
 void SongBrowser::onWebClicked(CBaseUIButton * /*button*/) {

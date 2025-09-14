@@ -102,8 +102,6 @@ class Database {
         return this->scoreSortingMethods;
     }
 
-    std::unordered_map<MD5Hash, std::vector<FinishedScore>> online_scores;
-
     static std::string getOsuSongsFolder();
 
     BeatmapSet *loadRawBeatmap(const std::string &beatmapPath);  // only used for raw loading without db
@@ -118,6 +116,7 @@ class Database {
     std::mutex scores_mtx;
     std::atomic<bool> bDidScoresChangeForStats = true;
     std::unordered_map<MD5Hash, std::vector<FinishedScore>> scores;
+    std::unordered_map<MD5Hash, std::vector<FinishedScore>> online_scores;
 
     // should only be accessed from database loader thread!
     std::unordered_map<std::string, UString> database_files;
