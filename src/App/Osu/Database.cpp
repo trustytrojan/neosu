@@ -769,8 +769,8 @@ void Database::loadMaps() {
 
     // read beatmapInfos, and also build two hashmaps (diff hash -> BeatmapDifficulty, diff hash -> Beatmap)
     struct Beatmap_Set {
-        int setID;
-        std::vector<DatabaseBeatmap *> *diffs2 = nullptr;
+        int setID{0};
+        std::vector<DatabaseBeatmap *> *diffs2{nullptr};
     };
     std::vector<Beatmap_Set> beatmapSets;
     std::unordered_map<int, size_t> setIDToIndex;
@@ -1294,12 +1294,24 @@ void Database::loadMaps() {
 
             // build beatmap sets
             for(const auto &beatmapSet : beatmapSets) {
-                if(this->bInterruptLoad.load()) break;    // cancellation point
-                if(beatmapSet.diffs2->empty()) continue;  // sanity check
+                if(this->bInterruptLoad.load()) {
+                    // clean up remaining unprocessed diffs2 vectors
+                    for(size_t i = &beatmapSet - &beatmapSets[0]; i < beatmapSets.size(); i++) {
+                        delete beatmapSets[i].diffs2;
+                    }
+                    break;
+                }
+
+                if(beatmapSet.diffs2->empty()) { // sanity check
+                    // clean up empty diffs2 vector
+                    delete beatmapSet.diffs2;
+                    continue;
+                }
 
                 if(beatmapSet.setID > 0) {
                     auto *set = new BeatmapSet(beatmapSet.diffs2, DatabaseBeatmap::BeatmapType::PEPPY_BEATMAPSET);
                     this->beatmapsets.push_back(set);
+                    // beatmapSet.diffs2 ownership transferred to BeatmapSet
                 } else {
                     // set with invalid ID: treat all its diffs separately. we'll group the diffs by title+artist.
                     std::unordered_map<std::string, std::vector<DatabaseBeatmap *> *> titleArtistToBeatmap;
@@ -1320,6 +1332,9 @@ void Database::loadMaps() {
                         auto *set = new BeatmapSet(scuffed_set.second, DatabaseBeatmap::BeatmapType::PEPPY_BEATMAPSET);
                         this->beatmapsets.push_back(set);
                     }
+
+                    // clean up the original diffs2 vector (ownership of diffs transferred to new vectors)
+                    delete beatmapSet.diffs2;
                 }
             }
         }
