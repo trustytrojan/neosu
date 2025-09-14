@@ -8,6 +8,7 @@
 #include "Engine.h"
 #include "Sound.h"
 #include "SoundEngine.h"
+#include "Thread.h"
 
 #ifdef MCENGINE_FEATURE_BASS
 #include "BassManager.h"
@@ -47,6 +48,9 @@ struct VolNormalization::LoudnessCalcThread {
 
    private:
     void run() {
+        McThread::set_current_thread_name("loudness_calc");
+        McThread::set_current_thread_prio(false); // reset priority
+
         UString last_song = "";
         f32 last_loudness = 0.f;
         std::array<f32, 44100> buf{};

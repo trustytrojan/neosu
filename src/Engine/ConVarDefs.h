@@ -28,7 +28,7 @@ dummyGraphics *g{};
 // };
 // dummyEnv *env{};
 namespace Environment {
-inline void setProcessPriority(float /**/) { ; }
+inline void setThreadPriority(float /**/) { ; }
 }  // namespace Environment
 
 extern void _borderless();
@@ -1243,7 +1243,7 @@ CONVAR(vsync, "vsync", false, CLIENT,
        [](float on) -> void { g ? g->setVSync(!!static_cast<int>(on)) : (void)0; });
 // this is not windows-only anymore, just keeping it with the "win_" prefix to not break old configs
 CONVAR(win_processpriority, "win_processpriority", 1, CLIENT,
-       "sets the main process priority (0 = normal, 1 = high)", CFUNC(Environment::setProcessPriority));
+       "sets the main process priority (0 = normal, 1 = high)", CFUNC(Environment::setThreadPriority));
 
 // Unfinished features
 CONVAR(cbf, "cbf", false, CLIENT, "click between frames");

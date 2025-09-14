@@ -36,7 +36,7 @@ class NotificationOverlayKeyListener {
 class NotificationOverlay : public OsuScreen {
    public:
     NotificationOverlay();
-    ~NotificationOverlay() override { ; }
+    ~NotificationOverlay() override;
 
     void mouse_update(bool *propagate_clicks) override;
     void draw() override;

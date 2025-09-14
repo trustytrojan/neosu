@@ -23,6 +23,7 @@
 #include "Timing.h"
 #include "score.h"
 
+#include <algorithm>
 #include <unordered_set>
 
 #include <algorithm>
@@ -93,7 +94,7 @@ bool sortScoreByPP(FinishedScore const &a, FinishedScore const &b) {
 void Database::AsyncDBLoader::init() {
     if(cv::debug_db.getBool() || cv::debug_async_db.getBool()) debugLog("(AsyncDBLoader) start\n");
 
-    if(this->bNeedRawLoad) {
+    if(db->bNeedRawLoad) {
         db->scheduleLoadRaw();
     } else {
         MapCalcThread::start_calc(db->maps_to_recalc);
@@ -111,53 +112,36 @@ void Database::AsyncDBLoader::init() {
 // run immediately on a separate thread when resourceManager->loadResource() is called
 void Database::AsyncDBLoader::initAsync() {
     if(cv::debug_db.getBool() || cv::debug_async_db.getBool()) debugLog("(AsyncDBLoader) start\n");
-
-    if(!db) return;
-
-    // stop threads that rely on database content
-    sct_abort();
-    lct_set_map(nullptr);
-    MapCalcThread::abort();
-    VolNormalization::abort();
-
-    db->loudness_to_calc.clear();
-    db->maps_to_recalc.clear();
-
-    for(auto &beatmapset : db->beatmapsets) {
-        SAFE_DELETE(beatmapset);
-    }
-    db->beatmapsets.clear();
-
-    for(auto &neosu_set : db->neosu_sets) {
-        SAFE_DELETE(neosu_set);
-    }
-    db->neosu_sets.clear();
-
-    db->findDatabases();
-    db->loadScores(db->database_files["neosu_scores.db"]);
-    db->loadOldMcNeosuScores(db->database_files["scores.db"]);
+    assert(db != nullptr);
 
     std::string peppy_scores_path = cv::osu_folder.getString();
     peppy_scores_path.append(PREF_PATHSEP "scores.db");
 
+    db->findDatabases();
+    if(db->bInterruptLoad.load()) goto done;
+    db->loadScores(db->database_files["neosu_scores.db"]);
+    if(db->bInterruptLoad.load()) goto done;
+    db->loadOldMcNeosuScores(db->database_files["scores.db"]);
+    if(db->bInterruptLoad.load()) goto done;
     db->loadPeppyScores(db->database_files[peppy_scores_path]);
-
     db->bScoresLoaded = true;
+    if(db->bInterruptLoad.load()) goto done;
 
     db->loadMaps();
+    if(db->bInterruptLoad.load()) goto done;
 
     // .db files that were dropped on the main window
     for(const auto &db_path : db->dbPathsToImport) {
         db->importDatabase(db_path);
+        if(db->bInterruptLoad.load()) goto done;
     }
-    db->dbPathsToImport.clear();
 
-    this->bNeedRawLoad = (!env->fileExists(fmt::format("{}" PREF_PATHSEP "osu!.db", cv::osu_folder.getString())) ||
-                          !cv::database_enabled.getBool());
-
-    if(!this->bNeedRawLoad) {
+    if(!db->bNeedRawLoad) {
         load_collections();
     }
+
+done:
+    db->dbPathsToImport.clear();
 
     this->bAsyncReady = true;
     if(cv::debug_db.getBool() || cv::debug_async_db.getBool()) debugLog("(AsyncDBLoader) done\n");
@@ -166,6 +150,33 @@ void Database::AsyncDBLoader::initAsync() {
 void Database::startLoader() {
     if(cv::debug_db.getBool() || cv::debug_async_db.getBool()) debugLog("start\n");
     this->destroyLoader();
+
+    // stop threads that rely on database content
+    sct_abort();
+    lct_set_map(nullptr);
+    MapCalcThread::abort();
+    VolNormalization::abort();
+
+    // only clear diffs/sets for full reloads (only handled for raw re-loading atm)
+    const bool lastLoadWasRaw{this->bNeedRawLoad};
+
+    this->bNeedRawLoad = (!env->fileExists(fmt::format("{}" PREF_PATHSEP "osu!.db", cv::osu_folder.getString())) ||
+                          !cv::database_enabled.getBool());
+
+    const bool nextLoadIsRaw{this->bNeedRawLoad};
+
+    if(!lastLoadWasRaw || !nextLoadIsRaw) {
+        db->loudness_to_calc.clear();
+        db->maps_to_recalc.clear();
+        {
+            std::scoped_lock lock(this->beatmap_difficulties_mtx);
+            this->beatmap_difficulties.clear();
+        }
+        for(auto &beatmapset : db->beatmapsets) {
+            SAFE_DELETE(beatmapset);
+        }
+        db->beatmapsets.clear();
+    }
 
     this->loader = new AsyncDBLoader();
     resourceManager->requestNextLoadAsync();
@@ -224,15 +235,14 @@ Database::~Database() {
     MapCalcThread::abort();
     this->maps_to_recalc.clear();
 
+    {
+        std::scoped_lock lock(this->beatmap_difficulties_mtx);
+        this->beatmap_difficulties.clear();
+    }
     for(auto &beatmapset : this->beatmapsets) {
         SAFE_DELETE(beatmapset);
     }
     this->beatmapsets.clear();
-
-    for(auto &neosu_set : this->neosu_sets) {
-        SAFE_DELETE(neosu_set);
-    }
-    this->neosu_sets.clear();
 
     unload_collections();
 }
@@ -302,6 +312,9 @@ void Database::load() {
     this->bInterruptLoad = false;
     this->fLoadingProgress = 0.0f;
 
+    // reset scheduled logic
+    this->bRawBeatmapLoadScheduled = false;
+
     this->startLoader();
 }
 
@@ -331,7 +344,6 @@ BeatmapSet *Database::addBeatmapSet(const std::string &beatmapFolderPath, i32 se
     }
 
     this->beatmapsets.push_back(beatmap);
-    this->neosu_sets.push_back(beatmap);
 
     this->beatmap_difficulties_mtx.lock();
     for(const auto &diff : beatmap->getDifficulties()) {
@@ -780,8 +792,8 @@ void Database::loadMaps() {
 
     // read beatmapInfos, and also build two hashmaps (diff hash -> BeatmapDifficulty, diff hash -> Beatmap)
     struct Beatmap_Set {
-        int setID;
-        std::vector<DatabaseBeatmap *> *diffs2 = nullptr;
+        int setID{0};
+        std::vector<DatabaseBeatmap *> *diffs2{nullptr};
     };
     std::vector<Beatmap_Set> beatmapSets;
     std::unordered_map<int, size_t> setIDToIndex;
@@ -803,6 +815,8 @@ void Database::loadMaps() {
 
             u32 nb_sets = neosu_maps.read<u32>();
             for(u32 i = 0; i < nb_sets; i++) {
+                if(this->bInterruptLoad.load()) break;  // cancellation point
+
                 u32 progress_bytes = this->bytes_processed + neosu_maps.total_pos;
                 f64 progress_float = (f64)progress_bytes / (f64)this->total_bytes;
                 this->fLoadingProgress = std::clamp(progress_float, 0.01, 0.99);
@@ -816,6 +830,17 @@ void Database::loadMaps() {
 
                 auto *diffs = new std::vector<DatabaseBeatmap *>();
                 for(u16 j = 0; j < nb_diffs; j++) {
+                    if(this->bInterruptLoad.load()) {  // cancellation point
+                        // clean up partially loaded diffs in current set
+                        for(DatabaseBeatmap *diff : *diffs) {
+                            this->beatmap_difficulties.erase(diff->getMD5Hash());
+                            delete diff;
+                        }
+                        delete diffs;
+                        diffs = nullptr;
+                        break;
+                    }
+
                     std::string osu_filename = neosu_maps.read_string();
 
                     std::string map_path = mapset_path;
@@ -894,19 +919,19 @@ void Database::loadMaps() {
                     nb_neosu_maps++;
                 }
 
+                // if we were canceled during inner loop, diffs will be nullptr
+                if(diffs == nullptr) break;
+
                 // NOTE: Ignoring mapsets with ID -1, since we most likely saved them in the correct folder,
                 //       but mistakenly set their ID to -1 (because the ID was missing from the .osu file).
                 if(diffs->empty() || set_id == -1) {
                     delete diffs;
                 } else {
                     auto set = new BeatmapSet(diffs, DatabaseBeatmap::BeatmapType::NEOSU_BEATMAPSET);
-                    this->neosu_sets.push_back(set);
+                    this->beatmapsets.push_back(set);
 
-                    setIDToIndex[set_id] = beatmapSets.size();
-                    Beatmap_Set s;
-                    s.setID = set_id;
-                    s.diffs2 = diffs;
-                    beatmapSets.push_back(s);
+                    // NOTE: Don't add neosu sets to beatmapSets since they're already processed
+                    // Adding them would create duplicate ownership of the diffs vector
                 }
             }
 
@@ -931,10 +956,9 @@ void Database::loadMaps() {
         this->neosu_maps_loaded = true;
     }
 
-    bool should_read_peppy_database = cv::database_enabled.getBool();
-    {
+    if(!this->bNeedRawLoad) {
         ByteBufferedFile::Reader db(peppy_db_path);
-        should_read_peppy_database = db.total_size > 0;
+        bool should_read_peppy_database = db.total_size > 0;
         if(should_read_peppy_database) {
             // read header
             this->iVersion = db.read<u32>();
@@ -1305,12 +1329,38 @@ void Database::loadMaps() {
 
             // build beatmap sets
             for(const auto &beatmapSet : beatmapSets) {
-                if(this->bInterruptLoad.load()) break;    // cancellation point
-                if(beatmapSet.diffs2->empty()) continue;  // sanity check
+                if(this->bInterruptLoad.load()) {  // cancellation point
+                    // clean up remaining unprocessed diffs2 vectors and their contents
+                    for(size_t i = &beatmapSet - &beatmapSets[0]; i < beatmapSets.size(); i++) {
+                        if(beatmapSets[i].diffs2) {
+                            for(DatabaseBeatmap *diff : *beatmapSets[i].diffs2) {
+                                this->beatmap_difficulties.erase(diff->getMD5Hash());
+
+                                // remove from loudness_to_calc
+                                std::erase_if(this->loudness_to_calc,
+                                              [diff](const auto &loudness_diff) { return loudness_diff == diff; });
+                                // remove from maps_to_recalc
+                                std::erase_if(this->maps_to_recalc,
+                                              [diff](const auto &recalc_diff) { return recalc_diff == diff; });
+
+                                delete diff;
+                            }
+                            delete beatmapSets[i].diffs2;
+                        }
+                    }
+                    break;
+                }
+
+                if(beatmapSet.diffs2->empty()) {  // sanity check
+                    // clean up empty diffs2 vector
+                    delete beatmapSet.diffs2;
+                    continue;
+                }
 
                 if(beatmapSet.setID > 0) {
                     auto *set = new BeatmapSet(beatmapSet.diffs2, DatabaseBeatmap::BeatmapType::PEPPY_BEATMAPSET);
                     this->beatmapsets.push_back(set);
+                    // beatmapSet.diffs2 ownership transferred to BeatmapSet
                 } else {
                     // set with invalid ID: treat all its diffs separately. we'll group the diffs by title+artist.
                     std::unordered_map<std::string, std::vector<DatabaseBeatmap *> *> titleArtistToBeatmap;
@@ -1331,6 +1381,9 @@ void Database::loadMaps() {
                         auto *set = new BeatmapSet(scuffed_set.second, DatabaseBeatmap::BeatmapType::PEPPY_BEATMAPSET);
                         this->beatmapsets.push_back(set);
                     }
+
+                    // clean up the original diffs2 vector (ownership of diffs transferred to new vectors)
+                    delete beatmapSet.diffs2;
                 }
             }
         }
@@ -1355,13 +1408,21 @@ void Database::saveMaps() {
     Timer t;
     t.start();
 
+    // collect neosu-only sets here
+    std::vector<BeatmapSet *> temp_neosu_sets;
+    for(const auto &beatmap : this->beatmapsets) {
+        if(beatmap->type == DatabaseBeatmap::BeatmapType::NEOSU_BEATMAPSET) {
+            temp_neosu_sets.push_back(beatmap);
+        }
+    }
+
     ByteBufferedFile::Writer maps("neosu_maps.db");
     maps.write<u32>(NEOSU_MAPS_DB_VERSION);
 
     // Save neosu-downloaded maps
     u32 nb_diffs_saved = 0;
-    maps.write<u32>(this->neosu_sets.size());
-    for(BeatmapSet *beatmap : this->neosu_sets) {
+    maps.write<u32>(temp_neosu_sets.size());
+    for(BeatmapSet *beatmap : temp_neosu_sets) {
         maps.write<i32>(beatmap->getSetID());
         maps.write<u16>(beatmap->getDifficulties().size());
 
@@ -1445,9 +1506,13 @@ void Database::findDatabases() {
     this->database_files.emplace("neosu_scores.db", UString("neosu_scores.db"));
     this->database_files.emplace("scores.db", UString("scores.db"));  // mcneosu database
 
-    std::string peppy_maps_path = cv::osu_folder.getString();
-    peppy_maps_path.append(PREF_PATHSEP "osu!.db");
-    this->database_files.emplace(peppy_maps_path, UString(peppy_maps_path));
+    // ignore if explicitly disabled
+    if(cv::database_enabled.getBool()) {
+        std::string peppy_maps_path = cv::osu_folder.getString();
+        peppy_maps_path.append(PREF_PATHSEP "osu!.db");
+        this->database_files.emplace(peppy_maps_path, UString(peppy_maps_path));
+    }
+
     this->database_files.emplace("neosu_maps.db", UString("neosu_maps.db"));
 
     std::string peppy_collections_path = cv::osu_folder.getString();

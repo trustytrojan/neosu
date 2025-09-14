@@ -102,8 +102,6 @@ class Database {
         return this->scoreSortingMethods;
     }
 
-    std::unordered_map<MD5Hash, std::vector<FinishedScore>> online_scores;
-
     static std::string getOsuSongsFolder();
 
     BeatmapSet *loadRawBeatmap(const std::string &beatmapPath);  // only used for raw loading without db
@@ -118,6 +116,7 @@ class Database {
     std::mutex scores_mtx;
     std::atomic<bool> bDidScoresChangeForStats = true;
     std::unordered_map<MD5Hash, std::vector<FinishedScore>> scores;
+    std::unordered_map<MD5Hash, std::vector<FinishedScore>> online_scores;
 
     // should only be accessed from database loader thread!
     std::unordered_map<std::string, UString> database_files;
@@ -144,7 +143,6 @@ class Database {
 
        private:
         friend class Database;
-        bool bNeedRawLoad{false};
     };
 
     friend class AsyncDBLoader;
@@ -173,7 +171,6 @@ class Database {
     int iNumBeatmapsToLoad;
     std::atomic<bool> bInterruptLoad;
     std::vector<BeatmapSet *> beatmapsets;
-    std::vector<BeatmapSet *> neosu_sets;
 
     std::mutex beatmap_difficulties_mtx;
     std::unordered_map<MD5Hash, BeatmapDifficulty *> beatmap_difficulties;
@@ -186,6 +183,8 @@ class Database {
 
     // scores.db (legacy and custom)
     bool bScoresLoaded = false;
+
+    bool bNeedRawLoad{false};
 
     PlayerStats prevPlayerStats;
     std::array<SCORE_SORTING_METHOD, 6> scoreSortingMethods;

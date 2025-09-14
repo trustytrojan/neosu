@@ -133,7 +133,7 @@ Environment::Environment(int argc, char *argv[]) : m_interop(this) {
     cv::monitor.setCallback(SA::MakeDelegate<&Environment::onMonitorChange>(this));
 
     // set high priority right away
-    Environment::setProcessPriority(cv::win_processpriority.getFloat());
+    Environment::setThreadPriority(cv::win_processpriority.getFloat());
 }
 
 Environment::~Environment() {
@@ -946,7 +946,7 @@ void Environment::listenToTextInput(bool listen) {
 //******************************//
 
 // convar callback
-void Environment::setProcessPriority(float newPrio) {
+void Environment::setThreadPriority(float newPrio) {
     SDL_SetCurrentThreadPriority(!!static_cast<int>(newPrio) ? SDL_THREAD_PRIORITY_HIGH : SDL_THREAD_PRIORITY_NORMAL);
 }
 

@@ -88,6 +88,8 @@ void skip_string(Packet *packet) {
 }
 
 void write_bytes(Packet *packet, u8 *bytes, size_t n) {
+    assert(bytes != nullptr);
+
     if(packet->pos + n > packet->size) {
         packet->memory = (unsigned char *)realloc(packet->memory, packet->size + n + 4096);
         packet->size += n + 4096;

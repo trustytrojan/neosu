@@ -295,7 +295,7 @@ class ConVar {
     [[nodiscard]] bool onSetValueGameplay(CvarEditor editor);
 
     // prevents score submission
-    void onSetValueProtected(const std::string &oldValue);
+    void onSetValueProtected(const std::string &oldValue, const std::string &newValue);
 
     // unified init for callback-only convars
     template <typename Callback>
@@ -416,7 +416,7 @@ class ConVar {
 
         // prevent score submission if the cvar was protected
         if(this->isProtected()) {
-            this->onSetValueProtected(oldString);
+            this->onSetValueProtected(oldString, newString);
         }
 
         if(doCallback) {

@@ -2,6 +2,7 @@
 
 #include "Thread.h"
 #include "UString.h"
+#include "Environment.h"
 
 #if defined(_WIN32)
 #include "WinDebloatDefs.h"
@@ -24,7 +25,8 @@ bool stdesc_load_attempted{false};
 
 namespace McThread {
 // WARNING: must be called from within the thread itself! otherwise, the main process name will be changed
-bool set_current_thread_name([[maybe_unused]] const UString &name) {
+bool set_current_thread_name([[maybe_unused]] const char *cname) {
+    UString name{cname};
 #if defined(_WIN32)
     if(!stdesc_load_attempted) {
         stdesc_load_attempted = true;
@@ -51,4 +53,9 @@ bool set_current_thread_name([[maybe_unused]] const UString &name) {
     return false;
 #endif
 }
+
+void set_current_thread_prio(bool high) {
+    Environment::setThreadPriority(high ? 1.f : 0.f);
+}
+
 };  // namespace McThread

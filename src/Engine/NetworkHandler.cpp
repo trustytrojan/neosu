@@ -72,6 +72,7 @@ NetworkHandler::~NetworkHandler() {
 
 void NetworkHandler::networkThreadFunc(const std::stop_token& stopToken) {
     McThread::set_current_thread_name("net_manager");
+    McThread::set_current_thread_prio(false); // reset priority
 
     while(!stopToken.stop_requested()) {
         processNewRequests();

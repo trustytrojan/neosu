@@ -20,6 +20,13 @@ NotificationOverlay::NotificationOverlay() : OsuScreen() {
     this->keyListener = nullptr;
 }
 
+NotificationOverlay::~NotificationOverlay() {
+    for(auto toast : this->toasts) {
+        delete toast;
+    }
+    this->toasts.clear();
+}
+
 static const f64 TOAST_WIDTH = 350.0;
 static const f64 TOAST_INNER_X_MARGIN = 5.0;
 static const f64 TOAST_INNER_Y_MARGIN = 5.0;
