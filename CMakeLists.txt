@@ -11,7 +11,9 @@ set(CMAKE_CXX_EXTENSIONS ON)
 set(CMAKE_C_EXTENSIONS ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(BUILD_SHARED_LIBS OFF)
-set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+
+set(CMAKE_C_COMPILER_LAUNCHER ccache)
+set(CMAKE_CXX_COMPILER_LAUNCHER ccache)
 
 include(deps.cmake)
 
@@ -32,6 +34,15 @@ target_compile_definitions(neosu PRIVATE
 )
 
 find_package(OpenGL REQUIRED)
+
+if(WIN32)
+    # setcb defined in deps.cmake
+    setcb(MCENGINE_PLATFORM_WINDOWS ON)
+    setcb(MCENGINE_FEATURE_OPENGL ON)
+    setcb(MCENGINE_FEATURE_BASS ON)
+    setcb(MCENGINE_FEATURE_SOLOUD ON)
+    configure_file("cmake-win/config.h.in" "${CMAKE_BINARY_DIR}/config.h" @ONLY)
+endif()
 
 target_include_directories(neosu PRIVATE
     src
@@ -61,6 +72,11 @@ target_include_directories(neosu PRIVATE
     ${bassloud_SOURCE_DIR}/c
     ${bassmix_SOURCE_DIR}
     ${discord_game_sdk_SOURCE_DIR}/c
+    ${CMAKE_BINARY_DIR}
+    ${lzma_SOURCE_DIR}/src/liblzma/api
+    ${bassasio_SOURCE_DIR}
+    ${basswasapi_header_SOURCE_DIR}/c
+    ${CMAKE_BINARY_DIR}/jpeg-prefix/src/jpeg/src
 )
 
 target_link_directories(neosu PRIVATE ${CMAKE_BINARY_DIR}/jpeg-prefix/src/jpeg-build)
@@ -68,7 +84,6 @@ target_link_libraries(neosu PRIVATE
     OpenGL::GL
     OpenGL::GLU
     SDL3::SDL3-static
-    zlibstatic
     turbojpeg
     png_static
     freetype
@@ -102,5 +117,8 @@ if(LINUX)
     file(CREATE_LINK ${bassflac-linux_SOURCE_DIR}/libs/x86_64/libbassflac.so ${CMAKE_BINARY_DIR}/lib/libbassflac.so SYMBOLIC)
 endif()
 
-file(CREATE_LINK ${CMAKE_SOURCE_DIR}/assets/fonts ${CMAKE_BINARY_DIR}/fonts SYMBOLIC)
-file(CREATE_LINK ${CMAKE_SOURCE_DIR}/assets/materials ${CMAKE_BINARY_DIR}/materials SYMBOLIC)
+if(NOT WIN32)
+    # on windows, just do this manually with admin command prompt
+    file(CREATE_LINK ${CMAKE_SOURCE_DIR}/assets/fonts ${CMAKE_BINARY_DIR}/fonts SYMBOLIC)
+    file(CREATE_LINK ${CMAKE_SOURCE_DIR}/assets/materials ${CMAKE_BINARY_DIR}/materials SYMBOLIC)
+endif()

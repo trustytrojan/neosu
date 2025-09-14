@@ -17,28 +17,26 @@ setcb(FT_DISABLE_BROTLI ON)
 setcb(FT_REQUIRE_ZLIB ON)
 setcb(FT_REQUIRE_PNG ON)
 setcb(FT_REQUIRE_BZIP2 ON)
-FetchContent_Declare(ft2 URL ${FREETYPE2_URL} URL_HASH ${FREETYPE2_HASH})
+setcb(SKIP_INSTALL_ALL ON)
+FetchContent_Declare(ft2 URL ${FREETYPE2_URL} URL_HASH ${FREETYPE2_HASH} EXCLUDE_FROM_ALL)
 
-include(ProcessorCount)
-ProcessorCount(CPU_COUNT)
-if(CPU_COUNT EQUAL 0)
-    set(CPU_COUNT 4)
+set(JPEG_CMAKE_ARGS
+	-DENABLE_STATIC=ON
+	-DENABLE_SHARED=OFF
+	-DWITH_JPEG8=ON
+	-DWITH_SIMD=ON
+	-DREQUIRE_SIMD=OFF
+	-DCMAKE_ASM_NASM_FLAGS="-DPIC")
+if(WIN32)
+	list(APPEND JPEG_CMAKE_ARGS -DCMAKE_ASM_NASM_OBJECT_FORMAT=win64)
 endif()
 
 include(ExternalProject)
 ExternalProject_Add(jpeg
     URL ${LIBJPEG_URL}
     URL_HASH ${LIBJPEG_HASH}	
-    CMAKE_ARGS
-        -DENABLE_STATIC=ON
-        -DENABLE_SHARED=OFF
-        -DWITH_JPEG8=ON
-        -DWITH_SIMD=ON
-        -DREQUIRE_SIMD=OFF
-        -DCMAKE_ASM_NASM_FLAGS="-DPIC"
-        # -DCMAKE_ASM_NASM_OBJECT_FORMAT=win64
-	INSTALL_COMMAND ""
-)
+    CMAKE_ARGS ${JPEG_CMAKE_ARGS}
+	INSTALL_COMMAND "")
 
 setcb(PNG_SHARED OFF)
 setcb(PNG_STATIC ON)
@@ -145,7 +143,27 @@ if(MSVC)
 endif()
 FetchContent_Declare(soloud URL ${SOLOUD_URL} URL_HASH ${SOLOUD_HASH})
 
-FetchContent_MakeAvailable(sdl3 ft2 png zlib bz2 fmt glm lzma libarchive curl mpg123 soundtouch soloud)
+# need to separately handle zlib,png,bzip2 because find_package wants these variables set on windows,
+# and freetype calls find_package on them
+FetchContent_MakeAvailable(zlib)
+if(WIN32)
+	set(ZLIB_LIBRARY zlib)
+	set(ZLIB_INCLUDE_DIR ${zlib_BINARY_DIR})
+endif()
+
+FetchContent_MakeAvailable(png)
+if(WIN32)
+	set(PNG_LIBRARY png_static)
+	set(PNG_PNG_INCLUDE_DIR ${png_SOURCE_DIR})
+endif()
+
+FetchContent_MakeAvailable(bz2)
+if(WIN32)
+	set(BZIP2_LIBRARIES bz2_static)
+	set(BZIP2_INCLUDE_DIR ${bz2_SOURCE_DIR})
+endif()
+
+FetchContent_MakeAvailable(sdl3 ft2 fmt glm lzma libarchive curl mpg123 soundtouch soloud)
 
 ## Binary dependencies
 FetchContent_Declare(discord_game_sdk URL ${DISCORDSDK_URL} URL_HASH ${DISCORDSDK_HASH})
