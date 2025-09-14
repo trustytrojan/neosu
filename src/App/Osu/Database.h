@@ -171,8 +171,8 @@ class Database {
     // global
     int iNumBeatmapsToLoad;
     std::atomic<bool> bInterruptLoad;
-    std::vector<BeatmapSet *> beatmapsets;
-    std::vector<BeatmapSet *> neosu_sets;
+    std::vector<BeatmapSet *> beatmapsets; // contains ALL beatmapsets
+    std::vector<BeatmapSet *> neosu_sets; // contains only beatmapsets from neosu folder
 
     std::mutex beatmap_difficulties_mtx;
     std::unordered_map<MD5Hash, BeatmapDifficulty *> beatmap_difficulties;

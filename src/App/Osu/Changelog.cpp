@@ -34,6 +34,7 @@ Changelog::Changelog() : ScreenBackable() {
         R"(- Added support for OAuth login servers)",
         R"(- Added ability for servers to override game settings)",
         R"(- Added ability for skins to override game settings)",
+        R"(- Fixed crash when reloading songs folder)",
         R"(- Fixed user presence/stats getting requested too often)",
     };
     changelogs.push_back(v40_04);
