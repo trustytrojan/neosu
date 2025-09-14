@@ -105,20 +105,34 @@ if(NOT EXISTS "${CMAKE_BINARY_DIR}/cacert.pem")
 endif()
 target_binary_resources(neosu PRIVATE cacert_pem "${CMAKE_BINARY_DIR}/cacert.pem")
 
+# need to copy bass libs
+set(LIB_DIR ${CMAKE_BINARY_DIR}/lib)
+make_directory(${LIB_DIR})
 if(LINUX)
     if(NOT CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64")
         message(FATAL_ERROR "do extra work here for other architectures")
     endif()
-    make_directory(${CMAKE_BINARY_DIR}/lib)
-    file(CREATE_LINK ${bass-linux_SOURCE_DIR}/x86_64/libbass.so ${CMAKE_BINARY_DIR}/lib/libbass.so SYMBOLIC)
-    file(CREATE_LINK ${bassfx-linux_SOURCE_DIR}/x86_64/libbass_fx.so ${CMAKE_BINARY_DIR}/lib/libbass_fx.so SYMBOLIC)
-    file(CREATE_LINK ${bassmix-linux_SOURCE_DIR}/x86_64/libbassmix.so ${CMAKE_BINARY_DIR}/lib/libbassmix.so SYMBOLIC)
-    file(CREATE_LINK ${bassloud-linux_SOURCE_DIR}/libs/x86_64/libbassloud.so ${CMAKE_BINARY_DIR}/lib/libbassloud.so SYMBOLIC)
-    file(CREATE_LINK ${bassflac-linux_SOURCE_DIR}/libs/x86_64/libbassflac.so ${CMAKE_BINARY_DIR}/lib/libbassflac.so SYMBOLIC)
+    file(COPY
+        ${bass-linux_SOURCE_DIR}/x86_64/libbass.so
+        ${bassfx-linux_SOURCE_DIR}/x86_64/libbass_fx.so
+        ${bassmix-linux_SOURCE_DIR}/x86_64/libbassmix.so
+        ${bassloud-linux_SOURCE_DIR}/libs/x86_64/libbassloud.so
+        ${bassflac-linux_SOURCE_DIR}/libs/x86_64/libbassflac.so
+        DESTINATION ${LIB_DIR})
+elseif(WIN32)
+    if(NOT CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64")
+        message(FATAL_ERROR "do extra work here for other architectures")
+    endif()
+    file(COPY
+        ${bass_SOURCE_DIR}/x64/bass.dll
+        ${basswasapi_SOURCE_DIR}/x64/basswasapi.dll
+        ${bassmix_SOURCE_DIR}/x64/bassmix.dll
+        ${bassloud_SOURCE_DIR}/x64/bassloud.dll
+        ${bassfx_SOURCE_DIR}/x64/bass_fx.dll
+        ${bassflac_SOURCE_DIR}/x64/bassflac.dll
+        ${bassasio_SOURCE_DIR}/x64/bassasio.dll
+        DESTINATION ${LIB_DIR})
+    file(COPY ${discord_game_sdk_SOURCE_DIR}/lib/x86_64/discord_game_sdk.dll DESTINATION ${CMAKE_BINARY_DIR})
 endif()
 
-if(NOT WIN32)
-    # on windows, just do this manually with admin command prompt
-    file(CREATE_LINK ${CMAKE_SOURCE_DIR}/assets/fonts ${CMAKE_BINARY_DIR}/fonts SYMBOLIC)
-    file(CREATE_LINK ${CMAKE_SOURCE_DIR}/assets/materials ${CMAKE_BINARY_DIR}/materials SYMBOLIC)
-endif()
+file(COPY assets/fonts assets/materials DESTINATION ${CMAKE_BINARY_DIR})

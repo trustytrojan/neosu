@@ -49,6 +49,11 @@ FetchContent_Declare(png URL ${LIBPNG_URL} URL_HASH ${LIBPNG_HASH})
 
 setcb(ZLIB_COMPAT ON)
 setcb(ZLIB_ENABLE_TESTS OFF)
+if(WIN32)
+	setcb(WITH_AVX512VNNI OFF)
+	setcb(WITH_AVX512 OFF)
+	setcb(WITH_AVX2 OFF)
+endif()
 FetchContent_Declare(zlib URL ${ZLIB_URL} URL_HASH ${ZLIB_HASH})
 
 setcb(ENABLE_STATIC_RUNTIME ON)
@@ -147,7 +152,7 @@ FetchContent_Declare(soloud URL ${SOLOUD_URL} URL_HASH ${SOLOUD_HASH})
 # and freetype calls find_package on them
 FetchContent_MakeAvailable(zlib)
 if(WIN32)
-	set(ZLIB_LIBRARY zlib)
+	set(ZLIB_LIBRARY ${zlib_BINARY_DIR}/libz.a)
 	set(ZLIB_INCLUDE_DIR ${zlib_BINARY_DIR})
 endif()
 
