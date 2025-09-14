@@ -133,29 +133,30 @@ void Database::AsyncDBLoader::initAsync() {
     peppy_scores_path.append(PREF_PATHSEP "scores.db");
 
     db->findDatabases();
-    if (db->bInterruptLoad.load()) goto done;
+    if(db->bInterruptLoad.load()) goto done;
     db->loadScores(db->database_files["neosu_scores.db"]);
-    if (db->bInterruptLoad.load()) goto done;
+    if(db->bInterruptLoad.load()) goto done;
     db->loadOldMcNeosuScores(db->database_files["scores.db"]);
-    if (db->bInterruptLoad.load()) goto done;
+    if(db->bInterruptLoad.load()) goto done;
     db->loadPeppyScores(db->database_files[peppy_scores_path]);
-    if (db->bInterruptLoad.load()) goto done;
     db->bScoresLoaded = true;
+    if(db->bInterruptLoad.load()) goto done;
 
     db->loadMaps();
-    if (db->bInterruptLoad.load()) goto done;
+    if(db->bInterruptLoad.load()) goto done;
 
     // .db files that were dropped on the main window
     for(const auto &db_path : db->dbPathsToImport) {
         db->importDatabase(db_path);
-        if (db->bInterruptLoad.load()) goto done;
+        if(db->bInterruptLoad.load()) goto done;
     }
-    db->dbPathsToImport.clear();
 
     if(!db->bNeedRawLoad) {
         load_collections();
     }
+
 done:
+    db->dbPathsToImport.clear();
 
     this->bAsyncReady = true;
     if(cv::debug_db.getBool() || cv::debug_async_db.getBool()) debugLog("(AsyncDBLoader) done\n");
@@ -913,11 +914,8 @@ void Database::loadMaps() {
                     auto set = new BeatmapSet(diffs, DatabaseBeatmap::BeatmapType::NEOSU_BEATMAPSET);
                     this->beatmapsets.push_back(set);
 
-                    setIDToIndex[set_id] = beatmapSets.size();
-                    Beatmap_Set s;
-                    s.setID = set_id;
-                    s.diffs2 = diffs;
-                    beatmapSets.push_back(s);
+                    // NOTE: Don't add neosu sets to beatmapSets since they're already processed
+                    // Adding them would create duplicate ownership of the diffs vector
                 }
             }
 
@@ -942,7 +940,7 @@ void Database::loadMaps() {
         this->neosu_maps_loaded = true;
     }
 
-    if (!this->bNeedRawLoad) {
+    if(!this->bNeedRawLoad) {
         ByteBufferedFile::Reader db(peppy_db_path);
         bool should_read_peppy_database = db.total_size > 0;
         if(should_read_peppy_database) {
@@ -1315,7 +1313,7 @@ void Database::loadMaps() {
 
             // build beatmap sets
             for(const auto &beatmapSet : beatmapSets) {
-                if(this->bInterruptLoad.load()) { // cancellation point
+                if(this->bInterruptLoad.load()) {  // cancellation point
                     // clean up remaining unprocessed diffs2 vectors and their contents
                     for(size_t i = &beatmapSet - &beatmapSets[0]; i < beatmapSets.size(); i++) {
                         if(beatmapSets[i].diffs2) {
@@ -1323,9 +1321,11 @@ void Database::loadMaps() {
                                 this->beatmap_difficulties.erase(diff->getMD5Hash());
 
                                 // remove from loudness_to_calc
-                                std::erase_if(this->loudness_to_calc, [diff](const auto& loudness_diff) { return loudness_diff == diff; });
+                                std::erase_if(this->loudness_to_calc,
+                                              [diff](const auto &loudness_diff) { return loudness_diff == diff; });
                                 // remove from maps_to_recalc
-                                std::erase_if(this->maps_to_recalc, [diff](const auto& recalc_diff) { return recalc_diff == diff; });
+                                std::erase_if(this->maps_to_recalc,
+                                              [diff](const auto &recalc_diff) { return recalc_diff == diff; });
 
                                 delete diff;
                             }
