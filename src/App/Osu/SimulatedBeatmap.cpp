@@ -16,7 +16,7 @@
 #include "Mouse.h"
 #include "ResourceManager.h"
 
-SimulatedBeatmap::SimulatedBeatmap(std::shared_ptr<DatabaseBeatmap> diff2, Replay::Mods mods_) {
+SimulatedBeatmap::SimulatedBeatmap(DatabaseBeatmap *diff2, Replay::Mods mods_) {
     this->selectedDifficulty2 = diff2;
     this->mods = mods_;
     this->live_score.mods = mods_;

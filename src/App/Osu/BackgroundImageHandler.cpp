@@ -104,7 +104,7 @@ void BackgroundImageHandler::handleLoadImageForEntry(ENTRY &entry) {
     entry.image = resourceManager->loadImageAbsUnnamed(fullBackgroundImageFilePath, true);
 }
 
-Image *BackgroundImageHandler::getLoadBackgroundImage(std::shared_ptr<DatabaseBeatmap> beatmap) {
+Image *BackgroundImageHandler::getLoadBackgroundImage(const DatabaseBeatmap *beatmap) {
     if(beatmap == nullptr || !cv::load_beatmap_background_images.getBool() || !beatmap->draw_background) return nullptr;
 
     // NOTE: no references to beatmap are kept anywhere (database can safely be deleted/reloaded without having to
@@ -130,9 +130,9 @@ Image *BackgroundImageHandler::getLoadBackgroundImage(std::shared_ptr<DatabaseBe
             // worked before the rework, but 100% safe(r) since we are not async
             if(i.image != nullptr && i.backgroundImageFileName.length() > 1 &&
                beatmap->getBackgroundImageFileName().length() < 2) {
-                beatmap->sBackgroundImageFileName = i.backgroundImageFileName;
-                beatmap->sFullBackgroundImageFilePath = beatmap->getFolder();
-                beatmap->sFullBackgroundImageFilePath.append(i.backgroundImageFileName);
+                const_cast<DatabaseBeatmap *>(beatmap)->sBackgroundImageFileName = i.backgroundImageFileName;
+                const_cast<DatabaseBeatmap *>(beatmap)->sFullBackgroundImageFilePath = beatmap->getFolder();
+                const_cast<DatabaseBeatmap *>(beatmap)->sFullBackgroundImageFilePath.append(i.backgroundImageFileName);
             }
 
             return entry.image;

@@ -24,7 +24,7 @@ class MapCalcThread {
     }
 
     struct mct_result {
-        std::shared_ptr<DatabaseBeatmap> diff2{};
+        DatabaseBeatmap* diff2{};
         u32 nb_circles{};
         u32 nb_sliders{};
         u32 nb_spinners{};
@@ -34,7 +34,7 @@ class MapCalcThread {
         u32 avg_bpm{};
     };
 
-    static inline void start_calc(const std::vector<std::shared_ptr<DatabaseBeatmap>>& maps_to_calc) {
+    static inline void start_calc(const std::vector<DatabaseBeatmap*>& maps_to_calc) {
         get_instance().start_calc_instance(maps_to_calc);
     }
 
@@ -80,7 +80,7 @@ class MapCalcThread {
    private:
     void run();
 
-    void start_calc_instance(const std::vector<std::shared_ptr<DatabaseBeatmap>>& maps_to_calc);
+    void start_calc_instance(const std::vector<DatabaseBeatmap*>& maps_to_calc);
     void abort_instance();
 
     // singleton access
@@ -94,7 +94,7 @@ class MapCalcThread {
     std::vector<mct_result> results{};
     zarray<BPMTuple> bpm_calc_buf;
 
-    const std::vector<std::shared_ptr<DatabaseBeatmap>>* maps_to_process{nullptr};
+    const std::vector<DatabaseBeatmap*>* maps_to_process{nullptr};
 
     static std::unique_ptr<MapCalcThread> instance;
     static std::once_flag instance_flag;

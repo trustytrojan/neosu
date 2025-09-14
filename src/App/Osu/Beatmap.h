@@ -101,7 +101,7 @@ class Beatmap : public BeatmapInterface {
     // songbrowser & player logic
     void select();  // loads the music of the currently selected diff and starts playing from the previewTime (e.g.
                     // clicking on a beatmap)
-    void selectDifficulty2(std::shared_ptr<DatabaseBeatmap> difficulty2);
+    void selectDifficulty2(DatabaseBeatmap *difficulty2);
     void deselect();  // stops + unloads the currently loaded music and deletes all hitobjects
 
     bool play();
@@ -187,7 +187,7 @@ class Beatmap : public BeatmapInterface {
     [[nodiscard]] inline bool hasFailed() const { return this->bFailed; }
 
     // database (legacy)
-    [[nodiscard]] inline std::shared_ptr<DatabaseBeatmap> getSelectedDifficulty2() const { return this->selectedDifficulty2; }
+    [[nodiscard]] inline DatabaseBeatmap *getSelectedDifficulty2() const { return this->selectedDifficulty2; }
 
     // generic state
     [[nodiscard]] inline bool isPlaying() const override { return this->bIsPlaying; }
@@ -266,7 +266,7 @@ class Beatmap : public BeatmapInterface {
     f32 fWaitTime = 0.f;
 
     // database
-    std::shared_ptr<DatabaseBeatmap> selectedDifficulty2;
+    DatabaseBeatmap *selectedDifficulty2;
 
     // sound
     f32 fMusicFrequencyBackup;

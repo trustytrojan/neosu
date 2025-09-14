@@ -86,21 +86,21 @@ DatabaseBeatmap::DatabaseBeatmap(std::string filePath, std::string folder, Beatm
     this->iOnlineOffset = 0;
 }
 
-DatabaseBeatmap::DatabaseBeatmap(std::vector<std::shared_ptr<DatabaseBeatmap>> &difficulties, BeatmapType type)
+DatabaseBeatmap::DatabaseBeatmap(std::vector<DatabaseBeatmap *> *difficulties, BeatmapType type)
     : DatabaseBeatmap("", "", type) {
     this->difficulties = difficulties;
-    if(this->difficulties.empty()) return;
+    if(this->difficulties->empty()) return;
 
     // set representative values for this container (i.e. use values from first difficulty)
-    this->sTitle = this->difficulties[0]->sTitle;
-    this->sTitleUnicode = this->difficulties[0]->sTitleUnicode;
-    this->bEmptyTitleUnicode = this->difficulties[0]->bEmptyTitleUnicode;
-    this->sArtist = this->difficulties[0]->sArtist;
-    this->sArtistUnicode = this->difficulties[0]->sArtistUnicode;
-    this->bEmptyArtistUnicode = this->difficulties[0]->bEmptyArtistUnicode;
-    this->sCreator = this->difficulties[0]->sCreator;
-    this->sBackgroundImageFileName = this->difficulties[0]->sBackgroundImageFileName;
-    this->iSetID = this->difficulties[0]->iSetID;
+    this->sTitle = (*this->difficulties)[0]->sTitle;
+    this->sTitleUnicode = (*this->difficulties)[0]->sTitleUnicode;
+    this->bEmptyTitleUnicode = (*this->difficulties)[0]->bEmptyTitleUnicode;
+    this->sArtist = (*this->difficulties)[0]->sArtist;
+    this->sArtistUnicode = (*this->difficulties)[0]->sArtistUnicode;
+    this->bEmptyArtistUnicode = (*this->difficulties)[0]->bEmptyArtistUnicode;
+    this->sCreator = (*this->difficulties)[0]->sCreator;
+    this->sBackgroundImageFileName = (*this->difficulties)[0]->sBackgroundImageFileName;
+    this->iSetID = (*this->difficulties)[0]->iSetID;
 
     // also calculate largest representative values
     this->iLengthMS = 0;
@@ -113,7 +113,7 @@ DatabaseBeatmap::DatabaseBeatmap(std::vector<std::shared_ptr<DatabaseBeatmap>> &
     this->iMaxBPM = 0;
     this->iMostCommonBPM = 0;
     this->last_modification_time = 0;
-    for(auto diff : this->difficulties) {
+    for(auto diff : (*this->difficulties)) {
         if(diff->getLengthMS() > this->iLengthMS) this->iLengthMS = diff->getLengthMS();
         if(diff->getCS() < this->fCS) this->fCS = diff->getCS();
         if(diff->getAR() > this->fAR) this->fAR = diff->getAR();
@@ -125,6 +125,16 @@ DatabaseBeatmap::DatabaseBeatmap(std::vector<std::shared_ptr<DatabaseBeatmap>> &
         if(diff->getMostCommonBPM() > this->iMostCommonBPM) this->iMostCommonBPM = diff->getMostCommonBPM();
         if(diff->last_modification_time > this->last_modification_time)
             this->last_modification_time = diff->last_modification_time;
+    }
+}
+
+DatabaseBeatmap::~DatabaseBeatmap() {
+    if(this->difficulties != nullptr) {
+        for(auto &diff : *this->difficulties) {
+            assert(diff->difficulties == nullptr);
+            SAFE_DELETE(diff);
+        }
+        SAFE_DELETE(this->difficulties);
     }
 }
 
@@ -1012,7 +1022,7 @@ std::string DatabaseBeatmap::getMapFile() {
 
 // XXX: code duplication (see loadPrimitiveObjects)
 bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
-    if(!this->difficulties.empty()) return false;  // we are a beatmapset, not a difficulty
+    if(this->difficulties != nullptr) return false;  // we are a beatmapset, not a difficulty
 
     // reset
     this->timingpoints.clear();
@@ -1193,7 +1203,7 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
     return true;
 }
 
-DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(std::shared_ptr<DatabaseBeatmap> databaseBeatmap,
+DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeatmap *databaseBeatmap,
                                                                     BeatmapInterface *beatmap) {
     LOAD_GAMEPLAY_RESULT result = LOAD_GAMEPLAY_RESULT();
 

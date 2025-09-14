@@ -59,7 +59,7 @@ void handle_osz(const char *osz_path) {
 
     // prevent song browser from picking main menu song after database loads
     // (we just loaded and selected another song, so previous no longer applies)
-    osu->mainMenu->preloaded_beatmapset = nullptr;
+    SAFE_DELETE(osu->mainMenu->preloaded_beatmapset);
 }
 }  // namespace
 

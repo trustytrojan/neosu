@@ -75,7 +75,7 @@ class SongBrowser final : public ScreenBackable {
     void onPlayEnd(bool quit = true);  // called when a beatmap is finished playing (or the player quit)
 
     void onSelectionChange(CarouselButton *button, bool rebuild);
-    void onDifficultySelected(std::shared_ptr<DatabaseBeatmap> diff2, bool play = false);
+    void onDifficultySelected(DatabaseBeatmap *diff2, bool play = false);
 
     void onScoreContextMenu(ScoreButton *scoreButton, int id);
     void onSongButtonContextMenu(SongButton *songButton, const UString &text, int id);
@@ -89,7 +89,7 @@ class SongBrowser final : public ScreenBackable {
     }
 
     void refreshBeatmaps();
-    void addBeatmapSet(std::shared_ptr<BeatmapSet> beatmap);
+    void addBeatmapSet(BeatmapSet *beatmap);
     void addSongButtonToAlphanumericGroup(SongButton *btn, std::vector<CollectionButton *> &group,
                                           const std::string &name);
 
@@ -141,7 +141,7 @@ class SongBrowser final : public ScreenBackable {
         int id;
     };
 
-    static bool searchMatcher(std::shared_ptr<DatabaseBeatmap> databaseBeatmap,
+    static bool searchMatcher(const DatabaseBeatmap *databaseBeatmap,
                               const std::vector<std::string> &searchStringTokens);
 
     void updateLayout() override;
@@ -242,7 +242,7 @@ class SongBrowser final : public ScreenBackable {
     CollectionButton *selectionPreviousCollectionButton;
 
     // beatmap database
-    std::vector<std::shared_ptr<DatabaseBeatmap>> beatmaps;
+    std::vector<DatabaseBeatmap *> beatmaps;
     std::vector<SongButton *> songButtons;
     std::vector<CarouselButton *> visibleSongButtons;
     std::vector<CollectionButton *> collectionButtons;
@@ -269,12 +269,12 @@ class SongBrowser final : public ScreenBackable {
     bool bPreviousRandomBeatmapScheduled;
 
     // behaviour
-    std::shared_ptr<DatabaseBeatmap> lastSelectedBeatmap = nullptr;
+    DatabaseBeatmap *lastSelectedBeatmap = nullptr;
     Beatmap *beatmap;
     bool bHasSelectedAndIsPlaying;
     float fPulseAnimation;
     float fBackgroundFadeInTime;
-    std::vector<std::shared_ptr<DatabaseBeatmap>> previousRandomBeatmaps;
+    std::vector<DatabaseBeatmap *> previousRandomBeatmaps;
 
     // map auto-download
     i32 map_autodl = 0;

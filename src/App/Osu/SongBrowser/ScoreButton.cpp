@@ -665,7 +665,7 @@ void ScoreButton::onDeleteScoreConfirmed(const UString & /*text*/, int id) {
     osu->userStats->rebuildScoreButtons();
 }
 
-void ScoreButton::setScore(const FinishedScore &score, std::shared_ptr<DatabaseBeatmap> diff2, int index, const UString &titleString,
+void ScoreButton::setScore(const FinishedScore &score, DatabaseBeatmap *diff2, int index, const UString &titleString,
                            float weight) {
     this->score = score;
     this->score.beatmap_hash = diff2->getMD5Hash();

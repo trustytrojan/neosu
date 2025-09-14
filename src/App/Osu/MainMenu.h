@@ -45,8 +45,8 @@ class MainMenu : public OsuScreen, public MouseListener {
     void draw() override;
     void mouse_update(bool *propagate_clicks) override;
 
-    std::shared_ptr<BeatmapDifficulty> preloaded_beatmap = nullptr;
-    std::shared_ptr<BeatmapSet> preloaded_beatmapset = nullptr;
+    BeatmapDifficulty *preloaded_beatmap = nullptr;
+    BeatmapSet *preloaded_beatmapset = nullptr;
     void selectRandomBeatmap();
 
     void onKeyDown(KeyboardEvent &e) override;

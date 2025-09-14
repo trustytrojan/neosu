@@ -349,7 +349,7 @@ void download_beatmapset(u32 set_id, float* progress) {
     }
 }
 
-std::shared_ptr<DatabaseBeatmap> download_beatmap(i32 beatmap_id, MD5Hash beatmap_md5, float* progress) {
+DatabaseBeatmap* download_beatmap(i32 beatmap_id, MD5Hash beatmap_md5, float* progress) {
     static i32 queried_map_id = 0;
 
     auto beatmap = db->getBeatmapDifficulty(beatmap_md5);
@@ -420,7 +420,7 @@ std::shared_ptr<DatabaseBeatmap> download_beatmap(i32 beatmap_id, MD5Hash beatma
     return beatmap;
 }
 
-std::shared_ptr<DatabaseBeatmap> download_beatmap(i32 beatmap_id, i32 beatmapset_id, float* progress) {
+DatabaseBeatmap* download_beatmap(i32 beatmap_id, i32 beatmapset_id, float* progress) {
     static i32 queried_map_id = 0;
 
     auto beatmap = db->getBeatmapDifficulty(beatmap_id);

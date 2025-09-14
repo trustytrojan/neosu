@@ -1336,7 +1336,7 @@ std::vector<SCORE_ENTRY> HUD::getCurrentScores() {
 void HUD::resetScoreboard() {
     Beatmap *beatmap = osu->getSelectedBeatmap();
     if(beatmap == nullptr) return;
-    std::shared_ptr<DatabaseBeatmap> diff2 = beatmap->getSelectedDifficulty2();
+    DatabaseBeatmap *diff2 = beatmap->getSelectedDifficulty2();
     if(diff2 == nullptr) return;
 
     this->beatmap_md5 = diff2->getMD5Hash();
@@ -1364,7 +1364,7 @@ void HUD::resetScoreboard() {
 void HUD::updateScoreboard(bool animate) {
     Beatmap *beatmap = osu->getSelectedBeatmap();
     if(beatmap == nullptr) return;
-    std::shared_ptr<DatabaseBeatmap> diff2 = beatmap->getSelectedDifficulty2();
+    DatabaseBeatmap *diff2 = beatmap->getSelectedDifficulty2();
     if(diff2 == nullptr) return;
 
     if(!cv::scoreboard_animations.getBool()) {

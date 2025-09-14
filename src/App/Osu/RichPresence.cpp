@@ -40,7 +40,7 @@ void crop_to(const UString& str, char* output, int max_len) {
 }
 
 // output is assumed to be a char[128] string
-void diff2str(std::shared_ptr<DatabaseBeatmap> diff2, char* output, bool /*include_difficulty*/) {
+void diff2str(DatabaseBeatmap* diff2, char* output, bool /*include_difficulty*/) {
     if(diff2 == nullptr) {
         strcpy(output, "No map selected");
         return;
@@ -167,7 +167,7 @@ void RichPresence::onSongBrowser() {
 void RichPresence::onPlayStart() {
     auto diff2 = osu->getSelectedBeatmap()->getSelectedDifficulty2();
 
-    static std::shared_ptr<DatabaseBeatmap> last_diff = nullptr;
+    static DatabaseBeatmap* last_diff = nullptr;
     static int64_t tms = 0;
     if(tms == 0 || last_diff != diff2) {
         last_diff = diff2;

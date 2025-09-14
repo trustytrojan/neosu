@@ -405,7 +405,7 @@ void Beatmap::select() {
     this->selectDifficulty2(this->selectedDifficulty2);
 }
 
-void Beatmap::selectDifficulty2(std::shared_ptr<DatabaseBeatmap> difficulty2) {
+void Beatmap::selectDifficulty2(DatabaseBeatmap *difficulty2) {
     lct_set_map(difficulty2);
 
     if(difficulty2 != nullptr) {

@@ -13,7 +13,7 @@ std::unique_ptr<MapCalcThread> MapCalcThread::instance = nullptr;
 std::once_flag MapCalcThread::instance_flag;
 std::once_flag MapCalcThread::shutdown_flag;
 
-void MapCalcThread::start_calc_instance(const std::vector<std::shared_ptr<DatabaseBeatmap>>& maps_to_calc) {
+void MapCalcThread::start_calc_instance(const std::vector<DatabaseBeatmap*>& maps_to_calc) {
     abort_instance();
 
     if(maps_to_calc.empty()) {

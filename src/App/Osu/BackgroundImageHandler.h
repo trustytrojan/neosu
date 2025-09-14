@@ -18,7 +18,7 @@ class BackgroundImageHandler {
 
     void scheduleFreezeCache() { this->bFrozen = true; }
 
-    Image *getLoadBackgroundImage(std::shared_ptr<DatabaseBeatmap> beatmap);
+    Image *getLoadBackgroundImage(const DatabaseBeatmap *beatmap);
 
    private:
     struct ENTRY {

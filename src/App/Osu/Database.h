@@ -69,7 +69,7 @@ class Database {
     void save();
 
     // Only use for neosu sets!
-    std::shared_ptr<BeatmapSet> addBeatmapSet(const std::string &beatmapFolderPath, i32 set_id_override = -1);
+    BeatmapSet *addBeatmapSet(const std::string &beatmapFolderPath, i32 set_id_override = -1);
 
     int addScore(const FinishedScore &score);
     void deleteScore(MD5Hash beatmapMD5Hash, u64 scoreUnixTimestamp);
@@ -93,10 +93,10 @@ class Database {
     inline bool isFinished() const { return (this->getProgress() >= 1.0f); }
     inline bool foundChanges() const { return this->bFoundChanges; }
 
-    inline const std::vector<std::shared_ptr<DatabaseBeatmap>> &getDatabaseBeatmaps() const { return this->beatmapsets; }
-    std::shared_ptr<DatabaseBeatmap> getBeatmapDifficulty(const MD5Hash &md5hash);
-    std::shared_ptr<DatabaseBeatmap> getBeatmapDifficulty(i32 map_id);
-    std::shared_ptr<DatabaseBeatmap> getBeatmapSet(i32 set_id);
+    inline const std::vector<DatabaseBeatmap *> &getDatabaseBeatmaps() const { return this->beatmapsets; }
+    DatabaseBeatmap *getBeatmapDifficulty(const MD5Hash &md5hash);
+    DatabaseBeatmap *getBeatmapDifficulty(i32 map_id);
+    DatabaseBeatmap *getBeatmapSet(i32 set_id);
 
     inline std::unordered_map<MD5Hash, std::vector<FinishedScore>> *getScores() { return &this->scores; }
     inline const std::array<SCORE_SORTING_METHOD, 6> &getScoreSortingMethods() const {
@@ -105,14 +105,14 @@ class Database {
 
     static std::string getOsuSongsFolder();
 
-    std::shared_ptr<BeatmapSet> loadRawBeatmap(const std::string &beatmapPath, bool is_neosu_folder);
+    BeatmapSet *loadRawBeatmap(const std::string &beatmapPath, bool is_neosu_folder);
 
     UString parseLegacyCfgBeatmapDirectoryParameter();
     void scheduleLoadRaw();
     std::mutex peppy_overrides_mtx;
     std::unordered_map<MD5Hash, MapOverrides> peppy_overrides;
-    std::vector<std::shared_ptr<BeatmapDifficulty>> maps_to_recalc;
-    std::vector<std::shared_ptr<BeatmapDifficulty>> loudness_to_calc;
+    std::vector<BeatmapDifficulty *> maps_to_recalc;
+    std::vector<BeatmapDifficulty *> loudness_to_calc;
 
     std::mutex scores_mtx;
     std::atomic<bool> bDidScoresChangeForStats = true;
@@ -172,10 +172,10 @@ class Database {
     // global
     int iNumBeatmapsToLoad;
     std::atomic<bool> bInterruptLoad;
-    std::vector<std::shared_ptr<BeatmapSet>> beatmapsets;
+    std::vector<BeatmapSet *> beatmapsets;
 
     std::mutex beatmap_difficulties_mtx;
-    std::unordered_map<MD5Hash, std::shared_ptr<BeatmapDifficulty>> beatmap_difficulties;
+    std::unordered_map<MD5Hash, BeatmapDifficulty *> beatmap_difficulties;
 
     bool neosu_maps_loaded = false;
 
