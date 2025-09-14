@@ -52,7 +52,8 @@ class SleepHandler final {
             return;
         }
 
-        m_pNtDelayExec(0, nsToDelayInterval(ns));
+        LARGE_INTEGER sleepTicks{.QuadPart = -static_cast<LONGLONG>(ns / 100LL)};
+        m_pNtDelayExec(0, static_cast<PLARGE_INTEGER>(&sleepTicks));
     }
 
     forceinline void precise(uint64_t ns) const noexcept {
@@ -68,7 +69,9 @@ class SleepHandler final {
             // e.g. 0.51ms with 0.5ms minimum: NtDelayExecution for exactly 1 x 0.5ms = 0.5ms, busy wait for 0.01ms remainder
             //      1.25ms with 0.5ms minimum: NtDelayExecution for exactly 2 x 0.5ms = 1ms, busy wait for 0.25ms remainder
             const uint64_t bulkDelay = (ns / m_actualDelayAmount) * m_actualDelayAmount;
-            m_pNtDelayExec(0, nsToDelayInterval(bulkDelay));
+
+            LARGE_INTEGER sleepTicks{.QuadPart = -static_cast<LONGLONG>(bulkDelay / 100LL)};
+            m_pNtDelayExec(0, static_cast<PLARGE_INTEGER>(&sleepTicks));
         }
 
         // busy-wait remainder
@@ -91,7 +94,10 @@ class SleepHandler final {
 
             for(int i = 0; i < numSamples; ++i) {
                 uint64_t startTime = getTicksNS();
-                m_pNtDelayExec(0, nsToDelayInterval(testDelayNs));
+
+                LARGE_INTEGER sleepTicks{.QuadPart = -static_cast<LONGLONG>(testDelayNs / 100LL)};
+                m_pNtDelayExec(0, static_cast<PLARGE_INTEGER>(&sleepTicks));
+
                 uint64_t endTime = getTicksNS();
 
                 uint64_t actualDelay = endTime - startTime;
@@ -117,13 +123,6 @@ class SleepHandler final {
             }
         }
         // else if we failed, m_actualDelayAmount will == the timer resolution
-    }
-
-    static PLARGE_INTEGER nsToDelayInterval(uint64_t ns) noexcept {
-        static thread_local int64_t sleep_ticks{0};
-        sleep_ticks = -static_cast<int64_t>(ns / 100);
-        assert(sleep_ticks < 0);
-        return reinterpret_cast<PLARGE_INTEGER>(&sleep_ticks);
     }
 
     // callback
