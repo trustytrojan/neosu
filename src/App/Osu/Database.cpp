@@ -111,7 +111,27 @@ void Database::AsyncDBLoader::init() {
 // run immediately on a separate thread when resourceManager->loadResource() is called
 void Database::AsyncDBLoader::initAsync() {
     if(cv::debug_db.getBool() || cv::debug_async_db.getBool()) debugLog("(AsyncDBLoader) start\n");
-    assert(db != nullptr);
+
+    if(!db) return;
+
+    // stop threads that rely on database content
+    sct_abort();
+    lct_set_map(nullptr);
+    MapCalcThread::abort();
+    VolNormalization::abort();
+
+    db->loudness_to_calc.clear();
+    db->maps_to_recalc.clear();
+
+    for(auto &beatmapset : db->beatmapsets) {
+        SAFE_DELETE(beatmapset);
+    }
+    db->beatmapsets.clear();
+
+    for(auto &neosu_set : db->neosu_sets) {
+        SAFE_DELETE(neosu_set);
+    }
+    db->neosu_sets.clear();
 
     db->findDatabases();
     db->loadScores(db->database_files["neosu_scores.db"]);
@@ -147,28 +167,7 @@ void Database::startLoader() {
     if(cv::debug_db.getBool() || cv::debug_async_db.getBool()) debugLog("start\n");
     this->destroyLoader();
 
-    // stop threads that rely on database content
-    sct_abort();
-    lct_set_map(nullptr);
-    MapCalcThread::abort();
-    VolNormalization::abort();
-
-    db->loudness_to_calc.clear();
-    db->maps_to_recalc.clear();
-
-    {
-        std::scoped_lock lock(this->beatmap_difficulties_mtx);
-        this->beatmap_difficulties.clear();
-    }
-    for(auto &beatmapset : db->beatmapsets) {
-        SAFE_DELETE(beatmapset);
-    }
-    db->beatmapsets.clear();
-    db->neosu_sets.clear();
-
     this->loader = new AsyncDBLoader();
-    this->bIsFirstLoad = true;
-    this->bRawBeatmapLoadScheduled = false;
     resourceManager->requestNextLoadAsync();
     resourceManager->loadResource(this->loader);
 
@@ -225,14 +224,14 @@ Database::~Database() {
     MapCalcThread::abort();
     this->maps_to_recalc.clear();
 
-    {
-        std::scoped_lock lock(this->beatmap_difficulties_mtx);
-        this->beatmap_difficulties.clear();
-    }
     for(auto &beatmapset : this->beatmapsets) {
         SAFE_DELETE(beatmapset);
     }
     this->beatmapsets.clear();
+
+    for(auto &neosu_set : this->neosu_sets) {
+        SAFE_DELETE(neosu_set);
+    }
     this->neosu_sets.clear();
 
     unload_collections();
@@ -259,9 +258,8 @@ void Database::update() {
                 this->addBeatmapSet(fullBeatmapPath);
             }
 
-            // update progress (songbrowser checks if progress >= 1.f to know when we're done)
-            f32 progress_float = (f32)this->iCurRawBeatmapLoadIndex / (f32)this->iNumBeatmapsToLoad;
-            this->fLoadingProgress = std::clamp(progress_float, 0.01f, 0.99f);
+            // update progress
+            this->fLoadingProgress = (float)this->iCurRawBeatmapLoadIndex / (float)this->iNumBeatmapsToLoad;
 
             // check if we are finished
             if(this->iCurRawBeatmapLoadIndex >= this->iNumBeatmapsToLoad ||
