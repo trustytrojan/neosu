@@ -449,6 +449,10 @@ bool Beatmap::play() {
             }
         }
 
+        if(BanchoState::can_submit_scores() && !cvars->areAllCvarsSubmittable()) {
+            osu->notificationOverlay->addToast("Score will not submit with current mods/settings", ERROR_TOAST);
+        }
+
         return true;
     }
 
@@ -1026,8 +1030,10 @@ void Beatmap::seekMS(u32 ms) {
 
     if(!this->is_watching && !BanchoState::spectating) {  // score submission already disabled when watching replay
         if(this->is_submittable) {
-            debugLog("Disabling score submission due to seeking\n");
             this->is_submittable = false;
+            if(BanchoState::can_submit_scores()) {
+                osu->notificationOverlay->addToast("Score will not submit due to seeking", ERROR_TOAST);
+            }
         }
     }
 }
