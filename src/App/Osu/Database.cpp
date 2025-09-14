@@ -150,28 +150,35 @@ done:
 void Database::startLoader() {
     if(cv::debug_db.getBool() || cv::debug_async_db.getBool()) debugLog("start\n");
     this->destroyLoader();
-    
+
     // stop threads that rely on database content
     sct_abort();
     lct_set_map(nullptr);
     MapCalcThread::abort();
     VolNormalization::abort();
 
-    db->loudness_to_calc.clear();
-    db->maps_to_recalc.clear();
+    // only clear diffs/sets for full reloads (only handled for raw re-loading atm)
+    const bool lastLoadWasRaw{this->bNeedRawLoad};
 
-    {
-        std::scoped_lock lock(this->beatmap_difficulties_mtx);
-        this->beatmap_difficulties.clear();
+    this->bNeedRawLoad = (!env->fileExists(fmt::format("{}" PREF_PATHSEP "osu!.db", cv::osu_folder.getString())) ||
+                          !cv::database_enabled.getBool());
+
+    const bool nextLoadIsRaw{this->bNeedRawLoad};
+
+    if(!lastLoadWasRaw || !nextLoadIsRaw) {
+        db->loudness_to_calc.clear();
+        db->maps_to_recalc.clear();
+        {
+            std::scoped_lock lock(this->beatmap_difficulties_mtx);
+            this->beatmap_difficulties.clear();
+        }
+        for(auto &beatmapset : db->beatmapsets) {
+            SAFE_DELETE(beatmapset);
+        }
+        db->beatmapsets.clear();
     }
-    for(auto &beatmapset : db->beatmapsets) {
-        SAFE_DELETE(beatmapset);
-    }
-    db->beatmapsets.clear();
 
     this->loader = new AsyncDBLoader();
-    this->bIsFirstLoad = true;
-    this->bRawBeatmapLoadScheduled = false;
     resourceManager->requestNextLoadAsync();
     resourceManager->loadResource(this->loader);
 
@@ -305,8 +312,8 @@ void Database::load() {
     this->bInterruptLoad = false;
     this->fLoadingProgress = 0.0f;
 
-    this->bNeedRawLoad = (!env->fileExists(fmt::format("{}" PREF_PATHSEP "osu!.db", cv::osu_folder.getString())) ||
-                          !cv::database_enabled.getBool());
+    // reset scheduled logic
+    this->bRawBeatmapLoadScheduled = false;
 
     this->startLoader();
 }
@@ -1499,9 +1506,13 @@ void Database::findDatabases() {
     this->database_files.emplace("neosu_scores.db", UString("neosu_scores.db"));
     this->database_files.emplace("scores.db", UString("scores.db"));  // mcneosu database
 
-    std::string peppy_maps_path = cv::osu_folder.getString();
-    peppy_maps_path.append(PREF_PATHSEP "osu!.db");
-    this->database_files.emplace(peppy_maps_path, UString(peppy_maps_path));
+    // ignore if explicitly disabled
+    if(cv::database_enabled.getBool()) {
+        std::string peppy_maps_path = cv::osu_folder.getString();
+        peppy_maps_path.append(PREF_PATHSEP "osu!.db");
+        this->database_files.emplace(peppy_maps_path, UString(peppy_maps_path));
+    }
+
     this->database_files.emplace("neosu_maps.db", UString("neosu_maps.db"));
 
     std::string peppy_collections_path = cv::osu_folder.getString();
