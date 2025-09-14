@@ -143,7 +143,6 @@ class Database {
 
        private:
         friend class Database;
-        bool bNeedRawLoad{false};
     };
 
     friend class AsyncDBLoader;
@@ -184,6 +183,8 @@ class Database {
 
     // scores.db (legacy and custom)
     bool bScoresLoaded = false;
+
+    bool bNeedRawLoad{false};
 
     PlayerStats prevPlayerStats;
     std::array<SCORE_SORTING_METHOD, 6> scoreSortingMethods;

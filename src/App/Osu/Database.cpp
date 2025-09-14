@@ -94,7 +94,7 @@ bool sortScoreByPP(FinishedScore const &a, FinishedScore const &b) {
 void Database::AsyncDBLoader::init() {
     if(cv::debug_db.getBool() || cv::debug_async_db.getBool()) debugLog("(AsyncDBLoader) start\n");
 
-    if(this->bNeedRawLoad) {
+    if(db->bNeedRawLoad) {
         db->scheduleLoadRaw();
     } else {
         MapCalcThread::start_calc(db->maps_to_recalc);
@@ -132,9 +132,6 @@ void Database::AsyncDBLoader::initAsync() {
     std::string peppy_scores_path = cv::osu_folder.getString();
     peppy_scores_path.append(PREF_PATHSEP "scores.db");
 
-    this->bNeedRawLoad = (!env->fileExists(fmt::format("{}" PREF_PATHSEP "osu!.db", cv::osu_folder.getString())) ||
-                          !cv::database_enabled.getBool());
-
     db->findDatabases();
     if (db->bInterruptLoad.load()) goto done;
     db->loadScores(db->database_files["neosu_scores.db"]);
@@ -155,7 +152,7 @@ void Database::AsyncDBLoader::initAsync() {
     }
     db->dbPathsToImport.clear();
 
-    if(!this->bNeedRawLoad) {
+    if(!db->bNeedRawLoad) {
         load_collections();
     }
 done:
@@ -297,6 +294,9 @@ void Database::update() {
 void Database::load() {
     this->bInterruptLoad = false;
     this->fLoadingProgress = 0.0f;
+
+    this->bNeedRawLoad = (!env->fileExists(fmt::format("{}" PREF_PATHSEP "osu!.db", cv::osu_folder.getString())) ||
+                          !cv::database_enabled.getBool());
 
     this->startLoader();
 }
@@ -942,10 +942,9 @@ void Database::loadMaps() {
         this->neosu_maps_loaded = true;
     }
 
-    bool should_read_peppy_database = cv::database_enabled.getBool();
-    {
+    if (!this->bNeedRawLoad) {
         ByteBufferedFile::Reader db(peppy_db_path);
-        should_read_peppy_database = db.total_size > 0;
+        bool should_read_peppy_database = db.total_size > 0;
         if(should_read_peppy_database) {
             // read header
             this->iVersion = db.read<u32>();
