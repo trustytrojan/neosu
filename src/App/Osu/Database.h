@@ -68,6 +68,7 @@ class Database {
     void cancel();
     void save();
 
+    // Only use for neosu sets!
     BeatmapSet *addBeatmapSet(const std::string &beatmapFolderPath, i32 set_id_override = -1);
 
     int addScore(const FinishedScore &score);
@@ -104,7 +105,7 @@ class Database {
 
     static std::string getOsuSongsFolder();
 
-    BeatmapSet *loadRawBeatmap(const std::string &beatmapPath);  // only used for raw loading without db
+    BeatmapSet *loadRawBeatmap(const std::string &beatmapPath, bool is_neosu_folder);
 
     UString parseLegacyCfgBeatmapDirectoryParameter();
     void scheduleLoadRaw();
@@ -171,8 +172,7 @@ class Database {
     // global
     int iNumBeatmapsToLoad;
     std::atomic<bool> bInterruptLoad;
-    std::vector<BeatmapSet *> beatmapsets; // contains ALL beatmapsets
-    std::vector<BeatmapSet *> neosu_sets; // contains only beatmapsets from neosu folder
+    std::vector<BeatmapSet *> beatmapsets;
 
     std::mutex beatmap_difficulties_mtx;
     std::unordered_map<MD5Hash, BeatmapDifficulty *> beatmap_difficulties;

@@ -27,6 +27,15 @@ class DatabaseBeatmap;
 typedef DatabaseBeatmap BeatmapDifficulty;
 typedef DatabaseBeatmap BeatmapSet;
 
+enum class BeatmapType : uint8_t {
+    NEOSU_BEATMAPSET,
+    PEPPY_BEATMAPSET,
+    UNKNOWN_BEATMAPSET,
+    NEOSU_DIFFICULTY,
+    PEPPY_DIFFICULTY,
+    UNKNOWN_DIFFICULTY,
+};
+
 class DatabaseBeatmap final {
    public:
     // raw structs (not editable, we're following db format directly)
@@ -75,13 +84,6 @@ class DatabaseBeatmap final {
         i32 volume = 0;
 
         bool isNaN = false;
-    };
-
-    enum class BeatmapType : uint8_t {
-        NEOSU_BEATMAPSET,
-        PEPPY_BEATMAPSET,
-        NEOSU_DIFFICULTY,
-        PEPPY_DIFFICULTY,
     };
 
     // primitive objects
