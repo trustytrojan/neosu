@@ -112,22 +112,7 @@ void Database::AsyncDBLoader::init() {
 // run immediately on a separate thread when resourceManager->loadResource() is called
 void Database::AsyncDBLoader::initAsync() {
     if(cv::debug_db.getBool() || cv::debug_async_db.getBool()) debugLog("(AsyncDBLoader) start\n");
-
-    if(!db) return;
-
-    // stop threads that rely on database content
-    sct_abort();
-    lct_set_map(nullptr);
-    MapCalcThread::abort();
-    VolNormalization::abort();
-
-    db->loudness_to_calc.clear();
-    db->maps_to_recalc.clear();
-
-    for(auto &beatmapset : db->beatmapsets) {
-        SAFE_DELETE(beatmapset);
-    }
-    db->beatmapsets.clear();
+    assert(db != nullptr);
 
     std::string peppy_scores_path = cv::osu_folder.getString();
     peppy_scores_path.append(PREF_PATHSEP "scores.db");
@@ -165,6 +150,24 @@ done:
 void Database::startLoader() {
     if(cv::debug_db.getBool() || cv::debug_async_db.getBool()) debugLog("start\n");
     this->destroyLoader();
+    
+    // stop threads that rely on database content
+    sct_abort();
+    lct_set_map(nullptr);
+    MapCalcThread::abort();
+    VolNormalization::abort();
+
+    db->loudness_to_calc.clear();
+    db->maps_to_recalc.clear();
+
+    {
+        std::scoped_lock lock(this->beatmap_difficulties_mtx);
+        this->beatmap_difficulties.clear();
+    }
+    for(auto &beatmapset : db->beatmapsets) {
+        SAFE_DELETE(beatmapset);
+    }
+    db->beatmapsets.clear();
 
     this->loader = new AsyncDBLoader();
     this->bIsFirstLoad = true;
@@ -225,6 +228,10 @@ Database::~Database() {
     MapCalcThread::abort();
     this->maps_to_recalc.clear();
 
+    {
+        std::scoped_lock lock(this->beatmap_difficulties_mtx);
+        this->beatmap_difficulties.clear();
+    }
     for(auto &beatmapset : this->beatmapsets) {
         SAFE_DELETE(beatmapset);
     }
