@@ -3,7 +3,8 @@
 
 #ifdef MCENGINE_FEATURE_SOLOUD
 
-#include <soloud.h>
+#include "SoLoudThread.h"
+
 #include <soloud_file.h>
 #include <soloud_wav.h>
 #include <soloud_wavstream.h>

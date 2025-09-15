@@ -1639,45 +1639,7 @@ void Database::loadScores(const UString &dbPath) {
         for(u32 s = 0; s < nb_beatmap_scores; s++) {
             FinishedScore sc;
 
-            sc.mods.flags = db.read<u64>();
-            sc.mods.speed = db.read<f32>();
-            sc.mods.notelock_type = db.read<i32>();
-            sc.mods.ar_override = db.read<f32>();
-            sc.mods.ar_overridenegative = db.read<f32>();
-            sc.mods.cs_override = db.read<f32>();
-            sc.mods.cs_overridenegative = db.read<f32>();
-            sc.mods.hp_override = db.read<f32>();
-            sc.mods.od_override = db.read<f32>();
-            using namespace ModMasks;
-            using namespace Replay::ModFlags;
-            if(eq(sc.mods.flags, Autopilot)) {
-                sc.mods.autopilot_lenience = db.read<f32>();
-            }
-            if(eq(sc.mods.flags, Timewarp)) {
-                sc.mods.timewarp_multiplier = db.read<f32>();
-            }
-            if(eq(sc.mods.flags, Minimize)) {
-                sc.mods.minimize_multiplier = db.read<f32>();
-            }
-            if(eq(sc.mods.flags, ARTimewarp)) {
-                sc.mods.artimewarp_multiplier = db.read<f32>();
-            }
-            if(eq(sc.mods.flags, ARWobble)) {
-                sc.mods.arwobble_strength = db.read<f32>();
-                sc.mods.arwobble_interval = db.read<f32>();
-            }
-            if(eq(sc.mods.flags, Wobble1) || eq(sc.mods.flags, Wobble2)) {
-                sc.mods.wobble_strength = db.read<f32>();
-                sc.mods.wobble_frequency = db.read<f32>();
-                sc.mods.wobble_rotation_speed = db.read<f32>();
-            }
-            if(eq(sc.mods.flags, Jigsaw1) || eq(sc.mods.flags, Jigsaw2)) {
-                sc.mods.jigsaw_followcircle_radius_factor = db.read<f32>();
-            }
-            if(eq(sc.mods.flags, Shirone)) {
-                sc.mods.shirone_combo = db.read<f32>();
-            }
-
+            sc.mods = db.read_mods();
             sc.score = db.read<u64>();
             sc.spinner_bonus = db.read<u64>();
             sc.unixTimestamp = db.read<u64>();
@@ -2145,45 +2107,7 @@ void Database::saveScores() {
         for(const auto &score : scorevec) {
             assert(!score.is_online_score);
 
-            db.write<u64>(score.mods.flags);
-            db.write<f32>(score.mods.speed);
-            db.write<i32>(score.mods.notelock_type);
-            db.write<f32>(score.mods.ar_override);
-            db.write<f32>(score.mods.ar_overridenegative);
-            db.write<f32>(score.mods.cs_override);
-            db.write<f32>(score.mods.cs_overridenegative);
-            db.write<f32>(score.mods.hp_override);
-            db.write<f32>(score.mods.od_override);
-            using namespace ModMasks;
-            using namespace Replay::ModFlags;
-            if(eq(score.mods.flags, Autopilot)) {
-                db.write<f32>(score.mods.autopilot_lenience);
-            }
-            if(eq(score.mods.flags, Timewarp)) {
-                db.write<f32>(score.mods.timewarp_multiplier);
-            }
-            if(eq(score.mods.flags, Minimize)) {
-                db.write<f32>(score.mods.minimize_multiplier);
-            }
-            if(eq(score.mods.flags, ARTimewarp)) {
-                db.write<f32>(score.mods.artimewarp_multiplier);
-            }
-            if(eq(score.mods.flags, ARWobble)) {
-                db.write<f32>(score.mods.arwobble_strength);
-                db.write<f32>(score.mods.arwobble_interval);
-            }
-            if(eq(score.mods.flags, Wobble1) || eq(score.mods.flags, Wobble2)) {
-                db.write<f32>(score.mods.wobble_strength);
-                db.write<f32>(score.mods.wobble_frequency);
-                db.write<f32>(score.mods.wobble_rotation_speed);
-            }
-            if(eq(score.mods.flags, Jigsaw1) || eq(score.mods.flags, Jigsaw2)) {
-                db.write<f32>(score.mods.jigsaw_followcircle_radius_factor);
-            }
-            if(eq(score.mods.flags, Shirone)) {
-                db.write<f32>(score.mods.shirone_combo);
-            }
-
+            db.write_mods(score.mods);
             db.write<u64>(score.score);
             db.write<u64>(score.spinner_bonus);
             db.write<u64>(score.unixTimestamp);

@@ -10,9 +10,10 @@ If you need help, contact `kiwec` or `spec.ta.tor` on Discord, either by direct 
 
 The recommended way to build (and the way releases are made) is using gcc/gcc-mingw.
 
-- On Linux, for Linux -> run `../configure` in `build`, then `make install`
-- On Linux/WSL, for Windows -> run ` ../configure --host=x86_64-w64-mingw32` in `build`, then `make install`
-
-If your `aclocal` version is older than 1.18, you might have to run `autoreconf -fiv` first.
+- For all *nix systems, run `./autogen.sh` in the top-level folder (once) to generate the build files.
+- Create and enter a build subdirectory; e.g. `mkdir build && cd build`
+- On Linux, for Linux -> run `../configure`, then `make install`
+  - This will build and install everything under `./dist/bin-$arch`, configurable with the `--prefix` option to `configure`
+- On Linux/WSL, for Windows -> run ` ../configure --host=x86_64-w64-mingw32`, then `make install`
 
 For debugging convenience, you can also do an MSVC build on Windows, by running `buildwin64.bat` in `cmake-win`.

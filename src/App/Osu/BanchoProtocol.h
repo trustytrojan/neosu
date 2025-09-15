@@ -1,7 +1,7 @@
 #pragma once
 // Copyright (c) 2023, kiwec, All rights reserved.
-
 #include "MD5Hash.h"
+#include "Replay.h"
 #include "types.h"
 
 enum Action : uint8_t {
@@ -344,6 +344,7 @@ UString read_string(Packet *packet);
 std::string read_stdstring(Packet *packet);
 void skip_string(Packet *packet);
 MD5Hash read_hash(Packet *packet);
+Replay::Mods read_mods(Packet *packet);
 
 template <typename T>
 T read(Packet *packet) {
@@ -362,6 +363,7 @@ void write_bytes(Packet *packet, u8 *bytes, size_t n);
 void write_uleb128(Packet *packet, u32 num);
 void write_string(Packet *packet, const char *str);
 void write_hash(Packet *packet, MD5Hash hash);
+void write_mods(Packet *packet, Replay::Mods mods);
 
 template <typename T>
 void write(Packet *packet, T t) {

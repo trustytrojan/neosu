@@ -9,6 +9,7 @@
 #include <fstream>
 #include <vector>
 
+#include "Replay.h"
 #include "MD5Hash.h"
 #include "types.h"
 
@@ -169,6 +170,7 @@ class ByteBufferedFile {
         [[nodiscard]] std::string_view error() const { return this->last_error; }
 
         [[nodiscard]] MD5Hash read_hash();
+        [[nodiscard]] Replay::Mods read_mods();
         [[nodiscard]] std::string read_string();
         [[nodiscard]] u32 read_uleb128();
 
@@ -205,6 +207,7 @@ class ByteBufferedFile {
         void write_hash(MD5Hash hash);
         void write_string(std::string str);
         void write_uleb128(u32 num);
+        void write_mods(Replay::Mods mods);
 
         template <typename T>
         void write(T t) {
