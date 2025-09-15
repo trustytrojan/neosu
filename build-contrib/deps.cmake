@@ -212,13 +212,12 @@ if(NOT SoundTouch_FOUND)
 endif()
 
 # this obviously needs to be from source, it's a neosu-specific fork
+set(SOLOUD_VERSION "SDL_PutAudioStreamDataNoCopy-guard")
+set(SOLOUD_URL "https://github.com/trustytrojan/neoloud/archive/${SOLOUD_VERSION}.tar.gz")
 setcb(SOLOUD_WITH_SDL3 ON)
 setcb(SOLOUD_WITH_MPG123 ON)
 setcb(SOLOUD_WITH_FFMPEG OFF)
-if(MSVC)
-	set(PKG_CONFIG_ARGN "--msvc-syntax")
-endif()
-FetchContent_Declare(soloud URL ${SOLOUD_URL} URL_HASH ${SOLOUD_HASH})
+FetchContent_Declare(soloud URL ${SOLOUD_URL})
 FetchContent_MakeAvailable(soloud)
 
 ## Binary dependencies
