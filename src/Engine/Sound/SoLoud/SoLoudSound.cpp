@@ -287,6 +287,13 @@ float SoLoudSound::getPosition() {
     return std::clamp<float>(streamPositionInSeconds / streamLengthInSeconds, 0.0f, 1.0f);
 }
 
+i32 SoLoudSound::getBASSStreamLatencyCompensation() const {
+    if(!this->bReady || !this->bStream || !this->audioSource || !this->handle) return 0.0f;
+
+    return static_cast<i32>(std::round(static_cast<SoLoud::SLFXStream *>(this->audioSource)->getInternalLatency())) -
+           18;
+}
+
 // slightly tweaked interp algo from the SDL_mixer version, to smooth out position updates
 u32 SoLoudSound::getPositionMS() {
     if(!this->bReady || !this->audioSource || !this->handle) return 0;
