@@ -170,6 +170,17 @@ void submit_score(FinishedScore score) {
         });
     }
 
+    {
+        Packet packet;
+        Proto::write_mods(&packet, score.mods);
+        auto mods_data_b64 = crypto::conv::encode64(packet.memory, packet.pos);
+
+        options.mimeParts.push_back({
+            .name = "neosu-mods",
+            .data = {mods_data_b64.begin(), mods_data_b64.end()},
+        });
+    }
+
     auto scheme = cv::use_https.getBool() ? "https://" : "http://";
     auto url = UString::fmt("{}osu.{}/web/osu-submit-modular-selector.php", scheme, BanchoState::endpoint);
     networkHandler->httpRequestAsync(

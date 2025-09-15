@@ -77,6 +77,51 @@ MD5Hash read_hash(Packet *packet) {
     return hash;
 }
 
+Replay::Mods read_mods(Packet *packet) {
+    Replay::Mods mods;
+
+    mods.flags = read<u64>(packet);
+    mods.speed = read<f32>(packet);
+    mods.notelock_type = read<i32>(packet);
+    mods.ar_override = read<f32>(packet);
+    mods.ar_overridenegative = read<f32>(packet);
+    mods.cs_override = read<f32>(packet);
+    mods.cs_overridenegative = read<f32>(packet);
+    mods.hp_override = read<f32>(packet);
+    mods.od_override = read<f32>(packet);
+    using namespace ModMasks;
+    using namespace Replay::ModFlags;
+    if(eq(mods.flags, Autopilot)) {
+        mods.autopilot_lenience = read<f32>(packet);
+    }
+    if(eq(mods.flags, Timewarp)) {
+        mods.timewarp_multiplier = read<f32>(packet);
+    }
+    if(eq(mods.flags, Minimize)) {
+        mods.minimize_multiplier = read<f32>(packet);
+    }
+    if(eq(mods.flags, ARTimewarp)) {
+        mods.artimewarp_multiplier = read<f32>(packet);
+    }
+    if(eq(mods.flags, ARWobble)) {
+        mods.arwobble_strength = read<f32>(packet);
+        mods.arwobble_interval = read<f32>(packet);
+    }
+    if(eq(mods.flags, Wobble1) || eq(mods.flags, Wobble2)) {
+        mods.wobble_strength = read<f32>(packet);
+        mods.wobble_frequency = read<f32>(packet);
+        mods.wobble_rotation_speed = read<f32>(packet);
+    }
+    if(eq(mods.flags, Jigsaw1) || eq(mods.flags, Jigsaw2)) {
+        mods.jigsaw_followcircle_radius_factor = read<f32>(packet);
+    }
+    if(eq(mods.flags, Shirone)) {
+        mods.shirone_combo = read<f32>(packet);
+    }
+
+    return mods;
+}
+
 void skip_string(Packet *packet) {
     u8 empty_check = read<u8>(packet);
     if(empty_check == 0) {
@@ -136,6 +181,47 @@ void write_hash(Packet *packet, MD5Hash hash) {
     write<u8>(packet, 0x0B);
     write<u8>(packet, 0x20);
     write_bytes(packet, (u8 *)hash.hash.data(), 32);
+}
+
+void write_mods(Packet *packet, Replay::Mods mods) {
+    write<u64>(packet, mods.flags);
+    write<f32>(packet, mods.speed);
+    write<i32>(packet, mods.notelock_type);
+    write<f32>(packet, mods.ar_override);
+    write<f32>(packet, mods.ar_overridenegative);
+    write<f32>(packet, mods.cs_override);
+    write<f32>(packet, mods.cs_overridenegative);
+    write<f32>(packet, mods.hp_override);
+    write<f32>(packet, mods.od_override);
+    using namespace ModMasks;
+    using namespace Replay::ModFlags;
+    if(eq(mods.flags, Autopilot)) {
+        write<f32>(packet, mods.autopilot_lenience);
+    }
+    if(eq(mods.flags, Timewarp)) {
+        write<f32>(packet, mods.timewarp_multiplier);
+    }
+    if(eq(mods.flags, Minimize)) {
+        write<f32>(packet, mods.minimize_multiplier);
+    }
+    if(eq(mods.flags, ARTimewarp)) {
+        write<f32>(packet, mods.artimewarp_multiplier);
+    }
+    if(eq(mods.flags, ARWobble)) {
+        write<f32>(packet, mods.arwobble_strength);
+        write<f32>(packet, mods.arwobble_interval);
+    }
+    if(eq(mods.flags, Wobble1) || eq(mods.flags, Wobble2)) {
+        write<f32>(packet, mods.wobble_strength);
+        write<f32>(packet, mods.wobble_frequency);
+        write<f32>(packet, mods.wobble_rotation_speed);
+    }
+    if(eq(mods.flags, Jigsaw1) || eq(mods.flags, Jigsaw2)) {
+        write<f32>(packet, mods.jigsaw_followcircle_radius_factor);
+    }
+    if(eq(mods.flags, Shirone)) {
+        write<f32>(packet, mods.shirone_combo);
+    }
 }
 }  // namespace BANCHO::Proto
 
