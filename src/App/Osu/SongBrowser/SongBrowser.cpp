@@ -1342,7 +1342,7 @@ void SongBrowser::onDifficultySelected(DatabaseBeatmap *diff2, bool play) {
     if(play) {
         if(BanchoState::is_in_a_multi_room()) {
             BanchoState::room.map_name = UString::format("%s - %s [%s]", diff2->getArtist().c_str(),
-                                                    diff2->getTitle().c_str(), diff2->getDifficultyName().c_str());
+                                                         diff2->getTitle().c_str(), diff2->getDifficultyName().c_str());
             BanchoState::room.map_md5 = diff2->getMD5Hash();
             BanchoState::room.map_id = diff2->getID();
 
@@ -1480,6 +1480,12 @@ void SongBrowser::refreshBeatmaps() {
 
 void SongBrowser::addBeatmapSet(BeatmapSet *mapset) {
     if(mapset->getDifficulties().size() < 1) return;
+
+    if(const auto it{std::ranges::find(this->songButtons, mapset, &SongButton::getDatabaseBeatmap)};
+       it != this->songButtons.end()) {
+        debugLog("already added mapset id={}, returning early\n", mapset->iSetID);
+        return;
+    }
 
     SongButton *songButton;
     if(mapset->getDifficulties().size() > 1) {
@@ -2132,7 +2138,8 @@ void SongBrowser::updateLayout() {
     this->webButton->setRelPos(this->topbarLeft->getSize().x - (topbarLeftButtonMargin + topbarLeftButtonWidth),
                                this->topbarLeft->getSize().y - this->webButton->getSize().y);
 
-    const int dropdowns_width = this->topbarLeft->getSize().x - 3 * topbarLeftButtonMargin - (topbarLeftButtonWidth + topbarLeftButtonMargin);
+    const int dropdowns_width =
+        this->topbarLeft->getSize().x - 3 * topbarLeftButtonMargin - (topbarLeftButtonWidth + topbarLeftButtonMargin);
     const int dropdowns_y = this->topbarLeft->getSize().y - this->sortScoresDropdown->getSize().y;
 
     this->filterScoresDropdown->onResized();  // HACKHACK: framework bug (should update string metrics on setSize())
@@ -2768,7 +2775,7 @@ void SongBrowser::onFilterScoresClicked(CBaseUIButton *button) {
     this->contextMenu->begin(button->getSize().x);
     {
         if(BanchoState::is_online()) {
-            for(const auto& filter : filters) {
+            for(const auto &filter : filters) {
                 CBaseUIButton *button = this->contextMenu->addButton(filter.c_str());
                 if(filter == cv::songbrowser_scores_filteringtype.getString()) {
                     button->setTextBrightColor(0xff00ff00);
