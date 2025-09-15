@@ -20,7 +20,7 @@ endif()
 
 include(deps.cmake)
 
-file(GLOB_RECURSE SOURCES src/*.cpp src/*.c libraries/*.cpp libraries/*.c)
+file(GLOB_RECURSE SOURCES ../src/*.cpp ../src/*.c ../libraries/*.cpp ../libraries/*.c)
 add_executable(neosu ${SOURCES})
 
 target_compile_definitions(neosu PRIVATE
@@ -31,7 +31,7 @@ target_compile_definitions(neosu PRIVATE
     SOLOUD_NO_ASSERTS=1
     _UNICODE
     UNICODE=1
-    SHADERS_INCDIR="${CMAKE_SOURCE_DIR}/assets/shaders/"
+    SHADERS_INCDIR="${CMAKE_SOURCE_DIR}/../assets/shaders/"
     $<$<CONFIG:Release>:NDEBUG>
     $<$<CONFIG:Debug>:_DEBUG>
 )
@@ -42,34 +42,26 @@ find_package(OpenSSL REQUIRED)
 if(WIN32)
     # setcb defined in deps.cmake
     setcb(MCENGINE_PLATFORM_WINDOWS ON)
-    setcb(MCENGINE_FEATURE_OPENGL ON)
-    setcb(MCENGINE_FEATURE_BASS ON)
-    setcb(MCENGINE_FEATURE_SOLOUD ON)
-    configure_file("cmake-win/config.h.in" "${CMAKE_BINARY_DIR}/config.h" @ONLY)
 endif()
 
+setcb(MCENGINE_FEATURE_OPENGL ON)
+setcb(MCENGINE_FEATURE_BASS ON)
+setcb(MCENGINE_FEATURE_SOLOUD ON)
+configure_file(../cmake-win/config.h.in ${CMAKE_BINARY_DIR}/config.h @ONLY)
+
+# Extract unique directories from the source files since they need to be include paths
+file(GLOB_RECURSE HEADERS ../src/*.h ../libraries/*.h)
+set(SRC_DIRS)
+foreach(SOURCE_FILE IN LISTS SOURCES HEADERS)
+    get_filename_component(DIR ${SOURCE_FILE} DIRECTORY)
+    list(APPEND SRC_DIRS ${DIR})
+endforeach()
+list(REMOVE_DUPLICATES SRC_DIRS)
+
+message("SRC_DIRS: ${SRC_DIRS}")
+
 target_include_directories(neosu PRIVATE
-    src
-    src/App
-    src/App/Osu
-    src/App/Osu/SongBrowser
-    src/Binary
-    src/Engine
-    src/Engine/Input
-    src/Engine/Renderer
-    src/Engine/Renderer/OpenGL
-    src/Engine/Resources
-    src/Engine/Sound
-    src/Engine/Sound/BASS
-    src/Engine/Sound/SoLoud
-    src/GUI
-    src/GUI/Windows
-    src/Platform
-    src/Util
-    libraries
-    libraries/delegatesv2
-    libraries/glad
-    libraries/glad/KHR
+    ${SRC_DIRS}
     ${bass_SOURCE_DIR}
     ${bassflac_SOURCE_DIR}/c
     ${bassfx_SOURCE_DIR}
@@ -105,10 +97,10 @@ target_link_libraries(neosu PRIVATE
     LibArchive::LibArchive
 )
 
-include(cmake-win/src/binclude.cmake)
+include(../cmake-win/src/binclude.cmake)
 enable_language(ASM_NASM)
 if(NOT EXISTS "${CMAKE_BINARY_DIR}/cacert.pem")
-    file(DOWNLOAD https://curl.se/ca/cacert.pem cacert.pem)
+    file(DOWNLOAD https://curl.se/ca/cacert.pem "${CMAKE_BINARY_DIR}/cacert.pem")
 endif()
 target_binary_resources(neosu PRIVATE cacert_pem "${CMAKE_BINARY_DIR}/cacert.pem")
 
@@ -142,4 +134,4 @@ elseif(WIN32)
     file(COPY ${discord_game_sdk_SOURCE_DIR}/lib/x86_64/discord_game_sdk.dll DESTINATION ${CMAKE_BINARY_DIR})
 endif()
 
-file(COPY assets/fonts assets/materials DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ../assets/fonts ../assets/materials DESTINATION ${CMAKE_BINARY_DIR})

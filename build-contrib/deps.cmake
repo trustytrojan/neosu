@@ -1,5 +1,5 @@
 include(FetchContent)
-include(cmake-win/dependencies.cmake)
+include(../cmake-win/dependencies.cmake)
 find_package(PkgConfig REQUIRED)
 
 # You want options in cache otherwise everything might rebuild
