@@ -585,11 +585,14 @@ void ModSelector::mouse_update(bool *propagate_clicks) {
 
     this->nonSubmittableWarning->setVisible(BanchoState::can_submit_scores() && !cvars->areAllCvarsSubmittable());
     if(this->nonSubmittableWarning->isVisible() && this->nonSubmittableWarning->isMouseInside()) {
-        osu->getTooltipOverlay()->begin();
-        for(const auto& cvar : cvars->getNonSubmittableCvars()) {
-            osu->getTooltipOverlay()->addLine(cvar->getName().c_str());
+        auto nonSubmittableCvars = cvars->getNonSubmittableCvars();
+        if(!nonSubmittableCvars.empty()) {
+            osu->getTooltipOverlay()->begin();
+            for(const auto& cvar : nonSubmittableCvars) {
+                osu->getTooltipOverlay()->addLine(cvar->getName().c_str());
+            }
+            osu->getTooltipOverlay()->end();
         }
-        osu->getTooltipOverlay()->end();
     }
 
     if(!BanchoState::is_in_a_multi_room()) {

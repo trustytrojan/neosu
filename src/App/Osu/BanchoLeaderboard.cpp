@@ -9,6 +9,7 @@
 #include "ModSelector.h"
 #include "Parsing.h"
 #include "SongBrowser/SongBrowser.h"
+#include "crypto.h"
 
 #include <cstdlib>
 #include <cstring>
@@ -39,6 +40,15 @@ FinishedScore parse_score(char *score_line) {
     score.player_id = static_cast<i32>(strtol(tokens[12].c_str(), nullptr, 10));
     score.unixTimestamp = strtoull(tokens[14].c_str(), nullptr, 10);
     score.is_online_replay_available = strtoul(tokens[15].c_str(), nullptr, 10) == 1;
+
+    if(tokens.size() > 16) {
+        auto mod_bytes = crypto::conv::decode64(tokens[16]);
+        Packet mod_packet{
+            .memory = mod_bytes.data(),
+            .size = mod_bytes.size(),
+        };
+        score.mods = BANCHO::Proto::read_mods(&mod_packet);
+    }
 
     // @PPV3: score can only be ppv2, AND we need to recompute ppv2 on it
     // might also be missing some important fields here, double check
