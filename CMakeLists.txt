@@ -37,6 +37,7 @@ target_compile_definitions(neosu PRIVATE
 )
 
 find_package(OpenGL REQUIRED)
+find_package(OpenSSL REQUIRED)
 
 if(WIN32)
     # setcb defined in deps.cmake
@@ -80,25 +81,27 @@ target_include_directories(neosu PRIVATE
     ${bassasio_SOURCE_DIR}
     ${basswasapi_header_SOURCE_DIR}/c
     ${CMAKE_BINARY_DIR}/jpeg-prefix/src/jpeg/src
+    /usr/include/freetype2 # arch linux freetype package is like this for some reason
 )
 
 target_link_directories(neosu PRIVATE ${CMAKE_BINARY_DIR}/jpeg-prefix/src/jpeg-build)
 target_link_libraries(neosu PRIVATE
     OpenGL::GL
     OpenGL::GLU
-    SDL3::SDL3-static
-    turbojpeg
-    png_static
-    freetype
+    SDL3::SDL3
+    libjpeg-turbo::turbojpeg
+    PNG::PNG
+    Freetype::Freetype
     fmt::fmt
-    liblzma
+    LibLZMA::LibLZMA
     CURL::libcurl
+    OpenSSL::SSL
     glm::glm
     SoundTouch
     soloud
-    libmpg123
-    bz2_static
-    archive_static
+    mpg123
+    BZip2::BZip2
+    LibArchive::LibArchive
 )
 
 include(cmake-win/src/binclude.cmake)
