@@ -42,7 +42,7 @@ class SoundEngine {
 
    public:
     using TypeId = uint8_t;
-    enum SndEngineType : TypeId { BASS, SOLOUD };
+    enum SndEngineType : TypeId { BASS, SOLOUD, MAX };
 
     SoundEngine() = default;
     virtual ~SoundEngine() { this->restartCBs = {}; }

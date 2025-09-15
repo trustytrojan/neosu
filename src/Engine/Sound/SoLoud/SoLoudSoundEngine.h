@@ -18,17 +18,13 @@ struct DeviceInfo;
 }  // namespace SoLoud
 
 class SoLoudSound;
+class SoLoudThreadWrapper;
 
 class SoLoudSoundEngine final : public SoundEngine {
+    NOCOPY_NOMOVE(SoLoudSoundEngine)
    public:
     SoLoudSoundEngine();
     ~SoLoudSoundEngine() override;
-
-    SoLoudSoundEngine &operator=(const SoLoudSoundEngine &) = delete;
-    SoLoudSoundEngine &operator=(SoLoudSoundEngine &&) = delete;
-
-    SoLoudSoundEngine(const SoLoudSoundEngine &) = delete;
-    SoLoudSoundEngine(SoLoudSoundEngine &&) = delete;
 
     void restart() override;
 
@@ -70,7 +66,7 @@ class SoLoudSoundEngine final : public SoundEngine {
 };
 
 // raw pointer access to the s_SLInstance singleton, for SoLoudSound to use
-extern std::unique_ptr<SoLoud::Soloud> soloud;
+extern std::unique_ptr<SoLoudThreadWrapper> soloud;
 
 #else
 class SoLoudSoundEngine : public SoundEngine {};

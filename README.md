@@ -8,8 +8,12 @@ If you need help, contact `kiwec` or `spec.ta.tor` on Discord, either by direct 
 
 ### Building
 
-- (MSVC) On Windows, for Windows -> run `buildwin64.bat` in `cmake-win`
-- (gcc) On Linux, for Linux -> run `../configure` in `build`, then `make install`
-- (gcc-mingw) On Linux/WSL, for Windows -> run ` ../configure --host=x86_64-w64-mingw32` in `build`, then `make install`
+The recommended way to build (and the way releases are made) is using gcc/gcc-mingw.
 
-Releases are made using gcc (for Linux) and gcc-mingw (for Windows).
+- For all *nix systems, run `./autogen.sh` in the top-level folder (once) to generate the build files.
+- Create and enter a build subdirectory; e.g. `mkdir build && cd build`
+- On Linux, for Linux -> run `../configure`, then `make install`
+  - This will build and install everything under `./dist/bin-$arch`, configurable with the `--prefix` option to `configure`
+- On Linux/WSL, for Windows -> run ` ../configure --host=x86_64-w64-mingw32`, then `make install`
+
+For debugging convenience, you can also do an MSVC build on Windows, by running `buildwin64.bat` in `cmake-win`.

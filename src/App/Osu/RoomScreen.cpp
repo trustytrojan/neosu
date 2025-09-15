@@ -50,6 +50,14 @@ void UIModList::draw() {
     else if(ModMasks::legacy_eq(*this->flags, LegacyFlags::SuddenDeath))
         mods.push_back(osu->getSkin()->getSelectionModSuddenDeath());
 
+    if(cv::nightcore_enjoyer.getBool()) {
+        if(ModMasks::legacy_eq(*this->flags, LegacyFlags::DoubleTime)) mods.push_back(osu->getSkin()->getSelectionModNightCore());
+        if(ModMasks::legacy_eq(*this->flags, LegacyFlags::HalfTime)) mods.push_back(osu->getSkin()->getSelectionModDayCore());
+    } else {
+        if(ModMasks::legacy_eq(*this->flags, LegacyFlags::DoubleTime)) mods.push_back(osu->getSkin()->getSelectionModDoubleTime());
+        if(ModMasks::legacy_eq(*this->flags, LegacyFlags::HalfTime)) mods.push_back(osu->getSkin()->getSelectionModHalfTime());
+    }
+
     if(ModMasks::legacy_eq(*this->flags, LegacyFlags::NoFail)) mods.push_back(osu->getSkin()->getSelectionModNoFail());
     if(ModMasks::legacy_eq(*this->flags, LegacyFlags::Easy)) mods.push_back(osu->getSkin()->getSelectionModEasy());
     if(ModMasks::legacy_eq(*this->flags, LegacyFlags::TouchDevice)) mods.push_back(osu->getSkin()->getSelectionModTD());
@@ -639,6 +647,10 @@ void RoomScreen::on_room_updated(Room room) {
         }
     }
 
+    if(osu->modSelector->isVisible() && !BanchoState::room.is_host() && !BanchoState::room.freemods) {
+        // Force close mod menu if host disabled freemods
+        osu->modSelector->setVisible(false);
+    }
     osu->modSelector->updateButtons();
     osu->modSelector->resetMods();
     osu->modSelector->enableModsFromFlags(BanchoState::room.mods | player_slot->mods);

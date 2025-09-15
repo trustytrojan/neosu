@@ -56,6 +56,7 @@ class Sound : public Resource {
     virtual float getPan() { return this->fPan; }
     virtual float getSpeed() { return this->fSpeed; }
     virtual float getPitch() { return this->fPitch; }
+    virtual i32 getBASSStreamLatencyCompensation() const { return 0; } // constant stream offset, backend dependent
 
     virtual bool isPlaying() = 0;
     virtual bool isFinished() = 0;

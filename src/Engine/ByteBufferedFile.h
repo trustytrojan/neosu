@@ -9,6 +9,7 @@
 #include <fstream>
 #include <vector>
 
+#include "Replay.h"
 #include "MD5Hash.h"
 #include "types.h"
 
@@ -27,15 +28,11 @@ class ByteBufferedFile {
 
    public:
     class Reader {
+        NOCOPY_NOMOVE(Reader)
        public:
         Reader() = default;  // MSVC complains if no default constructor
         Reader(const UString &uPath);
         ~Reader() = default;
-
-        Reader &operator=(const Reader &) = delete;
-        Reader &operator=(Reader &&) = delete;
-        Reader(const Reader &) = delete;
-        Reader(Reader &&) = delete;
 
         // always_inline is a 2x speedup here
         [[nodiscard]] always_inline_attr size_t read_bytes(u8 *out, size_t len) {
@@ -173,6 +170,7 @@ class ByteBufferedFile {
         [[nodiscard]] std::string_view error() const { return this->last_error; }
 
         [[nodiscard]] MD5Hash read_hash();
+        [[nodiscard]] Replay::Mods read_mods();
         [[nodiscard]] std::string read_string();
         [[nodiscard]] u32 read_uleb128();
 
@@ -196,14 +194,10 @@ class ByteBufferedFile {
     };
 
     class Writer {
+        NOCOPY_NOMOVE(Writer)
        public:
         Writer(const UString &uPath);
         ~Writer();
-
-        Writer &operator=(const Writer &) = delete;
-        Writer &operator=(Writer &&) = delete;
-        Writer(const Writer &) = delete;
-        Writer(Writer &&) = delete;
 
         [[nodiscard]] bool good() const { return !this->error_flag; }
         [[nodiscard]] std::string_view error() const { return this->last_error; }
@@ -213,6 +207,7 @@ class ByteBufferedFile {
         void write_hash(MD5Hash hash);
         void write_string(std::string str);
         void write_uleb128(u32 num);
+        void write_mods(Replay::Mods mods);
 
         template <typename T>
         void write(T t) {

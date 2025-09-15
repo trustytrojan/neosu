@@ -42,33 +42,33 @@ bool Environment::s_bIsWine = false;
 SDL_Environment *Environment::s_sdlenv = SDL_GetEnvironment();
 bool Environment::s_bIsATTY = (isatty(fileno(stdout)) != 0);
 
-Environment::Environment(int argc, char *argv[]) {
+Environment::Environment(int argc, char *argv[]) : m_interop(this) {
     env = this;
 
     // parse args
-    m_mArgMap = [&]() {
+    m_mArgMap = [&]() -> std::unordered_map<std::string, std::optional<std::string>> {
         // example usages:
         // args.contains("-file")
         // auto filename = args["-file"].value_or("default.txt");
         // if (args["-output"].has_value())
         // 	auto outfile = args["-output"].value();
-        std::unordered_map<UString, std::optional<UString>> args;
+        std::unordered_map<std::string, std::optional<std::string>> args;
         for(int i = 1; i < argc; ++i) {
-            std::string_view arg = argv[i];
+            std::string_view arg{argv[i]};
             if(arg.starts_with('-'))
                 if(i + 1 < argc && !(argv[i + 1][0] == '-')) {
-                    args[UString(arg)] = argv[i + 1];
+                    args[std::string(arg)] = argv[i + 1];
                     ++i;
                 } else
-                    args[UString(arg)] = std::nullopt;
+                    args[std::string(arg)] = std::nullopt;
             else
-                args[UString(arg)] = std::nullopt;
+                args[std::string(arg)] = std::nullopt;
         }
         return args;
     }();
 
     // simple vector representation of the whole cmdline including the program name (as the first element)
-    m_vCmdLine = std::vector<UString>(argv, argv + argc);
+    m_vCmdLine = std::vector<std::string>(argv, argv + argc);
 
 #ifdef MCENGINE_PLATFORM_WINDOWS
     s_bIsWine = !!GetProcAddress(GetModuleHandle(TEXT("ntdll.dll")), "wine_get_version");
@@ -133,7 +133,7 @@ Environment::Environment(int argc, char *argv[]) {
     cv::monitor.setCallback(SA::MakeDelegate<&Environment::onMonitorChange>(this));
 
     // set high priority right away
-    Environment::setProcessPriority(cv::win_processpriority.getFloat());
+    Environment::setThreadPriority(cv::win_processpriority.getFloat());
 }
 
 Environment::~Environment() {
@@ -946,7 +946,7 @@ void Environment::listenToTextInput(bool listen) {
 //******************************//
 
 // convar callback
-void Environment::setProcessPriority(float newPrio) {
+void Environment::setThreadPriority(float newPrio) {
     SDL_SetCurrentThreadPriority(!!static_cast<int>(newPrio) ? SDL_THREAD_PRIORITY_HIGH : SDL_THREAD_PRIORITY_NORMAL);
 }
 

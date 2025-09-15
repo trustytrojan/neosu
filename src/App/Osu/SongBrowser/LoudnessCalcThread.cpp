@@ -8,6 +8,7 @@
 #include "Engine.h"
 #include "Sound.h"
 #include "SoundEngine.h"
+#include "Thread.h"
 
 #ifdef MCENGINE_FEATURE_BASS
 #include "BassManager.h"
@@ -19,6 +20,8 @@ std::once_flag VolNormalization::instance_flag;
 std::once_flag VolNormalization::shutdown_flag;
 
 struct VolNormalization::LoudnessCalcThread {
+    NOCOPY_NOMOVE(LoudnessCalcThread)
+   public:
     std::thread thr;
     std::atomic<bool> dead{true};
     std::vector<DatabaseBeatmap *> maps;
@@ -43,13 +46,11 @@ struct VolNormalization::LoudnessCalcThread {
         }
     }
 
-    LoudnessCalcThread &operator=(const LoudnessCalcThread &) = delete;
-    LoudnessCalcThread &operator=(LoudnessCalcThread &&) = delete;
-    LoudnessCalcThread(const LoudnessCalcThread &) = delete;
-    LoudnessCalcThread(LoudnessCalcThread &&) = delete;
-
    private:
     void run() {
+        McThread::set_current_thread_name("loudness_calc");
+        McThread::set_current_thread_prio(false); // reset priority
+
         UString last_song = "";
         f32 last_loudness = 0.f;
         std::array<f32, 44100> buf{};

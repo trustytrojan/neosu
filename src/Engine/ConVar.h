@@ -1,16 +1,14 @@
-// Copyright (c) 2011, PG, All rights reserved.
+// Copyright (c) 2011, PG & 2025, WH & 2025, kiwec, All rights reserved.
 #ifndef CONVAR_H
 #define CONVAR_H
 
 #include <atomic>
-#include <mutex>
 #include <string>
 #include <variant>
 #include <type_traits>
 
 #include "Delegate.h"
 #include "UString.h"
-#include "types.h"
 
 #ifndef DEFINE_CONVARS
 #include "ConVarDefs.h"
@@ -21,7 +19,7 @@ using ConVarString = std::string;
 using std::string_view_literals::operator""sv;
 
 namespace cv {
-enum CvarFlags {
+enum CvarFlags : uint8_t {
     // Modifiable by clients
     CLIENT = (1 << 0),
 
@@ -252,15 +250,15 @@ class ConVar {
     [[nodiscard]] double getDouble() const;
     [[nodiscard]] const ConVarString &getString() const;
 
-    template <typename T>
-    [[nodiscard]] constexpr T getVal() {
-        return (T)this->getDouble();
+    template <typename T = int>
+    [[nodiscard]] inline auto getVal() const {
+        return static_cast<T>(this->getDouble());
     }
 
-    [[nodiscard]] const int getInt() const { return (int)this->getDouble(); }
-    [[nodiscard]] const bool getBool() const { return (bool)this->getDouble(); }
-    [[nodiscard]] const bool get() const { return this->getBool(); }
-    [[nodiscard]] const float getFloat() const { return (float)this->getDouble(); }
+    [[nodiscard]] inline int getInt() const { return this->getVal<int>(); }
+    [[nodiscard]] inline bool getBool() const { return !!this->getVal<int>(); }
+    [[nodiscard]] inline bool get() const { return this->getBool(); }
+    [[nodiscard]] inline float getFloat() const { return this->getVal<float>(); }
 
     [[nodiscard]] inline const ConVarString &getHelpstring() const { return this->sHelpString; }
     [[nodiscard]] inline const ConVarString &getName() const { return this->sName; }
@@ -297,7 +295,7 @@ class ConVar {
     [[nodiscard]] bool onSetValueGameplay(CvarEditor editor);
 
     // prevents score submission
-    void onSetValueProtected(const std::string &oldValue);
+    void onSetValueProtected(const std::string &oldValue, const std::string &newValue);
 
     // unified init for callback-only convars
     template <typename Callback>
@@ -324,6 +322,7 @@ class ConVar {
     template <typename T, typename Callback>
     void initValue(const std::string_view &name, const T &defaultValue, uint8_t flags,
                    const std::string_view &helpString, Callback callback) {
+        this->bHasValue = true;
         this->iFlags = flags;
         this->sName = name;
         this->sHelpString = helpString;
@@ -333,31 +332,19 @@ class ConVar {
                      !std::is_same_v<std::decay_t<T>, std::string_view> &&
                      !std::is_same_v<std::decay_t<T>, const char *>) {
             // T is double-like
-            double val = static_cast<double>(defaultValue);
-            this->setDefaultDouble(val);
-
-            this->dClientValue.store(val, std::memory_order_release);
-            this->dSkinValue.store(val, std::memory_order_release);
-            this->dServerValue.store(val, std::memory_order_release);
-            this->sClientValue = this->sDefaultValue;
-            this->sSkinValue = this->sDefaultValue;
-            this->sServerValue = this->sDefaultValue;
+            this->setDefaultDouble(static_cast<double>(defaultValue));
         } else {
             // T is string-like
             this->setDefaultString(defaultValue);
-
-            this->sClientValue = this->sDefaultValue;
-            this->sSkinValue = this->sDefaultValue;
-            this->sServerValue = this->sDefaultValue;
-
-            // try to read a double from the string
-            const double f = std::strtod(this->sDefaultValue.c_str(), nullptr);
-            if(f != 0.0) {
-                this->dClientValue.store(f, std::memory_order_release);
-                this->dSkinValue.store(f, std::memory_order_release);
-                this->dServerValue.store(f, std::memory_order_release);
-            }
         }
+
+        this->sClientValue = this->sDefaultValue;
+        this->sSkinValue = this->sDefaultValue;
+        this->sServerValue = this->sDefaultValue;
+
+        this->dClientValue.store(this->dDefaultValue, std::memory_order_relaxed);
+        this->dSkinValue.store(this->dDefaultValue, std::memory_order_relaxed);
+        this->dServerValue.store(this->dDefaultValue, std::memory_order_relaxed);
 
         // set callback if provided
         if constexpr(!std::is_same_v<Callback, std::nullptr_t>) {
@@ -399,7 +386,7 @@ class ConVar {
         }();
 
         // backup old values, for passing into callbacks
-        double oldDouble;
+        double oldDouble{0.0};
         std::string oldString;
         if(doCallback) {
             oldDouble = this->getDouble();
@@ -429,7 +416,7 @@ class ConVar {
 
         // prevent score submission if the cvar was protected
         if(this->isProtected()) {
-            this->onSetValueProtected(oldString);
+            this->onSetValueProtected(oldString, newString);
         }
 
         if(doCallback) {
@@ -509,6 +496,7 @@ class ConVarHandler {
     [[nodiscard]] ConVar *getConVarByName(const ConVarString &name, bool warnIfNotFound = true) const;
     [[nodiscard]] std::vector<ConVar *> getConVarByLetter(const ConVarString &letters) const;
 
+    [[nodiscard]] std::vector<ConVar *> getNonSubmittableCvars() const;
     bool areAllCvarsSubmittable();
 
     void resetServerCvars();

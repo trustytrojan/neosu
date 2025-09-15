@@ -5,19 +5,20 @@
 
 #include "SString.h"
 #include "SoLoudSound.h"
+#include "SoLoudThread.h"
 
 #include "ConVar.h"
 #include "Engine.h"
 
 #include "Environment.h"
+#include "ResourceManager.h"
 
 #include <utility>
-#include <soloud.h>
 
 #include <SDL3/SDL_hints.h>
 #include <SDL3/SDL_audio.h>
 
-std::unique_ptr<SoLoud::Soloud> soloud = nullptr;
+std::unique_ptr<SoLoudThreadWrapper> soloud{nullptr};
 
 SoundEngine::OutputDriver SoLoudSoundEngine::getMAorSDLCV() {
     OutputDriver out{OutputDriver::SOLOUD_MA};
@@ -35,7 +36,7 @@ SoundEngine::OutputDriver SoLoudSoundEngine::getMAorSDLCV() {
 
 SoLoudSoundEngine::SoLoudSoundEngine() : SoundEngine() {
     if(!soloud) {
-        soloud = std::make_unique<SoLoud::Soloud>();
+        soloud = std::make_unique<SoLoudThreadWrapper>();
     }
 
     cv::snd_freq.setValue(SoLoud::Soloud::AUTO);  // let it be auto-negotiated (the snd_freq callback will adjust if
@@ -447,6 +448,11 @@ bool SoLoudSoundEngine::initializeOutputDevice(const OUTPUT_DEVICE &device) {
 
     // cleanup potential previous device
     if(this->isReady()) {
+        // this isn't technically required, but might it be, if audio device initialization hangs and we have to detach the soloud thread
+        // should be fixable in soloud itself, probably
+        for(const auto &soundRes : resourceManager->getSounds()) {
+            soundRes->release();
+        }
         soloud->deinit();
         this->bReady = false;
     }
@@ -477,11 +483,22 @@ bool SoLoudSoundEngine::initializeOutputDevice(const OUTPUT_DEVICE &device) {
     SDL_SetHintWithPriority(SDL_HINT_AUDIO_DEVICE_STREAM_ROLE, "game", SDL_HINT_OVERRIDE);
 
     // initialize a new soloud instance
-    SoLoud::result result = soloud->init(flags, backend, sampleRate, bufferSize, channels);
+    SoLoud::result result = SoLoud::UNKNOWN_ERROR;
+    // try both backends, first with the one we chose, then the other one if that timed out/failed
+    for(const auto tryBackend :
+        std::array{backend, backend == SoLoud::Soloud::SDL3 ? SoLoud::Soloud::MINIAUDIO : SoLoud::Soloud::SDL3}) {
+        result = soloud->init(flags, tryBackend, sampleRate, bufferSize, channels);
+        backend = tryBackend;
+        if(result == SoLoud::SO_NO_ERROR) {
+            break;
+        } else {
+            debugLog("SoundEngine: The {} output backend failed to initialize, trying another one...\n",
+                     cv::snd_soloud_backend.getString());
+        }
+    }
 
     if(result != SoLoud::SO_NO_ERROR) {
         this->bReady = false;
-        this->bWasBackendEverReady = false;
         engine->showMessageError("Sound Error", UString::format("SoLoud::Soloud::init() failed (%i)!", result));
         return false;
     }

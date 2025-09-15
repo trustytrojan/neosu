@@ -9,15 +9,10 @@
 
 class OpenGLVertexArrayObject final : public VertexArrayObject
 {
+	NOCOPY_NOMOVE(OpenGLVertexArrayObject)
 public:
 	OpenGLVertexArrayObject(Graphics::PRIMITIVE primitive = Graphics::PRIMITIVE::PRIMITIVE_TRIANGLES, Graphics::USAGE_TYPE usage = Graphics::USAGE_TYPE::USAGE_STATIC, bool keepInSystemMemory = false);
 	~OpenGLVertexArrayObject() override {destroy();}
-
-	OpenGLVertexArrayObject &operator=(const OpenGLVertexArrayObject &) = delete;
-	OpenGLVertexArrayObject &operator=(OpenGLVertexArrayObject &&) = delete;
-
-	OpenGLVertexArrayObject(const OpenGLVertexArrayObject &) = delete;
-	OpenGLVertexArrayObject(OpenGLVertexArrayObject &&) = delete;
 
 	void draw() override;
 

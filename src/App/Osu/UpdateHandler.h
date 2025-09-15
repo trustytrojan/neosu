@@ -1,10 +1,13 @@
 #pragma once
 // Copyright (c) 2016, PG, All rights reserved.
 
-#include "UString.h"
+#include "noinclude.h"
+
+#include <string>
 #include <atomic>
 
 class UpdateHandler {
+    NOCOPY_NOMOVE(UpdateHandler)
    public:
     enum class STATUS : int8_t {
         STATUS_IDLE,
@@ -16,11 +19,6 @@ class UpdateHandler {
 
     UpdateHandler() = default;
     ~UpdateHandler() = default;
-
-    UpdateHandler(const UpdateHandler&) = delete;
-    UpdateHandler& operator=(const UpdateHandler&) = delete;
-    UpdateHandler(UpdateHandler&&) = delete;
-    UpdateHandler& operator=(UpdateHandler&&) = delete;
 
     void checkForUpdates(bool force_update);
     void installUpdate();

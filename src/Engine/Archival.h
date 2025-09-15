@@ -1,25 +1,27 @@
 #pragma once
 
+#include "noinclude.h"
+#include "types.h"
+
 #include <memory>
 #include <string>
 #include <vector>
-
-#include "types.h"
 
 struct archive;
 struct archive_entry;
 
 class Archive {
+    NOCOPY_NOMOVE(Archive)
    public:
     class Entry {
        public:
         Entry(struct archive* archive, struct archive_entry* entry);
         ~Entry() = default;
 
-        Entry &operator=(const Entry &) = default;
-        Entry &operator=(Entry &&) = default;
-        Entry(const Entry &) = default;
-        Entry(Entry &&) = default;
+        Entry& operator=(const Entry&) = default;
+        Entry& operator=(Entry&&) = default;
+        Entry(const Entry&) = default;
+        Entry(Entry&&) = default;
 
         // entry information
         [[nodiscard]] std::string getFilename() const;
@@ -48,12 +50,6 @@ class Archive {
     Archive(const u8* data, size_t size);
 
     ~Archive();
-
-    // no copy/move for simplicity
-    Archive(const Archive&) = delete;
-    Archive& operator=(const Archive&) = delete;
-    Archive(Archive&&) = delete;
-    Archive& operator=(Archive&&) = delete;
 
     // check if archive was opened successfully
     [[nodiscard]] bool isValid() const { return this->bValid; }

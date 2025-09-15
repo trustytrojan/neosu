@@ -119,7 +119,7 @@ class Beatmap : public BeatmapInterface {
     void resetScore();
 
     // music/sound
-    void loadMusic(bool stream = true);
+    void loadMusic();
     void unloadMusic();
     f32 getIdealVolume();
     void setSpeed(f32 speed);
@@ -225,7 +225,6 @@ class Beatmap : public BeatmapInterface {
     [[nodiscard]] inline f32 getBreakBackgroundFadeAnim() const { return this->fBreakBackgroundFade; }
 
     Sound *music;
-    bool bForceStreamPlayback;
 
     // live pp/stars
     uwu::lazy_promise<std::function<pp_info()>, pp_info> ppv2_calc{pp_info{}};
@@ -272,7 +271,6 @@ class Beatmap : public BeatmapInterface {
     long iCurMusicPos;
     long iCurMusicPosWithOffsets;
     McOsuInterpolator musicInterp;
-    int iResourceLoadUpdateDelayHack;
     f32 fAfterMusicIsFinishedVirtualAudioTimeStart;
     bool bIsFirstMissSound;
     DatabaseBeatmap::TIMING_INFO current_timing_point{};

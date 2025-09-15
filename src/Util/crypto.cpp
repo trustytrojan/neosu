@@ -170,9 +170,9 @@ std::string encode64(const u8* src, size_t len) {
     size_t encoded_len = 4 * ((len + 2) / 3);
     std::vector<u8> temp(encoded_len + 1);
 
-    int actual_len = EVP_EncodeBlock(temp.data(), src, static_cast<int>(len));
+    size_t actual_len = EVP_EncodeBlock(temp.data(), src, static_cast<int>(len));
     if(actual_len > 0) {
-        return std::string{(const char*)temp.data(), actual_len};
+        return std::string{reinterpret_cast<const char *>(temp.data()), actual_len};
     }
 #endif
 
@@ -180,7 +180,7 @@ std::string encode64(const u8* src, size_t len) {
     size_t out_len;
     u8* result = base64_encode(src, len, &out_len);
     if(result) {
-        std::string res{(const char*)result, out_len};
+        std::string res{reinterpret_cast<const char *>(result), out_len};
         delete[] result;
         return res;
     }
@@ -188,13 +188,16 @@ std::string encode64(const u8* src, size_t len) {
     return "";
 }
 
-std::vector<u8> decode64(const u8* src, size_t len) {
+std::vector<u8> decode64(std::string srcParam) {
+    const u8* src = (u8*)srcParam.data();
+    size_t len = srcParam.length();
+
 #ifdef USE_OPENSSL
     // calculate maximum output size
     size_t max_decoded_len = (len * 3) / 4 + 1;
     std::vector<u8> temp(max_decoded_len);
 
-    int actual_len = EVP_DecodeBlock(temp.data(), src, static_cast<int>(len));
+    int actual_len = EVP_DecodeBlock(temp.data(), src, len);
     if(actual_len >= 0) {
         // EVP_DecodeBlock doesn't account for padding, need to adjust
         int padding = 0;

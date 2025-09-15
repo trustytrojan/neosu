@@ -79,10 +79,7 @@ Shader *flashlight_shader = nullptr;
 
 Osu::Osu() {
     osu = this;
-
-    u32 seed{};
-    crypto::rng::get_bytes(reinterpret_cast<u8 *>(&seed), 4);
-    srand(seed);
+    srand(crypto::rng::get_rand<u32>());
 
     if(env->isDebugBuild()) {
         BanchoState::neosu_version = UString::fmt("dev-{}", cv::build_timestamp.getVal<u64>());
@@ -848,54 +845,6 @@ bool Osu::isInPlayModeAndNotPaused() {
 }
 
 void Osu::updateMods() {
-    using namespace ModMasks;
-    if(BanchoState::is_in_a_multi_room()) {
-        if(legacy_eq(BanchoState::room.mods, LegacyFlags::DoubleTime) ||
-           legacy_eq(BanchoState::room.mods, LegacyFlags::Nightcore)) {
-            cv::speed_override.setValue(1.5f);
-        } else if(legacy_eq(BanchoState::room.mods, (LegacyFlags::HalfTime))) {
-            cv::speed_override.setValue(0.75f);
-        } else {
-            cv::speed_override.setValue(-1.f);
-        }
-
-        cv::mod_nofail.setValue(legacy_eq(BanchoState::room.mods, LegacyFlags::NoFail));
-        cv::mod_easy.setValue(legacy_eq(BanchoState::room.mods, LegacyFlags::Easy));
-        cv::mod_touchdevice.setValue(legacy_eq(BanchoState::room.mods, LegacyFlags::TouchDevice));
-        cv::mod_hidden.setValue(legacy_eq(BanchoState::room.mods, LegacyFlags::Hidden));
-        cv::mod_hardrock.setValue(legacy_eq(BanchoState::room.mods, LegacyFlags::HardRock));
-        cv::mod_suddendeath.setValue(legacy_eq(BanchoState::room.mods, LegacyFlags::SuddenDeath));
-        cv::mod_relax.setValue(legacy_eq(BanchoState::room.mods, LegacyFlags::Relax));
-        cv::mod_autoplay.setValue(legacy_eq(BanchoState::room.mods, LegacyFlags::Autoplay));
-        cv::mod_spunout.setValue(legacy_eq(BanchoState::room.mods, LegacyFlags::SpunOut));
-        cv::mod_autopilot.setValue(legacy_eq(BanchoState::room.mods, LegacyFlags::Autopilot));
-        cv::mod_perfect.setValue(legacy_eq(BanchoState::room.mods, LegacyFlags::Perfect));
-        cv::mod_target.setValue(legacy_eq(BanchoState::room.mods, LegacyFlags::Target));
-        cv::mod_scorev2.setValue(BanchoState::room.win_condition == SCOREV2);
-        cv::mod_flashlight.setValue(legacy_eq(BanchoState::room.mods, LegacyFlags::Flashlight));
-        cv::mod_nightmare.setValue(false);
-        cv::mod_actual_flashlight.setValue(false);
-
-        if(BanchoState::room.freemods) {
-            for(auto &slot : BanchoState::room.slots) {
-                if(slot.player_id != BanchoState::get_uid()) continue;
-
-                cv::mod_nofail.setValue(legacy_eq(slot.mods, LegacyFlags::NoFail));
-                cv::mod_easy.setValue(legacy_eq(slot.mods, LegacyFlags::Easy));
-                cv::mod_touchdevice.setValue(legacy_eq(slot.mods, LegacyFlags::TouchDevice));
-                cv::mod_hidden.setValue(legacy_eq(slot.mods, LegacyFlags::Hidden));
-                cv::mod_hardrock.setValue(legacy_eq(slot.mods, LegacyFlags::HardRock));
-                cv::mod_suddendeath.setValue(legacy_eq(slot.mods, LegacyFlags::SuddenDeath));
-                cv::mod_relax.setValue(legacy_eq(slot.mods, LegacyFlags::Relax));
-                cv::mod_autoplay.setValue(legacy_eq(slot.mods, LegacyFlags::Autoplay));
-                cv::mod_spunout.setValue(legacy_eq(slot.mods, LegacyFlags::SpunOut));
-                cv::mod_autopilot.setValue(legacy_eq(slot.mods, LegacyFlags::Autopilot));
-                cv::mod_perfect.setValue(legacy_eq(slot.mods, LegacyFlags::Perfect));
-                cv::mod_target.setValue(legacy_eq(slot.mods, LegacyFlags::Target));
-            }
-        }
-    }
-
     osu->getScore()->mods = Replay::Mods::from_cvars();
     osu->getScore()->setCheated();
 
@@ -2159,10 +2108,6 @@ float Osu::getUIScale() {
 }
 
 void Osu::setupSoloud() {
-    // set +18ms universal offset here to match BASS better, at least on windows
-    // on linux BASS always needs ~-35ms offset, so people probably need to adjust that anyways
-    cv::universal_offset_hardcoded.setValue(18.0f);
-
     // need to save this state somewhere to share data between callback stages
     static bool was_playing = false;
     static unsigned long prev_position_ms = 0;
@@ -2188,7 +2133,7 @@ void Osu::setupSoloud() {
             if(osu->getSelectedBeatmap() && osu->getSelectedBeatmap()->getMusic()) {
                 if(osu->isInPlayMode()) {
                     osu->getSelectedBeatmap()->unloadMusic();
-                    osu->getSelectedBeatmap()->loadMusic(false);
+                    osu->getSelectedBeatmap()->loadMusic();
                     osu->getSelectedBeatmap()->getMusic()->setLoop(false);
                     osu->getSelectedBeatmap()->getMusic()->setPositionMS(prev_position_ms);
                 } else {

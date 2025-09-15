@@ -7,6 +7,7 @@
 #include "DifficultyCalculator.h"
 #include "Osu.h"
 #include "Timing.h"
+#include "Thread.h"
 
 // static member definitions
 std::unique_ptr<MapCalcThread> MapCalcThread::instance = nullptr;
@@ -46,6 +47,9 @@ void MapCalcThread::abort_instance() {
 }
 
 void MapCalcThread::run() {
+    McThread::set_current_thread_name("map_calc");
+    McThread::set_current_thread_prio(false); // reset priority
+
     std::vector<f64> aimStrains;
     std::vector<f64> speedStrains;
 

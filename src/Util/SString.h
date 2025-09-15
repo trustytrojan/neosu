@@ -40,6 +40,19 @@ inline std::vector<std::string> split(const std::string& s, const std::string_vi
     return r;
 };
 
+inline std::string join(const std::vector<std::string>& strings, std::string_view delim = " ") {
+    if(strings.empty()) return {};
+
+    std::string result = strings[0];
+
+    for(size_t i = 1; i < strings.size(); ++i) {
+        result += delim;
+        result += strings[i];
+    }
+
+    return result;
+};
+
 // in-place whitespace trimming
 inline void trim(std::string* str) {
     assert(str && "null string passed to SString::trim()");

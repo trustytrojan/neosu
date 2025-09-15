@@ -48,10 +48,6 @@ public:
 	bool hasEnded() override;
 	result seek(time aSeconds, float *mScratch, unsigned int mScratchSize) override;
 	result rewind() override;
-
-	// accurate position tracking
-	[[nodiscard]] time getRealStreamPosition() const;
-
 private:
 	// buffer management
 	void ensureBufferSize(unsigned int samples);
@@ -62,7 +58,6 @@ private:
 
 	// buffer synchronization and positioning
 	void reSynchronize();
-	void updateSTLatency();
 
 	void requestSettingUpdate(float speed, float pitch);
 
@@ -70,13 +65,6 @@ private:
 	SLFXStream *mParent;                  // parent filter
 	AudioSourceInstance *mSourceInstance; // source instance to process
 	soundtouch::SoundTouch *mSoundTouch;  // soundtouch processor
-
-	// soundtouch setting cache for calculting offset trailing behind source stream
-	unsigned int mInitialSTLatencySamples;
-	unsigned int mSTOutputSequenceSamples;
-
-	// this is derived from the above, it doesn't change very often so it makes sense to keep it cached as well
-	double mSTLatencySeconds;
 
 	float mSoundTouchSpeed;
 	float mSoundTouchPitch;
@@ -130,9 +118,6 @@ public:
 	// utility methods
 	double getLength();
 	UString getDecoder();
-
-	// accurate position access for active instance
-	time getRealStreamPosition() const;
 
 protected:
 	friend class SoundTouchFilterInstance;

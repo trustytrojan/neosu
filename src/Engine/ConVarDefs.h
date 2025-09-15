@@ -28,7 +28,7 @@ dummyGraphics *g{};
 // };
 // dummyEnv *env{};
 namespace Environment {
-inline void setProcessPriority(float /**/) { ; }
+inline void setThreadPriority(float /**/) { ; }
 }  // namespace Environment
 
 extern void _borderless();
@@ -374,7 +374,8 @@ CONVAR(songbrowser_search_hardcoded_filter, "songbrowser_search_hardcoded_filter
 
 // Song browser (maybe useful to servers)
 CONVAR(songbrowser_scorebrowser_enabled, "songbrowser_scorebrowser_enabled", true, CLIENT | SKINS | SERVER);
-CONVAR(songbrowser_scores_sortingtype, "songbrowser_scores_sortingtype", "Sort by pp", CLIENT | SKINS | SERVER);
+CONVAR(songbrowser_scores_filteringtype, "songbrowser_scores_filteringtype", "Local", CLIENT | SKINS | SERVER);
+CONVAR(songbrowser_scores_sortingtype, "songbrowser_scores_sortingtype", "By pp", CLIENT | SKINS | SERVER);
 CONVAR(songbrowser_sortingtype, "songbrowser_sortingtype", "By Date Added", CLIENT | SKINS | SERVER);
 
 // Playfield
@@ -771,6 +772,7 @@ CONVAR(fullscreen, "fullscreen", false, CLIENT,
 CONVAR(monitor, "monitor", 0, CLIENT, "monitor/display device to switch to, 0 = primary monitor");
 CONVAR(r_sync_max_frames, "r_sync_max_frames", 1, CLIENT,
        "maximum pre-rendered frames allowed in rendering pipeline");  // (a la "Max Prerendered Frames")
+CONVAR(alt_sleep, "alt_sleep", 1, CLIENT, "use an alternative sleep implementation (on Windows) for potentially more accurate frame limiting");
 
 // Constants (TODO: remove these)
 CONVAR(
@@ -1229,7 +1231,6 @@ CONVAR(ui_top_ranks_max, "ui_top_ranks_max", 200, CLIENT | SKINS | SERVER,
 CONVAR(ui_window_animspeed, "ui_window_animspeed", 0.29f, CLIENT | SKINS | SERVER);
 CONVAR(ui_window_shadow_radius, "ui_window_shadow_radius", 13.0f, CLIENT | SKINS | SERVER);
 CONVAR(universal_offset, "universal_offset", 0.0f, CLIENT);
-CONVAR(universal_offset_hardcoded, "universal_offset_hardcoded", 0.0f, CLIENT);
 CONVAR(use_https, "use_https", true, CLIENT);
 CONVAR(use_ppv3, "use_ppv3", false, CLIENT | SKINS | SERVER, "use ppv3 instead of ppv2 (experimental)");
 CONVAR(user_draw_accuracy, "user_draw_accuracy", true, CLIENT | SKINS | SERVER);
@@ -1242,7 +1243,7 @@ CONVAR(vsync, "vsync", false, CLIENT,
        [](float on) -> void { g ? g->setVSync(!!static_cast<int>(on)) : (void)0; });
 // this is not windows-only anymore, just keeping it with the "win_" prefix to not break old configs
 CONVAR(win_processpriority, "win_processpriority", 1, CLIENT,
-       "sets the main process priority (0 = normal, 1 = high)", CFUNC(Environment::setProcessPriority));
+       "sets the main process priority (0 = normal, 1 = high)", CFUNC(Environment::setThreadPriority));
 
 // Unfinished features
 CONVAR(cbf, "cbf", false, CLIENT, "click between frames");

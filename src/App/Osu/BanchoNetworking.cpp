@@ -402,9 +402,13 @@ void send_packet(Packet &packet) {
     proto::write<u16>(&outgoing, packet.id);
     proto::write<u8>(&outgoing, 0);
     proto::write<u32>(&outgoing, packet.pos);
-    proto::write_bytes(&outgoing, packet.memory, packet.pos);
 
-    free(packet.memory);
+    // Some packets have an empty payload
+    if(packet.memory != nullptr) {
+        proto::write_bytes(&outgoing, packet.memory, packet.pos);
+        free(packet.memory);
+    }
+
     packet.memory = nullptr;
     packet.size = 0;
 }
@@ -502,11 +506,7 @@ void BanchoState::disconnect() {
 
     BANCHO::User::logout_all_users();
     osu->chat->onDisconnect();
-
-    // XXX: We should toggle between "offline" sorting options and "online" ones
-    //      Online ones would be "Local scores", "Global", "Country", "Selected mods" etc
-    //      While offline ones would be "By score", "By pp", etc
-    osu->songBrowser2->onSortScoresChange(UString("Sort by pp"), 0);
+    osu->songBrowser2->onFilterScoresChange("Local", 0);
 
     Downloader::abort_downloads();
 }

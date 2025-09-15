@@ -125,32 +125,31 @@ void UIModSelectorModButton::onClicked(bool  /*left*/, bool  /*right*/) {
     // set new state
     this->setState(this->iState);
 
-    if(BanchoState::is_online()) {
-        RichPresence::updateBanchoMods();
-    }
-
     if(BanchoState::is_in_a_multi_room()) {
+        auto mod_flags = this->osuModSelector->getModFlags();
         for(auto &slot : BanchoState::room.slots) {
             if(slot.player_id != BanchoState::get_uid()) continue;
-
-            slot.mods = this->osuModSelector->getModFlags();
+            slot.mods = mod_flags;
             if(BanchoState::room.is_host()) {
-                BanchoState::room.mods = this->osuModSelector->getModFlags();
+                BanchoState::room.mods = mod_flags;
                 if(BanchoState::room.freemods) {
                     // When freemod is enabled, we only want to force DT, HT, or Target.
                     BanchoState::room.mods &= LegacyFlags::DoubleTime | LegacyFlags::HalfTime | LegacyFlags::Target;
                 }
             }
-
-            debugLog("Sending mod change to server.\n");
-            Packet packet;
-            packet.id = MATCH_CHANGE_MODS;
-            BANCHO::Proto::write<u32>(&packet, slot.mods);
-            BANCHO::Net::send_packet(packet);
-
-            osu->room->on_room_updated(BanchoState::room);
-            break;
         }
+
+        Packet packet;
+        packet.id = MATCH_CHANGE_MODS;
+        BANCHO::Proto::write<u32>(&packet, mod_flags);
+        BANCHO::Net::send_packet(packet);
+
+        // Don't wait on server response to update UI
+        osu->room->on_room_updated(BanchoState::room);
+    }
+
+    if(BanchoState::is_online()) {
+        RichPresence::updateBanchoMods();
     }
 }
 

@@ -38,9 +38,10 @@ class AsyncResourceLoader::LoaderThread final {
 
         if(cv::debug_rm.getBool()) debugLog("AsyncResourceLoader: Thread #{} started\n", this->thread_index);
 
-        const UString loaderThreadName =
-            UString::fmt("res_ldr_thr{}", (this->thread_index % this->loader_ptr->iMaxThreads) + 1);
-        McThread::set_current_thread_name(loaderThreadName);
+        const std::string loaderThreadName =
+            fmt::format("res_ldr_thr{}", (this->thread_index % this->loader_ptr->iMaxThreads) + 1);
+        McThread::set_current_thread_name(loaderThreadName.c_str());
+        McThread::set_current_thread_prio(false); // reset priority (don't inherit from main thread)
 
         while(!stoken.stop_requested() && !this->loader_ptr->bShuttingDown.load()) {
             const bool debug = cv::debug_rm.getBool();
@@ -74,12 +75,12 @@ class AsyncResourceLoader::LoaderThread final {
             }
 
             // prevent child threads from inheriting the name
-            McThread::set_current_thread_name(UString::fmt("res_{}", work->workId));
+            McThread::set_current_thread_name(fmt::format("res_{}", work->workId).c_str());
 
             resource->loadAsync();
 
             // restore loader thread name
-            McThread::set_current_thread_name(loaderThreadName);
+            McThread::set_current_thread_name(loaderThreadName.c_str());
 
             if(debug) {
                 debugLog("AsyncResourceLoader: Thread #{} finished async loading {:8p} : {:s}\n", this->thread_index,

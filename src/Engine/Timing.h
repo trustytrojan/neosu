@@ -38,6 +38,9 @@ constexpr inline INLINE_BODY uint64_t convert_time(uint64_t ns) noexcept {
     return ns / Ratio;
 }
 
+void sleep_ns_internal(uint64_t ns) noexcept;
+void sleep_ns_precise_internal(uint64_t ns) noexcept;
+
 }  // namespace detail
 
 inline INLINE_BODY uint64_t getTicksNS() noexcept { return SDL_GetTicksNS(); }
@@ -49,27 +52,27 @@ constexpr inline INLINE_BODY uint64_t ticksNSToMS(uint64_t ns) noexcept {
 inline INLINE_BODY uint64_t getTicksMS() noexcept { return ticksNSToMS(getTicksNS()); }
 
 inline INLINE_BODY void sleep(uint64_t us) noexcept {
-    us > 0 ? SDL_DelayNS(us * NS_PER_US) : detail::yield_internal();
+    us > 0 ? detail::sleep_ns_internal(us * NS_PER_US) : detail::yield_internal();
 }
 
 inline INLINE_BODY void sleepNS(uint64_t ns) noexcept {
-    ns > 0 ? SDL_DelayNS(ns) : detail::yield_internal();
+    ns > 0 ? detail::sleep_ns_internal(ns) : detail::yield_internal();
 }
 
 inline INLINE_BODY void sleepMS(uint64_t ms) noexcept {
-    ms > 0 ? SDL_DelayNS(ms * NS_PER_MS) : detail::yield_internal();
+    ms > 0 ? detail::sleep_ns_internal(ms * NS_PER_MS) : detail::yield_internal();
 }
 
 inline INLINE_BODY void sleepPrecise(uint64_t us) noexcept {
-    us > 0 ? SDL_DelayPrecise(us * NS_PER_US) : detail::yield_internal();
+    us > 0 ? detail::sleep_ns_precise_internal(us * NS_PER_US) : detail::yield_internal();
 }
 
 inline INLINE_BODY void sleepNSPrecise(uint64_t ns) noexcept {
-    ns > 0 ? SDL_DelayPrecise(ns) : detail::yield_internal();
+    ns > 0 ? detail::sleep_ns_precise_internal(ns) : detail::yield_internal();
 }
 
 inline INLINE_BODY void sleepMSPrecise(uint64_t ms) noexcept {
-    ms > 0 ? SDL_DelayPrecise(ms * NS_PER_MS) : detail::yield_internal();
+    ms > 0 ? detail::sleep_ns_precise_internal(ms * NS_PER_MS) : detail::yield_internal();
 }
 
 

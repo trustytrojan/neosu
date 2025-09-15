@@ -11,6 +11,32 @@ namespace crypto {
 
 namespace rng {
 void get_bytes(u8* out, size_t s_out);
+
+// generate a random integral value
+template <typename T = u64>
+T get_rand() {
+    static_assert(std::is_integral_v<T>, "T must be an integral type");
+    T result;
+    get_bytes(reinterpret_cast<u8*>(&result), sizeof(T));
+    return result;
+}
+
+// fill an array with random bytes
+template <typename T, std::size_t N>
+void get_rand(T (&arr)[N]) {
+    static_assert(std::is_trivially_copyable_v<T>, "T must be trivially copyable");
+    get_bytes(reinterpret_cast<u8*>(arr), sizeof(T) * N);
+}
+
+// fill a vector with random bytes
+template <typename T>
+void get_rand(std::vector<T>& vec) {
+    static_assert(std::is_trivially_copyable_v<T>, "T must be trivially copyable");
+    if(!vec.empty()) {
+        get_bytes(reinterpret_cast<u8*>(vec.data()), vec.size() * sizeof(T));
+    }
+}
+
 }  // namespace rng
 
 namespace hash {
@@ -24,7 +50,7 @@ void md5_f(const UString& file_path, u8* hash);
 
 namespace conv {
 std::string encode64(const u8* src, size_t len);
-std::vector<u8> decode64(const u8* src, size_t len);
+std::vector<u8> decode64(std::string src);
 
 template <size_t N>
 std::string encodehex(const std::array<u8, N>& src) {

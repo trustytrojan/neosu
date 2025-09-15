@@ -150,7 +150,7 @@ SDL_AppResult SDLMain::handleEvent(SDL_Event *event) {
                 } break;
                 case SDL_EVENT_DROP_TEXT:
                 case SDL_EVENT_DROP_FILE: {
-                    UString dropped_data{event->drop.data};
+                    std::string dropped_data{event->drop.data};
                     if(dropped_data.length() < 2) {
                         break;
                     }
@@ -355,9 +355,9 @@ bool SDLMain::createWindow() {
         }
         // setup antialiasing from -aa command line argument
         if(m_mArgMap["-aa"].has_value()) {
-            auto aaSamples = m_mArgMap["-aa"].value().to<unsigned int>();
+            auto aaSamples = std::strtoull(m_mArgMap["-aa"].value().c_str(), nullptr, 10);
             if(aaSamples > 1) {
-                aaSamples = std::clamp(std::bit_floor(aaSamples), 2u, 16u);
+                aaSamples = std::clamp(std::bit_floor(aaSamples), 2ULL, 16ULL);
                 SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
                 SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, static_cast<int>(aaSamples));
             }
@@ -595,7 +595,7 @@ void SDLMain::shutdown(SDL_AppResult result) {
     Environment::shutdown();
 }
 
-void SDLMain::restart(const std::vector<UString> &args) {
+void SDLMain::restart(const std::vector<std::string> &args) {
     SDL_PropertiesID restartprops = SDL_CreateProperties();
 
     std::vector<const char *> restartArgsChar(args.size() + 1);
@@ -603,7 +603,7 @@ void SDLMain::restart(const std::vector<UString> &args) {
     restartArgsChar.back() = nullptr;
 
     for(int i = 0; const auto &arg : args) {
-        restartArgsChar[i] = arg.toUtf8();
+        restartArgsChar[i] = arg.c_str();
         i++;
     }
 

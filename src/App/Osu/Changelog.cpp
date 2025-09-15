@@ -30,9 +30,12 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG v40_04;
     v40_04.title = "40.04";
     v40_04.changes = {
+        R"(- Added leaderboard filters)",
         R"(- Added support for OAuth login servers)",
         R"(- Added ability for servers to override game settings)",
         R"(- Added ability for skins to override game settings)",
+        R"(- Fixed crash when reloading songs list)",
+        R"(- Fixed multiplayer mod selection menu)",
         R"(- Fixed user presence/stats getting requested too often)",
     };
     changelogs.push_back(v40_04);

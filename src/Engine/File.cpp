@@ -6,6 +6,9 @@
 //===============================================================================//
 
 #include "File.h"
+#include "ConVar.h"
+#include "Engine.h"
+#include "UString.h"
 
 #include <algorithm>
 #include <chrono>
@@ -14,10 +17,6 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
-
-#include "ConVar.h"
-#include "Engine.h"
-#include "UString.h"
 
 namespace fs = std::filesystem;
 

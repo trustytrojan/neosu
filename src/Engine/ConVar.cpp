@@ -102,11 +102,11 @@ void ConVar::execFloat(float args) {
 }
 
 double ConVar::getDouble() const {
-    if(this->isFlagSet(cv::SERVER) && this->hasServerValue.load()) {
+    if(this->isFlagSet(cv::SERVER) && this->hasServerValue.load(std::memory_order_acquire)) {
         return this->dServerValue.load(std::memory_order_acquire);
     }
 
-    if(this->isFlagSet(cv::SKINS) && this->hasSkinValue.load()) {
+    if(this->isFlagSet(cv::SKINS) && this->hasSkinValue.load(std::memory_order_acquire)) {
         return this->dSkinValue.load(std::memory_order_acquire);
     }
 
@@ -118,11 +118,11 @@ double ConVar::getDouble() const {
 }
 
 const ConVarString &ConVar::getString() const {
-    if(this->isFlagSet(cv::SERVER) && this->hasServerValue.load()) {
+    if(this->isFlagSet(cv::SERVER) && this->hasServerValue.load(std::memory_order_acquire)) {
         return this->sServerValue;
     }
 
-    if(this->isFlagSet(cv::SKINS) && this->hasSkinValue.load()) {
+    if(this->isFlagSet(cv::SKINS) && this->hasSkinValue.load(std::memory_order_acquire)) {
         return this->sSkinValue;
     }
 
@@ -166,19 +166,13 @@ bool ConVar::onSetValueGameplay(CvarEditor editor) {
     return true;
 }
 
-void ConVar::onSetValueProtected(const std::string &oldValue) {
+void ConVar::onSetValueProtected(const std::string &oldValue, const std::string &newValue) {
     if(!osu) return;
-
-    (void)oldValue;  // we just assume it was changed to something else than default
+    if(oldValue == newValue) return;
 
     auto beatmap = osu->getSelectedBeatmap();
     if(beatmap != nullptr) {
         beatmap->is_submittable = false;
-    }
-
-    auto mod_selector = osu->modSelector;
-    if(mod_selector && mod_selector->nonSubmittableWarning) {
-        mod_selector->nonSubmittableWarning->setVisible(BanchoState::can_submit_scores());
     }
 }
 
@@ -276,6 +270,20 @@ ConVarString ConVarHandler::flagsToString(uint8_t flags) {
     string.pop_back(); // remove leading space
 
     return string;
+}
+
+std::vector<ConVar*> ConVarHandler::getNonSubmittableCvars() const {
+    std::vector<ConVar*> list;
+
+    for(const auto &cv : _getGlobalConVarArray()) {
+        if(!cv->isProtected()) continue;
+
+        if(cv->getString() != cv->getDefaultString()) {
+            list.push_back(cv);
+        }
+    }
+
+    return list;
 }
 
 bool ConVarHandler::areAllCvarsSubmittable() {
