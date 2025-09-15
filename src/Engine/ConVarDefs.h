@@ -812,7 +812,7 @@ CONVAR(mp_autologin, "mp_autologin", false, CLIENT);
 CONVAR(mp_oauth_token, "mp_oauth_token", "", CLIENT | HIDDEN);
 CONVAR(mp_password, "mp_password", "", CLIENT | HIDDEN | NOSAVE);
 CONVAR(mp_password_md5, "mp_password_md5", "", CLIENT | HIDDEN);
-CONVAR(mp_server, "mp_server", "akatsuki.gg", CLIENT);
+CONVAR(mp_server, "mp_server", "neosu.net", CLIENT);
 CONVAR(name, "name", "Guest", CLIENT);
 
 // Server settings
