@@ -81,7 +81,8 @@ target_include_directories(neosu PRIVATE
     ${bassasio_SOURCE_DIR}
     ${basswasapi_header_SOURCE_DIR}/c
     ${CMAKE_BINARY_DIR}/jpeg-prefix/src/jpeg/src
-    /usr/include/freetype2 # arch linux freetype package is like this for some reason
+    /usr/include/freetype2
+    /usr/include/soundtouch
 )
 
 target_link_directories(neosu PRIVATE ${CMAKE_BINARY_DIR}/jpeg-prefix/src/jpeg-build)
