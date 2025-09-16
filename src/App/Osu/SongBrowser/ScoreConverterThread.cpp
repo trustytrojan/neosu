@@ -30,12 +30,8 @@ static void update_ppv2(const FinishedScore& score) {
     if(!diff) return;
 
     f32 AR = score.mods.get_naive_ar(diff);
+    f32 CS = score.mods.get_naive_cs(diff);
     f32 OD = score.mods.get_naive_od(diff);
-
-    f32 CS = diff->getCS();
-    if(score.mods.cs_override != -1.f) CS = score.mods.cs_override;
-    if(score.mods.cs_overridenegative != 0.f) CS = score.mods.cs_overridenegative;
-
     bool RX = ModMasks::eq(score.mods.flags, Replay::ModFlags::Relax);
     bool TD = ModMasks::eq(score.mods.flags, Replay::ModFlags::TouchDevice);
 

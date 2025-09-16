@@ -59,6 +59,18 @@ f32 Mods::get_naive_ar(DatabaseBeatmap *diff2) const {
     return AR;
 }
 
+f32 Mods::get_naive_cs(DatabaseBeatmap *diff2) const {
+    float CSdifficultyMultiplier = 1.0f;
+    if((ModMasks::eq(this->flags, ModFlags::HardRock))) CSdifficultyMultiplier = 1.3f;  // different!
+    if((ModMasks::eq(this->flags, ModFlags::Easy))) CSdifficultyMultiplier = 0.5f;
+
+    f32 CS = std::clamp<f32>(diff2->getCS() * CSdifficultyMultiplier, 0.0f, 10.0f);
+    if(this->cs_override >= 0.0f) CS = this->cs_override;
+    if(this->cs_overridenegative < 0.0f) CS = this->cs_overridenegative;
+
+    return CS;
+}
+
 f32 Mods::get_naive_od(DatabaseBeatmap *diff2) const {
     float ODdifficultyMultiplier = 1.0f;
     if((ModMasks::eq(this->flags, ModFlags::HardRock))) ODdifficultyMultiplier = 1.4f;

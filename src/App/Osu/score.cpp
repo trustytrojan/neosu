@@ -478,14 +478,9 @@ f64 FinishedScore::get_or_calc_pp() {
     pp_calc_request request;
     request.mods_legacy = this->mods.to_legacy();
     request.speed = this->mods.speed;
-
     request.AR = this->mods.get_naive_ar(this->diff2);
+    request.CS = this->mods.get_naive_cs(this->diff2);
     request.OD = this->mods.get_naive_od(this->diff2);
-
-    request.CS = this->diff2->getCS();
-    if(this->mods.cs_override != -1.f) request.CS = this->mods.cs_override;
-    if(this->mods.cs_overridenegative != 0.f) request.CS = this->mods.cs_overridenegative;
-
     request.rx = ModMasks::eq(this->mods.flags, Replay::ModFlags::Relax);
     request.td = ModMasks::eq(this->mods.flags, Replay::ModFlags::TouchDevice);
     request.comboMax = this->comboMax;
