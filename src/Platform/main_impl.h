@@ -13,7 +13,7 @@ typedef union SDL_Event SDL_Event;
 enum SDL_AppResult : uint8_t;
 #endif
 
-#if !defined(SDL_main_h_)
+#if !(defined(SDL_main_h_) && defined(MCENGINE_FEATURE_MAINCALLBACKS))
 extern void SDL_AppQuit(void *appstate, SDL_AppResult result);
 #endif
 

@@ -91,34 +91,190 @@ void Environment::Interop::handle_cmdline_args(const std::vector<std::string> &a
     }
 }
 
-// these methods need to be factored out somehow to not be 100% tied to the windows main loop, putting them here to
-// avoid bloating main.cpp
 #ifdef _WIN32
 
 #include "Engine.h"
+#include "SString.h"
 
 #include "WinDebloatDefs.h"
 #include <objbase.h>
 
-void Environment::Interop::register_file_associations() {
+#include <SDL3/SDL_system.h>
+
+#define NEOSU_WINDOW_MESSAGE_ID TEXT("NEOSU_CMDLINE")
+namespace {  // static
+bool sdl_windows_message_hook(void *userdata, MSG *msg) {
+    static UINT neosu_msg = RegisterWindowMessage(NEOSU_WINDOW_MESSAGE_ID);
+
+    // true == continue processing
+    if(!userdata || !msg || msg->message != neosu_msg) {
+        return true;
+    }
+
+    // check for the custom registered message
+
+    // reconstruct the mapping/event names from the identifier passed in lParam
+    auto sender_pid = static_cast<DWORD>(msg->wParam);
+    auto identifier = static_cast<DWORD>(msg->lParam);
+
+    std::string mapping_name = fmt::format("neosu_cmdline_{}_{}", sender_pid, identifier);
+    std::string event_name = fmt::format("neosu_event_{}_{}", sender_pid, identifier);
+
+    HANDLE hMapFile = OpenFileMappingA(FILE_MAP_ALL_ACCESS, FALSE, mapping_name.c_str());
+    if(hMapFile) {
+        bool signaled = false;
+
+        static auto signal_completion = [signaled, event_name]() -> void {
+            if(signaled) return;
+            HANDLE hEvent = OpenEventA(EVENT_MODIFY_STATE, FALSE, event_name.c_str());
+            if(hEvent) {
+                SetEvent(hEvent);
+                CloseHandle(hEvent);
+            }
+        };
+
+        LPVOID pBuf = MapViewOfFile(hMapFile, FILE_MAP_ALL_ACCESS, 0, 0, 0);
+        if(pBuf) {
+            // first 4 bytes contain the data size
+            DWORD data_size = *((DWORD *)pBuf);
+            const char *data = ((const char *)pBuf) + sizeof(DWORD);
+
+            // parse null-separated arguments
+            std::vector<std::string> args;
+            const char *current = data;
+            const char *end = data + data_size;
+
+            while(current < end) {
+                size_t len = strnlen(current, end - current);
+                if(len > 0) {
+                    args.emplace_back(current, len);
+                }
+                current += len + 1;  // split on null, skip null
+            }
+
+            UnmapViewOfFile(pBuf);
+
+            // we're done with the mapped file, signal the event
+            signal_completion();
+
+            // handle the arguments
+            if(!args.empty()) {
+                debugLog("handling external arguments: {}\n", SString::join(args));
+                Environment *env_ptr{static_cast<Environment *>(userdata)};
+                env_ptr->getEnvInterop().handle_cmdline_args(args);
+            }
+        }
+        CloseHandle(hMapFile);
+        signal_completion();
+    }
+
+    return false;  // we already processed everything, don't fallthrough to sdl
+}
+}  // namespace
+
+void Environment::Interop::handle_existing_window(int argc, char *argv[]) {
+    // if a neosu instance is already running, send it a message then quit
+    HWND existing_window = FindWindow(TEXT(PACKAGE_NAME), nullptr);
+    if(existing_window && argc > 1) {  // only send if we have more than just the exe name as args
+
+        size_t total_size = 0;
+        for(int i = 1; i < argc; i++) {         // skip exe name
+            total_size += strlen(argv[i]) + 1;  // +1 for null terminator
+        }
+
+        if(total_size > 0 && total_size < 4096) {  // reasonable size limit...?
+            // need to create a unique identifier for this message
+            DWORD sender_pid = GetCurrentProcessId();
+            DWORD identifier = GetTickCount();
+
+            // create unique names for mapping and event
+            std::string mapping_name = fmt::format("neosu_cmdline_{}_{}", sender_pid, identifier);
+            std::string event_name = fmt::format("neosu_event_{}_{}", sender_pid, identifier);
+
+            // create completion event first, so we know when we can exit this process
+            HANDLE hEvent = CreateEventA(nullptr, FALSE, FALSE, event_name.c_str());
+
+            // create named shared memory for the data
+            // for some reason, WM_COPYDATA hooks don't work with the SDL message loop... this is the next best solution
+            HANDLE hMapFile = CreateFileMappingA(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE, 0,
+                                                 total_size + sizeof(DWORD),  // extra space for size header
+                                                 mapping_name.c_str());
+
+            if(hMapFile && hEvent) {
+                LPVOID pBuf = MapViewOfFile(hMapFile, FILE_MAP_ALL_ACCESS, 0, 0, 0);
+                if(pBuf) {
+                    // store the size first
+                    *((DWORD *)pBuf) = (DWORD)total_size;
+                    char *data = ((char *)pBuf) + sizeof(DWORD);
+                    char *current = data;
+
+                    // pack arguments with null separators, so we can split them easily
+                    for(int i = 1; i < argc; i++) {
+                        size_t len = strlen(argv[i]);
+                        memcpy(current, argv[i], len);
+                        current[len] = '\0';
+                        current += len + 1;
+                    }
+
+                    UnmapViewOfFile(pBuf);
+
+                    // post the identifier message
+                    UINT neosu_msg = RegisterWindowMessage(NEOSU_WINDOW_MESSAGE_ID);
+
+                    if(PostMessage(existing_window, neosu_msg, (WPARAM)sender_pid, (LPARAM)identifier)) {
+                        // wait for the receiver to signal completion (with 5 second timeout)
+                        DWORD wait_result = WaitForSingleObject(hEvent, 5000);
+                        switch(wait_result) {
+                            case WAIT_OBJECT_0:
+                                // success
+                                break;
+                            case WAIT_TIMEOUT:
+                                debugLog("timeout waiting for message processing completion\n");
+                                break;
+                            case WAIT_FAILED:
+                                debugLog("failed to wait for completion event, error: {}\n", GetLastError());
+                                break;
+                            default:
+                                debugLog("unexpected wait result: {}\n", wait_result);
+                                break;
+                        }
+                    } else {
+                        debugLog("failed to post message to existing HWND {}, error: {}\n",
+                                 static_cast<const void *>(existing_window), GetLastError());
+                    }
+                }
+            }
+            if(hMapFile) CloseHandle(hMapFile);
+            if(hEvent) CloseHandle(hEvent);
+        }
+
+        SetForegroundWindow(existing_window);
+        std::exit(0);
+    }
+}
+
+void Environment::Interop::setup_system_integrations() {
+    SDL_SetWindowsMessageHook(sdl_windows_message_hook, (void *)this->m_env);
+
     wchar_t exePath[MAX_PATH];
-    GetModuleFileNameW(NULL, exePath, MAX_PATH);
+    GetModuleFileNameW(nullptr, exePath, MAX_PATH);
 
     // Register neosu as an application
     HKEY neosu_key;
-    i32 err = RegCreateKeyExW(HKEY_CURRENT_USER, L"Software\\Classes\\neosu", 0, NULL, REG_OPTION_NON_VOLATILE,
-                              KEY_WRITE, NULL, &neosu_key, NULL);
+    i32 err = RegCreateKeyExW(HKEY_CURRENT_USER, L"Software\\Classes\\neosu", 0, nullptr, REG_OPTION_NON_VOLATILE,
+                              KEY_WRITE, nullptr, &neosu_key, nullptr);
     if(err != ERROR_SUCCESS) {
-        debugLog("Failed to register neosu as an application. Error: {:d} (root)\n", err);
+        debugLog("Failed to register neosu as an application. Error: {} (root)\n", err);
         return;
     }
     RegSetValueExW(neosu_key, L"", 0, REG_SZ, (BYTE *)L"neosu", 12);
     RegSetValueExW(neosu_key, L"URL Protocol", 0, REG_SZ, (BYTE *)L"", 2);
 
     HKEY app_key;
-    err = RegCreateKeyExW(neosu_key, L"Application", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &app_key, NULL);
+    err = RegCreateKeyExW(neosu_key, L"Application", 0, nullptr, REG_OPTION_NON_VOLATILE, KEY_WRITE, nullptr, &app_key,
+                          nullptr);
     if(err != ERROR_SUCCESS) {
-        debugLog("Failed to register neosu as an application. Error: {:d} (app)\n", err);
+        debugLog("Failed to register neosu as an application. Error: {} (app)\n", err);
         RegCloseKey(neosu_key);
         return;
     }
@@ -128,10 +284,10 @@ void Environment::Interop::register_file_associations() {
     HKEY cmd_key;
     wchar_t command[MAX_PATH + 10];
     swprintf_s(command, _countof(command), L"\"%s\" \"%%1\"", exePath);
-    err = RegCreateKeyExW(neosu_key, L"shell\\open\\command", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL,
-                          &cmd_key, NULL);
+    err = RegCreateKeyExW(neosu_key, L"shell\\open\\command", 0, nullptr, REG_OPTION_NON_VOLATILE, KEY_WRITE, nullptr,
+                          &cmd_key, nullptr);
     if(err != ERROR_SUCCESS) {
-        debugLog("Failed to register neosu as an application. Error: {:d} (command)\n", err);
+        debugLog("Failed to register neosu as an application. Error: {} (command)\n", err);
         RegCloseKey(neosu_key);
         return;
     }
@@ -142,10 +298,10 @@ void Environment::Interop::register_file_associations() {
 
     // Register neosu as .osk handler
     HKEY osk_key;
-    err = RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("Software\\Classes\\.osk\\OpenWithProgids"), 0, NULL,
-                         REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &osk_key, NULL);
+    err = RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("Software\\Classes\\.osk\\OpenWithProgids"), 0, nullptr,
+                         REG_OPTION_NON_VOLATILE, KEY_WRITE, nullptr, &osk_key, nullptr);
     if(err != ERROR_SUCCESS) {
-        debugLog("Failed to register neosu as .osk format handler. Error: {:d}\n", err);
+        debugLog("Failed to register neosu as .osk format handler. Error: {}\n", err);
         return;
     }
     RegSetValueEx(osk_key, TEXT("neosu"), 0, REG_SZ, (BYTE *)L"", 2);
@@ -153,10 +309,10 @@ void Environment::Interop::register_file_associations() {
 
     // Register neosu as .osr handler
     HKEY osr_key;
-    err = RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("Software\\Classes\\.osr\\OpenWithProgids"), 0, NULL,
-                         REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &osr_key, NULL);
+    err = RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("Software\\Classes\\.osr\\OpenWithProgids"), 0, nullptr,
+                         REG_OPTION_NON_VOLATILE, KEY_WRITE, nullptr, &osr_key, nullptr);
     if(err != ERROR_SUCCESS) {
-        debugLog("Failed to register neosu as .osr format handler. Error: {:d}\n", err);
+        debugLog("Failed to register neosu as .osr format handler. Error: {}\n", err);
         return;
     }
     RegSetValueEx(osr_key, TEXT("neosu"), 0, REG_SZ, (BYTE *)L"", 2);
@@ -164,36 +320,17 @@ void Environment::Interop::register_file_associations() {
 
     // Register neosu as .osz handler
     HKEY osz_key;
-    err = RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("Software\\Classes\\.osz\\OpenWithProgids"), 0, NULL,
-                         REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &osz_key, NULL);
+    err = RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("Software\\Classes\\.osz\\OpenWithProgids"), 0, nullptr,
+                         REG_OPTION_NON_VOLATILE, KEY_WRITE, nullptr, &osz_key, nullptr);
     if(err != ERROR_SUCCESS) {
-        debugLog("Failed to register neosu as .osz format handler. Error: {:d}\n", err);
+        debugLog("Failed to register neosu as .osz format handler. Error: {}\n", err);
         return;
     }
     RegSetValueEx(osz_key, TEXT("neosu"), 0, REG_SZ, (BYTE *)L"", 2);
     RegCloseKey(osz_key);
 }
 
-#define WM_NEOSU_PROTOCOL (WM_USER + 1)
-// TODO SDL: there's no way this works properly
-void Environment::Interop::handle_existing_window(int argc, char *argv[]) {
-    // if a neosu instance is already running, send it a message then quit
-    HWND existing_window = FindWindowW(L"neosu", NULL);
-    if(existing_window) {
-        for(i32 i = 0; i < argc; i++) {
-            COPYDATASTRUCT cds;
-            cds.dwData = WM_NEOSU_PROTOCOL;
-            cds.cbData = strlen(argv[i]) + 1;
-            cds.lpData = argv[i];
-            SendMessage(existing_window, WM_COPYDATA, (WPARAM)NULL, (LPARAM)&cds);
-        }
-
-        SetForegroundWindow(existing_window);
-        std::exit(0);
-    }
-}
-
-#else // not implemented
-void Environment::Interop::register_file_associations() { return; }
-void Environment::Interop::handle_existing_window(int /*argc*/, char **/*argv*/) { return; }
+#else  // not implemented
+void Environment::Interop::setup_system_integrations() { return; }
+void Environment::Interop::handle_existing_window(int /*argc*/, char ** /*argv*/) { return; }
 #endif
