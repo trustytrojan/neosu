@@ -144,14 +144,6 @@ void Database::AsyncDBLoader::initAsync() {
         load_collections();
     }
 
-    // If any .osz files are in "maps", extract and add them to the DB.
-    // Very helpful for users that don't have an osu!stable folder (and don't want to have one).
-    for(const auto &entry : fs::directory_iterator{MCENGINE_DATA_DIR "maps"}) {
-        if(!entry.is_regular_file() || entry.path().extension() != ".osz") continue;
-        env->getEnvInterop().handle_osz(entry.path().c_str());
-        fs::remove(entry); // delete when done
-    }
-
 done:
     db->dbPathsToImport.clear();
     this->bAsyncReady = true;
