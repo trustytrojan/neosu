@@ -14,6 +14,7 @@
 #include "LegacyReplay.h"
 #include "Osu.h"
 #include "RoomScreen.h"
+#include "SongBrowser/LeaderboardPPCalcThread.h"
 
 LiveScore::LiveScore(bool simulating) {
     this->simulating = simulating;
@@ -358,21 +359,21 @@ double LiveScore::getHealthIncrease(LiveScore::HIT hit, double HP, double hpMult
                                     double hpMultiplierComboEnd, double hpBarMaximumForNormalization) {
     switch(hit) {
         case LiveScore::HIT::HIT_MISS:
-            return (GameRules::mapDifficultyRangeDouble(HP, -6.0, -25.0, -40.0) / hpBarMaximumForNormalization);
+            return (GameRules::mapDifficultyRange(HP, -6.0, -25.0, -40.0) / hpBarMaximumForNormalization);
 
         case LiveScore::HIT::HIT_50:
-            return (hpMultiplierNormal * GameRules::mapDifficultyRangeDouble(HP, 0.4 * 8.0, 0.4, 0.4) /
+            return (hpMultiplierNormal * GameRules::mapDifficultyRange(HP, 0.4 * 8.0, 0.4, 0.4) /
                     hpBarMaximumForNormalization);
 
         case LiveScore::HIT::HIT_100:
-            return (hpMultiplierNormal * GameRules::mapDifficultyRangeDouble(HP, 2.2 * 8.0, 2.2, 2.2) /
+            return (hpMultiplierNormal * GameRules::mapDifficultyRange(HP, 2.2 * 8.0, 2.2, 2.2) /
                     hpBarMaximumForNormalization);
 
         case LiveScore::HIT::HIT_300:
             return (hpMultiplierNormal * 6.0 / hpBarMaximumForNormalization);
 
         case LiveScore::HIT::HIT_MISS_SLIDERBREAK:
-            return (GameRules::mapDifficultyRangeDouble(HP, -4.0, -15.0, -28.0) / hpBarMaximumForNormalization);
+            return (GameRules::mapDifficultyRange(HP, -4.0, -15.0, -28.0) / hpBarMaximumForNormalization);
 
         case LiveScore::HIT::HIT_MU:
             return (hpMultiplierComboEnd * 6.0 / hpBarMaximumForNormalization);
@@ -467,6 +468,44 @@ float LiveScore::calculateAccuracy(int num300s, int num100s, int num50s, int num
 
     return 0.0f;
 }
+
+f64 FinishedScore::get_or_calc_pp() {
+    assert(this->diff2 != nullptr);
+
+    f64 pp = this->get_pp();
+    if(pp != -1.0) return pp;
+
+    pp_calc_request request;
+    request.mods_legacy = this->mods.to_legacy();
+    request.speed = this->mods.speed;
+
+    request.AR = this->mods.get_naive_ar(this->diff2);
+    request.OD = this->mods.get_naive_od(this->diff2);
+
+    request.CS = this->diff2->getCS();
+    if(this->mods.cs_override != -1.f) request.CS = this->mods.cs_override;
+    if(this->mods.cs_overridenegative != 0.f) request.CS = this->mods.cs_overridenegative;
+
+    request.rx = ModMasks::eq(this->mods.flags, Replay::ModFlags::Relax);
+    request.td = ModMasks::eq(this->mods.flags, Replay::ModFlags::TouchDevice);
+    request.comboMax = this->comboMax;
+    request.numMisses = this->numMisses;
+    request.num300s = this->num300s;
+    request.num100s = this->num100s;
+    request.num50s = this->num50s;
+
+    auto info = lct_get_pp(request);
+    if(info.pp != -1.0) {
+        pp = info.pp;
+        this->ppv2_score = info.pp;
+        this->ppv2_version = DifficultyCalculator::PP_ALGORITHM_VERSION;
+        this->ppv2_total_stars = info.total_stars;
+        this->ppv2_aim_stars = info.aim_stars;
+        this->ppv2_speed_stars = info.speed_stars;
+    }
+
+    return pp;
+};
 
 f64 FinishedScore::get_pp() const {
     if(cv::use_ppv3.getBool() && this->ppv3_algorithm.size() > 0) {

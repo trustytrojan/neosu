@@ -29,12 +29,13 @@ static void update_ppv2(const FinishedScore& score) {
     auto diff = db->getBeatmapDifficulty(score.beatmap_hash);
     if(!diff) return;
 
-    f32 AR = diff->getAR();
-    if(score.mods.ar_override != -1.f) AR = score.mods.ar_override;
+    f32 AR = score.mods.get_naive_ar(diff);
+    f32 OD = score.mods.get_naive_od(diff);
+
     f32 CS = diff->getCS();
     if(score.mods.cs_override != -1.f) CS = score.mods.cs_override;
-    f32 OD = diff->getOD();
-    if(score.mods.od_override != -1.f) OD = score.mods.od_override;
+    if(score.mods.cs_overridenegative != 0.f) CS = score.mods.cs_overridenegative;
+
     bool RX = ModMasks::eq(score.mods.flags, Replay::ModFlags::Relax);
     bool TD = ModMasks::eq(score.mods.flags, Replay::ModFlags::TouchDevice);
 
@@ -104,9 +105,9 @@ static forceinline bool score_needs_recalc(const FinishedScore& score) {
     return false;
 }
 
-static void run_sct(const std::unordered_map<MD5Hash, std::vector<FinishedScore>> &all_set_scores) {
+static void run_sct(const std::unordered_map<MD5Hash, std::vector<FinishedScore>>& all_set_scores) {
     McThread::set_current_thread_name("score_cvt");
-    McThread::set_current_thread_prio(false); // reset priority
+    McThread::set_current_thread_prio(false);  // reset priority
 
     debugLog("Started score converter thread\n");
 
@@ -206,7 +207,7 @@ void sct_calc(std::unordered_map<MD5Hash, std::vector<FinishedScore>> scores_to_
     sct_total = 0;
     sct_computed = 0;
 
-    if (!scores_to_maybe_calc.empty()) {
+    if(!scores_to_maybe_calc.empty()) {
         thr = std::thread(run_sct, std::move(scores_to_maybe_calc));
     }
 }

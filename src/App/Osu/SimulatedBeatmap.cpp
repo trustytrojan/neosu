@@ -207,8 +207,7 @@ f32 SimulatedBeatmap::getAR_full() const {
     if(this->mods.ar_overridenegative < 0.0f) AR = this->mods.ar_overridenegative;
 
     if(ModMasks::eq(this->mods.flags, Replay::ModFlags::AROverrideLock)) {
-        AR = GameRules::getRawConstantApproachRateForSpeedMultiplier(GameRules::getRawApproachTime(AR),
-                                                                     this->mods.speed);
+        AR = GameRules::arWithSpeed(AR, 1.f / this->mods.speed);
     }
 
     if((ModMasks::eq(this->mods.flags, Replay::ModFlags::ARTimewarp)) && this->hitobjects.size() > 0) {
@@ -241,8 +240,7 @@ f32 SimulatedBeatmap::getOD_full() const {
     if(this->mods.od_override >= 0.0f) OD = this->mods.od_override;
 
     if(ModMasks::eq(this->mods.flags, Replay::ModFlags::ODOverrideLock))
-        OD = GameRules::getRawConstantOverallDifficultyForSpeedMultiplier(GameRules::getRawHitWindow300(OD),
-                                                                          this->mods.speed);
+        OD = GameRules::odWithSpeed(OD, 1.f / this->mods.speed);
 
     return OD;
 }
@@ -1006,8 +1004,7 @@ void SimulatedBeatmap::calculateStacks() {
                              : currHitObject->getOriginalRawPosAt(currHitObject->click_time);
 
                 if(vec::length(objectJ->getOriginalRawPosAt(objectJ->click_time) -
-                    currHitObject->getOriginalRawPosAt(currHitObject->click_time))
-                       < 3) {
+                               currHitObject->getOriginalRawPosAt(currHitObject->click_time)) < 3) {
                     currHitObject->setStack(currHitObject->getStack() + 1);
                     startTime = objectJ->click_time + objectJ->duration;
                 } else if(vec::length(objectJ->getOriginalRawPosAt(objectJ->click_time) - position2) < 3) {
@@ -1098,10 +1095,10 @@ void SimulatedBeatmap::computeDrainRate() {
 
         f64 testDrop = 0.05;
 
-        const f64 lowestHpEver = GameRules::mapDifficultyRangeDouble(HP, 195.0, 160.0, 60.0);
-        const f64 lowestHpComboEnd = GameRules::mapDifficultyRangeDouble(HP, 198.0, 170.0, 80.0);
-        const f64 lowestHpEnd = GameRules::mapDifficultyRangeDouble(HP, 198.0, 180.0, 80.0);
-        const f64 HpRecoveryAvailable = GameRules::mapDifficultyRangeDouble(HP, 8.0, 4.0, 0.0);
+        const f64 lowestHpEver = GameRules::mapDifficultyRange(HP, 195.0, 160.0, 60.0);
+        const f64 lowestHpComboEnd = GameRules::mapDifficultyRange(HP, 198.0, 170.0, 80.0);
+        const f64 lowestHpEnd = GameRules::mapDifficultyRange(HP, 198.0, 180.0, 80.0);
+        const f64 HpRecoveryAvailable = GameRules::mapDifficultyRange(HP, 8.0, 4.0, 0.0);
 
         bool fail = false;
 

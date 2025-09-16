@@ -53,7 +53,7 @@ f32 Mods::get_naive_ar(DatabaseBeatmap *diff2) const {
     if(this->ar_overridenegative < 0.0f) AR = this->ar_overridenegative;
 
     if(ModMasks::eq(this->flags, ModFlags::AROverrideLock)) {
-        AR = GameRules::getRawConstantApproachRateForSpeedMultiplier(GameRules::getRawApproachTime(AR), this->speed);
+        AR = GameRules::arWithSpeed(AR, 1.f / this->speed);
     }
 
     return AR;
@@ -68,8 +68,7 @@ f32 Mods::get_naive_od(DatabaseBeatmap *diff2) const {
     if(this->od_override >= 0.0f) OD = this->od_override;
 
     if(ModMasks::eq(this->flags, ModFlags::ODOverrideLock)) {
-        OD = GameRules::getRawConstantOverallDifficultyForSpeedMultiplier(GameRules::getRawHitWindow300(OD),
-                                                                          this->speed);
+        OD = GameRules::odWithSpeed(OD, 1.f / this->speed);
     }
 
     return OD;

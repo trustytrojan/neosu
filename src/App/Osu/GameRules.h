@@ -29,25 +29,6 @@ class GameRules {
     //	Hitobject Timing  //
     //********************//
 
-    // ignore all mods and overrides
-    static inline float getRawMinApproachTime() { return cv::approachtime_min.getFloat(); }
-    static inline float getRawMidApproachTime() { return cv::approachtime_mid.getFloat(); }
-    static inline float getRawMaxApproachTime() { return cv::approachtime_max.getFloat(); }
-
-    // respect mods and overrides
-    static inline float getMinApproachTime() {
-        return getRawMinApproachTime() *
-               (cv::mod_millhioref.getBool() ? cv::mod_millhioref_multiplier.getFloat() : 1.0f);
-    }
-    static inline float getMidApproachTime() {
-        return getRawMidApproachTime() *
-               (cv::mod_millhioref.getBool() ? cv::mod_millhioref_multiplier.getFloat() : 1.0f);
-    }
-    static inline float getMaxApproachTime() {
-        return getRawMaxApproachTime() *
-               (cv::mod_millhioref.getBool() ? cv::mod_millhioref_multiplier.getFloat() : 1.0f);
-    }
-
     static constexpr float getMinHitWindow300() { return 80.f; }
     static constexpr float getMidHitWindow300() { return 50.f; }
     static constexpr float getMaxHitWindow300() { return 20.f; }
@@ -60,8 +41,25 @@ class GameRules {
     static constexpr float getMidHitWindow50() { return 150.f; }
     static constexpr float getMaxHitWindow50() { return 100.f; }
 
+    static constexpr float getHitWindowMiss() { return 400.f; }
+
+    // respect mods and overrides
+    static inline float getMinApproachTime() {
+        return cv::approachtime_min.getFloat() *
+               (cv::mod_millhioref.getBool() ? cv::mod_millhioref_multiplier.getFloat() : 1.0f);
+    }
+    static inline float getMidApproachTime() {
+        return cv::approachtime_mid.getFloat() *
+               (cv::mod_millhioref.getBool() ? cv::mod_millhioref_multiplier.getFloat() : 1.0f);
+    }
+    static inline float getMaxApproachTime() {
+        return cv::approachtime_max.getFloat() *
+               (cv::mod_millhioref.getBool() ? cv::mod_millhioref_multiplier.getFloat() : 1.0f);
+    }
+
     // AR 5 -> 1200 ms
-    static forceinline float mapDifficultyRange(float scaledDiff, float min, float mid, float max) {
+    template <typename T>
+    static forceinline T mapDifficultyRange(T scaledDiff, T min, T mid, T max) {
         if(scaledDiff == 5.0f)
             return mid;
         else if(scaledDiff > 5.0f)
@@ -69,14 +67,12 @@ class GameRules {
         else
             return mid - (mid - min) * (5.0f - scaledDiff) / 5.0f;
     }
-
-    static forceinline double mapDifficultyRangeDouble(double scaledDiff, double min, double mid, double max) {
-        if(scaledDiff == 5.0)
-            return mid;
-        else if(scaledDiff > 5.0)
-            return mid + (max - mid) * (scaledDiff - 5.0) / 5.0;
-        else
-            return mid - (mid - min) * (5.0 - scaledDiff) / 5.0;
+    static inline INLINE_BODY float arToMilliseconds(float AR) {
+        return mapDifficultyRange(AR, cv::approachtime_min.getFloat(), cv::approachtime_mid.getFloat(),
+                                  cv::approachtime_max.getFloat());
+    }
+    static inline INLINE_BODY float odToMilliseconds(float OD) {
+        return mapDifficultyRange(OD, getMinHitWindow300(), getMidHitWindow300(), getMaxHitWindow300());
     }
 
     // 1200 ms -> AR 5
@@ -89,58 +85,29 @@ class GameRules {
             return 5.0f - ((mid * 5.0f - val * 5.0f) / (mid - min));
     }
 
-    // 1200 ms -> AR 5
-    static inline INLINE_BODY float getRawApproachRateForSpeedMultiplier(
-        float approachTime,
-        float speedMultiplier)  // ignore all mods and overrides
-    {
-        return mapDifficultyRangeInv(approachTime * (1.0f / speedMultiplier), getRawMinApproachTime(),
-                                     getRawMidApproachTime(), getRawMaxApproachTime());
-    }
-    static inline INLINE_BODY float getRawConstantApproachRateForSpeedMultiplier(
-        float approachTime,
-        float speedMultiplier)  // ignore all mods and overrides, keep AR consistent through speed changes
-    {
-        return mapDifficultyRangeInv(approachTime * speedMultiplier, getRawMinApproachTime(), getRawMidApproachTime(),
-                                     getRawMaxApproachTime());
+    // AR 9, speed 1.5 -> AR 10.3
+    static inline INLINE_BODY float arWithSpeed(float AR, float speed) {
+        float approachTime = arToMilliseconds(AR);
+        return mapDifficultyRangeInv(approachTime / speed, cv::approachtime_min.getFloat(),
+                                     cv::approachtime_mid.getFloat(), cv::approachtime_max.getFloat());
     }
 
-    // 50 ms -> OD 5
-    static inline INLINE_BODY float getRawOverallDifficultyForSpeedMultiplier(
-        float hitWindow300,
-        float speedMultiplier)  // ignore all mods and overrides
-    {
-        return mapDifficultyRangeInv(hitWindow300 * (1.0f / speedMultiplier), getMinHitWindow300(),
-                                     getMidHitWindow300(), getMaxHitWindow300());
-    }
-    static inline INLINE_BODY float getRawConstantOverallDifficultyForSpeedMultiplier(
-        float hitWindow300,
-        float speedMultiplier)  // ignore all mods and overrides, keep OD consistent through speed changes
-    {
-        return mapDifficultyRangeInv(hitWindow300 * speedMultiplier, getMinHitWindow300(), getMidHitWindow300(),
+    // OD 9, speed 1.5 -> OD 10.4
+    static inline INLINE_BODY float odWithSpeed(float OD, float speed) {
+        float hittableTime = odToMilliseconds(OD);
+        return mapDifficultyRangeInv(hittableTime / speed, getMinHitWindow300(), getMidHitWindow300(),
                                      getMaxHitWindow300());
     }
 
-    static inline INLINE_BODY float getRawApproachTime(float AR)  // ignore all mods and overrides
-    {
-        return mapDifficultyRange(AR, getRawMinApproachTime(), getRawMidApproachTime(), getRawMaxApproachTime());
-    }
     static inline INLINE_BODY float getApproachTimeForStacking(float AR) {
         return mapDifficultyRange(AR, getMinApproachTime(), getMidApproachTime(), getMaxApproachTime());
     }
 
-    static inline INLINE_BODY float getRawHitWindow300(float OD)  // ignore all mods and overrides
-    {
-        return mapDifficultyRange(OD, getMinHitWindow300(), getMidHitWindow300(), getMaxHitWindow300());
-    }
-
-    static constexpr float getHitWindowMiss() { return 400.f; }
-
-    static inline INLINE_BODY float getSpinnerSpinsPerSecond(
-        BeatmapInterface *beatmap)  // raw spins required per second
-    {
+    // raw spins required per second
+    static inline INLINE_BODY float getSpinnerSpinsPerSecond(BeatmapInterface *beatmap) {
         return mapDifficultyRange(beatmap->getOD(), 3.0f, 5.0f, 7.5f);
     }
+
     static inline INLINE_BODY float getSpinnerRotationsForSpeedMultiplier(BeatmapInterface *beatmap,
                                                                           long spinnerDuration, float speedMultiplier) {
         /// return (int)((float)spinnerDuration / 1000.0f * getSpinnerSpinsPerSecond(beatmap)); // actual
@@ -168,14 +135,11 @@ class GameRules {
         return std::max(0.0f, ((1.0f - 0.7f * (CS - 5.0f) / 5.0f) / 2.0f) * broken_gamefield_rounding_allowance);
     }
 
-    static forceinline f32 getRawHitCircleDiameter(f32 CS) {
-        return getRawHitCircleScale(CS) *
-               128.0f;  // gives the circle diameter in osu!pixels, goes negative above CS 12.1429
-    }
+    // gives the circle diameter in osu!pixels, goes negative above CS 12.1429
+    static forceinline f32 getRawHitCircleDiameter(f32 CS) { return getRawHitCircleScale(CS) * 128.0f; }
 
-    static forceinline f32 getHitCircleXMultiplier() {
-        return getPlayfieldSize().x / OSU_COORD_WIDTH;  // scales osu!pixels to the actual playfield size
-    }
+    // scales osu!pixels to the actual playfield size
+    static forceinline f32 getHitCircleXMultiplier() { return getPlayfieldSize().x / OSU_COORD_WIDTH; }
 
     //*************//
     //	Playfield  //

@@ -36,6 +36,7 @@ Changelog::Changelog() : ScreenBackable() {
         R"(- Added ability for skins to override game settings)",
         R"(- Changed default server to neosu.net)",
         R"(- Fixed crash when reloading songs list)",
+        R"(- Fixed leaderboards pp not using correct AR/OD values)",
         R"(- Fixed multiplayer mod selection menu)",
         R"(- Fixed user presence/stats getting requested too often)",
     };

@@ -35,7 +35,7 @@ class HitObject;
       GameRules::mapDifficultyRangeInv((f32)this->getApproachTime() * (1.0f / this->getSpeedMultiplier()),           \
                                        GameRules::getMinApproachTime(), GameRules::getMidApproachTime(),             \
                                        GameRules::getMaxApproachTime()))                                             \
-    X(f32, getRawApproachRateForSpeedMultiplier, 0.01,                                                               \
+    X(f32, getRawARForSpeedMultiplier, 0.01,                                                                         \
       GameRules::mapDifficultyRangeInv((f32)this->getRawApproachTime() * (1.0f / this->getSpeedMultiplier()),        \
                                        GameRules::getMinApproachTime(), GameRules::getMidApproachTime(),             \
                                        GameRules::getMaxApproachTime()))                                             \
@@ -47,7 +47,7 @@ class HitObject;
       GameRules::mapDifficultyRangeInv((f32)this->getHitWindow300() * (1.0f / this->getSpeedMultiplier()),           \
                                        GameRules::getMinHitWindow300(), GameRules::getMidHitWindow300(),             \
                                        GameRules::getMaxHitWindow300()))                                             \
-    X(f32, getRawOverallDifficultyForSpeedMultiplier, 0.01,                                                          \
+    X(f32, getRawODForSpeedMultiplier, 0.01,                                                                         \
       GameRules::mapDifficultyRangeInv((f32)this->getRawHitWindow300() * (1.0f / this->getSpeedMultiplier()),        \
                                        GameRules::getMinHitWindow300(), GameRules::getMidHitWindow300(),             \
                                        GameRules::getMaxHitWindow300()))                                             \
