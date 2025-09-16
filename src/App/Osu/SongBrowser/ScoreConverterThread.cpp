@@ -120,6 +120,8 @@ static void run_sct(const std::unordered_map<MD5Hash, std::vector<FinishedScore>
         }
     }
 
+    // deallocate unneeded space from reserve (if any)
+    scores_to_calc.shrink_to_fit();
     sct_total = scores_to_calc.size();
 
     debugLog("Found {} scores which need pp recalculation\n", sct_total.load());
