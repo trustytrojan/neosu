@@ -2112,7 +2112,7 @@ void Osu::setupSoloud() {
     static bool was_playing = false;
     static unsigned long prev_position_ms = 0;
 
-    static auto outputChangedBeforeCallback = [&]() -> void {
+    static auto outputChangedBeforeCallback = []() -> void {
         if(osu && osu->getSelectedBeatmap() && osu->getSelectedBeatmap()->getMusic()) {
             was_playing = osu->getSelectedBeatmap()->getMusic()->isPlaying();
             prev_position_ms = osu->getSelectedBeatmap()->getMusic()->getPositionMS();
@@ -2122,7 +2122,7 @@ void Osu::setupSoloud() {
         }
     };
     // the actual reset will be sandwiched between these during restart
-    static auto outputChangedAfterCallback = [&]() -> void {
+    static auto outputChangedAfterCallback = []() -> void {
         // part 2 of callback
         if(osu && osu->optionsMenu && osu->optionsMenu->outputDeviceLabel && osu->getSkin()) {
             osu->optionsMenu->outputDeviceLabel->setText(soundEngine->getOutputDeviceName());

@@ -337,9 +337,8 @@ UString InfoLabel::buildDiffInfoString() {
         request.mods_legacy = mods.to_legacy();
         request.speed = mods.speed;
         request.AR = mods.get_naive_ar(diff2);
+        request.CS = mods.get_naive_cs(diff2);
         request.OD = mods.get_naive_od(diff2);
-        request.CS = diff2->getCS();
-        if(mods.cs_override != -1.f) request.CS = mods.cs_override;
         request.rx = ModMasks::eq(mods.flags, Replay::ModFlags::Relax);
         request.td = ModMasks::eq(mods.flags, Replay::ModFlags::TouchDevice);
         request.comboMax = -1;

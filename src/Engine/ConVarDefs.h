@@ -138,19 +138,18 @@ CONVAR(snd_async_buffer, "snd_async_buffer", 65536, CLIENT,
 CONVAR(snd_change_check_interval, "snd_change_check_interval", 0.5f, CLIENT,
        "check for output device changes every this many seconds. 0 = disabled");
 CONVAR(snd_dev_buffer, "snd_dev_buffer", 30, CLIENT, "BASS_CONFIG_DEV_BUFFER length in milliseconds");
-CONVAR(snd_dev_period, "snd_dev_period", 10, CLIENT, "BASS_CONFIG_DEV_PERIOD length in milliseconds, or if negative then in samples");
+CONVAR(snd_dev_period, "snd_dev_period", 10, CLIENT,
+       "BASS_CONFIG_DEV_PERIOD length in milliseconds, or if negative then in samples");
 CONVAR(snd_output_device, "snd_output_device", "Default", CLIENT);
 CONVAR(snd_ready_delay, "snd_ready_delay", 0.f, CLIENT,
        "after a sound engine restart, wait this many seconds before marking it as ready");
 CONVAR(snd_restrict_play_frame, "snd_restrict_play_fr ame", true, CLIENT,
        "only allow one new channel per frame for overlayable sounds (prevents lag and earrape)");
-CONVAR(snd_updateperiod, "snd_updateperiod", 10, CLIENT,
-       "BASS_CONFIG_UPDATEPERIOD length in milliseconds");
+CONVAR(snd_updateperiod, "snd_updateperiod", 10, CLIENT, "BASS_CONFIG_UPDATEPERIOD length in milliseconds");
 CONVAR(snd_file_min_size, "snd_file_min_size", 64, CLIENT,
        "minimum file size in bytes for WAV files to be considered valid (everything below will "
        "fail to load), this is a workaround for BASS crashes");
-CONVAR(snd_force_load_unknown, "snd_force_load_unknown", false, CLIENT,
-       "force loading of assumed invalid audio files");
+CONVAR(snd_force_load_unknown, "snd_force_load_unknown", false, CLIENT, "force loading of assumed invalid audio files");
 CONVAR(snd_freq, "snd_freq", 44100, CLIENT | NOLOAD | NOSAVE, "output sampling rate in Hz");
 CONVAR(snd_soloud_buffer, "snd_soloud_buffer", 0, CLIENT | NOSAVE,
        "SoLoud audio device buffer size (recommended to leave this on 0/auto)");
@@ -210,10 +209,8 @@ CONVAR(r_debug_flush_drawstring, "r_debug_flush_drawstring", false, CLIENT);
 CONVAR(r_debug_drawstring_unbind, "r_debug_drawstring_unbind", false, CLIENT);
 CONVAR(r_debug_font_unicode, "r_debug_font_unicode", false, CLIENT,
        "debug messages for unicode/fallback font related stuff");
-CONVAR(r_sync_timeout, "r_sync_timeout", 5000000, CLIENT,
-       "timeout in microseconds for GPU synchronization operations");
-CONVAR(r_sync_enabled, "r_sync_enabled", true, CLIENT,
-       "enable explicit GPU synchronization for OpenGL");
+CONVAR(r_sync_timeout, "r_sync_timeout", 5000000, CLIENT, "timeout in microseconds for GPU synchronization operations");
+CONVAR(r_sync_enabled, "r_sync_enabled", true, CLIENT, "enable explicit GPU synchronization for OpenGL");
 CONVAR(r_opengl_legacy_vao_use_vertex_array, "r_opengl_legacy_vao_use_vertex_array",
        Env::cfg(REND::GLES32) ? true : false, CLIENT,
        "dramatically reduces per-vao draw calls, but completely breaks legacy ffp draw calls (vertices work, but "
@@ -234,8 +231,7 @@ CONVAR(vprof, "vprof", false, CLIENT | SERVER, "enables/disables the visual prof
 CONVAR(vprof_display_mode, "vprof_display_mode", 0, CLIENT | SERVER,
        "which info blade to show on the top right (gpu/engine/app/etc. info), use CTRL + TAB to "
        "cycle through, 0 = disabled");
-CONVAR(vprof_graph, "vprof_graph", true, CLIENT | SERVER,
-       "whether to draw the graph when the overlay is enabled");
+CONVAR(vprof_graph, "vprof_graph", true, CLIENT | SERVER, "whether to draw the graph when the overlay is enabled");
 CONVAR(vprof_graph_alpha, "vprof_graph_alpha", 0.9f, CLIENT | SERVER, "line opacity");
 CONVAR(vprof_graph_draw_overhead, "vprof_graph_draw_overhead", false, CLIENT | SERVER,
        "whether to draw the profiling overhead time in white (usually negligible)");
@@ -298,8 +294,7 @@ CONVAR(mod_suddendeath_restart, "mod_suddendeath_restart", false, CLIENT,
        "osu! has this set to false (i.e. you fail after missing). if set to true, then "
        "behave like SS/PF, instantly restarting the map");
 CONVAR(hud_shift_tab_toggles_everything, "hud_shift_tab_toggles_everything", true, CLIENT);
-CONVAR(win_disable_windows_key_while_playing, "win_disable_windows_key_while_playing", true,
-       CLIENT);
+CONVAR(win_disable_windows_key_while_playing, "win_disable_windows_key_while_playing", true, CLIENT);
 
 // Files
 CONVAR(database_enabled, "database_enabled", true, CLIENT);
@@ -317,7 +312,8 @@ CONVAR(always_render_cursor_trail, "always_render_cursor_trail", true, CLIENT | 
 CONVAR(automatic_cursor_size, "automatic_cursor_size", false, CLIENT | SKINS);
 CONVAR(mod_hd_circle_fadeout_end_percent, "mod_hd_circle_fadeout_end_percent", 0.3f, CLIENT | SKINS | SERVER | GAMEPLAY,
        "hiddenFadeOutEndTime = circleTime - approachTime * mod_hd_circle_fadeout_end_percent");
-CONVAR(mod_hd_circle_fadeout_start_percent, "mod_hd_circle_fadeout_start_percent", 0.6f, CLIENT | SKINS | SERVER | GAMEPLAY,
+CONVAR(mod_hd_circle_fadeout_start_percent, "mod_hd_circle_fadeout_start_percent", 0.6f,
+       CLIENT | SKINS | SERVER | GAMEPLAY,
        "hiddenFadeOutStartTime = circleTime - approachTime * mod_hd_circle_fadeout_start_percent");
 CONVAR(mod_hd_slider_fade_percent, "mod_hd_slider_fade_percent", 1.0f, CLIENT | SKINS | SERVER | GAMEPLAY);
 CONVAR(mod_hd_slider_fast_fade, "mod_hd_slider_fast_fade", false, CLIENT | SKINS | SERVER | GAMEPLAY);
@@ -327,8 +323,7 @@ CONVAR(draw_songbrowser_background_image, "draw_songbrowser_background_image", t
 CONVAR(draw_songbrowser_menu_background_image, "draw_songbrowser_menu_background_image", true, CLIENT | SKINS | SERVER);
 CONVAR(draw_songbrowser_strain_graph, "draw_songbrowser_strain_graph", false, CLIENT | SKINS | SERVER);
 CONVAR(draw_songbrowser_thumbnails, "draw_songbrowser_thumbnails", true, CLIENT | SKINS | SERVER);
-CONVAR(songbrowser_background_fade_in_duration, "songbrowser_background_fade_in_duration", 0.1f,
-       CLIENT | SKINS);
+CONVAR(songbrowser_background_fade_in_duration, "songbrowser_background_fade_in_duration", 0.1f, CLIENT | SKINS);
 CONVAR(songbrowser_button_active_color_a, "songbrowser_button_active_color_a", 230, CLIENT | SKINS);
 CONVAR(songbrowser_button_active_color_b, "songbrowser_button_active_color_b", 255, CLIENT | SKINS);
 CONVAR(songbrowser_button_active_color_g, "songbrowser_button_active_color_g", 255, CLIENT | SKINS);
@@ -630,7 +625,7 @@ CONVAR(mod_halftime_dummy, "mod_halftime_dummy", false, CLIENT | SKINS | SERVER)
 CONVAR(ar_override, "ar_override", -1.0f, CLIENT | SERVER | PROTECTED | GAMEPLAY,
        "use this to override between AR 0 and AR 12.5+. active if value is more than or equal to 0.");
 CONVAR(ar_override_lock, "ar_override_lock", false, CLIENT | SERVER | PROTECTED | GAMEPLAY,
-       "always force constant AR even through speed changes");
+       "always force constant approach time even through speed changes");
 CONVAR(ar_overridenegative, "ar_overridenegative", 0.0f, CLIENT | SERVER | PROTECTED | GAMEPLAY,
        "use this to override below AR 0. active if value is less than 0, disabled otherwise. "
        "this override always overrides the other override.");
@@ -647,8 +642,8 @@ CONVAR(mod_actual_flashlight, "mod_actual_flashlight", false, CLIENT | SERVER | 
 CONVAR(mod_nightmare, "mod_nightmare", false, CLIENT | SERVER | PROTECTED | GAMEPLAY);
 CONVAR(mod_approach_different, "mod_approach_different", false, CLIENT | SERVER | PROTECTED | GAMEPLAY,
        "replicates osu!lazer's \"Approach Different\" mod");
-CONVAR(mod_approach_different_initial_size, "mod_approach_different_initial_size", 4.0f,
-       CLIENT | SERVER | GAMEPLAY, "initial size of the approach circles, relative to hit circles (as a multiplier)");
+CONVAR(mod_approach_different_initial_size, "mod_approach_different_initial_size", 4.0f, CLIENT | SERVER | GAMEPLAY,
+       "initial size of the approach circles, relative to hit circles (as a multiplier)");
 CONVAR(mod_approach_different_style, "mod_approach_different_style", 1, CLIENT | SERVER | GAMEPLAY,
        "0 = linear, 1 = gravity, 2 = InOut1, 3 = InOut2, 4 = Accelerate1, 5 = Accelerate2, 6 = Accelerate3, 7 = "
        "Decelerate1, 8 = Decelerate2, 9 = Decelerate3");
@@ -668,9 +663,11 @@ CONVAR(mod_fullalternate, "mod_fullalternate", false, CLIENT | SERVER | GAMEPLAY
 CONVAR(mod_halfwindow, "mod_halfwindow", false, CLIENT | SERVER | PROTECTED | GAMEPLAY);
 CONVAR(mod_halfwindow_allow_300s, "mod_halfwindow_allow_300s", true, CLIENT | SERVER | GAMEPLAY,
        "should positive hit deltas be allowed within 300 range");
-CONVAR(mod_hd_circle_fadein_end_percent, "mod_hd_circle_fadein_end_percent", 0.6f, CLIENT | SERVER | PROTECTED | GAMEPLAY,
+CONVAR(mod_hd_circle_fadein_end_percent, "mod_hd_circle_fadein_end_percent", 0.6f,
+       CLIENT | SERVER | PROTECTED | GAMEPLAY,
        "hiddenFadeInEndTime = circleTime - approachTime * mod_hd_circle_fadein_end_percent");
-CONVAR(mod_hd_circle_fadein_start_percent, "mod_hd_circle_fadein_start_percent", 1.0f, CLIENT | SERVER | PROTECTED | GAMEPLAY,
+CONVAR(mod_hd_circle_fadein_start_percent, "mod_hd_circle_fadein_start_percent", 1.0f,
+       CLIENT | SERVER | PROTECTED | GAMEPLAY,
        "hiddenFadeInStartTime = circleTime - approachTime * mod_hd_circle_fadein_start_percent");
 CONVAR(mod_jigsaw1, "mod_jigsaw1", false, CLIENT | SERVER | PROTECTED | GAMEPLAY);
 CONVAR(mod_jigsaw2, "mod_jigsaw2", false, CLIENT | SERVER | PROTECTED | GAMEPLAY);
@@ -757,8 +754,7 @@ CONVAR(background_image_loading_delay, "background_image_loading_delay", 0.1f, C
 // Display settings
 CONVAR(fps_max, "fps_max", 1000.0f, CLIENT, "framerate limiter, gameplay");
 CONVAR(fps_max_menu, "fps_max_menu", 420.f, CLIENT, "framerate limiter, menus");
-CONVAR(fps_max_background, "fps_max_background", 30.0f, CLIENT,
-       "framerate limiter, background");
+CONVAR(fps_max_background, "fps_max_background", 30.0f, CLIENT, "framerate limiter, background");
 CONVAR(fps_max_yield, "fps_max_yield", false, CLIENT,
        "always release rest of timeslice once per frame (call scheduler via sleep(0))");
 // fps_unlimited: Unused since v39.01. Instead we just check if fps_max <= 0 (see MainMenu.cpp for migration)
@@ -772,7 +768,8 @@ CONVAR(fullscreen, "fullscreen", false, CLIENT,
 CONVAR(monitor, "monitor", 0, CLIENT, "monitor/display device to switch to, 0 = primary monitor");
 CONVAR(r_sync_max_frames, "r_sync_max_frames", 1, CLIENT,
        "maximum pre-rendered frames allowed in rendering pipeline");  // (a la "Max Prerendered Frames")
-CONVAR(alt_sleep, "alt_sleep", 1, CLIENT, "use an alternative sleep implementation (on Windows) for potentially more accurate frame limiting");
+CONVAR(alt_sleep, "alt_sleep", 1, CLIENT,
+       "use an alternative sleep implementation (on Windows) for potentially more accurate frame limiting");
 
 // Constants (TODO: remove these)
 CONVAR(
@@ -812,11 +809,12 @@ CONVAR(mp_autologin, "mp_autologin", false, CLIENT);
 CONVAR(mp_oauth_token, "mp_oauth_token", "", CLIENT | HIDDEN);
 CONVAR(mp_password, "mp_password", "", CLIENT | HIDDEN | NOSAVE);
 CONVAR(mp_password_md5, "mp_password_md5", "", CLIENT | HIDDEN);
-CONVAR(mp_server, "mp_server", "akatsuki.gg", CLIENT);
+CONVAR(mp_server, "mp_server", "neosu.net", CLIENT);
 CONVAR(name, "name", "Guest", CLIENT);
 
 // Server settings
-CONVAR(sv_allow_speed_override, "sv_allow_speed_override", false, SERVER, "let clients submit scores with non-vanilla speeds (e.g. not only HT/DT speed)");
+CONVAR(sv_allow_speed_override, "sv_allow_speed_override", false, SERVER,
+       "let clients submit scores with non-vanilla speeds (e.g. not only HT/DT speed)");
 
 // Not sorted
 CONVAR(beatmap_preview_mods_live, "beatmap_preview_mods_live", false, CLIENT | SKINS | SERVER,
@@ -933,8 +931,7 @@ CONVAR(followpoints_connect_spinners, "followpoints_connect_spinners", false, CL
 CONVAR(followpoints_prevfadetime, "followpoints_prevfadetime", 400.0f, CLIENT | SERVER | GAMEPLAY);
 CONVAR(followpoints_scale_multiplier, "followpoints_scale_multiplier", 1.0f, CLIENT | SERVER | GAMEPLAY);
 CONVAR(followpoints_separation_multiplier, "followpoints_separation_multiplier", 1.0f, CLIENT | SERVER | GAMEPLAY);
-CONVAR(force_oauth, "force_oauth", false, CLIENT,
-       "always display oauth login button instead of password field");
+CONVAR(force_oauth, "force_oauth", false, CLIENT, "always display oauth login button instead of password field");
 CONVAR(force_legacy_slider_renderer, "force_legacy_slider_renderer", false, CLIENT | SKINS | SERVER,
        "on some older machines, this may be faster than vertexbuffers");
 CONVAR(fposu_3d_skybox, "fposu_3d_skybox", true, CLIENT | SKINS | SERVER);
@@ -983,8 +980,10 @@ CONVAR(fposu_zoom_sensitivity_ratio, "fposu_zoom_sensitivity_ratio", 1.0f, CLIEN
 CONVAR(fposu_zoom_toggle, "fposu_zoom_toggle", false, CLIENT | SKINS | SERVER, "whether the zoom key acts as a toggle");
 CONVAR(hiterrorbar_misaims, "hiterrorbar_misaims", true, CLIENT | SKINS | SERVER);
 CONVAR(hiterrorbar_misses, "hiterrorbar_misses", true, CLIENT | SKINS | SERVER);
-CONVAR(hitobject_fade_in_time, "hitobject_fade_in_time", 400, CLIENT | SERVER | PROTECTED | GAMEPLAY, "in milliseconds (!)");
-CONVAR(hitobject_fade_out_time, "hitobject_fade_out_time", 0.293f, CLIENT | SERVER | PROTECTED | GAMEPLAY, "in seconds (!)");
+CONVAR(hitobject_fade_in_time, "hitobject_fade_in_time", 400, CLIENT | SERVER | PROTECTED | GAMEPLAY,
+       "in milliseconds (!)");
+CONVAR(hitobject_fade_out_time, "hitobject_fade_out_time", 0.293f, CLIENT | SERVER | PROTECTED | GAMEPLAY,
+       "in seconds (!)");
 CONVAR(hitobject_fade_out_time_speed_multiplier_min, "hitobject_fade_out_time_speed_multiplier_min", 0.5f,
        CLIENT | SERVER | PROTECTED | GAMEPLAY,
        "The minimum multiplication factor allowed for the speed multiplier influencing the fadeout duration");
@@ -1057,14 +1056,13 @@ CONVAR(notelock_stable_tolerance2b, "notelock_stable_tolerance2b", 3, CLIENT | S
 CONVAR(notelock_type, "notelock_type", 2, CLIENT | SERVER | PROTECTED | GAMEPLAY,
        "which notelock algorithm to use (0 = None, 1 = neosu, 2 = osu!stable, 3 = osu!lazer 2020)");
 CONVAR(notification_duration, "notification_duration", 1.25f, CLIENT | SKINS | SERVER);
-CONVAR(notify_friend_status_change, "notify_friend_status_change", true, CLIENT,
-       "notify when friends change status");
+CONVAR(notify_friend_status_change, "notify_friend_status_change", true, CLIENT, "notify when friends change status");
 CONVAR(number_max, "number_max", 0, CLIENT | SKINS | SERVER,
        "0 = disabled, 1/2/3/4/etc. limits visual circle numbers to this number");
 CONVAR(number_scale_multiplier, "number_scale_multiplier", 1.0f, CLIENT | SKINS | SERVER);
 CONVAR(od_override, "od_override", -1.0f, CLIENT | SERVER | PROTECTED | GAMEPLAY);
 CONVAR(od_override_lock, "od_override_lock", false, CLIENT | SERVER | PROTECTED | GAMEPLAY,
-       "always force constant OD even through speed changes");
+       "always force constant 300 hit window even through speed changes");
 CONVAR(old_beatmap_offset, "old_beatmap_offset", 24.0f, CLIENT | SKINS | SERVER,
        "offset in ms which is added to beatmap versions < 5 (default value is hardcoded 24 ms in stable)");
 CONVAR(options_high_quality_sliders, "options_high_quality_sliders", false, CLIENT | SKINS | SERVER);
@@ -1190,8 +1188,7 @@ CONVAR(snaking_sliders, "snaking_sliders", true, CLIENT | SKINS | SERVER);
 CONVAR(sort_skins_cleaned, "sort_skins_cleaned", false, CLIENT | SKINS | SERVER,
        "set to true to sort skins alphabetically, ignoring special characters at the start (not like stable)");
 
-CONVAR(spec_buffer, "spec_buffer", 2500, CLIENT,
-       "size of spectator buffer in milliseconds");
+CONVAR(spec_buffer, "spec_buffer", 2500, CLIENT, "size of spectator buffer in milliseconds");
 CONVAR(spec_share_map, "spec_share_map", true, CLIENT | SKINS | SERVER,
        "automatically send currently-playing beatmap to #spectator");
 
@@ -1218,7 +1215,8 @@ CONVAR(ui_scale_to_dpi_minimum_width, "ui_scale_to_dpi_minimum_width", 2200, CLI
        "any in-game resolutions below this will have ui_scale_to_dpi force disabled");
 CONVAR(ui_scrollview_kinetic_approach_time, "ui_scrollview_kinetic_approach_time", 0.075f, CLIENT | SKINS | SERVER,
        "approach target afterscroll delta over this duration");
-CONVAR(ui_scrollview_kinetic_energy_multiplier, "ui_scrollview_kinetic_energy_multiplier", 24.0f, CLIENT, "afterscroll delta multiplier");
+CONVAR(ui_scrollview_kinetic_energy_multiplier, "ui_scrollview_kinetic_energy_multiplier", 24.0f, CLIENT,
+       "afterscroll delta multiplier");
 CONVAR(ui_scrollview_mousewheel_multiplier, "ui_scrollview_mousewheel_multiplier", 3.5f, CLIENT | SKINS | SERVER);
 CONVAR(ui_scrollview_mousewheel_overscrollbounce, "ui_scrollview_mousewheel_overscrollbounce", true, CLIENT);
 CONVAR(ui_scrollview_resistance, "ui_scrollview_resistance", 5.0f, CLIENT | SKINS | SERVER,
@@ -1239,11 +1237,10 @@ CONVAR(user_draw_level_bar, "user_draw_level_bar", true, CLIENT | SKINS | SERVER
 CONVAR(user_draw_pp, "user_draw_pp", true, CLIENT | SKINS | SERVER);
 CONVAR(user_include_relax_and_autopilot_for_stats, "user_include_relax_and_autopilot_for_stats", false,
        CLIENT | SKINS | SERVER);
-CONVAR(vsync, "vsync", false, CLIENT,
-       [](float on) -> void { g ? g->setVSync(!!static_cast<int>(on)) : (void)0; });
+CONVAR(vsync, "vsync", false, CLIENT, [](float on) -> void { g ? g->setVSync(!!static_cast<int>(on)) : (void)0; });
 // this is not windows-only anymore, just keeping it with the "win_" prefix to not break old configs
-CONVAR(win_processpriority, "win_processpriority", 1, CLIENT,
-       "sets the main process priority (0 = normal, 1 = high)", CFUNC(Environment::setThreadPriority));
+CONVAR(win_processpriority, "win_processpriority", 1, CLIENT, "sets the main process priority (0 = normal, 1 = high)",
+       CFUNC(Environment::setThreadPriority));
 
 // Unfinished features
 CONVAR(cbf, "cbf", false, CLIENT, "click between frames");
@@ -1255,7 +1252,8 @@ CONVAR(ignore_beatmap_skins, "ignore_beatmap_skins", false, CLIENT | SERVER, "ig
 CONVAR(language, "language", "en", CLIENT | SERVER);
 CONVAR(draw_storyboard, "draw_storyboard", true, CLIENT | SERVER);
 CONVAR(draw_video, "draw_video", true, CLIENT | SERVER);
-CONVAR(save_failed_scores, "save_failed_scores", false, CLIENT | HIDDEN, "save scores locally, even if there was a fail");
+CONVAR(save_failed_scores, "save_failed_scores", false, CLIENT | HIDDEN,
+       "save scores locally, even if there was a fail");
 
 // NOLINTEND(misc-definitions-in-headers)
 

@@ -81,7 +81,7 @@ VertexArrayObject *generateVAO(const std::vector<vec2> &points, float hitcircleD
 
     const bool debugSquareVao = cv::slider_debug_draw_square_vao.getBool();
 
-    for(auto point : points) {
+    for(const auto &point : points) {
         // fuck oob sliders
         if(skipOOBPoints) {
             if(point.x < -hitcircleDiameter - GameRules::OSU_COORD_WIDTH * 2 ||

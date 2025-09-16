@@ -274,20 +274,18 @@ class ConVar {
 
     [[nodiscard]] inline bool isFlagSet(uint8_t flag) const { return (bool)((this->iFlags & flag) == flag); }
 
-    void setServerProtected(ProtectionPolicy policy) { this->serverProtectionPolicy = policy; }
+    void setServerProtected(ProtectionPolicy policy) { this->serverProtectionPolicy.store(policy, std::memory_order_release); }
 
     [[nodiscard]] inline bool isProtected() const {
-        switch(this->serverProtectionPolicy) {
+        switch(this->serverProtectionPolicy.load(std::memory_order_acquire)) {
             case ProtectionPolicy::DEFAULT:
                 return this->isFlagSet(cv::PROTECTED);
             case ProtectionPolicy::PROTECTED:
                 return true;
             case ProtectionPolicy::UNPROTECTED:
+            default:
                 return false;
         }
-
-        // unreachable, but MSVC is bitching
-        return true;
     }
 
    private:
@@ -403,13 +401,13 @@ class ConVar {
             case CvarEditor::SKIN: {
                 this->dSkinValue.store(newDouble, std::memory_order_release);
                 this->sSkinValue = newString;
-                this->hasSkinValue = true;
+                this->hasSkinValue.store(true, std::memory_order_release);
                 break;
             }
             case CvarEditor::SERVER: {
                 this->dServerValue.store(newDouble, std::memory_order_release);
                 this->sServerValue = newString;
-                this->hasServerValue = true;
+                this->hasServerValue.store(true, std::memory_order_release);
                 break;
             }
         }
@@ -468,7 +466,7 @@ class ConVar {
 
     std::atomic<double> dServerValue{0.0};
     ConVarString sServerValue{};
-    ProtectionPolicy serverProtectionPolicy{ProtectionPolicy::DEFAULT};
+    std::atomic<ProtectionPolicy> serverProtectionPolicy{ProtectionPolicy::DEFAULT};
 
     // callback storage (allow having 1 "change" callback and 1 single value (or void) callback)
     ExecutionCallback callback{std::monostate()};

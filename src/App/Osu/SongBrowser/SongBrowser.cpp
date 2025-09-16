@@ -379,17 +379,14 @@ SongBrowser::SongBrowser()  // NOLINT(cert-msc51-cpp, cert-msc32-c)
     this->topbarLeft->addBaseUIElement(this->songInfo);
 
     this->filterScoresDropdown = new CBaseUIButton(0, 0, 0, 0, "", "Local");
-    this->filterScoresDropdown->setDrawBackground(false);
     this->filterScoresDropdown->setClickCallback(SA::MakeDelegate<&SongBrowser::onFilterScoresClicked>(this));
     this->topbarLeft->addBaseUIElement(this->filterScoresDropdown);
 
     this->sortScoresDropdown = new CBaseUIButton(0, 0, 0, 0, "", "By score");
-    this->sortScoresDropdown->setDrawBackground(false);
     this->sortScoresDropdown->setClickCallback(SA::MakeDelegate<&SongBrowser::onSortScoresClicked>(this));
     this->topbarLeft->addBaseUIElement(this->sortScoresDropdown);
 
     this->webButton = new CBaseUIButton(0, 0, 0, 0, "", "Web");
-    this->webButton->setDrawBackground(false);
     this->webButton->setClickCallback(SA::MakeDelegate<&SongBrowser::onWebClicked>(this));
     this->topbarLeft->addBaseUIElement(this->webButton);
 
@@ -399,12 +396,10 @@ SongBrowser::SongBrowser()  // NOLINT(cert-msc51-cpp, cert-msc32-c)
         this->groupLabel = new CBaseUILabel(0, 0, 0, 0, "", "Group:");
         this->groupLabel->setSizeToContent(3);
         this->groupLabel->setDrawFrame(false);
-        this->groupLabel->setDrawBackground(false);
         this->groupLabel->grabs_clicks = true;
         this->topbarRight->addBaseUIElement(this->groupLabel);
 
         this->groupButton = new CBaseUIButton(0, 0, 0, 0, "", "No Grouping");
-        this->groupButton->setDrawBackground(false);
         this->groupButton->setClickCallback(SA::MakeDelegate<&SongBrowser::onGroupClicked>(this));
         this->groupButton->grabs_clicks = true;
         this->topbarRight->addBaseUIElement(this->groupButton);
@@ -412,34 +407,28 @@ SongBrowser::SongBrowser()  // NOLINT(cert-msc51-cpp, cert-msc32-c)
         this->sortLabel = new CBaseUILabel(0, 0, 0, 0, "", "Sort:");
         this->sortLabel->setSizeToContent(3);
         this->sortLabel->setDrawFrame(false);
-        this->sortLabel->setDrawBackground(false);
         this->sortLabel->grabs_clicks = true;
         this->topbarRight->addBaseUIElement(this->sortLabel);
 
         this->sortButton = new CBaseUIButton(0, 0, 0, 0, "", "By Date Added");
-        this->sortButton->setDrawBackground(false);
         this->sortButton->setClickCallback(SA::MakeDelegate<&SongBrowser::onSortClicked>(this));
         this->sortButton->grabs_clicks = true;
         this->topbarRight->addBaseUIElement(this->sortButton);
 
         // "hardcoded" grouping tabs
         this->groupByCollectionBtn = new CBaseUIButton(0, 0, 0, 0, "", "Collections");
-        this->groupByCollectionBtn->setDrawBackground(false);
         this->groupByCollectionBtn->setClickCallback(SA::MakeDelegate<&SongBrowser::onQuickGroupClicked>(this));
         this->groupByCollectionBtn->grabs_clicks = true;
         this->topbarRight->addBaseUIElement(this->groupByCollectionBtn);
         this->groupByArtistBtn = new CBaseUIButton(0, 0, 0, 0, "", "By Artist");
-        this->groupByArtistBtn->setDrawBackground(false);
         this->groupByArtistBtn->setClickCallback(SA::MakeDelegate<&SongBrowser::onQuickGroupClicked>(this));
         this->groupByArtistBtn->grabs_clicks = true;
         this->topbarRight->addBaseUIElement(this->groupByArtistBtn);
         this->groupByDifficultyBtn = new CBaseUIButton(0, 0, 0, 0, "", "By Difficulty");
-        this->groupByDifficultyBtn->setDrawBackground(false);
         this->groupByDifficultyBtn->setClickCallback(SA::MakeDelegate<&SongBrowser::onQuickGroupClicked>(this));
         this->groupByDifficultyBtn->grabs_clicks = true;
         this->topbarRight->addBaseUIElement(this->groupByDifficultyBtn);
         this->groupByNothingBtn = new CBaseUIButton(0, 0, 0, 0, "", "No Grouping");
-        this->groupByNothingBtn->setDrawBackground(false);
         this->groupByNothingBtn->setClickCallback(SA::MakeDelegate<&SongBrowser::onQuickGroupClicked>(this));
         this->groupByNothingBtn->grabs_clicks = true;
         this->topbarRight->addBaseUIElement(this->groupByNothingBtn);

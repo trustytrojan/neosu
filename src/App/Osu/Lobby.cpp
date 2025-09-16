@@ -8,6 +8,7 @@
 #include "Bancho.h"
 #include "BanchoNetworking.h"
 #include "BanchoUsers.h"
+#include "Beatmap.h"
 #include "CBaseUIButton.h"
 #include "CBaseUIContainer.h"
 #include "CBaseUILabel.h"
@@ -261,6 +262,14 @@ void Lobby::on_create_room_clicked() {
     }
     BanchoState::room.slots[0].status = 4;  // not ready
     BanchoState::room.slots[0].player_id = BanchoState::get_uid();
+
+    if(osu->getSelectedBeatmap() && osu->getSelectedBeatmap()->getSelectedDifficulty2()) {
+        auto diff2 = osu->getSelectedBeatmap()->getSelectedDifficulty2();
+        BanchoState::room.map_name = UString::format("%s - %s [%s]", diff2->getArtist().c_str(),
+                                                     diff2->getTitle().c_str(), diff2->getDifficultyName().c_str());
+        BanchoState::room.map_md5 = diff2->getMD5Hash();
+        BanchoState::room.map_id = diff2->getID();
+    }
 
     Packet packet = {0};
     packet.id = CREATE_ROOM;

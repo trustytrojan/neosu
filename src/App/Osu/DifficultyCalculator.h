@@ -12,7 +12,6 @@ class Beatmap;
 class SliderCurve;
 class ConVar;
 
-
 struct pp_info {
     f64 total_stars = 0.0;
     f64 aim_stars = 0.0;
@@ -169,7 +168,7 @@ class DifficultyCalculator {
         double strain_time;  // strain temp
 
         bool lazyCalcFinished;  // precalc temp
-        vec2 lazyEndPos{0.f};     // precalc temp
+        vec2 lazyEndPos{0.f};   // precalc temp
         double lazyTravelDist;  // precalc temp
         double lazyTravelTime;  // precalc temp
         double travelTime;      // precalc temp
@@ -202,9 +201,9 @@ class DifficultyCalculator {
         void calculate_strains(const DiffObject &prev, const DiffObject *next, double hitWindow300);
         void calculate_strain(const DiffObject &prev, const DiffObject *next, double hitWindow300,
                               const Skills::Skill dtype);
-        static f64 calculate_difficulty(const Skills::Skill type, const DiffObject* dobjects, size_t dobjectCount,
-                                        IncrementalState* incremental, std::vector<f64>* outStrains = nullptr,
-                                        f64* outDifficultStrains = nullptr, f64* outRelevantNotes = nullptr);
+        static f64 calculate_difficulty(const Skills::Skill type, const DiffObject *dobjects, size_t dobjectCount,
+                                        IncrementalState *incremental, std::vector<f64> *outStrains = nullptr,
+                                        f64 *outDifficultStrains = nullptr, f64 *outRelevantNotes = nullptr);
         static double spacing_weight1(const double distance, const Skills::Skill diff_type);
         double spacing_weight2(const Skills::Skill diff_type, const DiffObject &prev, const DiffObject *next,
                                double hitWindow300);
@@ -225,8 +224,8 @@ class DifficultyCalculator {
         f64 *speedNotes;
         f64 *difficultSpeedStrains;
         i32 upToObjectIndex = -1;
-        std::vector<f64>* outAimStrains = nullptr;
-        std::vector<f64>* outSpeedStrains = nullptr;
+        std::vector<f64> *outAimStrains = nullptr;
+        std::vector<f64> *outSpeedStrains = nullptr;
     };
 
     struct RhythmIsland {
@@ -244,12 +243,6 @@ class DifficultyCalculator {
     static f64 calculateStarDiffForHitObjects(StarCalcParams &params, const std::atomic<bool> &dead);
     static f64 calculateStarDiffForHitObjectsInt(std::vector<DiffObject> &cachedDiffObjects, StarCalcParams &params,
                                                  IncrementalState *incremental, const std::atomic<bool> &dead);
-
-    // pp, use runtime mods (convenience)
-    static f64 calculatePPv2(Beatmap *beatmap, f64 aim, f64 aimSliderFactor, f64 difficultAimStrains, f64 speed,
-                             f64 speedNotes, f64 difficultSpeedStrains, i32 numHitObjects, i32 numCircles,
-                             i32 numSliders, i32 numSpinners, i32 maxPossibleCombo, i32 combo = -1, i32 misses = 0,
-                             i32 c300 = -1, i32 c100 = 0, i32 c50 = 0);
 
     // pp, fully static
     static f64 calculatePPv2(u32 modsLegacy, f64 timescale, f64 ar, f64 od, f64 aim, f64 aimSliderFactor,

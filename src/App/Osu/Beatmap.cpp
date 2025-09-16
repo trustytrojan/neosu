@@ -1142,10 +1142,7 @@ f32 Beatmap::getAR_full() const {
 
     if(cv::ar_overridenegative.getFloat() < 0.0f) AR = cv::ar_overridenegative.getFloat();
 
-    if(cv::ar_override_lock.getBool())
-        AR = GameRules::getRawConstantApproachRateForSpeedMultiplier(
-            GameRules::getRawApproachTime(AR),
-            (this->music != nullptr && this->bIsPlaying ? this->getSpeedMultiplier() : this->getSpeedMultiplier()));
+    if(cv::ar_override_lock.getBool()) AR = GameRules::arWithSpeed(AR, 1.f / this->getSpeedMultiplier());
 
     if(cv::mod_artimewarp.getBool() && this->hitobjects.size() > 0) {
         const f32 percent =
@@ -1208,10 +1205,7 @@ f32 Beatmap::getOD_full() const {
 
     if(cv::od_override.getFloat() >= 0.0f) OD = cv::od_override.getFloat();
 
-    if(cv::od_override_lock.getBool())
-        OD = GameRules::getRawConstantOverallDifficultyForSpeedMultiplier(
-            GameRules::getRawHitWindow300(OD),
-            (this->music != nullptr && this->bIsPlaying ? this->getSpeedMultiplier() : this->getSpeedMultiplier()));
+    if(cv::od_override_lock.getBool()) OD = GameRules::odWithSpeed(OD, 1.f / this->getSpeedMultiplier());
 
     return OD;
 }
@@ -4039,10 +4033,10 @@ void Beatmap::computeDrainRate() {
 
         f64 testDrop = 0.05;
 
-        const f64 lowestHpEver = GameRules::mapDifficultyRangeDouble(HP, 195.0, 160.0, 60.0);
-        const f64 lowestHpComboEnd = GameRules::mapDifficultyRangeDouble(HP, 198.0, 170.0, 80.0);
-        const f64 lowestHpEnd = GameRules::mapDifficultyRangeDouble(HP, 198.0, 180.0, 80.0);
-        const f64 HpRecoveryAvailable = GameRules::mapDifficultyRangeDouble(HP, 8.0, 4.0, 0.0);
+        const f64 lowestHpEver = GameRules::mapDifficultyRange(HP, 195.0, 160.0, 60.0);
+        const f64 lowestHpComboEnd = GameRules::mapDifficultyRange(HP, 198.0, 170.0, 80.0);
+        const f64 lowestHpEnd = GameRules::mapDifficultyRange(HP, 198.0, 180.0, 80.0);
+        const f64 HpRecoveryAvailable = GameRules::mapDifficultyRange(HP, 8.0, 4.0, 0.0);
 
         bool fail = false;
 

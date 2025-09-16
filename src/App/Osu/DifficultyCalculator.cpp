@@ -206,7 +206,7 @@ f64 DifficultyCalculator::calculateStarDiffForHitObjectsInt(std::vector<DiffObje
 
     // NOTE: clamped CS because neosu allows CS > ~12.1429 (at which point the diameter becomes negative)
     f32 circleRadiusInOsuPixels = 64.0f * GameRules::getRawHitCircleScale(std::clamp<f32>(params.CS, 0.0f, 12.142f));
-    const f32 hitWindow300 = 2.0f * GameRules::getRawHitWindow300(params.OD) / params.speedMultiplier;
+    const f32 hitWindow300 = 2.0f * GameRules::odToMilliseconds(params.OD) / params.speedMultiplier;
 
     // ******************************************************************************************************************************************
     // //
@@ -504,8 +504,8 @@ f64 DifficultyCalculator::calculatePPv2(u32 modsLegacy, f64 timescale, f64 ar, f
     // that it will have the locked value AFTER applying the speed multiplier here) (all UI elements which display ar/od
     // from stored scores, like the ranking screen or score buttons, also do this calculation before displaying the
     // values to the user. of course the mod selection screen does too.)
-    od = GameRules::getRawOverallDifficultyForSpeedMultiplier(GameRules::getRawHitWindow300(od), timescale);
-    ar = GameRules::getRawApproachRateForSpeedMultiplier(GameRules::getRawApproachTime(ar), timescale);
+    ar = GameRules::arWithSpeed(ar, timescale);
+    od = GameRules::odWithSpeed(od, timescale);
 
     if(combo < 0) combo = maxPossibleCombo;
 

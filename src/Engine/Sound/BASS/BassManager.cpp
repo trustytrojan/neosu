@@ -319,7 +319,7 @@ static std::string getBassErrorStringFromCode(int code) {
         case BASS_ERROR_DENIED:
             errstr = "Access Denied";
             break;
-#ifdef MCENGINE_FEATURE_WINDOWS
+#ifdef MCENGINE_PLATFORM_WINDOWS
         case BASS_ERROR_WASAPI:
             errstr = "No WASAPI";
             break;

@@ -25,6 +25,7 @@
 #include "MainMenu.h"
 #include "ModSelector.h"
 #include "Mouse.h"
+#include "NotificationOverlay.h"
 #include "Osu.h"
 #include "PromptScreen.h"
 #include "RankingScreen.h"
@@ -675,6 +676,7 @@ void RoomScreen::on_match_started(Room room) {
 
         soundEngine->play(osu->getSkin()->getMatchStartSound());
     } else {
+        osu->notificationOverlay->addToast("Failed to load map", ERROR_TOAST);
         this->ragequit();  // map failed to load
     }
 }
