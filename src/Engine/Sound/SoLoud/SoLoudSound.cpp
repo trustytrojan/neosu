@@ -263,6 +263,8 @@ void SoLoudSound::setPan(float pan) {
 
     pan = std::clamp<float>(pan, -1.0f, 1.0f);
 
+    this->fPan = pan;
+
     // apply to the active voice
     soloud->setPan(this->handle, pan);
 }
@@ -371,19 +373,19 @@ double SoLoudSound::getStreamPositionInSeconds() const {
     // check if we need to force synchronous access (e.g. init, or after seek)
     if(this->force_sync_position_next) {
         this->force_sync_position_next = false;
-        this->cached_stream_position = soloud->getStreamPosition(this->handle);
-        this->soloud_stream_position_cache_time = now;
+        this->cached_stream_position.store(soloud->getStreamPosition(this->handle), std::memory_order_release);
+        this->soloud_stream_position_cache_time.store(now, std::memory_order_release);
         return this->cached_stream_position;
     }
 
     // use cached value if recent enough (updated within last 10ms)
     if(now >= this->soloud_stream_position_cache_time + 0.01) {
         // cache is stale, trigger async update
-        this->soloud_stream_position_cache_time = now;  // prevent multiple async calls
+        this->soloud_stream_position_cache_time.store(now, std::memory_order_relaxed);  // prevent multiple async calls
         soloud->updateCachedPosition(this->handle, this->soloud_stream_position_cache_time, this->cached_stream_position);
     }
 
-    return this->cached_stream_position;
+    return this->cached_stream_position.load(std::memory_order_acquire);
 }
 
 double SoLoudSound::getSourceLengthInSeconds() const {

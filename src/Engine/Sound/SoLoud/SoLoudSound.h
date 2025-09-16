@@ -7,6 +7,7 @@
 #ifdef MCENGINE_FEATURE_SOLOUD
 
 #include <memory>
+#include <atomic>
 
 // fwd decls to avoid include external soloud headers here
 namespace SoLoud {
@@ -91,8 +92,8 @@ class SoLoudSound final : public Sound {
     double soloud_paused_handle_cache_time{-1.};
 
     // async position caching to avoid blocking on getStreamPosition calls
-    mutable double cached_stream_position{0.0};
-    mutable double soloud_stream_position_cache_time{-1.};
+    mutable std::atomic<double> cached_stream_position{0.0};
+    mutable std::atomic<double> soloud_stream_position_cache_time{-1.};
     mutable bool force_sync_position_next{true};
 };
 

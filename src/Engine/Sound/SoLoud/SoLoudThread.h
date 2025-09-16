@@ -304,10 +304,10 @@ class SoLoudThreadWrapper {
     }
 
     // async position update helper (so we don't need to run tasks recursively)
-    void updateCachedPosition(SoLoud::handle aVoiceHandle, double &cacheTime, double &cachedPosition) {
+    void updateCachedPosition(SoLoud::handle aVoiceHandle, std::atomic<double> &cacheTime, std::atomic<double> &cachedPosition) {
         this->fire_and_forget([this, aVoiceHandle, &cacheTime, &cachedPosition]() {
-            cachedPosition = this->soloud->getStreamPosition(aVoiceHandle);
-            cacheTime = Timing::getTimeReal();
+            cachedPosition.store(this->soloud->getStreamPosition(aVoiceHandle), std::memory_order_release);
+            cacheTime.store(Timing::getTimeReal(), std::memory_order_release);
         });
     }
 

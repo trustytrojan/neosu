@@ -8,6 +8,7 @@
 #ifdef MCENGINE_FEATURE_SOLOUD
 #include <soloud_audiosource.h>
 #include <mutex>
+#include <atomic>
 #include <memory>
 
 class UString;
@@ -76,7 +77,7 @@ private:
 	unsigned int mSTOutputSequenceSamples;
 
 	// this is derived from the above, it doesn't change very often so it makes sense to keep it cached as well
-	double mSTLatencySeconds;
+	std::atomic<double> mSTLatencySeconds;
 
 	float mSoundTouchSpeed;
 	float mSoundTouchPitch;
@@ -144,7 +145,7 @@ protected:
 	std::unique_ptr<WavStream> mSource;
 
 	// track the active instance for position queries
-	mutable SoundTouchFilterInstance *mActiveInstance;
+	mutable std::atomic<SoundTouchFilterInstance *> mActiveInstance;
 
 private:
 	// to use as a wrapper for loading with unicode paths on Windows,
