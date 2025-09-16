@@ -5,6 +5,7 @@
 #ifdef MCENGINE_FEATURE_SOLOUD
 
 #include "Thread.h"
+#include "Timing.h"
 
 #include <soloud.h>
 
@@ -73,7 +74,7 @@ class SoLoudThreadWrapper {
             auto future = task->get_future();
 
             {
-                std::lock_guard<std::mutex> lock(queue_mutex);
+                std::scoped_lock<std::mutex> lock(queue_mutex);
                 this->task_queue.push(std::move(task));
             }
             this->queue_cv.notify_one();
@@ -84,7 +85,7 @@ class SoLoudThreadWrapper {
             auto future = task->get_future();
 
             {
-                std::lock_guard<std::mutex> lock(queue_mutex);
+                std::scoped_lock<std::mutex> lock(queue_mutex);
                 this->task_queue.push(std::move(task));
             }
             this->queue_cv.notify_one();
@@ -127,7 +128,7 @@ class SoLoudThreadWrapper {
         auto future = task->get_future();
 
         {
-            std::lock_guard<std::mutex> lock(queue_mutex);
+            std::scoped_lock<std::mutex> lock(queue_mutex);
             this->task_queue.push(std::move(task));
         }
         this->queue_cv.notify_one();
@@ -141,7 +142,7 @@ class SoLoudThreadWrapper {
         auto task = std::make_unique<FireAndForgetTask>(std::forward<F>(func));
 
         {
-            std::lock_guard<std::mutex> lock(queue_mutex);
+            std::scoped_lock<std::mutex> lock(queue_mutex);
             this->task_queue.push(std::move(task));
         }
         this->queue_cv.notify_one();
@@ -167,7 +168,7 @@ class SoLoudThreadWrapper {
         auto future = task->get_future();
 
         {
-            std::lock_guard<std::mutex> lock(queue_mutex);
+            std::scoped_lock<std::mutex> lock(queue_mutex);
             this->task_queue.push(std::move(task));
         }
         this->queue_cv.notify_one();
@@ -241,11 +242,15 @@ class SoLoudThreadWrapper {
         this->fire_and_forget([this, aVoiceHandle]() { this->soloud->stop(aVoiceHandle); });
     }
 
-    void seek(SoLoud::handle aVoiceHandle, SoLoud::time aSeconds) {
+    void seek_async(SoLoud::handle aVoiceHandle, SoLoud::time aSeconds) {
         this->fire_and_forget([this, aVoiceHandle, aSeconds]() { this->soloud->seek(aVoiceHandle, aSeconds); });
     }
 
-    // use sync for methods that need return values
+    // use sync for methods that need return values (or where we want the effect to be applied immediately)
+    void seek(SoLoud::handle aVoiceHandle, SoLoud::time aSeconds) {
+        this->sync([this, aVoiceHandle, aSeconds]() { this->soloud->seek(aVoiceHandle, aSeconds); });
+    }
+
     bool isValidVoiceHandle(SoLoud::handle aVoiceHandle) {
         return this->sync([this, aVoiceHandle]() { return this->soloud->isValidVoiceHandle(aVoiceHandle); });
     }
@@ -298,6 +303,14 @@ class SoLoudThreadWrapper {
         return this->sync([this, aDeviceIdentifier]() { return this->soloud->setDevice(aDeviceIdentifier); });
     }
 
+    // async position update helper (so we don't need to run tasks recursively)
+    void updateCachedPosition(SoLoud::handle aVoiceHandle, double &cacheTime, double &cachedPosition) {
+        this->fire_and_forget([this, aVoiceHandle, &cacheTime, &cachedPosition]() {
+            cachedPosition = this->soloud->getStreamPosition(aVoiceHandle);
+            cacheTime = Timing::getTimeReal();
+        });
+    }
+
    private:
     void start_worker_thread() {
         this->worker_thread = std::jthread([this](const std::stop_token& stoken) { this->worker_loop(stoken); });
@@ -336,7 +349,7 @@ class SoLoudThreadWrapper {
 
         // clear any remaining tasks from the old thread
         {
-            std::lock_guard<std::mutex> lock(this->queue_mutex);
+            std::scoped_lock<std::mutex> lock(this->queue_mutex);
             while(!this->task_queue.empty()) {
                 this->task_queue.pop();
             }
@@ -357,7 +370,7 @@ class SoLoudThreadWrapper {
 
         // signal completion
         {
-            std::lock_guard<std::mutex> lock(this->init_mutex);
+            std::scoped_lock<std::mutex> lock(this->init_mutex);
             this->initialized = true;
         }
         this->init_cv.notify_one();

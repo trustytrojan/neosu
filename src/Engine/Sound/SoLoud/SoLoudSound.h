@@ -84,10 +84,16 @@ class SoLoudSound final : public Sound {
     // avoid calling soloud->isValidVoiceHandle too often, because it locks the entire internal audio mutex
     bool valid_handle_cached();
     double soloud_valid_handle_cache_time{-1.};
+
     // same with soloud->getPause(), for getPosition queries
     bool is_playing_cached();
     bool cached_pause_state{false};
     double soloud_paused_handle_cache_time{-1.};
+
+    // async position caching to avoid blocking on getStreamPosition calls
+    mutable double cached_stream_position{0.0};
+    mutable double soloud_stream_position_cache_time{-1.};
+    mutable bool force_sync_position_next{true};
 };
 
 #else
