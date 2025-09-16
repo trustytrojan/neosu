@@ -59,6 +59,9 @@
 #include <chrono>
 #include <memory>
 #include <utility>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 const Color highlightColor = argb(255, 0, 255, 0);
 const Color defaultColor = argb(255, 255, 255, 255);

@@ -30,9 +30,6 @@
 #include <algorithm>
 #include <cstring>
 #include <utility>
-#include <filesystem>
-
-namespace fs = std::filesystem;
 
 std::unique_ptr<Database> db = nullptr;
 
