@@ -28,7 +28,7 @@ Changelog::Changelog() : ScreenBackable() {
     std::vector<CHANGELOG> changelogs;
 
     CHANGELOG v41_00;
-    v41_00.title = "41.00 (2025-09-15)";
+    v41_00.title = "41.00 (2025-09-17)";
     v41_00.changes = {
         R"(- Added leaderboard filters)",
         R"(- Added support for OAuth login servers)",
