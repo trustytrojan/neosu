@@ -364,6 +364,7 @@ class SoLoudThreadWrapper {
 
     void worker_loop(const std::stop_token& stoken) noexcept {
         McThread::set_current_thread_name("soloud_mixer");
+        McThread::set_current_thread_prio(false);
 
         // initialize SoLoud on the audio thread
         this->soloud = std::make_unique<SoLoud::Soloud>();
@@ -391,7 +392,11 @@ class SoLoudThreadWrapper {
                 lock.unlock();
                 task->execute();
                 lock.lock();
+
+                // yield after execution to give other threads time
+                Timing::sleep(0);
             }
+            Timing::sleep(0);
         }
 
         // cleanup/process remaining tasks before shutdown

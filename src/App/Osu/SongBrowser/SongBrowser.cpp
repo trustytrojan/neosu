@@ -252,8 +252,8 @@ bool sort_by_artist(SongButton const *a, SongButton const *b) {
     const auto *aPtr = a->getDatabaseBeatmap(), *bPtr = b->getDatabaseBeatmap();
     if((aPtr == nullptr) || (bPtr == nullptr)) return (aPtr == nullptr) < (bPtr == nullptr);
 
-    const auto &artistA{aPtr->getArtist()};
-    const auto &artistB{bPtr->getArtist()};
+    const auto &artistA{aPtr->getArtistLatin()};
+    const auto &artistB{bPtr->getArtistLatin()};
 
     i32 cmp = strcasecmp(artistA.c_str(), artistB.c_str());
     if(cmp == 0) return sort_by_difficulty(a, b);
@@ -311,8 +311,8 @@ bool sort_by_title(SongButton const *a, SongButton const *b) {
     const auto *aPtr = a->getDatabaseBeatmap(), *bPtr = b->getDatabaseBeatmap();
     if((aPtr == nullptr) || (bPtr == nullptr)) return (aPtr == nullptr) < (bPtr == nullptr);
 
-    const auto &titleA{aPtr->getTitle()};
-    const auto &titleB{bPtr->getTitle()};
+    const auto &titleA{aPtr->getTitleLatin()};
+    const auto &titleB{bPtr->getTitleLatin()};
 
     i32 cmp = strcasecmp(titleA.c_str(), titleB.c_str());
     if(cmp == 0) return sort_by_difficulty(a, b);
@@ -1333,8 +1333,9 @@ void SongBrowser::onDifficultySelected(DatabaseBeatmap *diff2, bool play) {
     // start playing
     if(play) {
         if(BanchoState::is_in_a_multi_room()) {
-            BanchoState::room.map_name = UString::format("%s - %s [%s]", diff2->getArtist().c_str(),
-                                                         diff2->getTitle().c_str(), diff2->getDifficultyName().c_str());
+            BanchoState::room.map_name =
+                UString::format("%s - %s [%s]", diff2->getArtistLatin().c_str(), diff2->getTitleLatin().c_str(),
+                                diff2->getDifficultyName().c_str());
             BanchoState::room.map_md5 = diff2->getMD5Hash();
             BanchoState::room.map_id = diff2->getID();
 
@@ -1501,9 +1502,9 @@ void SongBrowser::addBeatmapSet(BeatmapSet *mapset) {
 
     // add mapset to all necessary groups
     {
-        this->addSongButtonToAlphanumericGroup(songButton, this->artistCollectionButtons, mapset->getArtist());
+        this->addSongButtonToAlphanumericGroup(songButton, this->artistCollectionButtons, mapset->getArtistLatin());
         this->addSongButtonToAlphanumericGroup(songButton, this->creatorCollectionButtons, mapset->getCreator());
-        this->addSongButtonToAlphanumericGroup(songButton, this->titleCollectionButtons, mapset->getTitle());
+        this->addSongButtonToAlphanumericGroup(songButton, this->titleCollectionButtons, mapset->getTitleLatin());
 
         // difficulty
         if(this->difficultyCollectionButtons.size() == 12) {
@@ -2056,8 +2057,10 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
     if(hasAnyValidLiteralSearchString) {
         static constexpr auto findSubstringInDiff = [](const DatabaseBeatmap *diff,
                                                        const std::string &searchString) -> bool {
-            if(!diff->getTitle().empty() && SString::contains_ncase(diff->getTitle(), searchString)) return true;
-            if(!diff->getArtist().empty() && SString::contains_ncase(diff->getArtist(), searchString)) return true;
+            if(!diff->getTitleLatin().empty() && SString::contains_ncase(diff->getTitleLatin(), searchString))
+                return true;
+            if(!diff->getArtistLatin().empty() && SString::contains_ncase(diff->getArtistLatin(), searchString))
+                return true;
             if(!diff->getCreator().empty() && SString::contains_ncase(diff->getCreator(), searchString)) return true;
             if(!diff->getDifficultyName().empty() && SString::contains_ncase(diff->getDifficultyName(), searchString))
                 return true;

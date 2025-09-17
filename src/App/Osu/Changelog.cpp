@@ -28,17 +28,24 @@ Changelog::Changelog() : ScreenBackable() {
     std::vector<CHANGELOG> changelogs;
 
     CHANGELOG v41_00;
-    v41_00.title = "41.00 (2025-09-15)";
+    v41_00.title = "41.00 (2025-09-17)";
     v41_00.changes = {
         R"(- Added leaderboard filters)",
         R"(- Added support for OAuth login servers)",
         R"(- Added ability for servers to override game settings)",
         R"(- Added ability for skins to override game settings)",
+        R"(- Added support for tablet/pen input without OpenTabletDriver (e.g. native tablet drivers))",
         R"(- Changed default server to neosu.net)",
+        R"(- Changed default sound engine to SoLoud)",
+        R"(  - BASS can still be used from the neosu-BASS shortcut, or running with "-sound bass" appended to launch options)",
+        R"(- Re-added integration for file/url associations on Windows)",
+        R"(- Added support for Discord integration on Linux (thanks @NelloKudo))",
+        R"(- Fixed crashes when loading song folders directly without an osu!.db)",
         R"(- Fixed crash when reloading songs list)",
         R"(- Fixed leaderboards pp not using correct AR/OD values)",
         R"(- Fixed multiplayer mod selection menu)",
         R"(- Fixed user presence/stats getting requested too often)",
+        R"(- More rendering performance optimizations)",
     };
     changelogs.push_back(v41_00);
 
