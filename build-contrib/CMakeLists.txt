@@ -108,30 +108,36 @@ target_binary_resources(neosu PRIVATE cacert_pem "${CMAKE_BINARY_DIR}/cacert.pem
 set(LIB_DIR ${CMAKE_BINARY_DIR}/lib)
 make_directory(${LIB_DIR})
 if(LINUX)
-    if(NOT CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64")
-        message(FATAL_ERROR "do extra work here for other architectures")
+    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+        set(BASS_ARCH x86_64)
+        file(COPY ${discord_game_sdk_SOURCE_DIR}/lib/x86_64/discord_game_sdk.dll DESTINATION ${CMAKE_BINARY_DIR})
+    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "i686|pentium4")
+        set(BASS_ARCH x86)
     endif()
     file(COPY
-        ${bass-linux_SOURCE_DIR}/x86_64/libbass.so
-        ${bassfx-linux_SOURCE_DIR}/x86_64/libbass_fx.so
-        ${bassmix-linux_SOURCE_DIR}/x86_64/libbassmix.so
-        ${bassloud-linux_SOURCE_DIR}/libs/x86_64/libbassloud.so
-        ${bassflac-linux_SOURCE_DIR}/libs/x86_64/libbassflac.so
+        ${bass-linux_SOURCE_DIR}/${BASS_ARCH}/libbass.so
+        ${bassfx-linux_SOURCE_DIR}/${BASS_ARCH}/libbass_fx.so
+        ${bassmix-linux_SOURCE_DIR}/${BASS_ARCH}/libbassmix.so
+        ${bassloud-linux_SOURCE_DIR}/libs/${BASS_ARCH}/libbassloud.so
+        ${bassflac-linux_SOURCE_DIR}/libs/${BASS_ARCH}/libbassflac.so
         DESTINATION ${LIB_DIR})
 elseif(WIN32)
-    if(NOT CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64")
-        message(FATAL_ERROR "do extra work here for other architectures")
+    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "AMD64")
+        set(BASS_ARCH x64)
+        set(DGS_ARCH x86_64)
+    elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "X86")
+        set(DGS_ARCH x86)
     endif()
     file(COPY
-        ${bass_SOURCE_DIR}/x64/bass.dll
-        ${basswasapi_SOURCE_DIR}/x64/basswasapi.dll
-        ${bassmix_SOURCE_DIR}/x64/bassmix.dll
-        ${bassloud_SOURCE_DIR}/x64/bassloud.dll
-        ${bassfx_SOURCE_DIR}/x64/bass_fx.dll
-        ${bassflac_SOURCE_DIR}/x64/bassflac.dll
-        ${bassasio_SOURCE_DIR}/x64/bassasio.dll
+        ${bass_SOURCE_DIR}/${BASS_ARCH}/bass.dll
+        ${basswasapi_SOURCE_DIR}/${BASS_ARCH}/basswasapi.dll
+        ${bassmix_SOURCE_DIR}/${BASS_ARCH}/bassmix.dll
+        ${bassloud_SOURCE_DIR}/${BASS_ARCH}/bassloud.dll
+        ${bassfx_SOURCE_DIR}/${BASS_ARCH}/bass_fx.dll
+        ${bassflac_SOURCE_DIR}/${BASS_ARCH}/bassflac.dll
+        ${bassasio_SOURCE_DIR}/${BASS_ARCH}/bassasio.dll
         DESTINATION ${LIB_DIR})
-    file(COPY ${discord_game_sdk_SOURCE_DIR}/lib/x86_64/discord_game_sdk.dll DESTINATION ${CMAKE_BINARY_DIR})
+    file(COPY ${discord_game_sdk_SOURCE_DIR}/lib/${DGS_ARCH}/discord_game_sdk.dll DESTINATION ${CMAKE_BINARY_DIR})
 endif()
 
 file(COPY ../assets/fonts ../assets/materials DESTINATION ${CMAKE_BINARY_DIR})
