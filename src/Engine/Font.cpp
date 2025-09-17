@@ -150,6 +150,7 @@ void McFont::destroy() {
 
     m_vGlyphMetrics.clear();
     m_dynamicSlots.clear();
+    m_dynamicSlotMap.clear();
     m_fHeight = 1.0f;
     m_atlasNeedsReload = false;
 }
@@ -171,6 +172,7 @@ int McFont::allocateDynamicSlot(wchar_t ch) {
             m_dynamicSlots[i].character = ch;
             m_dynamicSlots[i].lastUsed = m_currentTime;
             m_dynamicSlots[i].occupied = true;
+            m_dynamicSlotMap[ch] = static_cast<int>(i);
             return static_cast<int>(i);
         }
     }
@@ -187,6 +189,9 @@ int McFont::allocateDynamicSlot(wchar_t ch) {
 
     // evict the LRU slot
     if(m_dynamicSlots[lruIndex].character != 0) {
+        // remove evicted character from slot map
+        m_dynamicSlotMap.erase(m_dynamicSlots[lruIndex].character);
+
         // HACK: clear the slot content area to remove leftover pixels from previous glyph
         // this should not be necessary (perf), but otherwise, a single-pixel border can appear on the right and bottom sides of the glyph rect
         const int maxSlotContent = DYNAMIC_SLOT_SIZE - 2 * TextureAtlas::ATLAS_PADDING;
@@ -204,17 +209,16 @@ int McFont::allocateDynamicSlot(wchar_t ch) {
     m_dynamicSlots[lruIndex].character = ch;
     m_dynamicSlots[lruIndex].lastUsed = m_currentTime;
     m_dynamicSlots[lruIndex].occupied = true;
+    m_dynamicSlotMap[ch] = lruIndex;
 
     return lruIndex;
 }
 
 void McFont::markSlotUsed(wchar_t ch) {
-    m_currentTime++;
-    for(auto &slot : m_dynamicSlots) {
-        if(slot.character == ch) {
-            slot.lastUsed = m_currentTime;
-            return;
-        }
+    auto it = m_dynamicSlotMap.find(ch);
+    if(it != m_dynamicSlotMap.end()) {
+        m_currentTime++;
+        m_dynamicSlots[it->second].lastUsed = m_currentTime;
     }
 }
 
@@ -230,6 +234,7 @@ void McFont::initializeDynamicRegion(int atlasSize) {
 
     m_dynamicSlots.clear();
     m_dynamicSlots.reserve(totalSlots);
+    m_dynamicSlotMap.clear();
 
     for(int row = 0; row < slotsPerColumn; row++) {
         for(int col = 0; col < m_slotsPerRow; col++) {
