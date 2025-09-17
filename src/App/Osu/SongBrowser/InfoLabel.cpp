@@ -258,9 +258,9 @@ void InfoLabel::mouse_update(bool *propagate_clicks) {
                     tooltipOverlay->addLine(UString::fmt("MD5: {:s}", bmDiff2->getMD5Hash().hash.data()));
                     // mostly for debugging
                     if(keyboard->isShiftDown()) {
-                        tooltipOverlay->addLine(UString::fmt("Title: {:s}", bmDiff2->getTitleRoman()));
+                        tooltipOverlay->addLine(UString::fmt("Title: {:s}", bmDiff2->getTitleLatin()));
                         tooltipOverlay->addLine(UString::fmt("TitleUnicode: {:s}", bmDiff2->getTitleUnicode()));
-                        tooltipOverlay->addLine(UString::fmt("Artist: {:s}", bmDiff2->getArtistRoman()));
+                        tooltipOverlay->addLine(UString::fmt("Artist: {:s}", bmDiff2->getArtistLatin()));
                         tooltipOverlay->addLine(UString::fmt("ArtistUnicode: {:s}", bmDiff2->getArtistUnicode()));
                     }
                 }
@@ -337,9 +337,8 @@ UString InfoLabel::buildDiffInfoString() {
         request.mods_legacy = mods.to_legacy();
         request.speed = mods.speed;
         request.AR = mods.get_naive_ar(diff2);
+        request.CS = mods.get_naive_cs(diff2);
         request.OD = mods.get_naive_od(diff2);
-        request.CS = diff2->getCS();
-        if(mods.cs_override != -1.f) request.CS = mods.cs_override;
         request.rx = ModMasks::eq(mods.flags, Replay::ModFlags::Relax);
         request.td = ModMasks::eq(mods.flags, Replay::ModFlags::TouchDevice);
         request.comboMax = -1;

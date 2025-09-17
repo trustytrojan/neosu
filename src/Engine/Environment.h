@@ -34,10 +34,14 @@ class Environment {
     NOCOPY_NOMOVE(Environment)
    public:
     struct Interop {
+        NOCOPY_NOMOVE(Interop)
+       public:
+        Interop() = delete;
         Interop(Environment *env_ptr) : m_env(env_ptr) {}
+        ~Interop() { m_env = nullptr; }
         void handle_cmdline_args(const std::vector<std::string> &args);
         void handle_cmdline_args() { handle_cmdline_args(m_env->getCommandLine()); }
-        void register_file_associations();
+        void setup_system_integrations();
         static void handle_existing_window([[maybe_unused]] int argc,
                                            [[maybe_unused]] char *argv[]);  // this is likely broken ATM
        private:
@@ -45,6 +49,7 @@ class Environment {
     };
 
    private:
+    friend struct Interop;
     Interop m_interop;
 
    public:

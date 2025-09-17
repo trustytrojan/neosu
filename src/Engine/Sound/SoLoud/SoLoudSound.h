@@ -7,6 +7,7 @@
 #ifdef MCENGINE_FEATURE_SOLOUD
 
 #include <memory>
+#include <atomic>
 
 // fwd decls to avoid include external soloud headers here
 namespace SoLoud {
@@ -43,7 +44,7 @@ class SoLoudSound final : public Sound {
     float getSpeed() override;
     float getPitch() override;
     // i.e. we would be hearing audio 15ms sooner than if we were using BASS
-    inline i32 getBASSStreamLatencyCompensation() const override { return -15; }
+    i32 getBASSStreamLatencyCompensation() const override;
     inline float getFrequency() override { return this->fFrequency; }
 
     bool isPlaying() override;
@@ -84,10 +85,16 @@ class SoLoudSound final : public Sound {
     // avoid calling soloud->isValidVoiceHandle too often, because it locks the entire internal audio mutex
     bool valid_handle_cached();
     double soloud_valid_handle_cache_time{-1.};
+
     // same with soloud->getPause(), for getPosition queries
     bool is_playing_cached();
     bool cached_pause_state{false};
     double soloud_paused_handle_cache_time{-1.};
+
+    // async position caching to avoid blocking on getStreamPosition calls
+    mutable std::atomic<double> cached_stream_position{0.0};
+    mutable std::atomic<double> soloud_stream_position_cache_time{-1.};
+    mutable bool force_sync_position_next{true};
 };
 
 #else

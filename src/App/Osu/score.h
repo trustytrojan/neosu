@@ -8,7 +8,7 @@ class BeatmapInterface;
 class HitObject;
 
 namespace LegacyReplay {
-    struct Frame;
+struct Frame;
 }
 
 struct FinishedScore {
@@ -85,6 +85,8 @@ struct FinishedScore {
     bool is_online_replay_available = false;
 
     [[nodiscard]] bool is_peppy_imported() const { return this->server == "ppy.sh"; }
+
+    f64 get_or_calc_pp();
     [[nodiscard]] f64 get_pp() const;
     [[nodiscard]] Grade calculate_grade() const;
 

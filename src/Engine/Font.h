@@ -184,8 +184,9 @@ class McFont final : public Resource {
     int m_dynamicRegionY;      // Y coordinate where dynamic region starts
     int m_slotsPerRow;         // number of slots per row in dynamic region
     std::vector<DynamicSlot> m_dynamicSlots;
-    uint64_t m_currentTime;   // for LRU tracking
-    bool m_atlasNeedsReload;  // flag to batch atlas reloads
+    std::unordered_map<wchar_t, int> m_dynamicSlotMap;  // character -> slot index for O(1) lookup
+    uint64_t m_currentTime;                             // for LRU tracking
+    bool m_atlasNeedsReload;                            // flag to batch atlas reloads
 
     bool m_batchActive;
     bool m_bFreeTypeInitialized;

@@ -1365,9 +1365,9 @@ void Database::loadMaps() {
                     // set with invalid ID: treat all its diffs separately. we'll group the diffs by title+artist.
                     std::unordered_map<std::string, std::vector<DatabaseBeatmap *> *> titleArtistToBeatmap;
                     for(const auto &diff : (*beatmapSet.diffs2)) {
-                        std::string titleArtist = diff->getTitle();
+                        std::string titleArtist = diff->getTitleLatin();
                         titleArtist.append("|");
-                        titleArtist.append(diff->getArtist());
+                        titleArtist.append(diff->getArtistLatin());
 
                         auto it = titleArtistToBeatmap.find(titleArtist);
                         if(it == titleArtistToBeatmap.end()) {

@@ -254,7 +254,8 @@ ModSelector::ModSelector() : OsuScreen() {
     this->nonSubmittableWarning = new CBaseUILabel();
     this->nonSubmittableWarning->setDrawFrame(false);
     this->nonSubmittableWarning->setDrawBackground(false);
-    this->nonSubmittableWarning->setText("WARNING: Score submission will be disabled due to non-vanilla mod selection.");
+    this->nonSubmittableWarning->setText(
+        "WARNING: Score submission will be disabled due to non-vanilla mod selection.");
     this->nonSubmittableWarning->setTextColor(0xffff0000);
     this->nonSubmittableWarning->setCenterText(true);
     this->nonSubmittableWarning->setVisible(false);
@@ -588,7 +589,7 @@ void ModSelector::mouse_update(bool *propagate_clicks) {
         auto nonSubmittableCvars = cvars->getNonSubmittableCvars();
         if(!nonSubmittableCvars.empty()) {
             osu->getTooltipOverlay()->begin();
-            for(const auto& cvar : nonSubmittableCvars) {
+            for(const auto &cvar : nonSubmittableCvars) {
                 osu->getTooltipOverlay()->addLine(cvar->getName().c_str());
             }
             osu->getTooltipOverlay()->end();
@@ -1390,7 +1391,7 @@ UString ModSelector::getOverrideSliderLabelText(ModSelector::OVERRIDE_SLIDER s, 
                 10.0f);
             convarValue = osu->getSelectedBeatmap()->getCS();
         } else if(s.label->getName().find("AR") != -1) {
-            beatmapValue = active ? osu->getSelectedBeatmap()->getRawApproachRateForSpeedMultiplier()
+            beatmapValue = active ? osu->getSelectedBeatmap()->getRawARForSpeedMultiplier()
                                   : osu->getSelectedBeatmap()->getApproachRateForSpeedMultiplier();
 
             // compensate and round
@@ -1400,7 +1401,7 @@ UString ModSelector::getOverrideSliderLabelText(ModSelector::OVERRIDE_SLIDER s, 
             else
                 convarValue = std::round(convarValue * 100.0f) / 100.0f;
         } else if(s.label->getName().find("OD") != -1) {
-            beatmapValue = active ? osu->getSelectedBeatmap()->getRawOverallDifficultyForSpeedMultiplier()
+            beatmapValue = active ? osu->getSelectedBeatmap()->getRawODForSpeedMultiplier()
                                   : osu->getSelectedBeatmap()->getOverallDifficultyForSpeedMultiplier();
 
             // compensate and round

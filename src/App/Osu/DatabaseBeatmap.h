@@ -207,7 +207,7 @@ class DatabaseBeatmap final {
             return this->sTitle;
         }
     }
-    [[nodiscard]] inline const std::string &getTitleRoman() const { return this->sTitle; }
+    [[nodiscard]] inline const std::string &getTitleLatin() const { return this->sTitle; }
     [[nodiscard]] inline const std::string &getTitleUnicode() const { return this->sTitleUnicode; }
 
     [[nodiscard]] inline const std::string &getArtist() const {
@@ -217,7 +217,7 @@ class DatabaseBeatmap final {
             return this->sArtist;
         }
     }
-    [[nodiscard]] inline const std::string &getArtistRoman() const { return this->sArtist; }
+    [[nodiscard]] inline const std::string &getArtistLatin() const { return this->sArtist; }
     [[nodiscard]] inline const std::string &getArtistUnicode() const { return this->sArtistUnicode; }
 
     [[nodiscard]] inline const std::string &getCreator() const { return this->sCreator; }

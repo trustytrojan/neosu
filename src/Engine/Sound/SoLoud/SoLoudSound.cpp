@@ -140,6 +140,11 @@ void SoLoudSound::destroy() {
     this->fLastPlayTime = 0.0f;
     this->bIgnored = false;
     this->bAsyncReady = false;
+
+    // reset position cache state
+    this->cached_stream_position = 0.0;
+    this->soloud_stream_position_cache_time = -1.0;
+    this->force_sync_position_next = true;
 }
 
 void SoLoudSound::setPositionMS(u32 ms) {
@@ -157,8 +162,11 @@ void SoLoudSound::setPositionMS(u32 ms) {
     // seek
     soloud->seek(this->handle, positionInSeconds);
 
-    // reset position interp vars
-    this->interpolator.reset(getStreamPositionInSeconds() / 1000.0, Timing::getTimeReal(), getSpeed());
+    // force next position query to be synchronous to get accurate post-seek position
+    this->force_sync_position_next = true;
+
+    // reset position interp vars with the new position
+    this->interpolator.reset(getStreamPositionInSeconds() * 1000.0, Timing::getTimeReal(), getSpeed());
 }
 
 void SoLoudSound::setSpeed(float speed) {
@@ -255,6 +263,8 @@ void SoLoudSound::setPan(float pan) {
 
     pan = std::clamp<float>(pan, -1.0f, 1.0f);
 
+    this->fPan = pan;
+
     // apply to the active voice
     soloud->setPan(this->handle, pan);
 }
@@ -285,6 +295,13 @@ float SoLoudSound::getPosition() {
     double streamPositionInSeconds = getStreamPositionInSeconds();
 
     return std::clamp<float>(streamPositionInSeconds / streamLengthInSeconds, 0.0f, 1.0f);
+}
+
+i32 SoLoudSound::getBASSStreamLatencyCompensation() const {
+    if(!this->bReady || !this->bStream || !this->audioSource || !this->handle) return 0.0f;
+
+    return static_cast<i32>(std::round(static_cast<SoLoud::SLFXStream *>(this->audioSource)->getInternalLatency())) -
+           18;
 }
 
 // slightly tweaked interp algo from the SDL_mixer version, to smooth out position updates
@@ -350,7 +367,25 @@ void SoLoudSound::setHandleVolume(SOUNDHANDLE handle, float volume) {
 
 double SoLoudSound::getStreamPositionInSeconds() const {
     if(!this->audioSource || !this->handle) return this->interpolator.getLastInterpolatedPositionMS() / 1000.0;
-    return soloud->getStreamPosition(this->handle);
+
+    const auto now = Timing::getTimeReal();
+
+    // check if we need to force synchronous access (e.g. init, or after seek)
+    if(this->force_sync_position_next) {
+        this->force_sync_position_next = false;
+        this->cached_stream_position.store(soloud->getStreamPosition(this->handle), std::memory_order_release);
+        this->soloud_stream_position_cache_time.store(now, std::memory_order_release);
+        return this->cached_stream_position;
+    }
+
+    // use cached value if recent enough (updated within last 10ms)
+    if(now >= this->soloud_stream_position_cache_time + 0.01) {
+        // cache is stale, trigger async update
+        this->soloud_stream_position_cache_time.store(now, std::memory_order_relaxed);  // prevent multiple async calls
+        soloud->updateCachedPosition(this->handle, this->soloud_stream_position_cache_time, this->cached_stream_position);
+    }
+
+    return this->cached_stream_position.load(std::memory_order_acquire);
 }
 
 double SoLoudSound::getSourceLengthInSeconds() const {

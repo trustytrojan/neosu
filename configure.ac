@@ -1,5 +1,5 @@
 AC_PREREQ([2.69])
-AC_INIT([neosu], [[40.04]], [], [], [https://github.com/kiwec/neosu]) # don't report bugs to McKay :)
+AC_INIT([neosu], [[41.00]], [], [], [https://github.com/kiwec/neosu]) # don't report bugs to McKay :)
 AC_CONFIG_SRCDIR([src/Engine/Engine.cpp])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_HEADERS([src/config.h])
@@ -792,8 +792,8 @@ MPG123_MIN_VERSION=1.30.0
 MPG123_BUILD_VERSION=ec6ead5fc1102d64efbb6a04865f59454198c3fc # git mirror, latest as of June 16th, 2025 (next version after 1.33.0)
 
 # always build these from source if we want to use them
-AC_SUBST([SOLOUD_VERSION], [1.1.7]) # my fork
-#AC_SUBST([SOLOUD_VERSION], [80057e2c67cc0eb16a3151431ff26dab44c458f6])
+AC_SUBST([SOLOUD_VERSION], [1.1.9]) # my fork
+#AC_SUBST([SOLOUD_VERSION], [3b38b64d0d57bf09a0028e1f45e71d2892e3d98c])
 AC_SUBST([SOLOUD_PREFIX],[$DEPS_PREFIX])
 AC_SUBST([SOUNDTOUCH_VERSION], [2.4.0])
 AC_SUBST([SOUNDTOUCH_PREFIX],[$DEPS_PREFIX])

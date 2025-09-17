@@ -65,8 +65,6 @@ SDLMain::~SDLMain() {
 }
 
 SDL_AppResult SDLMain::initialize() {
-    this->getEnvInterop().register_file_associations();  // only implemented for windows atm
-
     doEarlyCmdlineOverrides();
     setupLogging();
 
@@ -74,6 +72,8 @@ SDL_AppResult SDLMain::initialize() {
     if(!createWindow()) {
         return SDL_APP_FAILURE;
     }
+
+    this->getEnvInterop().setup_system_integrations();  // only implemented for windows atm
 
     // disable (filter) some SDL events we don't care about
     configureEvents();
@@ -593,42 +593,4 @@ void SDLMain::shutdown(SDL_AppResult result) {
         SDL_StopTextInput(m_window);
 
     Environment::shutdown();
-}
-
-void SDLMain::restart(const std::vector<std::string> &args) {
-    SDL_PropertiesID restartprops = SDL_CreateProperties();
-
-    std::vector<const char *> restartArgsChar(args.size() + 1);
-
-    restartArgsChar.back() = nullptr;
-
-    for(int i = 0; const auto &arg : args) {
-        restartArgsChar[i] = arg.c_str();
-        i++;
-    }
-
-    if(cv::debug_env.getBool()) {
-        Engine::logRaw("restart args: ");
-        for(int i = -1; const auto entry : restartArgsChar) {
-            i++;
-            if(!entry) continue;
-            Engine::logRaw("({}) {} ", i, entry);
-        }
-        Engine::logRaw("\n");
-    }
-
-    SDL_SetPointerProperty(restartprops, SDL_PROP_PROCESS_CREATE_ARGS_POINTER, (void *)restartArgsChar.data());
-#ifdef MCENGINE_PLATFORM_WINDOWS
-    const char *wincmdline = GetCommandLineA();
-    if(wincmdline) {
-        SDL_SetStringProperty(restartprops, SDL_PROP_PROCESS_CREATE_CMDLINE_STRING, GetCommandLineA());
-    }
-#endif
-    SDL_SetBooleanProperty(restartprops, SDL_PROP_PROCESS_CREATE_BACKGROUND_BOOLEAN, true);
-
-    if(!SDL_CreateProcessWithProperties(restartprops)) {
-        fprintf(stderr, "[restart]: WARNING: couldn't restart!\n");
-    }
-
-    SDL_DestroyProperties(restartprops);
 }

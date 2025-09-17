@@ -129,7 +129,7 @@ void ScoreButton::draw() {
 
         g->setColor(0xffffffff);
         grade->drawRaw(vec2((int)(this->vPos.x + this->vSize.x * indexNumberWidthPercent + gradeWidth / 2.0f),
-                               (int)(this->vPos.y + this->vSize.y / 2.0f)),
+                            (int)(this->vPos.y + this->vSize.y / 2.0f)),
                        scale);
     }
     g->popTransform();
@@ -368,37 +368,13 @@ void ScoreButton::draw() {
 void ScoreButton::mouse_update(bool *propagate_clicks) {
     // Update pp
     if(this->score.get_pp() == -1.0) {
-        pp_calc_request request;
-        request.mods_legacy = this->score.mods.to_legacy();
-        request.speed = this->score.mods.speed;
-        request.AR = this->score.diff2->getAR();
-        request.CS = this->score.diff2->getCS();
-        request.OD = this->score.diff2->getOD();
-        if(this->score.mods.ar_override != -1.f) request.AR = this->score.mods.ar_override;
-        if(this->score.mods.cs_override != -1.f) request.CS = this->score.mods.cs_override;
-        if(this->score.mods.od_override != -1.f) request.OD = this->score.mods.od_override;
-        request.rx = ModMasks::eq(this->score.mods.flags, Replay::ModFlags::Relax);
-        request.td = ModMasks::eq(this->score.mods.flags, Replay::ModFlags::TouchDevice);
-        request.comboMax = this->score.comboMax;
-        request.numMisses = this->score.numMisses;
-        request.num300s = this->score.num300s;
-        request.num100s = this->score.num100s;
-        request.num50s = this->score.num50s;
-
-        auto info = lct_get_pp(request);
-        if(info.pp != -1.0) {
+        if(this->score.get_or_calc_pp() != -1.0) {
             // NOTE: Allows dropped sliderends. Should fix with @PPV3
             const bool fullCombo =
                 (this->score.maxPossibleCombo > 0 && this->score.numMisses == 0 && this->score.numSliderBreaks == 0);
 
-            this->score.ppv2_score = info.pp;
-            this->score.ppv2_version = DifficultyCalculator::PP_ALGORITHM_VERSION;
-            this->score.ppv2_total_stars = info.total_stars;
-            this->score.ppv2_aim_stars = info.aim_stars;
-            this->score.ppv2_speed_stars = info.speed_stars;
-
             std::scoped_lock lock(db->scores_mtx);
-            auto& scores = this->score.is_online_score ? db->online_scores : db->scores;
+            auto &scores = this->score.is_online_score ? db->online_scores : db->scores;
             for(auto &other : scores[this->score.beatmap_hash]) {
                 if(other.unixTimestamp == this->score.unixTimestamp) {
                     osu->getSongBrowser()->score_resort_scheduled = true;

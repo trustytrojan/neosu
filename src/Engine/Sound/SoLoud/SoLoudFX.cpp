@@ -63,7 +63,7 @@ AudioSourceInstance *SLFXStream::createInstance()
 	ST_DEBUG_LOG("SoundTouchFilter: Creating instance with speed={:f}, pitch={:f}\n", mSpeedFactor, mPitchFactor);
 
 	auto *instance = new SoundTouchFilterInstance(this);
-	mActiveInstance = instance; // track the active instance for position queries
+	mActiveInstance.store(instance, std::memory_order_release); // track the active instance for position queries
 	return instance;
 }
 
@@ -71,16 +71,16 @@ void SLFXStream::setSpeedFactor(float aSpeed)
 {
 	ST_DEBUG_LOG("SoundTouchFilter: Speed changed from {:f} to {:f}\n", mSpeedFactor, aSpeed);
 	mSpeedFactor = aSpeed;
-	if (mActiveInstance)
-		mActiveInstance->requestSettingUpdate(mSpeedFactor, mPitchFactor);
+	if (mActiveInstance.load(std::memory_order_acquire))
+		mActiveInstance.load(std::memory_order_relaxed)->requestSettingUpdate(mSpeedFactor, mPitchFactor);
 }
 
 void SLFXStream::setPitchFactor(float aPitch)
 {
 	ST_DEBUG_LOG("SoundTouchFilter: Pitch changed from {:f} to {:f}\n", mPitchFactor, aPitch);
 	mPitchFactor = aPitch;
-	if (mActiveInstance)
-		mActiveInstance->requestSettingUpdate(mSpeedFactor, mPitchFactor);
+	if (mActiveInstance.load(std::memory_order_acquire))
+		mActiveInstance.load(std::memory_order_relaxed)->requestSettingUpdate(mSpeedFactor, mPitchFactor);
 }
 
 float SLFXStream::getSpeedFactor() const
@@ -91,6 +91,13 @@ float SLFXStream::getSpeedFactor() const
 float SLFXStream::getPitchFactor() const
 {
 	return mPitchFactor;
+}
+
+time SLFXStream::getInternalLatency() const
+{
+	if (mActiveInstance.load(std::memory_order_acquire))
+		return mActiveInstance.load(std::memory_order_relaxed)->getInternalLatency();
+	return 0.0;
 }
 
 // WavStream-compatibility methods
@@ -250,6 +257,9 @@ SoundTouchFilterInstance::SoundTouchFilterInstance(SLFXStream *aParent)
     : mParent(aParent),
       mSourceInstance(nullptr),
       mSoundTouch(nullptr),
+      mInitialSTLatencySamples(0),
+      mSTOutputSequenceSamples(0),
+      mSTLatencySeconds(0.0),
       mSoundTouchSpeed(1.0f),
       mSoundTouchPitch(1.0f),
       mNeedsSettingUpdate(false),
@@ -304,6 +314,12 @@ SoundTouchFilterInstance::SoundTouchFilterInstance(SLFXStream *aParent)
 
 				ST_DEBUG_LOG("SoundTouch: Initialized with speed={:f}, pitch={:f}\n", mSoundTouchSpeed, mSoundTouchPitch);
 				ST_DEBUG_LOG("SoundTouch: Version: {:s}\n", mSoundTouch->getVersionString());
+
+				// sync cache latency info for offset calc
+				updateSTLatency();
+
+				ST_DEBUG_LOG("SoundTouch: Initial latency: {:} samples ({:.1f}ms), Output sequence: {:} samples, Average latency: {:.1f}ms\n",
+				             mInitialSTLatencySamples, (mInitialSTLatencySamples * 1000.0f) / mBaseSamplerate, mSTOutputSequenceSamples, mSTLatencySeconds * 1000.0);
 			}
 		}
 	}
@@ -312,13 +328,13 @@ SoundTouchFilterInstance::SoundTouchFilterInstance(SLFXStream *aParent)
 SoundTouchFilterInstance::~SoundTouchFilterInstance()
 {
 	// clear the active instance reference in parent
-	if (mParent && mParent->mActiveInstance == this)
-		mParent->mActiveInstance = nullptr;
+	if (mParent && mParent->mActiveInstance.load(std::memory_order_acquire) == this)
+		mParent->mActiveInstance.store(nullptr, std::memory_order_release);
 
 	delete[] mInterleavedBuffer;
 	delete[] mBuffer;
-	delete mSoundTouch;
-	delete mSourceInstance;
+	SAFE_DELETE(mSoundTouch);
+	SAFE_DELETE(mSourceInstance);
 }
 
 // public methods below (to be called by SoLoud)
@@ -413,6 +429,11 @@ unsigned int SoundTouchFilterInstance::getAudio(float *aBuffer, unsigned int aSa
 		ST_DEBUG_LOG("No samples available from SoundTouch, returning silence\n");
 	}
 
+	if (logThisCall && mProcessingCounter % 100 == 0)
+		ST_DEBUG_LOG("Position: mStreamPosition={:.3f}s, init_latency={:}, input_seq={}, output_seq={:}, avg_latency={:.1f}ms, ratio={:.3f}, real_pos={:.3f}s\n",
+		             mStreamPosition, mInitialSTLatencySamples, mSoundTouch->getSetting(SETTING_NOMINAL_INPUT_SEQUENCE), mSTOutputSequenceSamples,
+		             mSTLatencySeconds * 1000.0, mSoundTouch->getInputOutputSampleRatio(), getInternalLatency());
+
 	// update SoundTouch parameters if they've changed, after the last getAudio chunk has played out with the old speed
 	bool updatePitchOrSpeed = false;
 	{
@@ -437,6 +458,8 @@ unsigned int SoundTouchFilterInstance::getAudio(float *aBuffer, unsigned int aSa
 
 		// SoLoud AudioStreamInstance inherited, allows the main SoLoud mixer to advance the mStreamPosition by the correct proportional amount
 		mSetRelativePlaySpeed = mOverallRelativePlaySpeed = mSoundTouchSpeed;
+
+		updateSTLatency();
 	}
 
 	if (logThisCall)
@@ -508,6 +531,11 @@ void SoundTouchFilterInstance::requestSettingUpdate(float speed, float pitch)
 	std::scoped_lock lock{mSettingUpdateMutex};
 	if (mSoundTouchSpeed != speed || mSoundTouchPitch != pitch)
 		mNeedsSettingUpdate = true;
+}
+
+time SoundTouchFilterInstance::getInternalLatency() const
+{
+	return mSTLatencySeconds.load(std::memory_order_acquire);
 }
 
 void SoundTouchFilterInstance::ensureBufferSize(unsigned int samples)
@@ -599,12 +627,26 @@ unsigned int SoundTouchFilterInstance::feedSoundTouch(unsigned int targetBufferL
 	return currentSamples;
 }
 
+void SoundTouchFilterInstance::updateSTLatency()
+{
+	if (!mSoundTouch) {
+		mSTLatencySeconds.store(0.0, std::memory_order_release);
+		return;
+	}
+
+	mInitialSTLatencySamples = mSoundTouch->getSetting(SETTING_INITIAL_LATENCY);
+	mSTOutputSequenceSamples = mSoundTouch->getSetting(SETTING_NOMINAL_OUTPUT_SEQUENCE);
+	mSTLatencySeconds.store(std::max(0.0, (static_cast<double>(mInitialSTLatencySamples) - (static_cast<double>(mSTOutputSequenceSamples) / 2.0)) /
+	                                       static_cast<double>(mBaseSamplerate)), std::memory_order_release);
+}
+
 void SoundTouchFilterInstance::reSynchronize()
 {
 	// clear SoundTouch buffers to reset its internal state
 	if (mSoundTouch)
 	{
 		mSoundTouch->clear();
+		updateSTLatency();
 	}
 
 	if (mSourceInstance)

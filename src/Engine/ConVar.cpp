@@ -313,14 +313,14 @@ bool ConVarHandler::areAllCvarsSubmittable() {
 
 void ConVarHandler::resetServerCvars() {
     for(const auto &cv : _getGlobalConVarArray()) {
-        cv->hasServerValue = false;
-        cv->serverProtectionPolicy = ConVar::ProtectionPolicy::DEFAULT;
+        cv->hasServerValue.store(false, std::memory_order_release);
+        cv->serverProtectionPolicy.store(ConVar::ProtectionPolicy::DEFAULT, std::memory_order_release);
     }
 }
 
 void ConVarHandler::resetSkinCvars() {
     for(const auto &cv : _getGlobalConVarArray()) {
-        cv->hasSkinValue = false;
+        cv->hasSkinValue.store(false, std::memory_order_release);
     }
 }
 

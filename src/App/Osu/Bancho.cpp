@@ -715,13 +715,14 @@ void BanchoState::handle_packet(Packet *packet) {
             break;
         }
 
+        // this should at least be in ConVarHandler...
         case RESET_VALUES: {
             u16 nb_variables = proto::read<u16>(packet);
             for(u16 i = 0; i < nb_variables; i++) {
                 auto name = proto::read_stdstring(packet);
                 auto cvar = cvars->getConVarByName(name, false);
                 if(cvar) {
-                    cvar->hasServerValue = false;
+                    cvar->hasServerValue.store(false, std::memory_order_release);
                 } else {
                     debugLog("Server wanted to reset cvar '{}', but it doesn't exist!", name);
                 }

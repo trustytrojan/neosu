@@ -1,6 +1,6 @@
 // Copyright (c) 2025, WH, All rights reserved.
-#include "BaseEnvironment.h"
-#include "UString.h"
+#include "Engine.h"
+#include "ConVar.h"
 
 #if defined(MCENGINE_PLATFORM_WASM) || defined(MCENGINE_FEATURE_MAINCALLBACKS)
 #define MAIN_FUNC SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
@@ -9,6 +9,7 @@
                                 // mainloop, needed for wasm (works on desktop too, but it's not necessary)
 #include <SDL3/SDL_main.h>
 #include <SDL3/SDL_hints.h>
+#include <SDL3/SDL_process.h>
 namespace {
 void setcwdexe(const std::string & /*unused*/) {}
 }  // namespace
@@ -16,6 +17,7 @@ void setcwdexe(const std::string & /*unused*/) {}
 #define SDL_MAIN_HANDLED
 #include <SDL3/SDL_main.h>
 #include <SDL3/SDL_hints.h>
+#include <SDL3/SDL_process.h>
 #define MAIN_FUNC int main(int argc, char *argv[])
 #define nocbinline forceinline
 #include <filesystem>
@@ -48,9 +50,10 @@ void setcwdexe(const std::string &exePathStr) noexcept {
 }  // namespace
 #endif
 
-#if defined(_WIN32) && defined(_DEBUG) // only debug builds create a console
+#if defined(_WIN32)
 #include "WinDebloatDefs.h"
-#include <consoleapi2.h> // for SetConsoleOutputCP
+#include <consoleapi2.h>  // for SetConsoleOutputCP
+#include <processenv.h>   // for GetCommandLine
 #endif
 
 #include "SString.h"
@@ -124,11 +127,15 @@ SDL_AppResult SDL_AppIterate(void *appstate) { return static_cast<SDLMain *>(app
 MAIN_FUNC /* int argc, char *argv[] */
 {
     // if a neosu instance is already running, send it a message then quit
-    // TODO actually test this and make sure it works
+    // only works on windows for now
     Environment::Interop::handle_existing_window(argc, argv);
 
-#if defined(_WIN32) && defined(_DEBUG)
+#if defined(_WIN32)
+    // required for handle_existing_window to find this running instance
+    SDL_RegisterApp(PACKAGE_NAME, 0, nullptr);
+#if defined(_DEBUG)  // only debug builds create a console
     SetConsoleOutputCP(65001 /*CP_UTF8*/);
+#endif
 #endif
 
     // improve floating point perf in case this isn't already enabled by the compiler
@@ -212,4 +219,44 @@ MAIN_FUNC /* int argc, char *argv[] */
     *appstate = fmain;
     return fmain->initialize();
 #endif  // SDL_MAIN_USE_CALLBACKS
+}
+
+void SDLMain::restart(const std::vector<std::string> &args) {
+    SDL_PropertiesID restartprops = SDL_CreateProperties();
+
+    std::vector<const char *> restartArgsChar(args.size() + 1);
+
+    restartArgsChar.back() = nullptr;
+
+    for(int i = 0; const auto &arg : args) {
+        restartArgsChar[i] = arg.c_str();
+        i++;
+    }
+
+    if(cv::debug_env.getBool()) {
+        Engine::logRaw("restart args: ");
+        for(int i = -1; const auto entry : restartArgsChar) {
+            i++;
+            if(!entry) continue;
+            Engine::logRaw("({}) {} ", i, entry);
+        }
+        Engine::logRaw("\n");
+    }
+
+    SDL_SetPointerProperty(restartprops, SDL_PROP_PROCESS_CREATE_ARGS_POINTER, (void *)restartArgsChar.data());
+#ifdef MCENGINE_PLATFORM_WINDOWS
+    const char *wincmdline = GetCommandLineA();
+    if(wincmdline) {
+        SDL_SetStringProperty(restartprops, SDL_PROP_PROCESS_CREATE_CMDLINE_STRING, GetCommandLineA());
+    }
+    // so that handle_existing_window doesn't find the currently running instance by the class name
+    SDL_UnregisterApp();
+#endif
+    SDL_SetBooleanProperty(restartprops, SDL_PROP_PROCESS_CREATE_BACKGROUND_BOOLEAN, true);
+
+    if(!SDL_CreateProcessWithProperties(restartprops)) {
+        fprintf(stderr, "[restart]: WARNING: couldn't restart!\n");
+    }
+
+    SDL_DestroyProperties(restartprops);
 }

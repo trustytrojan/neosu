@@ -672,20 +672,20 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
 
         {
             OPTIONS_ELEMENT *soloudBackendSelect = this->addButtonButtonLabel("MiniAudio", "SDL", "");
-            static const auto &MAButton = static_cast<UIButton *>(soloudBackendSelect->baseElems[0]);
-            static const auto &SDLButton = static_cast<UIButton *>(soloudBackendSelect->baseElems[1]);
+            const auto &MAButton = static_cast<UIButton *>(soloudBackendSelect->baseElems[0]);
+            const auto &SDLButton = static_cast<UIButton *>(soloudBackendSelect->baseElems[1]);
             const auto &driverLabel = static_cast<CBaseUILabel *>(soloudBackendSelect->baseElems[2]);
             driverLabel->setVisible(false);  // who cares
 
             soloudBackendSelect->cvars[MAButton] = &cv::snd_soloud_backend;
             soloudBackendSelect->cvars[SDLButton] = &cv::snd_soloud_backend;
-            soloudBackendSelect->render_condition = {[&]() -> bool {
+            soloudBackendSelect->render_condition = {[]() -> bool {
                 bool ret =
                     soundEngine ? soundEngine->getOutputDriverType() >= SoundEngine::OutputDriver::SOLOUD_MA : false;
                 return ret;
             }};
 
-            static auto setActiveColors = [&]() -> void {
+            static auto setActiveColors = [MAButton, SDLButton]() -> void {
                 const std::string &current = cv::snd_soloud_backend.getString();
                 const bool MAactive = !SString::contains_ncase(current, "sdl");
 
@@ -706,7 +706,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
 
             // need to use a change callback here because we already have a single-arg callback for the convar...
             cv::snd_soloud_backend.setCallback(
-                [&](const UString & /**/, const UString & /**/) -> void { setActiveColors(); });
+                [](const UString & /**/, const UString & /**/) -> void { setActiveColors(); });
         }
 
         // Dirty...
