@@ -8,8 +8,6 @@
 #include "Skin.h"
 #include "SongBrowser/SongBrowser.h"
 
-namespace {  // static namespace
-
 // drag-drop/file associations/registry stuff below
 void handle_osk(const char *osk_path) {
     Skin::unpack(osk_path);
@@ -104,7 +102,6 @@ void handle_neosu_url(const char *url) {
         return;
     }
 }
-}  // namespace
 
 void Environment::Interop::handle_cmdline_args(const std::vector<UString> &args) {
     bool need_to_reload_database = false;

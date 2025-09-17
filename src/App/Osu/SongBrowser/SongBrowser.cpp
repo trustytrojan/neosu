@@ -59,6 +59,9 @@
 #include <chrono>
 #include <memory>
 #include <utility>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 const Color highlightColor = argb(255, 0, 255, 0);
 const Color defaultColor = argb(255, 255, 255, 255);
@@ -2418,6 +2421,16 @@ void SongBrowser::onDatabaseLoadingFinished() {
     this->beatmaps = db->getDatabaseBeatmaps();
 
     debugLog("Loading {} beatmapsets from database.\n", this->beatmaps.size());
+
+    // If any .osz files are in "maps", extract and add them to the DB.
+    // Very helpful for users that don't have an osu!stable folder (and don't want to have one).
+    for(const auto &entry : fs::directory_iterator{MCENGINE_DATA_DIR "maps"}) {
+        if(!entry.is_regular_file() || entry.path().extension() != ".osz") continue;
+        debugLog("Auto-importing .osz file found in maps dir: {}\n", entry.path().c_str());
+        void handle_osz(const char *osz_path);  // from EnvironmentInterop.cpp
+        handle_osz(entry.path().c_str());
+        fs::remove(entry);  // delete when done
+    }
 
     // initialize all collection (grouped) buttons
     {
