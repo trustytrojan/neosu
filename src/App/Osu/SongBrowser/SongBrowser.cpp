@@ -1473,12 +1473,6 @@ void SongBrowser::refreshBeatmaps() {
 void SongBrowser::addBeatmapSet(BeatmapSet *mapset) {
     if(mapset->getDifficulties().size() < 1) return;
 
-    if(const auto it{std::ranges::find(this->songButtons, mapset, &SongButton::getDatabaseBeatmap)};
-       it != this->songButtons.end()) {
-        debugLog("already added mapset id={}, returning early\n", mapset->iSetID);
-        return;
-    }
-
     SongButton *songButton;
     if(mapset->getDifficulties().size() > 1) {
         songButton =
